@@ -1,0 +1,20 @@
+@import "variable/variable";
+
+@import "element/element";
+@import "module/module";
+@import "page/page";
+@import "modal/modal";
+
+.preview-photo {
+  z-index: 2100 !important;
+}
+
+.dropdown-toggle::after {
+  display: none;
+}
+
+.favorite-photo {
+  border: 5px solid #0d8aff;
+}
+
+

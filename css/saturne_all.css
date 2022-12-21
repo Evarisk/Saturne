@@ -1,0 +1,14 @@
+div.mainmenu.saturne {
+    background-image: none;
+}
+
+div.mainmenu.saturne::before {
+    content: '\f46c';
+}
+
+.pictoSaturne {
+    vertical-align: middle;
+    text-align: left;
+    width: 20px;
+    padding-right: 4px;
+}

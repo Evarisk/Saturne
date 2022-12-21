@@ -1,0 +1,74 @@
+# Copyright (C) 2022 EVARISK <dev@evarisk.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#
+# Générique
+#
+
+# Module label 'ModuleSaturneName'
+ModuleSaturneName = Saturne
+# Module description 'ModuleSaturneDesc'
+ModuleSaturneDesc = Corrigez vos problèmes de sécurité facilement et rapidement
+
+#
+# Page d'administration
+#
+SaturneSetup = Configuration du module Saturne
+Settings = Réglages
+SaturneSetupPage = Page de configuration du module Saturne
+TimeSpender = Pointeur de temps
+TimeSpenderConfiguration = Configuration du pointage de temps
+GitHubProjectName = Nom du projet GitHub
+GitHubProjectOrganization = Nom de l'organisation GitHub
+GitHubProjectVersion = Version du projet GitHub
+DolibarrLinkedTask = Tâche liée
+SaturneConfig = Configuration du module
+
+#
+# Page À propos
+#
+About = À propos
+SaturneAbout = À propos de Saturne
+
+#
+# Saturne
+#
+
+# Right - Droit
+LireSaturne = Consulter Saturne
+ReadSaturne = Consulter Saturne (read)
+ReadAdminPage = Accéder à la configuration du module Saturne
+
+#
+# Index
+#
+
+# Data - Donnée
+SaturneArea  = Bienvenue sur Saturne
+SecurityProblem = Problème de sécurité
+ProblemFix = Problème de sécurité réparé
+ConfFileHasGoodPermissions = Le fichier conf.php a les bonnes permissions pour éviter des problèmes de sécurité.
+ConfFileSetPermissions = Les permissions du fichier conf.php ont été édités
+InstallLockFileCreated = Le fichier install.lock a été généré
+NoSecurityProblem = Il n'y a pas de problème de sécurité
+RepairSecurityProblem = Réparer les problèmes de sécurité
+
+#
+# TimeSpending
+#
+
+YouHaveToSpendXMinutes = Vous avez %s minutes à pointer aujourd'hui
+TimeWillBeSpentOn = Le temps sera pointé sur
+HereIsWhatYouveDoneOn = Voici ce que vous avez fait le %s sur :
