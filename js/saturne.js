@@ -239,8 +239,8 @@ window.saturne.mediaGallery.event = function() {
 	$( document ).on( 'input', '.form-element #search_in_gallery', window.saturne.mediaGallery.handleSearch );
 	$( document ).on( 'click', '.media-gallery-unlink', window.saturne.mediaGallery.unlinkFile );
 	$( document ).on( 'click', '.media-gallery-favorite', window.saturne.mediaGallery.addToFavorite );
-	$( document ).on( 'submit', ';fast-upload', window.eoxiaJS.mediaGallery.fastUpload );
-	$( document ).on( 'click', '.selected-page', window.eoxiaJS.mediaGallery.selectPage );
+	$( document ).on( 'submit', '.fast-upload', window.saturne.mediaGallery.fastUpload );
+	$( document ).on( 'click', '.selected-page', window.saturne.mediaGallery.selectPage );
 }
 
 /**
@@ -444,23 +444,26 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 	event.preventDefault()
 	let files    = $(this).prop("files");
 	let elementParent = $(this).closest('.modal-container').find('.ecm-photo-list-content');
+	let modalFooter = $(this).closest('.modal-container').find('.modal-footer');
 	let actionContainerSuccess = $('.messageSuccessSendPhoto');
 	let actionContainerError = $('.messageErrorSendPhoto');
 	let totalCount = files.length
-    let progress = 0
-	let token = $('.id-container.page-ut-gp-list').find('input[name="token"]').val();
-	$('#myBar').width(0)
-    $('#myProgress').attr('style', 'display:block')
-	window.saturne.loader.display($('#myProgress'));
+	let progress = 0
+	let token = $('input[name="token"]').val();
+
+	$('#progressBar').width(0)
+	$('#progressBarContainer').attr('style', 'display:block')
+
+	window.saturne.loader.display($('#progressBarContainer'));
+
 	let querySeparator = '?'
 	document.URL.match(/\?/) ? querySeparator = '&' : 1
 
 	$.each(files, function(index, file) {
 		let formdata = new FormData();
 		formdata.append("userfile[]", file);
-		//@to
 		$.ajax({
-			url: document.URL + querySeparator + "action=uploadPhoto&uploadMediasSuccess=1&token=" + token,
+			url: document.URL + querySeparator + "subaction=uploadPhoto&uploadMediasSuccess=1&token=" + token,
 			type: "POST",
 			data: formdata,
 			processData: false,
@@ -479,26 +482,31 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 					actionContainerError.find('.notice-subtitle').text(textToShow)
 
 					actionContainerError.removeClass('hidden');
-
 				} else {
 					progress += (1 / totalCount) * 100
-					$('#myBar').animate({
+					$('#progressBar').animate({
 						width: progress + '%'
 					}, 300);
 					if (index + 1 === totalCount) {
-						elementParent.load( document.URL + querySeparator + 'uploadMediasSuccess=1' + ' .ecm-photo-list', () => {
+						elementParent.html($(resp).find('#media_gallery .ecm-photo-list')).promise().done( () => {
 							setTimeout(() => {
-								$('#myProgress').fadeOut(800)
+								$('#progressBarContainer').fadeOut(800)
 								$('.wpeo-loader').removeClass('wpeo-loader');
-								$('#myProgress').find('.loader-spin').remove();
+								$('#progressBarContainer').find('.loader-spin').remove();
 							}, 800)
+
+							//refresh pages navigation
+							modalFooter.html($(resp).find('#media_gallery .modal-footer'))
+
 							$('#add_media_to_gallery').parent().html($(resp).find('#add_media_to_gallery'))
 							if (totalCount == 1) {
 								elementParent.closest('.modal-container').find('.save-photo').removeClass('button-disable');
-								elementParent.find('.clickable-photo0').attr('style', 'border: 5px solid #0d8aff !important');
+								// elementParent.find('.clickable-photo0').attr('style', 'border: 5px solid #0d8aff !important');
+								console.log('testitesto')
 								elementParent.find('.clickable-photo0').addClass('clicked-photo');
 							}
-						});
+						})
+
 						actionContainerSuccess.removeClass('hidden');
 					}
 				}
@@ -719,7 +727,7 @@ window.saturne.mediaGallery.addToFavorite = function( event ) {
  *
  * @return {void}
  */
-window.eoxiaJS.mediaGallery.fastUpload = function( typeFrom ) {
+window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
 	let id = 0
 
 	if (typeFrom == 'photo_ok') {
@@ -731,7 +739,7 @@ window.eoxiaJS.mediaGallery.fastUpload = function( typeFrom ) {
 		typeFrom = 'answer_photo'
 		var files = $('#fast-upload-answer-photo'+id).prop('files');
 	}
-	window.eoxiaJS.mediaGallery.sendPhoto('', files, typeFrom, id)
+	window.saturne.mediaGallery.sendPhoto('', files, typeFrom, id)
 };
 
 
@@ -743,7 +751,7 @@ window.eoxiaJS.mediaGallery.fastUpload = function( typeFrom ) {
  *
  * @return {void}
  */
-window.eoxiaJS.mediaGallery.selectPage = function( event ) {
+window.saturne.mediaGallery.selectPage = function( event ) {
 	let offset = $(this).attr('value');
 	$(this).closest('.wpeo-pagination').find('.pagination-element').removeClass('pagination-current');
 	$(this).closest('.pagination-element').addClass('pagination-current');
@@ -752,7 +760,7 @@ window.eoxiaJS.mediaGallery.selectPage = function( event ) {
 	let querySeparator = '?';
 	document.URL.match(/\?/) ? querySeparator = '&' : 1
 	let token = $('.fiche').find('input[name="token"]').val();
-	window.eoxiaJS.loader.display($('#media_gallery').find('.modal-content'));
+	window.saturne.loader.display($('#media_gallery').find('.modal-content'));
 
 	$.ajax({
 		url: document.URL + querySeparator + "token=" + token + "&offset=" + offset,

@@ -2219,6 +2219,17 @@ div.wpeo-modal-patchnote .wpeo-button {
   border-bottom: 0 !important;
 }
 
+#progressBarContainer {
+  width: 100%;
+  background-color: grey;
+}
+
+#progressBar {
+  width: 1%;
+  height: 30px;
+  background-color: green;
+}
+
 .confirmquestions .tagtr {
   float: left;
   width: 25%;

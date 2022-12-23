@@ -1,6 +1,6 @@
 <?php
 
-function saturneHeader($module, $head = '', $title = '', $help_url = '', $target = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $morequerystring = '', $morecssonbody = '', $replacemainareaby = '', $disablenofollow = 0, $disablenoindex = 0) {
+function saturneHeader($module, $action, $subaction, $head = '', $title = '', $help_url = '', $target = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $morequerystring = '', $morecssonbody = '', $replacemainareaby = '', $disablenofollow = 0, $disablenoindex = 0) {
 
 	global $langs, $conf;
 
@@ -50,23 +50,23 @@ function saturne_show_medias($module, $modulepart = 'ecm', $sdir, $size = 0, $ma
 					$modulepart   = 'ecm';
 					$path         = DOL_URL_ROOT . '/document.php?modulepart=' . $modulepart . '&attachment=0&file=' . str_replace('/', '%2F', $relativepath);
 
-					$filename = preg_split('/\./',  $file);
-					$filename = $filename[0].'_'.$size.'.'.$filename[1];
+					$file_infos = pathinfo($file);
+					$filename = $file_infos['filename'].'_'.$size.'.'.$file_infos['extension'];
 
 					?>
 
-				<div class="center clickable-photo clickable-photo<?php echo $j; ?>" value="<?php echo $j; ?>" element="risk-evaluation">
-					<figure class="photo-image">
-						<?php
-						$urladvanced = getAdvancedPreviewUrl($modulepart, $module . '/medias/' .$file, 0, 'entity=' . $conf->entity); ?>
-						<a class="clicked-photo-preview" href="<?php echo $urladvanced; ?>"><i class="fas fa-2x fa-search-plus"></i></a>
-						<?php if (image_format_supported($file) >= 0) : ?>
-							<?php $fullpath = $path . '/' . $filename . '&entity=' . $conf->entity; ?>
-							<input class="filename" type="hidden" value="<?php echo $file; ?>">
-							<img class="photo photo<?php echo $j ?>" height="<?php echo $maxHeight; ?>" width="<?php echo $maxWidth; ?>" src="<?php echo $fullpath; ?>">
-						<?php endif; ?>
-					</figure>
-					<div class="title"><?php echo $file; ?></div>
+					<div class="center clickable-photo clickable-photo<?php echo $j; ?>" value="<?php echo $j; ?>" element="risk-evaluation">
+						<figure class="photo-image">
+							<?php
+							$urladvanced = getAdvancedPreviewUrl($modulepart, $module . '/medias/' .$file, 0, 'entity=' . $conf->entity); ?>
+							<a class="clicked-photo-preview" href="<?php echo $urladvanced; ?>"><i class="fas fa-2x fa-search-plus"></i></a>
+							<?php if (image_format_supported($file) >= 0) : ?>
+								<?php $fullpath = $path . '/' . $filename . '&entity=' . $conf->entity; ?>
+								<input class="filename" type="hidden" value="<?php echo $file; ?>">
+								<img class="photo photo<?php echo $j ?>" height="<?php echo $maxHeight; ?>" width="<?php echo $maxWidth; ?>" src="<?php echo $fullpath; ?>">
+							<?php endif; ?>
+						</figure>
+						<div class="title"><?php echo $file; ?></div>
 					</div><?php
 					$j++;
 				}

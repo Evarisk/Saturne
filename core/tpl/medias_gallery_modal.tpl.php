@@ -1,33 +1,44 @@
 <?php
+global $db;
+require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmdirectory.class.php';
 
-if ( ! $error && $action == "uploadPhoto" && ! empty($conf->global->MAIN_UPLOAD_DOC)) {
+$ecmdir           = new EcmDirectory($db);
+
+if ( ! $error && $subaction == "uploadPhoto" && ! empty($conf->global->MAIN_UPLOAD_DOC)) {
 	// Define relativepath and upload_dir
-	$relativepath                                             =  $module . '/medias';
+	$relativepath                                             = $module . '/medias';
 	$upload_dir                                               = $conf->ecm->dir_output . '/' . $relativepath;
 	if (is_array($_FILES['userfile']['tmp_name'])) $userfiles = $_FILES['userfile']['tmp_name'];
 	else $userfiles                                           = array($_FILES['userfile']['tmp_name']);
-
 
 	foreach ($userfiles as $key => $userfile) {
 		if (empty($_FILES['userfile']['tmp_name'][$key])) {
 			$error++;
 			if ($_FILES['userfile']['error'][$key] == 1 || $_FILES['userfile']['error'][$key] == 2) {
 				setEventMessages($langs->trans('ErrorFileSizeTooLarge'), null, 'errors');
+				$submit_file_error_text = array('message' => $langs->trans('ErrorFileSizeTooLarge'), 'code' => '1337');
+
 			} else {
 				setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("File")), null, 'errors');
+				$submit_file_error_text = array('message' => $langs->trans('ErrorFieldRequired'), 'code' => '1337');
+
 			}
 		}
+
 	}
 
 	if ( ! $error) {
 		$generatethumbs = 1;
 
-		$res            = dol_add_file_process($upload_dir, 0, 1, 'userfile', '', null, '', $generatethumbs);
+		$res = dol_add_file_process($upload_dir, 0, 1, 'userfile', '', null, '', $generatethumbs);
 
 		if ($res > 0) {
 			$result = $ecmdir->changeNbOfFiles('+');
 		}
 	}
+}
+if (is_array($submit_file_error_text)) {
+	print '<input class="error-medias" value="'. htmlspecialchars(json_encode($submit_file_error_text)) .'">';
 }
 ?>
 <!-- START MEDIA GALLERY MODAL -->
@@ -49,9 +60,10 @@ if ( ! $error && $action == "uploadPhoto" && ! empty($conf->global->MAIN_UPLOAD_
 				</div>
 			</div>
 			<div class="messageErrorSendPhoto notice hidden">
-				<div class="wpeo-notice notice-warning send-photo-error-notice">
+				<div class="wpeo-notice notice-error send-photo-error-notice">
 					<div class="notice-content">
 						<div class="notice-title"><?php echo $langs->trans('PhotoNotSent') ?></div>
+						<div class="notice-subtitle"></div>
 					</div>
 					<div class="notice-close"><i class="fas fa-times"></i></div>
 				</div>
@@ -59,10 +71,11 @@ if ( ! $error && $action == "uploadPhoto" && ! empty($conf->global->MAIN_UPLOAD_
 			<div class="wpeo-gridlayout grid-2">
 				<div class="modal-add-media">
 					<?php
+					print '<input type="hidden" name="token" value="'.newToken().'">';
 					// To attach new file
 					if (( ! empty($conf->use_javascript_ajax) && empty($conf->global->MAIN_ECM_DISABLE_JS)) || ! empty($section)) {
 						$sectiondir = GETPOST('file', 'alpha') ? GETPOST('file', 'alpha') : GETPOST('section_dir', 'alpha');
-						print '<!-- Start form to attach new file in '. $module .'_photo_view.tpl.tpl.php sectionid=' . $section . ' sectiondir=' . $sectiondir . ' -->' . "\n";
+						print '<!-- Start form to attach new file in '. $module .'_photo_view.tpl.php sectionid=' . $section . ' sectiondir=' . $sectiondir . ' -->' . "\n";
 						include_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
 						print '<strong>' . $langs->trans('AddFile') . '</strong>'
 						?>
@@ -86,7 +99,9 @@ if ( ! $error && $action == "uploadPhoto" && ! empty($conf->global->MAIN_UPLOAD_
 					</div>
 				</div>
 			</div>
-
+			<div id="progressBarContainer" style="display:none">
+				<div id="progressBar"></div>
+			</div>
 			<div class="ecm-photo-list-content">
 				<div class="wpeo-gridlayout grid-5 grid-gap-3 grid-margin-2 ecm-photo-list ecm-photo-list">
 					<?php
@@ -103,14 +118,11 @@ if ( ! $error && $action == "uploadPhoto" && ! empty($conf->global->MAIN_UPLOAD_
 			<ul class="wpeo-pagination">
 				<?php
 				$moduleImageNumberPerPageConf = strtoupper($module) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
-				for ($i = 1; $i <= $allMedias/($conf->global->$moduleImageNumberPerPageConf ?: 1 ); $i++) : ?>
+				for ($i = 1; $i <= 1 + $allMedias/($conf->global->$moduleImageNumberPerPageConf ?: 1 ); $i++) : ?>
 					<li class="pagination-element <?php echo ($i == 1 ? 'pagination-current' : '') ?>">
 						<a class="selected-page" value="<?php echo $i - 1; ?>"><?php echo $i; ?></a>
 					</li>
 				<?php endfor; ?>
-				<li class="pagination-element">
-					<a class="selected-page" value="<?php echo $i - 1; ?>"><?php echo $i; ?></a>
-				</li>
 			</ul>
 			<div class="save-photo wpeo-button button-blue button-disable" value="">
 				<input class="type-from" value="" type="hidden" />
