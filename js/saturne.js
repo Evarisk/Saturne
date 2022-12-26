@@ -265,8 +265,6 @@ window.saturne.mediaGallery.selectPhoto = function( event ) {
 
 	} else {
 		parent.closest('.modal-container').find('.save-photo').removeClass('button-disable');
-
-		parent.find('.clickable-photo'+photoID).attr('style', 'border: 5px solid #0d8aff !important');
 		parent.find('.clickable-photo'+photoID).addClass('clicked-photo');
 	}
 };
@@ -442,13 +440,19 @@ window.saturne.mediaGallery.handleSearch = function( event ) {
 window.saturne.mediaGallery.sendPhoto = function( event ) {
 
 	event.preventDefault()
-	let files    = $(this).prop("files");
+
+	let formdata = new FormData();
+
+	let files         = $(this).prop("files");
 	let elementParent = $(this).closest('.modal-container').find('.ecm-photo-list-content');
-	let modalFooter = $(this).closest('.modal-container').find('.modal-footer');
-	let actionContainerSuccess = $('.messageSuccessSendPhoto');
-	let actionContainerError = $('.messageErrorSendPhoto');
+	let modalFooter   = $(this).closest('.modal-container').find('.modal-footer');
+
 	let totalCount = files.length
-	let progress = 0
+	let progress   = 0
+
+	let actionContainerSuccess = $('.messageSuccessSendPhoto');
+	let actionContainerError   = $('.messageErrorSendPhoto');
+
 	let token = $('input[name="token"]').val();
 
 	$('#progressBar').width(0)
@@ -460,7 +464,6 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 	document.URL.match(/\?/) ? querySeparator = '&' : 1
 
 	$.each(files, function(index, file) {
-		let formdata = new FormData();
 		formdata.append("userfile[]", file);
 		$.ajax({
 			url: document.URL + querySeparator + "subaction=uploadPhoto&uploadMediasSuccess=1&token=" + token,
@@ -472,8 +475,8 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 				if ($(resp).find('.error-medias').length) {
 					let response = $(resp).find('.error-medias').val()
 					let decoded_response = JSON.parse(response)
-					$('#myBar').width('100%')
-					$('#myBar').css('background-color','#e05353')
+					$('#progressBar').width('100%')
+					$('#progressBar').css('background-color','#e05353')
 					$('.wpeo-loader').removeClass('wpeo-loader');
 
 					let textToShow = '';
@@ -501,19 +504,13 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 							$('#add_media_to_gallery').parent().html($(resp).find('#add_media_to_gallery'))
 							if (totalCount == 1) {
 								elementParent.closest('.modal-container').find('.save-photo').removeClass('button-disable');
-								// elementParent.find('.clickable-photo0').attr('style', 'border: 5px solid #0d8aff !important');
-								console.log('testitesto')
 								elementParent.find('.clickable-photo0').addClass('clicked-photo');
 							}
 						})
-
 						actionContainerSuccess.removeClass('hidden');
 					}
 				}
 			},
-			error : function (resp) {
-
-			}
 		});
 	})
 };
