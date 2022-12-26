@@ -278,18 +278,17 @@ window.saturne.mediaGallery.selectPhoto = function( event ) {
  * @return {void}
  */
 window.saturne.mediaGallery.savePhoto = function( event ) {
-	let parent = $('#media_gallery')
-	let idToSave = $(this).attr('value')
+
+	let currentElement    = $(this)
+	let mediaGallery      = $('#media_gallery')
 	let mediaGalleryModal = $(this).closest('.modal-container')
-	let filesLinked = mediaGalleryModal.find('.clicked-photo')
-	let modalFrom = $('.modal-active:not(.modal-photo)')
+	let filesLinked       = mediaGalleryModal.find('.clicked-photo')
+	let token             = $('.id-container').find('input[name="token"]').val();
 
-	let riskId = modalFrom.attr('value')
-	let mediaLinked = ''
-	let type = $(this).find('.type-from').val()
-
-	var params = new window.URLSearchParams(window.location.search);
-	var currentElementID = params.get('id')
+	let objectId         = $(this).find('.from-id').val()
+	let objectType       = $(this).find('.from-type').val()
+	let objectSubtype    = $(this).find('.from-subtype').length ? $(this).find('.from-subtype').val() : ''
+	let favoriteInput    = $(this).closest('.linked-medias')
 
 	let filenames = ''
 	if (filesLinked.length > 0) {
@@ -297,119 +296,157 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 			filenames += $( this ).find('.filename').val() + 'vVv'
 		});
 	}
-	let favorite = filenames
-	favorite = favorite.split('vVv')[0]
+
+	let favorite = filenames.split('vVv')[0]
 
 	window.saturne.loader.display($(this));
 
-	let token = $('.id-container').find('input[name="token"]').val();
+	let querySeparator = '?'
+	document.URL.match(/\?/) ? querySeparator = '&' : 1
 
-	if (type === 'riskassessment') {
-		mediaLinked = modalFrom.find('.element-linked-medias')
-		window.saturne.loader.display(mediaLinked);
+	$.ajax({
+		url: document.URL + querySeparator + "subaction=addFiles&token=" + token,
+		type: "POST",
+		data: JSON.stringify({
+			filenames: filenames,
+			objectId: objectId,
+			objectType: objectType,
+			objectSubtype: objectSubtype
+		}),
+		processData: false,
+		contentType: false,
+		success: function ( resp ) {
+			$('.wpeo-loader').removeClass('wpeo-loader')
+			mediaGallery.removeClass('modal-active')
 
-		let riskAssessmentPhoto = ''
-		riskAssessmentPhoto = $('.risk-evaluation-photo-'+idToSave+'.risk-'+riskId)
+			//sanitize media name
+			favorite = favorite.replace(/\ /g, '%20')
+			favorite = favorite.replace(/\(/g, '%28')
+			favorite = favorite.replace(/\)/g, '%29')
+			favorite = favorite.replace(/\+/g, '%2B')
 
-		let filepath = modalFrom.find('.risk-evaluation-photo-single .filepath-to-riskassessment').val()
-		let thumbName = window.saturne.file.getThumbName(favorite)
-		let newPhoto = filepath + thumbName
+			//refresh medias container after adding
+			$('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
 
-		$.ajax({
-			url: document.URL + "&action=addFiles&token=" + token +'&favorite='+favorite,
-			type: "POST",
-			data: JSON.stringify({
-				risk_id: riskId,
-				riskassessment_id: idToSave,
-				filenames: filenames,
-			}),
-			processData: false,
-			contentType: false,
-			success: function ( resp ) {
-				$('.wpeo-loader').removeClass('wpeo-loader')
-				parent.removeClass('modal-active')
+			//fill favorite hidden input
+			let favoriteMedia = $('.linked-medias.'+objectSubtype).find('.media-container').find('.media-gallery-favorite .filename').attr('value')
+			favoriteInput.val(favoriteMedia)
 
-				newPhoto = newPhoto.replace(/\ /g, '%20')
-				newPhoto = newPhoto.replace(/\(/g, '%28')
-				newPhoto = newPhoto.replace(/\)/g, '%29')
-				newPhoto = newPhoto.replace(/\+/g, '%2B')
+			//add media to favorite in frontend
+			$('.linked-medias.'+objectSubtype).find('.media-container').find('.media-gallery-favorite .fa-star').first().removeClass('far').addClass('fas')
+			$('.linked-medias.'+objectSubtype).find('.media-container').find('.media-gallery-favorite').first().addClass('favorite')
 
-				//Update risk assessment main img in "photo" of risk assessment modal
-				riskAssessmentPhoto.each( function() {
-					$(this).find('.clicked-photo-preview').attr('src',newPhoto)
-					$(this).find('.filename').attr('value', favorite)
-					$(this).find('.clicked-photo-preview').hasClass('photosaturne') ? $(this).find('.clicked-photo-preview').removeClass('photosaturne').addClass('photo') : 0
-				});
+			//refresh media gallery & unselect selected medias
+			$('.wpeo-modal.modal-photo').html($(resp).find('.wpeo-modal.modal-photo .modal-container'))
+		},
+	});
 
-				//Remove special chars from img
-				favorite = favorite.replace(/\ /g, '%20')
-				favorite = favorite.replace(/\(/g, '%28')
-				favorite = favorite.replace(/\)/g, '%29')
-				favorite = favorite.replace(/\+/g, '%2B')
-
-				mediaLinked.html($(resp).find('.element-linked-medias-'+idToSave+'.risk-'+riskId).first())
-
-				modalFrom.find('.messageSuccessSavePhoto').removeClass('hidden')
-			},
-			error: function ( ) {
-				modalFrom.find('.messageErrorSavePhoto').removeClass('hidden')
-			}
-		});
-
-	} else if (type === 'digiriskelement') {
-		mediaLinked = $('#digirisk_element_medias_modal_'+idToSave).find('.element-linked-medias')
-		window.saturne.loader.display(mediaLinked);
-
-		let digiriskElementPhoto = ''
-		digiriskElementPhoto = $('.digirisk-element-'+idToSave).find('.clicked-photo-preview')
-
-		let filepath = $('.digirisk-element-'+idToSave).find('.filepath-to-digiriskelement').val()
-		let thumbName = window.saturne.file.getThumbName(favorite)
-		let newPhoto = filepath + thumbName
-
-		$.ajax({
-			url: document.URL + "&action=addDigiriskElementFiles&token=" + token,
-			type: "POST",
-			data: JSON.stringify({
-				digiriskelement_id: idToSave,
-				filenames: filenames,
-			}),
-			processData: false,
-			contentType: false,
-			success: function ( resp ) {
-				$('.wpeo-loader').removeClass('wpeo-loader')
-				parent.removeClass('modal-active')
-
-				newPhoto = newPhoto.replace(/\ /g, '%20')
-				newPhoto = newPhoto.replace(/\(/g, '%28')
-				newPhoto = newPhoto.replace(/\)/g, '%29')
-				newPhoto = newPhoto.replace(/\+/g, '%2B')
-
-				digiriskElementPhoto.attr('src',newPhoto )
-
-				let photoContainer = digiriskElementPhoto.closest('.open-media-gallery')
-				photoContainer.removeClass('open-media-gallery')
-				photoContainer.addClass('open-medias-linked')
-				photoContainer.addClass('digirisk-element')
-				photoContainer.closest('.unit-container').find('.digirisk-element-medias-modal').load(document.URL+ ' #digirisk_element_medias_modal_'+idToSave)
-
-				favorite = favorite.replace(/\ /g, '%20')
-				favorite = favorite.replace(/\(/g, '%28')
-				favorite = favorite.replace(/\)/g, '%29')
-				favorite = favorite.replace(/\+/g, '%2B')
-
-				if (idToSave === currentElementID) {
-					let digiriskBanner = $('.arearef.heightref')
-					digiriskBanner.load(document.URL+'&favorite='+favorite + ' .arearef.heightref')
-				}
-				mediaLinked.load(document.URL+'&favorite='+favorite + ' .element-linked-medias-'+idToSave+'.digirisk-element')
-				modalFrom.find('.messageSuccessSavePhoto').removeClass('hidden')
-			},
-			error: function ( ) {
-				modalFrom.find('.messageErrorSavePhoto').removeClass('hidden')
-			}
-		});
-	}
+	// if (type === 'riskassessment') {
+	// 	mediaLinked = modalFrom.find('.element-linked-medias')
+	// 	window.saturne.loader.display(mediaLinked);
+	//
+	// 	let riskAssessmentPhoto = ''
+	// 	riskAssessmentPhoto = $('.risk-evaluation-photo-'+idToSave+'.risk-'+riskId)
+	//
+	// 	let filepath = modalFrom.find('.risk-evaluation-photo-single .filepath-to-riskassessment').val()
+	// 	let thumbName = window.saturne.file.getThumbName(favorite)
+	// 	let newPhoto = filepath + thumbName
+	//
+	// 	$.ajax({
+	// 		url: document.URL + "&action=addFiles&token=" + token +'&favorite='+favorite,
+	// 		type: "POST",
+	// 		data: JSON.stringify({
+	// 			risk_id: riskId,
+	// 			riskassessment_id: idToSave,
+	// 			filenames: filenames,
+	// 		}),
+	// 		processData: false,
+	// 		contentType: false,
+	// 		success: function ( resp ) {
+	// 			$('.wpeo-loader').removeClass('wpeo-loader')
+	// 			parent.removeClass('modal-active')
+	//
+	// 			newPhoto = newPhoto.replace(/\ /g, '%20')
+	// 			newPhoto = newPhoto.replace(/\(/g, '%28')
+	// 			newPhoto = newPhoto.replace(/\)/g, '%29')
+	// 			newPhoto = newPhoto.replace(/\+/g, '%2B')
+	//
+	// 			//Update risk assessment main img in "photo" of risk assessment modal
+	// 			riskAssessmentPhoto.each( function() {
+	// 				$(this).find('.clicked-photo-preview').attr('src',newPhoto)
+	// 				$(this).find('.filename').attr('value', favorite)
+	// 				$(this).find('.clicked-photo-preview').hasClass('photosaturne') ? $(this).find('.clicked-photo-preview').removeClass('photosaturne').addClass('photo') : 0
+	// 			});
+	//
+	// 			//Remove special chars from img
+	// 			favorite = favorite.replace(/\ /g, '%20')
+	// 			favorite = favorite.replace(/\(/g, '%28')
+	// 			favorite = favorite.replace(/\)/g, '%29')
+	// 			favorite = favorite.replace(/\+/g, '%2B')
+	//
+	// 			mediaLinked.html($(resp).find('.element-linked-medias-'+idToSave+'.risk-'+riskId).first())
+	//
+	// 			modalFrom.find('.messageSuccessSavePhoto').removeClass('hidden')
+	// 		},
+	// 		error: function ( ) {
+	// 			modalFrom.find('.messageErrorSavePhoto').removeClass('hidden')
+	// 		}
+	// 	});
+	//
+	// } else if (type === 'digiriskelement') {
+	// 	mediaLinked = $('#digirisk_element_medias_modal_'+idToSave).find('.element-linked-medias')
+	// 	window.saturne.loader.display(mediaLinked);
+	//
+	// 	let digiriskElementPhoto = ''
+	// 	digiriskElementPhoto = $('.digirisk-element-'+idToSave).find('.clicked-photo-preview')
+	//
+	// 	let filepath = $('.digirisk-element-'+idToSave).find('.filepath-to-digiriskelement').val()
+	// 	let thumbName = window.saturne.file.getThumbName(favorite)
+	// 	let newPhoto = filepath + thumbName
+	//
+	// 	$.ajax({
+	// 		url: document.URL + "&action=addDigiriskElementFiles&token=" + token,
+	// 		type: "POST",
+	// 		data: JSON.stringify({
+	// 			digiriskelement_id: idToSave,
+	// 			filenames: filenames,
+	// 		}),
+	// 		processData: false,
+	// 		contentType: false,
+	// 		success: function ( resp ) {
+	// 			$('.wpeo-loader').removeClass('wpeo-loader')
+	// 			parent.removeClass('modal-active')
+	//
+	// 			newPhoto = newPhoto.replace(/\ /g, '%20')
+	// 			newPhoto = newPhoto.replace(/\(/g, '%28')
+	// 			newPhoto = newPhoto.replace(/\)/g, '%29')
+	// 			newPhoto = newPhoto.replace(/\+/g, '%2B')
+	//
+	// 			digiriskElementPhoto.attr('src',newPhoto )
+	//
+	// 			let photoContainer = digiriskElementPhoto.closest('.open-media-gallery')
+	// 			photoContainer.removeClass('open-media-gallery')
+	// 			photoContainer.addClass('open-medias-linked')
+	// 			photoContainer.addClass('digirisk-element')
+	// 			photoContainer.closest('.unit-container').find('.digirisk-element-medias-modal').load(document.URL+ ' #digirisk_element_medias_modal_'+idToSave)
+	//
+	// 			favorite = favorite.replace(/\ /g, '%20')
+	// 			favorite = favorite.replace(/\(/g, '%28')
+	// 			favorite = favorite.replace(/\)/g, '%29')
+	// 			favorite = favorite.replace(/\+/g, '%2B')
+	//
+	// 			if (idToSave === currentElementID) {
+	// 				let digiriskBanner = $('.arearef.heightref')
+	// 				digiriskBanner.load(document.URL+'&favorite='+favorite + ' .arearef.heightref')
+	// 			}
+	// 			mediaLinked.load(document.URL+'&favorite='+favorite + ' .element-linked-medias-'+idToSave+'.digirisk-element')
+	// 			modalFrom.find('.messageSuccessSavePhoto').removeClass('hidden')
+	// 		},
+	// 		error: function ( ) {
+	// 			modalFrom.find('.messageErrorSavePhoto').removeClass('hidden')
+	// 		}
+	// 	});
+	// }
 };
 
 /**

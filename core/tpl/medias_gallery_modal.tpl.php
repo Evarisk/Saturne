@@ -1,8 +1,11 @@
 <?php
 global $db;
+
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmdirectory.class.php';
+require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
 
 $ecmdir           = new EcmDirectory($db);
+$ecmfile          = new EcmFiles($db);
 
 if ( ! $error && $subaction == "uploadPhoto" && ! empty($conf->global->MAIN_UPLOAD_DOC)) {
 	// Define relativepath and upload_dir
@@ -37,6 +40,72 @@ if ( ! $error && $subaction == "uploadPhoto" && ! empty($conf->global->MAIN_UPLO
 		}
 	}
 }
+
+if ( ! $error && $subaction == "addFiles") {
+	$data = json_decode(file_get_contents('php://input'), true);
+
+	$filenames     = $data['filenames'];
+	$objectId      = $data['objectId'];
+	$objectType    = $data['objectType'];
+	$objectSubtype = $data['objectSubtype'];
+
+	$object = new $objectType($db);
+	$object->fetch($objectId);
+
+	$modObjectName = strtoupper($module) . '_' . strtoupper($objectType) . '_ADDON';
+	$modObject     = new $conf->global->$modObjectName($db);
+
+	if (dol_strlen($object->ref) > 0) {
+		$pathToObjectPhoto = $conf->dolismq->multidir_output[$conf->entity] . '/'. $objectType .'/' . $object->ref . '/' . $objectSubtype;
+	} else {
+		$pathToObjectPhoto = $conf->dolismq->multidir_output[$conf->entity] . '/'. $objectType .'/tmp/' . $modObject->prefix . '0/' . $objectSubtype ;
+	}
+
+	if (preg_match('/vVv/', $filenames)) {
+		$filenames = preg_split('/vVv/', $filenames);
+		array_pop($filenames);
+	} else {
+		$filenames = array($filenames);
+	}
+
+	if ( ! (empty($filenames))) {
+		if ( ! is_dir($conf->dolismq->multidir_output[$conf->entity] . '/'. $objectType . '/tmp/')) {
+			dol_mkdir($conf->dolismq->multidir_output[$conf->entity] . '/'. $objectType . '/tmp/');
+		}
+
+		if ( ! is_dir($conf->dolismq->multidir_output[$conf->entity] . '/'. $objectType . '/' . (dol_strlen($object->ref) > 0 ? $object->ref : 'tmp/' . $modObject->prefix . '0/') )) {
+			dol_mkdir($conf->dolismq->multidir_output[$conf->entity] . '/'. $objectType . '/' . (dol_strlen($object->ref) > 0 ? $object->ref : 'tmp/' . $modObject->prefix . '0/'));
+		}
+
+		foreach ($filenames as $filename) {
+			$entity = ($conf->entity > 1) ? '/' . $conf->entity : '';
+
+			if (is_file($conf->ecm->multidir_output[$conf->entity] . '/'. $module .'/medias/' . $filename)) {
+				$pathToECMPhoto = $conf->ecm->multidir_output[$conf->entity] . '/'. $module .'/medias/' . $filename;
+
+				if ( ! is_dir($pathToObjectPhoto)) {
+					mkdir($pathToObjectPhoto);
+				}
+
+				copy($pathToECMPhoto, $pathToObjectPhoto . '/' . $filename);
+				$ecmfile->fetch(0,'',($conf->entity > 1 ? $conf->entity . '/' : ''). 'ecm/'. $module .'/medias/' . $filename);
+				$date      = dol_print_date(dol_now(),'dayxcard');
+				$extension = pathinfo($filename, PATHINFO_EXTENSION);
+				$newFilename = $conf->entity . '_' . $ecmfile->id . '_' . (dol_strlen($object->ref) > 0 ? $object->ref : $modObject->getNextValue($object)) . '_' . $date . '.' . $extension;
+				rename($pathToObjectPhoto . '/' . $filename, $pathToObjectPhoto . '/' . $newFilename);
+
+				global $maxwidthmini, $maxheightmini, $maxwidthsmall,$maxheightsmall ;
+				$destfull = $pathToObjectPhoto . '/' . $newFilename;
+
+				// Create thumbs
+				$imgThumbSmall = vignette($destfull, $maxwidthsmall, $maxheightsmall, '_small', 50, "thumbs");
+				// Create mini thumbs for image (Ratio is near 16/9)
+				$imgThumbMini = vignette($destfull, $maxwidthmini, $maxheightmini, '_mini', 50, "thumbs");
+			}
+		}
+	}
+}
+
 if (is_array($submit_file_error_text)) {
 	print '<input class="error-medias" value="'. htmlspecialchars(json_encode($submit_file_error_text)) .'">';
 }
@@ -125,7 +194,9 @@ if (is_array($submit_file_error_text)) {
 				<?php endfor; ?>
 			</ul>
 			<div class="save-photo wpeo-button button-blue button-disable" value="">
-				<input class="type-from" value="" type="hidden" />
+				<input class="from-type" value="" type="hidden" />
+				<input class="from-subtype" value="" type="hidden" />
+				<input class="from-id" value="" type="hidden" />
 				<span><?php echo $langs->trans('Add'); ?></span>
 			</div>
 		</div>
