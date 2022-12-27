@@ -657,99 +657,23 @@ window.saturne.mediaGallery.unlinkFile = function( event ) {
  * @return {void}
  */
 window.saturne.mediaGallery.addToFavorite = function( event ) {
+		event.preventDefault()
+		let filename = $(this).closest('.media-gallery-favorite').find('.filename').attr('value')
 
-	event.preventDefault()
-	var params = new window.URLSearchParams(window.location.search);
-	var id = window.location.search.split(/id=/)[1]
-	let element_linked_id = $(this).find('.element-linked-id').val()
-	let filename = $(this).find('.filename').val()
-	let querySeparator = '?'
-	let mediaContainer = $(this).closest('.media-container')
-	let modalFrom = $('.modal-risk.modal-active')
-	let riskId = modalFrom.attr('value')
-	let type = $(this).closest('.modal-container').find('.type-from').val()
-	let previousPhoto = null
-	let elementPhotos = ''
+		//change star button style
+		let previousFavorite = $(this).closest('.linked-medias').find('.fas.fa-star')
+		let newFavorite = $(this).find('.far.fa-star')
 
-	//change star button style
-	let previousFavorite = $(this).closest('.element-linked-medias').find('.fas.fa-star')
-	let newFavorite = $(this).find('.far.fa-star')
+		previousFavorite.removeClass('fas')
+		previousFavorite.addClass('far')
+		previousFavorite.closest('.media-gallery-favorite').removeClass('favorite')
+		newFavorite.addClass('fas')
+		newFavorite.removeClass('far')
+		newFavorite.closest('.media-gallery-favorite').addClass('favorite')
 
-	previousFavorite.removeClass('fas')
-	previousFavorite.addClass('far')
-	newFavorite.addClass('fas')
-	newFavorite.removeClass('far')
-
-	document.URL.match(/\?/) ? querySeparator = '&' : 1
-
-	window.saturne.loader.display(mediaContainer);
-
-	let token = $('.id-container.page-ut-gp-list').find('input[name="token"]').val();
-
-	if (type === 'riskassessment') {
-		previousPhoto = $(this).closest('.modal-container').find('.risk-evaluation-photo .clicked-photo-preview')
-		elementPhotos = $('.risk-evaluation-photo-'+element_linked_id+'.risk-'+riskId)
-
-		$(this).closest('.modal-content').find('.risk-evaluation-photo-single .filename').attr('value', filename)
-
-		let filepath = modalFrom.find('.risk-evaluation-photo-single .filepath-to-riskassessment').val()
-		let thumbName = window.saturne.file.getThumbName(filename)
-		let newPhoto = filepath + thumbName
-
-		let saveButton = $(this).closest('.modal-container').find('.risk-evaluation-save')
-		saveButton.addClass('button-disable')
-		$.ajax({
-			url: document.URL + querySeparator + "action=addToFavorite&token=" + token,
-			data: JSON.stringify({
-				riskassessment_id: element_linked_id,
-				filename: filename,
-			}),
-			type: "POST",
-			processData: false,
-			success: function ( ) {
-				newPhoto = newPhoto.replace(/\ /g, '%20')
-				newPhoto = newPhoto.replace(/\(/g, '%28')
-				newPhoto = newPhoto.replace(/\)/g, '%29')
-				newPhoto = newPhoto.replace(/\+/g, '%2B')
-
-				elementPhotos.each( function() {
-					$(this).find('.clicked-photo-preview').attr('src',newPhoto )
-					$(this).find('.clicked-photo-preview').hasClass('photosaturne') ? $(this).find('.clicked-photo-preview').removeClass('photosaturne').addClass('photo') : 0
-				});
-				saveButton.removeClass('button-disable')
-				$('.wpeo-loader').removeClass('wpeo-loader')
-			}
-		});
-	} else if (type === 'digiriskelement') {
-		previousPhoto = $('.digirisk-element-'+element_linked_id).find('.photo.clicked-photo-preview')
-
-		let filepath =$('.digirisk-element-'+element_linked_id).find('.filepath-to-digiriskelement').val()
-		let thumbName = window.saturne.file.getThumbName(filename)
-		let newPhoto = filepath + thumbName
-
-		jQuery.ajax({
-			url: document.URL + querySeparator + "action=addDigiriskElementPhotoToFavorite&token=" + token,
-			type: "POST",
-			data: JSON.stringify({
-				digiriskelement_id: element_linked_id,
-				filename: filename,
-			}),
-			processData: false,
-			success: function ( resp ) {
-
-				if (id === element_linked_id) {
-					$('.arearef.heightref.valignmiddle.centpercent').load(' .arearef.heightref.valignmiddle.centpercent')
-				}
-				newPhoto = newPhoto.replace(/\ /g, '%20')
-				newPhoto = newPhoto.replace(/\(/g, '%28')
-				newPhoto = newPhoto.replace(/\)/g, '%29')
-				newPhoto = newPhoto.replace(/\+/g, '%2B')
-
-				previousPhoto.attr('src',newPhoto )
-				$('.wpeo-loader').removeClass('wpeo-loader')
-			}
-		});
-	}
+		if (filename.length > 0) {
+			$(this).closest('.linked-medias').find('.favorite-photo').val(filename)
+		}
 };
 
 
