@@ -15,30 +15,28 @@ if ( ! $error && $subaction == "uploadPhoto" && ! empty($conf->global->MAIN_UPLO
 	else $userfiles                                           = array($_FILES['userfile']['tmp_name']);
 
 	foreach ($userfiles as $key => $userfile) {
+		$error = 0;
 		if (empty($_FILES['userfile']['tmp_name'][$key])) {
 			$error++;
 			if ($_FILES['userfile']['error'][$key] == 1 || $_FILES['userfile']['error'][$key] == 2) {
 				setEventMessages($langs->trans('ErrorFileSizeTooLarge'), null, 'errors');
 				$submit_file_error_text = array('message' => $langs->trans('ErrorFileSizeTooLarge'), 'code' => '1337');
-
 			} else {
 				setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("File")), null, 'errors');
 				$submit_file_error_text = array('message' => $langs->trans('ErrorFieldRequired'), 'code' => '1337');
-
 			}
 		}
+		if ( ! $error) {
+			$generatethumbs = 1;
+			$res = dol_add_file_process($upload_dir, 0, 1, 'userfile', '', null, '', $generatethumbs);
 
-	}
-
-	if ( ! $error) {
-		$generatethumbs = 1;
-
-		$res = dol_add_file_process($upload_dir, 0, 1, 'userfile', '', null, '', $generatethumbs);
-
-		if ($res > 0) {
-			$result = $ecmdir->changeNbOfFiles('+');
+			if ($res > 0) {
+				$result = $ecmdir->changeNbOfFiles('+');
+			}
 		}
 	}
+
+
 }
 
 if ( ! $error && $subaction == "addFiles") {
@@ -87,20 +85,22 @@ if ( ! $error && $subaction == "addFiles") {
 					mkdir($pathToObjectPhoto);
 				}
 
-				copy($pathToECMPhoto, $pathToObjectPhoto . '/' . $filename);
-				$ecmfile->fetch(0,'',($conf->entity > 1 ? $conf->entity . '/' : ''). 'ecm/'. $module .'/medias/' . $filename);
-				$date      = dol_print_date(dol_now(),'dayxcard');
-				$extension = pathinfo($filename, PATHINFO_EXTENSION);
-				$newFilename = $conf->entity . '_' . $ecmfile->id . '_' . (dol_strlen($object->ref) > 0 ? $object->ref : $modObject->getNextValue($object)) . '_' . $date . '.' . $extension;
-				rename($pathToObjectPhoto . '/' . $filename, $pathToObjectPhoto . '/' . $newFilename);
+				if (file_exists($pathToECMPhoto)) {
+					copy($pathToECMPhoto, $pathToObjectPhoto . '/' . $filename);
+					$ecmfile->fetch(0,'',($conf->entity > 1 ? $conf->entity . '/' : ''). 'ecm/'. $module .'/medias/' . $filename);
+					$date      = dol_print_date(dol_now(),'dayxcard');
+					$extension = pathinfo($filename, PATHINFO_EXTENSION);
+					$newFilename = $conf->entity . '_' . $ecmfile->id . '_' . (dol_strlen($object->ref) > 0 ? $object->ref : $modObject->getNextValue($object)) . '_' . $date . '.' . $extension;
+					rename($pathToObjectPhoto . '/' . $filename, $pathToObjectPhoto . '/' . $newFilename);
 
-				global $maxwidthmini, $maxheightmini, $maxwidthsmall,$maxheightsmall ;
-				$destfull = $pathToObjectPhoto . '/' . $newFilename;
+					global $maxwidthmini, $maxheightmini, $maxwidthsmall,$maxheightsmall ;
+					$destfull = $pathToObjectPhoto . '/' . $newFilename;
 
-				// Create thumbs
-				$imgThumbSmall = vignette($destfull, $maxwidthsmall, $maxheightsmall, '_small', 50, "thumbs");
-				// Create mini thumbs for image (Ratio is near 16/9)
-				$imgThumbMini = vignette($destfull, $maxwidthmini, $maxheightmini, '_mini', 50, "thumbs");
+					// Create thumbs
+					$imgThumbSmall = vignette($destfull, $maxwidthsmall, $maxheightsmall, '_small', 50, "thumbs");
+					// Create mini thumbs for image (Ratio is near 16/9)
+					$imgThumbMini = vignette($destfull, $maxwidthmini, $maxheightmini, '_mini', 50, "thumbs");
+				}
 			}
 		}
 	}
