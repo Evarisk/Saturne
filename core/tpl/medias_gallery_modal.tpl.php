@@ -54,9 +54,9 @@ if ( ! $error && $subaction == "addFiles") {
 	$modObject     = new $conf->global->$modObjectName($db);
 
 	if (dol_strlen($object->ref) > 0) {
-		$pathToObjectPhoto = $conf->dolismq->multidir_output[$conf->entity] . '/'. $objectType .'/' . $object->ref . '/' . $objectSubtype;
+		$pathToObjectPhoto = $conf->$module->multidir_output[$conf->entity] . '/'. $objectType .'/' . $object->ref . '/' . $objectSubtype;
 	} else {
-		$pathToObjectPhoto = $conf->dolismq->multidir_output[$conf->entity] . '/'. $objectType .'/tmp/' . $modObject->prefix . '0/' . $objectSubtype ;
+		$pathToObjectPhoto = $conf->$module->multidir_output[$conf->entity] . '/'. $objectType .'/tmp/' . $modObject->prefix . '0/' . $objectSubtype ;
 	}
 
 	if (preg_match('/vVv/', $filenames)) {
@@ -67,12 +67,12 @@ if ( ! $error && $subaction == "addFiles") {
 	}
 
 	if ( ! (empty($filenames))) {
-		if ( ! is_dir($conf->dolismq->multidir_output[$conf->entity] . '/'. $objectType . '/tmp/')) {
-			dol_mkdir($conf->dolismq->multidir_output[$conf->entity] . '/'. $objectType . '/tmp/');
+		if ( ! is_dir($conf->$module->multidir_output[$conf->entity] . '/'. $objectType . '/tmp/')) {
+			dol_mkdir($conf->$module->multidir_output[$conf->entity] . '/'. $objectType . '/tmp/');
 		}
 
-		if ( ! is_dir($conf->dolismq->multidir_output[$conf->entity] . '/'. $objectType . '/' . (dol_strlen($object->ref) > 0 ? $object->ref : 'tmp/' . $modObject->prefix . '0/') )) {
-			dol_mkdir($conf->dolismq->multidir_output[$conf->entity] . '/'. $objectType . '/' . (dol_strlen($object->ref) > 0 ? $object->ref : 'tmp/' . $modObject->prefix . '0/'));
+		if ( ! is_dir($conf->$module->multidir_output[$conf->entity] . '/'. $objectType . '/' . (dol_strlen($object->ref) > 0 ? $object->ref : 'tmp/' . $modObject->prefix . '0/') )) {
+			dol_mkdir($conf->$module->multidir_output[$conf->entity] . '/'. $objectType . '/' . (dol_strlen($object->ref) > 0 ? $object->ref : 'tmp/' . $modObject->prefix . '0/'));
 		}
 
 		foreach ($filenames as $filename) {
@@ -103,6 +103,16 @@ if ( ! $error && $subaction == "addFiles") {
 				}
 			}
 		}
+	}
+}
+
+if ( ! $error && $subaction == "unlinkFile") {
+	$data = json_decode(file_get_contents('php://input'), true);
+
+	$filepath = $data['filepath'];
+
+	if (is_file($filepath)) {
+		unlink($filepath);
 	}
 }
 

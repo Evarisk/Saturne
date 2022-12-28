@@ -112,6 +112,8 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
 			$photo   = '';
 			$filename    = $file['name'];
 
+			$fileFullName = $file['fullname'];
+			$return .= '<input hidden class="file-path" value="'. $fileFullName .'">';
 			//if (! utf8_check($filename)) $filename=utf8_encode($filename);	// To be sure file is stored in UTF8 in memory
 
 			//if (dol_is_file($dir.$filename) && image_format_supported($filename) >= 0)

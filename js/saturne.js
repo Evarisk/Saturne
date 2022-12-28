@@ -467,71 +467,32 @@ window.saturne.mediaGallery.previewPhoto = function( event ) {
 window.saturne.mediaGallery.unlinkFile = function( event ) {
 
 	event.preventDefault()
-	let element_linked_id = $(this).find('.element-linked-id').val()
-	let filename = $(this).find('.filename').val()
+
+	let token = $('input[name="token"]').val()
+
+	let objectSubtype = $(this).closest('.linked-medias').find('.from-subtype').length ? $(this).closest('.linked-medias').find('.from-subtype').val() : ''
+
+	let mediaContainer        = $(this).closest('.media-container')
+
+	let filepath = mediaContainer.find('.file-path').val()
+
+	window.saturne.loader.display(mediaContainer);
+
 	let querySeparator = '?'
-	let riskId = $(this).closest('.modal-risk').attr('value')
-	let type = $(this).closest('.modal-container').find('.type-from').val()
-	let noPhotoPath = $(this).closest('.modal-container').find('.no-photo-path').val()
-	var params = new window.URLSearchParams(window.location.search);
-	var currentElementID = params.get('id')
-
-	let mediaContainer = $(this).closest('.media-container')
-	let previousPhoto = null
-	let previousName = ''
-	let newPhoto = ''
-
-	let token = $('.id-container.page-ut-gp-list').find('input[name="token"]').val();
-
-	window.saturne.loader.display($(this).closest('.media-container'));
-
 	document.URL.match(/\?/) ? querySeparator = '&' : 1
 
-	if (type === 'riskassessment') {
-		let riskAssessmentPhoto = $('.risk-evaluation-photo-'+element_linked_id)
-		previousPhoto = $(this).closest('.modal-container').find('.risk-evaluation-photo .clicked-photo-preview')
-		newPhoto = previousPhoto[0].src
-		$.ajax({
-			url: document.URL + querySeparator + "action=unlinkFile&token=" + token,
-			type: "POST",
-			data: JSON.stringify({
-				risk_id: riskId,
-				riskassessment_id: element_linked_id,
-				filename: filename,
-			}),
-			processData: false,
-			success: function ( ) {
-				$('.wpeo-loader').removeClass('wpeo-loader')
-				riskAssessmentPhoto.each( function() {
-					$(this).find('.clicked-photo-preview').attr('src',noPhotoPath )
-				});
-				mediaContainer.hide()
-			}
-		});
-	} else if (type === 'digiriskelement') {
-		previousPhoto = $('.digirisk-element-'+element_linked_id).find('.photo.clicked-photo-preview')
-		newPhoto = previousPhoto[0].src
-
-		$.ajax({
-			url: document.URL + querySeparator + "action=unlinkDigiriskElementFile&token=" + token,
-			type: "POST",
-			data: JSON.stringify({
-				digiriskelement_id: element_linked_id,
-				filename: filename,
-			}),
-			processData: false,
-			success: function ( ) {
-				$('.wpeo-loader').removeClass('wpeo-loader')
-				previousPhoto.attr('src',newPhoto)
-				mediaContainer.hide()
-				if (element_linked_id === currentElementID) {
-					let digiriskBanner = $('.arearef.heightref')
-					digiriskBanner.find('input[value="'+filename+'"]').siblings('').hide()
-				}
-			}
-		});
-	}
-
+	$.ajax({
+		url: document.URL + querySeparator + "subaction=unlinkFile&token=" + token,
+		type: "POST",
+		data: JSON.stringify({
+			filepath: filepath,
+		}),
+		processData: false,
+		success: function ( resp ) {
+			$('.wpeo-loader').removeClass('wpeo-loader')
+			$('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
+		}
+	});
 };
 
 /**
@@ -639,7 +600,6 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
 		});
 	})
 };
-
 
 /**
  * Action select page.
