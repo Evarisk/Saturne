@@ -239,7 +239,7 @@ window.saturne.mediaGallery.event = function() {
 	$( document ).on( 'input', '.form-element #search_in_gallery', window.saturne.mediaGallery.handleSearch );
 	$( document ).on( 'click', '.media-gallery-unlink', window.saturne.mediaGallery.unlinkFile );
 	$( document ).on( 'click', '.media-gallery-favorite', window.saturne.mediaGallery.addToFavorite );
-	$( document ).on( 'submit', '.fast-upload', window.saturne.mediaGallery.fastUpload );
+	$( document ).on( 'change', '.fast-upload', window.saturne.mediaGallery.fastUpload );
 	$( document ).on( 'click', '.selected-page', window.saturne.mediaGallery.selectPage );
 }
 
@@ -279,7 +279,6 @@ window.saturne.mediaGallery.selectPhoto = function( event ) {
  */
 window.saturne.mediaGallery.savePhoto = function( event ) {
 
-	let currentElement    = $(this)
 	let mediaGallery      = $('#media_gallery')
 	let mediaGalleryModal = $(this).closest('.modal-container')
 	let filesLinked       = mediaGalleryModal.find('.clicked-photo')
@@ -296,8 +295,6 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 			filenames += $( this ).find('.filename').val() + 'vVv'
 		});
 	}
-
-	let favorite = filenames.split('vVv')[0]
 
 	window.saturne.loader.display($(this));
 
@@ -319,12 +316,6 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 			$('.wpeo-loader').removeClass('wpeo-loader')
 			mediaGallery.removeClass('modal-active')
 
-			//sanitize media name
-			favorite = favorite.replace(/\ /g, '%20')
-			favorite = favorite.replace(/\(/g, '%28')
-			favorite = favorite.replace(/\)/g, '%29')
-			favorite = favorite.replace(/\+/g, '%2B')
-
 			//refresh medias container after adding
 			$('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
 
@@ -340,113 +331,6 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 			$('.wpeo-modal.modal-photo').html($(resp).find('.wpeo-modal.modal-photo .modal-container'))
 		},
 	});
-
-	// if (type === 'riskassessment') {
-	// 	mediaLinked = modalFrom.find('.element-linked-medias')
-	// 	window.saturne.loader.display(mediaLinked);
-	//
-	// 	let riskAssessmentPhoto = ''
-	// 	riskAssessmentPhoto = $('.risk-evaluation-photo-'+idToSave+'.risk-'+riskId)
-	//
-	// 	let filepath = modalFrom.find('.risk-evaluation-photo-single .filepath-to-riskassessment').val()
-	// 	let thumbName = window.saturne.file.getThumbName(favorite)
-	// 	let newPhoto = filepath + thumbName
-	//
-	// 	$.ajax({
-	// 		url: document.URL + "&action=addFiles&token=" + token +'&favorite='+favorite,
-	// 		type: "POST",
-	// 		data: JSON.stringify({
-	// 			risk_id: riskId,
-	// 			riskassessment_id: idToSave,
-	// 			filenames: filenames,
-	// 		}),
-	// 		processData: false,
-	// 		contentType: false,
-	// 		success: function ( resp ) {
-	// 			$('.wpeo-loader').removeClass('wpeo-loader')
-	// 			parent.removeClass('modal-active')
-	//
-	// 			newPhoto = newPhoto.replace(/\ /g, '%20')
-	// 			newPhoto = newPhoto.replace(/\(/g, '%28')
-	// 			newPhoto = newPhoto.replace(/\)/g, '%29')
-	// 			newPhoto = newPhoto.replace(/\+/g, '%2B')
-	//
-	// 			//Update risk assessment main img in "photo" of risk assessment modal
-	// 			riskAssessmentPhoto.each( function() {
-	// 				$(this).find('.clicked-photo-preview').attr('src',newPhoto)
-	// 				$(this).find('.filename').attr('value', favorite)
-	// 				$(this).find('.clicked-photo-preview').hasClass('photosaturne') ? $(this).find('.clicked-photo-preview').removeClass('photosaturne').addClass('photo') : 0
-	// 			});
-	//
-	// 			//Remove special chars from img
-	// 			favorite = favorite.replace(/\ /g, '%20')
-	// 			favorite = favorite.replace(/\(/g, '%28')
-	// 			favorite = favorite.replace(/\)/g, '%29')
-	// 			favorite = favorite.replace(/\+/g, '%2B')
-	//
-	// 			mediaLinked.html($(resp).find('.element-linked-medias-'+idToSave+'.risk-'+riskId).first())
-	//
-	// 			modalFrom.find('.messageSuccessSavePhoto').removeClass('hidden')
-	// 		},
-	// 		error: function ( ) {
-	// 			modalFrom.find('.messageErrorSavePhoto').removeClass('hidden')
-	// 		}
-	// 	});
-	//
-	// } else if (type === 'digiriskelement') {
-	// 	mediaLinked = $('#digirisk_element_medias_modal_'+idToSave).find('.element-linked-medias')
-	// 	window.saturne.loader.display(mediaLinked);
-	//
-	// 	let digiriskElementPhoto = ''
-	// 	digiriskElementPhoto = $('.digirisk-element-'+idToSave).find('.clicked-photo-preview')
-	//
-	// 	let filepath = $('.digirisk-element-'+idToSave).find('.filepath-to-digiriskelement').val()
-	// 	let thumbName = window.saturne.file.getThumbName(favorite)
-	// 	let newPhoto = filepath + thumbName
-	//
-	// 	$.ajax({
-	// 		url: document.URL + "&action=addDigiriskElementFiles&token=" + token,
-	// 		type: "POST",
-	// 		data: JSON.stringify({
-	// 			digiriskelement_id: idToSave,
-	// 			filenames: filenames,
-	// 		}),
-	// 		processData: false,
-	// 		contentType: false,
-	// 		success: function ( resp ) {
-	// 			$('.wpeo-loader').removeClass('wpeo-loader')
-	// 			parent.removeClass('modal-active')
-	//
-	// 			newPhoto = newPhoto.replace(/\ /g, '%20')
-	// 			newPhoto = newPhoto.replace(/\(/g, '%28')
-	// 			newPhoto = newPhoto.replace(/\)/g, '%29')
-	// 			newPhoto = newPhoto.replace(/\+/g, '%2B')
-	//
-	// 			digiriskElementPhoto.attr('src',newPhoto )
-	//
-	// 			let photoContainer = digiriskElementPhoto.closest('.open-media-gallery')
-	// 			photoContainer.removeClass('open-media-gallery')
-	// 			photoContainer.addClass('open-medias-linked')
-	// 			photoContainer.addClass('digirisk-element')
-	// 			photoContainer.closest('.unit-container').find('.digirisk-element-medias-modal').load(document.URL+ ' #digirisk_element_medias_modal_'+idToSave)
-	//
-	// 			favorite = favorite.replace(/\ /g, '%20')
-	// 			favorite = favorite.replace(/\(/g, '%28')
-	// 			favorite = favorite.replace(/\)/g, '%29')
-	// 			favorite = favorite.replace(/\+/g, '%2B')
-	//
-	// 			if (idToSave === currentElementID) {
-	// 				let digiriskBanner = $('.arearef.heightref')
-	// 				digiriskBanner.load(document.URL+'&favorite='+favorite + ' .arearef.heightref')
-	// 			}
-	// 			mediaLinked.load(document.URL+'&favorite='+favorite + ' .element-linked-medias-'+idToSave+'.digirisk-element')
-	// 			modalFrom.find('.messageSuccessSavePhoto').removeClass('hidden')
-	// 		},
-	// 		error: function ( ) {
-	// 			modalFrom.find('.messageErrorSavePhoto').removeClass('hidden')
-	// 		}
-	// 	});
-	// }
 };
 
 /**
@@ -485,6 +369,7 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 	let modalFooter   = $(this).closest('.modal-container').find('.modal-footer');
 
 	let totalCount = files.length
+	let requestCompleted = 0
 	let progress   = 0
 
 	let actionContainerSuccess = $('.messageSuccessSendPhoto');
@@ -503,12 +388,12 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 	$.each(files, function(index, file) {
 		formdata.append("userfile[]", file);
 		$.ajax({
-			url: document.URL + querySeparator + "subaction=uploadPhoto&uploadMediasSuccess=1&token=" + token,
+			url: document.URL + querySeparator + "subaction=uploadPhoto&token=" + token,
 			type: "POST",
 			data: formdata,
 			processData: false,
 			contentType: false,
-			success: function (resp) {
+			complete: function (resp) {
 				if ($(resp).find('.error-medias').length) {
 					let response = $(resp).find('.error-medias').val()
 					let decoded_response = JSON.parse(response)
@@ -524,10 +409,11 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 					actionContainerError.removeClass('hidden');
 				} else {
 					progress += (1 / totalCount) * 100
+					requestCompleted++
 					$('#progressBar').animate({
 						width: progress + '%'
 					}, 300);
-					if (index + 1 === totalCount) {
+					if (requestCompleted === totalCount) {
 						elementParent.html($(resp).find('#media_gallery .ecm-photo-list')).promise().done( () => {
 							setTimeout(() => {
 								$('#progressBarContainer').fadeOut(800)
@@ -676,7 +562,6 @@ window.saturne.mediaGallery.addToFavorite = function( event ) {
 		}
 };
 
-
 /**
  * Action fast upload.
  *
@@ -686,18 +571,73 @@ window.saturne.mediaGallery.addToFavorite = function( event ) {
  * @return {void}
  */
 window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
-	let id = 0
+	let files         = $(this).prop("files");
+	let token         = $('input[name="token"]').val();
+	let mediaGallery  = $('#media_gallery')
 
-	if (typeFrom == 'photo_ok') {
-		var files = $('#fast-upload-photo-ok').prop('files');
-	} else if (typeFrom == 'photo_ko') {
-		var files = $('#fast-upload-photo-ko').prop('files');
-	} else if (typeFrom.match(/answer_photo/)) {
-		id = typeFrom.split(/_photo/)[1]
-		typeFrom = 'answer_photo'
-		var files = $('#fast-upload-answer-photo'+id).prop('files');
-	}
-	window.saturne.mediaGallery.sendPhoto('', files, typeFrom, id)
+	let formdata = new FormData();
+
+	let objectId         = $(this).closest('.linked-medias').find('.from-id').val()
+	let objectType       = $(this).closest('.linked-medias').find('.from-type').val()
+	let objectSubtype    = $(this).closest('.linked-medias').find('.from-subtype').length ? $(this).closest('.linked-medias').find('.from-subtype').val() : ''
+	let favoriteInput    = $(this).closest('.linked-medias').closest('.linked-medias')
+
+	let querySeparator = '?'
+	document.URL.match(/\?/) ? querySeparator = '&' : 1
+
+	let filenames = ''
+
+	let totalCount = files.length
+	let requestCompleted = 0
+
+	$.each(files, function(index, file) {
+
+		formdata.append("userfile[]", file);
+		filenames += file.name + 'vVv'
+
+		$.ajax({
+			url: document.URL + querySeparator + "subaction=uploadPhoto&token=" + token,
+			type: "POST",
+			data: formdata,
+			processData: false,
+			contentType: false,
+			complete: function () {
+				requestCompleted++
+				if (requestCompleted == totalCount) {
+					$.ajax({
+						url: document.URL + querySeparator + "subaction=addFiles&token=" + token,
+						type: "POST",
+						data: JSON.stringify({
+							filenames: filenames,
+							objectId: objectId,
+							objectType: objectType,
+							objectSubtype: objectSubtype
+						}),
+						processData: false,
+						contentType: false,
+						success: function ( resp ) {
+							$('.wpeo-loader').removeClass('wpeo-loader')
+							mediaGallery.removeClass('modal-active')
+
+							//refresh medias container after adding
+							$('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
+
+							//fill favorite hidden input
+							let favoriteMedia = $('.linked-medias.'+objectSubtype).find('.media-container').find('.media-gallery-favorite .filename').attr('value')
+							favoriteInput.val(favoriteMedia)
+
+							//add media to favorite in frontend
+							$('.linked-medias.'+objectSubtype).find('.media-container').find('.media-gallery-favorite .fa-star').first().removeClass('far').addClass('fas')
+							$('.linked-medias.'+objectSubtype).find('.media-container').find('.media-gallery-favorite').first().addClass('favorite')
+
+							//refresh media gallery & unselect selected medias
+							$('.wpeo-modal.modal-photo').html($(resp).find('.wpeo-modal.modal-photo .modal-container'))
+						},
+					});
+				}
+			}
+		});
+	})
 };
 
 
