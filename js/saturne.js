@@ -472,9 +472,8 @@ window.saturne.mediaGallery.unlinkFile = function( event ) {
 
 	let objectSubtype = $(this).closest('.linked-medias').find('.from-subtype').length ? $(this).closest('.linked-medias').find('.from-subtype').val() : ''
 
-	let mediaContainer        = $(this).closest('.media-container')
-
-	let filepath = mediaContainer.find('.file-path').val()
+	let mediaContainer = $(this).closest('.media-container')
+	let filepath       = mediaContainer.find('.file-path').val()
 
 	window.saturne.loader.display(mediaContainer);
 

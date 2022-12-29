@@ -77,7 +77,7 @@ function saturne_show_medias($module, $modulepart = 'ecm', $sdir, $size = 0, $ma
 	return $return;
 }
 
-function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbmax = 0, $nbbyrow = 5, $showfilename = 0, $showaction = 0, $maxHeight = 120, $maxWidth = 160, $nolink = 0, $notitle = 0, $usesharelink = 0, $subdir = "", $object = null, $favorite_field = 'photo', $show_favorite_button = 1, $show_unlink_button = 1 , $use_mini_format = 0)
+function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbmax = 0, $nbbyrow = 5, $showfilename = 0, $showaction = 0, $maxHeight = 120, $maxWidth = 160, $nolink = 0, $notitle = 0, $usesharelink = 0, $subdir = "", $object = null, $favorite_field = 'photo', $show_favorite_button = 1, $show_unlink_button = 1 , $use_mini_format = 0, $show_only_favorite = 0, $morecss = '', $showdiv = 1)
 {
 	global $conf, $langs;
 
@@ -108,147 +108,155 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
 		}
 
 		foreach ($filearray as $file) {
-			$return .= '<div class="media-container">';
 			$photo   = '';
 			$filename    = $file['name'];
 
 			$fileFullName = $file['fullname'];
-			$return .= '<input hidden class="file-path" value="'. $fileFullName .'">';
-			//if (! utf8_check($filename)) $filename=utf8_encode($filename);	// To be sure file is stored in UTF8 in memory
 
-			//if (dol_is_file($dir.$filename) && image_format_supported($filename) >= 0)
-			if (image_format_supported($filename) >= 0) {
-				$nbphoto++;
-				$photo        = $filename;
-				$viewfilename = $filename;
+			if (($show_only_favorite && $object->$favorite_field == $filename) || !$show_only_favorite) {
+				if ($showdiv) {
+					$return .= '<div class="media-container">';
+				}
 
-				if ($size == 1 || $size == 'small') {   // Format vignette
-					// Find name of thumb file
-					if ($use_mini_format) {
-						$photo_vignette = basename(getImageFileNameForSize($dir . $filename, '_mini'));
-					} else {
-						$photo_vignette = basename(getImageFileNameForSize($dir . $filename, '_small'));
-					}
+				$return .= '<input hidden class="file-path" value="'. $fileFullName .'">';
+				//if (! utf8_check($filename)) $filename=utf8_encode($filename);	// To be sure file is stored in UTF8 in memory
 
-					if ( ! dol_is_file($dirthumb . $photo_vignette)) $photo_vignette = '';
+				//if (dol_is_file($dir.$filename) && image_format_supported($filename) >= 0)
+				if (image_format_supported($filename) >= 0) {
+					$nbphoto++;
+					$photo        = $filename;
+					$viewfilename = $filename;
 
-					// Get filesize of original file
-					$imgarray = dol_getImageSize($dir . $photo);
+					if ($size == 1 || $size == 'small') {   // Format vignette
+						// Find name of thumb file
+						if ($use_mini_format) {
+							$photo_vignette = basename(getImageFileNameForSize($dir . $filename, '_mini'));
+						} else {
+							$photo_vignette = basename(getImageFileNameForSize($dir . $filename, '_small'));
+						}
 
-					if ($nbbyrow > 0) {
-						if ($nbphoto == 1) $return .= '<table class="valigntop center centpercent" style="border: 0; padding: 2px; border-spacing: 2px; border-collapse: separate;">';
+						if ( ! dol_is_file($dirthumb . $photo_vignette)) $photo_vignette = '';
 
-						if ($nbphoto % $nbbyrow == 1) $return .= '<tr class="center valignmiddle" style="border: 1px">';
-						$return                               .= '<td style="width: ' . ceil(100 / $nbbyrow) . '%" class="photo">';
-					} elseif ($nbbyrow < 0) $return .= '<div class="inline-block">';
+						// Get filesize of original file
+						$imgarray = dol_getImageSize($dir . $photo);
 
-					$return .= "\n";
+						if ($nbbyrow > 0) {
+							if ($nbphoto == 1) $return .= '<table class="valigntop center centpercent" style="border: 0; padding: 2px; border-spacing: 2px; border-collapse: separate;">';
 
-					$relativefile = preg_replace('/^\//', '', $pdir . $photo);
-					if (empty($nolink)) {
-						$urladvanced               = getAdvancedPreviewUrl($modulepart, $relativefile, 0, 'entity=' . $conf->entity);
-						if ($urladvanced) $return .= '<a href="' . $urladvanced . '">';
-						else $return              .= '<a href="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" class="aphoto" target="_blank">';
-					}
+							if ($nbphoto % $nbbyrow == 1) $return .= '<tr class="center valignmiddle" style="border: 1px">';
+							$return                               .= '<td style="width: ' . ceil(100 / $nbbyrow) . '%" class="photo">';
+						} elseif ($nbbyrow < 0) $return .= '<div class="inline-block">';
 
-					// Show image (width height=$maxHeight)
-					// Si fichier vignette disponible et image source trop grande, on utilise la vignette, sinon on utilise photo origine
-					$alt               = $langs->transnoentitiesnoconv('File') . ': ' . $relativefile;
-					$alt              .= ' - ' . $langs->transnoentitiesnoconv('Size') . ': ' . $imgarray['width'] . 'x' . $imgarray['height'];
-					if ($notitle) $alt = '';
-					if ($usesharelink) {
-						if ($file['share']) {
-							if (empty($maxHeight) || $photo_vignette && $imgarray['height'] > $maxHeight) {
-								$return .= '<!-- Show original file (thumb not yet available with shared links) -->';
-								$return .= '<img width="65" height="65" class="photo photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/viewimage.php?hashp=' . urlencode($file['share']) . '" title="' . dol_escape_htmltag($alt) . '">';
+						$return .= "\n";
+
+						$relativefile = preg_replace('/^\//', '', $pdir . $photo);
+						if (empty($nolink)) {
+							$urladvanced               = getAdvancedPreviewUrl($modulepart, $relativefile, 0, 'entity=' . $conf->entity);
+							if ($urladvanced) $return .= '<a href="' . $urladvanced . '">';
+							else $return              .= '<a href="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" class="aphoto" target="_blank">';
+						}
+
+						// Show image (width height=$maxHeight)
+						// Si fichier vignette disponible et image source trop grande, on utilise la vignette, sinon on utilise photo origine
+						$alt               = $langs->transnoentitiesnoconv('File') . ': ' . $relativefile;
+						$alt              .= ' - ' . $langs->transnoentitiesnoconv('Size') . ': ' . $imgarray['width'] . 'x' . $imgarray['height'];
+						if ($notitle) $alt = '';
+						if ($usesharelink) {
+							if ($file['share']) {
+								if (empty($maxHeight) || $photo_vignette && $imgarray['height'] > $maxHeight) {
+									$return .= '<!-- Show original file (thumb not yet available with shared links) -->';
+									$return .= '<img width="65" height="65" class="photo '. $morecss .' photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/viewimage.php?hashp=' . urlencode($file['share']) . '" title="' . dol_escape_htmltag($alt) . '">';
+								} else {
+									$return .= '<!-- Show original file -->';
+									$return .= '<img  width="65" height="65" class="photo '. $morecss .' photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/viewimage.php?hashp=' . urlencode($file['share']) . '" title="' . dol_escape_htmltag($alt) . '">';
+								}
 							} else {
-								$return .= '<!-- Show original file -->';
-								$return .= '<img  width="65" height="65" class="photo photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/viewimage.php?hashp=' . urlencode($file['share']) . '" title="' . dol_escape_htmltag($alt) . '">';
+								$return .= '<!-- Show nophoto file (because file is not shared) -->';
+								$return .= '<img  width="65" height="65" class="photo '. $morecss .' photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/public/theme/common/nophoto.png" title="' . dol_escape_htmltag($alt) . '">';
 							}
 						} else {
-							$return .= '<!-- Show nophoto file (because file is not shared) -->';
-							$return .= '<img  width="65" height="65" class="photo photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/public/theme/common/nophoto.png" title="' . dol_escape_htmltag($alt) . '">';
+							if (empty($maxHeight) || $photo_vignette && $imgarray['height'] > $maxHeight) {
+								$return .= '<!-- Show thumb -->';
+								$return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo '. $morecss .'"  src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdirthumb . $photo_vignette) . '" title="' . dol_escape_htmltag($alt) . '">';
+							} else {
+								$return .= '<!-- Show original file -->';
+								$return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo '. $morecss .' photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" title="' . dol_escape_htmltag($alt) . '">';
+							}
 						}
-					} else {
-						if (empty($maxHeight) || $photo_vignette && $imgarray['height'] > $maxHeight) {
-							$return .= '<!-- Show thumb -->';
-							$return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo"  src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdirthumb . $photo_vignette) . '" title="' . dol_escape_htmltag($alt) . '">';
-						} else {
-							$return .= '<!-- Show original file -->';
-							$return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" title="' . dol_escape_htmltag($alt) . '">';
+
+						if (empty($nolink)) $return .= '</a>';
+						$return                     .= "\n";
+						if ($showfilename) $return  .= '<br>' . $viewfilename;
+						if ($showaction) {
+							$return .= '<br>';
+							// On propose la generation de la vignette si elle n'existe pas et si la taille est superieure aux limites
+							if ($photo_vignette && (image_format_supported($photo) > 0) && ($object->imgWidth > $maxWidth || $object->imgHeight > $maxHeight)) {
+								$return .= '<a href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;action=addthumb&amp;file=' . urlencode($pdir . $viewfilename) . '">' . img_picto($langs->trans('GenerateThumb'), 'refresh') . '&nbsp;&nbsp;</a>';
+							}
 						}
+						$return .= "\n";
+
+						if ($nbbyrow > 0) {
+							$return                                 .= '</td>';
+							if (($nbphoto % $nbbyrow) == 0) $return .= '</tr>';
+						} elseif ($nbbyrow < 0) $return .= '</td>';
 					}
 
-					if (empty($nolink)) $return .= '</a>';
-					$return                     .= "\n";
-					if ($showfilename) $return  .= '<br>' . $viewfilename;
-					if ($showaction) {
-						$return .= '<br>';
-						// On propose la generation de la vignette si elle n'existe pas et si la taille est superieure aux limites
-						if ($photo_vignette && (image_format_supported($photo) > 0) && ($object->imgWidth > $maxWidth || $object->imgHeight > $maxHeight)) {
-							$return .= '<a href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;action=addthumb&amp;file=' . urlencode($pdir . $viewfilename) . '">' . img_picto($langs->trans('GenerateThumb'), 'refresh') . '&nbsp;&nbsp;</a>';
+					if (empty($size)) {     // Format origine
+						$return .= '<img class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '">';
+
+						if ($showfilename) $return .= '<br>' . $viewfilename;
+					}
+
+					if ($size == 'large') {
+						$relativefile = preg_replace('/^\//', '', $pdir . $photo);
+						if (empty($nolink)) {
+							$urladvanced               = getAdvancedPreviewUrl($modulepart, $relativefile, 0, 'entity=' . $conf->entity);
+							if ($urladvanced) $return .= '<a href="' . $urladvanced . '">';
+							else $return              .= '<a href="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" class="aphoto" target="_blank">';
 						}
+						$return .= '<img width="' . $conf->global->DOLISMQ_MEDIA_MAX_WIDTH_LARGE . '" height="' . $conf->global->DOLISMQ_MEDIA_MAX_HEIGHT_LARGE . '" class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '">';
+						if ($showfilename) $return .= '<br>' . $viewfilename;
 					}
-					$return .= "\n";
 
-					if ($nbbyrow > 0) {
-						$return                                 .= '</td>';
-						if (($nbphoto % $nbbyrow) == 0) $return .= '</tr>';
-					} elseif ($nbbyrow < 0) $return .= '</td>';
-				}
-
-				if (empty($size)) {     // Format origine
-					$return .= '<img class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '">';
-
-					if ($showfilename) $return .= '<br>' . $viewfilename;
-				}
-
-				if ($size == 'large') {
-					$relativefile = preg_replace('/^\//', '', $pdir . $photo);
-					if (empty($nolink)) {
-						$urladvanced               = getAdvancedPreviewUrl($modulepart, $relativefile, 0, 'entity=' . $conf->entity);
-						if ($urladvanced) $return .= '<a href="' . $urladvanced . '">';
-						else $return              .= '<a href="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" class="aphoto" target="_blank">';
+					if ($size == 'medium') {
+						$relativefile = preg_replace('/^\//', '', $pdir . $photo);
+						if (empty($nolink)) {
+							$urladvanced               = getAdvancedPreviewUrl($modulepart, $relativefile, 0, 'entity=' . $conf->entity);
+							if ($urladvanced) $return .= '<a href="' . $urladvanced . '">';
+							else $return              .= '<a href="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" class="aphoto" target="_blank">';
+						}
+						$return .= '<img width="' . $conf->global->DOLISMQ_MEDIA_MAX_WIDTH_MEDIUM . '" height="' . $conf->global->DOLISMQ_MEDIA_MAX_HEIGHT_MEDIUM . '" class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '">';
+						if ($showfilename) $return .= '<br>' . $viewfilename;
 					}
-					$return .= '<img width="' . $conf->global->DOLISMQ_MEDIA_MAX_WIDTH_LARGE . '" height="' . $conf->global->DOLISMQ_MEDIA_MAX_HEIGHT_LARGE . '" class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '">';
-					if ($showfilename) $return .= '<br>' . $viewfilename;
+
+					// On continue ou on arrete de boucler ?
+					if ($nbmax && $nbphoto >= $nbmax) break;
 				}
 
-				if ($size == 'medium') {
-					$relativefile = preg_replace('/^\//', '', $pdir . $photo);
-					if (empty($nolink)) {
-						$urladvanced               = getAdvancedPreviewUrl($modulepart, $relativefile, 0, 'entity=' . $conf->entity);
-						if ($urladvanced) $return .= '<a href="' . $urladvanced . '">';
-						else $return              .= '<a href="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" class="aphoto" target="_blank">';
-					}
-					$return .= '<img width="' . $conf->global->DOLISMQ_MEDIA_MAX_WIDTH_MEDIUM . '" height="' . $conf->global->DOLISMQ_MEDIA_MAX_HEIGHT_MEDIUM . '" class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '">';
-					if ($showfilename) $return .= '<br>' . $viewfilename;
-				}
+				//$return .= '<div>';
 
-				// On continue ou on arrete de boucler ?
-				if ($nbmax && $nbphoto >= $nbmax) break;
-			}
-
-			//$return .= '<div>';
-
-			if ($show_favorite_button) {
-				$return .= '
+				if ($show_favorite_button) {
+					$return .= '
 				<div class="wpeo-button button-square-50 button-blue media-gallery-favorite '. ($object->$favorite_field == '' && $i == 0 ? 'favorite' : ($object->$favorite_field == $photo ? 'favorite' : '')) .'" value="' . $object->id . '">
 					<input class="element-linked-id" type="hidden" value="' . ($object->id > 0 ? $object->id : 0) . '">
 					<input class="filename" type="hidden" value="' . $photo . '">
 					<i class="' . ($object->$favorite_field == '' && $i == 0 ? 'fas' : ($object->$favorite_field == $photo ? 'fas' : 'far')) . ' fa-star button-icon"></i>
 				</div>';
-			}
-			if ($show_unlink_button) {
-				$return .= '
+				}
+				if ($show_unlink_button) {
+					$return .= '
 				<div class="wpeo-button button-square-50 button-grey media-gallery-unlink" value="' . $object->id . '">
 				<input class="element-linked-id" type="hidden" value="' . ($object->id > 0 ? $object->id : 0) . '">
 				<input class="filename" type="hidden" value="' . $photo . '">
 				<i class="fas fa-unlink button-icon"></i>
 				</div>';
+				}
+				if ($showdiv) {
+					$return .= "</div>\n";
+				}
+				$i++;
 			}
-			$return .= "</div>\n";
-			$i++;
 		}
 		//$return .= "</div>\n";
 
