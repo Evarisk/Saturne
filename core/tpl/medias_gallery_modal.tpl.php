@@ -83,7 +83,7 @@ if ( ! $error && $subaction == "addFiles") {
 				$pathToECMPhoto = $conf->ecm->multidir_output[$conf->entity] . '/'. $module .'/medias/' . $filename;
 
 				if ( ! is_dir($pathToObjectPhoto)) {
-					mkdir($pathToObjectPhoto);
+					mkdir($pathToObjectPhoto, 0777, true);
 				}
 
 				if (file_exists($pathToECMPhoto)) {
