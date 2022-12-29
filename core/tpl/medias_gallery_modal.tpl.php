@@ -46,6 +46,7 @@ if ( ! $error && $subaction == "addFiles") {
 	$objectId      = $data['objectId'];
 	$objectType    = $data['objectType'];
 	$objectSubtype = $data['objectSubtype'];
+	$objectSubdir  = $data['objectSubdir'];
 
 	$object = new $objectType($db);
 	$object->fetch($objectId);
@@ -54,7 +55,7 @@ if ( ! $error && $subaction == "addFiles") {
 	$modObject     = new $conf->global->$modObjectName($db);
 
 	if (dol_strlen($object->ref) > 0) {
-		$pathToObjectPhoto = $conf->$module->multidir_output[$conf->entity] . '/'. $objectType .'/' . $object->ref . '/' . $objectSubtype;
+		$pathToObjectPhoto = $conf->$module->multidir_output[$conf->entity] . '/'. $objectType .'/' . $object->ref . '/' . $objectSubdir;
 	} else {
 		$pathToObjectPhoto = $conf->$module->multidir_output[$conf->entity] . '/'. $objectType .'/tmp/' . $modObject->prefix . '0/' . $objectSubtype ;
 	}
@@ -204,9 +205,10 @@ if (is_array($submit_file_error_text)) {
 				<?php endfor; ?>
 			</ul>
 			<div class="save-photo wpeo-button button-blue button-disable" value="">
-				<input class="from-type" value="" type="hidden" />
-				<input class="from-subtype" value="" type="hidden" />
-				<input class="from-id" value="" type="hidden" />
+				<input class="from-type" value="" type="hidden"/>
+				<input class="from-subtype" value="" type="hidden"/>
+				<input class="from-id" value="" type="hidden"/>
+				<input class="from-subdir" value="" type="hidden"/>
 				<span><?php echo $langs->trans('Add'); ?></span>
 			</div>
 		</div>

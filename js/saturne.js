@@ -287,6 +287,7 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 	let objectId         = $(this).find('.from-id').val()
 	let objectType       = $(this).find('.from-type').val()
 	let objectSubtype    = $(this).find('.from-subtype').length ? $(this).find('.from-subtype').val() : ''
+	let objectSubdir     = $(this).find('.from-subdir').length ? $(this).find('.from-subdir').val() : ''
 	let favoriteInput    = $(this).closest('.linked-medias')
 
 	let filenames = ''
@@ -308,6 +309,7 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 			filenames: filenames,
 			objectId: objectId,
 			objectType: objectType,
+			objectSubdir: objectSubdir,
 			objectSubtype: objectSubtype
 		}),
 		processData: false,
@@ -540,6 +542,7 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
 	let objectId         = $(this).closest('.linked-medias').find('.from-id').val()
 	let objectType       = $(this).closest('.linked-medias').find('.from-type').val()
 	let objectSubtype    = $(this).closest('.linked-medias').find('.from-subtype').length ? $(this).closest('.linked-medias').find('.from-subtype').val() : ''
+	let objectSubdir     = $(this).closest('.linked-medias').find('.from-subdir').length ? $(this).closest('.linked-medias').find('.from-subdir').val() : ''
 	let favoriteInput    = $(this).closest('.linked-medias').closest('.linked-medias')
 
 	let querySeparator = '?'
@@ -571,7 +574,8 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
 							filenames: filenames,
 							objectId: objectId,
 							objectType: objectType,
-							objectSubtype: objectSubtype
+							objectSubtype: objectSubtype,
+							objectSubdir: objectSubdir
 						}),
 						processData: false,
 						contentType: false,
