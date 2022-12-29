@@ -57,7 +57,7 @@ if ( ! $error && $subaction == "addFiles") {
 	if (dol_strlen($object->ref) > 0) {
 		$pathToObjectPhoto = $conf->$module->multidir_output[$conf->entity] . '/'. $objectType .'/' . $object->ref . '/' . $objectSubdir;
 	} else {
-		$pathToObjectPhoto = $conf->$module->multidir_output[$conf->entity] . '/'. $objectType .'/tmp/' . $modObject->prefix . '0/' . $objectSubtype ;
+		$pathToObjectPhoto = $conf->$module->multidir_output[$conf->entity] . '/'. $objectType .'/tmp/' . $modObject->prefix . '0/' . $objectSubdir ;
 	}
 
 	if (preg_match('/vVv/', $filenames)) {

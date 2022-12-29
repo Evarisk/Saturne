@@ -322,7 +322,7 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 			$('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
 
 			//fill favorite hidden input
-			let favoriteMedia = $('.linked-medias.'+objectSubtype).find('.media-container').find('.media-gallery-favorite .filename').attr('value')
+			let favoriteMedia = $('.linked-medias.'+objectSubtype).find('.media-container').find('.favorite .filename').attr('value')
 			favoriteInput.val(favoriteMedia)
 
 			//add media to favorite in frontend
@@ -587,7 +587,7 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
 							$('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
 
 							//fill favorite hidden input
-							let favoriteMedia = $('.linked-medias.'+objectSubtype).find('.media-container').find('.media-gallery-favorite .filename').attr('value')
+							let favoriteMedia = $('.linked-medias.'+objectSubtype).find('.media-container').find('.favorite .filename').attr('value')
 							favoriteInput.val(favoriteMedia)
 
 							//add media to favorite in frontend
