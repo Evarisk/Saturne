@@ -288,7 +288,6 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 	let objectType       = $(this).find('.from-type').val()
 	let objectSubtype    = $(this).find('.from-subtype').length ? $(this).find('.from-subtype').val() : ''
 	let objectSubdir     = $(this).find('.from-subdir').length ? $(this).find('.from-subdir').val() : ''
-	let favoriteInput    = $(this).closest('.linked-medias')
 
 	let filenames = ''
 	if (filesLinked.length > 0) {
@@ -320,10 +319,6 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 
 			//refresh medias container after adding
 			$('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
-
-			//fill favorite hidden input
-			let favoriteMedia = $('.linked-medias.'+objectSubtype).find('.media-container').find('.favorite .filename').attr('value')
-			favoriteInput.val(favoriteMedia)
 
 			//refresh media gallery & unselect selected medias
 			$('.wpeo-modal.modal-photo').html($(resp).find('.wpeo-modal.modal-photo .modal-container'))
@@ -539,7 +534,6 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
 	let objectType       = $(this).closest('.linked-medias').find('.from-type').val()
 	let objectSubtype    = $(this).closest('.linked-medias').find('.from-subtype').length ? $(this).closest('.linked-medias').find('.from-subtype').val() : ''
 	let objectSubdir     = $(this).closest('.linked-medias').find('.from-subdir').length ? $(this).closest('.linked-medias').find('.from-subdir').val() : ''
-	let favoriteInput    = $(this).closest('.linked-medias').closest('.linked-medias')
 
 	let querySeparator = '?'
 	document.URL.match(/\?/) ? querySeparator = '&' : 1
@@ -581,10 +575,6 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
 
 							//refresh medias container after adding
 							$('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
-
-							//fill favorite hidden input
-							let favoriteMedia = $('.linked-medias.'+objectSubtype).find('.media-container').find('.favorite .filename').attr('value')
-							favoriteInput.val(favoriteMedia)
 
 							//refresh media gallery & unselect selected medias
 							$('.wpeo-modal.modal-photo').html($(resp).find('.wpeo-modal.modal-photo .modal-container'))
