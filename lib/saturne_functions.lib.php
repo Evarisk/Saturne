@@ -1,6 +1,6 @@
 <?php
 
-function saturneHeader($module, $action, $subaction, $head = '', $title = '', $help_url = '', $target = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $morequerystring = '', $morecssonbody = '', $replacemainareaby = '', $disablenofollow = 0, $disablenoindex = 0) {
+function saturneHeader($module, $action, $subaction, $load_media_gallery, $head = '', $title = '', $help_url = '', $target = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $morequerystring = '', $morecssonbody = '', $replacemainareaby = '', $disablenofollow = 0, $disablenoindex = 0) {
 
 	global $langs, $conf;
 
@@ -12,8 +12,10 @@ function saturneHeader($module, $action, $subaction, $head = '', $title = '', $h
 
 	llxHeader($head, $title, $help_url, $target, $disablejs, $disablehead, $arrayofjs, $arrayofcss, $morequerystring, $morecssonbody, $replacemainareaby, $disablenofollow, $disablenoindex);
 
-	//Media gallery
-	include __DIR__ . '/../core/tpl/medias_gallery_modal.tpl.php';
+	if ($load_media_gallery) {
+		//Media gallery
+		include __DIR__ . '/../core/tpl/medias_gallery_modal.tpl.php';
+	}
 }
 
 function saturne_show_medias($module, $modulepart = 'ecm', $sdir, $size = 0, $maxHeight = 80, $maxWidth = 80, $offset = 0)
