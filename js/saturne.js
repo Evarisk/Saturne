@@ -322,7 +322,7 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 			$('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
 
 			//refresh media gallery & unselect selected medias
-			$('.wpeo-modal.modal-photo').html($(resp).find('.wpeo-modal.modal-photo .modal-container'))
+			mediaGallery.html($(resp).find('#media_gallery').children())
 		},
 	});
 };
@@ -580,7 +580,7 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
 							$('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
 
 							//refresh media gallery & unselect selected medias
-							$('.wpeo-modal.modal-photo').html($(resp).find('.wpeo-modal.modal-photo .modal-container'))
+							mediaGallery.html($(resp).find('#media_gallery').children())
 						},
 					});
 				}
