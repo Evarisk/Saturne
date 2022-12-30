@@ -297,6 +297,7 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 	}
 
 	window.saturne.loader.display($(this));
+	window.saturne.loader.display($('.linked-medias.'+objectSubtype));
 
 	let querySeparator = '?'
 	document.URL.match(/\?/) ? querySeparator = '&' : 1
@@ -534,6 +535,8 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
 	let objectType       = $(this).closest('.linked-medias').find('.from-type').val()
 	let objectSubtype    = $(this).closest('.linked-medias').find('.from-subtype').length ? $(this).closest('.linked-medias').find('.from-subtype').val() : ''
 	let objectSubdir     = $(this).closest('.linked-medias').find('.from-subdir').length ? $(this).closest('.linked-medias').find('.from-subdir').val() : ''
+
+	window.saturne.loader.display($('.linked-medias.'+objectSubtype));
 
 	let querySeparator = '?'
 	document.URL.match(/\?/) ? querySeparator = '&' : 1
