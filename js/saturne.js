@@ -325,10 +325,6 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 			let favoriteMedia = $('.linked-medias.'+objectSubtype).find('.media-container').find('.favorite .filename').attr('value')
 			favoriteInput.val(favoriteMedia)
 
-			//add media to favorite in frontend
-			$('.linked-medias.'+objectSubtype).find('.media-container').find('.media-gallery-favorite .fa-star').first().removeClass('far').addClass('fas')
-			$('.linked-medias.'+objectSubtype).find('.media-container').find('.media-gallery-favorite').first().addClass('favorite')
-
 			//refresh media gallery & unselect selected medias
 			$('.wpeo-modal.modal-photo').html($(resp).find('.wpeo-modal.modal-photo .modal-container'))
 		},
@@ -589,10 +585,6 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
 							//fill favorite hidden input
 							let favoriteMedia = $('.linked-medias.'+objectSubtype).find('.media-container').find('.favorite .filename').attr('value')
 							favoriteInput.val(favoriteMedia)
-
-							//add media to favorite in frontend
-							$('.linked-medias.'+objectSubtype).find('.media-container').find('.media-gallery-favorite .fa-star').first().removeClass('far').addClass('fas')
-							$('.linked-medias.'+objectSubtype).find('.media-container').find('.media-gallery-favorite').first().addClass('favorite')
 
 							//refresh media gallery & unselect selected medias
 							$('.wpeo-modal.modal-photo').html($(resp).find('.wpeo-modal.modal-photo .modal-container'))
