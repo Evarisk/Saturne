@@ -180,52 +180,52 @@ class modSaturne extends DolibarrModules
 
 		// Main menu entries to add
 		$this->menu = [];
-		$r = 0;
-		$this->menu[$r++] = [
-			'fk_menu'  => 'fk_mainmenu=saturne', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'type'     => 'top', // This is a Top menu entry
-			'titre'    => $langs->trans('Saturne'),
-			'prefix'   => '<i class="fa-solid fa-waffle"></i>',
-			'mainmenu' => 'saturne',
-			'leftmenu' => '',
-			'url'      => '/saturne/view/timespender.php',
-			'langs'    => 'saturne@saturne', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-			'position' => 1000 + $r,
-			'enabled'  => '$conf->saturne->enabled', // Define condition to show or hide menu entry. Use '$conf->saturne->enabled' if entry must be visible if module is enabled.
-			'perms'    => '1', // Use 'perms'=>'$user->rights->saturne->myobject->read' if you want your menu with a permission rules
-			'target'   => '',
-			'user'     => 0, // 0=Menu for internal users, 1=external users, 2=both
-        ];
-		$this->menu[$r++] = [
-			'fk_menu'  => 'fk_mainmenu=saturne',	    // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'type'     => 'left',			                // This is a Left menu entry
-			'titre'    => $langs->trans('SaturneConfig'),
-			'prefix'   => '<i class="fas fa-cog pictofixedwidth"></i>  ',
-			'mainmenu' => 'saturne',
-			'leftmenu' => 'Saturneconfig',
-			'url'      => '/saturne/admin/timespender.php',
-			'langs'    => 'saturne@saturne',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-			'position' => 1000 + $r,
-			'enabled'  => '$conf->saturne->enabled',  // Define condition to show or hide menu entry. Use '$conf->saturne->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
-			'perms'    => '$user->rights->saturne->adminpage->read',			                // Use 'perms'=>'$user->rights->saturne->level1->level2' if you want your menu with a permission rules
-			'target'   => '',
-			'user'     => 0,				                // 0=Menu for internal users, 1=external users, 2=both
-		];
-		$this->menu[$r++] = [
-			'fk_menu'  => 'fk_mainmenu=dolisirh', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-			'type'     => 'left', // This is a Top menu entry
-			'titre'    => $langs->trans('SecretWaffle'),
-			'prefix'   => '<i class="fas fa-mask pictofixedwidth"></i>',
-			'mainmenu' => 'dolisirh',
-			'leftmenu' => '',
-			'url'      => '/saturne/view/timespender.php',
-			'langs'    => 'saturne@saturne', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-			'position' => 1090 + $r,
-			'enabled'  => '$conf->saturne->enabled', // Define condition to show or hide menu entry. Use '$conf->saturne->enabled' if entry must be visible if module is enabled.
-			'perms'    => '1', // Use 'perms'=>'$user->rights->saturne->myobject->read' if you want your menu with a permission rules
-			'target'   => '',
-			'user'     => 0, // 0=Menu for internal users, 1=external users, 2=both
-		];
+//		$r = 0;
+//		$this->menu[$r++] = [
+//			'fk_menu'  => 'fk_mainmenu=saturne', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+//			'type'     => 'top', // This is a Top menu entry
+//			'titre'    => $langs->trans('Saturne'),
+//			'prefix'   => '<i class="fa-solid fa-waffle"></i>',
+//			'mainmenu' => 'saturne',
+//			'leftmenu' => '',
+//			'url'      => '/saturne/view/timespender.php',
+//			'langs'    => 'saturne@saturne', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+//			'position' => 1000 + $r,
+//			'enabled'  => '$conf->saturne->enabled', // Define condition to show or hide menu entry. Use '$conf->saturne->enabled' if entry must be visible if module is enabled.
+//			'perms'    => '1', // Use 'perms'=>'$user->rights->saturne->myobject->read' if you want your menu with a permission rules
+//			'target'   => '',
+//			'user'     => 0, // 0=Menu for internal users, 1=external users, 2=both
+//        ];
+//		$this->menu[$r++] = [
+//			'fk_menu'  => 'fk_mainmenu=saturne',	    // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+//			'type'     => 'left',			                // This is a Left menu entry
+//			'titre'    => $langs->trans('SaturneConfig'),
+//			'prefix'   => '<i class="fas fa-cog pictofixedwidth"></i>  ',
+//			'mainmenu' => 'saturne',
+//			'leftmenu' => 'Saturneconfig',
+//			'url'      => '/saturne/admin/timespender.php',
+//			'langs'    => 'saturne@saturne',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+//			'position' => 1000 + $r,
+//			'enabled'  => '$conf->saturne->enabled',  // Define condition to show or hide menu entry. Use '$conf->saturne->enabled' if entry must be visible if module is enabled. Use '$leftmenu==\'system\'' to show if leftmenu system is selected.
+//			'perms'    => '$user->rights->saturne->adminpage->read',			                // Use 'perms'=>'$user->rights->saturne->level1->level2' if you want your menu with a permission rules
+//			'target'   => '',
+//			'user'     => 0,				                // 0=Menu for internal users, 1=external users, 2=both
+//		];
+//		$this->menu[$r++] = [
+//			'fk_menu'  => 'fk_mainmenu=dolisirh', // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+//			'type'     => 'left', // This is a Top menu entry
+//			'titre'    => $langs->trans('SecretWaffle'),
+//			'prefix'   => '<i class="fas fa-mask pictofixedwidth"></i>',
+//			'mainmenu' => 'dolisirh',
+//			'leftmenu' => '',
+//			'url'      => '/saturne/view/timespender.php',
+//			'langs'    => 'saturne@saturne', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+//			'position' => 1090 + $r,
+//			'enabled'  => '$conf->saturne->enabled', // Define condition to show or hide menu entry. Use '$conf->saturne->enabled' if entry must be visible if module is enabled.
+//			'perms'    => '1', // Use 'perms'=>'$user->rights->saturne->myobject->read' if you want your menu with a permission rules
+//			'target'   => '',
+//			'user'     => 0, // 0=Menu for internal users, 1=external users, 2=both
+//		];
 	}
 
 	/**
