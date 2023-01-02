@@ -41,7 +41,7 @@ function saturne_show_medias($module, $modulepart = 'ecm', $sdir, $size = 0, $ma
 			$filearray = dol_sort_array($filearray, $sortfield, $sortorder);
 		}
 		$moduleImageNumberPerPageConf = strtoupper($module) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
-		for ($i = 0 + ($offset * $conf->global->$moduleImageNumberPerPageConf); $i < $conf->global->$moduleImageNumberPerPageConf + ($offset * $conf->global->$moduleImageNumberPerPageConf);  $i++) {
+		for ($i = ($offset * $conf->global->$moduleImageNumberPerPageConf); $i < ($conf->global->$moduleImageNumberPerPageConf + ($offset * $conf->global->$moduleImageNumberPerPageConf));  $i++) {
 			$file = $filearray[$i]['name'];
 
 			if (image_format_supported($file) >= 0) {

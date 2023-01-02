@@ -115,6 +115,79 @@ if ( ! $error && $subaction == "unlinkFile") {
 	}
 }
 
+if ( ! $error && $subaction == "pagination") {
+	$data = json_decode(file_get_contents('php://input'), true);
+
+	$offset       = $data['offset'];
+	$pagesCounter = $data['pagesCounter'];
+
+	$pagesDisplayed = [];
+
+	if ($pagesCounter < 6) {
+		for ($i = 1; $i <= $pagesCounter; $i++) {
+			$page_array[] = $pagesCounter;
+		}
+	} else {
+		for ($i = 1; $i <= 3; $i++) {
+			$page_array[] = $i;
+		}
+		if($offset > 5 && $offset < ($pagesCounter - 4)) {
+			if ($offset != 6) {
+				$page_array[] = '...';
+			}
+			$page_array[] = $offset - 2;
+			$page_array[] = $offset - 1;
+			$page_array[] = $offset;
+			$page_array[] = $offset + 1;
+			$page_array[] = $offset + 2;
+			if ($offset != $pagesCounter - 5) {
+				$page_array[] = '...';
+			}
+		} else {
+			if ($offset == 3) {
+				$page_array[] = $offset + 1;
+				$page_array[] = $offset + 2;
+				$page_array[] = '...';
+			} else if ($offset == 4) {
+				$page_array[] = $offset;
+				$page_array[] = '...';
+			} else if ($offset == 5) {
+				$page_array[] = $offset - 1;
+				$page_array[] = $offset;
+				$page_array[] = $offset + 1;
+				$page_array[] = $offset + 2;
+				$page_array[] = '...';
+			} else if ($offset == ($pagesCounter - 4)) {
+				$page_array[] = '...';
+				$page_array[] = $offset - 2;
+				$page_array[] = $offset - 1;
+				$page_array[] = $offset;
+				$page_array[] = $offset + 1;
+			} else if ($offset == ($pagesCounter - 3)) {
+				$page_array[] = '...';
+				$page_array[] = $offset - 2;
+				$page_array[] = $offset - 1;
+				$page_array[] = $offset;
+			} else if ($offset == ($pagesCounter - 2)) {
+				$page_array[] = '...';
+				$page_array[] = $offset - 2;
+				$page_array[] = $offset - 1;
+			} else {
+				$page_array[] = '...';
+			}
+		}
+
+		for ($i = 0; $i < 3; $i++) {
+			$last_pages[] = $pagesCounter - $i;
+		}
+		asort($last_pages);
+		$page_array = array_merge($page_array, $last_pages);
+	}
+
+	$new_pagination = 1;
+
+}
+
 if (is_array($submit_file_error_text)) {
 	print '<input class="error-medias" value="'. htmlspecialchars(json_encode($submit_file_error_text)) .'">';
 }
@@ -184,24 +257,50 @@ if (is_array($submit_file_error_text)) {
 				<div class="wpeo-gridlayout grid-5 grid-gap-3 grid-margin-2 ecm-photo-list ecm-photo-list">
 					<?php
 					$relativepath = $module . '/medias/thumbs';
-					print saturne_show_medias($module, 'ecm', $conf->ecm->multidir_output[$conf->entity] . '/'. $module .'/medias', ($conf->browser->layout == 'phone' ? 'mini' : 'small'), 80, 80, (!empty(GETPOST('offset')) ? GETPOST('offset') : 0));
+					print saturne_show_medias($module, 'ecm', $conf->ecm->multidir_output[$conf->entity] . '/'. $module .'/medias', ($conf->browser->layout == 'phone' ? 'mini' : 'small'), 80, 80, (!empty($offset) ? $offset : 0));
 					?>
 				</div>
 			</div>
 		</div>
 		<!-- Modal-Footer -->
 		<div class="modal-footer">
-			<?php $filearray = dol_dir_list($conf->ecm->multidir_output[$conf->entity] . '/'. $module .'/medias/', "files", 0, '', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC);
-			$allMedias = count($filearray); ?>
+			<?php
+			$filearray = dol_dir_list($conf->ecm->multidir_output[$conf->entity] . '/'. $module .'/medias/', "files", 0, '', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC);
+			$moduleImageNumberPerPageConf = strtoupper($module) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
+			$allMediasNumber = count($filearray);
+			$pagesCounter = $conf->global->$moduleImageNumberPerPageConf ? ceil($allMediasNumber/($conf->global->$moduleImageNumberPerPageConf ?: 1)) - 1 : 1;
+			?>
 			<ul class="wpeo-pagination">
 				<?php
-				$moduleImageNumberPerPageConf = strtoupper($module) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
-				for ($i = 1; $i <= 1 + $allMedias/($conf->global->$moduleImageNumberPerPageConf ?: 1 ); $i++) : ?>
-					<li class="pagination-element <?php echo ($i == 1 ? 'pagination-current' : '') ?>">
-						<a class="selected-page" value="<?php echo $i - 1; ?>"><?php echo $i; ?></a>
-					</li>
-				<?php endfor; ?>
+				print '<input hidden id="pagesCounter" value="'. ($pagesCounter) .'">';
+				print '<input hidden id="containerToRefresh" value="media_gallery">';
+				if (!is_array($page_array) || empty($page_array)) {
+					$page_array = [];
+					if ($pagesCounter < 6) {
+						for ($i = 1; $i <= $pagesCounter; $i++) {
+							$page_array[] = $pagesCounter;
+						}
+						$page_array[] = '...';
+					} else {
+						for ($i = 1; $i <= 3; $i++) {
+							$page_array[] = $i;
+						}
+						$page_array[] = '...';
+						for ($i = 0; $i < 3; $i++) {
+							$last_pages[] = $pagesCounter - $i;
+						}
+						asort($last_pages);
+						$page_array = array_merge($page_array, $last_pages);
+					}
+				}
+				foreach ($page_array as $pageNumber) {
+					print '<li class="pagination-element ' . ($pageNumber == $offset ? 'pagination-current' : ($pageNumber == 1 && !$offset ? 'pagination-current' : '')) . '">';
+					print '<a class="select-page" value="' . ($pageNumber) . '">' . $pageNumber . '</a>';
+					print '</li>';
+				}
+				?>
 			</ul>
+			<div class="test-pagination" id="demo"></div>
 			<div class="save-photo wpeo-button button-blue button-disable" value="">
 				<input class="from-type" value="" type="hidden"/>
 				<input class="from-subtype" value="" type="hidden"/>

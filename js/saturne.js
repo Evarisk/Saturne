@@ -240,7 +240,7 @@ window.saturne.mediaGallery.event = function() {
 	$( document ).on( 'click', '.media-gallery-unlink', window.saturne.mediaGallery.unlinkFile );
 	$( document ).on( 'click', '.media-gallery-favorite', window.saturne.mediaGallery.addToFavorite );
 	$( document ).on( 'change', '.fast-upload', window.saturne.mediaGallery.fastUpload );
-	$( document ).on( 'click', '.selected-page', window.saturne.mediaGallery.selectPage );
+	$( document ).on( 'click', '.select-page', window.saturne.mediaGallery.selectPage );
 }
 
 /**
@@ -594,24 +594,35 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
  * @return {void}
  */
 window.saturne.mediaGallery.selectPage = function( event ) {
+
+	let token = $('.fiche').find('input[name="token"]').val();
+
+	let pagesCounter       = $(this).closest('.wpeo-pagination').find('#pagesCounter').val()
+	let containerToRefresh = $(this).closest('.wpeo-pagination').find('#containerToRefresh').val()
+
 	let offset = $(this).attr('value');
+
+	let mediaGallery = $('#' + containerToRefresh);
+	let querySeparator = '?';
+
 	$(this).closest('.wpeo-pagination').find('.pagination-element').removeClass('pagination-current');
 	$(this).closest('.pagination-element').addClass('pagination-current');
 
-	let elementParent = $('.modal-container').find('.ecm-photo-list-content');
-	let querySeparator = '?';
 	document.URL.match(/\?/) ? querySeparator = '&' : 1
-	let token = $('.fiche').find('input[name="token"]').val();
 	window.saturne.loader.display($('#media_gallery').find('.modal-content'));
 
 	$.ajax({
-		url: document.URL + querySeparator + "token=" + token + "&offset=" + offset,
+		url: document.URL + querySeparator + "subaction=pagination" + "&token=" + token,
 		type: "POST",
+		data: JSON.stringify({
+			offset: offset,
+			pagesCounter: pagesCounter
+		}),
 		processData: false,
 		contentType: false,
 		success: function ( resp ) {
 			$('.wpeo-loader').removeClass('wpeo-loader')
-			elementParent.html($(resp).find('.ecm-photo-list-content'));
+			mediaGallery.html($(resp).find('#' + containerToRefresh).children());
 		},
 		error: function ( ) {
 		}
