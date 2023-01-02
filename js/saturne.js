@@ -356,7 +356,7 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 
 	event.preventDefault()
 
-	let formdata = new FormData();
+	let mediaGallery  = $('#media_gallery')
 
 	let files         = $(this).prop("files");
 	let elementParent = $(this).closest('.modal-container').find('.ecm-photo-list-content');
@@ -380,6 +380,7 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 	document.URL.match(/\?/) ? querySeparator = '&' : 1
 
 	$.each(files, function(index, file) {
+		let formdata = new FormData();
 		formdata.append("userfile[]", file);
 		$.ajax({
 			url: document.URL + querySeparator + "subaction=uploadPhoto&token=" + token,
