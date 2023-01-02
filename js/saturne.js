@@ -357,10 +357,8 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 	event.preventDefault()
 
 	let mediaGallery  = $('#media_gallery')
-
-	let files         = $(this).prop("files");
-	let elementParent = $(this).closest('.modal-container').find('.ecm-photo-list-content');
-	let modalFooter   = $(this).closest('.modal-container').find('.modal-footer');
+	let files         = $(this).prop("files")
+	let elementParent = $(this).closest('.modal-container').find('.ecm-photo-list-content')
 
 	let totalCount = files.length
 	let requestCompleted = 0
@@ -388,7 +386,7 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 			data: formdata,
 			processData: false,
 			contentType: false,
-			complete: function (resp) {
+			success: function (resp) {
 				if ($(resp).find('.error-medias').length) {
 					let response = $(resp).find('.error-medias').val()
 					let decoded_response = JSON.parse(response)
@@ -409,15 +407,12 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 						width: progress + '%'
 					}, 300);
 					if (requestCompleted === totalCount) {
-						elementParent.html($(resp).find('#media_gallery .ecm-photo-list')).promise().done( () => {
+						mediaGallery.html($(resp).find('#media_gallery').children()).promise().done( () => {
 							setTimeout(() => {
 								$('#progressBarContainer').fadeOut(800)
 								$('.wpeo-loader').removeClass('wpeo-loader');
 								$('#progressBarContainer').find('.loader-spin').remove();
 							}, 800)
-
-							//refresh pages navigation
-							modalFooter.html($(resp).find('#media_gallery .modal-footer'))
 
 							$('#add_media_to_gallery').parent().html($(resp).find('#add_media_to_gallery'))
 							if (totalCount == 1) {

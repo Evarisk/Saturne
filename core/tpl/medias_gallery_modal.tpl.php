@@ -8,6 +8,7 @@ $ecmdir           = new EcmDirectory($db);
 $ecmfile          = new EcmFiles($db);
 
 if ( ! $error && $subaction == "uploadPhoto" && ! empty($conf->global->MAIN_UPLOAD_DOC)) {
+
 	// Define relativepath and upload_dir
 	$relativepath                                             = $module . '/medias';
 	$upload_dir                                               = $conf->ecm->dir_output . '/' . $relativepath;
@@ -29,14 +30,11 @@ if ( ! $error && $subaction == "uploadPhoto" && ! empty($conf->global->MAIN_UPLO
 		if ( ! $error) {
 			$generatethumbs = 1;
 			$res = dol_add_file_process($upload_dir, 0, 1, 'userfile', '', null, '', $generatethumbs);
-
 			if ($res > 0) {
 				$result = $ecmdir->changeNbOfFiles('+');
 			}
 		}
 	}
-
-
 }
 
 if ( ! $error && $subaction == "addFiles") {
