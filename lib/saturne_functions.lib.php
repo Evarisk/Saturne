@@ -285,4 +285,82 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
 	return $return;
 }
 
+function saturne_load_pagination($pagesCounter, $page_array, $offset) {
+	if (!is_array($page_array) || empty($page_array)) {
+		$page_array = [];
+		if ($pagesCounter < 6) {
+			for ($i = 1; $i <= $pagesCounter; $i++) {
+				$page_array[] = $pagesCounter;
+			}
+		} else {
+			for ($i = 1; $i <= 3; $i++) {
+				$page_array[] = $i;
+			}
+			if($offset > 5 && $offset < ($pagesCounter - 4)) {
+				if ($offset != 6) {
+					$page_array[] = '...';
+				}
+				$page_array[] = $offset - 2;
+				$page_array[] = $offset - 1;
+				$page_array[] = $offset;
+				$page_array[] = $offset + 1;
+				$page_array[] = $offset + 2;
+				if ($offset != $pagesCounter - 5) {
+					$page_array[] = '...';
+				}
+			} else {
+				if ($offset == 3) {
+					$page_array[] = $offset + 1;
+					$page_array[] = $offset + 2;
+					$page_array[] = '...';
+				} else if ($offset == 4) {
+					$page_array[] = $offset;
+					$page_array[] = '...';
+				} else if ($offset == 5) {
+					$page_array[] = $offset - 1;
+					$page_array[] = $offset;
+					$page_array[] = $offset + 1;
+					$page_array[] = $offset + 2;
+					$page_array[] = '...';
+				} else if ($offset == ($pagesCounter - 4)) {
+					$page_array[] = '...';
+					$page_array[] = $offset - 2;
+					$page_array[] = $offset - 1;
+					$page_array[] = $offset;
+					$page_array[] = $offset + 1;
+				} else if ($offset == ($pagesCounter - 3)) {
+					$page_array[] = '...';
+					$page_array[] = $offset - 2;
+					$page_array[] = $offset - 1;
+					$page_array[] = $offset;
+				} else if ($offset == ($pagesCounter - 2)) {
+					$page_array[] = '...';
+					$page_array[] = $offset - 2;
+					$page_array[] = $offset - 1;
+				} else {
+					$page_array[] = '...';
+				}
+			}
+			for ($i = 0; $i < 3; $i++) {
+				$last_pages[] = $pagesCounter - $i;
+			}
+			asort($last_pages);
+			$page_array = array_merge($page_array, $last_pages);
+		}
+	}
+	return $page_array;
+}
 
+function saturne_show_pagination($pagesCounter, $page_array, $offset) {
+	$return = '<ul class="wpeo-pagination">';
+	$return .= '<input hidden id="pagesCounter" value="'. ($pagesCounter) .'">';
+	$return .= '<input hidden id="containerToRefresh" value="media_gallery">';
+
+	foreach ($page_array as $pageNumber) {
+		$return .= '<li class="pagination-element ' . ($pageNumber == $offset ? 'pagination-current' : ($pageNumber == 1 && !$offset ? 'pagination-current' : '')) . '">';
+		$return .= '<a class="select-page" value="' . ($pageNumber) . '">' . $pageNumber . '</a>';
+		$return .= '</li>';
+	}
+	$return .= '</ul>';
+	return $return;
+}
