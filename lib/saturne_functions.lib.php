@@ -1,5 +1,26 @@
 <?php
 
+/**
+ *      Print llxHeader with Saturne custom enhancements
+ *
+ *      @param      string				$module
+ *      @param      string				$action
+ *      @param      string				$subaction
+ *      @param      integer				$load_media_gallery
+ *      @param      string				$head
+ *      @param      string				$title
+ *      @param      string				$help_url
+ *      @param      string				$target
+ *      @param      integer				$disablejs
+ *      @param      integer				$disablehead
+ * 		@param		array				$arrayofjs
+ * 		@param		array				$arrayofcss
+ * 		@param		string				$morequerystring
+ * 		@param		string				$morecssonbody
+ * 		@param		string				$replacemainareaby
+ * 		@param		integer				$disablenofollow
+ * 		@param		integer				$disablenoindex
+ */
 function saturneHeader($module, $action, $subaction, $load_media_gallery, $head = '', $title = '', $help_url = '', $target = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $morequerystring = '', $morecssonbody = '', $replacemainareaby = '', $disablenofollow = 0, $disablenoindex = 0) {
 
 	global $langs, $conf;
@@ -18,6 +39,17 @@ function saturneHeader($module, $action, $subaction, $load_media_gallery, $head 
 	}
 }
 
+/**
+ *      Print medias from media gallery
+ *
+ *      @param      string				$module
+ *      @param      string				$modulepart
+ *      @param      string				$sdir
+ *      @param      integer				$size
+ *      @param      string				$maxHeight
+ *      @param      string				$maxWidth
+ *      @param      string				$offset
+ */
 function saturne_show_medias($module, $modulepart = 'ecm', $sdir, $size = 0, $maxHeight = 80, $maxWidth = 80, $offset = 0)
 {
 	global $conf;
@@ -29,8 +61,6 @@ function saturne_show_medias($module, $modulepart = 'ecm', $sdir, $size = 0, $ma
 	$sortorder = 'desc';
 	$dir       = $sdir . '/';
 
-
-	$return  = '<!-- Photo -->' . "\n";
 	$nbphoto = 0;
 
 	$filearray = dol_dir_list($dir, "files", 0, '', '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_DESC : SORT_ASC));
@@ -75,10 +105,35 @@ function saturne_show_medias($module, $modulepart = 'ecm', $sdir, $size = 0, $ma
 			}
 		}
 	}
-
-	return $return;
 }
 
+/**
+ *      Show medias linked to an object
+ *
+ *      @param      string				$modulepart
+ *      @param      string				$sdir
+ *      @param      integer				$size
+ *      @param      integer				$nbmax
+ *      @param      integer				$nbbyrow
+ *      @param      integer				$showfilename
+ *      @param      integer				$showaction
+ *      @param      integer				$maxHeight
+ *      @param      integer				$maxWidth
+ *      @param      integer				$nolink
+ *      @param      integer				$notitle
+ *      @param      integer				$usesharelink
+ *      @param      string				$subdir
+ *      @param      object				$object
+ *      @param      string				$favorite_field
+ *      @param      integer				$show_favorite_button
+ *      @param      integer				$show_unlink_button
+ *      @param      integer				$use_mini_format
+ *      @param      integer				$show_only_favorite
+ *      @param      string				$morecss
+ *      @param      integer				$showdiv
+ *      @return     string				Show medias linked
+ *
+ */
 function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbmax = 0, $nbbyrow = 5, $showfilename = 0, $showaction = 0, $maxHeight = 120, $maxWidth = 160, $nolink = 0, $notitle = 0, $usesharelink = 0, $subdir = "", $object = null, $favorite_field = 'photo', $show_favorite_button = 1, $show_unlink_button = 1 , $use_mini_format = 0, $show_only_favorite = 0, $morecss = '', $showdiv = 1)
 {
 	global $conf, $langs;
@@ -285,6 +340,16 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
 	return $return;
 }
 
+
+/**
+ *      Load array of pages to display
+ *
+ *      @param      integer				$pagesCounter
+ *      @param      array				$page_array
+ *      @param      integer				$offset
+ *      @return     array				Pages number array
+ *
+ */
 function saturne_load_pagination($pagesCounter, $page_array, $offset) {
 	if (!is_array($page_array) || empty($page_array)) {
 		$page_array = [];
@@ -351,6 +416,15 @@ function saturne_load_pagination($pagesCounter, $page_array, $offset) {
 	return $page_array;
 }
 
+/**
+ *      Show pages based on loaded pages array
+ *
+ *      @param      integer				$pagesCounter
+ *      @param      array				$page_array
+ *      @param      integer				$offset
+ *      @return     string				Pages html content
+ *
+ */
 function saturne_show_pagination($pagesCounter, $page_array, $offset) {
 	$return = '<ul class="wpeo-pagination">';
 	$return .= '<input hidden id="pagesCounter" value="'. ($pagesCounter) .'">';
