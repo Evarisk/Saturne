@@ -16,78 +16,83 @@
  */
 
 /**
- * \file    saturne/admin/setup.php
+ * \file    admin/setup.php
  * \ingroup saturne
  * \brief   Saturne setup page.
  */
 
 // Load Dolibarr environment
-$res = 0;
-// Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
-if (!$res && !empty($_SERVER['CONTEXT_DOCUMENT_ROOT'])) {
-	$res = @include $_SERVER['CONTEXT_DOCUMENT_ROOT']. '/main.inc.php';
-}
-// Try main.inc.php into web root detected using web root calculated from SCRIPT_FILENAME
-$tmp = empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME']; $tmp2 = realpath(__FILE__); $i = strlen($tmp) - 1; $j = strlen($tmp2) - 1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i] == $tmp2[$j]) {
-	$i--; $j--;
-}
-if (!$res && $i > 0 && file_exists(substr($tmp, 0, ($i + 1)). '/main.inc.php')) {
-	$res = @include substr($tmp, 0, ($i + 1)). '/main.inc.php';
-}
-if (!$res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i + 1))). '/main.inc.php')) {
-	$res = @include dirname(substr($tmp, 0, ($i + 1))). '/main.inc.php';
-}
-// Try main.inc.php using relative path
-if (!$res && file_exists('../../main.inc.php')) {
-	$res = @include '../../main.inc.php';
-}
-if (!$res && file_exists('../../../main.inc.php')) {
-	$res = @include '../../../main.inc.php';
-}
-if (!$res) {
-	die('Include of main fails');
-}
+include_once __DIR__ . '/../saturne.main.inc.php';
+
+global $conf, $db, $langs, $user;
 
 // Libraries
-require_once DOL_DOCUMENT_ROOT. '/core/lib/admin.lib.php';
+require_once DOL_DOCUMENT_ROOT . "/core/lib/admin.lib.php";
+require_once DOL_DOCUMENT_ROOT . "/core/lib/files.lib.php";
 
-require_once __DIR__ . '/../lib/saturne.lib.php';
-
-// Global variables definitions
-global $db, $langs, $hookmanager, $user;
+require_once '../lib/saturne.lib.php';
 
 // Translations
-$langs->loadLangs(['admin', 'saturne@saturne']);
+$langs->loadLangs(array("admin", "saturne@saturne"));
 
-// Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array of hook context
-$hookmanager->initHooks(['Saturnesetup', 'globalsetup']);
+// Initialize technical objects
+
+// Parameters
+$action     = GETPOST('action', 'alpha');
+$backtopage = GETPOST('backtopage', 'alpha');
+$value      = GETPOST('value', 'alpha');
 
 // Access control
-$permissiontoread = $user->rights->saturne->adminpage->read;
-if (empty($conf->saturne->enabled)) accessforbidden();
-if (!$permissiontoread) accessforbidden();
+if (!$user->admin) accessforbidden();
+
+// Parameters
+$backtopage = GETPOST('backtopage', 'alpha');
+
+/*
+ * Actions
+ */
+
+if ($action == 'setMediaDimension') {
+	$MediaMaxWidthMedium = GETPOST('MediaMaxWidthMedium', 'alpha');
+	$MediaMaxHeightMedium = GETPOST('MediaMaxHeightMedium', 'alpha');
+	$MediaMaxWidthLarge = GETPOST('MediaMaxWidthLarge', 'alpha');
+	$MediaMaxHeightLarge = GETPOST('MediaMaxHeightLarge', 'alpha');
+
+	if (!empty($MediaMaxWidthMedium) || $MediaMaxWidthMedium === '0') {
+		dolibarr_set_const($db, "DIGIRISKDOLIBARR_MEDIA_MAX_WIDTH_MEDIUM", $MediaMaxWidthMedium, 'integer', 0, '', $conf->entity);
+	}
+	if (!empty($MediaMaxHeightMedium) || $MediaMaxHeightMedium === '0') {
+		dolibarr_set_const($db, "DIGIRISKDOLIBARR_MEDIA_MAX_HEIGHT_MEDIUM", $MediaMaxHeightMedium, 'integer', 0, '', $conf->entity);
+	}
+	if (!empty($MediaMaxWidthLarge) || $MediaMaxWidthLarge === '0') {
+		dolibarr_set_const($db, "DIGIRISKDOLIBARR_MEDIA_MAX_WIDTH_LARGE", $MediaMaxWidthLarge, 'integer', 0, '', $conf->entity);
+	}
+	if (!empty($MediaMaxHeightLarge) || $MediaMaxHeightLarge === '0') {
+		dolibarr_set_const($db, "DIGIRISKDOLIBARR_MEDIA_MAX_HEIGHT_LARGE", $MediaMaxHeightLarge, 'integer', 0, '', $conf->entity);
+	}
+}
 
 /*
  * View
  */
 
-$help_url = 'FR:Module_Saturne';
-$title    = $langs->trans('SaturneSetup');
+$page_name = "SaturneSetup";
+$help_url  = 'FR:Module_Saturne#Configuration';
 
-llxHeader('', $title, $help_url);
+$morejs  = array("/saturne/js/saturne.js");
+$morecss = array("/saturne/css/saturne.css");
+
+saturneHeader('saturne', $action,'',0, '', $help_url, '', '', '', 0, $morejs, $morecss);
 
 // Subheader
-$linkback = '<a href="' . DOL_URL_ROOT.'/admin/modules.php' . '">'.$langs->trans('BackToModuleList') . '</a>';
+$linkback = '<a href="' . ($backtopage ?: DOL_URL_ROOT . '/admin/modules.php?restore_lastsearch_values=1') . '">' . $langs->trans("BackToModuleList") . '</a>';
 
-print load_fiche_titre($title, $linkback, 'Saturne_color@saturne');
+print load_fiche_titre($langs->trans($page_name), $linkback, 'saturne32px@saturne');
 
 // Configuration header
-$head = SaturneAdminPrepareHead();
-print dol_get_fiche_head($head, 'settings', $title, 0, 'Saturne_color@saturne');
-
-// Setup page goes here
-print '<span class="opacitymedium">' . $langs->trans('SaturneSetupPage') . '</span>';
+$head = saturneAdminPrepareHead();
+print dol_get_fiche_head($head, 'settings', '', -1, "saturne@saturne");
+print load_fiche_titre($langs->trans("SaturneData"), '', '');
 
 // Page end
 print dol_get_fiche_end();

@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2022 EVARISK <dev@evarisk.com>
+/* Copyright (C) 2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,12 +16,6 @@
  */
 
 /**
- * \file    lib/saturne.lib.php
- * \ingroup saturne
- * \brief   Library files with common functions for Saturne
- */
-
-/**
  * Prepare admin pages header
  *
  * @return array
@@ -35,10 +29,15 @@ function SaturneAdminPrepareHead(): array
 	$h = 0;
 	$head = [];
 
-    $head[$h][0] = dol_buildpath('/saturne/admin/timespender.php', 1);
-    $head[$h][1] = '<i class="fas fa-cog pictofixedwidth"></i>' . $langs->trans('TimeSpender');
-    $head[$h][2] = 'timespender';
+    $head[$h][0] = dol_buildpath('/saturne/admin/setup.php', 1);
+    $head[$h][1] = '<i class="fas fa-cog pictofixedwidth"></i>' . $langs->trans('Settings');
+    $head[$h][2] = 'settings';
     $h++;
+
+	$head[$h][0] = dol_buildpath('/saturne/admin/media_gallery.php', 1);
+	$head[$h][1] = '<i class="fas fa-image pictofixedwidth"></i>' . $langs->trans('MediaGallery');
+	$head[$h][2] = 'media_gallery';
+	$h++;
 
 	complete_head_from_modules($conf, $langs, null, $head, $h, 'saturne@saturne');
 

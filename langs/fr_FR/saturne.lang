@@ -57,18 +57,11 @@ ReadAdminPage = Accéder à la configuration du module Saturne
 
 # Data - Donnée
 SaturneArea  = Bienvenue sur Saturne
-SecurityProblem = Problème de sécurité
-ProblemFix = Problème de sécurité réparé
-ConfFileHasGoodPermissions = Le fichier conf.php a les bonnes permissions pour éviter des problèmes de sécurité.
-ConfFileSetPermissions = Les permissions du fichier conf.php ont été édités
-InstallLockFileCreated = Le fichier install.lock a été généré
-NoSecurityProblem = Il n'y a pas de problème de sécurité
-RepairSecurityProblem = Réparer les problèmes de sécurité
+SaturneData  = Données configurables de Saturne
+
 
 #
-# TimeSpending
+# Media Gallery
 #
 
-YouHaveToSpendXMinutes = Vous avez %s minutes à pointer aujourd'hui
-TimeWillBeSpentOn = Le temps sera pointé sur
-HereIsWhatYouveDoneOn = Voici ce que vous avez fait le %s sur :
+MediaGallery = Bibliothèque de médias

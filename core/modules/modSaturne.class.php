@@ -146,7 +146,13 @@ class modSaturne extends DolibarrModules
 		// Messages at activation
 		$this->warnings_activation = []; // Warning to show when we activate module. array('always'='text') or array('FR'='textfr','MX'='textmx'...)
 		$this->warnings_activation_ext = []; // Warning to show when we activate an external module. array('always'='text') or array('FR'='textfr','MX'='textmx'...)
-		$this->const = [];
+		$j = 0;
+		$this->const = [
+			$j++ => array('SATURNE_MEDIA_MAX_WIDTH_MEDIUM', 'integer', 854, '', 0, 'current'),
+			$j++ => array('SATURNE_MEDIA_MAX_HEIGHT_MEDIUM', 'integer', 480, '', 0, 'current'),
+			$j++ => array('SATURNE_MEDIA_MAX_WIDTH_LARGE', 'integer', 1280, '', 0, 'current'),
+			$j++ => array('SATURNE_MEDIA_MAX_HEIGHT_LARGE', 'integer', 720, '', 0, 'current'),
+		];
 
 		if (!isset($conf->saturne) || !isset($conf->saturne->enabled)) {
 			$conf->saturne = new stdClass();

@@ -27,10 +27,13 @@ if ( ! $error && $subaction == "uploadPhoto" && ! empty($conf->global->MAIN_UPLO
 				$submit_file_error_text = array('message' => $langs->trans('ErrorFieldRequired'), 'code' => '1337');
 			}
 		}
+
 		if ( ! $error) {
 			$generatethumbs = 1;
 			$res = dol_add_file_process($upload_dir, 0, 1, 'userfile', '', null, '', $generatethumbs);
 			if ($res > 0) {
+				$imgThumbLarge  = vignette($upload_dir . '/' . $_FILES['userfile']['name'][$key], $conf->global->SATURNE_MEDIA_MAX_WIDTH_LARGE, $conf->global->SATURNE_MEDIA_MAX_HEIGHT_LARGE, '_large');
+				$imgThumbMedium = vignette($upload_dir . '/' . $_FILES['userfile']['name'][$key], $conf->global->SATURNE_MEDIA_MAX_WIDTH_MEDIUM, $conf->global->SATURNE_MEDIA_MAX_HEIGHT_MEDIUM, '_medium');
 				$result = $ecmdir->changeNbOfFiles('+');
 			}
 		}
@@ -96,9 +99,11 @@ if ( ! $error && $subaction == "addFiles") {
 					$destfull = $pathToObjectPhoto . '/' . $newFilename;
 
 					// Create thumbs
-					$imgThumbSmall = vignette($destfull, $maxwidthsmall, $maxheightsmall, '_small', 50, "thumbs");
+					$imgThumbSmall  = vignette($destfull, $maxwidthsmall, $maxheightsmall);
+					$imgThumbMini   = vignette($destfull, $maxwidthmini, $maxheightmini, '_mini');
+					$imgThumbLarge  = vignette($destfull, $conf->global->SATURNE_MEDIA_MAX_WIDTH_LARGE, $conf->global->SATURNE_MEDIA_MAX_HEIGHT_LARGE, '_large');
+					$imgThumbMedium = vignette($destfull, $conf->global->SATURNE_MEDIA_MAX_WIDTH_MEDIUM, $conf->global->SATURNE_MEDIA_MAX_HEIGHT_MEDIUM, '_medium');
 					// Create mini thumbs for image (Ratio is near 16/9)
-					$imgThumbMini = vignette($destfull, $maxwidthmini, $maxheightmini, '_mini', 50, "thumbs");
 				}
 			}
 		}
@@ -161,18 +166,14 @@ if (is_array($submit_file_error_text)) {
 				<div class="modal-add-media">
 					<?php
 					print '<input type="hidden" name="token" value="'.newToken().'">';
-					// To attach new file
 					if (( ! empty($conf->use_javascript_ajax) && empty($conf->global->MAIN_ECM_DISABLE_JS)) || ! empty($section)) {
 						$sectiondir = GETPOST('file', 'alpha') ? GETPOST('file', 'alpha') : GETPOST('section_dir', 'alpha');
 						print '<!-- Start form to attach new file in '. $module .'_photo_view.tpl.php sectionid=' . $section . ' sectiondir=' . $sectiondir . ' -->' . "\n";
 						include_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
 						print '<strong>' . $langs->trans('AddFile') . '</strong>'
 						?>
-
 						<input type="file" id="add_media_to_gallery" class="flat minwidth400 maxwidth200onsmartphone" name="userfile[]" multiple accept>
-					<?php } else print '&nbsp;';
-					// End "Add new file" area
-					?>
+					<?php } else print '&nbsp;'; ?>
 					<div class="underbanner clearboth"></div>
 				</div>
 				<div class="form-element">
@@ -182,7 +183,6 @@ if (is_array($submit_file_error_text)) {
 							<label class="autocomplete-label" for="media-gallery-search">
 								<i class="autocomplete-icon-before fas fa-search"></i>
 								<input id="search_in_gallery" placeholder="<?php echo $langs->trans('Search') . '...' ?>" class="autocomplete-search-input" type="text" />
-<!--								<span class="autocomplete-icon-after"><i class="fas fa-times"></i></span>-->
 							</label>
 						</div>
 					</div>
@@ -208,7 +208,7 @@ if (is_array($submit_file_error_text)) {
 			$allMediasNumber              = count($filearray);
 			$pagesCounter                 = $conf->global->$moduleImageNumberPerPageConf ? ceil($allMediasNumber/($conf->global->$moduleImageNumberPerPageConf ?: 1)) - 1 : 1;
 			$page_array                   = saturne_load_pagination($pagesCounter, $page_array, $offset);
-			
+
 			print saturne_show_pagination($pagesCounter, $page_array, $offset);
 			?>
 			<div class="save-photo wpeo-button button-blue button-disable" value="">
