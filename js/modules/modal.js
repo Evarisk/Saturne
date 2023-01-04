@@ -66,29 +66,28 @@ window.saturne.modal.event = function() {
  * @return {void}
  */
 window.saturne.modal.openModal = function ( event ) {
-	let idSelected = $(this).attr('value');
+	let modalToOpen = $(this).find('.modal-to-open').val()
+
+	let fromId      = $(this).find('.from-id').length ? $(this).find('.from-id') : 0
+	let fromType    = $(this).find('.from-type').length ? $(this).find('.from-type') : ''
+	let fromSubtype = $(this).find('.from-subtype').length ? $(this).find('.from-subtype') : ''
+	let fromSubdir  = $(this).find('.from-subdir').length ? $(this).find('.from-subdir') : ''
+
+	let urlWithoutTag = ''
 	if (document.URL.match(/#/)) {
-		var urlWithoutTag = document.URL.split(/#/)[0]
+		urlWithoutTag = document.URL.split(/#/)[0]
 	} else {
-		var urlWithoutTag = document.URL
+		urlWithoutTag = document.URL
 	}
 	history.pushState({ path:  document.URL}, '', urlWithoutTag);
 
 	// Open modal media gallery.
-	if ($(this).hasClass('open-media-gallery')) {
-		$('#media_gallery').addClass('modal-active');
-		$('#media_gallery').attr('value', idSelected);
-		$('#media_gallery').find('.from-id').attr('value', $(this).find('.from-id').val());
-		$('#media_gallery').find('.from-type').attr('value', $(this).find('.from-type').val());
-		$('#media_gallery').find('.from-subtype').attr('value', $(this).find('.from-subtype').val());
-		$('#media_gallery').find('.from-subdir').attr('value', $(this).find('.from-subdir').val());
-		$('#media_gallery').find('.wpeo-button').attr('value', idSelected);
-	}
-
-	// Open modal patch note.
-	if ($(this).hasClass('show-patchnote')) {
-		$('.fiche .wpeo-modal-patchnote').addClass('modal-active');
-	}
+	$('#'+modalToOpen).find('.from-id').attr('value', fromId);
+	$('#'+modalToOpen).find('.from-type').attr('value', fromType);
+	$('#'+modalToOpen).find('.from-subtype').attr('value', fromSubtype);
+	$('#'+modalToOpen).find('.from-subdir').attr('value', fromSubdir);
+	$('#'+modalToOpen).find('.wpeo-button').attr('value', fromId);
+	$('#'+modalToOpen).addClass('modal-active')
 
 	$('.notice').addClass('hidden');
 };
