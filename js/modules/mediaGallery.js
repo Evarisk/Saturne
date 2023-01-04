@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 EVARISK <dev@evarisk.com>
+/* Copyright (C) 2023 EVARISK <dev@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,193 +17,13 @@
  */
 
 /**
- * \file    js/saturne.js
- * \ingroup saturne
+ * \file    js/modules/mediaGallery.js
+ * \ingroup mediaGallery
  * \brief   JavaScript file for module Saturne.
  */
 
-/* Javascript library of module Saturne */
-
-'use strict';
 /**
- * @namespace Saturne_Framework_Init
- *
- * @author Evarisk <dev@evarisk.com>
- * @copyright 2015-2022 Evarisk
- */
-
-if ( ! window.saturne ) {
-	/**
-	 * [saturne description]
-	 *
-	 * @memberof Saturne_Framework_Init
-	 *
-	 * @type {Object}
-	 */
-	window.saturne = {};
-
-	/**
-	 * [scriptsLoaded description]
-	 *
-	 * @memberof Saturne_Framework_Init
-	 *
-	 * @type {Boolean}
-	 */
-	window.saturne.scriptsLoaded = false;
-}
-
-if ( ! window.saturne.scriptsLoaded ) {
-	/**
-	 * [description]
-	 *
-	 * @memberof Saturne_Framework_Init
-	 *
-	 * @returns {void} [description]
-	 */
-	window.saturne.init = function() {
-		window.saturne.load_list_script();
-	};
-
-	/**
-	 * [description]
-	 *
-	 * @memberof Saturne_Framework_Init
-	 *
-	 * @returns {void} [description]
-	 */
-	window.saturne.load_list_script = function() {
-		if ( ! window.saturne.scriptsLoaded) {
-			var key = undefined, slug = undefined;
-			for ( key in window.saturne ) {
-
-				if ( window.saturne[key].init ) {
-					window.saturne[key].init();
-				}
-
-				for ( slug in window.saturne[key] ) {
-
-					if ( window.saturne[key] && window.saturne[key][slug] && window.saturne[key][slug].init ) {
-						window.saturne[key][slug].init();
-					}
-
-				}
-			}
-
-			window.saturne.scriptsLoaded = true;
-		}
-	};
-
-	/**
-	 * [description]
-	 *
-	 * @memberof Saturne_Framework_Init
-	 *
-	 * @returns {void} [description]
-	 */
-	window.saturne.refresh = function() {
-		var key = undefined;
-		var slug = undefined;
-		for ( key in window.saturne ) {
-			if ( window.saturne[key].refresh ) {
-				window.saturne[key].refresh();
-			}
-
-			for ( slug in window.saturne[key] ) {
-
-				if ( window.saturne[key] && window.saturne[key][slug] && window.saturne[key][slug].refresh ) {
-					window.saturne[key][slug].refresh();
-				}
-			}
-		}
-	};
-
-	$( document ).ready( window.saturne.init );
-}
-
-/**
- * @namespace EO_Framework_Loader
- *
- * @author Evarisk <dev@evarisk.com>
- * @copyright 2015-2018 Evarisk
- */
-
-/*
- * Gestion du loader.
- *
- * @since 1.0.0
- * @version 1.0.0
- */
-if ( ! window.saturne.loader ) {
-
-	/**
-	 * [loader description]
-	 *
-	 * @memberof EO_Framework_Loader
-	 *
-	 * @type {Object}
-	 */
-	window.saturne.loader = {};
-
-	/**
-	 * [description]
-	 *
-	 * @memberof EO_Framework_Loader
-	 *
-	 * @returns {void} [description]
-	 */
-	window.saturne.loader.init = function() {
-		window.saturne.loader.event();
-	};
-
-	/**
-	 * [description]
-	 *
-	 * @memberof EO_Framework_Loader
-	 *
-	 * @returns {void} [description]
-	 */
-	window.saturne.loader.event = function() {
-	};
-
-	/**
-	 * [description]
-	 *
-	 * @memberof EO_Framework_Loader
-	 *
-	 * @param  {void} element [description]
-	 * @returns {void}         [description]
-	 */
-	window.saturne.loader.display = function( element ) {
-		// Loader spécial pour les "button-progress".
-		if ( element.hasClass( 'button-progress' ) ) {
-			element.addClass( 'button-load' )
-		} else {
-			element.addClass( 'wpeo-loader' );
-			var el = $( '<span class="loader-spin"></span>' );
-			element[0].loaderElement = el;
-			element.append( element[0].loaderElement );
-		}
-	};
-
-	/**
-	 * [description]
-	 *
-	 * @memberof EO_Framework_Loader
-	 *
-	 * @param  {jQuery} element [description]
-	 * @returns {void}         [description]
-	 */
-	window.saturne.loader.remove = function( element ) {
-		if ( 0 < element.length && ! element.hasClass( 'button-progress' ) ) {
-			element.removeClass( 'wpeo-loader' );
-
-			$( element[0].loaderElement ).remove();
-		}
-	};
-}
-
-/**
- * Initialise l'objet "mediaGallery" ainsi que la méthode "init" obligatoire pour la bibliothèque EvariskJS.
+ * Initialise l'objet "mediaGallery" ainsi que la méthode "init" obligatoire pour la bibliothèque Saturne.
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -211,7 +31,7 @@ if ( ! window.saturne.loader ) {
 window.saturne.mediaGallery = {};
 
 /**
- * La méthode appelée automatiquement par la bibliothèque EvariskJS.
+ * La méthode appelée automatiquement par la bibliothèque Saturne.
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -223,7 +43,7 @@ window.saturne.mediaGallery.init = function() {
 };
 
 /**
- * La méthode contenant tous les événements pour le mediaGallery.
+ * La méthode contenant tous les événements pour la bibliothèque de médias.
  *
  * @since   1.0.0
  * @version 1.0.0

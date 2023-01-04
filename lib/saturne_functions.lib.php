@@ -29,7 +29,7 @@ function saturneHeader($module, $action, $subaction, $load_media_gallery, $head 
 	$arrayofcss[] = '/saturne/css/saturne.css';
 
 	//JS
-	$arrayofjs[]  = '/saturne/js/saturne.js';
+	$arrayofjs[]  = '/saturne/js/saturne.js.php';
 
 	llxHeader($head, $title, $help_url, $target, $disablejs, $disablehead, $arrayofjs, $arrayofcss, $morequerystring, $morecssonbody, $replacemainareaby, $disablenofollow, $disablenoindex);
 
