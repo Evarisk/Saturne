@@ -100,3 +100,4 @@ if ( ! window.saturne.scriptsLoaded ) {
 require_once './modules/modal.js';
 require_once './modules/loader.js';
 require_once './modules/mediaGallery.js';
+require_once './modules/keyEvents.js';
