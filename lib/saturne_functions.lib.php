@@ -272,7 +272,7 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
 							if ($urladvanced) $return .= '<a href="' . $urladvanced . '">';
 							else $return              .= '<a href="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" class="aphoto" target="_blank">';
 						}
-						$return .= '<img width="' . $conf->global->DOLISMQ_MEDIA_MAX_WIDTH_LARGE . '" height="' . $conf->global->DOLISMQ_MEDIA_MAX_HEIGHT_LARGE . '" class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '">';
+						$return .= '<img width="' . $conf->global->SATURNE_MEDIA_MAX_WIDTH_LARGE . '" height="' . $conf->global->SATURNE_MEDIA_MAX_HEIGHT_LARGE . '" class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '">';
 						if ($showfilename) $return .= '<br>' . $viewfilename;
 					}
 
@@ -283,7 +283,7 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
 							if ($urladvanced) $return .= '<a href="' . $urladvanced . '">';
 							else $return              .= '<a href="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" class="aphoto" target="_blank">';
 						}
-						$return .= '<img width="' . $conf->global->DOLISMQ_MEDIA_MAX_WIDTH_MEDIUM . '" height="' . $conf->global->DOLISMQ_MEDIA_MAX_HEIGHT_MEDIUM . '" class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '">';
+						$return .= '<img width="' . $conf->global->SATURNE_MEDIA_MAX_WIDTH_MEDIUM . '" height="' . $conf->global->SATURNE_MEDIA_MAX_HEIGHT_MEDIUM . '" class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '">';
 						if ($showfilename) $return .= '<br>' . $viewfilename;
 					}
 
