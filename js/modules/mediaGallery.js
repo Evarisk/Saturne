@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 EVARISK <dev@evarisk.com>
+/* Copyright (C) 2021-2023 EVARISK <dev@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -207,12 +207,14 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 			processData: false,
 			contentType: false,
 			success: function (resp) {
+				requestCompleted++
+				progress += (1 / totalCount) * 100
+				$('#progressBar').animate({
+					width: progress + '%'
+				}, 1);
 				if ($(resp).find('.error-medias').length) {
 					let response = $(resp).find('.error-medias').val()
 					let decoded_response = JSON.parse(response)
-					$('#progressBar').width('100%')
-					$('#progressBar').css('background-color','#e05353')
-					$('.wpeo-loader').removeClass('wpeo-loader');
 
 					let textToShow = '';
 					textToShow += decoded_response.message
@@ -220,28 +222,22 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 					actionContainerError.find('.notice-subtitle').text(textToShow)
 
 					actionContainerError.removeClass('hidden');
-				} else {
-					progress += (1 / totalCount) * 100
-					requestCompleted++
-					$('#progressBar').animate({
-						width: progress + '%'
-					}, 300);
-					if (requestCompleted === totalCount) {
-						mediaGallery.html($(resp).find('#media_gallery').children()).promise().done( () => {
-							setTimeout(() => {
-								$('#progressBarContainer').fadeOut(800)
-								$('.wpeo-loader').removeClass('wpeo-loader');
-								$('#progressBarContainer').find('.loader-spin').remove();
-							}, 800)
 
-							$('#add_media_to_gallery').parent().html($(resp).find('#add_media_to_gallery'))
+				}
+				if (requestCompleted === totalCount) {
+					$('.wpeo-loader').removeClass('wpeo-loader');
+					$('#progressBarContainer').fadeOut(800)
+					$('#progressBarContainer').find('.loader-spin').remove();
+					window.saturne.loader.display(mediaGallery.find('.ecm-photo-list-content'));
+					setTimeout(() => {
+						mediaGallery.html($(resp).find('#media_gallery').children()).promise().done( () => {
 							if (totalCount == 1) {
 								elementParent.closest('.modal-container').find('.save-photo').removeClass('button-disable');
 								elementParent.find('.clickable-photo0').addClass('clicked-photo');
 							}
 						})
 						actionContainerSuccess.removeClass('hidden');
-					}
+					}, 800)
 				}
 			},
 		});

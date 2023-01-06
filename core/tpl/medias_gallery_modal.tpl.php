@@ -136,7 +136,7 @@ if (is_array($submit_file_error_text)) {
 }
 ?>
 <!-- START MEDIA GALLERY MODAL -->
-<div class="wpeo-modal modal-photo modal-active" id="media_gallery" data-id="<?php echo $object->id ?: 0?>">
+<div class="wpeo-modal modal-photo" id="media_gallery" data-id="<?php echo $object->id ?: 0?>">
 	<div class="modal-container wpeo-modal-event">
 		<!-- Modal-Header -->
 		<div class="modal-header">
