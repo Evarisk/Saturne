@@ -178,7 +178,7 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 
 	let mediaGallery  = $('#media_gallery')
 	let files         = $(this).prop("files")
-	let elementParent = $(this).closest('.modal-container').find('.ecm-photo-list-content')
+	let elementParent = mediaGallery.find('.ecm-photo-list-content')
 
 	let totalCount = files.length
 	let requestCompleted = 0
@@ -232,8 +232,8 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 					setTimeout(() => {
 						mediaGallery.html($(resp).find('#media_gallery').children()).promise().done( () => {
 							if (totalCount == 1) {
-								elementParent.closest('.modal-container').find('.save-photo').removeClass('button-disable');
-								elementParent.find('.clickable-photo0').addClass('clicked-photo');
+								$('#media_gallery').find('.save-photo').removeClass('button-disable');
+								$('#media_gallery').find('.clickable-photo0').addClass('clicked-photo');
 							}
 						})
 						actionContainerSuccess.removeClass('hidden');
