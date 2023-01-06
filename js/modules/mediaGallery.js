@@ -425,8 +425,10 @@ window.saturne.mediaGallery.selectPage = function( event ) {
 	let mediaGallery = $('#' + containerToRefresh);
 	let querySeparator = '?';
 
-	$(this).closest('.wpeo-pagination').find('.pagination-element').removeClass('pagination-current');
-	$(this).closest('.pagination-element').addClass('pagination-current');
+	if (!$(this).hasClass('arrow')) {
+		$(this).closest('.wpeo-pagination').find('.pagination-element').removeClass('pagination-current');
+		$(this).closest('.pagination-element').addClass('pagination-current');
+	}
 
 	document.URL.match(/\?/) ? querySeparator = '&' : 1
 	window.saturne.loader.display($('#media_gallery').find('.modal-content'));
