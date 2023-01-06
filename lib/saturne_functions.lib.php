@@ -50,7 +50,7 @@ function saturneHeader($module, $action, $subaction, $load_media_gallery, $head 
  *      @param      string				$maxWidth
  *      @param      string				$offset
  */
-function saturne_show_medias($module, $modulepart = 'ecm', $sdir, $size = 0, $maxHeight = 80, $maxWidth = 80, $offset = 0)
+function saturne_show_medias($module, $modulepart = 'ecm', $sdir, $size = 0, $maxHeight = 80, $maxWidth = 80, $offset = 1)
 {
 	global $conf;
 
@@ -71,7 +71,7 @@ function saturne_show_medias($module, $modulepart = 'ecm', $sdir, $size = 0, $ma
 			$filearray = dol_sort_array($filearray, $sortfield, $sortorder);
 		}
 		$moduleImageNumberPerPageConf = strtoupper($module) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
-		for ($i = ($offset * $conf->global->$moduleImageNumberPerPageConf); $i < ($conf->global->$moduleImageNumberPerPageConf + ($offset * $conf->global->$moduleImageNumberPerPageConf));  $i++) {
+		for ($i = (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf); $i < ($conf->global->$moduleImageNumberPerPageConf + (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf));  $i++) {
 			$file = $filearray[$i]['name'];
 
 			if (image_format_supported($file) >= 0) {
@@ -328,11 +328,6 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
 				if ($nbphoto) $return .= '</table>';
 			}
 		}
-//	} else {
-//		$return .= '<td class="media-container">';
-//
-//		print $langs->trans('NoMediaLinked');
-//		print '</td>';
 	}
 	if (is_object($object)) {
 		$object->nbphoto = $nbphoto;
@@ -351,11 +346,12 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
  *
  */
 function saturne_load_pagination($pagesCounter, $page_array, $offset) {
+
 	if (!is_array($page_array) || empty($page_array)) {
 		$page_array = [];
 		if ($pagesCounter < 6) {
 			for ($i = 1; $i <= $pagesCounter; $i++) {
-				$page_array[] = $pagesCounter;
+				$page_array[] = $i;
 			}
 		} else {
 			for ($i = 1; $i <= 3; $i++) {
@@ -413,6 +409,7 @@ function saturne_load_pagination($pagesCounter, $page_array, $offset) {
 			$page_array = array_merge($page_array, $last_pages);
 		}
 	}
+
 	return $page_array;
 }
 
@@ -431,8 +428,11 @@ function saturne_show_pagination($pagesCounter, $page_array, $offset) {
 	$return .= '<input hidden id="containerToRefresh" value="media_gallery">';
 
 	foreach ($page_array as $pageNumber) {
-		$return .= '<li class="pagination-element ' . ($pageNumber == $offset ? 'pagination-current' : ($pageNumber == 1 && !$offset ? 'pagination-current' : '')) . '">';
-		$return .= '<a class="select-page" value="' . ($pageNumber) . '">' . $pageNumber . '</a>';
+//		$pageNumber = $pageNumber == '...' ? 1 : $pageNumber;
+		$index = $pageNumber > 0 ? $pageNumber : -1;
+
+		$return .= '<li class="pagination-element ' . ($index == $offset ? 'pagination-current' : ($pageNumber == 1 && !$offset ? 'pagination-current' : '')) . '">';
+		$return .= '<a class="select-page" value="' . ($index) . '">' . $pageNumber . '</a>';
 		$return .= '</li>';
 	}
 	$return .= '</ul>';

@@ -136,7 +136,7 @@ if (is_array($submit_file_error_text)) {
 }
 ?>
 <!-- START MEDIA GALLERY MODAL -->
-<div class="wpeo-modal modal-photo" id="media_gallery" data-id="<?php echo $object->id ?: 0?>">
+<div class="wpeo-modal modal-photo modal-active" id="media_gallery" data-id="<?php echo $object->id ?: 0?>">
 	<div class="modal-container wpeo-modal-event">
 		<!-- Modal-Header -->
 		<div class="modal-header">
@@ -195,7 +195,7 @@ if (is_array($submit_file_error_text)) {
 				<div class="wpeo-gridlayout grid-5 grid-gap-3 grid-margin-2 ecm-photo-list ecm-photo-list">
 					<?php
 					$relativepath = $module . '/medias/thumbs';
-					print saturne_show_medias($module, 'ecm', $conf->ecm->multidir_output[$conf->entity] . '/'. $module .'/medias', ($conf->browser->layout == 'phone' ? 'mini' : 'small'), 80, 80, (!empty($offset) ? $offset : 0));
+					print saturne_show_medias($module, 'ecm', $conf->ecm->multidir_output[$conf->entity] . '/'. $module .'/medias', ($conf->browser->layout == 'phone' ? 'mini' : 'small'), 80, 80, (!empty($offset) ? $offset : 1));
 					?>
 				</div>
 			</div>
@@ -206,7 +206,7 @@ if (is_array($submit_file_error_text)) {
 			$filearray                    = dol_dir_list($conf->ecm->multidir_output[$conf->entity] . '/'. $module .'/medias/', "files", 0, '', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC);
 			$moduleImageNumberPerPageConf = strtoupper($module) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
 			$allMediasNumber              = count($filearray);
-			$pagesCounter                 = $conf->global->$moduleImageNumberPerPageConf ? ceil($allMediasNumber/($conf->global->$moduleImageNumberPerPageConf ?: 1)) - 1 : 1;
+			$pagesCounter                 = $conf->global->$moduleImageNumberPerPageConf ? ceil($allMediasNumber/($conf->global->$moduleImageNumberPerPageConf ?: 1)) : 1;
 			$page_array                   = saturne_load_pagination($pagesCounter, $page_array, $offset);
 
 			print saturne_show_pagination($pagesCounter, $page_array, $offset);
