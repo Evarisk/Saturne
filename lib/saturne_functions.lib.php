@@ -335,7 +335,6 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
 	return $return;
 }
 
-
 /**
  *      Load array of pages to display
  *
@@ -430,3 +429,41 @@ function saturne_show_pagination($pagesCounter, $page_array, $offset) {
 	$return .= '</ul>';
 	return $return;
 }
+
+/**
+ *      Show pages based on loaded pages array
+ *
+ *      @param      integer				$pagesCounter
+ *      @param      array				$page_array
+ *      @param      integer				$offset
+ *      @return     string				Pages html content
+ *
+ */
+function saturne_check_access($module, $object, $permission) {
+
+	global $conf, $langs, $user;
+
+	if (!$permission)     accessforbidden();
+	if ($user->socid > 0) accessforbidden();
+
+	$langs->loadLangs(['saturne@saturne']);
+
+	if ($conf->multicompany->enabled) {
+		if ($conf->$module->enabled) {
+			if ($object->id > 0) {
+				if ($object->entity != $conf->entity) {
+					setEventMessage($langs->trans('ChangeEntityRedirection'), 'warnings');
+					$urltogo = dol_buildpath('/custom/' . $module . '/' . $module . 'index.php?mainmenu=' . $module, 1);
+					header("Location: " . $urltogo);
+					exit;
+				}
+			}
+		} else {
+			setEventMessage($langs->trans('EnableModule', ucfirst($module)), 'warnings');
+			$urltogo = dol_buildpath('/admin/modules.php?search_nature=external_Evarisk', 1);
+			header("Location: " . $urltogo);
+			exit;
+		}
+	}
+}
+

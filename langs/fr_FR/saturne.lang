@@ -28,12 +28,9 @@ ModuleSaturneDesc = Corrigez vos problèmes de sécurité facilement et rapideme
 SaturneSetup = Configuration du module Saturne
 Settings = Réglages
 SaturneSetupPage = Page de configuration du module Saturne
-TimeSpender = Pointeur de temps
-TimeSpenderConfiguration = Configuration du pointage de temps
 GitHubProjectName = Nom du projet GitHub
 GitHubProjectOrganization = Nom de l'organisation GitHub
 GitHubProjectVersion = Version du projet GitHub
-DolibarrLinkedTask = Tâche liée
 SaturneConfig = Configuration du module
 
 #
@@ -52,12 +49,21 @@ ReadSaturne = Consulter Saturne (read)
 ReadAdminPage = Accéder à la configuration du module Saturne
 
 #
+# Sécurité
+#
+
+# Data - Donnée
+ChangeEntityRedirection = Vous avez été redirigé car vous avez changé d'entité
+EnableModule = Veuillez activer le module %s pour voir cette page
+
+#
 # Index
 #
 
 # Data - Donnée
 SaturneArea  = Bienvenue sur Saturne
 SaturneData  = Données configurables de Saturne
+
 
 
 #
