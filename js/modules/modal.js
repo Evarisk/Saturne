@@ -68,10 +68,10 @@ window.saturne.modal.event = function() {
 window.saturne.modal.openModal = function ( event ) {
 	let modalToOpen = $(this).find('.modal-to-open').val()
 
-	let fromId      = $(this).find('.from-id').length ? $(this).find('.from-id') : 0
-	let fromType    = $(this).find('.from-type').length ? $(this).find('.from-type') : ''
-	let fromSubtype = $(this).find('.from-subtype').length ? $(this).find('.from-subtype') : ''
-	let fromSubdir  = $(this).find('.from-subdir').length ? $(this).find('.from-subdir') : ''
+	let fromId      = $(this).find('.from-id').length ? $(this).find('.from-id').val() : 0
+	let fromType    = $(this).find('.from-type').length ? $(this).find('.from-type').val() : ''
+	let fromSubtype = $(this).find('.from-subtype').length ? $(this).find('.from-subtype').val() : ''
+	let fromSubdir  = $(this).find('.from-subdir').length ? $(this).find('.from-subdir').val() : ''
 
 	let urlWithoutTag = ''
 	if (document.URL.match(/#/)) {
