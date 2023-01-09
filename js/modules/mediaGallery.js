@@ -178,14 +178,10 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 
 	let mediaGallery  = $('#media_gallery')
 	let files         = $(this).prop("files")
-	let elementParent = mediaGallery.find('.ecm-photo-list-content')
 
 	let totalCount = files.length
 	let requestCompleted = 0
 	let progress   = 0
-
-	let actionContainerSuccess = $('.messageSuccessSendPhoto');
-	let actionContainerError   = $('.messageErrorSendPhoto');
 
 	let token = $('input[name="token"]').val();
 
@@ -212,18 +208,7 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 				$('#progressBar').animate({
 					width: progress + '%'
 				}, 1);
-				if ($(resp).find('.error-medias').length) {
-					let response = $(resp).find('.error-medias').val()
-					let decoded_response = JSON.parse(response)
 
-					let textToShow = '';
-					textToShow += decoded_response.message
-
-					actionContainerError.find('.notice-subtitle').text(textToShow)
-
-					actionContainerError.removeClass('hidden');
-
-				}
 				if (requestCompleted === totalCount) {
 					$('.wpeo-loader').removeClass('wpeo-loader');
 					$('#progressBarContainer').fadeOut(800)
@@ -235,8 +220,19 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 								$('#media_gallery').find('.save-photo').removeClass('button-disable');
 								$('#media_gallery').find('.clickable-photo0').addClass('clicked-photo');
 							}
+							if ($(resp).find('.error-medias').length) {
+								let response = $(resp).find('.error-medias').val()
+								let decoded_response = JSON.parse(response)
+
+								let textToShow = '';
+								textToShow += decoded_response.message
+
+								$('.messageErrorSendPhoto').find('.notice-subtitle').text(textToShow)
+								$('.messageErrorSendPhoto').removeClass('hidden');
+							} else {
+								$('.messageSuccessSendPhoto').removeClass('hidden');
+							}
 						})
-						actionContainerSuccess.removeClass('hidden');
 					}, 800)
 				}
 			},

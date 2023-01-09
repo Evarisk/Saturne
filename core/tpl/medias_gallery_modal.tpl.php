@@ -20,11 +20,11 @@ if ( ! $error && $subaction == "uploadPhoto" && ! empty($conf->global->MAIN_UPLO
 		if (empty($_FILES['userfile']['tmp_name'][$key])) {
 			$error++;
 			if ($_FILES['userfile']['error'][$key] == 1 || $_FILES['userfile']['error'][$key] == 2) {
-				setEventMessages($langs->trans('ErrorFileSizeTooLarge'), null, 'errors');
-				$submit_file_error_text = array('message' => $langs->trans('ErrorFileSizeTooLarge'), 'code' => '1337');
+				setEventMessages($langs->transnoentitiesnoconv('ErrorThisFileSizeTooLarge', $_FILES['userfile']['name'][$key]), null, 'errors');
+				$submit_file_error_text = array('message' => $langs->transnoentitiesnoconv('ErrorThisFileSizeTooLarge', $_FILES['userfile']['name'][$key]), 'code' => '1337');
 			} else {
-				setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("File")), null, 'errors');
-				$submit_file_error_text = array('message' => $langs->trans('ErrorFieldRequired'), 'code' => '1337');
+				setEventMessages($langs->transnoentitiesnoconv("ErrorThisFileSizeTooLarge", $_FILES['userfile']['name'][$key], $langs->transnoentitiesnoconv("File")), null, 'errors');
+				$submit_file_error_text = array('message' => $langs->transnoentitiesnoconv('ErrorThisFileSizeTooLarge', $_FILES['userfile']['name'][$key]), 'code' => '1337');
 			}
 		}
 
@@ -35,6 +35,9 @@ if ( ! $error && $subaction == "uploadPhoto" && ! empty($conf->global->MAIN_UPLO
 				$imgThumbLarge  = vignette($upload_dir . '/' . $_FILES['userfile']['name'][$key], $conf->global->SATURNE_MEDIA_MAX_WIDTH_LARGE, $conf->global->SATURNE_MEDIA_MAX_HEIGHT_LARGE, '_large');
 				$imgThumbMedium = vignette($upload_dir . '/' . $_FILES['userfile']['name'][$key], $conf->global->SATURNE_MEDIA_MAX_WIDTH_MEDIUM, $conf->global->SATURNE_MEDIA_MAX_HEIGHT_MEDIUM, '_medium');
 				$result = $ecmdir->changeNbOfFiles('+');
+			} else {
+				setEventMessages($langs->transnoentitiesnoconv("ErrorThisFileExists", $_FILES['userfile']['name'][$key], $langs->transnoentitiesnoconv("File")), null, 'errors');
+				$submit_file_error_text = array('message' => $langs->transnoentities('ErrorThisFileExists', $_FILES['userfile']['name'][$key]), 'code' => '1337');
 			}
 		}
 	}
@@ -125,8 +128,6 @@ if ( ! $error && $subaction == "pagination") {
 
 	$offset       = $data['offset'];
 	$pagesCounter = $data['pagesCounter'];
-
-	$pagesDisplayed = [];
 
 	$page_array = saturne_load_pagination($pagesCounter, $page_array, $offset);
 }
