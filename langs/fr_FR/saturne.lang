@@ -73,3 +73,4 @@ SaturneData  = Données configurables de Saturne
 MediaGallery = Bibliothèque de médias
 ErrorThisFileSizeTooLarge = Le fichier %s est trop volumineux
 ErrorThisFileExists = Le fichier %s existe déjà
+EmptyMediaGallery = La bibliothèque de médias est vide
