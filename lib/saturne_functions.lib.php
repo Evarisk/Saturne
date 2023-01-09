@@ -93,7 +93,7 @@ function saturne_show_medias($module, $modulepart = 'ecm', $sdir, $size = 0, $ma
 							$urladvanced = getAdvancedPreviewUrl($modulepart, $module . '/medias/' .$file, 0, 'entity=' . $conf->entity); ?>
 							<a class="clicked-photo-preview" href="<?php echo $urladvanced; ?>"><i class="fas fa-2x fa-search-plus"></i></a>
 							<?php if (image_format_supported($file) >= 0) : ?>
-								<?php $fullpath = $path . '/' . $filename . '&entity=' . $conf->entity; ?>
+								<?php $fullpath = $path . '/' . urlencode($filename) . '&entity=' . $conf->entity; ?>
 								<input class="filename" type="hidden" value="<?php echo $file; ?>">
 								<img class="photo photo<?php echo $j ?>" height="<?php echo $maxHeight; ?>" width="<?php echo $maxWidth; ?>" src="<?php echo $fullpath; ?>">
 							<?php endif; ?>
