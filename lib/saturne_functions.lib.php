@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/medias.php';
 require_once __DIR__ . '/pagination.php';
+require_once __DIR__ . '/documents.php';
 
 /**
  *      Print llxHeader with Saturne custom enhancements

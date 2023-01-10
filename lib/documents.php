@@ -30,7 +30,7 @@
  */
 function saturne_show_documents($modulepart, $modulesubdir, $filedir, $urlsource, $genallowed, $delallowed = 0, $modelselected = '', $allowgenifempty = 1, $forcenomultilang = 0, $notused = 0, $noform = 0, $param = '', $title = '', $buttonlabel = '', $codelang = '', $morepicto = '', $object = null, $hideifempty = 0, $removeaction = 'remove_file', $active = 1, $tooltiptext = '')
 {
-	global $db, $langs, $conf, $hookmanager, $form;
+	global $db, $langs, $conf, $user, $hookmanager, $form;
 
 	if ( ! is_object($form)) $form = new Form($db);
 
@@ -79,6 +79,8 @@ function saturne_show_documents($modulepart, $modulesubdir, $filedir, $urlsource
 		if (class_exists($class)) {
 			if (preg_match('/specimen/', $param)) {
 				$type      = strtolower($class) . 'specimen';
+				$modellist = array();
+
 				include_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
 				$modellist = getListOfModels($db, $type, 0);
 			} else {
@@ -120,7 +122,7 @@ function saturne_show_documents($modulepart, $modulesubdir, $filedir, $urlsource
 		if ( ! empty($modellist)) {
 			asort($modellist);
 			$out      .= '<span class="hideonsmartphone"> <i class="fas fa-file-word"></i> </span>';
-			$modellist = array_filter($modellist, 'remove_index');
+			$modellist = array_filter($modellist, 'saturne_remove_index');
 			if (is_array($modellist)) {
 				foreach ($modellist as $key => $modellistsingle) {
 					$arrayvalues              = preg_replace('/template_/', '', $modellistsingle);
@@ -138,37 +140,18 @@ function saturne_show_documents($modulepart, $modulesubdir, $filedir, $urlsource
 
 			if ($conf->use_javascript_ajax) {
 				$out .= ajax_combobox('model');
-			}
-
-			// Button
+			}	// Button
 			if ($active) {
 				$genbutton .= '<button class="wpeo-button button-square-40 button-blue wpeo-tooltip-event" id="' . $forname . '_generatebutton" name="' . $forname . '_generatebutton" type="submit" aria-label="' . $langs->trans('Generate') . '"><i class="fas fa-print button-icon"></i></button>';
 			} else {
 				$genbutton .= '<i class="fas fa-exclamation-triangle pictowarning wpeo-tooltip-event" aria-label="' . $langs->trans($tooltiptext) . '"></i>';
 				$genbutton .= '<button class="wpeo-button button-square-40 button-disable" name="' . $forname . '_generatebutton"><i class="fas fa-print button-icon"></i></button>';
 			}
+			$out .= $genbutton;
 
-			//		if ( ! $allowgenifempty && ! is_array($modellist) && empty($modellist)) $genbutton .= ' disabled';
-			//		$genbutton                                                                         .= '>';
-			//		if ($allowgenifempty && ! is_array($modellist) && empty($modellist) && empty($conf->dol_no_mouse_hover) && $modulepart != 'unpaid') {
-			//			$langs->load("errors");
-			//			$genbutton .= ' ' . img_warning($langs->transnoentitiesnoconv("WarningNoDocumentModelActivated"));
-			//		}
-			//		if ( ! $allowgenifempty && ! is_array($modellist) && empty($modellist) && empty($conf->dol_no_mouse_hover) && $modulepart != 'unpaid') $genbutton = '';
-			//		if (empty($modellist) && ! $showempty && $modulepart != 'unpaid') $genbutton                                                                      = '';
-			$out                                                                                                                                             .= $genbutton;
-			//		if ( ! $active) {
-			//			$htmltooltip  = '';
-			//			$htmltooltip .= $tooltiptext;
-			//
-			//			$out .= '<span class="center">';
-			//			$out .= $form->textwithpicto($langs->trans('Help'), $htmltooltip, 1, 0);
-			//			$out .= '</span>';
-			//		}
 		} else {
 			$out .= '<div class="float">' . $langs->trans("Files") . '</div>';
 		}
-
 		$out .= '</th>';
 
 		if ( ! empty($hookmanager->hooks['formfile'])) {
@@ -257,7 +240,9 @@ function saturne_show_documents($modulepart, $modulesubdir, $filedir, $urlsource
 						$out      .= $morepicto;
 					}
 					$out .= '</td>';
+
 				}
+
 
 				if (is_object($hookmanager)) {
 					$parameters = array('colspan' => ($colspan + $colspanmore), 'socid' => (isset($GLOBALS['socid']) ? $GLOBALS['socid'] : ''), 'id' => (isset($GLOBALS['id']) ? $GLOBALS['id'] : ''), 'modulepart' => $modulepart, 'relativepath' => $relativepath);
@@ -322,5 +307,99 @@ function saturne_remove_index($model)
 		return '';
 	} else {
 		return $model;
+	}
+}
+
+/**
+ *	Return list of models for a document
+ *
+ * @param   string $model
+ * @return  '' or $model
+ */
+function saturne_get_list_of_models($db, $type, $maxfilenamelength = 0)
+{
+	global $conf, $langs;
+	$liste = array();
+	$found = 0;
+	$dirtoscan = '';
+
+	$sql = "SELECT nom as id, nom as doc_template_name, libelle as label, description as description";
+	$sql .= " FROM ".MAIN_DB_PREFIX."document_model";
+	$sql .= " WHERE type = '".$db->escape($type)."'";
+	$sql .= " AND entity IN (0,".$conf->entity.")";
+	$sql .= " ORDER BY description DESC";
+
+	dol_syslog('/core/lib/function2.lib.php::getListOfModels', LOG_DEBUG);
+	$resql = $db->query($sql);
+	if ($resql) {
+		$num = $db->num_rows($resql);
+		$i = 0;
+		while ($i < $num) {
+			$found = 1;
+
+			$obj = $db->fetch_object($resql);
+
+			// If this generation module needs to scan a directory, then description field is filled
+			// with the constant that contains list of directories to scan (COMPANY_ADDON_PDF_ODT_PATH, ...).
+			if (!empty($obj->description)) {	// A list of directories to scan is defined
+				include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+
+				$const = $obj->description;
+				//irtoscan.=($dirtoscan?',':'').preg_replace('/[\r\n]+/',',',trim($conf->global->$const));
+				$dirtoscan = preg_replace('/[\r\n]+/', ',', trim($conf->global->$const));
+
+				$listoffiles = array();
+
+				// Now we add models found in directories scanned
+				$listofdir = explode(',', $dirtoscan);
+				foreach ($listofdir as $key => $tmpdir) {
+					$tmpdir = trim($tmpdir);
+					$tmpdir = preg_replace('/DOL_DATA_ROOT/', DOL_DATA_ROOT, $tmpdir);
+					$tmpdir = preg_replace('/DOL_DOCUMENT_ROOT/', DOL_DOCUMENT_ROOT, $tmpdir);
+
+					if (!$tmpdir) {
+						unset($listofdir[$key]);
+						continue;
+					}
+					if (is_dir($tmpdir)) {
+						// all type of template is allowed
+						$tmpfiles = dol_dir_list($tmpdir, 'files', 0, '', '', 'name', SORT_ASC, 0);
+						if (count($tmpfiles)) {
+							$listoffiles = array_merge($listoffiles, $tmpfiles);
+						}
+					}
+				}
+
+				if (count($listoffiles)) {
+					foreach ($listoffiles as $record) {
+						$max = ($maxfilenamelength ?: 28);
+						$liste[$obj->id.':'.$record['fullname']] = dol_trunc($record['name'], $max, 'middle');
+					}
+				} else {
+					$liste[0] = $obj->label.': '.$langs->trans("None");
+				}
+			} else {
+				if ($type == 'member' && $obj->doc_template_name == 'standard') {   // Special case, if member template, we add variant per format
+					global $_Avery_Labels;
+					include_once DOL_DOCUMENT_ROOT.'/core/lib/format_cards.lib.php';
+					foreach ($_Avery_Labels as $key => $val) {
+						$liste[$obj->id.':'.$key] = ($obj->label ?: $obj->doc_template_name).' '.$val['name'];
+					}
+				} else {
+					// Common usage
+					$liste[$obj->id] = $obj->label ?: $obj->doc_template_name;
+				}
+			}
+			$i++;
+		}
+	} else {
+		dol_print_error($db);
+		return -1;
+	}
+
+	if ($found) {
+		return $liste;
+	} else {
+		return 0;
 	}
 }
