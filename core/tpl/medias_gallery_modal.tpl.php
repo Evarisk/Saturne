@@ -1,6 +1,4 @@
 <?php
-global $db;
-
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmdirectory.class.php';
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
 
@@ -129,7 +127,7 @@ if ( ! $error && $subaction == "pagination") {
 	$offset       = $data['offset'];
 	$pagesCounter = $data['pagesCounter'];
 
-	$page_array = saturne_load_pagination($pagesCounter, $page_array, $offset);
+	$loadedPageArray = saturne_load_pagination($pagesCounter, [], $offset);
 }
 
 if (is_array($submit_file_error_text)) {
@@ -208,7 +206,7 @@ if (is_array($submit_file_error_text)) {
 			$moduleImageNumberPerPageConf = strtoupper($module) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
 			$allMediasNumber              = count($filearray);
 			$pagesCounter                 = $conf->global->$moduleImageNumberPerPageConf ? ceil($allMediasNumber/($conf->global->$moduleImageNumberPerPageConf ?: 1)) : 1;
-			$page_array                   = saturne_load_pagination($pagesCounter, $page_array, $offset);
+			$page_array                   = saturne_load_pagination($pagesCounter, $loadedPageArray, $offset);
 
 			print saturne_show_pagination($pagesCounter, $page_array, $offset);
 			?>

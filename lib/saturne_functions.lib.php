@@ -27,7 +27,7 @@ require_once __DIR__ . '/documents.php';
  */
 function saturneHeader($module, $action, $subaction, $load_media_gallery, $head = '', $title = '', $help_url = '', $target = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $morequerystring = '', $morecssonbody = '', $replacemainareaby = '', $disablenofollow = 0, $disablenoindex = 0) {
 
-	global $langs, $conf;
+	global $langs, $conf, $db;
 
 	//CSS
 	$arrayofcss[] = '/saturne/css/saturne.css';
