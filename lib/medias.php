@@ -226,6 +226,19 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
 						if ($showfilename) $return .= '<br>' . $viewfilename;
 					}
 
+					if ($size == 'large' || $size == 'medium') {
+						$relativefile = preg_replace('/^\//', '', $pdir . $photo);
+						if (empty($nolink)) {
+							$urladvanced               = getAdvancedPreviewUrl($modulepart, $relativefile, 0, 'entity=' . $conf->entity);
+							if ($urladvanced) $return .= '<a href="' . $urladvanced . '">';
+							else $return              .= '<a href="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" class="aphoto" target="_blank">';
+						}
+						$widthName = 'SATURNE_MEDIA_MAX_WIDTH_' . strtoupper($size);
+						$heightName = 'SATURNE_MEDIA_MAX_HEIGHT_' . strtoupper($size);
+						$return .= '<img width="' . $conf->global->$widthName . '" height="' . $conf->global->$heightName . '" class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '">';
+						if ($showfilename) $return .= '<br>' . $viewfilename;
+					}
+
 					// On continue ou on arrete de boucler ?
 					if ($nbmax && $nbphoto >= $nbmax) break;
 				}
@@ -233,20 +246,20 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
 				//$return .= '<div>';
 
 				if ($show_favorite_button) {
-					$return .= '
-				<div class="wpeo-button button-square-50 button-blue media-gallery-favorite '. ($object->$favorite_field == '' && $i == 0 ? 'favorite' : ($object->$favorite_field == $photo ? 'favorite' : '')) .'" value="' . $object->id . '">
-					<input class="element-linked-id" type="hidden" value="' . ($object->id > 0 ? $object->id : 0) . '">
-					<input class="filename" type="hidden" value="' . $photo . '">
-					<i class="' . ($object->$favorite_field == '' && $i == 0 ? 'fas' : ($object->$favorite_field == $photo ? 'fas' : 'far')) . ' fa-star button-icon"></i>
-				</div>';
+					$return .=
+						'<div class="wpeo-button button-square-50 button-blue media-gallery-favorite '. ($object->$favorite_field == '' && $i == 0 ? 'favorite' : ($object->$favorite_field == $photo ? 'favorite' : '')) .'" value="' . $object->id . '">
+							<input class="element-linked-id" type="hidden" value="' . ($object->id > 0 ? $object->id : 0) . '">
+							<input class="filename" type="hidden" value="' . $photo . '">
+							<i class="' . ($object->$favorite_field == '' && $i == 0 ? 'fas' : ($object->$favorite_field == $photo ? 'fas' : 'far')) . ' fa-star button-icon"></i>
+						</div>';
 				}
 				if ($show_unlink_button) {
-					$return .= '
-				<div class="wpeo-button button-square-50 button-grey media-gallery-unlink" value="' . $object->id . '">
-				<input class="element-linked-id" type="hidden" value="' . ($object->id > 0 ? $object->id : 0) . '">
-				<input class="filename" type="hidden" value="' . $photo . '">
-				<i class="fas fa-unlink button-icon"></i>
-				</div>';
+					$return .=
+						'<div class="wpeo-button button-square-50 button-grey media-gallery-unlink" value="' . $object->id . '">
+							<input class="element-linked-id" type="hidden" value="' . ($object->id > 0 ? $object->id : 0) . '">
+							<input class="filename" type="hidden" value="' . $photo . '">
+							<i class="fas fa-unlink button-icon"></i>
+						</div>';
 				}
 				if ($showdiv) {
 					$return .= "</div>\n";
