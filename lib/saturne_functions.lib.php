@@ -25,7 +25,7 @@ require_once __DIR__ . '/documents.php';
  * 		@param		integer				$disablenofollow
  * 		@param		integer				$disablenoindex
  */
-function saturneHeader($module, $action, $subaction, $load_media_gallery, $head = '', $title = '', $help_url = '', $target = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $morequerystring = '', $morecssonbody = '', $replacemainareaby = '', $disablenofollow = 0, $disablenoindex = 0) {
+function saturneHeader($module, $action, $subaction, $load_media_gallery = 0, $head = '', $title = '', $help_url = '', $target = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $morequerystring = '', $morecssonbody = '', $replacemainareaby = '', $disablenofollow = 0, $disablenoindex = 0) {
 
 	global $langs, $conf, $db;
 
@@ -34,6 +34,9 @@ function saturneHeader($module, $action, $subaction, $load_media_gallery, $head 
 
 	//JS
 	$arrayofjs[]  = '/saturne/js/saturne.js.php';
+
+	//Langs
+	$langs->load('saturne@saturne');
 
 	llxHeader($head, $title, $help_url, $target, $disablejs, $disablehead, $arrayofjs, $arrayofcss, $morequerystring, $morecssonbody, $replacemainareaby, $disablenofollow, $disablenoindex);
 
@@ -58,8 +61,6 @@ function saturne_check_access($module, $object, $permission) {
 
 	if (!$permission)     accessforbidden();
 	if ($user->socid > 0) accessforbidden();
-
-	$langs->loadLangs(['saturne@saturne']);
 
 	if ($conf->multicompany->enabled) {
 		if ($conf->$module->enabled) {
