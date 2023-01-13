@@ -188,21 +188,28 @@ class modSaturne extends DolibarrModules
 		$this->menu = [];
 		$r = 0;
 
-		$this->menu[$r++] = [
-			'fk_menu'  => 'fk_mainmenu=dolismq',
-			'type'     => 'left',
-			'titre'    => $langs->transnoentities('MinimizeMenu'),
-			'prefix'   => '<i class="fas fa-chevron-circle-left pictofixedwidth"></i>',
-			'mainmenu' => 'dolismq',
-			'leftmenu' => 'minimizemenu',
-			'url'      => '',
-			'langs'    => 'dolismq@dolismq',
-			'position' => 2000 + $r,
-			'enabled'  => '$conf->dolismq->enabled',
-			'perms'    => '$user->rights->dolismq->lire',
-			'target'   => '',
-			'user'     => 0,
+		$modules_array = [
+			'dolismq'
 		];
+
+		foreach ($modules_array as $module) {
+			$this->menu[$r++] = [
+				'fk_menu'  => 'fk_mainmenu=' . $module,
+				'type'     => 'left',
+				'titre'    => $langs->transnoentities('MinimizeMenu'),
+				'prefix'   => '<i class="fas fa-chevron-circle-left pictofixedwidth"></i>',
+				'mainmenu' => $module,
+				'leftmenu' => 'minimizemenu',
+				'url'      => '',
+				'langs'    => $module . '@' . $module,
+				'position' => 2000 + $r,
+				'enabled'  => '$conf->'. $module .'->enabled',
+				'perms'    => '$user->rights->'. $module .'->lire',
+				'target'   => '',
+				'user'     => 0,
+			];
+		}
+
 	}
 
 	/**
