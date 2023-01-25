@@ -274,11 +274,6 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
 				if ($nbphoto) $return .= '</table>';
 			}
 		}
-	} else {
-		// Display media library is empty if no media uploaded
-		if (!is_array($_FILES['userfile']['tmp_name'])) {
-			print($langs->trans("EmptyMediaGallery"));
-		}
 	}
 	if (is_object($object)) {
 		$object->nbphoto = $nbphoto;
