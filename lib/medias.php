@@ -13,7 +13,7 @@
  */
 function saturne_show_medias($module, $modulepart = 'ecm', $sdir, $size = 0, $maxHeight = 80, $maxWidth = 80, $offset = 1)
 {
-	global $conf;
+	global $conf, $langs;
 
 	include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 	include_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
@@ -37,6 +37,7 @@ function saturne_show_medias($module, $modulepart = 'ecm', $sdir, $size = 0, $ma
 
 			if (image_format_supported($file) >= 0) {
 				$nbphoto++;
+				print '<div class="wpeo-gridlayout grid-5 grid-gap-3 grid-margin-2 ecm-photo-list ecm-photo-list">';
 
 				if ($size == 'mini' || $size == 'small') {   // Format vignette
 					$relativepath = $module . '/medias/thumbs';
@@ -48,23 +49,30 @@ function saturne_show_medias($module, $modulepart = 'ecm', $sdir, $size = 0, $ma
 
 					?>
 
-				<div class="center clickable-photo clickable-photo<?php echo $j; ?>" value="<?php echo $j; ?>">
-					<figure class="photo-image">
-						<?php
-						$urladvanced = getAdvancedPreviewUrl($modulepart, $module . '/medias/' .$file, 0, 'entity=' . $conf->entity); ?>
-						<a class="clicked-photo-preview" href="<?php echo $urladvanced; ?>"><i class="fas fa-2x fa-search-plus"></i></a>
-						<?php if (image_format_supported($file) >= 0) : ?>
-							<?php $fullpath = $path . '/' . urlencode($filename) . '&entity=' . $conf->entity; ?>
-							<input class="filename" type="hidden" value="<?php echo $file; ?>">
-							<img class="photo photo<?php echo $j ?>" height="<?php echo $maxHeight; ?>" width="<?php echo $maxWidth; ?>" src="<?php echo $fullpath; ?>">
-						<?php endif; ?>
-					</figure>
+					<div class="center clickable-photo clickable-photo<?php echo $j; ?>" value="<?php echo $j; ?>">
+						<figure class="photo-image">
+							<?php
+							$urladvanced = getAdvancedPreviewUrl($modulepart, $module . '/medias/' .$file, 0, 'entity=' . $conf->entity); ?>
+							<a class="clicked-photo-preview" href="<?php echo $urladvanced; ?>"><i class="fas fa-2x fa-search-plus"></i></a>
+							<?php if (image_format_supported($file) >= 0) : ?>
+								<?php $fullpath = $path . '/' . urlencode($filename) . '&entity=' . $conf->entity; ?>
+								<input class="filename" type="hidden" value="<?php echo $file; ?>">
+								<img class="photo photo<?php echo $j ?>" height="<?php echo $maxHeight; ?>" width="<?php echo $maxWidth; ?>" src="<?php echo $fullpath; ?>">
+							<?php endif; ?>
+						</figure>
 					<div class="title"><?php echo $file; ?></div>
 					</div><?php
 					$j++;
 				}
+
+				print '</div>';
 			}
 		}
+	} else {
+		print '<br>';
+		print '<div class="ecm-photo-list ecm-photo-list">';
+		print $langs->trans("EmptyMediaGallery");
+		print '</div>';
 	}
 }
 

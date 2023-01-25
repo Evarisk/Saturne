@@ -191,12 +191,10 @@ if (is_array($submitFileErrorText)) {
 				<div id="progressBar"></div>
 			</div>
 			<div class="ecm-photo-list-content">
-				<div class="wpeo-gridlayout grid-5 grid-gap-3 grid-margin-2 ecm-photo-list ecm-photo-list">
-					<?php
-					$relativepath = $module . '/medias/thumbs';
-					print saturne_show_medias($module, 'ecm', $conf->ecm->multidir_output[$conf->entity] . '/'. $module .'/medias', ($conf->browser->layout == 'phone' ? 'mini' : 'small'), 80, 80, (!empty($offset) ? $offset : 1));
-					?>
-				</div>
+				<?php
+				$relativepath = $module . '/medias/thumbs';
+				print saturne_show_medias($module, 'ecm', $conf->ecm->multidir_output[$conf->entity] . '/'. $module .'/medias', ($conf->browser->layout == 'phone' ? 'mini' : 'small'), 80, 80, (!empty($offset) ? $offset : 1));
+				?>
 			</div>
 		</div>
 		<!-- Modal-Footer -->
