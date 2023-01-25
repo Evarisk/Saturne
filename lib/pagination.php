@@ -3,10 +3,10 @@
 /**
  *      Load array of pages to display
  *
- *      @param      integer				$pagesCounter
- *      @param      array				$page_array
- *      @param      integer				$offset
- *      @return     array				Pages number array
+ *      @param      integer				$pagesCounter	Number of pages
+ *      @param      array				$page_array		Array with all available pages
+ *      @param      integer				$offset			Selected page
+ *      @return     array				$page_array		Pages number array
  *
  */
 function saturne_load_pagination($pagesCounter, $page_array, $offset) {
@@ -61,10 +61,10 @@ function saturne_load_pagination($pagesCounter, $page_array, $offset) {
 /**
  *      Show pages based on loaded pages array
  *
- *      @param      integer				$pagesCounter
- *      @param      array				$page_array
- *      @param      integer				$offset
- *      @return     string				Pages html content
+ *      @param      integer				$pagesCounter	Number of pages
+ *      @param      array				$page_array		Array with all available pages
+ *      @param      integer				$offset			Selected page
+ *      @return     string				$return 		Pages html content	Pages number array
  *
  */
 function saturne_show_pagination($pagesCounter, $page_array, $offset) {

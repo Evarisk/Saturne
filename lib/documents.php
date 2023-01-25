@@ -256,26 +256,6 @@ function saturne_show_documents($modulepart, $modulesubdir, $filedir, $urlsource
 				}
 			}
 		}
-		// Loop on each link found
-		//      if (is_array($link_list))
-		//      {
-		//          $colspan = 2;
-		//
-		//          foreach ($link_list as $file)
-		//          {
-		//              $out .= '<tr class="oddeven">';
-		//              $out .= '<td colspan="'.$colspan.'" class="maxwidhtonsmartphone">';
-		//              $out .= '<a data-ajax="false" href="'.$file->url.'" target="_blank">';
-		//              $out .= $file->label;
-		//              $out .= '</a>';
-		//              $out .= '</td>';
-		//              $out .= '<td class="right">';
-		//              $out .= dol_print_date($file->datea, 'dayhour');
-		//              $out .= '</td>';
-		//              if ($delallowed || $printer || $morepicto) $out .= '<td></td>';
-		//              $out .= '</tr>'."\n";
-		//          }
-		//      }
 
 		if (count($file_list) == 0 && count($link_list) == 0 && $headershown) {
 			$out .= '<tr><td colspan="' . (3 + ($addcolumforpicto ? 1 : 0)) . '" class="opacitymedium">' . $langs->trans("None") . '</td></tr>' . "\n";
@@ -298,7 +278,7 @@ function saturne_show_documents($modulepart, $modulesubdir, $filedir, $urlsource
 /**
  *	Exclude index.php files from list of models for document generation
  *
- * @param   string $model
+ * @param   string $model Model name
  * @return  '' or $model
  */
 function saturne_remove_index($model)
@@ -313,7 +293,7 @@ function saturne_remove_index($model)
 /**
  *	Return list of models for a document
  *
- * @param   string $model
+ * @param   string $model Model name
  * @return  '' or $model
  */
 function saturne_get_list_of_models($db, $type, $maxfilenamelength = 0)

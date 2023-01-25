@@ -18,7 +18,7 @@
 /**
  * Prepare admin pages header
  *
- * @return array
+ * @return array $head 	Selectable tabs
  */
 function SaturneAdminPrepareHead(): array
 {

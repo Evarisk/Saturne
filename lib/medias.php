@@ -3,13 +3,13 @@
 /**
  *      Print medias from media gallery
  *
- *      @param      string				$module
- *      @param      string				$modulepart
- *      @param      string				$sdir
- *      @param      integer				$size
- *      @param      string				$maxHeight
- *      @param      string				$maxWidth
- *      @param      string				$offset
+ *      @param      string				$module 	Module name
+ *      @param      string				$modulepart Submodule name
+ *      @param      string				$sdir 		Directory path
+ *      @param      integer				$size 		Media size
+ *      @param      string				$maxHeight	Media max height
+ *      @param      string				$maxWidth	Media max width
+ *      @param      string				$offset		Media gallery offset page
  */
 function saturne_show_medias($module, $modulepart = 'ecm', $sdir, $size = 0, $maxHeight = 80, $maxWidth = 80, $offset = 1)
 {
@@ -71,28 +71,28 @@ function saturne_show_medias($module, $modulepart = 'ecm', $sdir, $size = 0, $ma
 /**
  *      Show medias linked to an object
  *
- *      @param      string				$modulepart
- *      @param      string				$sdir
- *      @param      integer				$size
- *      @param      integer				$nbmax
- *      @param      integer				$nbbyrow
- *      @param      integer				$showfilename
- *      @param      integer				$showaction
- *      @param      integer				$maxHeight
- *      @param      integer				$maxWidth
- *      @param      integer				$nolink
- *      @param      integer				$notitle
- *      @param      integer				$usesharelink
- *      @param      string				$subdir
- *      @param      object				$object
- *      @param      string				$favorite_field
- *      @param      integer				$show_favorite_button
- *      @param      integer				$show_unlink_button
- *      @param      integer				$use_mini_format
- *      @param      integer				$show_only_favorite
- *      @param      string				$morecss
- *      @param      integer				$showdiv
- *      @return     string				Show medias linked
+ *      @param      string				$modulepart 			Submodule name
+ *      @param      string				$sdir					Directory path
+ *      @param      integer				$size					Medias size
+ *      @param      integer				$nbmax					Max number of medias shown per page
+ *      @param      integer				$nbbyrow				Number of images per row
+ *      @param      integer				$showfilename			Show filename under image
+ *      @param      integer				$showaction				Show icon with action links
+ *      @param      integer				$maxHeight				Media max height
+ *      @param      integer				$maxWidth				Media max width
+ *      @param      integer				$nolink					Do not add href link to image
+ *      @param      integer				$notitle				Do not add title tag on image
+ *      @param      integer				$usesharelink			Use the public shared link of image (if not available, the 'nophoto' image will be shown instead)
+ *      @param      string				$subdir					Subdir for file
+ *      @param      object				$object					Object linked to show medias of
+ *      @param      string				$favorite_field			Name of favorite sql field of object
+ *      @param      integer				$show_favorite_button	Show or hide favorite button
+ *      @param      integer				$show_unlink_button		Show or hide unlink button
+ *      @param      integer				$use_mini_format		Use media mini format instead of small
+ *      @param      integer				$show_only_favorite		Show only object favorite media
+ *      @param      string				$morecss				Add more CSS on link
+ *      @param      integer				$showdiv				Add div with "media-container" class
+ *      @return     string				$return 				Show medias linked
  *
  */
 function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbmax = 0, $nbbyrow = 5, $showfilename = 0, $showaction = 0, $maxHeight = 120, $maxWidth = 160, $nolink = 0, $notitle = 0, $usesharelink = 0, $subdir = "", $object = null, $favorite_field = 'photo', $show_favorite_button = 1, $show_unlink_button = 1 , $use_mini_format = 0, $show_only_favorite = 0, $morecss = '', $showdiv = 1)
@@ -137,9 +137,6 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
 				}
 
 				$return .= '<input hidden class="file-path" value="'. $fileFullName .'">';
-				//if (! utf8_check($filename)) $filename=utf8_encode($filename);	// To be sure file is stored in UTF8 in memory
-
-				//if (dol_is_file($dir.$filename) && image_format_supported($filename) >= 0)
 				if (image_format_supported($filename) >= 0) {
 					$nbphoto++;
 					$photo        = $filename;
@@ -175,7 +172,6 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
 						}
 
 						// Show image (width height=$maxHeight)
-						// Si fichier vignette disponible et image source trop grande, on utilise la vignette, sinon on utilise photo origine
 						$alt               = $langs->transnoentitiesnoconv('File') . ': ' . $relativefile;
 						$alt              .= ' - ' . $langs->transnoentitiesnoconv('Size') . ': ' . $imgarray['width'] . 'x' . $imgarray['height'];
 						if ($notitle) $alt = '';
@@ -207,7 +203,6 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
 						if ($showfilename) $return  .= '<br>' . $viewfilename;
 						if ($showaction) {
 							$return .= '<br>';
-							// On propose la generation de la vignette si elle n'existe pas et si la taille est superieure aux limites
 							if ($photo_vignette && (image_format_supported($photo) > 0) && ($object->imgWidth > $maxWidth || $object->imgHeight > $maxHeight)) {
 								$return .= '<a href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;action=addthumb&amp;file=' . urlencode($pdir . $viewfilename) . '">' . img_picto($langs->trans('GenerateThumb'), 'refresh') . '&nbsp;&nbsp;</a>';
 							}
@@ -220,10 +215,12 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
 						} elseif ($nbbyrow < 0) $return .= '</td>';
 					}
 
-					if (empty($size)) {     // Format origine
+					if (empty($size)) {
+						// Format origine
 						$return .= '<img class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '">';
-
-						if ($showfilename) $return .= '<br>' . $viewfilename;
+						if ($showfilename) {
+							$return .= '<br>' . $viewfilename;
+						}
 					}
 
 					if ($size == 'large' || $size == 'medium') {
@@ -242,8 +239,6 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
 					// On continue ou on arrete de boucler ?
 					if ($nbmax && $nbphoto >= $nbmax) break;
 				}
-
-				//$return .= '<div>';
 
 				if ($show_favorite_button) {
 					$return .=
@@ -267,7 +262,6 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
 				$i++;
 			}
 		}
-		//$return .= "</div>\n";
 
 		if ($size == 1 || $size == 'small') {
 			if ($nbbyrow > 0) {
