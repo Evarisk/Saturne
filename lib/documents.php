@@ -44,11 +44,11 @@ function saturne_show_documents($modulepart, $modulesubdir, $filedir, $urlsource
 	$hookmanager->initHooks(array('formfile'));
 
 	// Get list of files
-	$file_list = null;
+	$fileList = null;
 	if ( ! empty($filedir)) {
-		$file_list = dol_dir_list($filedir, 'files', 0, '(\.odt|\.zip|\.pdf)', '', 'date', SORT_DESC, 1);
+		$fileList = dol_dir_list($filedir, 'files', 0, '(\.odt|\.zip|\.pdf)', '', 'date', SORT_DESC, 1);
 	}
-	if ($hideifempty && empty($file_list)) return '';
+	if ($hideifempty && empty($fileList)) return '';
 
 	$out         = '';
 	$forname     = 'builddoc';
@@ -187,7 +187,7 @@ function saturne_show_documents($modulepart, $modulesubdir, $filedir, $urlsource
 		$out .= '<!-- html.formfile::showdocuments -->' . "\n";
 
 		// Show title of array if not already shown
-		if (( ! empty($file_list) || ! empty($link_list) || preg_match('/^massfilesarea/', $modulepart))
+		if (( ! empty($fileList) || ! empty($link_list) || preg_match('/^massfilesarea/', $modulepart))
 			&& ! $headershown) {
 			$headershown = 1;
 			$out        .= '<div class="titre">' . $titletoshow . '</div>' . "\n";
@@ -196,8 +196,8 @@ function saturne_show_documents($modulepart, $modulesubdir, $filedir, $urlsource
 		}
 
 		// Loop on each file found
-		if (is_array($file_list)) {
-			foreach ($file_list as $file) {
+		if (is_array($fileList)) {
+			foreach ($fileList as $file) {
 				// Define relative path for download link (depends on module)
 				$relativepath                    = $file["name"]; // Cas general
 				if ($modulesubdir) $relativepath = $modulesubdir . "/" . $file["name"]; // Cas propal, facture...
@@ -257,7 +257,7 @@ function saturne_show_documents($modulepart, $modulesubdir, $filedir, $urlsource
 			}
 		}
 
-		if (count($file_list) == 0 && count($link_list) == 0 && $headershown) {
+		if (count($fileList) == 0 && count($link_list) == 0 && $headershown) {
 			$out .= '<tr><td colspan="' . (3 + ($addcolumforpicto ? 1 : 0)) . '" class="opacitymedium">' . $langs->trans("None") . '</td></tr>' . "\n";
 		}
 	}

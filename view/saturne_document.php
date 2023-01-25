@@ -31,11 +31,11 @@ if (file_exists('../../../main.inc.php')) {
 }
 
 // Get module parameters
-$module_name        = GETPOST('module_name', 'alpha');
-$object_type        = GETPOST('object_type', 'alpha');
-$object_parent_type = GETPOSTISSET('object_parent_type') ? GETPOST('object_parent_type', 'alpha') : $object_type;
+$moduleName        = GETPOST('module_name', 'alpha');
+$objectType        = GETPOST('object_type', 'alpha');
+$bojectParentType  = GETPOSTISSET('object_parent_type') ? GETPOST('object_parent_type', 'alpha') : $objectType;
 
-$module_name_lower = strtolower($module_name);
+$moduleNameLowerCase = strtolower($moduleName);
 
 // Libraries
 //@todo test les requires
@@ -50,14 +50,14 @@ if (isModEnabled('contrat')) {
     require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
 }
 
-require_once __DIR__ . '/../../' . $module_name_lower . '/class/' . $object_type . '.class.php';
-require_once __DIR__ . '/../../' . $module_name_lower . '/lib/' . $module_name_lower . '_' . $object_parent_type . '.lib.php';
+require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
+require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' . $bojectParentType . '.lib.php';
 
 // Global variables definitions
 global $conf, $db, $langs, $hookmanager, $user;
 
 // Load translation files required by the page
-$langs->loadLangs([$module_name_lower . '@' . $module_name_lower, 'companies', 'other', 'mails']);
+$langs->loadLangs([$moduleNameLowerCase . '@' . $moduleNameLowerCase, 'companies', 'other', 'mails']);
 
 // Get parameters
 $id          = GETPOST('id', 'int');
@@ -89,7 +89,7 @@ if (!$sortorder) {
 }
 
 // Initialize technical objects
-$classname   = ucfirst($object_type);
+$classname   = ucfirst($objectType);
 $object      = new $classname($db);
 $extrafields = new ExtraFields($db);
 if (isModEnabled('project')) {
@@ -107,13 +107,13 @@ $extrafields->fetch_name_optionals_label($object->table_element);
 // Load object
 include DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php'; // Must be included, not include_once. Include fetch and fetch_thirdparty but not fetch_optionals
 if ($id > 0 || !empty($ref)) {
-    $upload_dir = $conf->$module_name_lower->multidir_output[$object->entity ?: $conf->entity] . '/' . $object_type . '/' . get_exdir(0, 0, 0, 1, $object);
+    $uploadDir = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?: $conf->entity] . '/' . $objectType . '/' . get_exdir(0, 0, 0, 1, $object);
 }
 
 // Security check - Protection if external user
-$permissiontoread = $user->rights->$module_name_lower->$object_type->read;
-$permissiontoadd  = $user->rights->$module_name_lower->$object_type->write;
-if (empty($conf->$module_name_lower->enabled) || !$permissiontoread) {
+$permissiontoread = $user->rights->$moduleNameLowerCase->$objectType->read;
+$permissiontoadd  = $user->rights->$moduleNameLowerCase->$objectType->write;
+if (empty($conf->$moduleNameLowerCase->enabled) || !$permissiontoread) {
     accessforbidden();
 }
 
@@ -136,12 +136,12 @@ if (empty($reshook)) {
 */
 
 $title    = $langs->trans('Files') . ' - ' . $langs->trans(ucfirst($object->element));
-$help_url = 'FR:Module_' . $module_name;
+$helpUrl = 'FR:Module_' . $moduleName;
 //@todo changement avec saturne
 $morejs   = ['/dolimeet/js/dolimeet.js'];
 $morecss  = ['/dolimeet/css/dolimeet.css'];
 
-llxHeader('', $title, $help_url, '', 0, 0, $morejs, $morecss);
+llxHeader('', $title, $helpUrl, '', 0, 0, $morejs, $morecss);
 
 if ($id > 0 || !empty($ref)) {
     // Configuration header
@@ -150,7 +150,7 @@ if ($id > 0 || !empty($ref)) {
     print dol_get_fiche_head($head, 'document', $title, -1, $object->picto);
 
     // Build file list
-    $filearray = dol_dir_list($upload_dir, 'files', 0, '', '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_DESC : SORT_ASC), 1);
+    $filearray = dol_dir_list($uploadDir, 'files', 0, '', '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_DESC : SORT_ASC), 1);
     $totalsize = 0;
     foreach ($filearray as $key => $file) {
         $totalsize += $file['size'];
@@ -158,7 +158,7 @@ if ($id > 0 || !empty($ref)) {
 
     // Object card
     // ------------------------------------------------------------
-    $linkback = '<a href="' . dol_buildpath('/' . $module_name_lower . '/view/' . $object->element . '/' . $object->element . '_list.php', 1) . '?restore_lastsearch_values=1' . '">' . $langs->trans('BackToList') . '</a>';
+    $linkback = '<a href="' . dol_buildpath('/' . $moduleNameLowerCase . '/view/' . $object->element . '/' . $object->element . '_list.php', 1) . '?restore_lastsearch_values=1' . '">' . $langs->trans('BackToList') . '</a>';
 
     $morehtmlref = '<div class="refidno">';
     // Project
@@ -197,13 +197,13 @@ if ($id > 0 || !empty($ref)) {
 
     print dol_get_fiche_end();
 
-    $modulepart    = $module_name_lower;
-    $param         = '&module_name=' . urlencode($module_name) . '&object_parent_type=' . urlencode($object_parent_type) . '&object_type=' . urlencode($object_type);
+    $modulepart    = $moduleNameLowerCase;
+    $param         = '&module_name=' . urlencode($moduleName) . '&object_parent_type=' . urlencode($bojectParentType) . '&object_type=' . urlencode($objectType);
     $urlbacktopage = $_SERVER['PHP_SELF'] . '?id=' . $object->id . $param;
     $param        .= '&backtopage=' . urlencode($urlbacktopage);
     $moreparam     = $param;
 
-    $relativepathwithnofile = $object_type . '/' . dol_sanitizeFileName($object->ref) . '/';
+    $relativepathwithnofile = $objectType . '/' . dol_sanitizeFileName($object->ref) . '/';
 
     require_once DOL_DOCUMENT_ROOT.'/core/tpl/document_actions_post_headers.tpl.php';
 }

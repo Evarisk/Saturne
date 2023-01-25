@@ -85,7 +85,7 @@ $linkback = '<a href="' . DOL_URL_ROOT.'/admin/modules.php' . '">'.$langs->trans
 print load_fiche_titre($title, $linkback, 'Saturne_color@saturne');
 
 // Configuration header
-$head = SaturneAdminPrepareHead();
+$head = saturne_admin_prepare_head();
 print dol_get_fiche_head($head, 'about', $title, 0, 'Saturne_color@saturne');
 
 print $modSaturne->getDescLong();

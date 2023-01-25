@@ -31,11 +31,11 @@ if (file_exists('../../../main.inc.php')) {
 }
 
 // Get module parameters
-$module_name        = GETPOST('module_name', 'alpha');
-$object_type        = GETPOST('object_type', 'alpha');
-$object_parent_type = GETPOSTISSET('object_parent_type') ? GETPOST('object_parent_type', 'alpha') : $object_type;
+$moduleName        = GETPOST('module_name', 'alpha');
+$objectType        = GETPOST('object_type', 'alpha');
+$objectParentType  = GETPOSTISSET('object_parent_type') ? GETPOST('object_parent_type', 'alpha') : $objectType;
 
-$module_name_lower = strtolower($module_name);
+$moduleNameLowerCase = strtolower($moduleName);
 
 // Libraries
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
@@ -46,14 +46,14 @@ if (isModEnabled('contrat')) {
     require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
 }
 
-require_once __DIR__ . '/../../' . $module_name_lower . '/class/' . $object_type . '.class.php';
-require_once __DIR__ . '/../../' . $module_name_lower . '/lib/' . $module_name_lower . '_' . $object_parent_type . '.lib.php';
+require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
+require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' . $objectParentType . '.lib.php';
 
 // Global variables definitions
 global $conf, $db, $langs, $hookmanager, $user;
 
 // Load translation files required by the page
-$langs->loadLangs([$module_name_lower . '@' . $module_name_lower, 'other']);
+$langs->loadLangs([$moduleNameLowerCase . '@' . $moduleNameLowerCase, 'other']);
 
 // Get parameters
 $id          = GETPOST('id', 'int');
@@ -95,7 +95,7 @@ if (!$sortorder) {
 }
 
 // Initialize technical objects
-$classname   = ucfirst($object_type);
+$classname   = ucfirst($objectType);
 $object      = new $classname($db);
 $extrafields = new ExtraFields($db);
 if (isModEnabled('project')) {
@@ -113,12 +113,12 @@ $extrafields->fetch_name_optionals_label($object->table_element);
 // Load object
 include DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php'; // Must be included, not include_once. Include fetch and fetch_thirdparty but not fetch_optionals
 if ($id > 0 || !empty($ref)) {
-    $upload_dir = $conf->$module_name_lower->multidir_output[!empty($object->entity) ? $object->entity : $conf->entity] . '/' . $object->id;
+    $upload_dir = $conf->$moduleNameLowerCase->multidir_output[!empty($object->entity) ? $object->entity : $conf->entity] . '/' . $object->id;
 }
 
 // Security check - Protection if external user
-$permissiontoread = $user->rights->$module_name_lower->$object_type->read;
-if (empty($conf->$module_name_lower->enabled) || !$permissiontoread) {
+$permissiontoread = $user->rights->$moduleNameLowerCase->$objectType->read;
+if (empty($conf->$moduleNameLowerCase->enabled) || !$permissiontoread) {
     accessforbidden();
 }
 
@@ -151,7 +151,7 @@ if (empty($reshook)) {
 */
 
 $title    = $langs->trans('Agenda') . ' - ' . $langs->trans(ucfirst($object->element));
-$help_url = 'FR:Module_' . $module_name;
+$help_url = 'FR:Module_' . $moduleName;
 //@todo changement avec saturne
 $morejs   = ['/dolimeet/js/dolimeet.js'];
 $morecss  = ['/dolimeet/css/dolimeet.css'];
@@ -166,7 +166,7 @@ if ($id > 0 || !empty($ref)) {
 
     // Object card
     // ------------------------------------------------------------
-    $linkback = '<a href="' . dol_buildpath('/' . $module_name_lower . '/view/' . $object->element . '/' . $object->element . '_list.php', 1) . '?restore_lastsearch_values=1' . '">' . $langs->trans('BackToList') . '</a>';
+    $linkback = '<a href="' . dol_buildpath('/' . $moduleNameLowerCase . '/view/' . $object->element . '/' . $object->element . '_list.php', 1) . '?restore_lastsearch_values=1' . '">' . $langs->trans('BackToList') . '</a>';
 
     $morehtmlref = '<div class="refidno">';
     // Project

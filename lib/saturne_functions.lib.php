@@ -25,7 +25,7 @@ require_once __DIR__ . '/documents.php';
  * 		@param		integer				$disablenofollow		Disable the "nofollow" on meta robot header
  * 		@param		integer				$disablenoindex			Disable the "noindex" on meta robot header
  */
-function saturneHeader($module, $action, $subaction, $load_media_gallery = 0, $head = '', $title = '', $help_url = '', $target = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $morequerystring = '', $morecssonbody = '', $replacemainareaby = '', $disablenofollow = 0, $disablenoindex = 0) {
+function saturne_header($module, $action, $subaction, $load_media_gallery = 0, $head = '', $title = '', $help_url = '', $target = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $morequerystring = '', $morecssonbody = '', $replacemainareaby = '', $disablenofollow = 0, $disablenoindex = 0) {
 
 	global $langs, $conf, $db;
 

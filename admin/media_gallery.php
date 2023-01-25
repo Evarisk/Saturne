@@ -82,7 +82,7 @@ $help_url  = 'FR:Module_Saturne#Configuration';
 $morejs  = array("/saturne/js/saturne.js");
 $morecss = array("/saturne/css/saturne.css");
 
-saturneHeader('saturne', $action,'',0, '', $help_url, '', '', '', 0, $morejs, $morecss);
+saturne_header('saturne', $action,'',0, '', $help_url, '', '', '', 0, $morejs, $morecss);
 
 // Subheader
 $linkback = '<a href="' . ($backtopage ?: DOL_URL_ROOT . '/admin/modules.php?restore_lastsearch_values=1') . '">' . $langs->trans("BackToModuleList") . '</a>';
@@ -90,7 +90,7 @@ $linkback = '<a href="' . ($backtopage ?: DOL_URL_ROOT . '/admin/modules.php?res
 print load_fiche_titre($langs->trans($page_name), $linkback, 'saturne32px@saturne');
 
 // Configuration header
-$head = saturneAdminPrepareHead();
+$head = saturne_admin_prepare_head();
 print dol_get_fiche_head($head, 'media_gallery', '', -1, "saturne@saturne");
 
 print load_fiche_titre($langs->trans("MediaData"), '', '');

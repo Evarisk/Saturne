@@ -20,7 +20,7 @@
  *
  * @return array $head 	Selectable tabs
  */
-function SaturneAdminPrepareHead(): array
+function saturne_admin_prepare_head(): array
 {
 	global $langs, $conf;
 
