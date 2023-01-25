@@ -183,6 +183,11 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 	let requestCompleted = 0
 	let progress   = 0
 
+	let objectId         = mediaGallery.find('.from-id').val()
+	let objectType       = mediaGallery.find('.from-type').val()
+	let objectSubtype    = mediaGallery.find('.from-subtype').length ? mediaGallery.find('.from-subtype').val() : ''
+	let objectSubdir     = mediaGallery.find('.from-subdir').length ? mediaGallery.find('.from-subdir').val() : ''
+
 	let token = $('input[name="token"]').val();
 
 	$('#progressBar').width(0)
@@ -232,6 +237,11 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 							} else {
 								$('.messageSuccessSendPhoto').removeClass('hidden');
 							}
+							$('#media_gallery').find('.from-id').attr('value', objectId);
+							$('#media_gallery').find('.from-type').attr('value', objectType);
+							$('#media_gallery').find('.from-subtype').attr('value', objectSubtype);
+							$('#media_gallery').find('.from-subdir').attr('value', objectSubdir);
+							$('#media_gallery').find('.wpeo-button').attr('value', objectId);
 						})
 					}, 800)
 				}

@@ -28,16 +28,19 @@ function saturne_show_medias($module, $modulepart = 'ecm', $sdir, $size = 0, $ma
 	$j         = 0;
 
 	if (count($filearray)) {
+
+		print '<div class="wpeo-gridlayout grid-5 grid-gap-3 grid-margin-2 ecm-photo-list ecm-photo-list">';
+
 		if ($sortfield && $sortorder) {
 			$filearray = dol_sort_array($filearray, $sortfield, $sortorder);
 		}
+
 		$moduleImageNumberPerPageConf = strtoupper($module) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
 		for ($i = (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf); $i < ($conf->global->$moduleImageNumberPerPageConf + (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf));  $i++) {
 			$file = $filearray[$i]['name'];
 
 			if (image_format_supported($file) >= 0) {
 				$nbphoto++;
-				print '<div class="wpeo-gridlayout grid-5 grid-gap-3 grid-margin-2 ecm-photo-list ecm-photo-list">';
 
 				if ($size == 'mini' || $size == 'small') {   // Format vignette
 					$relativepath = $module . '/medias/thumbs';
@@ -65,9 +68,9 @@ function saturne_show_medias($module, $modulepart = 'ecm', $sdir, $size = 0, $ma
 					$j++;
 				}
 
-				print '</div>';
 			}
 		}
+		print '</div>';
 	} else {
 		print '<br>';
 		print '<div class="ecm-photo-list ecm-photo-list">';
