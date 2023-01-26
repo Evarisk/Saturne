@@ -55,7 +55,9 @@ function saturne_show_medias($module, $modulepart = 'ecm', $sdir, $size = 0, $ma
 					<div class="center clickable-photo clickable-photo<?php echo $j; ?>" value="<?php echo $j; ?>">
 						<figure class="photo-image">
 							<?php
-							$urladvanced = getAdvancedPreviewUrl($modulepart, $module . '/medias/' .$file, 0, 'entity=' . $conf->entity); ?>
+							$file = preg_replace("/'/", "\\'", $file);
+							$urladvanced = getAdvancedPreviewUrl($modulepart, $module . '/medias/' .$file, 0, 'entity=' . $conf->entity);
+							?>
 							<a class="clicked-photo-preview" href="<?php echo $urladvanced; ?>"><i class="fas fa-2x fa-search-plus"></i></a>
 							<?php if (image_format_supported($file) >= 0) : ?>
 								<?php $fullpath = $path . '/' . urlencode($filename) . '&entity=' . $conf->entity; ?>
@@ -177,6 +179,7 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
 
 						$relativefile = preg_replace('/^\//', '', $pdir . $photo);
 						if (empty($nolink)) {
+							$relativefile              = preg_replace("/'/", "\\'", $relativefile);
 							$urladvanced               = getAdvancedPreviewUrl($modulepart, $relativefile, 0, 'entity=' . $conf->entity);
 							if ($urladvanced) $return .= '<a href="' . $urladvanced . '">';
 							else $return              .= '<a href="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" class="aphoto" target="_blank">';
