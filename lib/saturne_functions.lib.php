@@ -38,9 +38,9 @@ function saturne_header($module, $action, $subaction, $load_media_gallery = 0, $
 
 	//JS
 	if (is_array($arrayofjs)) {
-		$arrayofjs[]  = '/saturne/js/saturne.js.php';
+		$arrayofjs[]  = '/saturne/js/saturne.min.js';
 	} else {
-		$arrayofjs  = '/saturne/js/saturne.js.php';
+		$arrayofjs  = '/saturne/js/saturne.min.js';
 	}
 
 	//Langs
