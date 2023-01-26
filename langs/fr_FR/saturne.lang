@@ -20,7 +20,7 @@
 # Module label 'ModuleSaturneName'
 ModuleSaturneName = Saturne
 # Module description 'ModuleSaturneDesc'
-ModuleSaturneDesc = Corrigez vos problèmes de sécurité facilement et rapidement
+ModuleSaturneDesc = Framework et librairie d'objets et fonctions d'Evarisk
 
 #
 # Page d'administration
