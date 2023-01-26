@@ -118,8 +118,8 @@ llxHeader('', $title, $help_url, '', 0, 0, $morejs, $morecss);
 
 if ($id > 0 || !empty($ref)) {
     // Configuration header
-    //@todo changer le mot session
-    $head = sessionPrepareHead($object);
+    $prepareHead = $objectParentType . 'PrepareHead';
+    $head = $prepareHead($object);
     print dol_get_fiche_head($head, 'note', $title, -1, $object->picto);
 
     // Object card
@@ -128,7 +128,7 @@ if ($id > 0 || !empty($ref)) {
 
     $morehtmlref = '<div class="refidno">';
     // Project
-    if (!empty($conf->projet->enabled)) {
+    if (isModEnabled('project')) {
         if (!empty($object->fk_project)) {
             $project->fetch($object->fk_project);
             $morehtmlref .= $langs->trans('Project') . ' : ' . $project->getNomUrl(1, '', 1);
