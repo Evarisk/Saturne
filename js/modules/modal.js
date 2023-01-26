@@ -66,18 +66,18 @@ window.saturne.modal.event = function() {
  * @return {void}
  */
 window.saturne.modal.openModal = function ( event ) {
-	let modalToOpen = $(this).find('.modal-to-open').val()
+	let modalToOpen = $(this).find('.modal-to-open').val();
 
-	let fromId      = $(this).find('.from-id').length ? $(this).find('.from-id').val() : 0
-	let fromType    = $(this).find('.from-type').length ? $(this).find('.from-type').val() : ''
-	let fromSubtype = $(this).find('.from-subtype').length ? $(this).find('.from-subtype').val() : ''
-	let fromSubdir  = $(this).find('.from-subdir').length ? $(this).find('.from-subdir').val() : ''
+	let fromId      = $(this).find('.from-id').length ? $(this).find('.from-id').val() : 0;
+	let fromType    = $(this).find('.from-type').length ? $(this).find('.from-type').val() : '';
+	let fromSubtype = $(this).find('.from-subtype').length ? $(this).find('.from-subtype').val() : '';
+	let fromSubdir  = $(this).find('.from-subdir').length ? $(this).find('.from-subdir').val() : '';
 
-	let urlWithoutTag = ''
+	let urlWithoutTag = '';
 	if (document.URL.match(/#/)) {
-		urlWithoutTag = document.URL.split(/#/)[0]
+		urlWithoutTag = document.URL.split(/#/)[0];
 	} else {
-		urlWithoutTag = document.URL
+		urlWithoutTag = document.URL;
 	}
 	history.pushState({ path:  document.URL}, '', urlWithoutTag);
 
@@ -87,7 +87,12 @@ window.saturne.modal.openModal = function ( event ) {
 	$('#'+modalToOpen).find('.from-subtype').attr('value', fromSubtype);
 	$('#'+modalToOpen).find('.from-subdir').attr('value', fromSubdir);
 	$('#'+modalToOpen).find('.wpeo-button').attr('value', fromId);
-	$('#'+modalToOpen).addClass('modal-active')
+	$('#'+modalToOpen).addClass('modal-active');
+
+	// Open modal signature.
+	if ($(this).hasClass('modal-signature-open')) {
+		window.saturne.signature.modalSignatureOpened($(this));
+	}
 
 	$('.notice').addClass('hidden');
 };
