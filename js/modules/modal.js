@@ -107,11 +107,13 @@ window.saturne.modal.openModal = function ( event ) {
  * @return {void}
  */
 window.saturne.modal.closeModal = function ( event ) {
-	if ($(event.target).hasClass('modal-active') || $(event.target).hasClass('modal-close') || $(event.target).parent().hasClass('modal-close')) {
-		$(this).closest('.modal-active').removeClass('modal-active')
-		$('.clicked-photo').attr('style', '');
-		$('.clicked-photo').removeClass('clicked-photo');
-		$('.notice').addClass('hidden');
+	if ($('input:focus').length < 1 && ($('textarea:focus').length < 1)) {
+		if ($(event.target).hasClass('modal-active') || $(event.target).hasClass('modal-close') || $(event.target).parent().hasClass('modal-close')) {
+			$(this).closest('.modal-active').removeClass('modal-active')
+			$('.clicked-photo').attr('style', '');
+			$('.clicked-photo').removeClass('clicked-photo');
+			$('.notice').addClass('hidden');
+		}
 	}
 };
 
