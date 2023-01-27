@@ -44,7 +44,7 @@ function saturne_header($module, $action, $subaction, $load_media_gallery = 0, $
 	}
 
 	//Langs
-	$langs->load('saturne@saturne');
+	$langs->loadLangs(['saturne@saturne', $module.'@'.$module]);
 
 	llxHeader($head, $title, $help_url, $target, $disablejs, $disablehead, $arrayofjs, $arrayofcss, $morequerystring, $morecssonbody, $replacemainareaby, $disablenofollow, $disablenoindex);
 
