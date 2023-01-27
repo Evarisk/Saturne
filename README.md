@@ -4,9 +4,9 @@
 
 - Numéro du module : 436311
 - Version :  1.0.0
-- Dernière mise à jour : 21/11/2022
+- Dernière mise à jour : 26/01/2023
 - Éditeur : [Evarisk](https://www.evarisk.com)
-- Compatibilité : Dolibarr 14.0.0 - 16.0.2
+- Compatibilité : Dolibarr 15.0.0 - 16.0.2
 - Thème : Eldy Menu
 - Licence : GPLv3
 - Disponible sur : Windows - MacOS - Linux
