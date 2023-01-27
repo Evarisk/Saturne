@@ -41,7 +41,7 @@ class modSaturne extends DolibarrModules
 		$this->db = $db;
 
         $langs->load('saturne@saturne');
-		$this->numero = 436311;
+		$this->numero = 436318;
 		$this->rights_class = 'saturne';
 		$this->family = '';
 		$this->module_position = '50';
