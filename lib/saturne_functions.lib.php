@@ -67,24 +67,34 @@ function saturne_check_access($module, $object, $permission) {
 
 	global $conf, $langs, $user;
 
-	if (!$permission)     accessforbidden();
-	if ($user->socid > 0) accessforbidden();
+	if (!isModEnabled($module) || !isModEnabled('saturne')) {
+		if (!isModEnabled($module)){
+			setEventMessage($langs->transnoentitiesnoconv('Enable' . ucfirst($module)), 'warnings');
+		}
+		if (!isModEnabled('saturne')) {
+			setEventMessage($langs->trans('EnableSaturne'), 'warnings');
+		}
+		$urltogo = dol_buildpath('/admin/modules.php?search_nature=external_Evarisk', 1);
+		header("Location: " . $urltogo);
+		exit;
+	}
+
+	if (!$permission){
+		accessforbidden();
+	}
+
+	if ($user->socid > 0){
+		accessforbidden();
+	}
 
 	if ($conf->multicompany->enabled) {
-		if ($conf->$module->enabled) {
-			if ($object->id > 0) {
-				if ($object->entity != $conf->entity) {
-					setEventMessage($langs->trans('ChangeEntityRedirection'), 'warnings');
-					$urltogo = dol_buildpath('/custom/' . $module . '/' . $module . 'index.php?mainmenu=' . $module, 1);
-					header("Location: " . $urltogo);
-					exit;
-				}
+		if ($object->id > 0) {
+			if ($object->entity != $conf->entity) {
+				setEventMessage($langs->trans('ChangeEntityRedirection'), 'warnings');
+				$urltogo = dol_buildpath('/custom/' . $module . '/' . $module . 'index.php?mainmenu=' . $module, 1);
+				header("Location: " . $urltogo);
+				exit;
 			}
-		} else {
-			setEventMessage($langs->trans('EnableModule', ucfirst($module)), 'warnings');
-			$urltogo = dol_buildpath('/admin/modules.php?search_nature=external_Evarisk', 1);
-			header("Location: " . $urltogo);
-			exit;
 		}
 	}
 }

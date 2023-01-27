@@ -54,7 +54,7 @@ ReadAdminPage = Accéder à la configuration du module Saturne
 
 # Data - Donnée
 ChangeEntityRedirection = Vous avez été redirigé car vous avez changé d'entité
-EnableModule = Veuillez activer le module %s pour voir cette page
+EnableSaturne = Veuillez activer le module Saturne pour voir cette page
 
 #
 # Index
