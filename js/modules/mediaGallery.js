@@ -187,7 +187,7 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 	let objectSubtype    = mediaGallery.find('.from-subtype').length ? mediaGallery.find('.from-subtype').val() : ''
 	let objectSubdir     = mediaGallery.find('.from-subdir').length ? mediaGallery.find('.from-subdir').val() : ''
 
-	let token = window.saturne.toolbox.getToken();;
+	let token = window.saturne.toolbox.getToken();
 
 	$('#progressBar').width(0)
 	$('#progressBarContainer').attr('style', 'display:block')
@@ -195,6 +195,7 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 	window.saturne.loader.display($('#progressBarContainer'));
 
 	let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
+	let textToShow = '';
 
 	$.each(files, function(index, file) {
 		let formdata = new FormData();
@@ -211,6 +212,10 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 				$('#progressBar').animate({
 					width: progress + '%'
 				}, 1);
+				let errorMessage = $(resp).find('.error-medias').val()
+				let decodedErrorMessage = JSON.parse(errorMessage)
+
+				textToShow += decodedErrorMessage.message + '<br>'
 
 				if (requestCompleted === totalCount) {
 					$('.wpeo-loader').removeClass('wpeo-loader');
@@ -224,13 +229,7 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 								$('#media_gallery').find('.clickable-photo0').addClass('clicked-photo');
 							}
 							if ($(resp).find('.error-medias').length) {
-								let response = $(resp).find('.error-medias').val()
-								let decoded_response = JSON.parse(response)
-
-								let textToShow = '';
-								textToShow += decoded_response.message
-
-								$('.messageErrorSendPhoto').find('.notice-subtitle').text(textToShow)
+								$('.messageErrorSendPhoto').find('.notice-subtitle').html(textToShow)
 								$('.messageErrorSendPhoto').removeClass('hidden');
 							} else {
 								$('.messageSuccessSendPhoto').removeClass('hidden');

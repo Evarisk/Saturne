@@ -9,7 +9,7 @@ if ( ! $error && $subaction == "uploadPhoto" && ! empty($conf->global->MAIN_UPLO
 
 	// Define relativepath and upload_dir
 	$relativepath                                             = $module . '/medias';
-	$uploadDir                                               = $conf->ecm->dir_output . '/' . $relativepath;
+	$uploadDir                                                = $conf->ecm->dir_output . '/' . $relativepath;
 	if (is_array($_FILES['userfile']['tmp_name'])) $userfiles = $_FILES['userfile']['tmp_name'];
 	else $userfiles                                           = array($_FILES['userfile']['tmp_name']);
 

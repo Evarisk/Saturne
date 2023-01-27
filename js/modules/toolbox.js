@@ -39,7 +39,6 @@ window.saturne.toolbox = {};
  * @return {void}
  */
 window.saturne.toolbox.init = function() {
-	window.saturne.toolbox.event();
 };
 
 /**
@@ -63,7 +62,7 @@ window.saturne.toolbox.getQuerySeparator = function( url ) {
  *
  * @return {string}
  */
-window.saturne.toolbox.window.saturne.toolbox.getToken = function() {
+window.saturne.toolbox.getToken = function() {
 	let token = $('input[name="token"]').val();
 
 	return token
