@@ -263,7 +263,6 @@ window.saturne.mediaGallery.previewPhoto = function( event ) {
 		if ($('.ui-dialog').length) {
 			clearInterval(checkExist);
 			$( document ).find('.ui-dialog').addClass('preview-photo');
-			$( document ).find('.ui-dialog').css('z-index', '1500');
 		}
 	}, 100);
 };
