@@ -119,8 +119,7 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 	window.saturne.loader.display($(this));
 	window.saturne.loader.display($('.linked-medias.'+objectSubtype));
 
-	let querySeparator = '?'
-	document.URL.match(/\?/) ? querySeparator = '&' : 1
+	let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
 
 	$.ajax({
 		url: document.URL + querySeparator + "subaction=addFiles&token=" + token,
@@ -195,8 +194,7 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 
 	window.saturne.loader.display($('#progressBarContainer'));
 
-	let querySeparator = '?'
-	document.URL.match(/\?/) ? querySeparator = '&' : 1
+	let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
 
 	$.each(files, function(index, file) {
 		let formdata = new FormData();
@@ -288,8 +286,7 @@ window.saturne.mediaGallery.unlinkFile = function( event ) {
 
 	window.saturne.loader.display(mediaContainer);
 
-	let querySeparator = '?'
-	document.URL.match(/\?/) ? querySeparator = '&' : 1
+	let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
 
 	$.ajax({
 		url: document.URL + querySeparator + "subaction=unlinkFile&token=" + token,
@@ -355,8 +352,7 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
 
 	window.saturne.loader.display($('.linked-medias.'+objectSubtype));
 
-	let querySeparator = '?'
-	document.URL.match(/\?/) ? querySeparator = '&' : 1
+	let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
 
 	let filenames = ''
 
@@ -424,14 +420,14 @@ window.saturne.mediaGallery.selectPage = function( event ) {
 	let offset = $(this).attr('value');
 
 	let mediaGallery = $('#' + containerToRefresh);
-	let querySeparator = '?';
+
+	let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
 
 	if (!$(this).hasClass('arrow')) {
 		$(this).closest('.wpeo-pagination').find('.pagination-element').removeClass('pagination-current');
 		$(this).closest('.pagination-element').addClass('pagination-current');
 	}
 
-	document.URL.match(/\?/) ? querySeparator = '&' : 1
 	window.saturne.loader.display($('#media_gallery').find('.modal-content'));
 
 	$.ajax({
