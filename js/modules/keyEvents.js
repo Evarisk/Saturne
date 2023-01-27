@@ -29,7 +29,6 @@ window.saturne.keyEvent.init = function() {
 window.saturne.keyEvent.event = function() {
 	$( document ).on( 'keydown', window.saturne.keyEvent.modalActions );
 	$( document ).on( 'keyup', '.url-container' , window.saturne.keyEvent.checkUrlFormat );
-	$( document ).on( 'click', '.modal-active:not(.modal-container)' , window.saturne.modal.closeModal );
 }
 
 /**
