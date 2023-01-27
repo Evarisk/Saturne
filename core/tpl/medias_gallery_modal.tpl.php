@@ -1,4 +1,11 @@
 <?php
+
+// Protection to avoid direct call of template
+if (empty($conf) || !is_object($conf)) {
+	print "Error, template page can't be called as URL";
+	exit;
+}
+
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmdirectory.class.php';
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
 

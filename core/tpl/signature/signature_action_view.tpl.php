@@ -1,3 +1,13 @@
+<?php
+
+// Protection to avoid direct call of template
+if (empty($conf) || !is_object($conf)) {
+	print "Error, template page can't be called as URL";
+	exit;
+}
+
+?>
+
 <div class="wpeo-dropdown">
     <div class="dropdown-toggle wpeo-button button-main"><span><?php echo $langs->trans('ActionsSignature'); ?></span> <i class="fas fa-caret-down"></i></div>
     <ul class="dropdown-content">

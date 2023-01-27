@@ -1,4 +1,11 @@
 <?php
+
+// Protection to avoid direct call of template
+if (empty($conf) || !is_object($conf)) {
+	print "Error, template page can't be called as URL";
+	exit;
+}
+
 if (empty($element->signature)) : ?>
 	<div class="wpeo-button button-blue wpeo-modal-event modal-signature-open modal-open" value="<?php echo $element->id ?>">
         <input type="hidden" class="modal-to-open" value="modal-signature<?php echo $element->id ?>">
