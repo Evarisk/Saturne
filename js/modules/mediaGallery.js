@@ -187,7 +187,7 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 	let objectSubtype    = mediaGallery.find('.from-subtype').length ? mediaGallery.find('.from-subtype').val() : ''
 	let objectSubdir     = mediaGallery.find('.from-subdir').length ? mediaGallery.find('.from-subdir').val() : ''
 
-	let token = $('input[name="token"]').val();
+	let token = window.saturne.toolbox.getToken();;
 
 	$('#progressBar').width(0)
 	$('#progressBarContainer').attr('style', 'display:block')
@@ -277,7 +277,7 @@ window.saturne.mediaGallery.unlinkFile = function( event ) {
 
 	event.preventDefault()
 
-	let token = $('input[name="token"]').val()
+	let token = window.saturne.toolbox.getToken();
 
 	let objectSubtype = $(this).closest('.linked-medias').find('.from-subtype').length ? $(this).closest('.linked-medias').find('.from-subtype').val() : ''
 
@@ -412,7 +412,7 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
  */
 window.saturne.mediaGallery.selectPage = function( event ) {
 
-	let token = $('.fiche').find('input[name="token"]').val();
+	let token = window.saturne.toolbox.getToken();
 
 	let pagesCounter       = $(this).closest('.wpeo-pagination').find('#pagesCounter').val()
 	let containerToRefresh = $(this).closest('.wpeo-pagination').find('#containerToRefresh').val()

@@ -51,7 +51,22 @@ window.saturne.toolbox.init = function() {
  * @return {string}
  */
 window.saturne.toolbox.getQuerySeparator = function( url ) {
-	return url.match(/\?/) ? '&' : "?";
+	return url.match(/\?/) ? '&' : "?"
+};
+
+
+/**
+ * Returns action security token
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @return {string}
+ */
+window.saturne.toolbox.window.saturne.toolbox.getToken = function() {
+	let token = window.saturne.toolbox.getToken();
+
+	return token
 };
 
 

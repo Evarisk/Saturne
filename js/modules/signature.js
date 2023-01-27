@@ -164,7 +164,8 @@ window.saturne.signature.createSignature = function() {
 		var signature = $(this).closest('.wpeo-modal').find('canvas')[0].toDataURL();
 	}
 
-	let token = $('.modal-signature').find('input[name="token"]').val();
+	let token = window.saturne.toolbox.getToken();
+	
 	let url   = document.URL + '&action=add_signature' + signatoryIDPost + '&token=' + token;
 	$.ajax({
 		url: url,
