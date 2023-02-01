@@ -21,42 +21,32 @@
  *  \brief      Tab of documents linked to generic element
  */
 
-// Load Dolibarr environment
-if (file_exists('../../../main.inc.php')) {
-    require_once __DIR__ . '/../../../main.inc.php';
-} elseif (file_exists('../../../../../main.inc.php')) {
-    require_once '../../../../main.inc.php';
+// Load Saturne environment
+if (file_exists('../saturne.main.inc.php')) {
+    require_once __DIR__ . '/../saturne.main.inc.php';
 } else {
-    die('Include of main fails');
+    die('Include of saturne main fails');
 }
 
 // Get module parameters
 $moduleName        = GETPOST('module_name', 'alpha');
 $objectType        = GETPOST('object_type', 'alpha');
-$bojectParentType  = GETPOSTISSET('object_parent_type') ? GETPOST('object_parent_type', 'alpha') : $objectType;
+$objectParentType  = GETPOSTISSET('object_parent_type') ? GETPOST('object_parent_type', 'alpha') : $objectType;
 
 $moduleNameLowerCase = strtolower($moduleName);
 
 // Libraries
-//@todo test les requires
-require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
-require_once DOL_DOCUMENT_ROOT.'/core/lib/images.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
-if (isModEnabled('project')) {
-    require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
-}
-if (isModEnabled('contrat')) {
-    require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
-}
 
 require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' . $bojectParentType . '.lib.php';
+require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' . $objectParentType . '.lib.php';
 
 // Global variables definitions
-global $conf, $db, $langs, $hookmanager, $user;
+global $conf, $db, $hookmanager, $langs, $user;
 
 // Load translation files required by the page
+// @todo gérer fichier langs
 $langs->loadLangs([$moduleNameLowerCase . '@' . $moduleNameLowerCase, 'companies', 'other', 'mails']);
 
 // Get parameters
@@ -92,12 +82,6 @@ if (!$sortorder) {
 $classname   = ucfirst($objectType);
 $object      = new $classname($db);
 $extrafields = new ExtraFields($db);
-if (isModEnabled('project')) {
-    $project = new Project($db);
-}
-if (isModEnabled('contrat')) {
-    $contract = new Contrat($db);
-}
 
 $hookmanager->initHooks([$object->element . 'note', 'globalcard']); // Note that conf->hooks_modules contains array
 
@@ -107,7 +91,7 @@ $extrafields->fetch_name_optionals_label($object->table_element);
 // Load object
 include DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php'; // Must be included, not include_once. Include fetch and fetch_thirdparty but not fetch_optionals
 if ($id > 0 || !empty($ref)) {
-    $uploadDir = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?: $conf->entity] . '/' . $objectType . '/' . get_exdir(0, 0, 0, 1, $object);
+    $upload_dir = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?: $conf->entity] . '/' . $objectType . '/' . get_exdir(0, 0, 0, 1, $object);
 }
 
 // Security check - Protection if external user
@@ -135,61 +119,28 @@ if (empty($reshook)) {
 *	View
 */
 
-$title    = $langs->trans('Files') . ' - ' . $langs->trans(ucfirst($object->element));
+$title   = $langs->trans('Files') . ' - ' . $langs->trans(ucfirst($object->element));
 $helpUrl = 'FR:Module_' . $moduleName;
-//@todo changement avec saturne
-$morejs   = ['/dolimeet/js/dolimeet.js'];
-$morecss  = ['/dolimeet/css/dolimeet.css'];
+// @todo gérer l'include css/js
+$morejs  = ['/saturne/js/saturne.js'];
+$morecss = ['/saturne/css/saturne.css'];
 
 llxHeader('', $title, $helpUrl, '', 0, 0, $morejs, $morecss);
 
 if ($id > 0 || !empty($ref)) {
-    // Configuration header
-    //@todo changer le mot session
-    $head = sessionPrepareHead($object);
-    print dol_get_fiche_head($head, 'document', $title, -1, $object->picto);
+    saturne_banner_tab($object, 'document', $title);
 
     // Build file list
-    $filearray = dol_dir_list($uploadDir, 'files', 0, '', '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_DESC : SORT_ASC), 1);
+    $filearray = dol_dir_list($upload_dir, 'files', 0, '', '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_DESC : SORT_ASC), 1);
     $totalsize = 0;
     foreach ($filearray as $key => $file) {
         $totalsize += $file['size'];
     }
 
-    // Object card
-    // ------------------------------------------------------------
-    $linkback = '<a href="' . dol_buildpath('/' . $moduleNameLowerCase . '/view/' . $object->element . '/' . $object->element . '_list.php', 1) . '?restore_lastsearch_values=1' . '">' . $langs->trans('BackToList') . '</a>';
-
-    $morehtmlref = '<div class="refidno">';
-    // Project
-    if (!empty($conf->projet->enabled)) {
-        if (!empty($object->fk_project)) {
-            $project->fetch($object->fk_project);
-            $morehtmlref .= $langs->trans('Project') . ' : ' . $project->getNomUrl(1, '', 1);
-        } else {
-            $morehtmlref .= '';
-        }
-    }
-
-    // Contract @todo hook car spécifique a dolimeet
-    if ($object->element == 'trainingsession') {
-        if (!empty($object->fk_contrat)) {
-            $contract->fetch($object->fk_contrat);
-            $morehtmlref .= $langs->trans('Contract') . ' : ' . $contract->getNomUrl(1, '', 1);
-        } else {
-            $morehtmlref .= '';
-        }
-    }
-    $morehtmlref .= '</div>';
-
-    //@todo problème avec dolimeet
-    dol_banner_tab($object, 'ref', $linkback, 1, 'ref', 'ref', $morehtmlref);
-
     print '<div class="fichecenter">';
-    print '<div class="underbanner clearboth"></div>';
     print '<table class="border centpercent tableforfield">';
     // Number of files
-    print '<tr><td class="titlefield">' . $langs->trans('NbOfAttachedFiles') . '</td><td colspan="3">' .count($filearray) . '</td></tr>';
+    print '<tr><td class="titlefield">' . $langs->trans('NbOfAttachedFiles') . '</td><td colspan="3">' . count($filearray) . '</td></tr>';
     // Total size
     print '<tr><td>' . $langs->trans('TotalSizeOfAttachedFiles') . '</td><td colspan="3">' . $totalsize . ' ' . $langs->trans('bytes') . '</td></tr>';
     print '</table>';
@@ -198,7 +149,7 @@ if ($id > 0 || !empty($ref)) {
     print dol_get_fiche_end();
 
     $modulepart    = $moduleNameLowerCase;
-    $param         = '&module_name=' . urlencode($moduleName) . '&object_parent_type=' . urlencode($bojectParentType) . '&object_type=' . urlencode($objectType);
+    $param         = '&module_name=' . urlencode($moduleName) . '&object_parent_type=' . urlencode($objectParentType) . '&object_type=' . urlencode($objectType);
     $urlbacktopage = $_SERVER['PHP_SELF'] . '?id=' . $object->id . $param;
     $param        .= '&backtopage=' . urlencode($urlbacktopage);
     $moreparam     = $param;

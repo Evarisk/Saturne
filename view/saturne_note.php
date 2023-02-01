@@ -21,13 +21,11 @@
  *  \brief      Tab of notes on generic element
  */
 
-// Load Dolibarr environment
-if (file_exists('../../../main.inc.php')) {
-    require_once __DIR__ . '/../../../main.inc.php';
-} elseif (file_exists('../../../../../main.inc.php')) {
-    require_once '../../../../main.inc.php';
+// Load Saturne environment
+if (file_exists('../saturne.main.inc.php')) {
+    require_once __DIR__ . '/../saturne.main.inc.php';
 } else {
-    die('Include of main fails');
+    die('Include of saturne main fails');
 }
 
 // Get module parameters
@@ -38,13 +36,6 @@ $objectParentType  = GETPOSTISSET('object_parent_type') ? GETPOST('object_parent
 $moduleNameLowerCase = strtolower($moduleName);
 
 // Libraries
-if (isModEnabled('project')) {
-    require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
-}
-if (isModEnabled('contrat')) {
-    require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
-}
-
 require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
 require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' . $objectParentType . '.lib.php';
 
@@ -52,6 +43,7 @@ require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameL
 global $conf, $db, $langs, $hookmanager, $user;
 
 // Load translation files required by the page
+// @todo gérer fichier langs
 $langs->loadLangs([$moduleNameLowerCase . '@' . $moduleNameLowerCase, 'companies']);
 
 // Get parameters
@@ -65,12 +57,6 @@ $backtopage  = GETPOST('backtopage', 'alpha');
 $classname   = ucfirst($objectType);
 $object      = new $classname($db);
 $extrafields = new ExtraFields($db);
-if (isModEnabled('project')) {
-    $project = new Project($db);
-}
-if (isModEnabled('contrat')) {
-    $contract = new Contrat($db);
-}
 
 $hookmanager->initHooks([$object->element . 'note', 'globalcard']); // Note that conf->hooks_modules contains array
 
@@ -79,9 +65,6 @@ $extrafields->fetch_name_optionals_label($object->table_element);
 
 // Load object
 include DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php'; // Must be included, not include_once. Include fetch and fetch_thirdparty but not fetch_optionals
-if ($id > 0 || !empty($ref)) {
-    $upload_dir = $conf->$moduleNameLowerCase->multidir_output[!empty($object->entity) ? $object->entity : $conf->entity] . '/' . $object->id;
-}
 
 // Security check - Protection if external user
 $permissiontoread = $user->rights->$moduleNameLowerCase->$objectType->read;
@@ -110,49 +93,16 @@ if (empty($reshook)) {
 
 $title    = $langs->trans('Note') . ' - ' . $langs->trans(ucfirst($object->element));
 $help_url = 'FR:Module_' . $moduleName;
-//@todo changement avec saturne
-$morejs   = ['/dolimeet/js/dolimeet.js'];
-$morecss  = ['/dolimeet/css/dolimeet.css'];
+// @todo gérer l'include css/js
+$morejs  = ['/saturne/js/saturne.js'];
+$morecss = ['/saturne/css/saturne.css'];
 
 llxHeader('', $title, $help_url, '', 0, 0, $morejs, $morecss);
 
 if ($id > 0 || !empty($ref)) {
-    // Configuration header
-    $prepareHead = $objectParentType . 'PrepareHead';
-    $head = $prepareHead($object);
-    print dol_get_fiche_head($head, 'note', $title, -1, $object->picto);
-
-    // Object card
-    // ------------------------------------------------------------
-    $linkback = '<a href="' . dol_buildpath('/' . $moduleNameLowerCase . '/view/' . $object->element . '/' . $object->element . '_list.php', 1) . '?restore_lastsearch_values=1' . '">' . $langs->trans('BackToList') . '</a>';
-
-    $morehtmlref = '<div class="refidno">';
-    // Project
-    if (isModEnabled('project')) {
-        if (!empty($object->fk_project)) {
-            $project->fetch($object->fk_project);
-            $morehtmlref .= $langs->trans('Project') . ' : ' . $project->getNomUrl(1, '', 1);
-        } else {
-            $morehtmlref .= '';
-        }
-    }
-
-    // Contract @todo hook car spécifique a dolimeet
-    if ($object->element == 'trainingsession') {
-        if (!empty($object->fk_contrat)) {
-            $contract->fetch($object->fk_contrat);
-            $morehtmlref .= $langs->trans('Contract') . ' : ' . $contract->getNomUrl(1, '', 1);
-        } else {
-            $morehtmlref .= '';
-        }
-    }
-    $morehtmlref .= '</div>';
-
-    //@todo problème avec dolimeet
-    dol_banner_tab($object, 'ref', $linkback, 1, 'ref', 'ref', $morehtmlref);
+    saturne_banner_tab($object, 'note', $title);
 
     print '<div class="fichecenter">';
-    print '<div class="underbanner clearboth"></div>';
 
     $cssclass = 'titlefield';
     $moreparam = '&module_name=' . urlencode($moduleName) . '&object_parent_type=' . urlencode($objectParentType) . '&object_type=' . urlencode($objectType);
