@@ -21,13 +21,11 @@
  *  \brief      Tab of events on generic element
  */
 
-// Load Dolibarr environment
-if (file_exists('../../../main.inc.php')) {
-    require_once __DIR__ . '/../../../main.inc.php';
-} elseif (file_exists('../../../../../main.inc.php')) {
-    require_once '../../../../main.inc.php';
+// Load Saturne environment
+if (file_exists('../saturne.main.inc.php')) {
+    require_once __DIR__ . '/../saturne.main.inc.php';
 } else {
-    die('Include of main fails');
+    die('Include of saturne main fails');
 }
 
 // Get module parameters
