@@ -66,7 +66,7 @@ function saturne_header($load_media_gallery = 0, $head = '', $title = '', $help_
 
 	if ($load_media_gallery) {
 		//Media gallery
-		include __DIR__ . '/../core/tpl/medias_gallery_modal.tpl.php';
+		include __DIR__ . '/../core/tpl/medias/medias_gallery_modal.tpl.php';
 	}
 }
 
