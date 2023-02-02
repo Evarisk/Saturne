@@ -150,27 +150,43 @@ class modSaturne extends DolibarrModules
 		$r = 0;
 
 		$modules_array = [
-			'dolismq'
+			'DoliSMQ' => 'dolismq'
 		];
 
-		foreach ($modules_array as $module) {
+		foreach ($modules_array as $moduleName => $moduleNameLowerCase) {
+
 			$this->menu[$r++] = [
-				'fk_menu'  => 'fk_mainmenu=' . $module,
+				'fk_menu'  => 'fk_mainmenu=' . $moduleNameLowerCase,
+				'type'     => 'left',
+				'titre'    => $langs->trans($moduleName . 'Config'),
+				'prefix'   => '<i class="fas fa-cog pictofixedwidth"></i>',
+				'mainmenu' => $moduleNameLowerCase,
+				'leftmenu' => $moduleNameLowerCase . 'config',
+				'url'      => '/'. $moduleNameLowerCase .'/admin/setup.php',
+				'langs'    => $moduleNameLowerCase . '@' . $moduleNameLowerCase,
+				'position' => 2000 + $r,
+				'enabled'  => '$conf->'. $moduleNameLowerCase .'->enabled',
+				'perms'    => '$user->rights->'. $moduleNameLowerCase .'->adminpage->read',
+				'target'   => '',
+				'user'     => 0,
+			];
+
+			$this->menu[$r++] = [
+				'fk_menu'  => 'fk_mainmenu=' . $moduleNameLowerCase,
 				'type'     => 'left',
 				'titre'    => $langs->transnoentities('MinimizeMenu'),
 				'prefix'   => '<i class="fas fa-chevron-circle-left pictofixedwidth"></i>',
-				'mainmenu' => $module,
+				'mainmenu' => $moduleNameLowerCase,
 				'leftmenu' => 'minimizemenu',
 				'url'      => '',
-				'langs'    => $module . '@' . $module,
+				'langs'    => $moduleNameLowerCase . '@' . $moduleNameLowerCase,
 				'position' => 2000 + $r,
-				'enabled'  => '$conf->'. $module .'->enabled',
-				'perms'    => '$user->rights->'. $module .'->lire',
+				'enabled'  => '$conf->'. $moduleNameLowerCase .'->enabled',
+				'perms'    => '$user->rights->'. $moduleNameLowerCase .'->lire',
 				'target'   => '',
 				'user'     => 0,
 			];
 		}
-
 	}
 
 	/**
