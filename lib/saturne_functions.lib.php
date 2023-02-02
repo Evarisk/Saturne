@@ -25,9 +25,9 @@ require_once __DIR__ . '/documents.lib.php';
  * 		@param		integer				$disablenofollow		Disable the "nofollow" on meta robot header
  * 		@param		integer				$disablenoindex			Disable the "noindex" on meta robot header
  */
-function saturne_header($module = 'saturne', $action, $subaction, $load_media_gallery = 0, $head = '', $title = '', $help_url = '', $target = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $morequerystring = '', $morecssonbody = '', $replacemainareaby = '', $disablenofollow = 0, $disablenoindex = 0) {
+function saturne_header($load_media_gallery = 0, $head = '', $title = '', $help_url = '', $target = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $morequerystring = '', $morecssonbody = '', $replacemainareaby = '', $disablenofollow = 0, $disablenoindex = 0) {
 
-	global $langs, $conf, $db;
+	global $langs, $moduleNameLowerCase;
 
 	//CSS
 	if (is_array($arrayofcss)) {
@@ -44,7 +44,7 @@ function saturne_header($module = 'saturne', $action, $subaction, $load_media_ga
 	}
 
 	//Langs
-	$langs->loadLangs(['saturne@saturne', $module.'@'.$module]);
+	$langs->loadLangs(['saturne@saturne', $moduleNameLowerCase.'@'.$moduleNameLowerCase]);
 
 	llxHeader($head, $title, $help_url, $target, $disablejs, $disablehead, $arrayofjs, $arrayofcss, $morequerystring, $morecssonbody, $replacemainareaby, $disablenofollow, $disablenoindex);
 
