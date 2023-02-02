@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2021-2023 EVARISK <dev@evarisk.com>
+/* Copyright (C) 2022-2023 EVARISK <dev@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 
 /**
  *   	\file       view/openinghours_card.php
- *		\ingroup    dolimeet
+ *		\ingroup    saturne
  *		\brief      Page to view Opening Hours
  */
 
@@ -64,6 +64,9 @@ if (isModEnabled($elementType)) {
     $classname = ucfirst($elementType);
     $objectLinked = new $classname($db);
 }
+
+// Initialize view objects
+$form = new Form($db);
 
 $hookmanager->initHooks([$elementType . 'openinghours', 'globalcard']); // Note that conf->hooks_modules contains array of hook context
 
@@ -113,9 +116,7 @@ if (empty($reshook)) {
         }
 
         if ($result > 0) {
-            setEventMessages($langs->trans('SaveOpeningHours'), []);
-            $urltogo = str_replace('__ID__', $result, $backtopage);
-            header('Location: ' . $urltogo);
+            setEventMessages($langs->trans('OpeningHoursSaved'), []);
         } elseif (!empty($object->errors)) {
             setEventMessages('', $object->errors, 'errors');
         } else {
@@ -129,14 +130,10 @@ if (empty($reshook)) {
  *  View
  */
 
-// Initialize view objects
-$form = new Form($db);
-
 $title   =  $langs->trans('OpeningHours') . ' - ' . $langs->trans(ucfirst($elementType));
 $helpUrl = 'FR:Module_' . $moduleName;
-$morecss = ['/' . $moduleNameLowerCase . '/css/' . $moduleNameLowerCase . '.css'];
 
-llxHeader('', $title, $helpUrl, '', 0, 0, [], $morecss);
+saturne_header(0, '', $title, $helpUrl);
 
 if (!empty($objectLinked) && empty($action)) {
     switch ($elementType) {
@@ -161,11 +158,38 @@ if (!empty($objectLinked) && empty($action)) {
     // ------------------------------------------------------------
     $linkback = '<a href="' . DOL_URL_ROOT . '/' . $elementType . '/list.php?restore_lastsearch_values=1' . (!empty($socid) ? '&socid='.$socid : '') . '">' . $langs->trans('BackToList') . '</a>';
 
-    // @todo a finir
-    $morehtmlref = '<div class="refidno">';
+    $morehtmlref = $objectLinked->ref;
+
+    $morehtmlref .= '<div class="refidno">';
+
+    // Ref customer
+    $morehtmlref .= $form->editfieldkey("RefCustomer", 'ref_customer', $objectLinked->ref_customer, $objectLinked, 0, 'string', '', 0, 1);
+    $morehtmlref .= $form->editfieldval("RefCustomer", 'ref_customer', $objectLinked->ref_customer, $objectLinked, 0, 'string', '', null, null, '', 1, 'getFormatedCustomerRef');
+
+    // Ref supplier
+    $morehtmlref .= '<br>';
+    $morehtmlref .= $form->editfieldkey("RefSupplier", 'ref_supplier', $objectLinked->ref_supplier, $objectLinked, 0, 'string', '', 0, 1);
+    $morehtmlref .= $form->editfieldval("RefSupplier", 'ref_supplier', $objectLinked->ref_supplier, $objectLinked, 0, 'string', '', null, null, '', 1, 'getFormatedSupplierRef');
+
+    // Thirdparty
+    if (isModEnabled('societe')) {
+        $objectLinked->fetch_thirdparty();
+        $morehtmlref .= '<br>' . $langs->trans('ThirdParty') . ' : ' . (is_object($objectLinked->thirdparty) ? $objectLinked->thirdparty->getNomUrl(1) : '') . '<br>';
+    }
+
+    // Project
+    if (isModEnabled('project')) {
+        if (!empty($objectLinked->fk_project)) {
+            $project = new Project($db);
+            $project->fetch($object->fk_project);
+            $morehtmlref .= $langs->trans('Project') . ' : ' . $project->getNomUrl(1, '', 1) . '<br>';
+        } else {
+            $morehtmlref .= $langs->trans('Project') . ' : ';
+        }
+    }
     $morehtmlref .= '</div>';
 
-    dol_banner_tab($objectLinked, 'socid', $linkback, ($user->socid ? 0 : 1), 'rowid', 'nom');
+    dol_banner_tab($objectLinked, 'socid', $linkback, ($user->socid ? 0 : 1), 'rowid', 'nom', $morehtmlref);
 
     print '<div class="fichecenter">';
     print '<div class="underbanner clearboth"></div>';

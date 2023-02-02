@@ -1,4 +1,4 @@
--- Copyright (C) 2021-2023 EVARISK <dev@evarisk.com>
+-- Copyright (C) 2022-2023 EVARISK <dev@evarisk.com>
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -14,5 +14,6 @@
 -- along with this program.  If not, see https://www.gnu.org/licenses/.
 
 ALTER TABLE llx_element_openinghours ADD INDEX idx_element_openinghours_rowid (rowid);
+ALTER TABLE llx_element_openinghours ADD INDEX idx_element_openinghours_entity (entity);
 ALTER TABLE llx_element_openinghours ADD INDEX idx_element_openinghours_status (status);
 ALTER TABLE llx_element_openinghours ADD CONSTRAINT llx_element_openinghours_fk_user_creat FOREIGN KEY (fk_user_creat) REFERENCES llx_user(rowid);
