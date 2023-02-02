@@ -131,17 +131,17 @@ class modSaturne extends DolibarrModules
 
 		/* CERTIFICATE PERMISSIONS */
 		$this->rights[$r][0] = $this->numero . sprintf("%02d", $r + 1);
-		$this->rights[$r][1] = $langs->trans('ReadCertificate');
+		$this->rights[$r][1] = $langs->trans('ReadSaturneCertificate');
 		$this->rights[$r][4] = 'certificate';
 		$this->rights[$r][5] = 'read';
 		$r++;
 		$this->rights[$r][0] = $this->numero . sprintf("%02d", $r + 1);
-		$this->rights[$r][1] = $langs->transnoentities('CreateCertificate');
+		$this->rights[$r][1] = $langs->transnoentities('CreateSaturneCertificate');
 		$this->rights[$r][4] = 'certificate';
 		$this->rights[$r][5] = 'write';
 		$r++;
 		$this->rights[$r][0] = $this->numero . sprintf("%02d", $r + 1);
-		$this->rights[$r][1] = $langs->trans('DeleteCertificate');
+		$this->rights[$r][1] = $langs->trans('DeleteSaturneCertificate');
 		$this->rights[$r][4] = 'certificate';
 		$this->rights[$r][5] = 'delete';
 		$r++;

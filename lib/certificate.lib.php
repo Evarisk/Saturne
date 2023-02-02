@@ -19,13 +19,13 @@
 /**
  * \file    lib/certificate.lib.php
  * \ingroup saturne
- * \brief   Library files with common functions for Certificate
+ * \brief   Library files with common functions for SaturneCertificate
  */
 
 /**
- * Prepare array of tabs for Certificate
+ * Prepare array of tabs for SaturneCertificate
  *
- * @param	Certificate	$object		Certificate
+ * @param	SaturneCertificate	$object		SaturneCertificate
  * @return 	array					Array of tabs
  */
 function certificate_prepare_head($object)

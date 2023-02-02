@@ -78,8 +78,8 @@ $backtopage  = GETPOST('backtopage', 'alpha');
 $cancel      = GETPOST('cancel', 'aZ09');
 
 // Initialize technical objects
-$object     = new Certificate($db);
-$signatory  = new CertificateSignature($db);
+$object     = new SaturneCertificate($db);
+$signatory  = new SaturneCertificateSignature($db);
 $usertmp    = new User($db);
 $contact    = new Contact($db);
 $form       = new Form($db);
@@ -300,7 +300,7 @@ if ($action == 'deleteAttendant') {
  *  View
  */
 
-$title    = $langs->trans("CertificateAttendants");
+$title    = $langs->trans("SaturneCertificateAttendants");
 $help_url = '';
 $morejs   = array("/saturne/js/signature-pad.min.js", "/saturne/js/saturne.js");
 $morecss  = array("/saturne/css/saturne.css");
@@ -316,7 +316,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 	$prepareHead = $object->element . 'PrepareHead';
 	$head = $prepareHead($object);
-	print dol_get_fiche_head($head, 'attendants', $langs->trans("Certificate"), -1, $object->picto);
+	print dol_get_fiche_head($head, 'attendants', $langs->trans("SaturneCertificate"), -1, $object->picto);
 
 	$linkback = '<a href="'.dol_buildpath('/saturne/view/certificate/certificate_list.php', 1).'">'.$langs->trans("BackToList").'</a>';
 
@@ -352,7 +352,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 		<div class="wpeo-notice notice-warning">
 			<div class="notice-content">
 				<div class="notice-title"><?php echo $langs->trans('DisclaimerSignatureTitle') ?></div>
-				<div class="notice-subtitle"><?php echo $langs->trans("CertificateMustBeValidatedToSign") ?></div>
+				<div class="notice-subtitle"><?php echo $langs->trans("SaturneCertificateMustBeValidatedToSign") ?></div>
 			</div>
 			<a class="butAction" style="width = 100%;margin-right:0" href="<?php echo DOL_URL_ROOT ?>/custom/saturne/view/<?php echo $object->element ?>/<?php echo $object->element ?>_card.php?id=<?php echo $id ?>"><?php echo $langs->trans("GoToValidate") ?></a>;
 		</div>

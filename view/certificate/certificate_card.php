@@ -79,10 +79,10 @@ $backtopageforcancel = GETPOST('backtopageforcancel', 'alpha');
 $lineid              = GETPOST('lineid', 'int');
 
 // Initialize technical objects
-$object              = new Certificate($db);
-//$objectline          = new CertificateLine($db);
-$signatory           = new CertificateSignature($db);
-$certificatedocument = new CertificateDocument($db);
+$object              = new SaturneCertificate($db);
+//$objectline          = new SaturneCertificateLine($db);
+$signatory           = new SaturneCertificateSignature($db);
+$certificatedocument = new SaturneCertificateDocument($db);
 $extrafields         = new ExtraFields($db);
 $project             = new Project($db);
 
@@ -257,7 +257,7 @@ if (empty($reshook)) {
 // Initialize view objects
 $form = new Form($db);
 
-$title    = $langs->trans("Certificate");
+$title    = $langs->trans("SaturneCertificate");
 $help_url = '';
 $morejs   = array("/saturne/js/saturne.js");
 $morecss  = array("/saturne/css/saturne.css");
@@ -271,7 +271,7 @@ if ($action == 'create') {
 		exit;
 	}
 
-	print load_fiche_titre($langs->trans("NewCertificate"), '', 'object_'.$object->picto);
+	print load_fiche_titre($langs->trans("NewSaturneCertificate"), '', 'object_'.$object->picto);
 
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';
@@ -309,7 +309,7 @@ if ($action == 'create') {
 
 // Part to edit record
 if (($id || $ref) && $action == 'edit') {
-	print load_fiche_titre($langs->trans("ModifyCertificate"), '', 'object_'.$object->picto);
+	print load_fiche_titre($langs->trans("ModifySaturneCertificate"), '', 'object_'.$object->picto);
 
 	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';
@@ -346,12 +346,12 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	$res = $object->fetch_optionals();
 
 	$head = certificate_prepare_head($object);
-	print dol_get_fiche_head($head, 'card', $langs->trans("Certificate"), -1, $object->picto);
+	print dol_get_fiche_head($head, 'card', $langs->trans("SaturneCertificate"), -1, $object->picto);
 
 	$formconfirm = '';
 	// Confirmation to delete
 	if ($action == 'delete') {
-		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('DeleteCertificate'), $langs->trans('ConfirmDeleteObject'), 'confirm_delete', '', 0, 1);
+		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('DeleteSaturneCertificate'), $langs->trans('ConfirmDeleteObject'), 'confirm_delete', '', 0, 1);
 	}
 //	// Confirmation to delete line
 //	if ($action == 'deleteline') {
@@ -481,7 +481,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 		if (empty($reshook)) {
             // Modify
-			print '<a class="' . ($object->status == $object::STATUS_DRAFT ? 'butAction' : 'butActionRefused classfortooltip') . '" id="actionButtonEdit" title="' . ($object->status == $object::STATUS_DRAFT ? '' : dol_escape_htmltag($langs->trans("CertificateMustBeDraft"))) . '" href="' . ($object->status == $object::STATUS_DRAFT ? ($_SERVER["PHP_SELF"] . '?id=' . $object->id . '&action=edit') : '#') . '">' . $langs->trans("Modify") . '</a>';
+			print '<a class="' . ($object->status == $object::STATUS_DRAFT ? 'butAction' : 'butActionRefused classfortooltip') . '" id="actionButtonEdit" title="' . ($object->status == $object::STATUS_DRAFT ? '' : dol_escape_htmltag($langs->trans("SaturneCertificateMustBeDraft"))) . '" href="' . ($object->status == $object::STATUS_DRAFT ? ($_SERVER["PHP_SELF"] . '?id=' . $object->id . '&action=edit') : '#') . '">' . $langs->trans("Modify") . '</a>';
 
             // Validate
             print '<span class="' . ($object->status == $object::STATUS_DRAFT ? 'butAction' : 'butActionRefused classfortooltip') . '" id="' . ($object->status == $object::STATUS_DRAFT ? 'actionButtonPendingSignature' : '') . '" title="' . ($object->status == $object::STATUS_DRAFT ? '' : dol_escape_htmltag($langs->trans("TimeSheetMustBeDraftToValidate"))) . '" href="' . ($object->status == $object::STATUS_DRAFT ? ($_SERVER["PHP_SELF"] . '?id=' . $object->id . '&action=setPendingSignature') : '#') . '">' . $langs->trans("Validate") . '</span>';
@@ -491,7 +491,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
             //print '<a class="' . ($object->status == $object::STATUS_LOCKED ? 'butAction' : 'butActionRefused classfortooltip') . '" id="actionButtonSign" title="' . dol_escape_htmltag($langs->trans("TimeSheetMustBeLockedToSendEmail")) . '" href="' . ($object->status == $object::STATUS_LOCKED ? ($_SERVER['PHP_SELF'] . '?id=' . $object->id . '&action=presend&mode=init#formmailbeforetitle&sendto=' . $allLinks['LabourInspectorSociety']->id[0]) : '#') . '">' . $langs->trans('SendMail') . '</a>';
 
             // Archive
-            print '<a class="' . ($object->status == $object::STATUS_VALIDATED  && !empty(dol_dir_list($upload_dir . '/certificatedocument/' . dol_sanitizeFileName($object->ref))) ? 'butAction' : 'butActionRefused classfortooltip') . '" id="" title="' . ($object->status == $object::STATUS_VALIDATED && !empty(dol_dir_list($upload_dir . '/certificatedocument/' . dol_sanitizeFileName($object->ref))) ? '' : dol_escape_htmltag($langs->trans("CertificateMustBeLockedGenerated"))) . '" href="' . ($object->status == $object::STATUS_VALIDATED && !empty(dol_dir_list($upload_dir . '/certificatedocument/' . dol_sanitizeFileName($object->ref))) ? ($_SERVER["PHP_SELF"] . '?id=' . $object->id . '&action=setArchived') : '#') . '">' . $langs->trans("Archive") . '</a>';
+            print '<a class="' . ($object->status == $object::STATUS_VALIDATED  && !empty(dol_dir_list($upload_dir . '/certificatedocument/' . dol_sanitizeFileName($object->ref))) ? 'butAction' : 'butActionRefused classfortooltip') . '" id="" title="' . ($object->status == $object::STATUS_VALIDATED && !empty(dol_dir_list($upload_dir . '/certificatedocument/' . dol_sanitizeFileName($object->ref))) ? '' : dol_escape_htmltag($langs->trans("SaturneCertificateMustBeLockedGenerated"))) . '" href="' . ($object->status == $object::STATUS_VALIDATED && !empty(dol_dir_list($upload_dir . '/certificatedocument/' . dol_sanitizeFileName($object->ref))) ? ($_SERVER["PHP_SELF"] . '?id=' . $object->id . '&action=setArchived') : '#') . '">' . $langs->trans("Archive") . '</a>';
 
 			// Clone
 			//print dolGetButtonAction($langs->trans('ToClone'), '', 'default', $_SERVER['PHP_SELF'].'?id='.$object->id.(!empty($object->socid)?'&socid='.$object->socid:'').'&action=clone&token='.newToken(), '', $permissiontoadd);
@@ -522,7 +522,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
             $genallowed = $permissiontoadd; // If you can read, you can build the PDF to read content
             $delallowed = $permissiontodelete; // If you can create/edit, you can remove a file on card
 
-            print doliSirhShowDocuments('saturne:CertificateDocument', $dir_files, $filedir, $urlsource, $genallowed, $object->status == $object::STATUS_VALIDATED ? $delallowed : 0, $conf->global->SATURNE_CERTIFICATEDOCUMENT_DEFAULT_MODEL, 1, 0, 0, 0, 0, '', '', '', $langs->defaultlang, $object, 0, 'removefile', $object->status == $object::STATUS_VALIDATED && empty(dol_dir_list($filedir)), $langs->trans('CertificateMustBeLocked'));
+            print doliSirhShowDocuments('saturne:SaturneCertificateDocument', $dir_files, $filedir, $urlsource, $genallowed, $object->status == $object::STATUS_VALIDATED ? $delallowed : 0, $conf->global->SATURNE_CERTIFICATEDOCUMENT_DEFAULT_MODEL, 1, 0, 0, 0, 0, '', '', '', $langs->defaultlang, $object, 0, 'removefile', $object->status == $object::STATUS_VALIDATED && empty(dol_dir_list($filedir)), $langs->trans('SaturneCertificateMustBeLocked'));
 		}
 
 		print '</div><div class="fichehalfright">';

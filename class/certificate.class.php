@@ -18,7 +18,7 @@
 /**
  * \file        class/certificate.class.php
  * \ingroup     saturne
- * \brief       This file is a CRUD class file for Certificate (Create/Read/Update/Delete)
+ * \brief       This file is a CRUD class file for SaturneCertificate (Create/Read/Update/Delete)
  */
 
 // Put here all includes required by your class file
@@ -27,9 +27,9 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
 require_once __DIR__ . '/saturnesignature.class.php';
 
 /**
- * Class for Certificate
+ * Class for SaturneCertificate
  */
-class Certificate extends CommonObject
+class SaturneCertificate extends CommonObject
 {
 	/**
 	 * @var string ID of module.
@@ -465,7 +465,7 @@ class Certificate extends CommonObject
 			return 0;
 		}
 
-        $signatory = new CertificateSignature($this->db);
+        $signatory = new SaturneCertificateSignature($this->db);
         $signatory->deleteSignatoriesSignatures($this->id, 'certificate');
 		return $this->setStatusCommon($user, self::STATUS_DRAFT, $notrigger, 'CERTIFICATE_UNVALIDATE');
 	}
@@ -502,7 +502,7 @@ class Certificate extends CommonObject
 
 		$result = '';
 
-		$label = '<i class="fas fa-user-graduate" style="color: #d35968;"></i> <u>'.$langs->trans("Certificate").'</u>';
+		$label = '<i class="fas fa-user-graduate" style="color: #d35968;"></i> <u>'.$langs->trans("SaturneCertificate").'</u>';
 		if (isset($this->status)) {
 			$label .= ' '.$this->getLibStatut(5);
 		}
@@ -525,7 +525,7 @@ class Certificate extends CommonObject
 		$linkclose = '';
 		if (empty($notooltip)) {
 			if (!empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
-				$label = $langs->trans("ShowCertificate");
+				$label = $langs->trans("ShowSaturneCertificate");
 				$linkclose .= ' alt="'.dol_escape_htmltag($label, 1).'"';
 			}
 			$linkclose .= ' title="'.dol_escape_htmltag($label, 1).'"';
@@ -657,7 +657,7 @@ class Certificate extends CommonObject
 	{
 		$this->lines = array();
 
-		$objectline = new CertificateLine($this->db);
+		$objectline = new SaturneCertificateLine($this->db);
 		$result = $objectline->fetchAll('ASC', 'position', 0, 0, array('customsql'=>'fk_certificate = '.($this->id)));
 
 		if (is_numeric($result)) {
@@ -729,11 +729,11 @@ class Certificate extends CommonObject
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonobjectline.class.php';
 
 /**
- * Class CertificateLine. You can also remove this and generate a CRUD class for lines objects.
+ * Class SaturneCertificateLine. You can also remove this and generate a CRUD class for lines objects.
  */
-class CertificateLine extends CommonObjectLine
+class SaturneCertificateLine extends CommonObjectLine
 {
-	// To complete with content of an object CertificateLine
+	// To complete with content of an object SaturneCertificateLine
 	// We should have a field rowid, fk_certificate and position
 
 	/**
@@ -753,10 +753,10 @@ class CertificateLine extends CommonObjectLine
 }
 
 /**
- * Class CertificateSignature
+ * Class SaturneCertificateSignature
  */
 
-class CertificateSignature extends SaturneSignature
+class SaturneCertificateSignature extends SaturneSignature
 {
 	/**
 	 * @var string Name of table without prefix where object is stored. This is also the key used for extrafields management.
