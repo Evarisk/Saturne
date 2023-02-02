@@ -18,7 +18,7 @@
 /**
  *  \file       view/certificate/certificate_note.php
  *  \ingroup    saturne
- *  \brief      Tab for notes on Certificate
+ *  \brief      Tab for notes on SaturneCertificate
  */
 
 // Load Dolibarr environment
@@ -75,7 +75,7 @@ $cancel     = GETPOST('cancel', 'aZ09');
 $backtopage = GETPOST('backtopage', 'alpha');
 
 // Initialize technical objects
-$object      = new Certificate($db);
+$object      = new SaturneCertificate($db);
 $extrafields = new ExtraFields($db);
 $project     = new Project($db);
 
@@ -116,7 +116,7 @@ if (empty($reshook)) {
 // Initialize view objects
 $form = new Form($db);
 
-$title    = $langs->trans('Certificate') . ' - ' . $langs->trans('Notes');
+$title    = $langs->trans('SaturneCertificate') . ' - ' . $langs->trans('Notes');
 $help_url = '';
 $morejs   = array("/saturne/js/saturne.js");
 $morecss  = array("/saturne/css/saturne.css");
@@ -128,7 +128,7 @@ if ($id > 0 || !empty($ref)) {
 
 	$head = certificate_prepare_head($object);
 
-	print dol_get_fiche_head($head, 'note', $langs->trans("Certificate"), -1, $object->picto);
+	print dol_get_fiche_head($head, 'note', $langs->trans("SaturneCertificate"), -1, $object->picto);
 
 	// Object card
 	// ------------------------------------------------------------

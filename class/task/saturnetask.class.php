@@ -201,7 +201,7 @@ class SaturneTask extends Task
 	 * @return array|int                    0 < if KO, array of time spent if OK
 	 * @throws Exception
 	 */
-	public function fetch_all_time_spent_all_users($morewherefilter = '', $sortfield = '', $sortorder = '')
+	public function fetchAllTimeSpentAllUsers($morewherefilter = '', $sortfield = '', $sortorder = '')
 	{
 		$arrayres = array();
 
@@ -237,7 +237,7 @@ class SaturneTask extends Task
 			$sql .= $this->db->order($sortfield, $sortorder);
 		}
 
-		dol_syslog(get_class($this)."::fetch_all_time_spent_all_users", LOG_DEBUG);
+		dol_syslog(get_class($this)."::fetchAllTimeSpentAllUsers", LOG_DEBUG);
 		$resql = $this->db->query($sql);
 		if ($resql) {
 			$num = $this->db->num_rows($resql);

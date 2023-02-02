@@ -18,7 +18,7 @@
 /**
  *  \file       certificate_agenda.php
  *  \ingroup    saturne
- *  \brief      Tab of events on Certificate
+ *  \brief      Tab of events on SaturneCertificate
  */
 
 // Load Saturne environment
@@ -84,7 +84,7 @@ if (!$sortorder) {
 }
 
 // Initialize technical objects
-$object      = new Certificate($db);
+$object      = new SaturneCertificate($db);
 $extrafields = new ExtraFields($db);
 $project     = new Project($db);
 
@@ -136,7 +136,7 @@ if (empty($reshook)) {
 $form = new Form($db);
 
 if ($object->id > 0) {
-	$title    = $langs->trans('Certificate') . ' - ' . $langs->trans("Agenda");
+	$title    = $langs->trans('SaturneCertificate') . ' - ' . $langs->trans("Agenda");
 	$help_url = '';
 	$morejs   = array("/saturne/js/saturne.js");
 	$morecss  = array("/saturne/css/saturne.css");
@@ -148,7 +148,7 @@ if ($object->id > 0) {
 	}
 	$head = certificate_prepare_head($object);
 
-	print dol_get_fiche_head($head, 'agenda', $langs->trans("Certificate"), -1, $object->picto);
+	print dol_get_fiche_head($head, 'agenda', $langs->trans("SaturneCertificate"), -1, $object->picto);
 
 	// Object card
 	// ------------------------------------------------------------
@@ -226,7 +226,7 @@ if ($object->id > 0) {
 			$param .= '&limit='.urlencode($limit);
 		}
 
-		print load_fiche_titre($langs->trans("ActionsOnCertificate"), '', '');
+		print load_fiche_titre($langs->trans("ActionsOnSaturneCertificate"), '', '');
 
 		// List of all actions
 		$filters = array();

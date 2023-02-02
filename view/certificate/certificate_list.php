@@ -117,7 +117,7 @@ $pageprev = $page - 1;
 $pagenext = $page + 1;
 
 // Initialize technical objects
-$object = new Certificate($db);
+$object = new SaturneCertificate($db);
 $extrafields = new ExtraFields($db);
 $diroutputmassaction = $conf->saturne->dir_output.'/temp/massgeneration/'.$user->id;
 $hookmanager->initHooks(array('certificatelist')); // Note that conf->hooks_modules contains array
@@ -243,8 +243,8 @@ if (empty($reshook)) {
 	}
 
 	// Mass actions
-	$objectclass = 'Certificate';
-	$objectlabel = 'Certificate';
+	$objectclass = 'SaturneCertificate';
+	$objectlabel = 'SaturneCertificate';
 	$uploaddir = $conf->saturne->dir_output;
 	include DOL_DOCUMENT_ROOT . '/core/actions_massactions.inc.php';
 }
@@ -259,9 +259,9 @@ $form = new Form($db);
 
 $now = dol_now();
 
-//$help_url="EN:Module_Certificate|FR:Module_Certificate_FR|ES:Módulo_Certificate";
+//$help_url="EN:Module_SaturneCertificate|FR:Module_SaturneCertificate_FR|ES:Módulo_SaturneCertificate";
 $help_url = '';
-$title = $langs->trans('CertificateList');
+$title = $langs->trans('SaturneCertificateList');
 $morejs = array("/saturne/js/saturne.js");
 $morecss = array("/saturne/css/saturne.css");
 
@@ -489,9 +489,9 @@ $newcardbutton = dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle'
 print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, 'object_'.$object->picto, 0, $newcardbutton, '', $limit, 0, 0, 1);
 
 // Add code for pre mass action (confirmation or email presend form)
-$topicmail = "SendCertificateRef";
+$topicmail = "SendSaturneCertificateRef";
 $modelmail = "certificate";
-$objecttmp = new Certificate($db);
+$objecttmp = new SaturneCertificate($db);
 $trackid = 'xxxx'.$object->id;
 include DOL_DOCUMENT_ROOT . '/core/tpl/massactions_pre.tpl.php';
 

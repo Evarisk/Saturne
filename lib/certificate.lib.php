@@ -1,5 +1,6 @@
 <?php
-/* Copyright (C) 2023 EVARISK <dev@evarisk.com>
+
+/* Copyright (C) 2021-2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,13 +19,13 @@
 /**
  * \file    lib/certificate.lib.php
  * \ingroup saturne
- * \brief   Library files with common functions for Certificate
+ * \brief   Library files with common functions for SaturneCertificate
  */
 
 /**
- * Prepare array of tabs for Certificate
+ * Prepare array of tabs for SaturneCertificate
  *
- * @param	Certificate	$object		Certificate
+ * @param	SaturneCertificate	$object		SaturneCertificate
  * @return 	array					Array of tabs
  */
 function certificate_prepare_head($object)
