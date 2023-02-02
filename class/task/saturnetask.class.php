@@ -46,9 +46,9 @@ class SaturneTask extends Task
 	 * @return array|int
 	 * @throws Exception
 	 */
-	public function load_dashboard()
+	public function loadDashboard()
 	{
-		$arrayTasksByProgress = $this->get_tasks_by_progress();
+		$arrayTasksByProgress = $this->getTasksByProgress();
 
 		$array['graphs'] = $arrayTasksByProgress;
 
@@ -61,7 +61,7 @@ class SaturneTask extends Task
 	 * @return array
 	 * @throws Exception
 	 */
-	public function get_tasks_by_progress($projectId = 0)
+	public function getTasksByProgress($projectId = 0)
 	{
 		// Tasks by progress
 		global $conf, $langs;
@@ -108,7 +108,7 @@ class SaturneTask extends Task
 	 *
 	 * @return string           CSS class
 	 */
-	public function get_task_progress_color_class($progress)
+	public function getTaskProgressColorClass($progress)
 	{
 		switch (true) {
 			case $progress < 50 :
@@ -132,9 +132,9 @@ class SaturneTask extends Task
 	 * @param  int      $saveLastSearchValue    -1=Auto, 0=No save of lastsearch_values when clicking, 1=Save lastsearch_values whenclicking
 	 * @return string					        Chaine avec URL
 	 */
-	public function saturne_get_nom_url($withpicto = 0, $option = '', $mode = 'task', $addlabel = 0, $sep = ' - ', $notooltip = 0, $saveLastSearchValue = -1)
+	public function saturneGetNomUrl($withpicto = 0, $option = '', $mode = 'task', $addlabel = 0, $sep = ' - ', $notooltip = 0, $saveLastSearchValue = -1, $showFavorite = 1)
 	{
-		global $conf, $langs;
+		global $conf, $langs, $user;
 
 		if ( ! empty($conf->dol_no_mouse_hover)) $notooltip = 1; // Force disable tooltips
 
@@ -177,6 +177,17 @@ class SaturneTask extends Task
 		if ($withpicto != 2) $result .= $this->ref;
 		$result                      .= $linkend;
 		if ($withpicto != 2) $result .= (($addlabel && $this->label) ? $sep . dol_trunc($this->label, ($addlabel > 1 ? $addlabel : 0)) : '');
+
+		if ($showFavorite) {
+			if (isTaskFavorite($this->id, $user->id)) {
+				$favoriteStar = '<span class="fas fa-star toggleTaskFavorite" onclick="toggleTaskFavorite()"></span>';
+			} else {
+				$favoriteStar = '<span class="far fa-star toggleTaskFavorite" onclick="toggleTaskFavorite()"></span>';
+			}
+
+			$result .= $favoriteStar;
+		}
+
 
 		return $result;
 	}
