@@ -188,7 +188,6 @@ class SaturneTask extends Task
 			$result .= $favoriteStar;
 		}
 
-
 		return $result;
 	}
 
