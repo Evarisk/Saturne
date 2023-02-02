@@ -13,6 +13,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see https://www.gnu.org/licenses/.
 
+-- @todo more keys ??
 ALTER TABLE llx_saturne_object_signature ADD INDEX idx_saturne_object_signature_rowid (rowid);
 ALTER TABLE llx_saturne_object_signature ADD INDEX idx_saturne_object_signature_status (status);
 ALTER TABLE llx_saturne_object_signature ADD INDEX idx_saturne_object_signature_element_id (element_id);

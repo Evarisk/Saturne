@@ -15,5 +15,4 @@
 
 ALTER TABLE llx_element_openinghours ADD INDEX idx_element_openinghours_rowid (rowid);
 ALTER TABLE llx_element_openinghours ADD INDEX idx_element_openinghours_status (status);
-ALTER TABLE llx_element_openinghours ADD UNIQUE INDEX uk_element_openinghours_rowid (rowid, entity);
 ALTER TABLE llx_element_openinghours ADD CONSTRAINT llx_element_openinghours_fk_user_creat FOREIGN KEY (fk_user_creat) REFERENCES llx_user(rowid);

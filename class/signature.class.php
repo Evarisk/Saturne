@@ -115,7 +115,7 @@ class Signature extends CommonObject
 		'stamp'                => ['type' => 'varchar(255)', 'label' => 'Stamp', 'enabled' => '1', 'position' => 165, 'notnull' => 0, 'visible' => 3,],
 		'signature_url'        => ['type' => 'varchar(50)', 'label' => 'SignatureUrl', 'enabled' => '1', 'position' => 170, 'notnull' => 0, 'visible' => 1, 'default' => null,],
 		'transaction_url'      => ['type' => 'varchar(50)', 'label' => 'TransactionUrl', 'enabled' => '1', 'position' => 180, 'notnull' => 0, 'visible' => 1,'default' => null,],
-		'last_email_sent_date' => ['type' => 'datetime', 'label' => 'LastEmailSentDate', 'enabled' => '1', 'position' => 190, 'notnull' => 0, 'visible' => 3,],
+		'last_email_sent_date' => ['type' => 'datetime', 'label' => 'SendMailDate', 'enabled' => '1', 'position' => 190, 'notnull' => 0, 'visible' => 3,],
 		'object_type'          => ['type' => 'varchar(255)', 'label' => 'object_type', 'enabled' => '1', 'position' => 195, 'notnull' => 0, 'visible' => 0,],
 		'fk_object'            => ['type' => 'integer', 'label' => 'FKObject', 'enabled' => '1', 'position' => 200, 'notnull' => 1, 'visible' => 0,],
     ];

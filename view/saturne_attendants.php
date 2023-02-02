@@ -40,22 +40,15 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/html.formcompany.class.php';
 if (isModEnabled('societe')) {
     require_once DOL_DOCUMENT_ROOT . '/contact/class/contact.class.php';
 }
-if (isModEnabled('project')) {
-    require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
-}
-if (isModEnabled('contrat')) {
-    require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
-}
 
 require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
 require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' . $objectParentType . '.lib.php';
 
 // Global variables definitions
-global $conf, $db, $langs, $hookmanager, $user;
+global $conf, $db, $hookmanager, $langs, $user;
 
 // Load translation files required by the page
-// @todo cibler fichier lang signature
-$langs->loadLangs([$moduleNameLowerCase . '@' . $moduleNameLowerCase, 'other']);
+$langs->loadLangs([$moduleNameLowerCase . '@' . $moduleNameLowerCase, 'signature@saturne']);
 
 // Get parameters
 $id          = GETPOST('id', 'int');
@@ -66,21 +59,20 @@ $cancel      = GETPOST('cancel', 'aZ09');
 $backtopage  = GETPOST('backtopage', 'alpha');
 
 // Initialize technical objects
+// @Todo a voir l'objet signature
 $classname          = ucfirst($objectType);
-$signatureClassname = ucfirst($objectType) . 'Signature';
+//$signatureClassname = ucfirst($objectType) . 'Signature';
 $object             = new $classname($db);
-$signatory          = new $signatureClassname($db);
+$signatory          = new Signature($db);
 $usertmp            = new User($db);
 if (isModEnabled('societe')) {
     $thirdparty = new Societe($db);
     $contact    = new Contact($db);
 }
-if (isModEnabled('project')) {
-    $project = new Project($db);
-}
-if (isModEnabled('contrat')) {
-    $contract = new Contrat($db);
-}
+
+// Initialize view objects
+$form        = new Form($db);
+$formcompany = new FormCompany($db);
 
 $hookmanager->initHooks([$objectType . 'signature', 'globalcard']); // Note that conf->hooks_modules contains array
 
@@ -99,6 +91,7 @@ if (empty($conf->$moduleNameLowerCase->enabled) || !$permissiontoread) {
 *  Actions
 */
 
+// @todo finir le clean actions
 $parameters = ['id' => $id];
 $reshook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
 if ($reshook < 0) {
@@ -299,68 +292,22 @@ if (empty($reshook)) {
 *	View
 */
 
-// Initialize view objects
-$form        = new Form($db);
-$formcompany = new FormCompany($db);
-
 $title   = $langs->trans('Attendants') . ' - ' . $langs->trans(ucfirst($objectType));
 $helpUrl = 'FR:Module_' . $moduleName;
-$morejs  = ['/saturne/js/modules/signature-pad.min.js', '/saturne/js/saturne.js.php'];
-$morecss = ['/' . $moduleNameLowerCase . '/css/' . $moduleNameLowerCase . '.css'];
+$morejs  = ['/saturne/js/modules/signature-pad.min.js', '/saturne/js/saturne.min.js'];
+$morecss = ['/saturne/css/saturne.css'];
 
 llxHeader('', $title, $helpUrl, '', 0, 0, $morejs, $morecss);
 
 if ($id > 0 || !empty($ref) && empty($action)) {
     // @todo pertinence
     $object->fetch_optionals();
-    // Configuration header
-    $prepareHead = $objectParentType . 'PrepareHead';
-    $head = $prepareHead($object);
-    print dol_get_fiche_head($head, 'attendants', $title, -1, $object->picto);
 
-    // Object card
-    // ------------------------------------------------------------
-    $linkback = '<a href="' . dol_buildpath('/' . $moduleNameLowerCase . '/view/' . $objectType . '/' . $objectType . '_list.php', 1) . '?restore_lastsearch_values=1' . '">' . $langs->trans('BackToList') . '</a>';
+    saturne_banner_tab($object, 'attendants', $title);
 
-    $morehtmlref = '<div class="refidno">';
-    // Thirdparty
-    // @todo a test sur dolimeet
-    if (isModEnabled('societe')) {
-        $object->fetch_thirdparty();
-        $morehtmlref .= $langs->trans('ThirdParty') . ' : ' . (is_object($object->thirdparty) ? $object->thirdparty->getNomUrl(1) : '');
-    }
+    print '<div class="fichecenter">';
 
-    // Project
-    if (isModEnabled('project')) {
-        if (!empty($object->fk_project)) {
-            $project->fetch($object->fk_project);
-            $morehtmlref .= $langs->trans('Project') . ' : ' . $project->getNomUrl(1, '', 1);
-        } else {
-            $morehtmlref .= '';
-        }
-    }
-
-    // Contract @todo hook car spécifique a dolimeet
-    if (isModEnabled('contrat')) {
-        if ($objectType == 'trainingsession') {
-            if (!empty($object->fk_contrat)) {
-                $contract->fetch($object->fk_contrat);
-                $morehtmlref .= $langs->trans('Contract') . ' : ' . $contract->getNomUrl(1, '', 1);
-            } else {
-                $morehtmlref .= '';
-            }
-        }
-    }
-    $morehtmlref .= '</div>';
-
-    // @todo problème avec dolimeet
-    dol_banner_tab($object, 'ref', $linkback, 1, 'ref', 'ref', $morehtmlref);
-
-    print '<div class="underbanner clearboth"></div>';
-
-    print dol_get_fiche_end();
-
-    print '<div class="fichecenter">'; ?>
+    print dol_get_fiche_end(); ?>
 
     <?php if ($object->status == $object::STATUS_DRAFT) : ?>
         <div class="wpeo-notice notice-warning">
@@ -399,7 +346,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
     print '<td class="center">' . $langs->trans('SendMailDate') . '</td>';
     print '<td class="center">' . $langs->trans('SignatureDate') . '</td>';
     print '<td class="center">' . $langs->trans('Status') . '</td>';
-    print '<td class="center">' . $langs->trans('ActionsSignature') . '</td>';
+    print '<td class="center">' . $langs->trans('Actions') . '</td>';
     print '<td class="center">' . $langs->trans('Signature') . '</td>';
     print '</tr>';
 
@@ -503,7 +450,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
     print '<td class="center">' . $langs->trans('SendMailDate') . '</td>';
     print '<td class="center">' . $langs->trans('SignatureDate') . '</td>';
     print '<td class="center">' . $langs->trans('Status') . '</td>';
-    print '<td class="center">' . $langs->trans('ActionsSignature') . '</td>';
+    print '<td class="center">' . $langs->trans('Actions') . '</td>';
     print '<td class="center">' . $langs->trans('Signature') . '</td>';
     print '</tr>';
 

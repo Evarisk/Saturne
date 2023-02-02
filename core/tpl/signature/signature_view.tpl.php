@@ -12,7 +12,7 @@ if (empty($element->signature)) : ?>
         <input type="hidden" class="from-id" value="<?php echo $element->id ?>">
 		<span><i class="fas fa-signature"></i> <?php echo $langs->trans('Sign'); ?></span>
 	</div>
-<?php elseif ( ! empty($element->signature)) : ?>
+<?php elseif (!empty($element->signature)) : ?>
 	<img class="wpeo-modal-event modal-signature-open modal-open" value="<?php echo $element->id ?>" src='<?php echo $element->signature ?>' width="100px" height="100px" style="border: #0b419b solid 2px">
 <?php endif; ?>
 
