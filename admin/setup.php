@@ -82,7 +82,7 @@ $help_url  = 'FR:Module_Saturne#Configuration';
 $morejs  = array("/saturne/js/saturne.js");
 $morecss = array("/saturne/css/saturne.css");
 
-saturne_header('saturne', $action,'',0, '', $help_url, '', '', '', 0, $morejs, $morecss);
+saturne_header(1,'',0, '', $help_url, '', '', '', 0, $morejs, $morecss);
 
 // Subheader
 $linkback = '<a href="' . ($backtopage ?: DOL_URL_ROOT . '/admin/modules.php?restore_lastsearch_values=1') . '">' . $langs->trans("BackToModuleList") . '</a>';
