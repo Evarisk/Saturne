@@ -69,7 +69,10 @@ class modSaturne extends DolibarrModules
 			'hooks' => [],
 			'moduleforexternal' => 0,
         ];
-		$this->dirs = ['/saturne/temp'];
+		$this->dirs = [
+			'/saturne/temp',
+			"/ecm/saturne/certificatedocument"
+		];
 		$this->config_page_url = ['setup.php@saturne'];
 		$this->hidden = false;
 		$this->depends = [];
@@ -82,10 +85,20 @@ class modSaturne extends DolibarrModules
 		$this->warnings_activation_ext = []; // Warning to show when we activate an external module. array('always'='text') or array('FR'='textfr','MX'='textmx'...)
 		$j = 0;
 		$this->const = [
+			// CONST MEDIAS
 			$j++ => array('SATURNE_MEDIA_MAX_WIDTH_MEDIUM', 'integer', 854, '', 0, 'current'),
 			$j++ => array('SATURNE_MEDIA_MAX_HEIGHT_MEDIUM', 'integer', 480, '', 0, 'current'),
 			$j++ => array('SATURNE_MEDIA_MAX_WIDTH_LARGE', 'integer', 1280, '', 0, 'current'),
 			$j++ => array('SATURNE_MEDIA_MAX_HEIGHT_LARGE', 'integer', 720, '', 0, 'current'),
+
+			// CONST CERTIFICATE
+			$j++ => array('SATURNE_CERTIFICATE_ADDON', 'chaine', 'mod_certificate_standard', '', 0, 'current'),
+
+			// CONST CERTIFICATE DOCUMENT
+			$j++ => array('SATURNE_CERTIFICATEDOCUMENT_ADDON', 'chaine', 'mod_certificatedocument_standard', '', 0, 'current'),
+			$j++ => array('SATURNE_CERTIFICATEDOCUMENT_ADDON_ODT_PATH', 'chaine', 'DOL_DOCUMENT_ROOT/custom/saturne/documents/doctemplates/certificatedocument/', '', 0, 'current'),
+			$j++ => array('SATURNE_CERTIFICATEDOCUMENT_CUSTOM_ADDON_ODT_PATH', 'chaine', 'DOL_DATA_ROOT' . (($conf->entity == 1 ) ? '/' : '/' . $conf->entity . '/') . 'ecm/saturne/certificatedocument/', '', 0, 'current'),
+			$j++ => array('SATURNE_CERTIFICATEDOCUMENT_DEFAULT_MODEL', 'chaine', 'certificatedocument_odt', '', 0, 'current'),
 		];
 
 		if (!isset($conf->saturne) || !isset($conf->saturne->enabled)) {
@@ -115,6 +128,23 @@ class modSaturne extends DolibarrModules
         $this->rights[$r][1] = $langs->trans('ReadAdminPage');
         $this->rights[$r][4] = 'adminpage';
         $this->rights[$r][5] = 'read';
+
+		/* CERTIFICATE PERMISSIONS */
+		$this->rights[$r][0] = $this->numero . sprintf("%02d", $r + 1);
+		$this->rights[$r][1] = $langs->trans('ReadCertificate');
+		$this->rights[$r][4] = 'certificate';
+		$this->rights[$r][5] = 'read';
+		$r++;
+		$this->rights[$r][0] = $this->numero . sprintf("%02d", $r + 1);
+		$this->rights[$r][1] = $langs->transnoentities('CreateCertificate');
+		$this->rights[$r][4] = 'certificate';
+		$this->rights[$r][5] = 'write';
+		$r++;
+		$this->rights[$r][0] = $this->numero . sprintf("%02d", $r + 1);
+		$this->rights[$r][1] = $langs->trans('DeleteCertificate');
+		$this->rights[$r][4] = 'certificate';
+		$this->rights[$r][5] = 'delete';
+		$r++;
 
 		$this->menu = [];
 		$r = 0;
@@ -156,6 +186,26 @@ class modSaturne extends DolibarrModules
 		// Permissions
 		$this->remove($options);
 		$sql = [];
+
+		// Load sql sub folders
+		$sqlFolder = scandir(__DIR__ . '/../../sql');
+		foreach ($sqlFolder as $subFolder) {
+			if ( ! preg_match('/\./', $subFolder)) {
+				$this->_load_tables('/saturne/sql/' . $subFolder . '/');
+			}
+		}
+
+		$result = $this->_load_tables('/saturne/sql/');
+		if ($result < 0) {
+			return -1; // Do not activate module if error 'not allowed' returned when loading module SQL queries (the _load_table run sql with run_sql with the error allowed parameter set to 'default')
+		}
+
+		// Document models
+		delDocumentModel('timesheetdocument_odt', 'timesheetdocument');
+		delDocumentModel('certificatedocument_odt', 'certificatedocument');
+		addDocumentModel('timesheetdocument_odt', 'timesheetdocument', 'ODT templates', 'DOLISIRH_TIMESHEETDOCUMENT_ADDON_ODT_PATH');
+		addDocumentModel('certificatedocument_odt', 'certificatedocument', 'ODT templates', 'DOLISIRH_CERTIFICATEDOCUMENT_ADDON_ODT_PATH');
+
 		return $this->_init($sql, $options);
 	}
 

@@ -350,7 +350,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
     print '<td class="center">' . $langs->trans('Signature') . '</td>';
     print '</tr>';
 
-    $already_added_users = [];
+    $alreadyAddedUsers = [];
     $j = 1;
     if (!empty($society_intervenants) && $society_intervenants > 0) {
         foreach ($society_intervenants as $element) {
@@ -386,7 +386,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
             }
             print '</td>';
             print '</tr>';
-            $already_added_users[$element->element_id] = $element->element_id;
+            $alreadyAddedUsers[$element->element_id] = $element->element_id;
             $j++;
         }
     } else {
@@ -396,7 +396,6 @@ if ($id > 0 || !empty($ref) && empty($action)) {
     }
 
     // @todo check conf et surement changer la post method
-    //$conf->global->DOLISIRH_TIMESHEET_ADD_ATTENDANTS
     if ($object->status == $object::STATUS_DRAFT && $permissiontoadd) {
         print '<form method="POST" action="' . $_SERVER['REQUEST_URI'] . '">';
         print '<input type="hidden" name="token" value="' . newToken() . '">';
@@ -408,7 +407,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
 
         // Internal attendant
         print '<tr class="oddeven"><td class="maxwidth200">';
-        print $form->select_dolusers('', 'attendant', 1, $already_added_users, 0, '', '', $conf->entity);
+        print $form->select_dolusers('', 'attendant', 1, $alreadyAddedUsers, 0, '', '', $conf->entity);
         print '</td>';
         print '<td>';
         print '<select id="attendant_role" name="attendant_role">';

@@ -46,9 +46,6 @@ require_once __DIR__ . '/../class/openinghours.class.php';
 // Global variables definitions
 global $conf, $db, $hookmanager, $langs, $user;
 
-// Load translation files required by the page
-$langs->loadLangs([$moduleNameLowerCase . '@' . $moduleNameLowerCase]);
-
 // Get parameters
 $id          = GETPOST('id', 'int');
 $action      = GETPOST('action', 'aZ09');
@@ -74,13 +71,11 @@ $hookmanager->initHooks([$elementType . 'openinghours', 'globalcard']); // Note 
 if ($id > 0 && !empty($elementType)) {
     $morewhere = ' AND element_id = ' . $id;
     $morewhere .= ' AND element_type = ' . "'" . $elementType . "'";
-
     $object->fetch(0, '', $morewhere);
 }
 
 // Security check - Protection if external user
 $permissiontoread = $user->rights->$moduleNameLowerCase->read;
-// @todo a finir peut être utiliser un droit custom
 $permissiontoadd  = $user->rights->$moduleNameLowerCase->read;
 if (empty($conf->$moduleNameLowerCase->enabled) || !$permissiontoread) {
     accessforbidden();
