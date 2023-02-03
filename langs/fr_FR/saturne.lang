@@ -75,5 +75,9 @@ ErrorThisFileSizeTooLarge = Le fichier %s est trop volumineux
 ErrorThisFileExists = Le fichier %s existe déjà
 EmptyMediaGallery = La bibliothèque de médias est vide
 
+#
+# Schedules - horaires
+#
+
 # Data - Donnée
-OpeningHoursSaved = Les horaires ont bien été enregistrés
+SchedulesSaved = Les horaires ont bien été enregistrés

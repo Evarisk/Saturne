@@ -13,7 +13,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see https://www.gnu.org/licenses/.
 
-CREATE TABLE llx_element_openinghours(
+CREATE TABLE llx_saturne_schedules(
 	rowid         integer AUTO_INCREMENT PRIMARY KEY NOT NULL,
 	entity        integer DEFAULT 1 NOT NULL,
 	date_creation datetime NOT NULL,

@@ -15,3 +15,4 @@
 
 -- 1.0.0
 ALTER TABLE `llx_element_openinghours` ADD `fk_user_modif` INT NULL AFTER `fk_user_creat`;
+ALTER TABLE `llx_element_openinghours` RENAME `llx_saturne_schedules`;

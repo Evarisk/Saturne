@@ -16,17 +16,17 @@
  */
 
 /**
- * \file        class/openinghours.class.php
+ * \file        class/saturneschedules.class.php
  * \ingroup     saturne
- * \brief       This file is a CRUD class file for OpeningHours (Create/Read/Update/Delete)
+ * \brief       This file is a CRUD class file for SaturneSchedules (Create/Read/Update/Delete)
  */
 
 require_once DOL_DOCUMENT_ROOT . '/core/class/commonobject.class.php';
 
 /**
- * Class for OpeningHours
+ * Class for SaturneSchedules
  */
-class OpeningHours extends CommonObject
+class SaturneSchedules extends CommonObject
 {
 	/**
 	 * @var DoliDB Database handler.
@@ -36,12 +36,12 @@ class OpeningHours extends CommonObject
 	/**
 	 * @var string Element type of object.
 	 */
-	public $element = 'openinghours';
+	public $element = 'saturne_schedules';
 
 	/**
 	 * @var string Name of table without prefix where object is stored. This is also the key used for extrafields management.
 	 */
-	public $table_element = 'element_openinghours';
+	public $table_element = 'saturne_schedules';
 
 	/**
 	 * @var int  Does this object support multicompany module ?
@@ -114,37 +114,37 @@ class OpeningHours extends CommonObject
     /**
      * @var string First day week
      */
-	public string$monday;
+	public string $monday = '';
 
     /**
      * @var string Second day week
      */
-	public string $tuesday;
+	public string $tuesday = '';
 
     /**
      * @var string Third day week
      */
-	public string $wednesday;
+	public string $wednesday = '';
 
     /**
      * @var string Fourth day week
      */
-	public string $thursday;
+	public string $thursday = '';
 
     /**
      * @var string Fifth day week
      */
-	public string $friday;
+	public string $friday = '';
 
     /**
      * @var string Sixth day week
      */
-	public string $saturday;
+	public string $saturday = '';
 
     /**
      * @var string Seventh day week
      */
-	public string $sunday;
+	public string $sunday = '';
 
     /**
      * @var int User ID

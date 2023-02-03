@@ -13,7 +13,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see https://www.gnu.org/licenses/.
 
-ALTER TABLE llx_element_openinghours ADD INDEX idx_element_openinghours_rowid (rowid);
-ALTER TABLE llx_element_openinghours ADD INDEX idx_element_openinghours_entity (entity);
-ALTER TABLE llx_element_openinghours ADD INDEX idx_element_openinghours_status (status);
-ALTER TABLE llx_element_openinghours ADD CONSTRAINT llx_element_openinghours_fk_user_creat FOREIGN KEY (fk_user_creat) REFERENCES llx_user(rowid);
+ALTER TABLE llx_saturne_schedules ADD INDEX idx_saturne_schedules_rowid (rowid);
+ALTER TABLE llx_saturne_schedules ADD INDEX idx_saturne_schedules_entity (entity);
+ALTER TABLE llx_saturne_schedules ADD INDEX idx_saturne_schedules_status (status);
+ALTER TABLE llx_saturne_schedules ADD CONSTRAINT llx_saturne_schedules_fk_user_creat FOREIGN KEY (fk_user_creat) REFERENCES llx_user(rowid);

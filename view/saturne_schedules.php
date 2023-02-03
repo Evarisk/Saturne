@@ -16,9 +16,9 @@
  */
 
 /**
- *   	\file       view/openinghours_card.php
+ *   	\file       view/saturne_schedules.php
  *		\ingroup    saturne
- *		\brief      Page to view Opening Hours
+ *		\brief      Page to view Saturne Schedules
  */
 
 // Load Saturne environment
@@ -41,7 +41,7 @@ if (isModEnabled('contrat')) {
     require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
 }
 
-require_once __DIR__ . '/../class/openinghours.class.php';
+require_once __DIR__ . '/../class/saturneschedules.class.php';
 
 // Global variables definitions
 global $conf, $db, $hookmanager, $langs, $user;
@@ -58,7 +58,7 @@ if ($user->socid) {
 }
 
 // Initialize technical objects
-$object = new OpeningHours($db);
+$object = new SaturneSchedules($db);
 
 if (isModEnabled($elementType)) {
     $classname = ucfirst($elementType);
@@ -68,9 +68,9 @@ if (isModEnabled($elementType)) {
 // Initialize view objects
 $form = new Form($db);
 
-$hookmanager->initHooks([$elementType . 'openinghours', 'globalcard']); // Note that conf->hooks_modules contains array of hook context
+$hookmanager->initHooks([$elementType . 'schedules', 'globalcard']); // Note that conf->hooks_modules contains array of hook context
 
-// Fetch current OpeningHours object
+// Fetch current Schedules object
 if ($id > 0 && !empty($elementType)) {
     $morewhere = ' AND element_id = ' . $id;
     $morewhere .= ' AND element_type = ' . "'" . $elementType . "'";
@@ -116,7 +116,7 @@ if (empty($reshook)) {
         }
 
         if ($result > 0) {
-            setEventMessages($langs->trans('OpeningHoursSaved'), []);
+            setEventMessages($langs->trans('SchedulesSaved'), []);
         } elseif (!empty($object->errors)) {
             setEventMessages('', $object->errors, 'errors');
         } else {
@@ -130,7 +130,7 @@ if (empty($reshook)) {
  *  View
  */
 
-$title   =  $langs->trans('OpeningHours') . ' - ' . $langs->trans(ucfirst($elementType));
+$title   =  $langs->trans('Schedules') . ' - ' . $langs->trans(ucfirst($elementType));
 $helpUrl = 'FR:Module_' . $moduleName;
 
 saturne_header(0, '', $title, $helpUrl);
@@ -151,7 +151,7 @@ if (!empty($objectLinked) && empty($action)) {
     $objectLinked->fetch($id);
     if (!empty($prepareHead)) {
         $head = $prepareHead($objectLinked);
-        print dol_get_fiche_head($head, 'openinghours', $title, -1, $objectLinked->picto);
+        print dol_get_fiche_head($head, 'schedules', $title, -1, $objectLinked->picto);
     }
 
     // Object card
@@ -196,7 +196,7 @@ if (!empty($objectLinked) && empty($action)) {
 
     print dol_get_fiche_end();
 
-    print load_fiche_titre($langs->trans(ucfirst($elementType) . 'OpeningHours'), '', '');
+    print load_fiche_titre($langs->trans(ucfirst($elementType) . 'Schedules'), '', '');
 
     print '<form method="POST" action="' . $_SERVER['REQUEST_URI'] . '">';
     print '<input type="hidden" name="token" value="' . newToken() . '">';
