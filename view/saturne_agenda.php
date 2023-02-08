@@ -29,9 +29,9 @@ if (file_exists('../saturne.main.inc.php')) {
 }
 
 // Get module parameters
-$moduleName        = GETPOST('module_name', 'alpha');
-$objectType        = GETPOST('object_type', 'alpha');
-$objectParentType  = GETPOSTISSET('object_parent_type') ? GETPOST('object_parent_type', 'alpha') : $objectType;
+$moduleName       = GETPOST('module_name', 'alpha');
+$objectType       = GETPOST('object_type', 'alpha');
+$objectParentType = GETPOSTISSET('object_parent_type') ? GETPOST('object_parent_type', 'alpha') : $objectType;
 
 $moduleNameLowerCase = strtolower($moduleName);
 
@@ -44,16 +44,12 @@ require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameL
 // Global variables definitions
 global $conf, $db, $langs, $hookmanager, $user;
 
-// Load translation files required by the page
-// @todo gérer fichier langs
-$langs->loadLangs([$moduleNameLowerCase . '@' . $moduleNameLowerCase, 'other']);
-
 // Get parameters
-$id          = GETPOST('id', 'int');
-$ref         = GETPOST('ref', 'alpha');
-$action      = GETPOST('action', 'aZ09');
-$cancel      = GETPOST('cancel', 'aZ09');
-$backtopage  = GETPOST('backtopage', 'alpha');
+$id         = GETPOST('id', 'int');
+$ref        = GETPOST('ref', 'alpha');
+$action     = GETPOST('action', 'aZ09');
+$cancel     = GETPOST('cancel', 'aZ09');
+$backtopage = GETPOST('backtopage', 'alpha');
 
 if (GETPOST('actioncode', 'array')) {
     $actioncode = GETPOST('actioncode', 'array', 3);
@@ -92,7 +88,7 @@ $classname   = ucfirst($objectType);
 $object      = new $classname($db);
 $extrafields = new ExtraFields($db);
 
-$hookmanager->initHooks([$object->element . 'agenda', 'globalcard']); // Note that conf->hooks_modules contains array
+$hookmanager->initHooks([$objectType . 'agenda', 'globalcard']); // Note that conf->hooks_modules contains array
 
 // Fetch optionals attributes and labels
 $extrafields->fetch_name_optionals_label($object->table_element);
@@ -137,13 +133,10 @@ if (empty($reshook)) {
 *	View
 */
 
-$title    = $langs->trans('Agenda') . ' - ' . $langs->trans(ucfirst($object->element));
+$title    = $langs->trans('Agenda') . ' - ' . $langs->trans(ucfirst($objectType));
 $help_url = 'FR:Module_' . $moduleName;
-// @todo gérer l'include css/js
-$morejs  = ['/saturne/js/saturne.js'];
-$morecss = ['/saturne/css/saturne.css'];
 
-llxHeader('', $title, $help_url, '', 0, 0, $morejs, $morecss);
+saturne_header(0,'', $title, $help_url);
 
 if ($id > 0 || !empty($ref)) {
     saturne_banner_tab($object, 'agenda', $title);
@@ -158,21 +151,19 @@ if ($id > 0 || !empty($ref)) {
     print dol_get_fiche_end();
 
     // Actions buttons
-    $out = '&origin=' . urlencode($object->element . '@' . $object->module) . '&originid=' . $object->id;
+    $out = '&origin=' . urlencode($objectType . '@' . $object->module) . '&originid=' . $object->id;
     $urlbacktopage = $_SERVER['REQUEST_URI'];
     $out .= '&backtopage=' . urlencode($urlbacktopage);
 
-    print '<div class="tabsAction">';
+    $newcardbutton = '';
     if (isModEnabled('agenda')) {
         if (!empty($user->rights->agenda->myactions->create) || !empty($user->rights->agenda->allactions->create)) {
-            print '<a class="butAction" href="' . DOL_URL_ROOT . '/comm/action/card.php?action=create' . $out . '">' . $langs->trans('AddAction') . '</a>';
-        } else {
-            print '<a class="butActionRefused classfortooltip" href="#">' . $langs->trans('AddAction') . '</a>';
+            $newcardbutton .= dolGetButtonTitle($langs->trans('AddAction'), '', 'fa fa-plus-circle', DOL_URL_ROOT.'/comm/action/card.php?action=create'.$out);
         }
     }
-    print '</div>';
 
     if (isModEnabled('agenda') && (!empty($user->rights->agenda->myactions->read) || !empty($user->rights->agenda->allactions->read))) {
+        print '<br>';
         $param = '&id=' . $object->id;
         if (!empty($contextpage) && $contextpage != $_SERVER['PHP_SELF']) {
             $param .= '&contextpage=' . urlencode($contextpage);
@@ -181,7 +172,7 @@ if ($id > 0 || !empty($ref)) {
             $param .= '&limit=' . urlencode($limit);
         }
 
-        print load_fiche_titre($langs->trans('ActionsOn' . ucfirst($object->element)), '', '');
+        print load_fiche_titre($langs->trans('ActionsOn' . ucfirst($objectType)), $newcardbutton, '');
 
         // List of all actions
         $filters = [];

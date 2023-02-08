@@ -29,9 +29,9 @@ if (file_exists('../saturne.main.inc.php')) {
 }
 
 // Get module parameters
-$moduleName        = GETPOST('module_name', 'alpha');
-$objectType        = GETPOST('object_type', 'alpha');
-$objectParentType  = GETPOSTISSET('object_parent_type') ? GETPOST('object_parent_type', 'alpha') : $objectType;
+$moduleName       = GETPOST('module_name', 'alpha');
+$objectType       = GETPOST('object_type', 'alpha');
+$objectParentType = GETPOSTISSET('object_parent_type') ? GETPOST('object_parent_type', 'alpha') : $objectType;
 
 $moduleNameLowerCase = strtolower($moduleName);
 
@@ -42,23 +42,19 @@ require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameL
 // Global variables definitions
 global $conf, $db, $langs, $hookmanager, $user;
 
-// Load translation files required by the page
-// @todo gérer fichier langs
-$langs->loadLangs([$moduleNameLowerCase . '@' . $moduleNameLowerCase, 'companies']);
-
 // Get parameters
-$id          = GETPOST('id', 'int');
-$ref         = GETPOST('ref', 'alpha');
-$action      = GETPOST('action', 'aZ09');
-$cancel      = GETPOST('cancel', 'aZ09');
-$backtopage  = GETPOST('backtopage', 'alpha');
+$id         = GETPOST('id', 'int');
+$ref        = GETPOST('ref', 'alpha');
+$action     = GETPOST('action', 'aZ09');
+$cancel     = GETPOST('cancel', 'aZ09');
+$backtopage = GETPOST('backtopage', 'alpha');
 
 // Initialize technical objects
 $classname   = ucfirst($objectType);
 $object      = new $classname($db);
 $extrafields = new ExtraFields($db);
 
-$hookmanager->initHooks([$object->element . 'note', 'globalcard']); // Note that conf->hooks_modules contains array
+$hookmanager->initHooks([$objectType . 'note', 'globalcard']); // Note that conf->hooks_modules contains array
 
 // Fetch optionals attributes and labels
 $extrafields->fetch_name_optionals_label($object->table_element);
@@ -91,13 +87,10 @@ if (empty($reshook)) {
 *	View
 */
 
-$title    = $langs->trans('Note') . ' - ' . $langs->trans(ucfirst($object->element));
+$title    = $langs->trans('Note') . ' - ' . $langs->trans(ucfirst($objectType));
 $help_url = 'FR:Module_' . $moduleName;
-// @todo gérer l'include css/js
-$morejs  = ['/saturne/js/saturne.js'];
-$morecss = ['/saturne/css/saturne.css'];
 
-llxHeader('', $title, $help_url, '', 0, 0, $morejs, $morecss);
+saturne_header(0, '', $title, $help_url);
 
 if ($id > 0 || !empty($ref)) {
     saturne_banner_tab($object, 'note', $title);
