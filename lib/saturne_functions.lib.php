@@ -137,7 +137,7 @@ function saturne_banner_tab($object, $tabactive, $title) {
     $head = $prepareHead($object);
     print dol_get_fiche_head($head, $tabactive, $title, -1, $object->picto);
 
-    $linkback = '<a href="' . dol_buildpath('/' . $moduleNameLowerCase . '/view/' . $objectType . '/' . $objectType . '_list.php', 1) . '?restore_lastsearch_values=1' . '">' . $langs->trans('BackToList') . '</a>';
+    $linkback = '<a href="' . dol_buildpath('/' . $moduleNameLowerCase . '/view/' . $objectParentType . '/' . $objectParentType . '_list.php?object_type=' . $objectType . '&restore_lastsearch_values=1', 1)  . '">' . $langs->trans('BackToList') . '</a>';
 
     $morehtmlref = '<div class="refidno">';
     // Thirdparty

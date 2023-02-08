@@ -39,7 +39,7 @@ $moduleNameLowerCase = strtolower($moduleName);
 require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
+require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectParentType . '.class.php';
 require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' . $objectParentType . '.lib.php';
 
 // Global variables definitions
@@ -79,8 +79,8 @@ if (!$sortorder) {
 }
 
 // Initialize technical objects
-$classname   = ucfirst($objectType);
-$object      = new $classname($db);
+$classname   = ucfirst($objectParentType);
+$object      = new $classname($db, $objectType ?: '');
 $extrafields = new ExtraFields($db);
 
 $hookmanager->initHooks([$object->element . 'note', 'globalcard']); // Note that conf->hooks_modules contains array

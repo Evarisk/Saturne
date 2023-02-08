@@ -36,7 +36,7 @@ $objectParentType  = GETPOSTISSET('object_parent_type') ? GETPOST('object_parent
 $moduleNameLowerCase = strtolower($moduleName);
 
 // Libraries
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
+require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectParentType . '.class.php';
 require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' . $objectParentType . '.lib.php';
 
 // Global variables definitions
@@ -54,8 +54,8 @@ $cancel      = GETPOST('cancel', 'aZ09');
 $backtopage  = GETPOST('backtopage', 'alpha');
 
 // Initialize technical objects
-$classname   = ucfirst($objectType);
-$object      = new $classname($db);
+$classname   = ucfirst($objectParentType);
+$object      = new $classname($db, $objectType ?: '');
 $extrafields = new ExtraFields($db);
 
 $hookmanager->initHooks([$object->element . 'note', 'globalcard']); // Note that conf->hooks_modules contains array
