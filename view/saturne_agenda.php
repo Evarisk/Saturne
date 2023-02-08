@@ -38,11 +38,11 @@ $moduleNameLowerCase = strtolower($moduleName);
 // Libraries
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
 
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectParentType . '.class.php';
+require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
 require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' . $objectParentType . '.lib.php';
 
 // Global variables definitions
-global $conf, $db, $hookmanager, $langs, $user;
+global $conf, $db, $langs, $hookmanager, $user;
 
 // Load translation files required by the page
 // @todo gérer fichier langs
@@ -88,8 +88,8 @@ if (!$sortorder) {
 }
 
 // Initialize technical objects
-$classname   = ucfirst($objectParentType);
-$object      = new $classname($db, $objectType ?: '');
+$classname   = ucfirst($objectType);
+$object      = new $classname($db);
 $extrafields = new ExtraFields($db);
 
 $hookmanager->initHooks([$object->element . 'agenda', 'globalcard']); // Note that conf->hooks_modules contains array

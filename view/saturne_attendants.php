@@ -41,7 +41,7 @@ if (isModEnabled('societe')) {
     require_once DOL_DOCUMENT_ROOT . '/contact/class/contact.class.php';
 }
 
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectParentType . '.class.php';
+require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
 require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' . $objectParentType . '.lib.php';
 
 // Global variables definitions
@@ -60,9 +60,9 @@ $backtopage  = GETPOST('backtopage', 'alpha');
 
 // Initialize technical objects
 // @Todo a voir l'objet signature
-$classname          = ucfirst($objectParentType);
+$classname          = ucfirst($objectType);
 //$signatureClassname = ucfirst($objectType) . 'Signature';
-$object             = new $classname($db, $objectType ?: '');
+$object             = new $classname($db);
 $signatory          = new Signature($db);
 $usertmp            = new User($db);
 if (isModEnabled('societe')) {
@@ -315,7 +315,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
                 <div class="notice-title"><?php echo $langs->trans('DisclaimerSignatureTitle') ?></div>
                 <div class="notice-subtitle"><?php echo $langs->trans(ucfirst($objectType) . 'MustBeValidatedToSign') ?></div>
             </div>
-            <a class="butAction" style="width = 100%;margin-right:0" href="<?php echo dol_buildpath('/custom/' . $moduleNameLowerCase . '/view/' . $objectParentType . '/' . $objectParentType . '_card.php?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $objectType, 1); ?>"><?php echo $langs->trans('GoToValidate') ?></a>;
+            <a class="butAction" style="width = 100%;margin-right:0" href="<?php echo dol_buildpath('/custom/' . $moduleNameLowerCase . '/view/' . $objectType . '/' . $objectType . '_card.php?id=' . $id, 1); ?>"><?php echo $langs->trans('GoToValidate') ?></a>;
         </div>
     <?php endif; ?>
     <div class="noticeSignatureSuccess wpeo-notice notice-success hidden">
