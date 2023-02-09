@@ -48,6 +48,7 @@ function saturne_header($load_media_gallery = 0, $head = '', $title = '', $help_
 	} else {
 		$arrayofcss = '/saturne/css/saturne.css';
 	}
+	$arrayofcss[] = '/' . $moduleNameLowerCase . '/css/' . $moduleNameLowerCase . '.css';
 
 	//JS
 	if (is_array($arrayofjs)) {
@@ -55,6 +56,7 @@ function saturne_header($load_media_gallery = 0, $head = '', $title = '', $help_
 	} else {
 		$arrayofjs  = '/saturne/js/saturne.min.js';
 	}
+	$arrayofjs[] = '/' . $moduleNameLowerCase . '/js/' . $moduleNameLowerCase . '.min.js';
 
 	//Langs
 	$langs->loadLangs(['saturne@saturne', $moduleNameLowerCase.'@'.$moduleNameLowerCase]);
