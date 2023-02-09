@@ -38,24 +38,16 @@ require_once __DIR__ . '/documents.lib.php';
  * 		@param		integer				$disablenofollow		Disable the "nofollow" on meta robot header
  * 		@param		integer				$disablenoindex			Disable the "noindex" on meta robot header
  */
-function saturne_header($load_media_gallery = 0, $head = '', $title = '', $help_url = '', $target = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $morequerystring = '', $morecssonbody = '', $replacemainareaby = '', $disablenofollow = 0, $disablenoindex = 0) {
+function saturne_header($load_media_gallery = 0, $head = '', $title = '', $help_url = '', $target = '', $disablejs = 0, $disablehead = 0, $arrayofjs = [], $arrayofcss = [], $morequerystring = '', $morecssonbody = '', $replacemainareaby = '', $disablenofollow = 0, $disablenoindex = 0) {
 
 	global $langs, $moduleNameLowerCase;
 
 	//CSS
-	if (is_array($arrayofcss)) {
-		$arrayofcss[] = '/saturne/css/saturne.css';
-	} else {
-		$arrayofcss = '/saturne/css/saturne.css';
-	}
+	$arrayofcss[] = '/saturne/css/saturne.css';
 	$arrayofcss[] = '/' . $moduleNameLowerCase . '/css/' . $moduleNameLowerCase . '.css';
 
 	//JS
-	if (is_array($arrayofjs)) {
-		$arrayofjs[]  = '/saturne/js/saturne.min.js';
-	} else {
-		$arrayofjs  = '/saturne/js/saturne.min.js';
-	}
+	$arrayofjs[] = '/saturne/js/saturne.min.js';
 	$arrayofjs[] = '/' . $moduleNameLowerCase . '/js/' . $moduleNameLowerCase . '.min.js';
 
 	//Langs
