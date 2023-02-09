@@ -23,9 +23,6 @@ require_once __DIR__ . '/documents.lib.php';
 /**
  *      Print llxHeader with Saturne custom enhancements
  *
- *      @param      string				$module					Module name
- *      @param      string				$action					Post action
- *      @param      string				$subaction				Post sub action
  *      @param      integer				$load_media_gallery		Load media gallery on page
  *      @param      string				$head					Show header
  *      @param      string				$title					Page title
@@ -73,19 +70,19 @@ function saturne_header($load_media_gallery = 0, $head = '', $title = '', $help_
 /**
  *      Show pages based on loaded pages array
  *
- *      @param      integer				$module			Module name
+ *      @param      integer				$moduleName			Module name
  *      @param      array				$object			Object in current page
  *      @param      integer				$permission		Permission to access to current page
  *      @return     string				Pages html content
  *
  */
-function saturne_check_access($module, $object, $permission) {
+function saturne_check_access($moduleName, $object, $permission) {
 
 	global $conf, $langs, $user;
 
-	if (!isModEnabled($module) || !isModEnabled('saturne')) {
-		if (!isModEnabled($module)){
-			setEventMessage($langs->transnoentitiesnoconv('Enable' . ucfirst($module)), 'warnings');
+	if (!isModEnabled($moduleName) || !isModEnabled('saturne')) {
+		if (!isModEnabled($moduleName)){
+			setEventMessage($langs->transnoentitiesnoconv('Enable' . ucfirst($moduleName)), 'warnings');
 		}
 		if (!isModEnabled('saturne')) {
 			setEventMessage($langs->trans('EnableSaturne'), 'warnings');
@@ -107,7 +104,7 @@ function saturne_check_access($module, $object, $permission) {
 		if ($object->id > 0) {
 			if ($object->entity != $conf->entity) {
 				setEventMessage($langs->trans('ChangeEntityRedirection'), 'warnings');
-				$urltogo = dol_buildpath('/custom/' . $module . '/' . $module . 'index.php?mainmenu=' . $module, 1);
+				$urltogo = dol_buildpath('/custom/' . $moduleName . '/' . $moduleName . 'index.php?mainmenu=' . $moduleName, 1);
 				header("Location: " . $urltogo);
 				exit;
 			}

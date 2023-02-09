@@ -19,7 +19,7 @@
 /**
  *      Print medias from media gallery
  *
- *      @param      string				$module 	Module name
+ *      @param      string				$moduleName 	Module name
  *      @param      string				$modulepart Submodule name
  *      @param      string				$sdir 		Directory path
  *      @param      integer				$size 		Media size
@@ -27,7 +27,7 @@
  *      @param      string				$maxWidth	Media max width
  *      @param      string				$offset		Media gallery offset page
  */
-function saturne_show_medias($module, $modulepart = 'ecm', $sdir, $size = 0, $maxHeight = 80, $maxWidth = 80, $offset = 1)
+function saturne_show_medias($moduleName, $modulepart = 'ecm', $sdir, $size = 0, $maxHeight = 80, $maxWidth = 80, $offset = 1)
 {
 	global $conf, $langs;
 
@@ -51,7 +51,7 @@ function saturne_show_medias($module, $modulepart = 'ecm', $sdir, $size = 0, $ma
 			$filearray = dol_sort_array($filearray, $sortfield, $sortorder);
 		}
 
-		$moduleImageNumberPerPageConf = strtoupper($module) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
+		$moduleImageNumberPerPageConf = strtoupper($moduleName) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
 		for ($i = (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf); $i < ($conf->global->$moduleImageNumberPerPageConf + (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf));  $i++) {
 			$file = $filearray[$i]['name'];
 
@@ -59,7 +59,7 @@ function saturne_show_medias($module, $modulepart = 'ecm', $sdir, $size = 0, $ma
 				$nbphoto++;
 
 				if ($size == 'mini' || $size == 'small') {   // Format vignette
-					$relativepath = $module . '/medias/thumbs';
+					$relativepath = $moduleName . '/medias/thumbs';
 					$modulepart   = 'ecm';
 					$path         = DOL_URL_ROOT . '/document.php?modulepart=' . $modulepart . '&attachment=0&file=' . str_replace('/', '%2F', $relativepath);
 
@@ -72,7 +72,7 @@ function saturne_show_medias($module, $modulepart = 'ecm', $sdir, $size = 0, $ma
 						<figure class="photo-image">
 							<?php
 							$file = preg_replace("/'/", "\\'", $file);
-							$urladvanced = getAdvancedPreviewUrl($modulepart, $module . '/medias/' .$file, 0, 'entity=' . $conf->entity);
+							$urladvanced = getAdvancedPreviewUrl($modulepart, $moduleName . '/medias/' .$file, 0, 'entity=' . $conf->entity);
 							?>
 							<a class="clicked-photo-preview" href="<?php echo $urladvanced; ?>"><i class="fas fa-2x fa-search-plus"></i></a>
 							<?php if (image_format_supported($file) >= 0) : ?>

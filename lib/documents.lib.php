@@ -218,8 +218,8 @@ function saturne_show_documents(string $modulepart, string $modulesubdir, string
 		$out .= '</th>';
 
 		if (!empty($hookmanager->hooks['formfile'])) {
-			foreach ($hookmanager->hooks['formfile'] as $module) {
-				if (method_exists($module, 'formBuilddocLineOptions')) {
+			foreach ($hookmanager->hooks['formfile'] as $moduleName) {
+				if (method_exists($moduleName, 'formBuilddocLineOptions')) {
 					$colspanmore++;
 					$out .= '<th></th>';
 				}
