@@ -62,7 +62,7 @@ class SaturneSchedules extends CommonObject
 		'entity'        => ['type' => 'integer',      'label' => 'Entity',           'enabled' => 1, 'position' => 10,  'notnull' => 1, 'visible' => 0, 'index' => 1],
 		'date_creation' => ['type' => 'datetime',     'label' => 'DateCreation',     'enabled' => 1, 'position' => 20,  'notnull' => 1, 'visible' => 0],
 		'tms'           => ['type' => 'timestamp',    'label' => 'DateModification', 'enabled' => 1, 'position' => 30,  'notnull' => 0, 'visible' => 0],
-		'status'        => ['type' => 'smallint',     'label' => 'Status',           'enabled' => 1, 'position' => 40,  'notnull' => 0, 'visible' => 0, 'index' => 1],
+		'status'        => ['type' => 'smallint',     'label' => 'Status',           'enabled' => 1, 'position' => 40,  'notnull' => 1, 'visible' => 0, 'index' => 1],
 		'element_type'  => ['type' => 'varchar(50)',  'label' => 'ElementType',      'enabled' => 1, 'position' => 50,  'notnull' => 0, 'visible' => 0],
 		'element_id'    => ['type' => 'integer',      'label' => 'ElementID',        'enabled' => 1, 'position' => 60,  'notnull' => 1, 'visible' => 0],
 		'monday'        => ['type' => 'varchar(128)', 'label' => 'Day 0',            'enabled' => 1, 'position' => 70,  'notnull' => 0, 'visible' => 1],

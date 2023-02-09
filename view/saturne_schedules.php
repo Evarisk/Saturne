@@ -96,13 +96,13 @@ if ($reshook < 0) {
 
 if (empty($reshook)) {
     if ($action == 'update' && $permissiontoadd) {
-        $object->monday       = GETPOST('monday', 'alpha');
-        $object->tuesday      = GETPOST('tuesday', 'alpha');
-        $object->wednesday    = GETPOST('wednesday', 'alpha');
-        $object->thursday     = GETPOST('thursday', 'alpha');
-        $object->friday       = GETPOST('friday', 'alpha');
-        $object->saturday     = GETPOST('saturday', 'alpha');
-        $object->sunday       = GETPOST('sunday', 'alpha');
+        $object->monday    = GETPOST('monday', 'alpha');
+        $object->tuesday   = GETPOST('tuesday', 'alpha');
+        $object->wednesday = GETPOST('wednesday', 'alpha');
+        $object->thursday  = GETPOST('thursday', 'alpha');
+        $object->friday    = GETPOST('friday', 'alpha');
+        $object->saturday  = GETPOST('saturday', 'alpha');
+        $object->sunday    = GETPOST('sunday', 'alpha');
 
         $object->element_type = $elementType;
         $object->element_id   = $id;
