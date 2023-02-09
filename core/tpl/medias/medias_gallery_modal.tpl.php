@@ -1,6 +1,6 @@
 <?php
 
-global $moduleName, $moduleNameLowerCase, $action, $subaction, $db;
+global $conf, $moduleName, $moduleNameLowerCase, $action, $subaction, $db;
 
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmdirectory.class.php';
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
@@ -11,8 +11,9 @@ $ecmfile          = new EcmFiles($db);
 if ( ! $error && $subaction == "uploadPhoto" && ! empty($conf->global->MAIN_UPLOAD_DOC)) {
 
 	// Define relativepath and upload_dir
-	$relativepath                                             = $module . '/medias';
+	$relativepath                                             = $moduleNameLowerCase . '/medias';
 	$uploadDir                                                = $conf->ecm->dir_output . '/' . $relativepath;
+
 	if (is_array($_FILES['userfile']['tmp_name'])) $userfiles = $_FILES['userfile']['tmp_name'];
 	else $userfiles                                           = array($_FILES['userfile']['tmp_name']);
 
@@ -56,13 +57,13 @@ if ( ! $error && $subaction == "addFiles") {
 	$object = new $objectType($db);
 	$object->fetch($objectId);
 
-	$modObjectName = strtoupper($module) . '_' . strtoupper($objectType) . '_ADDON';
+	$modObjectName = strtoupper($moduleNameLowerCase) . '_' . strtoupper($objectType) . '_ADDON';
 	$modObject     = new $conf->global->$modObjectName($db);
 
 	if (dol_strlen($object->ref) > 0) {
-		$pathToObjectPhoto = $conf->$module->multidir_output[$conf->entity] . '/'. $objectType .'/' . $object->ref . '/' . $objectSubdir;
+		$pathToObjectPhoto = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType .'/' . $object->ref . '/' . $objectSubdir;
 	} else {
-		$pathToObjectPhoto = $conf->$module->multidir_output[$conf->entity] . '/'. $objectType .'/tmp/' . $modObject->prefix . '0/' . $objectSubdir ;
+		$pathToObjectPhoto = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType .'/tmp/' . $modObject->prefix . '0/' . $objectSubdir ;
 	}
 
 	if (preg_match('/vVv/', $filenames)) {
@@ -73,19 +74,19 @@ if ( ! $error && $subaction == "addFiles") {
 	}
 
 	if ( ! (empty($filenames))) {
-		if ( ! is_dir($conf->$module->multidir_output[$conf->entity] . '/'. $objectType . '/tmp/')) {
-			dol_mkdir($conf->$module->multidir_output[$conf->entity] . '/'. $objectType . '/tmp/');
+		if ( ! is_dir($conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType . '/tmp/')) {
+			dol_mkdir($conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType . '/tmp/');
 		}
 
-		if ( ! is_dir($conf->$module->multidir_output[$conf->entity] . '/'. $objectType . '/' . (dol_strlen($object->ref) > 0 ? $object->ref : 'tmp/' . $modObject->prefix . '0/') )) {
-			dol_mkdir($conf->$module->multidir_output[$conf->entity] . '/'. $objectType . '/' . (dol_strlen($object->ref) > 0 ? $object->ref : 'tmp/' . $modObject->prefix . '0/'));
+		if ( ! is_dir($conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType . '/' . (dol_strlen($object->ref) > 0 ? $object->ref : 'tmp/' . $modObject->prefix . '0/') )) {
+			dol_mkdir($conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType . '/' . (dol_strlen($object->ref) > 0 ? $object->ref : 'tmp/' . $modObject->prefix . '0/'));
 		}
 
 		foreach ($filenames as $filename) {
 			$entity = ($conf->entity > 1) ? '/' . $conf->entity : '';
 
-			if (is_file($conf->ecm->multidir_output[$conf->entity] . '/'. $module .'/medias/' . $filename)) {
-				$pathToECMPhoto = $conf->ecm->multidir_output[$conf->entity] . '/'. $module .'/medias/' . $filename;
+			if (is_file($conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias/' . $filename)) {
+				$pathToECMPhoto = $conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias/' . $filename;
 
 				if ( ! is_dir($pathToObjectPhoto)) {
 					mkdir($pathToObjectPhoto, 0777, true);
@@ -93,7 +94,7 @@ if ( ! $error && $subaction == "addFiles") {
 
 				if (file_exists($pathToECMPhoto)) {
 					copy($pathToECMPhoto, $pathToObjectPhoto . '/' . $filename);
-					$ecmfile->fetch(0,'',($conf->entity > 1 ? $conf->entity . '/' : ''). 'ecm/'. $module .'/medias/' . $filename);
+					$ecmfile->fetch(0,'',($conf->entity > 1 ? $conf->entity . '/' : ''). 'ecm/'. $moduleNameLowerCase .'/medias/' . $filename);
 					$date      = dol_print_date(dol_now(),'dayxcard');
 					$extension = pathinfo($filename, PATHINFO_EXTENSION);
 					$newFilename = $conf->entity . '_' . $ecmfile->id . '_' . (dol_strlen($object->ref) > 0 ? $object->ref : $modObject->getNextValue($object)) . '_' . $date . '.' . $extension;
@@ -170,7 +171,7 @@ if (is_array($submitFileErrorText)) {
 					print '<input type="hidden" name="token" value="'.newToken().'">';
 					if (( ! empty($conf->use_javascript_ajax) && empty($conf->global->MAIN_ECM_DISABLE_JS)) || ! empty($section)) {
 						$sectiondir = GETPOST('file', 'alpha') ? GETPOST('file', 'alpha') : GETPOST('section_dir', 'alpha');
-						print '<!-- Start form to attach new file in '. $module .'_photo_view.tpl.php sectionid=' . $section . ' sectiondir=' . $sectiondir . ' -->' . "\n";
+						print '<!-- Start form to attach new file in '. $moduleNameLowerCase .'_photo_view.tpl.php sectionid=' . $section . ' sectiondir=' . $sectiondir . ' -->' . "\n";
 						include_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
 						print '<strong>' . $langs->trans('AddFile') . '</strong>'
 						?>
@@ -195,16 +196,16 @@ if (is_array($submitFileErrorText)) {
 			</div>
 			<div class="ecm-photo-list-content">
 				<?php
-				$relativepath = $module . '/medias/thumbs';
-				print saturne_show_medias($module, 'ecm', $conf->ecm->multidir_output[$conf->entity] . '/'. $module .'/medias', ($conf->browser->layout == 'phone' ? 'mini' : 'small'), 80, 80, (!empty($offset) ? $offset : 1));
+				$relativepath = $moduleNameLowerCase . '/medias/thumbs';
+				print saturne_show_medias($moduleNameLowerCase, 'ecm', $conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias', ($conf->browser->layout == 'phone' ? 'mini' : 'small'), 80, 80, (!empty($offset) ? $offset : 1));
 				?>
 			</div>
 		</div>
 		<!-- Modal-Footer -->
 		<div class="modal-footer">
 			<?php
-			$filearray                    = dol_dir_list($conf->ecm->multidir_output[$conf->entity] . '/'. $module .'/medias/', "files", 0, '', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC);
-			$moduleImageNumberPerPageConf = strtoupper($module) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
+			$filearray                    = dol_dir_list($conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias/', "files", 0, '', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC);
+			$moduleImageNumberPerPageConf = strtoupper($moduleNameLowerCase) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
 			$allMediasNumber              = count($filearray);
 			$pagesCounter                 = $conf->global->$moduleImageNumberPerPageConf ? ceil($allMediasNumber/($conf->global->$moduleImageNumberPerPageConf ?: 1)) : 1;
 			$page_array                   = saturne_load_pagination($pagesCounter, $loadedPageArray, $offset);
