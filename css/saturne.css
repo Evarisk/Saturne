@@ -2048,29 +2048,6 @@ div.wpeo-modal-patchnote .wpeo-button {
   background-color: green;
 }
 
-.digirisk-signature-container {
-  max-width: 800px;
-  background: #fff;
-  -webkit-box-shadow: 0 0 40px 0 rgba(0, 0, 0, 0.1);
-  box-shadow: 0 0 40px 0 rgba(0, 0, 0, 0.1);
-  margin: 1.5em auto 0 auto;
-  padding: 2em;
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
-}
-.digirisk-signature-container * {
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
-}
-.digirisk-signature-container .signature .signature-element .wpeo-button.modal-signature-open {
-  display: none;
-}
-.digirisk-signature-container .signature .signature-element img {
-  width: 100%;
-  height: auto;
-  border: 1px solid rgba(0, 0, 0, 0.4) !important;
-}
-
 .ui-dialog.ui-corner-all.ui-widget.ui-widget-content.ui-front.ui-draggable.ui-resizable.preview-photo {
   z-index: 2100 !important;
 }

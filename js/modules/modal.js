@@ -89,11 +89,6 @@ window.saturne.modal.openModal = function ( event ) {
 	$('#'+modalToOpen).find('.wpeo-button').attr('value', fromId);
 	$('#'+modalToOpen).addClass('modal-active');
 
-	// Open modal signature.
-	if ($(this).hasClass('modal-signature-open')) {
-		window.saturne.signature.modalSignatureOpened($(this));
-	}
-
 	$('.notice').addClass('hidden');
 };
 
