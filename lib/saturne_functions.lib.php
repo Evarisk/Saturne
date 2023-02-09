@@ -109,25 +109,35 @@ function saturne_check_access($moduleName, $object, $permission) {
 /**
  * Print dol_banner_tab with Saturne custom enhancements
  *
- * @param CommonObject $object      Current object
- * @param string       $tabactive   Tab active in navbar
- * @param string       $title       Title navbar
- * @param int          $shownav     Show Condition (navigation is shown if value is 1)
- * @param string       $fieldid     Field name for select next et previous (we make the select max and min on this field). Use 'none' for no prev/next search.
- * @param string       $fieldref    Field name objet ref (object->ref) for select next and previous
+ * @param CommonObject $object    Current object
+ * @param string       $tabactive Tab active in navbar
+ * @param string       $title     Title navbar
  */
-function saturne_banner_tab(CommonObject $object, string $tabactive, string $title, string $paramid = 'ref', int $shownav = 1, string $fieldid = 'ref', string $fieldref = 'ref')
+function saturne_fiche_head(CommonObject $object, string $tabactive, string $title)
+{
+    global $objectParentType;
+
+    // Configuration header
+    $prepareHead = $objectParentType . 'PrepareHead';
+    $head = $prepareHead($object);
+    print dol_get_fiche_head($head, $tabactive, $title, -1, $object->picto);
+}
+
+/**
+ * Print dol_banner_tab with Saturne custom enhancements
+ *
+ * @param CommonObject $object   Current object
+ * @param int          $shownav  Show Condition (navigation is shown if value is 1)
+ * @param string       $fieldid  Field name for select next et previous (we make the select max and min on this field). Use 'none' for no prev/next search.
+ * @param string       $fieldref Field name objet ref (object->ref) for select next and previous
+ */
+function saturne_banner_tab(CommonObject $object, string $paramid = 'ref', int $shownav = 1, string $fieldid = 'ref', string $fieldref = 'ref')
 {
     global $db, $langs, $hookmanager, $moduleName, $moduleNameLowerCase, $objectParentType, $objectType;
 
     if (isModEnabled('project')) {
         require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
     }
-
-    // Configuration header
-    $prepareHead = $objectParentType . 'PrepareHead';
-    $head = $prepareHead($object);
-    print dol_get_fiche_head($head, $tabactive, $title, -1, $object->picto);
 
     $linkback = '<a href="' . dol_buildpath('/' . $moduleNameLowerCase . '/view/' . ($objectParentType != $objectType ? $objectParentType : $objectType) . '/' . ($objectParentType != $objectType ? $objectParentType : $objectType) . '_list.php', 1) . '?restore_lastsearch_values=1&object_type=' . $object->type . '">' . $langs->trans('BackToList') . '</a>';
 

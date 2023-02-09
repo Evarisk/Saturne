@@ -121,7 +121,8 @@ $helpUrl = 'FR:Module_' . $moduleName;
 saturne_header(0, '', $title, $helpUrl);
 
 if ($id > 0 || !empty($ref)) {
-    saturne_banner_tab($object, 'document', $title);
+    saturne_fiche_head($object, 'document', $title);
+    saturne_banner_tab($object);
 
     // Build file list
     $filearray = dol_dir_list($upload_dir, 'files', 0, '', '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_DESC : SORT_ASC), 1);

@@ -93,7 +93,8 @@ $help_url = 'FR:Module_' . $moduleName;
 saturne_header(0, '', $title, $help_url);
 
 if ($id > 0 || !empty($ref)) {
-    saturne_banner_tab($object, 'note', $title);
+    saturne_fiche_head($object, 'note', $title);
+    saturne_banner_tab($object);
 
     print '<div class="fichecenter">';
 
