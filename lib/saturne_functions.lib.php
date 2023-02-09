@@ -118,18 +118,19 @@ function saturne_check_access($module, $object, $permission) {
 /**
  * Print dol_banner_tab with Saturne custom enhancements
  *
- * @param CommonObject $object    Current object
- * @param string       $tabactive Tab active in navbar
- * @param string       $title     Title navbar
+ * @param CommonObject $object      Current object
+ * @param string       $tabactive   Tab active in navbar
+ * @param string       $title       Title navbar
+ * @param int          $shownav     Show Condition (navigation is shown if value is 1)
+ * @param string       $fieldid     Field name for select next et previous (we make the select max and min on this field). Use 'none' for no prev/next search.
+ * @param string       $fieldref    Field name objet ref (object->ref) for select next and previous
  */
-function saturne_banner_tab($object, $tabactive, $title) {
-    global $db, $langs, $moduleNameLowerCase, $objectParentType, $objectType;
+function saturne_banner_tab(CommonObject $object, string $tabactive, string $title, string $paramid = 'ref', int $shownav = 1, string $fieldid = 'ref', string $fieldref = 'ref')
+{
+    global $db, $langs, $hookmanager, $moduleName, $moduleNameLowerCase, $objectParentType, $objectType;
 
     if (isModEnabled('project')) {
         require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
-    }
-    if (isModEnabled('contrat')) {
-        require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
     }
 
     // Configuration header
@@ -137,14 +138,17 @@ function saturne_banner_tab($object, $tabactive, $title) {
     $head = $prepareHead($object);
     print dol_get_fiche_head($head, $tabactive, $title, -1, $object->picto);
 
-    $linkback = '<a href="' . dol_buildpath('/' . $moduleNameLowerCase . '/view/' . $objectType . '/' . $objectType . '_list.php', 1) . '?restore_lastsearch_values=1' . '">' . $langs->trans('BackToList') . '</a>';
+    $linkback = '<a href="' . dol_buildpath('/' . $moduleNameLowerCase . '/view/' . ($objectParentType != $objectType ? $objectParentType : $objectType) . '/' . ($objectParentType != $objectType ? $objectParentType : $objectType) . '_list.php', 1) . '?restore_lastsearch_values=1&object_type=' . $object->type . '">' . $langs->trans('BackToList') . '</a>';
 
     $morehtmlref = '<div class="refidno">';
     // Thirdparty
-    // @todo a test sur dolimeet
     if (isModEnabled('societe')) {
-        $object->fetch_thirdparty();
-        $morehtmlref .= $langs->trans('ThirdParty') . ' : ' . (is_object($object->thirdparty) ? $object->thirdparty->getNomUrl(1) : '') . '<br>';
+        if (!empty($object->fk_soc)) {
+            $object->fetch_thirdparty();
+            $morehtmlref .= $langs->trans('ThirdParty') . ' : ' . (is_object($object->thirdparty) ? $object->thirdparty->getNomUrl(1) : '') . '<br>';
+        } else {
+            $morehtmlref .= $langs->trans('ThirdParty') . ' : ' . '<br>';
+        }
     }
 
     // Project
@@ -154,26 +158,22 @@ function saturne_banner_tab($object, $tabactive, $title) {
             $project->fetch($object->fk_project);
             $morehtmlref .= $langs->trans('Project') . ' : ' . $project->getNomUrl(1, '', 1) . '<br>';
         } else {
-            $morehtmlref .= '';
+            $morehtmlref .= $langs->trans('Project') . ' : ' . '<br>';
         }
     }
 
-    // Contract @todo hook car spécifique a dolimeet
-    if (isModEnabled('contrat')) {
-        if ($objectType == 'trainingsession') {
-            if (!empty($object->fk_contrat)) {
-                $contract = new Contrat($db);
-                $contract->fetch($object->fk_contrat);
-                $morehtmlref .= $langs->trans('Contract') . ' : ' . $contract->getNomUrl(1, '', 1) . '<br>';
-            } else {
-                $morehtmlref .= '';
-            }
-        }
+    $parameters = [];
+    $reshook = $hookmanager->executeHooks('saturneBannerTab', $parameters, $object); // Note that $action and $object may have been modified by some hooks
+    if ($reshook < 0) {
+        setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+    } else {
+        $morehtmlref .= $hookmanager->resPrint;
     }
     $morehtmlref .= '</div>';
 
-    // @todo problème avec dolimeet
-    dol_banner_tab($object, 'ref', $linkback, 1, 'ref', 'ref', $morehtmlref);
+    $moreparam = '&module_name=' . $moduleName . '&object_parent_type=' . $objectParentType . '&object_type=' . $object->type;
+
+    dol_banner_tab($object, $paramid, $linkback, $shownav, $fieldid, $fieldref, $morehtmlref, $moreparam);
 
     print '<div class="underbanner clearboth"></div>';
 }
