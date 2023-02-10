@@ -22,7 +22,7 @@
  * @since   1.0.0
  * @version 1.0.0
  */
-window.eoxiaJS.menu = {};
+window.saturne.menu = {};
 
 /**
  * La méthode appelée automatiquement par la bibliothèque EoxiaJS.
@@ -32,8 +32,8 @@ window.eoxiaJS.menu = {};
  *
  * @return {void}
  */
-window.eoxiaJS.menu.init = function() {
-	window.eoxiaJS.menu.event();
+window.saturne.menu.init = function() {
+	window.saturne.menu.event();
 };
 
 /**
@@ -44,9 +44,9 @@ window.eoxiaJS.menu.init = function() {
  *
  * @return {void}
  */
-window.eoxiaJS.menu.event = function() {
-	$(document).on( 'click', ' .blockvmenu', window.eoxiaJS.menu.toggleMenu);
-	$(document).ready(function() { window.eoxiaJS.menu.setMenu()});
+window.saturne.menu.event = function() {
+	$(document).on( 'click', ' .blockvmenu', window.saturne.menu.toggleMenu);
+	$(document).ready(function() { window.saturne.menu.setMenu()});
 }
 
 /**
@@ -57,7 +57,7 @@ window.eoxiaJS.menu.event = function() {
  *
  * @return {void}
  */
-window.eoxiaJS.menu.toggleMenu = function() {
+window.saturne.menu.toggleMenu = function() {
 
 	var menu = $(this).closest('#id-left').find('a.vmenu, font.vmenudisabled, span.vmenu, a.vsmenu');
 	var elementParent = $(this).closest('#id-left').find('div.vmenu')
@@ -109,7 +109,7 @@ window.eoxiaJS.menu.toggleMenu = function() {
  *
  * @return {void}
  */
-window.eoxiaJS.menu.setMenu = function() {
+window.saturne.menu.setMenu = function() {
 	if ($('.blockvmenu.blockvmenufirst').length > 0) {
 		if ($('.blockvmenu.blockvmenufirst').html().match(/digiriskdolibarr|dolismq/)) {
 			$('span.vmenu').find('.fa-chevron-circle-left').parent().parent().parent().attr('style', 'cursor:pointer ! important')
