@@ -31,8 +31,9 @@ if ($action == 'pdfGeneration') {
 	$pdfName   = $fileInfos['filename'] . '.pdf';
 
 	$manualPdfGenerationConf = $moduleNameUpperCase . '_MANUAL_PDF_GENERATION';
+
 	// Write new file
-	if ( ! empty($conf->global->MAIN_ODT_AS_PDF) && $conf->global->DIGIRISKDOLIBARR_MANUAL_PDF_GENERATION > 0) {
+	if ( ! empty($conf->global->MAIN_ODT_AS_PDF) && $conf->global->$manualPdfGenerationConf > 0) {
 		try {
 			$odfHandler->exportAsAttachedPDF($file);
 			setEventMessages($langs->trans("FileGenerated") . ' - ' . $pdfName, null);
