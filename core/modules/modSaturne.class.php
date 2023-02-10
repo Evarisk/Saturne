@@ -40,7 +40,7 @@ class modSaturne extends DolibarrModules
 		global $langs, $conf;
 		$this->db = $db;
 
-        $langs->load('saturne@saturne');
+        $langs->loadLangs(['saturne@saturne', 'other@saturne']);
 		$this->numero = 436318;
 		$this->rights_class = 'saturne';
 		$this->family = '';
@@ -134,7 +134,7 @@ class modSaturne extends DolibarrModules
 			$this->menu[$r++] = [
 				'fk_menu'  => 'fk_mainmenu=' . $moduleNameLowerCase,
 				'type'     => 'left',
-				'titre'    => $langs->trans($moduleName . 'Config'),
+				'titre'    => $langs->trans('ModuleConfig'),
 				'prefix'   => '<i class="fas fa-cog pictofixedwidth"></i>',
 				'mainmenu' => $moduleNameLowerCase,
 				'leftmenu' => $moduleNameLowerCase . 'config',
