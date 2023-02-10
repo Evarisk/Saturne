@@ -29,15 +29,14 @@ if (file_exists('../saturne.main.inc.php')) {
 }
 
 // Get module parameters
-$moduleName       = GETPOST('module_name', 'alpha');
-$objectType       = GETPOST('object_type', 'alpha');
-$objectParentType = GETPOSTISSET('object_parent_type') ? GETPOST('object_parent_type', 'alpha') : $objectType;
+$moduleName = GETPOST('module_name', 'alpha');
+$objectType = GETPOST('object_type', 'alpha');
 
 $moduleNameLowerCase = strtolower($moduleName);
 
 // Libraries
 require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' . $objectParentType . '.lib.php';
+require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' .  $objectType . '.lib.php';
 
 // Global variables definitions
 global $conf, $db, $langs, $hookmanager, $user;
@@ -54,7 +53,7 @@ $classname   = ucfirst($objectType);
 $object      = new $classname($db);
 $extrafields = new ExtraFields($db);
 
-$hookmanager->initHooks([$objectType . 'note', 'saturnecard', 'globalcard']); // Note that conf->hooks_modules contains array
+$hookmanager->initHooks([$object->element . 'note', 'saturnecard', 'globalcard']); // Note that conf->hooks_modules contains array
 
 // Fetch optionals attributes and labels
 $extrafields->fetch_name_optionals_label($object->table_element);
@@ -87,7 +86,7 @@ if (empty($reshook)) {
 *	View
 */
 
-$title    = $langs->trans('Note') . ' - ' . $langs->trans(ucfirst($objectType));
+$title    = $langs->trans('Note') . ' - ' . $langs->trans(ucfirst($object->element));
 $help_url = 'FR:Module_' . $moduleName;
 
 saturne_header(0, '', $title, $help_url);
@@ -99,7 +98,7 @@ if ($id > 0 || !empty($ref)) {
     print '<div class="fichecenter">';
 
     $cssclass = 'titlefield';
-    $moreparam = '&module_name=' . urlencode($moduleName) . '&object_parent_type=' . urlencode($objectParentType) . '&object_type=' . urlencode($objectType);
+    $moreparam = '&module_name=' . urlencode($moduleName) . '&object_type=' . urlencode($object->element);
     require_once DOL_DOCUMENT_ROOT . '/core/tpl/notes.tpl.php';
 
     print '</div>';

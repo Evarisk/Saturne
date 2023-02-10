@@ -115,10 +115,8 @@ function saturne_check_access($moduleName, $object, $permission) {
  */
 function saturne_fiche_head(CommonObject $object, string $tabactive, string $title)
 {
-    global $objectParentType;
-
     // Configuration header
-    $prepareHead = $objectParentType . 'PrepareHead';
+    $prepareHead = $object->element . 'PrepareHead';
     $head = $prepareHead($object);
     print dol_get_fiche_head($head, $tabactive, $title, -1, $object->picto);
 }
@@ -133,13 +131,13 @@ function saturne_fiche_head(CommonObject $object, string $tabactive, string $tit
  */
 function saturne_banner_tab(CommonObject $object, string $paramid = 'ref', int $shownav = 1, string $fieldid = 'ref', string $fieldref = 'ref')
 {
-    global $db, $langs, $hookmanager, $moduleName, $moduleNameLowerCase, $objectParentType, $objectType;
+    global $db, $langs, $hookmanager, $moduleName, $moduleNameLowerCase;
 
     if (isModEnabled('project')) {
         require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
     }
 
-    $linkback = '<a href="' . dol_buildpath('/' . $moduleNameLowerCase . '/view/' . ($objectParentType != $objectType ? $objectParentType : $objectType) . '/' . ($objectParentType != $objectType ? $objectParentType : $objectType) . '_list.php', 1) . '?restore_lastsearch_values=1&object_type=' . $object->type . '">' . $langs->trans('BackToList') . '</a>';
+    $linkback = '<a href="' . dol_buildpath('/' . $moduleNameLowerCase . '/view/' .  $object->element . '/' . $object->element . '_list.php', 1) . '?restore_lastsearch_values=1&object_type=' . $object->element . '">' . $langs->trans('BackToList') . '</a>';
 
     $morehtmlref = '<div class="refidno">';
     // Thirdparty
@@ -172,7 +170,7 @@ function saturne_banner_tab(CommonObject $object, string $paramid = 'ref', int $
     }
     $morehtmlref .= '</div>';
 
-    $moreparam = '&module_name=' . $moduleName . '&object_parent_type=' . $objectParentType . '&object_type=' . $object->type;
+    $moreparam = '&module_name=' . $moduleName . '&object_type=' . $object->element;
 
     dol_banner_tab($object, $paramid, $linkback, $shownav, $fieldid, $fieldref, $morehtmlref, $moreparam);
 

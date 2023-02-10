@@ -29,9 +29,8 @@ if (file_exists('../saturne.main.inc.php')) {
 }
 
 // Get module parameters
-$moduleName       = GETPOST('module_name', 'alpha');
-$objectType       = GETPOST('object_type', 'alpha');
-$objectParentType = GETPOSTISSET('object_parent_type') ? GETPOST('object_parent_type', 'alpha') : $objectType;
+$moduleName = GETPOST('module_name', 'alpha');
+$objectType = GETPOST('object_type', 'alpha');
 
 $moduleNameLowerCase = strtolower($moduleName);
 
@@ -39,7 +38,7 @@ $moduleNameLowerCase = strtolower($moduleName);
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
 
 require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' . $objectParentType . '.lib.php';
+require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' . $objectType . '.lib.php';
 
 // Global variables definitions
 global $conf, $db, $langs, $hookmanager, $user;
@@ -88,7 +87,7 @@ $classname   = ucfirst($objectType);
 $object      = new $classname($db);
 $extrafields = new ExtraFields($db);
 
-$hookmanager->initHooks([$objectType . 'agenda', 'saturnecard', 'globalcard']); // Note that conf->hooks_modules contains array
+$hookmanager->initHooks([$object->element . 'agenda', 'saturnecard', 'globalcard']); // Note that conf->hooks_modules contains array
 
 // Fetch optionals attributes and labels
 $extrafields->fetch_name_optionals_label($object->table_element);
@@ -133,7 +132,7 @@ if (empty($reshook)) {
 *	View
 */
 
-$title    = $langs->trans('Agenda') . ' - ' . $langs->trans(ucfirst($objectType));
+$title    = $langs->trans('Agenda') . ' - ' . $langs->trans(ucfirst($object->element));
 $help_url = 'FR:Module_' . $moduleName;
 
 saturne_header(0,'', $title, $help_url);
@@ -152,7 +151,7 @@ if ($id > 0 || !empty($ref)) {
     print dol_get_fiche_end();
 
     // Actions buttons
-    $out = '&origin=' . urlencode($objectType . '@' . $object->module) . '&originid=' . $object->id;
+    $out = '&origin=' . urlencode($object->element . '@' . $object->module) . '&originid=' . $object->id;
     $urlbacktopage = $_SERVER['REQUEST_URI'];
     $out .= '&backtopage=' . urlencode($urlbacktopage);
 
@@ -173,7 +172,7 @@ if ($id > 0 || !empty($ref)) {
             $param .= '&limit=' . urlencode($limit);
         }
 
-        print load_fiche_titre($langs->trans('ActionsOn' . ucfirst($objectType)), $newcardbutton, '');
+        print load_fiche_titre($langs->trans('ActionsOn' . ucfirst($object->element)), $newcardbutton, '');
 
         // List of all actions
         $filters = [];

@@ -29,9 +29,8 @@ if (file_exists('../saturne.main.inc.php')) {
 }
 
 // Get module parameters
-$moduleName       = GETPOST('module_name', 'alpha');
-$objectType       = GETPOST('object_type', 'alpha');
-$objectParentType = GETPOSTISSET('object_parent_type') ? GETPOST('object_parent_type', 'alpha') : $objectType;
+$moduleName = GETPOST('module_name', 'alpha');
+$objectType = GETPOST('object_type', 'alpha');
 
 $moduleNameLowerCase = strtolower($moduleName);
 
@@ -40,7 +39,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 
 require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' . $objectParentType . '.lib.php';
+require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' . $objectType . '.lib.php';
 
 // Global variables definitions
 global $conf, $db, $hookmanager, $langs, $user;
@@ -79,7 +78,7 @@ $classname   = ucfirst($objectType);
 $object      = new $classname($db);
 $extrafields = new ExtraFields($db);
 
-$hookmanager->initHooks([$objectType . 'document', 'saturnecard', 'globalcard']); // Note that conf->hooks_modules contains array
+$hookmanager->initHooks([$object->element . 'document', 'saturnecard', 'globalcard']); // Note that conf->hooks_modules contains array
 
 // Fetch optionals attributes and labels
 $extrafields->fetch_name_optionals_label($object->table_element);
@@ -87,7 +86,7 @@ $extrafields->fetch_name_optionals_label($object->table_element);
 // Load object
 include DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php'; // Must be included, not include_once. Include fetch and fetch_thirdparty but not fetch_optionals
 if ($id > 0 || !empty($ref)) {
-    $upload_dir = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?: $conf->entity] . '/' . $objectType . '/' . get_exdir(0, 0, 0, 1, $object);
+    $upload_dir = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?: $conf->entity] . '/' . $object->element . '/' . get_exdir(0, 0, 0, 1, $object);
 }
 
 // Security check - Protection if external user
@@ -115,7 +114,7 @@ if (empty($reshook)) {
 *	View
 */
 
-$title   = $langs->trans('Files') . ' - ' . $langs->trans(ucfirst($objectType));
+$title   = $langs->trans('Files') . ' - ' . $langs->trans(ucfirst($object->element));
 $helpUrl = 'FR:Module_' . $moduleName;
 
 saturne_header(0, '', $title, $helpUrl);
@@ -143,12 +142,12 @@ if ($id > 0 || !empty($ref)) {
     print dol_get_fiche_end();
 
     $modulepart    = $moduleNameLowerCase;
-    $param         = '&module_name=' . urlencode($moduleName) . '&object_parent_type=' . urlencode($objectParentType) . '&object_type=' . urlencode($objectType);
+    $param         = '&module_name=' . urlencode($moduleName) . '&object_type=' . urlencode($object->element);
     $urlbacktopage = $_SERVER['PHP_SELF'] . '?id=' . $object->id . $param;
     $param        .= '&backtopage=' . urlencode($urlbacktopage);
     $moreparam     = $param;
 
-    $relativepathwithnofile = $objectType . '/' . dol_sanitizeFileName($object->ref) . '/';
+    $relativepathwithnofile = $object->element . '/' . dol_sanitizeFileName($object->ref) . '/';
 
     require_once DOL_DOCUMENT_ROOT.'/core/tpl/document_actions_post_headers.tpl.php';
 }
