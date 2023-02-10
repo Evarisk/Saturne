@@ -94,6 +94,7 @@ function saturne_show_documents(string $modulepart, string $modulesubdir, string
 		if (!empty($tmp[1])) {
 			$modulepart    = $tmp[0];
 			$submodulepart = $tmp[1];
+			$moduleNameUpperCase = dol_strtoupper($modulepart);
 		}
 
 		// For normalized external modules.
@@ -219,6 +220,10 @@ function saturne_show_documents(string $modulepart, string $modulesubdir, string
 				}
 			}
 		}
+		$manualPdfGenerationConf = $moduleNameUpperCase . '_MANUAL_PDF_GENERATION';
+		if ($conf->global->$manualPdfGenerationConf > 0) {
+			$out .= '<td></td>';
+		}
 		$out .= '</tr>';
 
 		// Execute hooks
@@ -300,6 +305,23 @@ function saturne_show_documents(string $modulepart, string $modulesubdir, string
 				// Show file date
 				$date = (!empty($file['date']) ? $file['date'] : dol_filemtime($filedir . '/' . $file['name']));
 				$out .= '<td class="nowrap right">' . dol_print_date($date, 'dayhour', 'tzuser') . '</td>';
+
+				// Show pdf generation icon
+				if ($conf->global->$manualPdfGenerationConf > 0) {
+					$extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+
+					$out .= '<td class="right">';
+
+					if ($extension == 'odt') {
+						$tmpurlsource = preg_replace('/#[a-zA-Z0-9_]*$/', '', $urlsource);
+						$out .= '<a href="' . $tmpurlsource . ((strpos($tmpurlsource, '?') === false) ? '?' : '&amp;') . 'action=pdfGeneration&amp;file=' . urlencode($relativepath) . '&token=' . newToken();
+						$out .= ($param ? '&amp;' . $param : '');
+						$out .= '">' . img_picto($langs->trans("PDFGeneration"), 'pdf') . '</a>';
+						$out .= ' ' . $form->textwithpicto('', $langs->trans('PDFGenerationTooltip'));
+					}
+
+					$out .= '</td>';
+				}
 
 				if ($delallowed || $morepicto) {
 					$out .= '<td class="right nowraponall">';
