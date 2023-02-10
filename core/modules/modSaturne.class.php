@@ -123,7 +123,10 @@ class modSaturne extends DolibarrModules
 		$r = 0;
 
 		$modules_array = [
-			'DoliSMQ' => 'dolismq'
+			'DoliSMQ'  => 'dolismq',
+			'DoliMeet' => 'dolimeet',
+			'DoliSIRH' => 'dolisirh',
+			'DoliCar'  => 'dolicar'
 		];
 
 		foreach ($modules_array as $moduleName => $moduleNameLowerCase) {
