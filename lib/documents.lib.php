@@ -95,11 +95,6 @@ function saturne_show_documents(string $modulepart, string $modulesubdir, string
 			$modulepart    = $tmp[0];
 			$submodulepart = $tmp[1];
 		}
-        // @todo spec dolimeet
-        if ($submodulepart == 'trainingsession' || $submodulepart == 'meeting' || $submodulepart == 'audit') {
-            $subtype = $submodulepart;
-            $submodulepart = 'session';
-        }
 
 		// For normalized external modules.
 		$file = dol_buildpath('/' . $modulepart . '/core/modules/' . $modulepart . '/'. $modulepart .'documents/' . strtolower($submodulepart) . '/modules_' . strtolower($submodulepart) . '.php');
@@ -113,8 +108,7 @@ function saturne_show_documents(string $modulepart, string $modulesubdir, string
 				include_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
 				$modellist = getListOfModels($db, $type);
 			} else {
-                // @todo spec dolimeet -> $subtype
-				$modellist = call_user_func($class . '::liste_modeles', $db, 100, $subtype);
+				$modellist = call_user_func($class . '::liste_modeles', $db, 100);
 			}
 		} else {
 			dol_print_error($db, "Bad value for modulepart '" . $modulepart . "' in saturne_show_documents");
