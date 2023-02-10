@@ -122,14 +122,14 @@ class modSaturne extends DolibarrModules
 		$this->menu = [];
 		$r = 0;
 
-		$modules_array = [
+		$modulesList = [
 			'DoliSMQ'  => 'dolismq',
 			'DoliMeet' => 'dolimeet',
 			'DoliSIRH' => 'dolisirh',
 			'DoliCar'  => 'dolicar'
 		];
 
-		foreach ($modules_array as $moduleName => $moduleNameLowerCase) {
+		foreach ($modulesList as $moduleName => $moduleNameLowerCase) {
 
 			$this->menu[$r++] = [
 				'fk_menu'  => 'fk_mainmenu=' . $moduleNameLowerCase,
