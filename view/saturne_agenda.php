@@ -35,6 +35,7 @@ $objectType = GETPOST('object_type', 'alpha');
 $moduleNameLowerCase = strtolower($moduleName);
 
 // Libraries
+require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
 
 require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
