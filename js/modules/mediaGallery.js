@@ -212,10 +212,11 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 				$('#progressBar').animate({
 					width: progress + '%'
 				}, 1);
-				let errorMessage = $(resp).find('.error-medias').val()
-				let decodedErrorMessage = JSON.parse(errorMessage)
-
-				textToShow += decodedErrorMessage.message + '<br>'
+				if ($(resp).find('.error-medias').length) {
+					let errorMessage = $(resp).find('.error-medias').val()
+					let decodedErrorMessage = JSON.parse(errorMessage)
+					textToShow += decodedErrorMessage.message + '<br>'
+				}
 
 				if (requestCompleted === totalCount) {
 					$('.wpeo-loader').removeClass('wpeo-loader');
