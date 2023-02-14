@@ -36,13 +36,9 @@ if ($action == 'pdfGeneration') {
 	if ( ! empty($conf->global->MAIN_ODT_AS_PDF) && $conf->global->$manualPdfGenerationConf > 0) {
 		try {
 			$odfHandler->exportAsAttachedPDF($file);
-			
 			$documentUrl = DOL_URL_ROOT . '/document.php';
-			$documentPath = preg_split('/\//', $filename, 2);
-			$modulepart   = $documentPath[0];
-			$filepath     = $documentPath[1];
 
-			setEventMessages($langs->trans("FileGenerated") . ' - ' . '<a href='.  $documentUrl . '?modulepart=' . $modulepart . '&amp;file=' . urlencode($filepath) . '&entity='. $conf->entity . '"' . '>' . $pdfName, null);
+			setEventMessages($langs->trans("FileGenerated") . ' - ' . '<a href='.  $documentUrl . '?modulepart=' . $moduleNameLowerCase . '&amp;file=' . urlencode($filename) . '&entity='. $conf->entity . '"' . '>' . $pdfName, null);
 		} catch (Exception $e) {
 			$error = $e->getMessage();
 			setEventMessages($langs->transnoentities('FileCouldNotBeGeneratedInPDF') . '<br>' . $langs->transnoentities('CheckDocumentationToEnablePDFGeneration'), null, 'errors');
