@@ -38,7 +38,7 @@ if ($action == 'pdfGeneration') {
 			$odfHandler->exportAsAttachedPDF($file);
 			$documentUrl = DOL_URL_ROOT . '/document.php';
 
-			setEventMessages($langs->trans("FileGenerated") . ' - ' . '<a href='.  $documentUrl . '?modulepart=' . $moduleNameLowerCase . '&amp;file=' . urlencode($filename) . '&entity='. $conf->entity . '"' . '>' . $pdfName, null);
+			setEventMessages($langs->trans("FileGenerated") . ' - ' . '<a href='.  $documentUrl . '?modulepart=' . $moduleNameLowerCase . '&amp;file=' . urlencode($pdfName) . '&entity='. $conf->entity . '"' . '>' . $pdfName, null);
 		} catch (Exception $e) {
 			$error = $e->getMessage();
 			setEventMessages($langs->transnoentities('FileCouldNotBeGeneratedInPDF') . '<br>' . $langs->transnoentities('CheckDocumentationToEnablePDFGeneration'), null, 'errors');
