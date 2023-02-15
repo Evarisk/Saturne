@@ -54,9 +54,6 @@ function saturne_header($load_media_gallery = 0, $head = '', $title = '', $help_
         $arrayofjs[] = '/' . $moduleNameLowerCase . '/js/' . $moduleNameLowerCase . '.min.js';
     }
 
-	//Langs
-	$langs->loadLangs(['saturne@saturne', $moduleNameLowerCase.'@'.$moduleNameLowerCase]);
-
 	llxHeader($head, $title, $help_url, $target, $disablejs, $disablehead, $arrayofjs, $arrayofcss, $morequerystring, $morecssonbody, $replacemainareaby, $disablenofollow, $disablenoindex);
 
 	if ($load_media_gallery) {
@@ -179,4 +176,23 @@ function saturne_banner_tab(CommonObject $object, string $paramid = 'ref', int $
     dol_banner_tab($object, $paramid, $linkback, $shownav, $fieldid, $fieldref, $morehtmlref, $moreparam);
 
     print '<div class="underbanner clearboth"></div>';
+}
+
+/**
+ *  Load translation files.
+ *
+ *  @param	array	$domains      		Array of lang files to load
+ *	@return	int							<0 if KO, 0 if already loaded or loading not required, >0 if OK
+ */
+function saturne_load_langs($domains = [])
+{
+	global $langs, $moduleNameLowerCase;
+
+	$langs->loadLangs(['saturne@saturne', 'other@saturne', $moduleNameLowerCase . '@' . $moduleNameLowerCase]);
+
+	if (!empty($domains)) {
+		foreach ($domains as $domain) {
+			$langs->load($domain);
+		}
+	}
 }
