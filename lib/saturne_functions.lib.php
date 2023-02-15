@@ -71,13 +71,13 @@ function saturne_header($load_media_gallery = 0, $head = '', $title = '', $help_
  *      @return     string				Pages html content
  *
  */
-function saturne_check_access($moduleName, $object, $permission) {
+function saturne_check_access($permission, $object = null) {
 
-	global $conf, $langs, $user;
+	global $conf, $langs, $user, $moduleNameLowerCase;
 
-	if (!isModEnabled($moduleName) || !isModEnabled('saturne')) {
-		if (!isModEnabled($moduleName)){
-			setEventMessage($langs->transnoentitiesnoconv('Enable' . ucfirst($moduleName)), 'warnings');
+	if (!isModEnabled($moduleNameLowerCase) || !isModEnabled('saturne')) {
+		if (!isModEnabled($moduleNameLowerCase)){
+			setEventMessage($langs->transnoentitiesnoconv('Enable' . ucfirst($moduleNameLowerCase)), 'warnings');
 		}
 		if (!isModEnabled('saturne')) {
 			setEventMessage($langs->trans('EnableSaturne'), 'warnings');
@@ -99,7 +99,7 @@ function saturne_check_access($moduleName, $object, $permission) {
 		if ($object->id > 0) {
 			if ($object->entity != $conf->entity) {
 				setEventMessage($langs->trans('ChangeEntityRedirection'), 'warnings');
-				$urltogo = dol_buildpath('/custom/' . $moduleName . '/' . $moduleName . 'index.php?mainmenu=' . $moduleName, 1);
+				$urltogo = dol_buildpath('/custom/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'index.php?mainmenu=' . $moduleNameLowerCase, 1);
 				header("Location: " . $urltogo);
 				exit;
 			}
