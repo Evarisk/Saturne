@@ -114,12 +114,19 @@ function saturne_check_access($permission, $object = null) {
  * @param string       $tabactive Tab active in navbar
  * @param string       $title     Title navbar
  */
-function saturne_get_fiche_head(CommonObject $object, string $tabactive, string $title)
+function saturne_get_fiche_head(CommonObject $object = null, string $tabactive = '', string $title = '', array $head = [], string $picto = '', int $notab = -1)
 {
     // Configuration header
-    $prepareHead = $object->element . '_prepare_head';
-    $head = $prepareHead($object);
-    print dol_get_fiche_head($head, $tabactive, $title, -1, $object->picto);
+	if(is_object($object)) {
+		if (array_key_exists('element', $object)) {
+			$prepareHead = $object->element . '_prepare_head';
+			$head = $prepareHead($object);
+		}
+		if (array_key_exists('element', $object)) {
+			$picto = $object->picto;
+		}
+	}
+    print dol_get_fiche_head($head, $tabactive, $title, $notab, $picto);
 }
 
 /**
@@ -191,7 +198,7 @@ function saturne_banner_tab(CommonObject $object, string $paramid = 'ref', int $
  *  @param	array	$domains      		Array of lang files to load
  *	@return	int							<0 if KO, 0 if already loaded or loading not required, >0 if OK
  */
-function saturne_load_langs($domains = [])
+function saturne_load_langs(array $domains = [])
 {
 	global $langs, $moduleNameLowerCase;
 
