@@ -130,7 +130,7 @@ function saturne_get_fiche_head(CommonObject $object, string $tabactive, string 
  * @param string       $fieldid  Field name for select next et previous (we make the select max and min on this field). Use 'none' for no prev/next search.
  * @param string       $fieldref Field name objet ref (object->ref) for select next and previous
  */
-function saturne_banner_tab(CommonObject $object, string $paramid = 'ref', int $shownav = 1, string $fieldid = 'ref', string $fieldref = 'ref')
+function saturne_banner_tab(CommonObject $object, string $paramid = 'ref', int $shownav = 1, string $fieldid = 'ref', string $fieldref = 'ref', string $morehtmlref = '')
 {
     global $db, $langs, $hookmanager, $moduleName, $moduleNameLowerCase;
 
@@ -140,31 +140,32 @@ function saturne_banner_tab(CommonObject $object, string $paramid = 'ref', int $
 
     $linkback = '<a href="' . dol_buildpath('/' . $moduleNameLowerCase . '/view/' .  $object->element . '/' . $object->element . '_list.php', 1) . '?restore_lastsearch_values=1&object_type=' . $object->element . '">' . $langs->trans('BackToList') . '</a>';
 
-	$morehtmlref = '';
-	if (property_exists($object, 'label')) {
-		$morehtmlref .= ' - ' . $object->label . '<br>';
+	$saturneMorehtmlref = '';
+	if (array_key_exists('label', $object->fields)) {
+		$saturneMorehtmlref .= ' - ' . $object->label . '<br>';
 	}
 
-    $morehtmlref .= '<div class="refidno">';
+    $saturneMorehtmlref .= '<div class="refidno">';
 
+	$saturneMorehtmlref .= $morehtmlref;
     // Thirdparty
-    if (isModEnabled('societe')) {
+    if (isModEnabled('societe') && array_key_exists('fk_soc', $object->fields)) {
         if (!empty($object->fk_soc)) {
             $object->fetch_thirdparty();
-            $morehtmlref .= $langs->trans('ThirdParty') . ' : ' . (is_object($object->thirdparty) ? $object->thirdparty->getNomUrl(1) : '') . '<br>';
+            $saturneMorehtmlref .= $langs->trans('ThirdParty') . ' : ' . (is_object($object->thirdparty) ? $object->thirdparty->getNomUrl(1) : '') . '<br>';
         } else {
-            $morehtmlref .= $langs->trans('ThirdParty') . ' : ' . '<br>';
+            $saturneMorehtmlref .= $langs->trans('ThirdParty') . ' : ' . '<br>';
         }
     }
 
     // Project
-    if (isModEnabled('project')) {
+    if (isModEnabled('project') && array_key_exists('fk_project', $object->fields)) {
         if (!empty($object->fk_project)) {
             $project = new Project($db);
             $project->fetch($object->fk_project);
-            $morehtmlref .= $langs->trans('Project') . ' : ' . $project->getNomUrl(1, '', 1) . '<br>';
+            $saturneMorehtmlref .= $langs->trans('Project') . ' : ' . $project->getNomUrl(1, '', 1) . '<br>';
         } else {
-            $morehtmlref .= $langs->trans('Project') . ' : ' . '<br>';
+            $saturneMorehtmlref .= $langs->trans('Project') . ' : ' . '<br>';
         }
     }
 
@@ -173,13 +174,13 @@ function saturne_banner_tab(CommonObject $object, string $paramid = 'ref', int $
     if ($reshook < 0) {
         setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
     } else {
-        $morehtmlref .= $hookmanager->resPrint;
+        $saturneMorehtmlref .= $hookmanager->resPrint;
     }
-    $morehtmlref .= '</div>';
+    $saturneMorehtmlref .= '</div>';
 
     $moreparam = '&module_name=' . $moduleName . '&object_type=' . $object->element;
 
-    dol_banner_tab($object, $paramid, $linkback, $shownav, $fieldid, $fieldref, $morehtmlref, $moreparam);
+    dol_banner_tab($object, $paramid, $linkback, $shownav, $fieldid, $fieldref, $saturneMorehtmlref, $moreparam);
 
     print '<div class="underbanner clearboth"></div>';
 }
