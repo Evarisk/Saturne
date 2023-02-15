@@ -117,7 +117,7 @@ function saturne_check_access($permission, $object = null) {
 function saturne_fiche_head(CommonObject $object, string $tabactive, string $title)
 {
     // Configuration header
-    $prepareHead = $object->element . 'PrepareHead';
+    $prepareHead = $object->element . '_prepare_head';
     $head = $prepareHead($object);
     print dol_get_fiche_head($head, $tabactive, $title, -1, $object->picto);
 }
