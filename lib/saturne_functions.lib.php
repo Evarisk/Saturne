@@ -108,13 +108,13 @@ function saturne_check_access($permission, $object = null) {
 }
 
 /**
- * Print dol_banner_tab with Saturne custom enhancements
+ * Print dol_get_fiche_head with Saturne custom enhancements
  *
  * @param CommonObject $object    Current object
  * @param string       $tabactive Tab active in navbar
  * @param string       $title     Title navbar
  */
-function saturne_fiche_head(CommonObject $object, string $tabactive, string $title)
+function saturne_get_fiche_head(CommonObject $object, string $tabactive, string $title)
 {
     // Configuration header
     $prepareHead = $object->element . '_prepare_head';

@@ -120,7 +120,7 @@ $helpUrl = 'FR:Module_' . $moduleName;
 saturne_header(0, '', $title, $helpUrl);
 
 if ($id > 0 || !empty($ref)) {
-    saturne_fiche_head($object, 'document', $title);
+    saturne_get_fiche_head($object, 'document', $title);
     saturne_banner_tab($object);
 
     // Build file list
