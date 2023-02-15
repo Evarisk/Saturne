@@ -140,7 +140,13 @@ function saturne_banner_tab(CommonObject $object, string $paramid = 'ref', int $
 
     $linkback = '<a href="' . dol_buildpath('/' . $moduleNameLowerCase . '/view/' .  $object->element . '/' . $object->element . '_list.php', 1) . '?restore_lastsearch_values=1&object_type=' . $object->element . '">' . $langs->trans('BackToList') . '</a>';
 
-    $morehtmlref = '<div class="refidno">';
+	$morehtmlref = '';
+	if (property_exists($object, 'label')) {
+		$morehtmlref .= ' - ' . $object->label . '<br>';
+	}
+
+    $morehtmlref .= '<div class="refidno">';
+
     // Thirdparty
     if (isModEnabled('societe')) {
         if (!empty($object->fk_soc)) {
