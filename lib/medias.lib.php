@@ -310,3 +310,21 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
 	}
 	return $return;
 }
+
+
+/**
+ * Return file specified thumb name
+ *
+ * @param     string		$filename		File name
+ * @param     string		$thumbType		Thumb type (small, mini, large, medium)
+ * @return    string		$thumbFullname	Thumb full name
+ * 
+ */
+function saturne_get_thumb_name($filename, $thumbType = 'small')
+{
+	$imgName       = pathinfo($filename, PATHINFO_FILENAME);
+	$imgExtension  = pathinfo($filename, PATHINFO_EXTENSION);
+	$thumbFullname = $imgName . '_' . $thumbType . '.' . $imgExtension;
+
+	return $thumbFullname;
+}
