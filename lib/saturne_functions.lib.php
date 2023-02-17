@@ -43,9 +43,9 @@ function saturne_header($load_media_gallery = 0, $head = '', $title = '', $help_
 	global $langs, $moduleNameLowerCase;
 
 	//CSS
-	$arrayofcss[] = '/saturne/css/saturne.css';
-    if (file_exists(__DIR__ . '/../../' . $moduleNameLowerCase . '/css/' . $moduleNameLowerCase . '.css')) {
-        $arrayofcss[] = '/' . $moduleNameLowerCase . '/css/' . $moduleNameLowerCase . '.css';
+	$arrayofcss[] = '/saturne/css/saturne.min.css';
+    if (file_exists(__DIR__ . '/../../' . $moduleNameLowerCase . '/css/' . $moduleNameLowerCase . '.min.css')) {
+        $arrayofcss[] = '/' . $moduleNameLowerCase . '/css/' . $moduleNameLowerCase . '.min.css';
     }
 
 	//JS
