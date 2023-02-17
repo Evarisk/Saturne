@@ -114,19 +114,19 @@ function saturne_check_access($permission, $object = null) {
  * @param string       $tabactive Tab active in navbar
  * @param string       $title     Title navbar
  */
-function saturne_get_fiche_head(CommonObject $object = null, string $tabactive = '', string $title = '', array $head = [], string $picto = '', int $notab = -1)
+function saturne_get_fiche_head(CommonObject $object = null, string $tabactive = '', string $title = '')
 {
     // Configuration header
 	if(is_object($object)) {
-		if (array_key_exists('element', $object)) {
+		if (array_key_exists('element', $object->fields)) {
 			$prepareHead = $object->element . '_prepare_head';
 			$head = $prepareHead($object);
 		}
-		if (array_key_exists('element', $object)) {
+		if (array_key_exists('picto', $object->fields)) {
 			$picto = $object->picto;
 		}
+		print dol_get_fiche_head($head, $tabactive, $title, -1, $picto);
 	}
-    print dol_get_fiche_head($head, $tabactive, $title, $notab, $picto);
 }
 
 /**
