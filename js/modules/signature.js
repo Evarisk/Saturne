@@ -105,7 +105,6 @@ window.saturne.signature.event = function() {
  */
 window.saturne.signature.modalSignatureOpened = function(triggeredElement) {
     window.saturne.signature.buttonSignature = triggeredElement;
-    console.log('d');
 
     let ratio =  Math.max(window.devicePixelRatio || 1, 1);
 
