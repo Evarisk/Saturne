@@ -64,7 +64,7 @@ class modSaturne extends DolibarrModules
 			'models' => 0,
 			'printing' => 0,
 			'theme' => 0,
-			'css' => ['/saturne/css/Saturne_all.css'],
+			'css' => ['/saturne/css/scss/modules/picto/_picto.scss'],
 			'js' => [],
 			'hooks' => [],
 			'moduleforexternal' => 0,

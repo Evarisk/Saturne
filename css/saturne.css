@@ -2048,6 +2048,13 @@ div.wpeo-modal-patchnote .wpeo-button {
   background-color: green;
 }
 
+.pictoModule {
+  vertical-align: middle;
+  text-align: left;
+  width: 20px;
+  padding-right: 4px;
+}
+
 .signature-container {
   max-width: 800px;
   background: #fff;
