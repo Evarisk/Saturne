@@ -318,7 +318,7 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
  * @param     string		$filename		File name
  * @param     string		$thumbType		Thumb type (small, mini, large, medium)
  * @return    string		$thumbFullname	Thumb full name
- * @throws    Exception
+ * 
  */
 function saturne_get_thumb_name($filename, $thumbType = 'small')
 {
