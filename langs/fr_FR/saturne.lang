@@ -14,39 +14,47 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #
-# Générique
-#
-
-# Module label 'ModuleSaturneName'
-ModuleSaturneName = Saturne
-# Module description 'ModuleSaturneDesc'
-ModuleSaturneDesc = Framework et librairie d'objets et fonctions d'Evarisk
-
-#
-# Page d'administration
-#
-SaturneSetup = Configuration du module Saturne
-Settings = Réglages
-SaturneSetupPage = Page de configuration du module Saturne
-GitHubProjectName = Nom du projet GitHub
-GitHubProjectOrganization = Nom de l'organisation GitHub
-GitHubProjectVersion = Version du projet GitHub
-SaturneConfig = Configuration du module
-
-#
-# Page À propos
-#
-About = À propos
-SaturneAbout = À propos de Saturne
-
-#
 # Saturne
 #
 
+ModuleSaturneName = Saturne
+ModuleSaturneDesc = Framework et librairie d'objets et fonctions d'Evarisk
+ModuleConfig      = Configuration
+MinimizeMenu      = Réduire le menu
+
 # Right - Droit
-LireSaturne = Consulter Saturne
-ReadSaturne = Consulter Saturne (read)
-ReadAdminPage = Accéder à la configuration du module Saturne
+LireModule    = Consulter %s
+ReadModule    = Consulter %s (read)
+ReadAdminPage = Accéder à la configuration du module %s
+
+
+
+#
+# Config page - Page d'administration
+#
+ModuleSettings = Réglages
+ModuleSetup    = Configuration du module %s
+SaturneData    = Données configurables de %s
+
+# Mod Numbering - Modèle de numérotation
+NumberingModule = Modèle de numérotation
+StandardModel   = Renvoie le numéro sous la forme %syymm-nnnn où yy est l'année, mm le mois et nnnn est un compteur séquentiel sans rupture et sans remise à 0.
+
+# ODT Template - Template ODT
+YourDocuments          = Documents
+DocumentsConfig        = Configuration des documents
+DocumentTemplate       = Modèle de documents
+ODTDefaultTemplateName = ODT par défaut des documents %s
+
+
+
+#
+# About - Page À propos
+#
+About       = À propos
+ModuleAbout = À propos de %s
+
+
 
 #
 # Sécurité
@@ -54,26 +62,34 @@ ReadAdminPage = Accéder à la configuration du module Saturne
 
 # Data - Donnée
 ChangeEntityRedirection = Vous avez été redirigé car vous avez changé d'entité
-EnableSaturne = Veuillez activer le module Saturne pour voir cette page
+EnableSaturne           = Veuillez activer le module Saturne pour voir cette page
+
+
 
 #
-# Index
+# Index - Accueil
 #
 
 # Data - Donnée
-SaturneArea  = Bienvenue sur Saturne
-SaturneData  = Données configurables de Saturne
+ModuleArea             = Bienvenue sur %s
+ModuleUpdate           = Mise à jour de %s :
+ModuleHasBeenUpdatedTo = %s a été mis à jour en version %s
+ModulePatchNote        = Note de mise à jour %s %s
+ShowPatchNote          = Consulter la note de mise à jour
+DontShowPatchNote      = Ne plus afficher la note de mise à jour
 
 
 
 #
-# Media Gallery
+# Media Gallery - Bibliothèque de médias
 #
 
-MediaGallery = Bibliothèque de médias
+MediaGallery              = Bibliothèque de médias
 ErrorThisFileSizeTooLarge = Le fichier %s est trop volumineux
-ErrorThisFileExists = Le fichier %s existe déjà
-EmptyMediaGallery = La bibliothèque de médias est vide
+ErrorThisFileExists       = Le fichier %s existe déjà
+EmptyMediaGallery         = La bibliothèque de médias est vide
+
+
 
 #
 # Schedules - horaires
@@ -85,16 +101,15 @@ SchedulesSaved = Les horaires ont bien été enregistrés
 
 
 #
-# Documents
+# Documents - Documents
 #
 
-AutomaticPdfGeneration = Génération automatique des PDF
-AutomaticPdfGenerationDescription = Crée automatiquement le document en PDF lors de la génération
-ManualPdfGeneration = Génération manuelle des PDF
-ManualPdfGenerationDescription = Ajout d'un bouton pour créer un document ODT en PDF
-FileCouldNotBeGeneratedInPDF = Le fichier n'a pas pu être généré en PDF
+AutomaticPdfGeneration                  = Génération automatique des PDF
+AutomaticPdfGenerationDescription       = Crée automatiquement le document en PDF lors de la génération
+ManualPdfGeneration                     = Génération manuelle des PDF
+ManualPdfGenerationDescription          = Ajout d'un bouton pour créer un document ODT en PDF
+FileCouldNotBeGeneratedInPDF            = Le fichier n'a pas pu être généré en PDF
 CheckDocumentationToEnablePDFGeneration = Veuillez vous référer à la documentation pour la génération en PDF : <a target="_blank" href="https://wiki.dolibarr.org/index.php?title=Module_Digirisk#Impression_du_Document_Unique_au_format_pdf_-_.28.2A.pdf.29">Documentation</a>
-PDFGenerationTooltip = Appuyez sur ce bouton pour générer le document ODT en PDF
-PDFGeneration = Génération du document PDF
-YourDocuments = Documents
-DocumentsConfig = Configuration des documents
+PDFGenerationTooltip                    = Appuyez sur ce bouton pour générer le document ODT en PDF
+PDFGeneration                           = Génération du document PDF
+NoData                                  = N/A
