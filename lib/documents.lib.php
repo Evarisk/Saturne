@@ -310,13 +310,13 @@ function saturne_show_documents(string $modulepart, string $modulesubdir, string
 				if ($conf->global->$manualPdfGenerationConf > 0) {
 					$extension = pathinfo($file['name'], PATHINFO_EXTENSION);
 
-					$out .= '<td class="right">';
+					$out .= '<td class="right pdf-generation">';
 
 					if ($extension == 'odt') {
 						$tmpurlsource = preg_replace('/#[a-zA-Z0-9_]*$/', '', $urlsource);
 						$out .= '<a href="' . $tmpurlsource . ((strpos($tmpurlsource, '?') === false) ? '?' : '&amp;') . 'action=pdfGeneration&amp;file=' . urlencode($relativepath) . '&token=' . newToken();
 						$out .= ($param ? '&amp;' . $param : '');
-						$out .= '">' . img_picto($langs->trans('PDFGeneration'),  'fontawesome_fa-file-pdf_fas_red') . '</a>';
+						$out .= '">' . img_picto($langs->trans("PDFGeneration"), 'fontawesome_fa-file-pdf_fas_red') . '</a>';
 						$out .= ' ' . $form->textwithpicto('', $langs->trans('PDFGenerationTooltip'));
 					}
 
