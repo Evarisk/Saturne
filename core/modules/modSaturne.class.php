@@ -133,10 +133,6 @@ class modSaturne extends DolibarrModules
             'DoliCar'  => 'dolicar'
         ];
 
-        foreach ($modulesList as $moduleName => $moduleNameLowerCase) {
-            $this->requiredby[] = 'mod' . $moduleName;
-        }
-
         // A condition to hide module
 		$this->hidden = false;
         // List of module class names as string that must be enabled if this module is enabled. Example: array('always1'=>'modModuleToEnable1','always2'=>'modModuleToEnable2', 'FR1'=>'modModuleToEnableFR'...)
