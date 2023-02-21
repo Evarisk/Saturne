@@ -41,6 +41,9 @@ require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameL
 // Global variables definitions
 global $conf, $db, $langs, $hookmanager, $user;
 
+// Load translation files required by the page
+saturne_load_langs();
+
 // Get parameters
 $id         = GETPOST('id', 'int');
 $ref        = GETPOST('ref', 'alpha');
@@ -53,7 +56,7 @@ $classname   = ucfirst($objectType);
 $object      = new $classname($db);
 $extrafields = new ExtraFields($db);
 
-$hookmanager->initHooks([$objectType . 'note', $object->element . 'note', 'saturnecard', 'globalcard']); // Note that conf->hooks_modules contains array
+$hookmanager->initHooks([$objectType . 'note', $object->element . 'note', 'saturneglobal', 'globalcard']); // Note that conf->hooks_modules contains array
 
 // Fetch optionals attributes and labels
 $extrafields->fetch_name_optionals_label($object->table_element);
@@ -64,9 +67,7 @@ include DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php'; // Must be incl
 // Security check - Protection if external user
 $permissiontoread = $user->rights->$moduleNameLowerCase->$objectType->read;
 $permissionnote   = $user->rights->$moduleNameLowerCase->$objectType->write; // Used by include of actions_setnotes.inc.php
-if (empty($conf->$moduleNameLowerCase->enabled) || !$permissiontoread) {
-    accessforbidden();
-}
+saturne_check_access($permissiontoread);
 
 /*
 *  Actions

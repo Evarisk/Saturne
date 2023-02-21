@@ -44,6 +44,9 @@ require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameL
 // Global variables definitions
 global $conf, $db, $hookmanager, $langs, $user;
 
+// Load translation files required by the page
+saturne_load_langs();
+
 // Get parameters
 $id         = GETPOST('id', 'int');
 $ref        = GETPOST('ref', 'alpha');
@@ -78,7 +81,7 @@ $classname   = ucfirst($objectType);
 $object      = new $classname($db);
 $extrafields = new ExtraFields($db);
 
-$hookmanager->initHooks([$objectType . 'document', $object->element . 'document', 'saturnecard', 'globalcard']); // Note that conf->hooks_modules contains array
+$hookmanager->initHooks([$objectType . 'document', $object->element . 'document', 'saturneglobal', 'globalcard']); // Note that conf->hooks_modules contains array
 
 // Fetch optionals attributes and labels
 $extrafields->fetch_name_optionals_label($object->table_element);
@@ -92,9 +95,7 @@ if ($id > 0 || !empty($ref)) {
 // Security check - Protection if external user
 $permissiontoread = $user->rights->$moduleNameLowerCase->$objectType->read;
 $permissiontoadd  = $user->rights->$moduleNameLowerCase->$objectType->write;
-if (empty($conf->$moduleNameLowerCase->enabled) || !$permissiontoread) {
-    accessforbidden();
-}
+saturne_check_access($permissiontoread);
 
 /*
 *  Actions
@@ -126,7 +127,7 @@ if ($id > 0 || !empty($ref)) {
     // Build file list
     $filearray = dol_dir_list($upload_dir, 'files', 0, '', '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_DESC : SORT_ASC), 1);
     $totalsize = 0;
-    foreach ($filearray as $key => $file) {
+    foreach ($filearray as $file) {
         $totalsize += $file['size'];
     }
 

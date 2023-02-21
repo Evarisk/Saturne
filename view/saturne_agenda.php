@@ -44,6 +44,9 @@ require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameL
 // Global variables definitions
 global $conf, $db, $langs, $hookmanager, $user;
 
+// Load translation files required by the page
+saturne_load_langs();
+
 // Get parameters
 $id         = GETPOST('id', 'int');
 $ref        = GETPOST('ref', 'alpha');
@@ -60,7 +63,7 @@ if (GETPOST('actioncode', 'array')) {
     $actioncode = GETPOST('actioncode', 'alpha', 3) ? GETPOST('actioncode', 'alpha', 3) : (GETPOST('actioncode') == '0' ? '0' : (empty($conf->global->AGENDA_DEFAULT_FILTER_TYPE_FOR_OBJECT) ? '' : $conf->global->AGENDA_DEFAULT_FILTER_TYPE_FOR_OBJECT));
 }
 
-$search_agenda_label = GETPOST('search_agenda_label');
+$searchAgendaLabel = GETPOST('search_agenda_label');
 
 // Get pagination parameters
 $limit     = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : $conf->liste_limit;
@@ -88,7 +91,7 @@ $classname   = ucfirst($objectType);
 $object      = new $classname($db);
 $extrafields = new ExtraFields($db);
 
-$hookmanager->initHooks([$objectType . 'agenda', $object->element . 'agenda', 'saturnecard', 'globalcard']); // Note that conf->hooks_modules contains array
+$hookmanager->initHooks([$objectType . 'agenda', $object->element . 'agenda', 'saturneglobal', 'globalcard']); // Note that conf->hooks_modules contains array
 
 // Fetch optionals attributes and labels
 $extrafields->fetch_name_optionals_label($object->table_element);
@@ -101,9 +104,7 @@ if ($id > 0 || !empty($ref)) {
 
 // Security check - Protection if external user
 $permissiontoread = $user->rights->$moduleNameLowerCase->$objectType->read;
-if (empty($conf->$moduleNameLowerCase->enabled) || !$permissiontoread) {
-    accessforbidden();
-}
+saturne_check_access($permissiontoread);
 
 /*
 *  Actions
@@ -125,7 +126,7 @@ if (empty($reshook)) {
     // Purge search criteria
     if (GETPOST('button_removefilter_x', 'alpha') || GETPOST('button_removefilter.x', 'alpha') || GETPOST('button_removefilter', 'alpha')) { // All tests are required to be compatible with all browsers
         $actioncode          = '';
-        $search_agenda_label = '';
+        $searchAgendaLabel = '';
     }
 }
 
@@ -156,31 +157,32 @@ if ($id > 0 || !empty($ref)) {
     $urlbacktopage = $_SERVER['REQUEST_URI'];
     $out .= '&backtopage=' . urlencode($urlbacktopage);
 
-    $newcardbutton = '';
+    $newCardButton = '';
     if (isModEnabled('agenda')) {
         if (!empty($user->rights->agenda->myactions->create) || !empty($user->rights->agenda->allactions->create)) {
-            $newcardbutton .= dolGetButtonTitle($langs->trans('AddAction'), '', 'fa fa-plus-circle', DOL_URL_ROOT.'/comm/action/card.php?action=create'.$out);
+            $newCardButton .= dolGetButtonTitle($langs->trans('AddAction'), '', 'fa fa-plus-circle', DOL_URL_ROOT.'/comm/action/card.php?action=create'.$out);
+        }
+
+        if (!empty($user->rights->agenda->myactions->read) || !empty($user->rights->agenda->allactions->read)) {
+            print '<br>';
+            $param = '&id=' . $object->id;
+            if (!empty($contextpage) && $contextpage != $_SERVER['PHP_SELF']) {
+                $param .= '&contextpage=' . urlencode($contextpage);
+            }
+            if ($limit > 0 && $limit != $conf->liste_limit) {
+                $param .= '&limit=' . urlencode($limit);
+            }
+
+            print load_fiche_titre($langs->trans('ActionsOn' . ucfirst($object->element)), $newCardButton, '');
+
+            // List of all actions
+            $filters = [];
+            $filters['search_agenda_label'] = $searchAgendaLabel;
+
+            show_actions_done($conf, $langs, $db, $object, null, 0, $actioncode, '', $filters, $sortfield, $sortorder, $object->module);
         }
     }
 
-    if (isModEnabled('agenda') && (!empty($user->rights->agenda->myactions->read) || !empty($user->rights->agenda->allactions->read))) {
-        print '<br>';
-        $param = '&id=' . $object->id;
-        if (!empty($contextpage) && $contextpage != $_SERVER['PHP_SELF']) {
-            $param .= '&contextpage=' . urlencode($contextpage);
-        }
-        if ($limit > 0 && $limit != $conf->liste_limit) {
-            $param .= '&limit=' . urlencode($limit);
-        }
-
-        print load_fiche_titre($langs->trans('ActionsOn' . ucfirst($object->element)), $newcardbutton, '');
-
-        // List of all actions
-        $filters = [];
-        $filters['search_agenda_label'] = $search_agenda_label;
-
-        show_actions_done($conf, $langs, $db, $object, null, 0, $actioncode, '', $filters, $sortfield, $sortorder, $object->module);
-    }
 }
 
 // End of page
