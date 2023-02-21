@@ -3,6 +3,8 @@
 if ($action == 'pdfGeneration') {
 	global $langs, $moduleName, $moduleNameLowerCase;
 
+    require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+
 	$moduleNameUpperCase = dol_strtoupper($moduleName);
 	$filename = GETPOST('file');
 
