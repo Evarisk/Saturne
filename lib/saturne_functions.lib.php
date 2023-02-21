@@ -91,10 +91,6 @@ function saturne_check_access($permission, $object = null) {
 		accessforbidden();
 	}
 
-	if ($user->socid > 0){
-		accessforbidden();
-	}
-
 	if ($conf->multicompany->enabled) {
 		if ($object->id > 0) {
 			if ($object->entity != $conf->entity) {
