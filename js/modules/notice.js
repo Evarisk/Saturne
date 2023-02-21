@@ -68,10 +68,8 @@ window.saturne.notice.closeNotice = function() {
 	});
 
 	if ($(this).hasClass('notice-close-forever')) {
-		let token = $(this).closest('.notice').find('input[name="token"]').val();
-		let querySeparator = '?';
-
-		document.URL.match(/\?/) ? querySeparator = '&' : 1;
+		let token          = window.saturne.toolbox.getToken();
+		let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
 
 		$.ajax({
 			url: document.URL + querySeparator + 'action=closenotice&token='+token,

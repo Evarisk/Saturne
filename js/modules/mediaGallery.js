@@ -102,7 +102,7 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 	let mediaGallery      = $('#media_gallery')
 	let mediaGalleryModal = $(this).closest('.modal-container')
 	let filesLinked       = mediaGalleryModal.find('.clicked-photo')
-	let token             = $('.id-container').find('input[name="token"]').val();
+	let token             = window.saturne.toolbox.getToken();
 
 	let objectId         = $(this).find('.from-id').val()
 	let objectType       = $(this).find('.from-type').val()
@@ -340,7 +340,7 @@ window.saturne.mediaGallery.addToFavorite = function( event ) {
  */
 window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
 	let files         = $(this).prop("files");
-	let token         = $('input[name="token"]').val();
+	let token         = window.saturne.toolbox.getToken();
 	let mediaGallery  = $('#media_gallery')
 
 	let formdata = new FormData();

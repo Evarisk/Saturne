@@ -178,7 +178,7 @@ window.saturne.signature.createSignature = function() {
         }),
         success: function( resp ) {
             if (elementZone == "private") {
-                actionContainerSuccess.html($(resp).find('.noticeSignatureSuccess .all-notice-content'));
+                actionContainerSuccess.html($(resp).find('.noticeSignatureSuccess .notice-content'));
                 actionContainerSuccess.removeClass('hidden');
                 $('.signatures-container').html($(resp).find('.signatures-container'));
             } else {
@@ -219,7 +219,7 @@ window.saturne.signature.download = function(fileUrl, filename) {
  */
 window.saturne.signature.autoDownloadSpecimen = function() {
     let element = $(this).closest('.file-generation');
-    let token   = $('.signature-container').find('input[name="token"]').val();
+    let token   = window.saturne.toolbox.getToken();
     let url     = document.URL + '&action=builddoc&token=' + token;
     $.ajax({
         url: url,
