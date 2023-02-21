@@ -152,9 +152,9 @@ class SaturneSchedules extends CommonObject
 	public int $fk_user_creat;
 
     /**
-     * @var int User ID
+     * @var int|null User ID
      */
-    public int $fk_user_modif;
+    public ?int $fk_user_modif;
 
 	/**
 	 * Constructor

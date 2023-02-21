@@ -36,6 +36,9 @@ $moduleNameLowerCase = strtolower($moduleName);
 if (isModEnabled('societe')) {
     require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
 }
+if (isModEnabled('project')) {
+    require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
+}
 if (isModEnabled('contrat')) {
     require_once DOL_DOCUMENT_ROOT . '/core/lib/contract.lib.php';
     require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
@@ -45,6 +48,9 @@ require_once __DIR__ . '/../class/saturneschedules.class.php';
 
 // Global variables definitions
 global $conf, $db, $hookmanager, $langs, $user;
+
+// Load translation files required by the page
+saturne_load_langs();
 
 // Get parameters
 $id          = GETPOST('id', 'int');
@@ -61,14 +67,14 @@ if ($user->socid) {
 $object = new SaturneSchedules($db);
 
 if (isModEnabled($elementType)) {
-    $classname = ucfirst($elementType);
-    $objectLinked = new $classname($db);
+    $className = ucfirst($elementType);
+    $objectLinked = new $className($db);
 }
 
 // Initialize view objects
 $form = new Form($db);
 
-$hookmanager->initHooks([$elementType . 'schedules', 'globalcard']); // Note that conf->hooks_modules contains array of hook context
+$hookmanager->initHooks([$elementType . 'schedules',  'saturneschedules', 'saturneglobal', 'globalcard']); // Note that conf->hooks_modules contains array of hook context
 
 // Fetch current Schedules object
 if ($id > 0 && !empty($elementType)) {
@@ -79,10 +85,8 @@ if ($id > 0 && !empty($elementType)) {
 
 // Security check - Protection if external user
 $permissiontoread = $user->rights->$moduleNameLowerCase->read;
-$permissiontoadd  = $user->rights->$moduleNameLowerCase->read;
-if (empty($conf->$moduleNameLowerCase->enabled) || !$permissiontoread) {
-    accessforbidden();
-}
+$permissiontoadd  = $permissiontoread;
+saturne_check_access($permissiontoread);
 
 /*
  * Actions
@@ -163,13 +167,13 @@ if (!empty($objectLinked) && empty($action)) {
     $morehtmlref .= '<div class="refidno">';
 
     // Ref customer
-    $morehtmlref .= $form->editfieldkey("RefCustomer", 'ref_customer', $objectLinked->ref_customer, $objectLinked, 0, 'string', '', 0, 1);
-    $morehtmlref .= $form->editfieldval("RefCustomer", 'ref_customer', $objectLinked->ref_customer, $objectLinked, 0, 'string', '', null, null, '', 1, 'getFormatedCustomerRef');
+    $morehtmlref .= $form->editfieldkey('RefCustomer', 'ref_customer', $objectLinked->ref_customer, $objectLinked, 0, 'string', '', 0, 1);
+    $morehtmlref .= $form->editfieldval('RefCustomer', 'ref_customer', $objectLinked->ref_customer, $objectLinked, 0, 'string', '', null, null, '', 1, 'getFormatedCustomerRef');
 
     // Ref supplier
     $morehtmlref .= '<br>';
-    $morehtmlref .= $form->editfieldkey("RefSupplier", 'ref_supplier', $objectLinked->ref_supplier, $objectLinked, 0, 'string', '', 0, 1);
-    $morehtmlref .= $form->editfieldval("RefSupplier", 'ref_supplier', $objectLinked->ref_supplier, $objectLinked, 0, 'string', '', null, null, '', 1, 'getFormatedSupplierRef');
+    $morehtmlref .= $form->editfieldkey('RefSupplier', 'ref_supplier', $objectLinked->ref_supplier, $objectLinked, 0, 'string', '', 0, 1);
+    $morehtmlref .= $form->editfieldval('RefSupplier', 'ref_supplier', $objectLinked->ref_supplier, $objectLinked, 0, 'string', '', null, null, '', 1, 'getFormatedSupplierRef');
 
     // Thirdparty
     if (isModEnabled('societe')) {
@@ -179,13 +183,13 @@ if (!empty($objectLinked) && empty($action)) {
 
     // Project
     if (isModEnabled('project')) {
+        $morehtmlref .= $langs->trans('Project') . ' : ';
         if (!empty($objectLinked->fk_project)) {
             $project = new Project($db);
             $project->fetch($object->fk_project);
-            $morehtmlref .= $langs->trans('Project') . ' : ' . $project->getNomUrl(1, '', 1) . '<br>';
-        } else {
-            $morehtmlref .= $langs->trans('Project') . ' : ';
+            $morehtmlref .= $project->getNomUrl(1, '', 1);
         }
+        $morehtmlref .= '<br>';
     }
     $morehtmlref .= '</div>';
 
@@ -206,50 +210,27 @@ if (!empty($objectLinked) && empty($action)) {
     }
 
     print '<table class="noborder centpercent">';
-
     print '<tr class="liste_titre"><th class="titlefield wordbreak">' . $langs->trans('Day') . '</th><th>' . $langs->trans('Value') . '</th></tr>';
 
-    print '<tr class="oddeven"><td>';
-    print $form->textwithpicto($langs->trans('Monday'), $langs->trans('OpeningHoursFormatDesc'));
-    print '</td><td>';
-    print '<input name="monday" id="monday" class="minwidth100" value="' . ($object->monday ?: GETPOST('monday', 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '></td></tr>';
-
-    print '<tr class="oddeven"><td>';
-    print $form->textwithpicto($langs->trans('Tuesday'), $langs->trans('OpeningHoursFormatDesc'));
-    print '</td><td>';
-    print '<input name="tuesday" id="tuesday" class="minwidth100" value="' . ($object->tuesday ?: GETPOST('tuesday', 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '></td></tr>';
-
-    print '<tr class="oddeven"><td>';
-    print $form->textwithpicto($langs->trans('Wednesday'), $langs->trans('OpeningHoursFormatDesc'));
-    print '</td><td>';
-    print '<input name="wednesday" id="wednesday" class="minwidth100" value="' . ($object->wednesday ?: GETPOST('wednesday', 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '></td></tr>';
-
-    print '<tr class="oddeven"><td>';
-    print $form->textwithpicto($langs->trans('Thursday'), $langs->trans('OpeningHoursFormatDesc'));
-    print '</td><td>';
-    print '<input name="thursday" id="thursday" class="minwidth100" value="' . ($object->thursday ?: GETPOST('thursday', 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '></td></tr>';
-
-    print '<tr class="oddeven"><td>';
-    print $form->textwithpicto($langs->trans('Friday'), $langs->trans('OpeningHoursFormatDesc'));
-    print '</td><td>';
-    print '<input name="friday" id="friday" class="minwidth100" value="' . ($object->friday ?: GETPOST('friday', 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '></td></tr>';
-
-    print '<tr class="oddeven"><td>';
-    print $form->textwithpicto($langs->trans('Saturday'), $langs->trans('OpeningHoursFormatDesc'));
-    print '</td><td>';
-    print '<input name="saturday" id="saturday" class="minwidth100" value="' . ($object->saturday ?: GETPOST('saturday', 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '></td></tr>';
-
-    print '<tr class="oddeven"><td>';
-    print $form->textwithpicto($langs->trans('Sunday'), $langs->trans('OpeningHoursFormatDesc'));
-    print '</td><td>';
-    print '<input name="sunday" id="sunday" class="minwidth100" value="' . ($object->sunday ?: GETPOST('sunday', 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '></td></tr>';
-
+    $daysArray = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    foreach ($daysArray as $day) {
+        print '<tr class="oddeven"><td>';
+        print $form->textwithpicto($langs->trans(ucfirst($day)), $langs->trans('OpeningHoursFormatDesc'));
+        print '</td><td>';
+        print '<input name="' . $day . '" id=' . $day . '" class="minwidth100" value="' . ($object->$day ?: GETPOST($day, 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '></td></tr>';
+    }
     print '</table>';
 
-    if ($objectLinked->status < 2) {
+    $parameters = [];
+    $reshook = $hookmanager->executeHooks('saturneSchedules', $parameters, $object); // Note that $action and $object may have been modified by some hooks
+    if ($reshook < 0) {
+        setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+    } elseif (empty($reshook)) {
         print '<div class="center">';
         print '<input type="submit" class="button" name="save" value="' . $langs->trans('Save') . '">';
         print '</div>';
+    } else {
+        print $hookmanager->resPrint;
     }
     print '</form>';
 }
