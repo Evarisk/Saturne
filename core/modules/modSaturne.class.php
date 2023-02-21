@@ -127,11 +127,23 @@ class modSaturne extends DolibarrModules
 		$this->config_page_url = ['setup.php@saturne'];
 
         // Dependencies
+        $modulesList = [
+            'DoliSMQ'  => 'dolismq',
+            'DoliMeet' => 'dolimeet',
+            'DoliCar'  => 'dolicar'
+        ];
+
+        foreach ($modulesList as $moduleName => $moduleNameLowerCase) {
+            $this->requiredby[] = 'mod' . $moduleName;
+        }
+
         // A condition to hide module
 		$this->hidden = false;
         // List of module class names as string that must be enabled if this module is enabled. Example: array('always1'=>'modModuleToEnable1','always2'=>'modModuleToEnable2', 'FR1'=>'modModuleToEnableFR'...)
 		$this->depends = [];
-		$this->requiredby = []; // List of module class names as string to disable if this one is disabled. Example: array('modModuleToDisable1', ...)
+        foreach ($modulesList as $moduleName => $moduleNameLowerCase) {
+            $this->requiredby[] = 'mod' . $moduleName; // List of module class names as string to disable if this one is disabled. Example: array('modModuleToDisable1', ...)
+        }
 		$this->conflictwith = []; // List of module class names as string this module is in conflict with. Example: array('modModuleToDisable1', ...)
 
         // The language file dedicated to your module
@@ -195,12 +207,6 @@ class modSaturne extends DolibarrModules
         // Main menu entries to add
 		$this->menu = [];
 		$r = 0;
-
-		$modulesList = [
-			'DoliSMQ'  => 'dolismq',
-			'DoliMeet' => 'dolimeet',
-			'DoliCar'  => 'dolicar'
-		];
 
 		foreach ($modulesList as $moduleName => $moduleNameLowerCase) {
 			$this->menu[$r++] = [
