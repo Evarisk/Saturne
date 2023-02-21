@@ -17,6 +17,7 @@
 # Saturne
 #
 
+# Data
 ModuleSaturneName = Saturne
 ModuleSaturneDesc = Evarisk framework and library of objects and functions
 ModuleConfig      = Configuration
@@ -32,9 +33,15 @@ ReadAdminPage = Access the module configuration %s
 #
 # Config page
 #
-ModuleSettings = Settings
-ModuleSetup    = Module configuration %s
-SaturneData    = Configurable data from %s
+
+# Data
+ModuleSettings     = Settings
+ModuleSetup        = Module configuration %s
+SaturneData        = Configurable data from %s
+ModuleMediaGallery = Configuration of %s media
+MediaData          = Configurable media data
+SavedMediaData     = Recording of media data
+
 
 # Mod Numbering
 NumberingModule = Numbering model
@@ -51,6 +58,8 @@ ODTDefaultTemplateName = Default ODT of documents %s
 #
 # About
 #
+
+# Data
 About       = About
 ModuleAbout = About %s
 
@@ -84,6 +93,7 @@ DontShowPatchNote      = No longer display the update note
 # Media Gallery
 #
 
+# Data
 MediaGallery              = Media library
 ErrorThisFileSizeTooLarge = The %s file is too large
 ErrorThisFileExists       = The %s file already exists
@@ -95,7 +105,7 @@ EmptyMediaGallery         = The media library is empty
 # Schedules
 #
 
-# Data - Donnée
+# Data
 SchedulesSaved = The timetables have been properly recorded
 
 
@@ -104,6 +114,7 @@ SchedulesSaved = The timetables have been properly recorded
 # Documents
 #
 
+# Data
 AutomaticPdfGeneration                  = Automatic generation of PDFs
 AutomaticPdfGenerationDescription       = Automatically creates the document as a PDF when it is generated
 ManualPdfGeneration                     = Manual generation of PDFs

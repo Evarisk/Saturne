@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2022-2023 EVARISK <dev@evarisk.com>
+/* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ $backtopage = GETPOST('backtopage', 'alpha');
 
 // Security check - Protection if external user
 $permissiontoread = $user->rights->saturne->adminpage->read;
-//saturne_check_access($permissiontoread);
+saturne_check_access($permissiontoread);
 
 /*
  * View

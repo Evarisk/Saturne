@@ -17,6 +17,7 @@
 # Saturne
 #
 
+# Data - Donnée
 ModuleSaturneName = Saturne
 ModuleSaturneDesc = Framework et librairie d'objets et fonctions d'Evarisk
 ModuleConfig      = Configuration
@@ -32,9 +33,14 @@ ReadAdminPage = Accéder à la configuration du module %s
 #
 # Config page - Page d'administration
 #
-ModuleSettings = Réglages
-ModuleSetup    = Configuration du module %s
-SaturneData    = Données configurables de %s
+
+# Data - Donnée
+ModuleSettings     = Réglages
+ModuleSetup        = Configuration du module %s
+SaturneData        = Données configurables de %s
+ModuleMediaGallery = Configuration des médias de %s
+MediaData          = Données configurables des médias
+SavedMediaData     = Enregistrement des données des médias
 
 # Mod Numbering - Modèle de numérotation
 NumberingModule = Modèle de numérotation
@@ -51,6 +57,8 @@ ODTDefaultTemplateName = ODT par défaut des documents %s
 #
 # About - Page À propos
 #
+
+# Data - Donnée
 About       = À propos
 ModuleAbout = À propos de %s
 
@@ -84,6 +92,7 @@ DontShowPatchNote      = Ne plus afficher la note de mise à jour
 # Media Gallery - Bibliothèque de médias
 #
 
+# Data - Donnée
 MediaGallery              = Bibliothèque de médias
 ErrorThisFileSizeTooLarge = Le fichier %s est trop volumineux
 ErrorThisFileExists       = Le fichier %s existe déjà
@@ -104,6 +113,7 @@ SchedulesSaved = Les horaires ont bien été enregistrés
 # Documents - Documents
 #
 
+# Data - Donnée
 AutomaticPdfGeneration                  = Génération automatique des PDF
 AutomaticPdfGenerationDescription       = Crée automatiquement le document en PDF lors de la génération
 ManualPdfGeneration                     = Génération manuelle des PDF
