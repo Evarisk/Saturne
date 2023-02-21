@@ -1,0 +1,72 @@
+# Copyright (C) 2022-2023 EVARISK <dev@evarisk.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#
+# Signature
+#
+
+# Trigger
+AddAttendantTrigger     = Adding a participant : %s
+SignedTrigger           = Signature of participant completed %s
+PendingSignatureTrigger = Email sent, awaiting participant's signature %s
+AbsentTrigger           = Participant %s absent
+DeletedTrigger          = Participant %s deleted
+
+# SetEventMessage
+BeCareful               = Attention
+AddSignatureSuccess     = Successful participant signature
+AddSignatureSuccessText = The signature has been registered for the document
+AddAttendantMessage     = Add participant : %s
+DeleteAttendantMessage  = Participant deletion: %s
+SignAttendantMessage    = The participant %s signed
+AbsentAttendantMessage  = The participant %s is absent
+
+# Status
+Registered       = Registered
+SignatureRequest = Request for signature
+PendingSignature = Awaiting signature
+Denied           = Rejected
+Signed           = Signed
+Unsigned         = Unsigned
+Absent           = Absent
+JustifiedAbsent  = Justified absence
+
+# Header table
+Role             = Role
+SignatureLink    = Signature link
+SendMailDate     = Date email sent
+SignatureDate    = Date of signature
+SignatureActions = Actions
+
+# Button
+GoToValidate    = Validate %s
+GoToLock        = Lock %s
+SendEmail       = Send an email
+DeleteAttendant = Delete the participant
+Sign            = Sign
+Erase           = Erase
+
+# Data
+Attendant          = Participant
+Attendants         = Participants
+InternalAttendant  = Internal participant
+InternalAttendants = Internal participants
+ExternalAttendant  = External participant
+ExternalAttendants = External participants
+NoAttendants       = No linked participants. To add participants, the status must be "Draft (to be validated)".
+CloneAttendants    = Clone participants
+
+# Public interface
+FullName = Last name First name

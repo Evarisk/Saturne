@@ -1,0 +1,115 @@
+# Copyright (C) 2022 EVARISK <dev@evarisk.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#
+# Saturne
+#
+
+ModuleSaturneName = Saturne
+ModuleSaturneDesc = Evarisk framework and library of objects and functions
+ModuleConfig      = Configuration
+MinimizeMenu      = Minimize the menu
+
+# Right
+LireModule    = Read %s
+ReadModule    = Read %s (read)
+ReadAdminPage = Access the module configuration %s
+
+
+
+#
+# Config page
+#
+ModuleSettings = Settings
+ModuleSetup    = Module configuration %s
+SaturneData    = Configurable data from %s
+
+# Mod Numbering
+NumberingModule = Numbering model
+StandardModel   = Returns the number in the form %syymm-nnnn where yy is the year, mm is the month and nnnn is a sequential counter without break and without reset.
+
+# ODT Template
+YourDocuments          = Documents
+DocumentsConfig        = Document configuration
+DocumentTemplate       = Model documents
+ODTDefaultTemplateName = Default ODT of documents %s
+
+
+
+#
+# About
+#
+About       = About
+ModuleAbout = About %s
+
+
+
+#
+# Security
+#
+
+# Data
+ChangeEntityRedirection = You have been redirected because you have changed entity
+EnableSaturne           = Please activate the Saturn module to see this page
+
+
+
+#
+# Index
+#
+
+# Data
+ModuleArea             = Welcome to %s
+ModuleUpdate           = Update of %s :
+ModuleHasBeenUpdatedTo = %s has been updated to %s
+ModulePatchNote        = Update note %s %s
+ShowPatchNote          = See the update note
+DontShowPatchNote      = No longer display the update note
+
+
+
+#
+# Media Gallery
+#
+
+MediaGallery              = Media library
+ErrorThisFileSizeTooLarge = The %s file is too large
+ErrorThisFileExists       = The %s file already exists
+EmptyMediaGallery         = The media library is empty
+
+
+
+#
+# Schedules
+#
+
+# Data - Donnée
+SchedulesSaved = The timetables have been properly recorded
+
+
+
+#
+# Documents
+#
+
+AutomaticPdfGeneration                  = Automatic generation of PDFs
+AutomaticPdfGenerationDescription       = Automatically creates the document as a PDF when it is generated
+ManualPdfGeneration                     = Manual generation of PDFs
+ManualPdfGenerationDescription          = Added a button to create an ODT document in PDF
+FileCouldNotBeGeneratedInPDF            = The file could not be generated in PDF
+CheckDocumentationToEnablePDFGeneration = Please refer to the documentation for the PDF generation : <a target="_blank" href="https://wiki.dolibarr.org/index.php?title=Module_Digirisk#Impression_du_Document_Unique_au_format_pdf_-_.28.2A.pdf.29">Documentation</a>
+PDFGenerationTooltip                    = Appuyez sur ce bouton pour générer le document ODT en PDF
+PDFGeneration                           = Generating the PDF document
+NoData                                  = N/A
