@@ -173,7 +173,7 @@ if ($id > 0 || !empty($ref)) {
                 $param .= '&limit=' . urlencode($limit);
             }
 
-            print load_fiche_titre($langs->trans('ActionsOn' . ucfirst($object->element)), $newCardButton, '');
+            print load_fiche_titre($langs->trans('ActionsOnObject', $langs->transnoentities('The' . ucfirst($object->element))), $newCardButton, '');
 
             // List of all actions
             $filters = [];

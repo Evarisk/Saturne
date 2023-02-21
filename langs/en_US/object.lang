@@ -63,3 +63,6 @@ ConfirmLockObject     = Are you sure you want to lock %s?<br>This lock allows yo
 CloneObject           = Clone %s
 NewLabelForClone      = New %s label
 ConfirmCloneObject    = Are you sure you want to clone %s <b>%s</b>?
+
+# Data
+ActionsOnObject = Events on %s
