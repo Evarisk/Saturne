@@ -62,9 +62,9 @@ Erase           = Effacer
 Attendant          = Participant
 Attendants         = Participants
 InternalAttendant  = Participant interne
-InternalAttendants = Participants interne
+InternalAttendants = Participants internes
 ExternalAttendant  = Participant externe
-ExternalAttendants = Participants externe
+ExternalAttendants = Participants externes
 NoAttendants       = Pas de participants liés. Pour ajouter des participants, le statut doit être "Brouillon (à valider)".
 CloneAttendants    = Cloner les participants
 
