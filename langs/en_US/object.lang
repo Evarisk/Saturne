@@ -40,18 +40,19 @@ Locked                   = Locked
 Archived                 = Archived
 
 # Button
-ReOpenDoli                    = Reopen
-Sign                          = Sign
-Lock                          = Lock
-Archive                       = Archive
-Clone                         = Clone
-ObjectMustBeDraft             = %s must be in (draft) status
-ObjectMustBeDraftToValidate   = %s is already at status (validated) or higher
-ObjectMustBeValidated         = %s must be in status (validated)
-ObjectMustBeValidatedToSign   = %s must be in status (validated) for participants to sign
-AllSignatoriesMustHaveSigned  = All participants must have signed to lock %s
-ObjectMustBeLockedToSendEmail = %s must be in (locked) status to send an email
-ObjectMustBeLockedToArchive   = %s must be in status (locked) and the document generated in order to archive it
+ReOpenDoli                      = Reopen
+Sign                            = Sign
+Lock                            = Lock
+Archive                         = Archive
+Clone                           = Clone
+ObjectMustBeDraft               = %s must be in (draft) status
+ObjectMustBeDraftToValidate     = %s is already at status (validated) or higher
+ObjectMustBeValidated           = %s must be in status (validated)
+ObjectMustBeValidatedToGenerate = %s must be in status (validated) to generate the document
+ObjectMustBeValidatedToSign     = %s must be in status (validated) for participants to sign
+AllSignatoriesMustHaveSigned    = All participants must have signed to lock %s
+ObjectMustBeLockedToSendEmail   = %s must be in (locked) status to send an email
+ObjectMustBeLockedToArchive     = %s must be in status (locked) and the document generated in order to archive it
 
 # Confirm box
 ValidateObject        = Validate %s

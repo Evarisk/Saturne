@@ -40,18 +40,19 @@ Locked                   = Verrouillé
 Archived                 = Archivé
 
 # Button - Bouton
-ReOpenDoli                    = Rouvrir
-Sign                          = Signer
-Lock                          = Verrouiller
-Archive                       = Archiver
-Clone                         = Cloner
-ObjectMustBeDraft             = %s doit être au statut (brouillon)
-ObjectMustBeDraftToValidate   = %s est déjà au statut (validé) ou supérieur
-ObjectMustBeValidated         = %s doit être au statut (validé)
-ObjectMustBeValidatedToSign   = %s doit être au statut (validé) pour que les participants puissent signer
-AllSignatoriesMustHaveSigned  = Tous les participants doivent avoir signé pour verrouiller %s
-ObjectMustBeLockedToSendEmail = %s doit être au statut (verrouillé) pour envoyer un email
-ObjectMustBeLockedToArchive   = %s doit être au statut (verrouillé) et le document généré afin de pouvoir l'archiver
+ReOpenDoli                      = Rouvrir
+Sign                            = Signer
+Lock                            = Verrouiller
+Archive                         = Archiver
+Clone                           = Cloner
+ObjectMustBeDraft               = %s doit être au statut (brouillon)
+ObjectMustBeDraftToValidate     = %s est déjà au statut (validé) ou supérieur
+ObjectMustBeValidated           = %s doit être au statut (validé)
+ObjectMustBeValidatedToGenerate = %s doit être au statut (validé) pour générer le document
+ObjectMustBeValidatedToSign     = %s doit être au statut (validé) pour que les participants puissent signer
+AllSignatoriesMustHaveSigned    = Tous les participants doivent avoir signé pour verrouiller %s
+ObjectMustBeLockedToSendEmail   = %s doit être au statut (verrouillé) pour envoyer un email
+ObjectMustBeLockedToArchive     = %s doit être au statut (verrouillé) et le document généré afin de pouvoir l'archiver
 
 # Confirm box - Boite de confirmation
 ValidateObject        = Valider %s
