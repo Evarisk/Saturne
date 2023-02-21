@@ -1,4 +1,4 @@
-/* Copyright (C) 2021-2023 EVARISK <dev@evarisk.com>
+/* Copyright (C) 2022-2023 EVARISK <dev@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,8 @@
 
 /**
  * \file    js/modules/modal.js
- * \ingroup modal
- * \brief   JavaScript file for module Saturne.
+ * \ingroup saturne
+ * \brief   JavaScript file modal for module Saturne.
  */
 
 /**

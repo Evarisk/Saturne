@@ -1,4 +1,4 @@
-/* Copyright (C) 2021-2023 EVARISK <dev@evarisk.com>
+/* Copyright (C) 2022-2023 EVARISK <dev@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  * Library javascript to enable Browser notifications
+ */
+
+/**
+ * \file    js/modules/menu.js
+ * \ingroup saturne
+ * \brief   JavaScript file menu for module Saturne.
  */
 
 /**
@@ -111,7 +117,7 @@ window.saturne.menu.toggleMenu = function() {
  */
 window.saturne.menu.setMenu = function() {
 	if ($('.blockvmenu.blockvmenufirst').length > 0) {
-		if ($('.blockvmenu.blockvmenufirst').html().match(/digiriskdolibarr|dolismq/)) {
+		if ($('.blockvmenu.blockvmenufirst').html().match(/digiriskdolibarr|dolismq|dolimeet|dolisirh/)) {
 			$('span.vmenu').find('.fa-chevron-circle-left').parent().parent().parent().attr('style', 'cursor:pointer ! important')
 
 			if (localStorage.maximized == 'false') {
