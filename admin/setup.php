@@ -47,7 +47,7 @@ $backtopage = GETPOST('backtopage', 'alpha');
 
 // Security check - Protection if external user
 $permissiontoread = $user->rights->saturne->adminpage->read;
-saturne_check_access($permissiontoread);
+//saturne_check_access($permissiontoread);
 
 /*
  * View

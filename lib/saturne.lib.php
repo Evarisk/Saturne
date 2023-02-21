@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2021-2023 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,21 +16,27 @@
  */
 
 /**
+ * \file    lib/saturne.lib.php
+ * \ingroup saturne
+ * \brief   Library files with common functions for Saturne
+ */
+
+/**
  * Prepare admin pages header
  *
  * @return array $head 	Selectable tabs
  */
 function saturne_admin_prepare_head(): array
 {
+    // Global variables definitions
 	global $langs, $conf;
 
-	$langs->load('saturne@saturne');
-
+    // Initialize values
 	$h = 0;
 	$head = [];
 
     $head[$h][0] = dol_buildpath('/saturne/admin/setup.php', 1);
-    $head[$h][1] = '<i class="fas fa-cog pictofixedwidth"></i>' . $langs->trans('Settings');
+    $head[$h][1] = '<i class="fas fa-cog pictofixedwidth"></i>' . $langs->trans('ModuleSettings');
     $head[$h][2] = 'settings';
     $h++;
 
@@ -40,6 +46,8 @@ function saturne_admin_prepare_head(): array
 	$h++;
 
 	complete_head_from_modules($conf, $langs, null, $head, $h, 'saturne@saturne');
+
+    complete_head_from_modules($conf, $langs, null, $head, $h, 'saturne@saturne', 'remove');
 
 	return $head;
 }
