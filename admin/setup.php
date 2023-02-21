@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2022 EVARISK <dev@evarisk.com>
+/* Copyright (C) 2022-2023 EVARISK <dev@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,78 +21,51 @@
  * \brief   Saturne setup page.
  */
 
-// Load Dolibarr environment
-include_once __DIR__ . '/../saturne.main.inc.php';
+// Load Saturne environment
+if (file_exists('../saturne.main.inc.php')) {
+    require_once __DIR__ . '/../saturne.main.inc.php';
+} else {
+    die('Include of saturne main fails');
+}
 
-global $conf, $db, $langs, $user;
 
 // Libraries
-require_once DOL_DOCUMENT_ROOT . "/core/lib/admin.lib.php";
-require_once DOL_DOCUMENT_ROOT . "/core/lib/files.lib.php";
+require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
 
-require_once '../lib/saturne.lib.php';
+require_once __DIR__ . '/../lib/saturne.lib.php';
 
-// Translations
-$langs->loadLangs(array("admin", "saturne@saturne"));
+// Global variables definitions
+global $db, $langs, $user;
 
-// Initialize technical objects
+// Load translation files required by the page
+saturne_load_langs();
 
 // Parameters
 $action     = GETPOST('action', 'alpha');
-$backtopage = GETPOST('backtopage', 'alpha');
 $value      = GETPOST('value', 'alpha');
-
-// Access control
-if (!$user->admin) accessforbidden();
-
-// Parameters
 $backtopage = GETPOST('backtopage', 'alpha');
 
-/*
- * Actions
- */
-
-if ($action == 'setMediaDimension') {
-	$MediaMaxWidthMedium = GETPOST('MediaMaxWidthMedium', 'alpha');
-	$MediaMaxHeightMedium = GETPOST('MediaMaxHeightMedium', 'alpha');
-	$MediaMaxWidthLarge = GETPOST('MediaMaxWidthLarge', 'alpha');
-	$MediaMaxHeightLarge = GETPOST('MediaMaxHeightLarge', 'alpha');
-
-	if (!empty($MediaMaxWidthMedium) || $MediaMaxWidthMedium === '0') {
-		dolibarr_set_const($db, "DIGIRISKDOLIBARR_MEDIA_MAX_WIDTH_MEDIUM", $MediaMaxWidthMedium, 'integer', 0, '', $conf->entity);
-	}
-	if (!empty($MediaMaxHeightMedium) || $MediaMaxHeightMedium === '0') {
-		dolibarr_set_const($db, "DIGIRISKDOLIBARR_MEDIA_MAX_HEIGHT_MEDIUM", $MediaMaxHeightMedium, 'integer', 0, '', $conf->entity);
-	}
-	if (!empty($MediaMaxWidthLarge) || $MediaMaxWidthLarge === '0') {
-		dolibarr_set_const($db, "DIGIRISKDOLIBARR_MEDIA_MAX_WIDTH_LARGE", $MediaMaxWidthLarge, 'integer', 0, '', $conf->entity);
-	}
-	if (!empty($MediaMaxHeightLarge) || $MediaMaxHeightLarge === '0') {
-		dolibarr_set_const($db, "DIGIRISKDOLIBARR_MEDIA_MAX_HEIGHT_LARGE", $MediaMaxHeightLarge, 'integer', 0, '', $conf->entity);
-	}
-}
+// Security check - Protection if external user
+$permissiontoread = $user->rights->saturne->adminpage->read;
+saturne_check_access($permissiontoread);
 
 /*
  * View
  */
 
-$page_name = "SaturneSetup";
+$title    = $langs->trans('ModuleSetup', 'Saturne');
 $help_url  = 'FR:Module_Saturne#Configuration';
 
-$morejs  = array("/saturne/js/saturne.js");
-$morecss = array("/saturne/css/saturne.css");
-
-saturne_header(1,'',0, '', $help_url, '', '', '', 0, $morejs, $morecss);
+saturne_header(0,'', $title, $help_url);
 
 // Subheader
-$linkback = '<a href="' . ($backtopage ?: DOL_URL_ROOT . '/admin/modules.php?restore_lastsearch_values=1') . '">' . $langs->trans("BackToModuleList") . '</a>';
+$linkback = '<a href="' . ($backtopage ?: DOL_URL_ROOT . '/admin/modules.php?restore_lastsearch_values=1') . '">' . $langs->trans('BackToModuleList') . '</a>';
 
-print load_fiche_titre($langs->trans($page_name), $linkback, 'saturne32px@saturne');
+print load_fiche_titre($title, $linkback, 'saturne_color@saturne');
 
 // Configuration header
 $head = saturne_admin_prepare_head();
-print dol_get_fiche_head($head, 'settings', '', -1, "saturne@saturne");
-print load_fiche_titre($langs->trans("SaturneData"), '', '');
+print dol_get_fiche_head($head, 'settings', '', -1, 'saturne_color@saturne');
 
 // Page end
 print dol_get_fiche_end();
