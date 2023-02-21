@@ -219,7 +219,7 @@ window.saturne.signature.download = function(fileUrl, filename) {
  */
 window.saturne.signature.autoDownloadSpecimen = function() {
     let element = $(this).closest('.file-generation');
-    let token   = $('.digirisk-signature-container').find('input[name="token"]').val();
+    let token   = $('.signature-container').find('input[name="token"]').val();
     let url     = document.URL + '&action=builddoc&token=' + token;
     $.ajax({
         url: url,

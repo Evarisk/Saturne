@@ -114,30 +114,32 @@ function saturne_check_access($permission, $object = null) {
  * @param string       $tabactive Tab active in navbar
  * @param string       $title     Title navbar
  */
-function saturne_get_fiche_head(CommonObject $object = null, string $tabactive = '', string $title = '')
+function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', string $title = '')
 {
     // Configuration header
-	if(is_object($object)) {
-		if (array_key_exists('element', $object->fields)) {
-			$prepareHead = $object->element . '_prepare_head';
-			$head = $prepareHead($object);
-		}
-		if (array_key_exists('picto', $object->fields)) {
-			$picto = $object->picto;
-		}
-		print dol_get_fiche_head($head, $tabactive, $title, -1, $picto);
-	}
+    if (property_exists($object, 'element')) {
+        $prepareHead = $object->element . '_prepare_head';
+        $head = $prepareHead($object);
+    }
+    if (property_exists($object, 'picto')) {
+        $picto = $object->picto;
+    }
+    print dol_get_fiche_head($head, $tabactive, $title, -1, $picto);
 }
 
 /**
  * Print dol_banner_tab with Saturne custom enhancements
  *
- * @param CommonObject $object   Current object
- * @param int          $shownav  Show Condition (navigation is shown if value is 1)
- * @param string       $fieldid  Field name for select next et previous (we make the select max and min on this field). Use 'none' for no prev/next search.
- * @param string       $fieldref Field name objet ref (object->ref) for select next and previous
+ *  @param  Object $object      Object to show
+ *  @param  string $paramid     Name of parameter to use to name the id into the URL next/previous link
+ *  @param  string $morehtml    More html content to output just before the nav bar
+ *  @param  int    $shownav     Show Condition (navigation is shown if value is 1)
+ *  @param  string $fieldid     Field name for select next et previous (we make the select max and min on this field). Use 'none' for no prev/next search.
+ *  @param  string $fieldref    Field name objet ref (object->ref) for select next and previous
+ *  @param  string $morehtmlref More html to show after the ref (see $morehtmlleft for before)
+ *  @return void
  */
-function saturne_banner_tab(CommonObject $object, string $paramid = 'ref', int $shownav = 1, string $fieldid = 'ref', string $fieldref = 'ref', string $morehtmlref = '')
+function saturne_banner_tab(object $object, string $paramid = 'ref', string $morehtml = '', int $shownav = 1, string $fieldid = 'ref', string $fieldref = 'ref', string $morehtmlref = ''): void
 {
     global $db, $langs, $hookmanager, $moduleName, $moduleNameLowerCase;
 
@@ -145,7 +147,9 @@ function saturne_banner_tab(CommonObject $object, string $paramid = 'ref', int $
         require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
     }
 
-    $linkback = '<a href="' . dol_buildpath('/' . $moduleNameLowerCase . '/view/' .  $object->element . '/' . $object->element . '_list.php', 1) . '?restore_lastsearch_values=1&object_type=' . $object->element . '">' . $langs->trans('BackToList') . '</a>';
+    if (empty($morehtml)) {
+        $morehtml = '<a href="' . dol_buildpath('/' . $moduleNameLowerCase . '/view/' . $object->element . '/' . $object->element . '_list.php', 1) . '?restore_lastsearch_values=1&object_type=' . $object->element . '">' . $langs->trans('BackToList') . '</a>';
+    }
 
 	$saturneMorehtmlref = '';
 	if (array_key_exists('label', $object->fields)) {
@@ -187,7 +191,7 @@ function saturne_banner_tab(CommonObject $object, string $paramid = 'ref', int $
 
     $moreparam = '&module_name=' . $moduleName . '&object_type=' . $object->element;
 
-    dol_banner_tab($object, $paramid, $linkback, $shownav, $fieldid, $fieldref, $saturneMorehtmlref, $moreparam);
+    dol_banner_tab($object, $paramid, $morehtml, $shownav, $fieldid, $fieldref, $saturneMorehtmlref, $moreparam);
 
     print '<div class="underbanner clearboth"></div>';
 }
