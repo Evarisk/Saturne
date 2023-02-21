@@ -193,16 +193,15 @@ function saturne_banner_tab(CommonObject $object, string $paramid = 'ref', int $
 }
 
 /**
- *  Load translation files.
+ *  Load saturne and module translation files.
  *
- *  @param	array	$domains      		Array of lang files to load
- *	@return	int							<0 if KO, 0 if already loaded or loading not required, >0 if OK
+ * @param array $domains Array of lang files to load
  */
 function saturne_load_langs(array $domains = [])
 {
 	global $langs, $moduleNameLowerCase;
 
-	$langs->loadLangs(['saturne@saturne', 'other@saturne', $moduleNameLowerCase . '@' . $moduleNameLowerCase]);
+	$langs->loadLangs(['saturne@saturne', 'object@saturne', 'signature@saturne', $moduleNameLowerCase . '@' . $moduleNameLowerCase]);
 
 	if (!empty($domains)) {
 		foreach ($domains as $domain) {

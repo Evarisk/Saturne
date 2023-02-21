@@ -1,0 +1,72 @@
+# Copyright (C) 2022-2023 EVARISK <dev@evarisk.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#
+# Signature - Signature
+#
+
+# Trigger - Déclencheur
+AddAttendantTrigger     = Ajout d'un participant : %s
+SignedTrigger           = Signature du participant effectuée %s
+PendingSignatureTrigger = Email envoyé, en attente de la signature du participant %s
+AbsentTrigger           = Participant %s absent
+DeletedTrigger          = Participant %s supprimé
+
+# SetEventMessage - Notice info
+BeCareful               = Attention
+AddSignatureSuccess     = Signature du participant réussie
+AddSignatureSuccessText = La signature a bien été enregistrée pour le document
+AddAttendantMessage     = Ajout du participant : %s
+DeleteAttendantMessage  = Suppression du participant : %s
+SignAttendantMessage    = Le participant %s a signé
+AbsentAttendantMessage  = Le participant %s est absent
+
+# Status - Statut
+Registered       = Inscrit
+SignatureRequest = Demande de signature
+PendingSignature = En attente de signature
+Denied           = Refusé
+Signed           = Signé
+Unsigned         = Non signé
+Absent           = Absent
+JustifiedAbsent  = Absence justifiée
+
+# Header table - Entête de tableau
+Role             = Rôle
+SignatureLink    = Lien signature
+SendMailDate     = Date d'envoi d'email
+SignatureDate    = Date de signature
+SignatureActions = Actions
+
+# Button - Bouton
+GoToValidate    = Valider %s
+GoToLock        = Verrouiller %s
+SendEmail       = Envoyer un email
+DeleteAttendant = Supprimer le participant
+Sign            = Signer
+Erase           = Effacer
+
+# Data - Donnée
+Attendant          = Participant
+Attendants         = Participants
+InternalAttendant  = Participant interne
+InternalAttendants = Participants interne
+ExternalAttendant  = Participant externe
+ExternalAttendants = Participants externe
+NoAttendants       = Pas de participants liés. Pour ajouter des participants, le statut doit être "Brouillon (à valider)".
+CloneAttendants    = Cloner les participants
+
+# Public interface - Interface publique
+FullName = NOM Prénom
