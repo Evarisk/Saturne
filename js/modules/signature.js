@@ -164,9 +164,10 @@ window.saturne.signature.createSignature = function() {
         var signature = $(this).closest('.wpeo-modal').find('canvas')[0].toDataURL();
     }
 
-    let token = window.saturne.toolbox.getToken();
+    let token          = window.saturne.toolbox.getToken();
+    let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
 
-    let url   = document.URL + '&action=add_signature' + signatoryIDPost + '&token=' + token;
+    let url   = document.URL + querySeparator + 'action=add_signature' + signatoryIDPost + '&token=' + token;
     $.ajax({
         url: url,
         type: 'POST',
@@ -218,9 +219,10 @@ window.saturne.signature.download = function(fileUrl, filename) {
  * @return {void}
  */
 window.saturne.signature.autoDownloadSpecimen = function() {
-    let element = $(this).closest('.file-generation');
-    let token   = window.saturne.toolbox.getToken();
-    let url     = document.URL + '&action=builddoc&token=' + token;
+    let element        = $(this).closest('.file-generation');
+    let token          = window.saturne.toolbox.getToken();
+    let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+    let url            = document.URL + querySeparator + 'action=builddoc&token=' + token;
     $.ajax({
         url: url,
         type: 'POST',
@@ -229,7 +231,7 @@ window.saturne.signature.autoDownloadSpecimen = function() {
             let path     = element.find('.specimen-path').attr('value');
             window.saturne.signature.download(path + filename, filename);
             $.ajax({
-                url: document.URL + '&action=remove_file&token=' + token,
+                url: document.URL + querySeparator + 'action=remove_file&token=' + token,
                 type: 'POST',
                 success: function ( ) {
                 },
