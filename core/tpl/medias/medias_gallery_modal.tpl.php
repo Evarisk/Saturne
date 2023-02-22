@@ -1,6 +1,6 @@
 <?php
 
-global $conf, $moduleName, $moduleNameLowerCase, $action, $subaction, $db;
+global $action, $conf, $db, $langs, $moduleName, $moduleNameLowerCase, $subaction;
 
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmdirectory.class.php';
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
