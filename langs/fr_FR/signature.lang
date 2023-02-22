@@ -34,6 +34,7 @@ SignAttendantMessage    = Le participant %s a signé
 AbsentAttendantMessage  = Le participant %s est absent
 SendEmailAt             = Envoi de l'email à %s
 ErrorSetupEmail         = Erreur de configuration des mails, vous n'avez pas configuré votre serveur d'envoi de mail
+NoEmailSet              = Aucun email renseigné : %s
 
 # Mail - Mail
 SignatureEmailSubject = Signature de %s %s

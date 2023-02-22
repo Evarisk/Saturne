@@ -34,6 +34,7 @@ SignAttendantMessage    = The participant %s signed
 AbsentAttendantMessage  = The participant %s is absent
 SendEmailAt             = Send email to %s
 ErrorSetupEmail         = Mail configuration error, you have not configured your mail server
+NoEmailSet              = No email entered: %s
 
 # Mail
 SignatureEmailSubject = Signature of %s %s
