@@ -78,6 +78,10 @@ function saturne_check_access($permission, object $object = null, bool $allowExt
 {
     global $conf, $langs, $user, $moduleNameLowerCase;
 
+    if (empty($moduleNameLowerCase)) {
+        $moduleNameLowerCase = 'saturne';
+    }
+
     if (!isModEnabled($moduleNameLowerCase) || !isModEnabled('saturne')) {
         if (!isModEnabled($moduleNameLowerCase)) {
             setEventMessage($langs->transnoentitiesnoconv('Enable' . ucfirst($moduleNameLowerCase)), 'warnings');
