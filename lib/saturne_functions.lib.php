@@ -1,6 +1,5 @@
 <?php
-
-/* Copyright (C) 2021-2023 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,31 +15,37 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * \file    lib/saturne_functions.lib.php
+ * \ingroup saturne
+ * \brief   Library files with common functions for Saturne
+ */
+
 require_once __DIR__ . '/medias.lib.php';
 require_once __DIR__ . '/pagination.lib.php';
 require_once __DIR__ . '/documents.lib.php';
 
 /**
- *      Print llxHeader with Saturne custom enhancements
+ * Print llxHeader with Saturne custom enhancements
  *
- *      @param      integer				$load_media_gallery		Load media gallery on page
- *      @param      string				$head					Show header
- *      @param      string				$title					Page title
- *      @param      string				$help_url				Help url shown in "?" tooltip
- *      @param      string				$target					Target to use on links
- *      @param      integer				$disablejs				More content into html header
- *      @param      integer				$disablehead			More content into html header
- * 		@param		array				$arrayofjs				Array of complementary js files
- * 		@param		array				$arrayofcss				Array of complementary css files
- * 		@param		string				$morequerystring		Query string to add to the link "print" to get same parameters (use only if autodetect fails)
- * 		@param		string				$morecssonbody			More CSS on body tag. For example 'classforhorizontalscrolloftabs'.
- * 		@param		string				$replacemainareaby		Replace call to main_area() by a print of this string
- * 		@param		integer				$disablenofollow		Disable the "nofollow" on meta robot header
- * 		@param		integer				$disablenoindex			Disable the "noindex" on meta robot header
+ * @param int    $load_media_gallery Load media gallery on page
+ * @param string $head               Show header
+ * @param string $title              Page title
+ * @param string $help_url           Help url shown in "?" tooltip
+ * @param string $target       	     Target to use on links
+ * @param int    $disablejs          More content into html header
+ * @param int    $disablehead        More content into html header
+ * @param array  $arrayofjs          Array of complementary js files
+ * @param array  $arrayofcss         Array of complementary css files
+ * @param string $morequerystring    Query string to add to the link "print" to get same parameters (use only if autodetect fails)
+ * @param string $morecssonbody      More CSS on body tag. For example 'classforhorizontalscrolloftabs'.
+ * @param string $replacemainareaby  Replace call to main_area() by a print of this string
+ * @param int    $disablenofollow    Disable the "nofollow" on meta robot header
+ * @param int    $disablenoindex     Disable the "noindex" on meta robot header
  */
-function saturne_header($load_media_gallery = 0, $head = '', $title = '', $help_url = '', $target = '', $disablejs = 0, $disablehead = 0, $arrayofjs = [], $arrayofcss = [], $morequerystring = '', $morecssonbody = '', $replacemainareaby = '', $disablenofollow = 0, $disablenoindex = 0) {
-
-	global $langs, $moduleNameLowerCase;
+function saturne_header(int $load_media_gallery = 0, string $head = '', string $title = '', string $help_url = '', string $target = '', int $disablejs = 0, int $disablehead = 0, array $arrayofjs = [], array $arrayofcss = [], string $morequerystring = '', string $morecssonbody = '', string $replacemainareaby = '', int $disablenofollow = 0, int $disablenoindex = 0)
+{
+	global $moduleNameLowerCase;
 
 	//CSS
 	$arrayofcss[] = '/saturne/css/saturne.min.css';
@@ -63,40 +68,44 @@ function saturne_header($load_media_gallery = 0, $head = '', $title = '', $help_
 }
 
 /**
- *      Show pages based on loaded pages array
+ * Check user access on current page
  *
- *      @param      integer				$moduleName			Module name
- *      @param      array				$object			Object in current page
- *      @param      integer				$permission		Permission to access to current page
- *      @return     string				Pages html content
- *
+ * @param object|bool $permission        Permission to access to current page
+ * @param object|null $object            Object in current page
+ * @param bool        $allowExternalUser Allow external user to have access at current page
  */
-function saturne_check_access($permission, $object = null) {
+function saturne_check_access($permission, object $object = null, bool $allowExternalUser = false)
+{
+    global $conf, $langs, $user, $moduleNameLowerCase;
 
-	global $conf, $langs, $user, $moduleNameLowerCase;
+    if (!isModEnabled($moduleNameLowerCase) || !isModEnabled('saturne')) {
+        if (!isModEnabled($moduleNameLowerCase)) {
+            setEventMessage($langs->transnoentitiesnoconv('Enable' . ucfirst($moduleNameLowerCase)), 'warnings');
+        }
+        if (!isModEnabled('saturne')) {
+            setEventMessage($langs->trans('EnableSaturne'), 'warnings');
+        }
+        $urltogo = dol_buildpath('/admin/modules.php?search_nature=external_Evarisk', 1);
+        header('Location: ' . $urltogo);
+        exit;
+    }
 
-	if (!isModEnabled($moduleNameLowerCase) || !isModEnabled('saturne')) {
-		if (!isModEnabled($moduleNameLowerCase)){
-			setEventMessage($langs->transnoentitiesnoconv('Enable' . ucfirst($moduleNameLowerCase)), 'warnings');
-		}
-		if (!isModEnabled('saturne')) {
-			setEventMessage($langs->trans('EnableSaturne'), 'warnings');
-		}
-		$urltogo = dol_buildpath('/admin/modules.php?search_nature=external_Evarisk', 1);
-		header("Location: " . $urltogo);
-		exit;
-	}
+    if (!$permission) {
+        accessforbidden();
+    }
 
-	if (!$permission){
-		accessforbidden();
-	}
+    if (!$allowExternalUser) {
+        if ($user->socid > 0) {
+            accessforbidden();
+        }
+    }
 
 	if ($conf->multicompany->enabled) {
 		if ($object->id > 0) {
 			if ($object->entity != $conf->entity) {
 				setEventMessage($langs->trans('ChangeEntityRedirection'), 'warnings');
 				$urltogo = dol_buildpath('/custom/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'index.php?mainmenu=' . $moduleNameLowerCase, 1);
-				header("Location: " . $urltogo);
+				header('Location: ' . $urltogo);
 				exit;
 			}
 		}

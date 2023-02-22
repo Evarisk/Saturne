@@ -59,7 +59,7 @@ if (!$res) {
     die('Include of main fails');
 }
 
-$moduleName = 'Saturne';
-$moduleNameLowerCase = strtolower($moduleName);
+//$moduleName = 'Saturne';
+//$moduleNameLowerCase = strtolower($moduleName);
 
 require_once __DIR__ . '/lib/saturne_functions.lib.php';
