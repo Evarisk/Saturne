@@ -32,6 +32,12 @@ AddAttendantMessage     = Add participant : %s
 DeleteAttendantMessage  = Participant deletion: %s
 SignAttendantMessage    = The participant %s signed
 AbsentAttendantMessage  = The participant %s is absent
+SendEmailAt             = Send email to %s
+ErrorSetupEmail         = Mail configuration error, you have not configured your mail server
+
+# Mail
+SignatureEmailSubject = Signature of %s %s
+SignatureEmailMessage = Hello, <br> Please find attached the link to sign the document.<br> %s
 
 # Status
 Registered       = Registered

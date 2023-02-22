@@ -32,6 +32,12 @@ AddAttendantMessage     = Ajout du participant : %s
 DeleteAttendantMessage  = Suppression du participant : %s
 SignAttendantMessage    = Le participant %s a signé
 AbsentAttendantMessage  = Le participant %s est absent
+SendEmailAt             = Envoi de l'email à %s
+ErrorSetupEmail         = Erreur de configuration des mails, vous n'avez pas configuré votre serveur d'envoi de mail
+
+# Mail - Mail
+SignatureEmailSubject = Signature de %s %s
+SignatureEmailMessage = Bonjour, <br> Veuillez trouver ci-joint le lien de signature du document.<br> %s
 
 # Status - Statut
 Registered       = Inscrit
