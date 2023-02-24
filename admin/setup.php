@@ -67,6 +67,44 @@ print load_fiche_titre($title, $linkback, 'saturne_color@saturne');
 $head = saturne_admin_prepare_head();
 print dol_get_fiche_head($head, 'settings', '', -1, 'saturne_color@saturne');
 
+print load_fiche_titre($langs->trans('GeneralConfig'), '', '');
+
+print '<div class="div-table-responsive-no-min">';
+print '<table class="noborder centpercent">';
+print '<tr class="liste_titre">';
+print '<td>' . $langs->trans('Name') . '</td>';
+print '<td>' . $langs->trans('Description') . '</td>';
+print '<td class="center">' . $langs->trans('Status') . '</td>';
+print '</tr>';
+
+// Enable public interface
+print '<tr class="oddeven"><td>';
+print  $langs->trans('EnablePublicInterface');
+print '</td><td>';
+print $langs->trans('EnablePublicInterfaceDescription');
+print '</td><td class="center">';
+print ajax_constantonoff('SATURNE_ENABLE_PUBLIC_INTERFACE');
+print '</td></tr>';
+
+// Show logo for company
+print '<tr class="oddeven"><td>';
+print  $langs->trans('ShowCompanyLogo');
+print '</td><td>';
+print $langs->trans('ShowCompanyLogoDescription');
+print '</td><td class="center">';
+print ajax_constantonoff('SATURNE_SHOW_COMPANY_LOGO');
+print '</td></tr>';
+
+//Use captcha
+print '<tr class="oddeven"><td>';
+print  $langs->trans('UseCaptcha');
+print '</td><td>';
+print $langs->trans('UseCaptchaDescription');
+print '</td><td class="center">';
+print ajax_constantonoff('SATURNE_USE_CAPTCHA');
+print '</td></tr>';
+print '</table>';
+
 // Page end
 print dol_get_fiche_end();
 llxFooter();

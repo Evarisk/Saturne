@@ -92,7 +92,7 @@ print load_fiche_titre($title, $linkback, 'saturne_color@saturne');
 $head = saturne_admin_prepare_head();
 print dol_get_fiche_head($head, 'media_gallery', '', -1, 'saturne_color@saturne');
 
-print load_fiche_titre($langs->trans('MediaData'), '', '');
+print load_fiche_titre($langs->trans('Configs', $langs->transnoentities('MediasMin')), '', '');
 
 print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '" name="media_data">';
 print '<input type="hidden" name="token" value="' . newToken() . '">';

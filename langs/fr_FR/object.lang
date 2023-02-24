@@ -68,7 +68,6 @@ ConfirmCloneObject    = Êtes-vous sûr de vouloir cloner %s <b>%s</b> ?
 # Data - Donnée
 ActionsOnObject = Événements sur %s
 
-
 # Email - Mail
 ObjectLabel     = Récapitulatif
 ObjectSubject   = Email document

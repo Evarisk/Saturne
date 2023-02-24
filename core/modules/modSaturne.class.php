@@ -114,7 +114,9 @@ class modSaturne extends DolibarrModules
             // Set this to relative path of js file if module must load a js on all pages
             'js' => [],
             // Set here all hooks context managed by module. To find available hook context, make a "grep -r '>initHooks(' *" on source code. You can also set hook context to 'all'
-            'hooks' => [],
+            'hooks' => [
+                'saturnepublicinterface'
+            ],
             // Set this to 1 if features of module are opened to external users
             'moduleforexternal' => 0,
         ];
@@ -220,6 +222,22 @@ class modSaturne extends DolibarrModules
 				'target'   => '',
 				'user'     => 0,
 			];
+
+            $this->menu[$r++] = [
+                'fk_menu'  => 'fk_mainmenu=' . $moduleNameLowerCase,
+                'type'     => 'left',
+                'titre'    => $langs->trans('ModuleConfigSaturne'),
+                'prefix'   => '<i class="fas fa-cog pictofixedwidth"></i>',
+                'mainmenu' => $moduleNameLowerCase,
+                'leftmenu' => $moduleNameLowerCase . 'saturneconfig',
+                'url'      => '/saturne/admin/setup.php',
+                'langs'    => 'saturne@saturne',
+                'position' => 2000 + $r,
+                'enabled'  => '$conf->saturne->enabled',
+                'perms'    => '$user->rights->saturne->adminpage->read',
+                'target'   => '',
+                'user'     => 0,
+            ];
 
 			$this->menu[$r++] = [
 				'fk_menu'  => 'fk_mainmenu=' . $moduleNameLowerCase,

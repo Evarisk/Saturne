@@ -18,10 +18,11 @@
 #
 
 # Data - Donnée
-ModuleSaturneName = Saturne
-ModuleSaturneDesc = Framework et librairie d'objets et fonctions d'Evarisk
-ModuleConfig      = Configuration
-MinimizeMenu      = Réduire le menu
+ModuleSaturneName   = Saturne
+ModuleSaturneDesc   = Framework et librairie d'objets et fonctions d'Evarisk
+ModuleConfig        = Configuration
+ModuleConfigSaturne = Configuration Saturne
+MinimizeMenu        = Réduire le menu
 
 # Right - Droit
 LireModule    = Consulter %s
@@ -35,12 +36,20 @@ ReadAdminPage = Accéder à la configuration du module %s
 #
 
 # Data - Donnée
-ModuleSettings     = Réglages
-ModuleSetup        = Configuration du module %s
-SaturneData        = Données configurables de %s
-ModuleMediaGallery = Configuration des médias de %s
-MediaData          = Données configurables des médias
-SavedMediaData     = Enregistrement des données des médias
+ModuleSettings                   = Réglages
+ModuleSetup                      = Configuration du module %s
+GeneralConfig                    = Configuration générale
+ConfigData                       = Données configurables de %s
+Configs                          = Configuration des %s
+ModuleMediaGallery               = Configuration des médias de %s
+SavedMediaData                   = Enregistrement des données des médias
+EnablePublicInterface            = Interface publique
+EnablePublicInterfaceDescription = Activation des interfaces publique
+ShowCompanyLogo                  = Afficher le logo de la société
+ShowCompanyLogoDescription       = Activez cette option pour masquer le logo de la société dans les pages d'interface publique
+UseCaptcha                       = Code graphique (CAPTCHA)
+UseCaptchaDescription            = Utilisation du code graphique (CAPTCHA) sur les pages d'interfaces publique
+SaturnePublicInterfaceForbidden  = Accès interdit à l'interface publique de signature
 
 # Mod Numbering - Modèle de numérotation
 NumberingModule = Modèle de numérotation
@@ -48,7 +57,6 @@ StandardModel   = Renvoie le numéro sous la forme %syymm-nnnn où yy est l'ann�
 
 # ODT Template - Template ODT
 YourDocuments          = Documents
-DocumentsConfig        = Configuration des documents
 DocumentTemplate       = Modèle de documents
 ODTDefaultTemplateName = ODT par défaut des documents %s
 
@@ -93,6 +101,7 @@ DontShowPatchNote      = Ne plus afficher la note de mise à jour
 #
 
 # Data - Donnée
+MediasMin                 = médias
 MediaGallery              = Bibliothèque de médias
 ErrorThisFileSizeTooLarge = Le fichier %s est trop volumineux
 ErrorThisFileExists       = Le fichier %s existe déjà
@@ -114,6 +123,7 @@ SchedulesSaved = Les horaires ont bien été enregistrés
 #
 
 # Data - Donnée
+DocumentsMin                            = documents
 AutomaticPdfGeneration                  = Génération automatique des PDF
 AutomaticPdfGenerationDescription       = Crée automatiquement le document en PDF lors de la génération
 ManualPdfGeneration                     = Génération manuelle des PDF

@@ -18,10 +18,11 @@
 #
 
 # Data
-ModuleSaturneName = Saturne
-ModuleSaturneDesc = Evarisk framework and library of objects and functions
-ModuleConfig      = Configuration
-MinimizeMenu      = Minimize the menu
+ModuleSaturneName   = Saturne
+ModuleSaturneDesc   = Evarisk framework and library of objects and functions
+ModuleConfig        = Configuration
+ModuleConfigSaturne = Configuration Saturne
+MinimizeMenu        = Minimize the menu
 
 # Right
 LireModule    = Read %s
@@ -35,13 +36,20 @@ ReadAdminPage = Access the module configuration %s
 #
 
 # Data
-ModuleSettings     = Settings
-ModuleSetup        = Module configuration %s
-SaturneData        = Configurable data from %s
-ModuleMediaGallery = Configuration of %s media
-MediaData          = Configurable media data
-SavedMediaData     = Recording of media data
-
+ModuleSettings                   = Settings
+ModuleSetup                      = Module configuration %s
+GeneralConfig                    = General configuration
+ConfigData                       = Configurable data from %s
+ConfigsData                      = Configurable % data
+ModuleMediaGallery               = Configuration of %s media
+SavedMediaData                   = Recording of media data
+EnablePublicInterface            = Public interface
+EnablePublicInterfaceDescription = Activation of public interfaces
+ShowCompanyLogo                  = Display the company logo
+ShowCompanyLogoDescription       = Enable this option to hide the company logo in the public interface pages
+UseCaptcha                       = Graphic code (CAPTCHA)
+UseCaptchaDescription            = Use of graphic code (CAPTCHA) on public interface pages
+SaturnePublicInterfaceForbidden  = No access to the public signature interface
 
 # Mod Numbering
 NumberingModule = Numbering model
@@ -49,7 +57,6 @@ StandardModel   = Returns the number in the form %syymm-nnnn where yy is the yea
 
 # ODT Template
 YourDocuments          = Documents
-DocumentsConfig        = Document configuration
 DocumentTemplate       = Model documents
 ODTDefaultTemplateName = Default ODT of documents %s
 
@@ -94,6 +101,7 @@ DontShowPatchNote      = No longer display the update note
 #
 
 # Data
+MediasMin                 = medias
 MediaGallery              = Media library
 ErrorThisFileSizeTooLarge = The %s file is too large
 ErrorThisFileExists       = The %s file already exists
@@ -115,6 +123,7 @@ SchedulesSaved = The timetables have been properly recorded
 #
 
 # Data
+DocumentsMin                            = documents
 AutomaticPdfGeneration                  = Automatic generation of PDFs
 AutomaticPdfGenerationDescription       = Automatically creates the document as a PDF when it is generated
 ManualPdfGeneration                     = Manual generation of PDFs
@@ -124,3 +133,12 @@ CheckDocumentationToEnablePDFGeneration = Please refer to the documentation for 
 PDFGenerationTooltip                    = Appuyez sur ce bouton pour générer le document ODT en PDF
 PDFGeneration                           = Generating the PDF document
 NoData                                  = N/A
+
+
+
+# Email
+
+# Data
+SendMailSubject = Email
+QHSEService     = QHSE Service
+WithKindRegards = With kind regards
