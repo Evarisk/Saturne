@@ -67,3 +67,9 @@ ConfirmCloneObject    = Êtes-vous sûr de vouloir cloner %s <b>%s</b> ?
 
 # Data - Donnée
 ActionsOnObject = Événements sur %s
+
+
+# Email - Mail
+ObjectLabel     = Récapitulatif
+ObjectSubject   = Email document
+ObjectContent   = Veuillez trouver ci-joint le/les document(s) ODT lié(s) à __THETYPE__.

@@ -123,3 +123,12 @@ CheckDocumentationToEnablePDFGeneration = Veuillez vous référer à la document
 PDFGenerationTooltip                    = Appuyez sur ce bouton pour générer le document ODT en PDF
 PDFGeneration                           = Génération du document PDF
 NoData                                  = N/A
+
+
+
+# Email - Mail
+
+# Data - Donnée
+SendMailSubject = Email
+QHSEService     = Service QHSE
+WithKindRegards = Bien cordialement
