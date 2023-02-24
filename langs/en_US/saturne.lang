@@ -36,20 +36,20 @@ ReadAdminPage = Access the module configuration %s
 #
 
 # Data
-ModuleSettings                   = Settings
-ModuleSetup                      = Module configuration %s
-GeneralConfig                    = General configuration
-ConfigData                       = Configurable data from %s
-ConfigsData                      = Configurable % data
-ModuleMediaGallery               = Configuration of %s media
-SavedMediaData                   = Recording of media data
-EnablePublicInterface            = Public interface
-EnablePublicInterfaceDescription = Activation of public interfaces
-ShowCompanyLogo                  = Display the company logo
-ShowCompanyLogoDescription       = Enable this option to hide the company logo in the public interface pages
-UseCaptcha                       = Graphic code (CAPTCHA)
-UseCaptchaDescription            = Use of graphic code (CAPTCHA) on public interface pages
-SaturnePublicInterfaceForbidden  = No access to the public signature interface
+ModuleSettings                    = Settings
+ModuleSetup                       = Module configuration %s
+GeneralConfig                     = General configuration
+ConfigData                        = Configurable data from %s
+ConfigsData                       = Configurable % data
+ModuleMediaGallery                = Configuration of %s media
+SavedMediaData                    = Recording of media data
+EnablePublicInterface             = Public interface
+EnablePublicInterfaceDescription  = Activation of public interfaces
+ShowCompanyLogo                   = Display the company logo
+ShowCompanyLogoDescription        = Enable this option to hide the company logo in the public interface pages
+UseCaptcha                        = Graphic code (CAPTCHA)
+UseCaptchaDescription             = Use of graphic code (CAPTCHA) on public interface pages
+SignaturePublicInterfaceForbidden = No access to the public signature interface
 
 # Mod Numbering
 NumberingModule = Numbering model
