@@ -74,6 +74,7 @@ ExternalAttendant  = External participant
 ExternalAttendants = External participants
 NoAttendants       = No linked participants. To add participants, the status must be "Draft (to be validated)".
 CloneAttendants    = Clone participants
+NoAttendant        = No %s present for %s.
 
 # Public interface
 FullName = Last name First name

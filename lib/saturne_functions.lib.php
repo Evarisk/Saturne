@@ -214,7 +214,7 @@ function saturne_load_langs(array $domains = [])
 {
 	global $langs, $moduleNameLowerCase;
 
-	$langs->loadLangs(['saturne@saturne', 'object@saturne', 'signature@saturne', $moduleNameLowerCase . '@' . $moduleNameLowerCase]);
+	$langs->loadLangs(['saturne@saturne', 'object@saturne', 'signature@saturne', $moduleNameLowerCase . '@' . $moduleNameLowerCase, 'admin']);
 
 	if (!empty($domains)) {
 		foreach ($domains as $domain) {
