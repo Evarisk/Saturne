@@ -117,7 +117,7 @@ window.saturne.menu.toggleMenu = function() {
  */
 window.saturne.menu.setMenu = function() {
 	if ($('.blockvmenu.blockvmenufirst').length > 0) {
-		if ($('.blockvmenu.blockvmenufirst').html().match(/digiriskdolibarr|dolismq|dolimeet|dolisirh/)) {
+		if ($('.blockvmenu.blockvmenufirst').html().match(/digiriskdolibarr|dolismq|dolimeet|dolisirh|dolicar/)) {
 			$('span.vmenu').find('.fa-chevron-circle-left').parent().parent().parent().attr('style', 'cursor:pointer ! important')
 
 			if (localStorage.maximized == 'false') {
