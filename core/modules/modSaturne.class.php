@@ -167,7 +167,13 @@ class modSaturne extends DolibarrModules
 			$i++ => ['SATURNE_MEDIA_MAX_WIDTH_MEDIUM', 'integer', 854, '', 0, 'current'],
 			$i++ => ['SATURNE_MEDIA_MAX_HEIGHT_MEDIUM', 'integer', 480, '', 0, 'current'],
 			$i++ => ['SATURNE_MEDIA_MAX_WIDTH_LARGE', 'integer', 1280, '', 0, 'current'],
-			$i   => ['SATURNE_MEDIA_MAX_HEIGHT_LARGE', 'integer', 720, '', 0, 'current'],
+            $i++ => ['SATURNE_MEDIA_MAX_HEIGHT_LARGE', 'integer', 720, '', 0, 'current'],
+
+            // CONST MODULE
+            $i++ => ['SATURNE_ENABLE_PUBLIC_INTERFACE', 'integer', 0, '', 0, 'current'],
+            $i++ => ['SATURNE_SHOW_COMPANY_LOGO', 'integer', 0, '', 0, 'current'],
+            $i++ => ['SATURNE_USE_CAPTCHA', 'integer', 0, '', 0, 'current'],
+            $i   => ['SATURNE_USE_ALL_EMAIL_MODE', 'integer', 0, '', 0, 'current']
 		];
 
 		if (!isset($conf->saturne) || !isset($conf->saturne->enabled)) {

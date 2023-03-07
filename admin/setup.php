@@ -95,13 +95,22 @@ print '</td><td class="center">';
 print ajax_constantonoff('SATURNE_SHOW_COMPANY_LOGO');
 print '</td></tr>';
 
-//Use captcha
+// Use captcha
 print '<tr class="oddeven"><td>';
 print  $langs->trans('UseCaptcha');
 print '</td><td>';
 print $langs->trans('UseCaptchaDescription');
 print '</td><td class="center">';
 print ajax_constantonoff('SATURNE_USE_CAPTCHA');
+print '</td></tr>';
+
+// Use all email mode
+print '<tr class="oddeven"><td>';
+print  $langs->trans('UseAllEmailMode');
+print '</td><td>';
+print $langs->trans('UseAllEmailModeDescription');
+print '</td><td class="center">';
+print ajax_constantonoff('SATURNE_USE_ALL_EMAIL_MODE');
 print '</td></tr>';
 print '</table>';
 

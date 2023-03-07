@@ -49,6 +49,8 @@ ShowCompanyLogo                   = Display the company logo
 ShowCompanyLogoDescription        = Enable this option to hide the company logo in the public interface pages
 UseCaptcha                        = Graphic code (CAPTCHA)
 UseCaptchaDescription             = Use of graphic code (CAPTCHA) on public interface pages
+UseAllEmailMode                   = Use of all email configuration modes
+UseAllEmailModeDescription        = Allow the use of all email configuration modes by default, only SMTP mode is allowed
 SignaturePublicInterfaceForbidden = No access to the public signature interface
 
 # Mod Numbering
@@ -142,3 +144,4 @@ NoData                                  = N/A
 SendMailSubject = Email
 QHSEService     = QHSE Service
 WithKindRegards = With kind regards
+ConfigEmail     = Click on this link to go to the email configuration
