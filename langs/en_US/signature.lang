@@ -33,7 +33,7 @@ DeleteAttendantMessage  = Participant deletion: %s
 SignAttendantMessage    = The participant %s signed
 AbsentAttendantMessage  = The participant %s is absent
 SendEmailAt             = Send email to %s
-ErrorSetupEmail         = Mail configuration error, you have not configured your mail server
+ErrorSetupEmail         = Mail configuration error, you have not configured your mail server in SMTP mode <br> Please use SMTP mode for better delivery and security of emails
 NoEmailSet              = No email entered: %s
 
 # Mail
@@ -51,10 +51,10 @@ Absent           = Absent
 JustifiedAbsent  = Justified absence
 
 # Header table
-Role             = Role
 SignatureLink    = Signature link
 SendMailDate     = Date email sent
 SignatureDate    = Date of signature
+Attendance       = Attendance
 SignatureActions = Actions
 
 # Button
