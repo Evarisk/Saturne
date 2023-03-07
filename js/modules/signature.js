@@ -91,6 +91,7 @@ window.saturne.signature.event = function() {
     $(document).on('click', '.signature-erase', window.saturne.signature.clearCanvas);
     $(document).on('click', '.signature-validate', window.saturne.signature.createSignature);
     $(document).on('click', '.auto-download', window.saturne.signature.autoDownloadSpecimen);
+    $(document).on('click', '.copy-signatureurl', window.saturne.signature.copySignatureUrlClipboard);
 };
 
 /**
@@ -242,4 +243,19 @@ window.saturne.signature.autoDownloadSpecimen = function() {
         error: function ( ) {
         }
     });
+};
+
+/**
+ * Copy signature url in clipboard
+ *
+ * @memberof Saturne_Framework_Signature
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @return {void}
+ */
+window.saturne.signature.copySignatureUrlClipboard = function() {
+    let signatureUrl = $(this).attr('data-signature-url');
+    navigator.clipboard.writeText(signatureUrl);
 };
