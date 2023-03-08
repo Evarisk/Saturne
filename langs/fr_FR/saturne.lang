@@ -52,6 +52,7 @@ UseCaptchaDescription             = Utilisation du code graphique (CAPTCHA) sur 
 UseAllEmailMode                   = Utilisation de tout les modes de configuration des emails
 UseAllEmailModeDescription        = Autorise l'utilisation de tout les modes de configuration des emails par défaut, seul le mode SMTP est autorisé
 SignaturePublicInterfaceForbidden = Accès interdit à l'interface publique de signature
+ObjectVisibleDescription          = Afficher le champ %s
 
 # Mod Numbering - Modèle de numérotation
 NumberingModule = Modèle de numérotation

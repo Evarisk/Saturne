@@ -24,7 +24,7 @@
 /**
  * Load list of objects in memory from the database.
  *
- * @param  string      $objectType Object type
+ * @param  string      $className  Object className
  * @param  string      $sortorder  Sort Order
  * @param  string      $sortfield  Sort field
  * @param  int         $limit      Limit
@@ -34,20 +34,19 @@
  * @return int|array               0 < if KO, array of pages if OK
  * @throws Exception
  */
-function fetchAllObjectType(string $objectType = '', string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = [], string $filtermode = 'AND')
+function saturne_fetch_all_object_type(string $className = '', string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = [], string $filtermode = 'AND')
 {
     dol_syslog(__METHOD__, LOG_DEBUG);
 
     global $db;
 
-    $classname = is_string($objectType) ?: get_class($objectType);
-    $object    = new $classname($db);
+    $object = new $className($db);
 
     $records = [];
 
     $sql = 'SELECT ';
     $sql .= $object->getFieldList('t');
-    $sql .= ' FROM ' .MAIN_DB_PREFIX . $object->table_element . ' as t';
+    $sql .= ' FROM ' . MAIN_DB_PREFIX . $object->table_element . ' as t';
     if (isset($object->ismultientitymanaged) && $object->ismultientitymanaged == 1) {
         $sql .= ' WHERE entity IN (' . getEntity($object->table_element) . ')';
     } else {
@@ -58,27 +57,27 @@ function fetchAllObjectType(string $objectType = '', string $sortorder = '', str
     if (count($filter) > 0) {
         foreach ($filter as $key => $value) {
             if ($key == 't.rowid') {
-                $sqlwhere[] = $key. ' = ' . $value;
-            } elseif (in_array($object->fields[$key]['type'], array('date', 'datetime', 'timestamp'))) {
-                $sqlwhere[] = $key.' = \'' . $object->db->idate($value) . '\'';
+                $sqlwhere[] = $key . ' = ' . $value;
+            } elseif (in_array($object->fields[$key]['type'], ['date', 'datetime', 'timestamp'])) {
+                $sqlwhere[] = $key .' = \'' . $object->db->idate($value) . '\'';
             } elseif ($key == 'customsql') {
                 $sqlwhere[] = $value;
             } elseif (strpos($value, '%') === false) {
-                $sqlwhere[] = $key.' IN (' . $object->db->sanitize($object->db->escape($value)) . ')';
+                $sqlwhere[] = $key .' IN (' . $object->db->sanitize($object->db->escape($value)) . ')';
             } else {
-                $sqlwhere[] = $key.' LIKE \'%' . $object->db->escape($value) . '%\'';
+                $sqlwhere[] = $key .' LIKE \'%' . $object->db->escape($value) . '%\'';
             }
         }
     }
     if (count($sqlwhere) > 0) {
-        $sql .= ' AND (' . implode(' '.$filtermode.' ', $sqlwhere) . ')';
+        $sql .= ' AND (' . implode(' ' . $filtermode . ' ', $sqlwhere) . ')';
     }
 
     if (!empty($sortfield)) {
         $sql .= $object->db->order($sortfield, $sortorder);
     }
     if (!empty($limit)) {
-        $sql .= ' '.$object->db->plimit($limit, $offset);
+        $sql .= ' ' . $object->db->plimit($limit, $offset);
     }
 
     $resql = $object->db->query($sql);
@@ -88,7 +87,7 @@ function fetchAllObjectType(string $objectType = '', string $sortorder = '', str
         while ($i < ($limit ? min($limit, $num) : $num)) {
             $obj = $object->db->fetch_object($resql);
 
-            $record = new $classname($db);
+            $record = new $className($db);
             $record->setVarsFromFetchObj($obj);
 
             $records[$record->id] = $record;
