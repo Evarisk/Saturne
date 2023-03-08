@@ -399,6 +399,8 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
 				}
 			}
 		});
+
+		formdata = new FormData();
 	})
 };
 
