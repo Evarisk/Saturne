@@ -153,6 +153,12 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
 		if ($sortfield && $sortorder) {
 			$filearray = dol_sort_array($filearray, $sortfield, $sortorder);
 		}
+		$favoriteExists = 0;
+		foreach ($filearray as $file) {
+			if ($file['name'] == $object->$favorite_field) {
+				$favoriteExists = 1;
+			}
+		}
 
 		foreach ($filearray as $file) {
 			$photo   = '';
@@ -271,11 +277,12 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
 				}
 
 				if ($show_favorite_button) {
+					$favorite = (($object->$favorite_field == '' || $favoriteExists == 0) && $i == 0 ? 'favorite' : ($object->$favorite_field == $photo ? 'favorite' : ''));
 					$return .=
-						'<div class="wpeo-button button-square-50 button-blue media-gallery-favorite '. ($object->$favorite_field == '' && $i == 0 ? 'favorite' : ($object->$favorite_field == $photo ? 'favorite' : '')) .'" value="' . $object->id . '">
+						'<div class="wpeo-button button-square-50 button-blue media-gallery-favorite '. $favorite .'" value="' . $object->id . '">
 							<input class="element-linked-id" type="hidden" value="' . ($object->id > 0 ? $object->id : 0) . '">
 							<input class="filename" type="hidden" value="' . $photo . '">
-							<i class="' . ($object->$favorite_field == '' && $i == 0 ? 'fas' : ($object->$favorite_field == $photo ? 'fas' : 'far')) . ' fa-star button-icon"></i>
+							<i class="' . ($favorite == 'favorite' ? 'fas' : 'far') . ' fa-star button-icon"></i>
 						</div>';
 				}
 				if ($show_unlink_button) {
@@ -318,7 +325,7 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
  * @param  string $filename  File name
  * @param  string $thumbType Thumb type (small, mini, large, medium)
  * @return string            Thumb full name
- * 
+ *
  */
 function saturne_get_thumb_name(string $filename, string$thumbType = 'small'): string
 {
