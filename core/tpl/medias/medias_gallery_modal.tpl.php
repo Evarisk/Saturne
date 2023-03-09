@@ -84,7 +84,7 @@ if ( ! $error && $subaction == "addFiles") {
 
 		foreach ($filenames as $filename) {
 			$entity = ($conf->entity > 1) ? '/' . $conf->entity : '';
-
+			$filename = dol_sanitizeFileName($filename);
 			if (is_file($conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias/' . $filename)) {
 				$pathToECMPhoto = $conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias/' . $filename;
 
