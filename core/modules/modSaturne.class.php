@@ -213,6 +213,9 @@ class modSaturne extends DolibarrModules
 		$this->menu = [];
 		$r = 0;
 
+		$pictopath    = dol_buildpath('/custom/saturne/img/saturne_color.png', 1);
+		$pictoSaturne = img_picto('', $pictopath, '', 1, 0, 0, '', 'pictoModule');
+
 		foreach ($modulesList as $moduleName => $moduleNameLowerCase) {
 			$this->menu[$r++] = [
 				'fk_menu'  => 'fk_mainmenu=' . $moduleNameLowerCase,
@@ -234,7 +237,7 @@ class modSaturne extends DolibarrModules
                 'fk_menu'  => 'fk_mainmenu=' . $moduleNameLowerCase,
                 'type'     => 'left',
                 'titre'    => $langs->trans('ModuleConfigSaturne'),
-                'prefix'   => '<i class="fas fa-cog pictofixedwidth"></i>',
+                'prefix'   => $pictoSaturne,
                 'mainmenu' => $moduleNameLowerCase,
                 'leftmenu' => $moduleNameLowerCase . 'saturneconfig',
                 'url'      => '/saturne/admin/setup.php',
