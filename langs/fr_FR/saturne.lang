@@ -97,21 +97,6 @@ ModulePatchNote        = Note de mise à jour %s %s
 ShowPatchNote          = Consulter la note de mise à jour
 DontShowPatchNote      = Ne plus afficher la note de mise à jour
 
-
-
-#
-# Media Gallery - Bibliothèque de médias
-#
-
-# Data - Donnée
-MediasMin                 = médias
-MediaGallery              = Bibliothèque de médias
-ErrorThisFileSizeTooLarge = Le fichier %s est trop volumineux
-ErrorThisFileExists       = Le fichier %s existe déjà
-EmptyMediaGallery         = La bibliothèque de médias est vide
-
-
-
 #
 # Schedules - horaires
 #
