@@ -12,9 +12,9 @@
 - Filenames         <span style="color:#0da2ff">snake_case</span>
 
 ## Fonctions de la librairie
-### Bonne pratique à respecter pour ajouter une fonction.
+### Bonnes pratiques à respecter pour ajouter une fonction.
 
-- Création d'un fichier fonction pour objet
+- Création d'un fichier fonction pour l'objet
 - Les fonctions doivent être appelées saturne_name_of_function
 - Ajouter la documentation de la fonction
 
@@ -24,10 +24,10 @@ Pour faire un commit sur les repositories d'Evarisk il faut respecter la convent
 
 #NuméroIssue [Object/Element] add/fix: commit message
 - Ex: #100 [Signature] add: signature update action
-- Ex: #101 [Lib] fix: wrong method call for use this function
+- Ex: #101 [Lib] fix: wrong method call
 
 ## CSS OU JS
 
-Pour simplifier l'utilisation et la compréhension du CSS/JS on a utilisé un minifier avec la libraire npm gulpfile.
-Par conséquent, il ne faut pas oublier de lancer le terminal et d'éxécuter la commande npm i (si c'est la première utilisation) ou npm start.
+Pour simplifier l'utilisation et la compréhension du CSS/JS, nous avons utilisé un minifier avec la libraire npm gulpfile.
+Par conséquent, il ne faut pas oublier de lancer le terminal et d'exécuter la commande npm i (si c'est la première utilisation) ou npm start.
 - Ex: C:\wamp64\www\dolibarr-16.0.3\htdocs\custom\saturne> npm start
