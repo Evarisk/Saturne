@@ -31,6 +31,9 @@ function saturne_admin_prepare_head(): array
     // Global variables definitions
 	global $langs, $conf;
 
+    // Load translation files required by the page
+    saturne_load_langs();
+
     // Initialize values
 	$h = 0;
 	$head = [];

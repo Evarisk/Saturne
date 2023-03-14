@@ -40,7 +40,8 @@ ModuleSettings                    = Settings
 ModuleSetup                       = Module configuration %s
 GeneralConfig                     = General configuration
 ConfigData                        = Configurable data from %s
-ConfigsData                       = Configurable % data
+Configs                           = Configurable % data
+ConfigDatas                       = Configurations
 ModuleMediaGallery                = Configuration of %s media
 SavedMediaData                    = Recording of media data
 EnablePublicInterface             = Public interface
@@ -61,7 +62,7 @@ StandardModel   = Returns the number in the form %syymm-nnnn where yy is the yea
 # ODT Template
 YourDocuments          = Documents
 DocumentTemplate       = Model documents
-ODTDefaultTemplateName = Default ODT of documents %s
+ODTDefaultTemplateName = Default ODT of documents
 
 
 
@@ -96,21 +97,6 @@ ModuleHasBeenUpdatedTo = %s has been updated to %s
 ModulePatchNote        = Update note %s %s
 ShowPatchNote          = See the update note
 DontShowPatchNote      = No longer display the update note
-
-
-
-#
-# Media Gallery
-#
-
-# Data
-MediasMin                 = medias
-MediaGallery              = Media library
-ErrorThisFileSizeTooLarge = The %s file is too large
-ErrorThisFileExists       = The %s file already exists
-EmptyMediaGallery         = The media library is empty
-
-
 
 #
 # Schedules

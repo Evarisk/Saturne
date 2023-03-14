@@ -41,6 +41,7 @@ ModuleSetup                       = Configuration du module %s
 GeneralConfig                     = Configuration générale
 ConfigData                        = Données configurables de %s
 Configs                           = Configuration des %s
+ConfigDatas                       = Configurations
 ModuleMediaGallery                = Configuration des médias de %s
 SavedMediaData                    = Enregistrement des données des médias
 EnablePublicInterface             = Interface publique
@@ -61,7 +62,7 @@ StandardModel   = Renvoie le numéro sous la forme %syymm-nnnn où yy est l'ann�
 # ODT Template - Template ODT
 YourDocuments          = Documents
 DocumentTemplate       = Modèle de documents
-ODTDefaultTemplateName = ODT par défaut des documents %s
+ODTDefaultTemplateName = ODT par défaut
 
 
 

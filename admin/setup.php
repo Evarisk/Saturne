@@ -65,7 +65,7 @@ print load_fiche_titre($title, $linkback, 'saturne_color@saturne');
 
 // Configuration header
 $head = saturne_admin_prepare_head();
-print dol_get_fiche_head($head, 'settings', '', -1, 'saturne_color@saturne');
+print dol_get_fiche_head($head, 'settings', $title, -1, 'saturne_color@saturne');
 
 print load_fiche_titre($langs->trans('GeneralConfig'), '', '');
 

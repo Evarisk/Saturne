@@ -24,16 +24,14 @@ ErrorThisFileSizeTooLarge = Le fichier %s est trop volumineux
 ErrorThisFileExists       = Le fichier %s existe déjà
 EmptyMediaGallery         = La bibliothèque de médias est vide
 
-MediaData = Données configurables des médias
-MediaMaxWidthMedium = Largeur du média medium
-MediaMaxWidthMediumDescription = Largeur du média (dimension medium) avec pour ratio 16:9
-MediaMaxHeightMedium = Hauteur du média medium
-MediaMaxHeightMediumDescription = Hauteur du média (dimension medium) avec pour ratio 16:9
-MediaMaxWidthLarge = Largeur du média large
-MediaMaxWidthLargeDescription = Largeur du média (dimension large) avec pour ratio 16:9
-MediaMaxHeightLarge = Hauteur du média large
-MediaMaxHeightLargeDescription = Hauteur du média (dimension large) avec pour ratio 16:9
-DisplayNumberMediaGallery = Nombre de médias affichés dans la bibliothèque de médias
+# Config page - Page d'administration
+MediaMaxWidthMedium                  = Largeur du média medium
+MediaMaxWidthMediumDescription       = Largeur du média (dimension medium) avec pour ratio 16:9
+MediaMaxHeightMedium                 = Hauteur du média medium
+MediaMaxHeightMediumDescription      = Hauteur du média (dimension medium) avec pour ratio 16:9
+MediaMaxWidthLarge                   = Largeur du média large
+MediaMaxWidthLargeDescription        = Largeur du média (dimension large) avec pour ratio 16:9
+MediaMaxHeightLarge                  = Hauteur du média large
+MediaMaxHeightLargeDescription       = Hauteur du média (dimension large) avec pour ratio 16:9
+DisplayNumberMediaGallery            = Nombre de médias affichés dans la bibliothèque de médias
 DisplayNumberMediaGalleryDescription = Affiche 8 médias (par défaut) par page dans la bibliothèque de médias
-
-
