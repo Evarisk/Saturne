@@ -150,7 +150,7 @@ class modSaturne extends DolibarrModules
 		$this->langfiles = ['saturne@saturne'];
 
         // Prerequisites
-		$this->phpmin = [7, 0]; // Minimum version of PHP required by module
+		$this->phpmin = [7, 4]; // Minimum version of PHP required by module
 		$this->need_dolibarr_version = [15, 0]; // Minimum version of Dolibarr required by module
 
         // Messages at activation
@@ -174,7 +174,7 @@ class modSaturne extends DolibarrModules
             $i++ => ['SATURNE_ENABLE_PUBLIC_INTERFACE', 'integer', 1, '', 0, 'current'],
             $i++ => ['SATURNE_SHOW_COMPANY_LOGO', 'integer', 0, '', 0, 'current'],
             $i++ => ['SATURNE_USE_CAPTCHA', 'integer', 0, '', 0, 'current'],
-            $i   => ['SATURNE_USE_ALL_EMAIL_MODE', 'integer', 0, '', 0, 'current']
+            $i   => ['SATURNE_USE_ALL_EMAIL_MODE', 'integer', 1, '', 0, 'current']
 		];
 
 		if (!isset($conf->saturne) || !isset($conf->saturne->enabled)) {
