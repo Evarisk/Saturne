@@ -97,11 +97,9 @@ if ( ! $error && $subaction == "addFiles") {
 					$ecmfile->fetch(0,'',($conf->entity > 1 ? $conf->entity . '/' : ''). 'ecm/'. $moduleNameLowerCase .'/medias/' . $filename);
 					$date      = dol_print_date(dol_now(),'dayxcard');
 					$extension = pathinfo($filename, PATHINFO_EXTENSION);
-					$newFilename = $conf->entity . '_' . $ecmfile->id . '_' . (dol_strlen($object->ref) > 0 ? $object->ref : $modObject->getNextValue($object)) . '_' . $date . '.' . $extension;
-					rename($pathToObjectPhoto . '/' . $filename, $pathToObjectPhoto . '/' . $newFilename);
 
 					global $maxwidthmini, $maxheightmini, $maxwidthsmall,$maxheightsmall ;
-					$destfull = $pathToObjectPhoto . '/' . $newFilename;
+					$destfull = $pathToObjectPhoto . '/' . $filename;
 
 					// Create thumbs
 					$imgThumbSmall  = vignette($destfull, $maxwidthsmall, $maxheightsmall);
