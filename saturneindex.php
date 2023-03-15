@@ -21,40 +21,14 @@
  *	\brief      Home page of saturne top menu
  */
 
-// Load DoliMeet environment
+// Load Saturne environment
 if (file_exists('saturne.main.inc.php')) {
     require_once __DIR__ . '/saturne.main.inc.php';
 } else {
     die('Include of saturne main fails');
 }
 
-// Libraries
-require_once __DIR__ . '/core/modules/modSaturne.class.php';
+$moduleName = 'Saturne';
+$moduleNameLowerCase = strtolower($moduleName);
 
-// Global variables definitions
-global $db, $langs, $user;
-
-// Load translation files required by the page
-saturne_load_langs();
-
-// Initialize technical objects
-$modSaturne = new modSaturne($db);
-
-// Security check
-$permissiontoread = $user->rights->saturne->lire;
-saturne_check_access($permissiontoread);
-
-/*
- * View
- */
-
-$title   = $langs->trans('ModuleArea', 'Saturne');
-$helpUrl = 'FR:Module_Saturne';
-
-saturne_header(0, '', $title . ' ' . $modSaturne->version, $helpUrl);
-
-print load_fiche_titre($title . ' ' . $modSaturne->version, '', 'saturne_color.png@saturne');
-
-// End of page
-llxFooter();
-$db->close();
+require_once __DIR__ . '/core/tpl/index/index_view.tpl.php';

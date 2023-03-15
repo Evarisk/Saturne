@@ -124,11 +124,20 @@ PDFGeneration                           = Generating the PDF document
 NoData                                  = N/A
 
 
-
+#
 # Email
+#
 
 # Data
 SendMailSubject = Email
 QHSEService     = QHSE Service
 WithKindRegards = With kind regards
 ConfigEmail     = Click on this link to go to the email configuration
+
+
+#
+# Modal
+#
+
+# Data
+CloseModal = Close

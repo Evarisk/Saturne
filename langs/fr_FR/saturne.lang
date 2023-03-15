@@ -125,10 +125,20 @@ NoData                                  = N/A
 
 
 
+#
 # Email - Mail
+#
 
 # Data - Donnée
 SendMailSubject = Email
 QHSEService     = Service QHSE
 WithKindRegards = Bien cordialement
 ConfigEmail     = Cliquez sur ce lien pour vous rendre à la configuration des emails
+
+
+#
+# Modal - Modal
+#
+
+# Data - Donnée
+CloseModal = Fermer
