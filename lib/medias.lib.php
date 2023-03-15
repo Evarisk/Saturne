@@ -28,12 +28,12 @@
  * @param string $moduleName Module name
  * @param string $modulepart Submodule name
  * @param string $sdir       Directory path
- * @param int    $size       Media size
+ * @param string $size       Media size
  * @param int    $maxHeight  Media max height
  * @param int    $maxWidth   Media max width
  * @param int    $offset     Media gallery offset page
  */
-function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', string $sdir, int $size = 0, int $maxHeight = 80, int $maxWidth = 80, int $offset = 1)
+function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', string $sdir = '',string $size = '', int $maxHeight = 80, int $maxWidth = 80, int $offset = 1)
 {
 	global $conf, $langs;
 
@@ -108,8 +108,8 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
  *
  * @param  string      $modulepart           Submodule name
  * @param  string      $sdir                 Directory path
- * @param  int         $size                 Medias size
- * @param  int         $nbmax                Max number of medias shown per page
+ * @param  int|string  $size                 Medias size
+ * @param  int|string  $nbmax                Max number of medias shown per page
  * @param  int         $nbbyrow              Number of images per row
  * @param  int         $showfilename         Show filename under image
  * @param  int         $showaction           Show icon with action links
@@ -129,7 +129,7 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
  * @param  int         $showdiv              Add div with "media-container" class
  * @return string      $return               Show medias linked
  */
-function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, int $size = 0, int $nbmax = 0, int $nbbyrow = 5, int $showfilename = 0, int $showaction = 0, int $maxHeight = 120, int $maxWidth = 160, int $nolink = 0, int $notitle = 0, int $usesharelink = 0, string $subdir = '', object $object = null, string $favorite_field = 'photo', int $show_favorite_button = 1, int $show_unlink_button = 1 , int $use_mini_format = 0, int $show_only_favorite = 0, string $morecss = '', int $showdiv = 1): string
+function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $size = 0, $nbmax = 0, int $nbbyrow = 5, int $showfilename = 0, int $showaction = 0, int $maxHeight = 120, int $maxWidth = 160, int $nolink = 0, int $notitle = 0, int $usesharelink = 0, string $subdir = '', object $object = null, string $favorite_field = 'photo', int $show_favorite_button = 1, int $show_unlink_button = 1 , int $use_mini_format = 0, int $show_only_favorite = 0, string $morecss = '', int $showdiv = 1): string
 {
 	global $conf, $langs;
 
