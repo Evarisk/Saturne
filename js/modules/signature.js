@@ -258,4 +258,8 @@ window.saturne.signature.autoDownloadSpecimen = function() {
 window.saturne.signature.copySignatureUrlClipboard = function() {
     let signatureUrl = $(this).attr('data-signature-url');
     navigator.clipboard.writeText(signatureUrl);
+    if ($(this).closest('.signatures-container').find('.clipboard-text').length > 0) {
+        $(this).closest('.signatures-container').find('.clipboard-text').remove();
+    }
+    $(this).after('<span class="clipboard-text"> Copié dans le presse-papier </span>');
 };
