@@ -25,18 +25,18 @@
  *  Return a link to the user card (with optionaly the picto)
  *  Use this->id,this->lastname, this->firstname
  *
- * @param  User   	$object                    	User object
- * @param  int	 	$withpictoimg				Include picto in link (0=No picto, 1=Include picto into link, 2=Only picto, -1=Include photo into link, -2=Only picto photo, -3=Only photo very small)
- * @param  string 	$option						On what the link point to ('leave', 'nolink', )
- * @param  int    	$infologin      			0=Add default info tooltip, 1=Add complete info tooltip, -1=No info tooltip
- * @param  int	 	$notooltip					1=Disable tooltip on picto and name
- * @param  int	 	$maxlen						Max length of visible username
- * @param  int	 	$hidethirdpartylogo			Hide logo of thirdparty if user is external user
- * @param  string 	$mode               		''=Show firstname and lastname, 'firstname'=Show only firstname, 'firstelselast'=Show firstname or lastname if not defined, 'login'=Show login
- * @param  string 	$morecss            		Add more css on link
- * @param  int    	$save_lastsearch_value    	-1=Auto, 0=No save of lastsearch_values when clicking, 1=Save lastsearch_values whenclicking
- * @param  int    	$display_initials          	Show only initials for firstname/lastname of user
- * @return string								String with URL
+ * @param  User   $object                User object
+ * @param  int    $withpictoimg          Include picto in link (0=No picto, 1=Include picto into link, 2=Only picto, -1=Include photo into link, -2=Only picto photo, -3=Only photo very small)
+ * @param  string $option                On what the link point to ('leave', 'nolink', )
+ * @param  int    $infologin             0=Add default info tooltip, 1=Add complete info tooltip, -1=No info tooltip
+ * @param  int    $notooltip             1=Disable tooltip on picto and name
+ * @param  int    $maxlen                Max length of visible username
+ * @param  int    $hidethirdpartylogo    Hide logo of thirdparty if user is external user
+ * @param  string $mode                  ''=Show firstname and lastname, 'firstname'=Show only firstname, 'firstelselast'=Show firstname or lastname if not defined, 'login'=Show login
+ * @param  string $morecss               Add more css on link
+ * @param  int    $save_lastsearch_value -1=Auto, 0=No save of lastsearch_values when clicking, 1=Save lastsearch_values whenclicking
+ * @param  int    $display_initials      Show only initials for firstname/lastname of user
+ * @return string                        String with URL
  */
 function get_nom_url_user(User $object, $withpictoimg = 0, $option = '', $infologin = 0, $notooltip = 0, $maxlen = 24, $hidethirdpartylogo = 0, $mode = '', $morecss = '', $save_lastsearch_value = -1, $display_initials = 1)
 {

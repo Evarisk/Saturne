@@ -46,7 +46,7 @@
  * @param  string            $removeaction     (optional) The action to remove a file
  * @param  int               $active           (optional) To show gen button disabled
  * @param  string            $tooltiptext      (optional) Tooltip text when gen button disabled
- * @return string                         Output string with HTML array of documents (might be empty string)
+ * @return string                              Output string with HTML array of documents (might be empty string)
  */
 function saturne_show_documents(string $modulepart, string $modulesubdir, string $filedir, string $urlsource, $genallowed, int $delallowed = 0, string $modelselected = '', int $allowgenifempty = 1, int $forcenomultilang = 0, int $notused = 0, int $noform = 0, string $param = '', string $title = '', string $buttonlabel = '', string $codelang = '', string $morepicto = '', $object = null, int $hideifempty = 0, string $removeaction = 'remove_file', int $active = 1, string $tooltiptext = ''): string
 {

@@ -23,17 +23,17 @@
 
 
 /**
- *      Print medias from media gallery
+ * Print medias from media gallery
  *
- *      @param      string				$moduleName 	Module name
- *      @param      string				$modulepart Submodule name
- *      @param      string				$sdir 		Directory path
- *      @param      integer				$size 		Media size
- *      @param      string				$maxHeight	Media max height
- *      @param      string				$maxWidth	Media max width
- *      @param      string				$offset		Media gallery offset page
+ * @param string $moduleName Module name
+ * @param string $modulepart Submodule name
+ * @param string $sdir       Directory path
+ * @param int    $size       Media size
+ * @param int    $maxHeight  Media max height
+ * @param int    $maxWidth   Media max width
+ * @param int    $offset     Media gallery offset page
  */
-function saturne_show_medias($moduleName, $modulepart = 'ecm', $sdir, $size = 0, $maxHeight = 80, $maxWidth = 80, $offset = 1)
+function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', string $sdir, int $size = 0, int $maxHeight = 80, int $maxWidth = 80, int $offset = 1)
 {
 	global $conf, $langs;
 
@@ -46,7 +46,7 @@ function saturne_show_medias($moduleName, $modulepart = 'ecm', $sdir, $size = 0,
 
 	$nbphoto = 0;
 
-	$filearray = dol_dir_list($dir, "files", 0, '', '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_DESC : SORT_ASC));
+	$filearray = dol_dir_list($dir, 'files', 0, '', '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_DESC : SORT_ASC));
 	$j         = 0;
 
 	if (count($filearray)) {
@@ -98,39 +98,38 @@ function saturne_show_medias($moduleName, $modulepart = 'ecm', $sdir, $size = 0,
 	} else {
 		print '<br>';
 		print '<div class="ecm-photo-list ecm-photo-list">';
-		print $langs->trans("EmptyMediaGallery");
+		print $langs->trans('EmptyMediaGallery');
 		print '</div>';
 	}
 }
 
 /**
- *      Show medias linked to an object
+ * Show medias linked to an object
  *
- *      @param      string				$modulepart 			Submodule name
- *      @param      string				$sdir					Directory path
- *      @param      integer				$size					Medias size
- *      @param      integer				$nbmax					Max number of medias shown per page
- *      @param      integer				$nbbyrow				Number of images per row
- *      @param      integer				$showfilename			Show filename under image
- *      @param      integer				$showaction				Show icon with action links
- *      @param      integer				$maxHeight				Media max height
- *      @param      integer				$maxWidth				Media max width
- *      @param      integer				$nolink					Do not add href link to image
- *      @param      integer				$notitle				Do not add title tag on image
- *      @param      integer				$usesharelink			Use the public shared link of image (if not available, the 'nophoto' image will be shown instead)
- *      @param      string				$subdir					Subdir for file
- *      @param      object				$object					Object linked to show medias of
- *      @param      string				$favorite_field			Name of favorite sql field of object
- *      @param      integer				$show_favorite_button	Show or hide favorite button
- *      @param      integer				$show_unlink_button		Show or hide unlink button
- *      @param      integer				$use_mini_format		Use media mini format instead of small
- *      @param      integer				$show_only_favorite		Show only object favorite media
- *      @param      string				$morecss				Add more CSS on link
- *      @param      integer				$showdiv				Add div with "media-container" class
- *      @return     string				$return 				Show medias linked
- *
+ * @param  string      $modulepart           Submodule name
+ * @param  string      $sdir                 Directory path
+ * @param  int         $size                 Medias size
+ * @param  int         $nbmax                Max number of medias shown per page
+ * @param  int         $nbbyrow              Number of images per row
+ * @param  int         $showfilename         Show filename under image
+ * @param  int         $showaction           Show icon with action links
+ * @param  int         $maxHeight            Media max height
+ * @param  int         $maxWidth             Media max width
+ * @param  int         $nolink 	             Do not add href link to image
+ * @param  int         $notitle              Do not add title tag on image
+ * @param  int         $usesharelink         Use the public shared link of image (if not available, the 'nophoto' image will be shown instead)
+ * @param  string      $subdir               Subdir for file
+ * @param  object|null $object               Object linked to show medias of
+ * @param  string      $favorite_field       Name of favorite sql field of object
+ * @param  int         $show_favorite_button Show or hide favorite button
+ * @param  int         $show_unlink_button   Show or hide unlink button
+ * @param  int         $use_mini_format      Use media mini format instead of small
+ * @param  int         $show_only_favorite   Show only object favorite media
+ * @param  string      $morecss              Add more CSS on link
+ * @param  int         $showdiv              Add div with "media-container" class
+ * @return string      $return               Show medias linked
  */
-function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbmax = 0, $nbbyrow = 5, $showfilename = 0, $showaction = 0, $maxHeight = 120, $maxWidth = 160, $nolink = 0, $notitle = 0, $usesharelink = 0, $subdir = "", $object = null, $favorite_field = 'photo', $show_favorite_button = 1, $show_unlink_button = 1 , $use_mini_format = 0, $show_only_favorite = 0, $morecss = '', $showdiv = 1)
+function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, int $size = 0, int $nbmax = 0, int $nbbyrow = 5, int $showfilename = 0, int $showaction = 0, int $maxHeight = 120, int $maxWidth = 160, int $nolink = 0, int $notitle = 0, int $usesharelink = 0, string $subdir = '', object $object = null, string $favorite_field = 'photo', int $show_favorite_button = 1, int $show_unlink_button = 1 , int $use_mini_format = 0, int $show_only_favorite = 0, string $morecss = '', int $showdiv = 1): string
 {
 	global $conf, $langs;
 
@@ -152,7 +151,7 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
 	$return  = '<!-- Photo -->' . "\n";
 	$nbphoto = 0;
 
-	$filearray = dol_dir_list($dir, "files", 0, '', '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_DESC : SORT_ASC), 1);
+	$filearray = dol_dir_list($dir, 'files', 0, '', '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_DESC : SORT_ASC), 1);
 
 	$i = 0;
 	if (count($filearray)) {
@@ -246,7 +245,7 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
 						if ($showaction) {
 							$return .= '<br>';
 							if ($photo_vignette && (image_format_supported($photo) > 0) && ($object->imgWidth > $maxWidth || $object->imgHeight > $maxHeight)) {
-								$return .= '<a href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;action=addthumb&amp;file=' . urlencode($pdir . $viewfilename) . '">' . img_picto($langs->trans('GenerateThumb'), 'refresh') . '&nbsp;&nbsp;</a>';
+								$return .= '<a href="' . $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&amp;action=addthumb&amp;file=' . urlencode($pdir . $viewfilename) . '">' . img_picto($langs->trans('GenerateThumb'), 'refresh') . '&nbsp;&nbsp;</a>';
 							}
 						}
 						$return .= "\n";
@@ -324,7 +323,6 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
 	return $return;
 }
 
-
 /**
  * Return file specified thumb name
  *
@@ -333,7 +331,7 @@ function saturne_show_medias_linked($modulepart = 'ecm', $sdir, $size = 0, $nbma
  * @return string            Thumb full name
  *
  */
-function saturne_get_thumb_name(string $filename, string$thumbType = 'small'): string
+function saturne_get_thumb_name(string $filename, string $thumbType = 'small'): string
 {
 	$imgName       = pathinfo($filename, PATHINFO_FILENAME);
 	$imgExtension  = pathinfo($filename, PATHINFO_EXTENSION);
