@@ -36,7 +36,7 @@ require_once __DIR__ . '/../core/modules/modSaturne.class.php';
 global $db, $langs, $user;
 
 // Load translation files required by the page
-saturne_load_langs();
+saturne_load_langs(['admin']);
 
 // Initialize technical objects
 $modSaturne = new modSaturne($db);

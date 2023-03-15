@@ -37,7 +37,7 @@ require_once __DIR__ . '/../lib/saturne.lib.php';
 global $conf, $db, $langs, $user;
 
 // Load translation files required by the page
-saturne_load_langs();
+saturne_load_langs(['admin']);
 
 // Parameters
 $action     = GETPOST('action', 'alpha');
