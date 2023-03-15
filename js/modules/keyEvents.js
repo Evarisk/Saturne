@@ -54,6 +54,7 @@ window.saturne.keyEvent.init = function() {
 window.saturne.keyEvent.event = function() {
 	$( document ).on( 'keydown', window.saturne.keyEvent.modalActions );
 	$( document ).on( 'keyup', '.url-container' , window.saturne.keyEvent.checkUrlFormat );
+	$( document ).on( 'keydown', window.saturne.keyEvent.buttonActions );
 }
 
 /**
@@ -93,5 +94,25 @@ window.saturne.keyEvent.checkUrlFormat = function( event ) {
 		$(this).attr('style', 'border: solid; border-color: green')
 	} else if ($('input:focus').val().length > 0) {
 		$(this).attr('style', 'border: solid; border-color: red')
+	}
+};
+
+/**
+ * Action save & cancel with key events
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @return {void}
+ */
+window.saturne.keyEvent.buttonActions = function( event ) {
+	if ( 'Escape' === event.key  ) {
+		$(this).find('.button-cancel').click();
+	}
+
+	if ( 'Enter' === event.key )  {
+		if (!$('input, textarea').is(':focus')) {
+			$(this).find('.button-add').click();
+		}
 	}
 };
