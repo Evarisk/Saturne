@@ -77,8 +77,8 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
 					<div class="center clickable-photo clickable-photo<?php echo $j; ?>" value="<?php echo $j; ?>">
 						<figure class="photo-image">
 							<?php
-							$file = preg_replace("/'/", "\\'", $file);
-							$urladvanced = getAdvancedPreviewUrl($modulepart, $moduleName . '/medias/' .$file, 0, 'entity=' . $conf->entity);
+							$filePreviewUrl = urlencode($file);
+							$urladvanced = getAdvancedPreviewUrl($modulepart, $moduleName . '/medias/' . $filePreviewUrl, 0, 'entity=' . $conf->entity);
 							?>
 							<a class="clicked-photo-preview" href="<?php echo $urladvanced; ?>"><i class="fas fa-2x fa-search-plus"></i></a>
 							<?php if (image_format_supported($file) >= 0) : ?>
