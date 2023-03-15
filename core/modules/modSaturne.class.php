@@ -251,7 +251,7 @@ class modSaturne extends DolibarrModules
 				'fk_menu'  => 'fk_mainmenu=' . $moduleNameLowerCase,
 				'type'     => 'left',
 				'titre'    => $langs->transnoentities('MinimizeMenu'),
-				'prefix'   => '<i class="fas fa-chevron-circle-left pictofixedwidth"></i>',
+				'prefix'   => '<i class="fas fa-chevron-circle-left pictofixedwidth saturne-toggle-menu"></i>',
 				'mainmenu' => $moduleNameLowerCase,
 				'leftmenu' => 'minimizemenu',
 				'url'      => '',

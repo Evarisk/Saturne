@@ -116,38 +116,35 @@ window.saturne.menu.toggleMenu = function() {
  * @return {void}
  */
 window.saturne.menu.setMenu = function() {
-	if ($('.blockvmenu.blockvmenufirst').length > 0) {
-		if ($('.blockvmenu.blockvmenufirst').html().match(/digiriskdolibarr|dolismq|dolimeet|dolisirh|dolicar/)) {
-			$('span.vmenu').find('.fa-chevron-circle-left').parent().parent().parent().attr('style', 'cursor:pointer ! important')
-
-			if (localStorage.maximized == 'false') {
-				$('#id-left').attr('style', 'display:none !important')
-			}
-
-			if (localStorage.maximized == 'false') {
-				var text = '';
-				var menu = $('#id-left').find('a.vmenu, font.vmenudisabled, span.vmenu, a.vsmenu');
-				var elementParent = $(document).find('div.vmenu')
-
-				menu.each(function () {
-					text = $(this).html().split('</i>');
-					$(this).attr('title', text[1])
-					$(this).html(text[0]);
-					console.log(text)
-				});
-
-				$('#id-left').attr('style', 'display:block !important')
-				$('div.menu_titre').attr('style', 'width: 50px !important')
-				$('span.vmenu').attr('title', ' Agrandir le menu')
-
-				$('span.vmenu').html($('span.vmenu').html())
-				$('span.vmenu').find('.fa-chevron-circle-left').removeClass('fa-chevron-circle-left').addClass('fa-chevron-circle-right');
-
-				elementParent.css('width', '30px');
-				elementParent.find('.blockvmenusearch').hide();
-			}
-			localStorage.setItem('currentString', '')
-			localStorage.setItem('keypressNumber', 0)
+	if ($('.blockvmenu.blockvmenulast .saturne-toggle-menu').length > 0) {
+		$('.blockvmenu.blockvmenulast .saturne-toggle-menu').closest('.menu_titre').attr('style', 'cursor:pointer ! important')
+		if (localStorage.maximized == 'false') {
+			$('#id-left').attr('style', 'display:none !important')
 		}
+
+		if (localStorage.maximized == 'false') {
+			var text = '';
+			var menu = $('#id-left').find('a.vmenu, font.vmenudisabled, span.vmenu, a.vsmenu');
+			var elementParent = $(document).find('div.vmenu')
+
+			menu.each(function () {
+				text = $(this).html().split('</i>');
+				$(this).attr('title', text[1])
+				$(this).html(text[0]);
+				console.log(text)
+			});
+
+			$('#id-left').attr('style', 'display:block !important')
+			$('div.menu_titre').attr('style', 'width: 50px !important')
+			$('span.vmenu').attr('title', ' Agrandir le menu')
+
+			$('span.vmenu').html($('span.vmenu').html())
+			$('span.vmenu').find('.fa-chevron-circle-left').removeClass('fa-chevron-circle-left').addClass('fa-chevron-circle-right');
+
+			elementParent.css('width', '30px');
+			elementParent.find('.blockvmenusearch').hide();
+		}
+		localStorage.setItem('currentString', '')
+		localStorage.setItem('keypressNumber', 0)
 	}
 };
