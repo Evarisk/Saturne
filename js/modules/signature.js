@@ -92,6 +92,7 @@ window.saturne.signature.event = function() {
     $(document).on('click', '.signature-validate', window.saturne.signature.createSignature);
     $(document).on('click', '.auto-download', window.saturne.signature.autoDownloadSpecimen);
     $(document).on('click', '.copy-signatureurl', window.saturne.signature.copySignatureUrlClipboard);
+    $(document).on('click', '.set-attendance', window.saturne.signature.setAttendance);
 };
 
 /**
@@ -265,5 +266,38 @@ window.saturne.signature.copySignatureUrlClipboard = function() {
             $(this).attr('class', 'fas fa-clipboard copy-signatureurl');
             $(this).css('color', '#666');
         });
+    });
+};
+
+/**
+ * set Attendance signatory
+ *
+ * @memberof Saturne_Framework_Signature
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @return {void}
+ */
+window.saturne.signature.setAttendance = function() {
+    let signatoryID    = $(this).closest('.attendance-container').find('input[name="signatoryID"]').val();
+    let attendance     = $(this).attr('value');
+    let token          = window.saturne.toolbox.getToken();
+    let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+    let url            = document.URL + querySeparator + 'action=set_attendance&token=' + token;
+    $.ajax({
+        url: url,
+        type: 'POST',
+        processData: false,
+        contentType: '',
+        data: JSON.stringify({
+            signatoryID: signatoryID,
+            attendance: attendance
+        }),
+        success: function (resp) {
+            $('.signatures-container').html($(resp).find('.signatures-container'));
+        },
+        error: function () {
+        }
     });
 };

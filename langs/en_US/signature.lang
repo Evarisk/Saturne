@@ -21,6 +21,7 @@
 AddAttendantTrigger     = Adding a participant : %s
 SignedTrigger           = Signature of participant completed %s
 PendingSignatureTrigger = Email sent, awaiting participant's signature %s
+DelayTrigger            = Participant %s delay
 AbsentTrigger           = Participant %s absent
 DeletedTrigger          = Participant %s deleted
 
@@ -49,6 +50,7 @@ Signed           = Signed
 Unsigned         = Unsigned
 Absent           = Absent
 JustifiedAbsent  = Justified absence
+Delay            = Delay
 
 # Header table
 SignatureLink    = Signature link
