@@ -54,6 +54,7 @@ UseAllEmailMode                   = Utilisation de tous les modes de configurati
 UseAllEmailModeDescription        = Autorise l'utilisation de tous les modes de configuration des emails par défaut, seul le mode SMTP est autorisé
 SignaturePublicInterfaceForbidden = Accès interdit à l'interface publique de signature
 ObjectVisibleDescription          = Afficher le champ %s
+SavedConfig                       = Configuration sauvegardée
 
 # Mod Numbering - Modèle de numérotation
 NumberingModule = Modèle de numérotation
