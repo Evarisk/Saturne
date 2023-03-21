@@ -257,9 +257,20 @@ window.saturne.signature.autoDownloadSpecimen = function() {
  */
 window.saturne.signature.copySignatureUrlClipboard = function() {
     let signatureUrl = $(this).attr('data-signature-url');
-    navigator.clipboard.writeText(signatureUrl);
-    if ($(this).closest('.signatures-container').find('.clipboard-text').length > 0) {
-        $(this).closest('.signatures-container').find('.clipboard-text').remove();
-    }
-    $(this).after('<span class="clipboard-text"> Copié dans le presse-papier </span>');
+    navigator.clipboard.writeText(signatureUrl).then(() => {
+        $(this).animate({
+            backgroundColor: "#59ed9c"
+        }, {
+            duration: 2000,
+            start: function () {
+                $(this).attr('class', 'fas fa-check copy-signatureurl');
+                $(this).closest('.copy-signatureurl-container').find('.copied-to-clipboard').attr('style', '');
+                $(this).closest('.copy-signatureurl-container').find('.copied-to-clipboard').fadeOut(5000);
+            },
+            complete: function () {
+                $(this).attr('class', 'fas fa-clipboard copy-signatureurl');
+                $(this).attr('style', 'color: #666');
+            }
+        });
+    });
 };
