@@ -35,6 +35,7 @@ ObjectArchivedTrigger   = Archiving %s
 
 # Status
 StatusDraft              = Draft (to be validated)
+Validated                = Validated
 ValidatePendingSignature = Validated (pending signature)
 Locked                   = Locked
 Archived                 = Archived
