@@ -21,8 +21,8 @@
 AddAttendantTrigger     = Ajout d'un participant : %s
 SignedTrigger           = Signature du participant effectuée %s
 PendingSignatureTrigger = Email envoyé, en attente de la signature du participant %s
-DelayTrigger            = Participant %s en retard
-AbsentTrigger           = Participant %s absent
+AttendanceDelayTrigger  = Participant %s en retard
+AttendanceAbsentTrigger = Participant %s absent
 DeletedTrigger          = Participant %s supprimé
 
 # SetEventMessage - Notice info
@@ -32,7 +32,6 @@ AddSignatureSuccessText = La signature a bien été enregistrée pour le documen
 AddAttendantMessage     = Ajout du participant : %s
 DeleteAttendantMessage  = Suppression du participant : %s
 SignAttendantMessage    = Le participant %s a signé
-AbsentAttendantMessage  = Le participant %s est absent
 SendEmailAt             = Envoi de l'email à %s
 ErrorSetupEmail         = Erreur de configuration des mails, vous n'avez pas configuré votre serveur d'envoi de mail en mode SMTP <br> Veuillez utiliser le mode SMTP pour une meilleure délivrabilité et sécurisation des emails
 NoEmailSet              = Aucun email renseigné : %s
@@ -43,14 +42,8 @@ SignatureEmailMessage = Bonjour, <br> Veuillez trouver ci-joint le lien de signa
 
 # Status - Statut
 Registered       = Inscrit
-SignatureRequest = Demande de signature
 PendingSignature = En attente de signature
-Denied           = Refusé
 Signed           = Signé
-Unsigned         = Non signé
-Absent           = Absent
-JustifiedAbsent  = Absence justifiée
-Delay            = En retard
 
 # Header table - Entête de tableau
 SignatureLink    = Lien signature
@@ -78,6 +71,8 @@ NoAttendants       = Pas de participants liés. Pour ajouter des participants, l
 CloneAttendants    = Cloner les participants
 NoAttendant        = Aucun %s présent pour %s.
 Present            = Présent
+Absent             = Absent
+Delay              = En retard
 
 # Public interface - Interface publique
 FullName = NOM Prénom

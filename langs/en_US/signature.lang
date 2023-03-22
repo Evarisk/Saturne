@@ -21,8 +21,8 @@
 AddAttendantTrigger     = Adding a participant : %s
 SignedTrigger           = Signature of participant completed %s
 PendingSignatureTrigger = Email sent, awaiting participant's signature %s
-DelayTrigger            = Participant %s delay
-AbsentTrigger           = Participant %s absent
+AttendanceDelayTrigger  = Participant %s delay
+AttendanceAbsentTrigger = Participant %s absent
 DeletedTrigger          = Participant %s deleted
 
 # SetEventMessage
@@ -32,7 +32,6 @@ AddSignatureSuccessText = The signature has been registered for the document
 AddAttendantMessage     = Add participant : %s
 DeleteAttendantMessage  = Participant deletion: %s
 SignAttendantMessage    = The participant %s signed
-AbsentAttendantMessage  = The participant %s is absent
 SendEmailAt             = Send email to %s
 ErrorSetupEmail         = Mail configuration error, you have not configured your mail server in SMTP mode <br> Please use SMTP mode for better delivery and security of emails
 NoEmailSet              = No email entered: %s
@@ -43,14 +42,8 @@ SignatureEmailMessage = Hello, <br> Please find attached the link to sign the do
 
 # Status
 Registered       = Registered
-SignatureRequest = Request for signature
 PendingSignature = Awaiting signature
-Denied           = Rejected
 Signed           = Signed
-Unsigned         = Unsigned
-Absent           = Absent
-JustifiedAbsent  = Justified absence
-Delay            = Delay
 
 # Header table
 SignatureLink    = Signature link
@@ -78,6 +71,8 @@ NoAttendants       = No linked participants. To add participants, the status mus
 CloneAttendants    = Clone participants
 NoAttendant        = No %s present for %s.
 Present            = Present
+Absent             = Absent
+Delay              = Delay
 
 # Public interface
 FullName = Last name First name
