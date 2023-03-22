@@ -46,7 +46,6 @@ Lock                            = Lock
 Archive                         = Archive
 Clone                           = Clone
 ObjectMustBeDraft               = %s must be in (draft) status
-ObjectMustBeDraftToValidate     = %s must be in status (validated) or higher
 ObjectMustBeValidated           = %s must be in status (validated)
 ObjectMustBeValidatedToGenerate = %s must be in status (validated) to generate the document
 ObjectMustBeValidatedToSign     = %s must be in status (validated) for participants to sign
