@@ -23,13 +23,14 @@ CreateObject = Créer/Modifier les %s
 DeleteObject = Supprimer les %s
 
 # Trigger - Déclencheur
-ObjectCreateTrigger     = Création de %s
-ObjectModifyTrigger     = Modification de %s
-ObjectDeleteTrigger     = Suppression de %s
-ObjectUnValidateTrigger = Réouverture de %s
-ObjectValidateTrigger   = En attente de la signature des participants de %s
-ObjectLockedTrigger     = Verrouillage de %s - Prêt pour la génération du document
-ObjectArchivedTrigger   = Archivage de %s
+ObjectCreateTrigger     = %s créé(e)
+ObjectModifyTrigger     = %s modifié(e)
+ObjectDeleteTrigger     = %s supprimé(e)
+ObjectUnValidateTrigger = %s réouvert(e)
+ObjectValidateTrigger   = %s validé(e)
+ObjectLockedTrigger     = %s verrouillé(e) - Prêt pour la génération du document
+ObjectSentByMailTrigger = Mail envoyé
+ObjectArchivedTrigger   = %s archivé(e)
 
 # SetEventMessage - Notice info
 
