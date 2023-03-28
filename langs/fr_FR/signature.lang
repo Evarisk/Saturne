@@ -37,8 +37,11 @@ ErrorSetupEmail         = Erreur de configuration des mails, vous n'avez pas con
 NoEmailSet              = Aucun email renseigné : %s
 
 # Mail - Mail
-SignatureEmailSubject = Signature de %s %s
-SignatureEmailMessage = Bonjour, <br> Veuillez trouver ci-joint le lien de signature du document.<br> %s
+SignatureEmailSubject          = Signature de %s %s
+SignatureEmailMessage          = Bonjour, <br><br> Veuillez trouver ci-joint le lien de signature du document.<br> %s
+GlobalSignatureEmailSubject    = Signature global de %s %s
+GlobalSignatureEmailMessage    = Bonjour, <br><br> Suite à votre %s "%s" en date du %s, veuillez trouver ci-dessous les liens de signature du document "%s" des différents participants : <br><br>
+GlobalSignatureEmailMessageEnd = Nous vous remercions de bien vouloir leur transmettre. <br><br> Vous en souhaitant une excellente réception, <br><br> Cordialement
 
 # Status - Statut
 Registered       = Inscrit
@@ -53,12 +56,13 @@ Attendance       = Présence
 SignatureActions = Actions
 
 # Button - Bouton
-GoToValidate    = Valider %s
-GoToLock        = Verrouiller %s
-SendEmail       = Envoyer un email
-DeleteAttendant = Supprimer le participant
-Sign            = Signer
-Erase           = Effacer
+GoToValidate            = Valider %s
+GoToLock                = Verrouiller %s
+SendEmail               = Envoyer un email
+SendGlobalSignatureMail = Envoyer un email de signature à tous les participants
+DeleteAttendant         = Supprimer le participant
+Sign                    = Signer
+Erase                   = Effacer
 
 # Data - Donnée
 Attendant          = Participant
