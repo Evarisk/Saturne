@@ -280,11 +280,12 @@ window.saturne.signature.copySignatureUrlClipboard = function() {
  * @return {void}
  */
 window.saturne.signature.setAttendance = function() {
-    let signatoryID    = $(this).closest('.attendance-container').find('input[name="signatoryID"]').val();
-    let attendance     = $(this).attr('value');
-    let token          = window.saturne.toolbox.getToken();
-    let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
-    let url            = document.URL + querySeparator + 'action=set_attendance&token=' + token;
+    let signatoryID       = $(this).closest('.attendance-container').find('input[name="signatoryID"]').val();
+    let attendance        = $(this).attr('value');
+    let token             = window.saturne.toolbox.getToken();
+    let querySeparator    = window.saturne.toolbox.getQuerySeparator(document.URL);
+    let urlWithoutHashtag = String(document.location.href).replace(/#formmail/, "");
+    let url = urlWithoutHashtag + querySeparator + 'action=set_attendance&token=' + token;
     $.ajax({
         url: url,
         type: 'POST',
