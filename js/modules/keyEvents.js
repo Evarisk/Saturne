@@ -115,4 +115,13 @@ window.saturne.keyEvent.buttonActions = function( event ) {
 			$(this).find('.button-add').click();
 		}
 	}
+
+	if (!$(event.target).is('input, textarea')) {
+		if ('Enter' === event.key)  {
+			$(this).find('.button_search').click();
+		}
+		if (event.shiftKey && 'Enter' === event.key)  {
+			$(this).find('.button_removefilter').click();
+		}
+	}
 };
