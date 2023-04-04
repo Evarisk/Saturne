@@ -4,11 +4,11 @@ on:
         branches:
             - main
 jobs:
-    main:
+    master:
         name: 'build'
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@master
+            - uses: actions/checkout@main
               with:
                   fetch-depth: 0
             - name: Generate Auto Changelog
