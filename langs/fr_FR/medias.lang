@@ -1,0 +1,37 @@
+# Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#
+# Media Gallery - Bibliothèque de médias
+#
+
+# Data - Donnée
+MediasMin                 = médias
+MediaGallery              = Bibliothèque de médias
+ErrorThisFileSizeTooLarge = Le fichier %s est trop volumineux
+ErrorThisFileExists       = Le fichier %s existe déjà
+EmptyMediaGallery         = La bibliothèque de médias est vide
+
+# Config page - Page d'administration
+MediaMaxWidthMedium                  = Largeur du média medium
+MediaMaxWidthMediumDescription       = Largeur du média (dimension medium) avec pour ratio 16:9
+MediaMaxHeightMedium                 = Hauteur du média medium
+MediaMaxHeightMediumDescription      = Hauteur du média (dimension medium) avec pour ratio 16:9
+MediaMaxWidthLarge                   = Largeur du média large
+MediaMaxWidthLargeDescription        = Largeur du média (dimension large) avec pour ratio 16:9
+MediaMaxHeightLarge                  = Hauteur du média large
+MediaMaxHeightLargeDescription       = Hauteur du média (dimension large) avec pour ratio 16:9
+DisplayNumberMediaGallery            = Nombre de médias affichés dans la bibliothèque de médias
+DisplayNumberMediaGalleryDescription = Affiche 8 médias (par défaut) par page dans la bibliothèque de médias

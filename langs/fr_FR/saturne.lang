@@ -1,0 +1,145 @@
+# Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#
+# Saturne
+#
+
+# Data - Donnée
+ModuleSaturneName   = Saturne
+ModuleSaturneDesc   = Framework et librairie d'objets et fonctions d'Evarisk
+ModuleConfig        = Configuration
+ModuleConfigSaturne = Configuration Saturne
+MinimizeMenu        = Réduire le menu
+
+# Right - Droit
+LireModule    = Consulter %s
+ReadModule    = Consulter %s (read)
+ReadAdminPage = Accéder à la configuration du module %s
+
+
+
+#
+# Config page - Page d'administration
+#
+
+# Data - Donnée
+ModuleSettings                    = Réglages
+ModuleSetup                       = Configuration du module %s
+GeneralConfig                     = Configuration générale
+ConfigData                        = Données configurables de %s
+Configs                           = Configuration des %s
+ConfigDatas                       = Configurations
+ModuleMediaGallery                = Configuration des médias de %s
+SavedMediaData                    = Enregistrement des données des médias
+EnablePublicInterface             = Interface publique
+EnablePublicInterfaceDescription  = Activation des interfaces publiques
+ShowCompanyLogo                   = Afficher le logo de la société
+ShowCompanyLogoDescription        = Activez cette option pour masquer le logo de la société dans les pages d'interface publique
+UseCaptcha                        = Code graphique (CAPTCHA)
+UseCaptchaDescription             = Utilisation du code graphique (CAPTCHA) sur les pages d'interfaces publique
+UseAllEmailMode                   = Utilisation de tous les modes de configuration des emails
+UseAllEmailModeDescription        = Autorise l'utilisation de tous les modes de configuration des emails par défaut, seul le mode SMTP est autorisé
+SignaturePublicInterfaceForbidden = Accès interdit à l'interface publique de signature
+ObjectVisibleDescription          = Afficher le champ %s
+SavedConfig                       = Configuration sauvegardée
+
+# Mod Numbering - Modèle de numérotation
+NumberingModule = Modèle de numérotation
+StandardModel   = Renvoie le numéro sous la forme %syymm-nnnn où yy est l'année, mm le mois et nnnn est un compteur séquentiel sans rupture et sans remise à 0.
+
+# ODT Template - Template ODT
+YourDocuments          = Documents
+DocumentTemplate       = Modèle de documents
+ODTDefaultTemplateName = ODT par défaut
+
+
+
+#
+# About - Page À propos
+#
+
+# Data - Donnée
+About       = À propos
+ModuleAbout = À propos de %s
+
+
+
+#
+# Sécurité
+#
+
+# Data - Donnée
+ChangeEntityRedirection = Vous avez été redirigé car vous avez changé d'entité
+EnableSaturne           = Veuillez activer le module Saturne pour voir cette page
+
+
+
+#
+# Index - Accueil
+#
+
+# Data - Donnée
+ModuleArea             = Bienvenue sur %s
+ModuleUpdate           = Mise à jour de %s :
+ModuleHasBeenUpdatedTo = %s a été mis à jour en version %s
+ModulePatchNote        = Note de mise à jour %s %s
+ShowPatchNote          = Consulter la note de mise à jour
+DontShowPatchNote      = Ne plus afficher la note de mise à jour
+
+#
+# Schedules - horaires
+#
+
+# Data - Donnée
+SchedulesSaved = Les horaires ont bien été enregistrés
+
+
+
+#
+# Documents - Documents
+#
+
+# Data - Donnée
+DocumentsMin                            = documents
+AutomaticPdfGeneration                  = Génération automatique des PDF
+AutomaticPdfGenerationDescription       = Crée automatiquement le document en PDF lors de la génération
+ManualPdfGeneration                     = Génération manuelle des PDF
+ManualPdfGenerationDescription          = Ajout d'un bouton pour créer un document ODT en PDF
+FileCouldNotBeGeneratedInPDF            = Le fichier n'a pas pu être généré en PDF
+CheckDocumentationToEnablePDFGeneration = Veuillez vous référer à la documentation pour la génération en PDF : <a target="_blank" href="https://wiki.dolibarr.org/index.php?title=Module_Saturne">Documentation</a>
+PDFGenerationTooltip                    = Appuyez sur ce bouton pour générer le document ODT en PDF
+PDFGeneration                           = Génération du document PDF
+NoData                                  = N/A
+
+
+
+#
+# Email - Mail
+#
+
+# Data - Donnée
+SendMailSubject = Email
+QHSEService     = Service QHSE
+WithKindRegards = Bien cordialement
+ConfigEmail     = Cliquez sur ce lien pour vous rendre à la configuration des emails
+
+
+#
+# Modal - Modal
+#
+
+# Data - Donnée
+CloseModal = Fermer

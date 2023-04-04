@@ -1,0 +1,82 @@
+# Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#
+# Signature - Signature
+#
+
+# Trigger - Déclencheur
+AddAttendantTrigger     = Ajout d'un participant : %s
+SignedTrigger           = Signature du participant effectuée %s
+PendingSignatureTrigger = Email envoyé, en attente de la signature du participant %s
+AttendanceDelayTrigger  = Participant %s en retard
+AttendanceAbsentTrigger = Participant %s absent
+DeletedTrigger          = Participant %s supprimé
+
+# SetEventMessage - Notice info
+BeCareful               = Attention
+AddSignatureSuccess     = Signature du participant réussie
+AddSignatureSuccessText = La signature a bien été enregistrée pour le document
+AddAttendantMessage     = Ajout du participant : %s
+DeleteAttendantMessage  = Suppression du participant : %s
+SignAttendantMessage    = Le participant %s a signé
+SendEmailAt             = Envoi de l'email à %s
+ErrorSetupEmail         = Erreur de configuration des mails, vous n'avez pas configuré votre serveur d'envoi de mail en mode SMTP <br> Veuillez utiliser le mode SMTP pour une meilleure délivrabilité et sécurisation des emails
+NoEmailSet              = Aucun email renseigné : %s
+
+# Mail - Mail
+SignatureEmailSubject          = Signature de %s %s
+SignatureEmailMessage          = Bonjour, <br><br> Veuillez trouver ci-joint le lien de signature du document.<br> %s
+GlobalSignatureEmailSubject    = Signature global de %s %s
+GlobalSignatureEmailMessage    = Bonjour, <br><br> Suite à votre %s "%s" en date du %s, veuillez trouver ci-dessous les liens de signature du document "%s" des différents participants : <br><br>
+GlobalSignatureEmailMessageEnd = Nous vous remercions de bien vouloir leur transmettre. <br><br> Vous en souhaitant une excellente réception, <br><br> Cordialement
+
+# Status - Statut
+Registered       = Inscrit
+PendingSignature = En attente de signature
+Signed           = Signé
+
+# Header table - Entête de tableau
+SignatureLink    = Lien signature
+SendMailDate     = Date d'envoi d'email
+SignatureDate    = Date de signature
+Attendance       = Présence
+SignatureActions = Actions
+
+# Button - Bouton
+GoToValidate            = Valider %s
+GoToLock                = Verrouiller %s
+SendEmail               = Envoyer un email
+SendGlobalSignatureMail = Envoyer un email de signature à tous les participants
+DeleteAttendant         = Supprimer le participant
+Sign                    = Signer
+Erase                   = Effacer
+
+# Data - Donnée
+Attendant          = Participant
+Attendants         = Participants
+InternalAttendant  = Participant interne
+InternalAttendants = Participants internes
+ExternalAttendant  = Participant externe
+ExternalAttendants = Participants externes
+NoAttendants       = Pas de participants liés. Pour ajouter des participants, le statut doit être "Brouillon (à valider)".
+CloneAttendants    = Cloner les participants
+NoAttendant        = Aucun %s présent pour %s.
+Present            = Présent
+Absent             = Absent
+Delay              = En retard
+
+# Public interface - Interface publique
+FullName = NOM Prénom

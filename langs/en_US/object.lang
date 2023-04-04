@@ -1,0 +1,74 @@
+# Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#
+# Generic object
+#
+
+# Right
+ReadObject   = Read %s
+CreateObject = Create/Modidy %s
+DeleteObject = Delete %s
+
+# Trigger
+ObjectCreateTrigger     = Creation of %s
+ObjectModifyTrigger     = Modification of %s
+ObjectDeleteTrigger     = Deletion of %s
+ObjectUnValidateTrigger = Reopening of %s
+ObjectValidateTrigger   = Pending signature of the participants of %s
+ObjectLockedTrigger     = Locking %s - Ready for document generation
+ObjectArchivedTrigger   = Archiving %s
+
+# SetEventMessage
+
+# Status
+StatusDraft              = Draft (to be validated)
+Validated                = Validated
+ValidatePendingSignature = Validated (pending signature)
+Locked                   = Locked
+Archived                 = Archived
+
+# Button
+ReOpenDoli                      = Reopen
+Sign                            = Sign
+Lock                            = Lock
+Archive                         = Archive
+Clone                           = Clone
+ObjectMustBeDraft               = %s must be in (draft) status
+ObjectMustBeValidated           = %s must be in status (validated)
+ObjectMustBeValidatedToGenerate = %s must be in status (validated) to generate the document
+ObjectMustBeValidatedToSign     = %s must be in status (validated) for participants to sign
+AllSignatoriesMustHaveSigned    = All participants must have signed to lock %s
+ObjectMustBeLockedToSendEmail   = %s must be in (locked) status to send an email
+ObjectMustBeLockedToArchive     = %s must be in status (locked) and the document generated in order to archive it
+
+# Confirm box
+ValidateObject        = Validate %s
+ConfirmValidateObject = Are you sure you want to validate %s? <br> La validation permet aux participants de signer le document mais <b> empêche l'ajout de nouveaux participants ou la modification de %s. </b>
+ReOpenObject          = Open %s again
+ConfirmReOpenObject   = Are you sure you want to reopen %s ? Reopening allows %s to be modified and new participants to be added but all document signatures will be lost
+LockObject            = Lock %s
+ConfirmLockObject     = Are you sure you want to lock %s?<br>This lock allows you to freeze the data and the document generation.
+CloneObject           = Clone %s
+NewLabelForClone      = New %s label
+ConfirmCloneObject    = Are you sure you want to clone %s <b>%s</b>?
+
+# Data
+ActionsOnObject = Events on %s
+
+# Email - Mail
+ObjectLabel     = Summary
+ObjectSubject   = Email document
+ObjectContent   = Please find attached the ODT document(s) related to __THETYPE__.
