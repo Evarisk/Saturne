@@ -4,7 +4,7 @@ on:
         branches:
             - main
 jobs:
-    master:
+    main:
         name: 'build'
         runs-on: ubuntu-latest
         steps:
