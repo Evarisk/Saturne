@@ -4,14 +4,14 @@ on:
         branches:
             - main
 jobs:
-    main:
+    master:
         name: 'build'
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@main
+            - uses: actions/checkout@master
               with:
                   fetch-depth: 0
             - name: Generate Auto Changelog
-              uses: Evarisk/action-auto-changelog@main
+              uses: Evarisk/action-auto-changelog@master
               with:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
