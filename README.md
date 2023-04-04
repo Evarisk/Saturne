@@ -4,9 +4,9 @@
 
 - Numéro du module : 436318
 - Version :  1.0.0
-- Dernière mise à jour : 26/01/2023
+- Dernière mise à jour : 04/04/2023
 - Éditeur : [Evarisk](https://www.evarisk.com)
-- Compatibilité : Dolibarr 15.0.0 - 16.0.4
+- Compatibilité : Dolibarr 16.0.0 - 16.0.5
 - Thème : eldy
 - Licence : GPLv3
 - Disponible sur : Windows - MacOS - Linux
