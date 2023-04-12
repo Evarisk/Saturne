@@ -290,8 +290,13 @@ if ($id > 0 || !empty($ref) && empty($action)) {
 
     print '<div class="fichecenter">';
 
-    //$test = dol_buildpath('/custom/' . $moduleNameLowerCase . '/view/session/session_card.php?id=' . $id . '&object_type=' . $object->element, 1);
-    $test = dol_buildpath('/custom/' . $moduleNameLowerCase . '/view/' . $object->element . '/' . $object->element . '_card.php?id=' . $id, 1);
+    $backtocard = dol_buildpath('/custom/' . $moduleNameLowerCase . '/view/' . $object->element . '/' . $object->element . '_card.php?id=' . $id, 1);
+
+    $parameters = ['backtocard' => $backtocard];
+    $reshook    = $hookmanager->executeHooks('SaturneAttendentBackToCard', $parameters, $object); // Note that $action and $object may have been modified by some hooks
+    if ($reshook > 0) {
+        $backtocard = $hookmanager->results;
+    }
 
     if ($object->status == $object::STATUS_DRAFT && $permissiontoadd) : ?>
         <div class="wpeo-notice notice-warning">
@@ -299,7 +304,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
                 <div class="notice-title"><?php echo $langs->trans('BeCareful') ?></div>
                 <div class="notice-subtitle"><?php echo $langs->trans('ObjectMustBeValidatedToSign', ucfirst($langs->transnoentities('The' . ucfirst($object->element)))) ?></div>
             </div>
-            <a class="butAction" href="<?php echo $test ?>"><i class="fas fa-check"></i> <?php echo $langs->trans('GoToValidate', $langs->transnoentities('The' . ucfirst($object->element))) ?></a>;
+            <a class="butAction" href="<?php echo $backtocard ?>"><i class="fas fa-check"></i> <?php echo $langs->trans('GoToValidate', $langs->transnoentities('The' . ucfirst($object->element))) ?></a>;
         </div>
     <?php endif; ?>
         <div class="noticeSignatureSuccess wpeo-notice notice-success hidden">
@@ -317,7 +322,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
         print '<div class="tabsAction" style="margin-bottom: 0">';
         print '<a class="butAction" href="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&action=presend&mode=init&token=' .newToken() . '#formmailbeforetitle' . '"><i class="fas fa-paper-plane"></i> ' . $langs->trans('SendGlobalSignatureMail') . '</a>';
         if ($signatory->checkSignatoriesSignatures($object->id, $object->element)) {
-            print '<a class="butAction" href="' . $test . '"><i class="fas fa-lock"></i> ' . $langs->trans('GoToLock', $langs->transnoentities('The' . ucfirst($object->element))) . '</a>';
+            print '<a class="butAction" href="' . $backtocard . '"><i class="fas fa-lock"></i> ' . $langs->trans('GoToLock', $langs->transnoentities('The' . ucfirst($object->element))) . '</a>';
         }
         print '</div>';
     }

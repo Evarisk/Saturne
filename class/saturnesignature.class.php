@@ -42,7 +42,7 @@ class SaturneSignature extends CommonObject
     /**
      * @var string Module name.
      */
-    public string $module = 'dolimeet';
+    public string $module = 'saturne';
 
     /**
      * @var string Element type of object.
@@ -704,7 +704,7 @@ class SaturneSignature extends CommonObject
         global $user;
 
         $filter              = ['customsql' => ' role="' . $role . '" AND fk_object=' . $fk_object . ' AND status=1 AND object_type="' . $object_type . '"'];
-        $signatoriesToDelete = $this->fetchAll('', '', 0, 0, $filter, 'AND');
+        $signatoriesToDelete = $this->fetchAll('', '', 0, 0, $filter);
         if (!empty($signatoriesToDelete) && $signatoriesToDelete > 0) {
             foreach ($signatoriesToDelete as $signatoryToDelete) {
                 $signatoryToDelete->setDeleted($user, true);
