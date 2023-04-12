@@ -293,7 +293,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
     $backtocard = dol_buildpath('/custom/' . $moduleNameLowerCase . '/view/' . $object->element . '/' . $object->element . '_card.php?id=' . $id, 1);
 
     $parameters = ['backtocard' => $backtocard];
-    $reshook    = $hookmanager->executeHooks('SaturneAttendentBackToCard', $parameters, $object); // Note that $action and $object may have been modified by some hooks
+    $reshook    = $hookmanager->executeHooks('SaturneAttendantBackToCard', $parameters, $object); // Note that $action and $object may have been modified by some hooks
     if ($reshook > 0) {
         $backtocard = $hookmanager->results;
     }
