@@ -149,7 +149,7 @@ function saturne_object_prepare_head(CommonObject $object, bool $showAttendantsT
                 $nbAttendants = 0;
             }
 
-            $head[$h][0] = dol_buildpath('/' . $moduleNameLowerCase . '/view/saturne_attendants.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType;
+            $head[$h][0] = dol_buildpath('/saturne/view/saturne_attendants.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType;
             $head[$h][1] = '<i class="fas fa-file-signature pictofixedwidth"></i>' . $langs->trans('Attendants');
             if ($nbAttendants > 0) {
                 $head[$h][1] .= '<span class="badge marginleftonlyshort">' . $nbAttendants . '</span>';
@@ -224,11 +224,11 @@ function saturne_object_prepare_head(CommonObject $object, bool $showAttendantsT
             $head[$h][2] = 'agenda';
             $h++;
         }
+
+        complete_head_from_modules($conf, $langs, $object, $head, $h, $objectType . '@' . $moduleNameLowerCase);
+
+        complete_head_from_modules($conf, $langs, $object, $head, $h, $objectType . '@' . $moduleNameLowerCase, 'remove');
     }
-
-    complete_head_from_modules($conf, $langs, $object, $head, $h, $objectType . '@' . $moduleNameLowerCase);
-
-    complete_head_from_modules($conf, $langs, $object, $head, $h, $objectType . '@' . $moduleNameLowerCase, 'remove');
 
     return $head;
 }
