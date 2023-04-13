@@ -22,7 +22,7 @@ CREATE TABLE llx_saturne_object_certificate(
     tms           timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     import_key    varchar(14),
     status        integer NOT NULL,
-    label         varchar(255),
+    label         varchar(255) NOT NULL,
     date_start    datetime,
     date_end      datetime,
     description   text,

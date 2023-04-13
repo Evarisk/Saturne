@@ -62,7 +62,7 @@ class SaturneCertificate extends CommonObject
 	/**
 	 * @var string Name of icon for certificate. Must be a 'fa-xxx' fontawesome code (or 'fa-xxx_fa_color_size') or 'certificate@saturne' if picto is file 'img/object_certificate.png'.
 	 */
-	public string $picto = 'fontawesome_fa-user-graduate_#d35968';
+	public string $picto = 'fontawesome_fa-user-graduate_fas_#d35968';
 
     public const STATUS_DELETED = -1;
     public const STATUS_DRAFT = 0;
@@ -119,19 +119,19 @@ class SaturneCertificate extends CommonObject
         'date_creation' => ['type' => 'datetime',     'label' => 'DateCreation',     'enabled' => 1, 'position' => 40,  'notnull' => 1, 'visible' => 0],
         'tms'           => ['type' => 'timestamp',    'label' => 'DateModification', 'enabled' => 1, 'position' => 50,  'notnull' => 1, 'visible' => 0],
         'import_key'    => ['type' => 'varchar(14)',  'label' => 'ImportId',         'enabled' => 1, 'position' => 60,  'notnull' => 0, 'visible' => 0, 'index' => 0],
-        'status'        => ['type' => 'smallint',     'label' => 'Status',           'enabled' => 1, 'position' => 190, 'notnull' => 1, 'visible' => 2, 'default' => 0, 'index' => 1, 'validate' => 1, 'arrayofkeyval' => [0 => 'StatusDraft', 1 => 'Validated', 2 => 'Expired', 3 => 'Archived']],
+        'status'        => ['type' => 'smallint',     'label' => 'Status',           'enabled' => 1, 'position' => 190, 'notnull' => 1, 'visible' => 2, 'default' => 0, 'index' => 1, 'validate' => 1, 'arrayofkeyval' => [0 => 'StatusDraft', 1 => 'ValidatePendingSignature', 2 => 'Expired', 3 => 'Archived']],
         'label'         => ['type' => 'varchar(255)', 'label' => 'Label',            'enabled' => 1, 'position' => 70,  'notnull' => 1, 'visible' => 1, 'searchall' => 1, 'css' => 'minwidth300', 'cssview' => 'wordbreak', 'showoncombobox' => 2, 'validate' => 1, 'autofocusoncreate' => 1],
-        'date_start'    => ['type' => 'datetime',     'label' => 'DateStart',        'enabled' => 1, 'position' => 110, 'notnull' => 1, 'visible' => 1],
-        'date_end'      => ['type' => 'datetime',     'label' => 'DateEnd',          'enabled' => 1, 'position' => 120, 'notnull' => 1, 'visible' => 1],
-        'description'   => ['type' => 'html',         'label' => 'Description',      'enabled' => 1, 'position' => 110, 'notnull' => 0, 'visible' => 3, 'validate' => 1],
-        'note_public'   => ['type' => 'html',         'label' => 'NotePublic',       'enabled' => 1, 'position' => 150, 'notnull' => 0, 'visible' => 0, 'cssview' => 'wordbreak', 'validate' => 1],
-        'note_private'  => ['type' => 'html',         'label' => 'NotePrivate',      'enabled' => 1, 'position' => 160, 'notnull' => 0, 'visible' => 0, 'cssview' => 'wordbreak', 'validate' => 1],
-        'element_type'  => ['type' => 'text',         'label' => 'ElementType',      'enabled' => 1, 'position' => 180, 'notnull' => 0, 'visible' => 0],
-        'fk_element'    => ['type' => 'integer',      'label' => 'FkElement',        'enabled' => 1, 'position' => 84,  'notnull' => 0, 'visible' => 3, 'index' => 1, 'css' => 'maxwidth500 widthcentpercentminusxx'],
+        'date_start'    => ['type' => 'date',         'label' => 'DateStart',        'enabled' => 1, 'position' => 100, 'notnull' => 0, 'visible' => 1],
+        'date_end'      => ['type' => 'date',         'label' => 'DateEnd',          'enabled' => 1, 'position' => 110, 'notnull' => 0, 'visible' => 1],
+        'description'   => ['type' => 'html',         'label' => 'Description',      'enabled' => 1, 'position' => 130, 'notnull' => 0, 'visible' => 3, 'validate' => 1],
+        'note_public'   => ['type' => 'html',         'label' => 'NotePublic',       'enabled' => 1, 'position' => 140, 'notnull' => 0, 'visible' => 0, 'cssview' => 'wordbreak', 'validate' => 1],
+        'note_private'  => ['type' => 'html',         'label' => 'NotePrivate',      'enabled' => 1, 'position' => 150, 'notnull' => 0, 'visible' => 0, 'cssview' => 'wordbreak', 'validate' => 1],
+        'element_type'  => ['type' => 'text',         'label' => 'ElementType',      'enabled' => 1, 'position' => 125, 'notnull' => 0, 'visible' => 0],
+        'fk_element'    => ['type' => 'integer',      'label' => 'FkElement',        'enabled' => 1, 'position' => 120, 'notnull' => 0, 'visible' => 3, 'index' => 1, 'css' => 'maxwidth500 widthcentpercentminusxx'],
         'fk_soc'        => ['type' => 'integer:Societe:societe/class/societe.class.php:1', 'label' => 'ThirdParty', 'picto' => 'company', 'enabled' => '$conf->societe->enabled', 'position' => 80,  'notnull' => 0, 'visible' => 1, 'index' => 1, 'css' => 'maxwidth500 widthcentpercentminusxx', 'validate' => 1, 'foreignkey' => 'societe.rowid'],
         'fk_project'    => ['type' => 'integer:Project:projet/class/project.class.php:1',  'label' => 'Project',    'picto' => 'project', 'enabled' => '$conf->project->enabled', 'position' => 90,  'notnull' => 0, 'visible' => 1, 'index' => 1, 'css' => 'maxwidth500 widthcentpercentminusxx', 'validate' => 1, 'foreignkey' => 'projet.rowid'],
-        'fk_user_creat' => ['type' => 'integer:User:user/class/user.class.php',            'label' => 'UserAuthor', 'picto' => 'user',    'enabled' => 1,                         'position' => 170, 'notnull' => 1, 'visible' => 0, 'foreignkey' => 'user.rowid'],
-        'fk_user_modif' => ['type' => 'integer:User:user/class/user.class.php',            'label' => 'UserModif',  'picto' => 'user',    'enabled' => 1,                         'position' => 180, 'notnull' => 0, 'visible' => 0, 'foreignkey' => 'user.rowid'],
+        'fk_user_creat' => ['type' => 'integer:User:user/class/user.class.php',            'label' => 'UserAuthor', 'picto' => 'user',    'enabled' => 1,                         'position' => 160, 'notnull' => 1, 'visible' => 0, 'foreignkey' => 'user.rowid'],
+        'fk_user_modif' => ['type' => 'integer:User:user/class/user.class.php',            'label' => 'UserModif',  'picto' => 'user',    'enabled' => 1,                         'position' => 170, 'notnull' => 0, 'visible' => 0, 'foreignkey' => 'user.rowid'],
     ];
 
     /**
@@ -210,9 +210,9 @@ class SaturneCertificate extends CommonObject
 	public string $element_type;
 
     /**
-     * @var int Element ID.
+     * @var int|string  Element ID.
      */
-	public int $fk_element;
+	public $fk_element;
 
     /**
      * @var int|string  ThirdParty ID.
@@ -452,7 +452,7 @@ class SaturneCertificate extends CommonObject
 
 			if (!$error && !$notrigger) {
 				// Call trigger.
-				$result = $this->call_trigger(strtoupper($this->element) . '_VALIDATE', $user);
+				$result = $this->call_trigger('SATURNECERTIFICATE_VALIDATE', $user);
 				if ($result < 0) {
 					$error++;
 				}
@@ -466,16 +466,18 @@ class SaturneCertificate extends CommonObject
 			// Rename directory if dir was a temporary ref.
 			if (preg_match('/^\(?PROV/i', $this->ref)) {
 				// Now we rename also files into index.
-				$sql = 'UPDATE ' . MAIN_DB_PREFIX . "ecm_files set filename = CONCAT('" . $this->db->escape($this->newref) . "', SUBSTR(filename, " . (strlen($this->ref) + 1) . ')), filepath = ' . $this->db->escape($objectType . '/' . $this->ref) . "'";
-				$sql .= " WHERE filename LIKE '" . $this->db->escape($this->ref) . "%' AND filepath = " . $this->db->escape($objectType . '/' . $this->ref) . "' and entity = " . $conf->entity;
+				$sql = 'UPDATE ' . MAIN_DB_PREFIX . 'ecm_files';
+				$sql .= " SET filename = CONCAT('" . $this->db->escape($this->newref) . "', SUBSTR(filename, " . (strlen($this->ref) + 1) . ')),';
+				$sql .= " filepath = '" . $this->db->escape($objectType . '/' . $this->ref) . "'";
+				$sql .= " WHERE filename LIKE '" . $this->db->escape($this->ref) . "%' AND filepath = '" . $this->db->escape($objectType . '/' . $this->ref) . "' AND entity = " . $conf->entity;
 				$resql = $this->db->query($sql);
 				if (!$resql) {
 					$error++; $this->error = $this->db->lasterror();
 				}
 
 				// We rename directory ($this->ref = old ref, $num = new ref) in order not to lose the attachments.
-				$oldRef = dol_sanitizeFileName($this->ref);
-				$newRef = dol_sanitizeFileName($num);
+				$oldRef    = dol_sanitizeFileName($this->ref);
+				$newRef    = dol_sanitizeFileName($num);
 				$dirSource = $conf->$moduleNameLowerCase->dir_output . '/' . $objectType . '/' . $oldRef;
 				$dirDest   = $conf->$moduleNameLowerCase->dir_output . '/' . $objectType . '/' . $newRef;
 				if (!$error && file_exists($dirSource)) {
@@ -526,7 +528,7 @@ class SaturneCertificate extends CommonObject
 			return 0;
 		}
 
-		return $this->setStatusCommon($user, self::STATUS_DRAFT, $notrigger, strtoupper($this->element) . '_UNVALIDATE');
+		return $this->setStatusCommon($user, self::STATUS_DRAFT, $notrigger, 'SATURNECERTIFICATE_UNVALIDATE');
 	}
 
     /**
@@ -538,7 +540,7 @@ class SaturneCertificate extends CommonObject
      */
     public function setArchived(User $user, int $notrigger = 0): int
     {
-        return $this->setStatusCommon($user, self::STATUS_ARCHIVED, $notrigger, strtoupper($this->element) . '_ARCHIVED');
+        return $this->setStatusCommon($user, self::STATUS_ARCHIVED, $notrigger, 'SATURNECERTIFICATE_ARCHIVED');
     }
 
     /**
@@ -657,13 +659,13 @@ class SaturneCertificate extends CommonObject
 			global $langs;
             $this->labelStatus[self::STATUS_DELETED]   = $langs->transnoentitiesnoconv('Deleted');
 			$this->labelStatus[self::STATUS_DRAFT]     = $langs->transnoentitiesnoconv('StatusDraft');
-			$this->labelStatus[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Validated');
+			$this->labelStatus[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('ValidatePendingSignature');
             $this->labelStatus[self::STATUS_EXPIRED]   = $langs->transnoentitiesnoconv('Expired');
             $this->labelStatus[self::STATUS_ARCHIVED]  = $langs->transnoentitiesnoconv('Archived');
 
             $this->labelStatusShort[self::STATUS_DELETED]   = $langs->transnoentitiesnoconv('Deleted');
 			$this->labelStatusShort[self::STATUS_DRAFT]     = $langs->transnoentitiesnoconv('StatusDraft');
-			$this->labelStatusShort[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Validated');
+			$this->labelStatusShort[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('ValidatePendingSignature');
             $this->labelStatusShort[self::STATUS_EXPIRED]   = $langs->transnoentitiesnoconv('Expired');
             $this->labelStatusShort[self::STATUS_ARCHIVED]  = $langs->transnoentitiesnoconv('Archived');
 		}
@@ -732,7 +734,6 @@ class SaturneCertificate extends CommonObject
 	public function getNextNumRef(): string
 	{
 		global $langs, $conf;
-		$langs->load('saturne@saturne');
 
         $moduleName          = strtoupper($this->module);
         $moduleNameLowerCase = $this->module;
@@ -749,9 +750,9 @@ class SaturneCertificate extends CommonObject
 			$className = $conf->global->$moduleName;
 
 			// Include file with class.
-			$dirModels = array_merge(['/'], $conf->$moduleNameLowerCase->modules_parts['models']);
+			$dirModels = array_merge(['/'], $conf->modules_parts['models']);
 			foreach ($dirModels as $relDir) {
-				$dir = dol_buildpath($relDir . 'core/modules/'. $moduleNameLowerCase . '/');
+				$dir = dol_buildpath($relDir . 'core/modules/'. $moduleNameLowerCase . '/' . $objectType . '/');
 
 				// Load file with numbering class (if found).
 				$result |= @include_once $dir . $file;
