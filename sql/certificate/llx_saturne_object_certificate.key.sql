@@ -17,7 +17,6 @@ ALTER TABLE llx_saturne_object_certificate ADD INDEX idx_saturne_object_certific
 ALTER TABLE llx_saturne_object_certificate ADD INDEX idx_saturne_object_certificate_ref (ref);
 ALTER TABLE llx_saturne_object_certificate ADD INDEX idx_saturne_object_certificate_status (status);
 ALTER TABLE llx_saturne_object_certificate ADD INDEX idx_saturne_object_certificate_fk_element (fk_element);
-ALTER TABLE llx_saturne_object_certificate ADD INDEX idx_saturne_object_certificate_fk_product (fk_product);
 ALTER TABLE llx_saturne_object_certificate ADD INDEX idx_saturne_object_certificate_fk_soc (fk_soc);
 ALTER TABLE llx_saturne_object_certificate ADD INDEX idx_saturne_object_certificate_fk_project (fk_project);
 ALTER TABLE llx_saturne_object_certificate ADD UNIQUE INDEX uk_saturne_object_certificate_ref (ref, entity);
