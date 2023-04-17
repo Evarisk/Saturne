@@ -64,11 +64,11 @@ class SaturneCertificate extends CommonObject
 	 */
 	public string $picto = 'fontawesome_fa-user-graduate_fas_#d35968';
 
-    public const STATUS_DELETED = -1;
-    public const STATUS_DRAFT = 0;
+    public const STATUS_DELETED   = -1;
+    public const STATUS_DRAFT     = 0;
     public const STATUS_VALIDATED = 1;
-    public const STATUS_EXPIRED = 2;
-    public const STATUS_ARCHIVED = 3;
+    public const STATUS_EXPIRED   = 2;
+    public const STATUS_ARCHIVED  = 3;
 
     /**
      *  'type' field format:
@@ -112,26 +112,30 @@ class SaturneCertificate extends CommonObject
 	 * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
 	 */
 	public array $fields = [
-        'rowid'         => ['type' => 'integer',      'label' => 'TechnicalID',      'enabled' => 1, 'position' => 1,   'notnull' => 1, 'visible' => 0, 'noteditable' => 1, 'index' => 1, 'comment' => 'Id'],
-        'ref'           => ['type' => 'varchar(128)', 'label' => 'Ref',              'enabled' => 1, 'position' => 10,  'notnull' => 1, 'visible' => 4, 'noteditable' => 1, 'default' => '(PROV)', 'index' => 1, 'searchall' => 1, 'showoncombobox' => 1, 'validate' => 1, 'comment' => 'Reference of object'],
-        'ref_ext'       => ['type' => 'varchar(128)', 'label' => 'RefExt',           'enabled' => 1, 'position' => 20,  'notnull' => 0, 'visible' => 0],
-        'entity'        => ['type' => 'integer',      'label' => 'Entity',           'enabled' => 1, 'position' => 30,  'notnull' => 1, 'visible' => 0, 'index' => 1],
-        'date_creation' => ['type' => 'datetime',     'label' => 'DateCreation',     'enabled' => 1, 'position' => 40,  'notnull' => 1, 'visible' => 0],
-        'tms'           => ['type' => 'timestamp',    'label' => 'DateModification', 'enabled' => 1, 'position' => 50,  'notnull' => 1, 'visible' => 0],
-        'import_key'    => ['type' => 'varchar(14)',  'label' => 'ImportId',         'enabled' => 1, 'position' => 60,  'notnull' => 0, 'visible' => 0, 'index' => 0],
-        'status'        => ['type' => 'smallint',     'label' => 'Status',           'enabled' => 1, 'position' => 190, 'notnull' => 1, 'visible' => 2, 'default' => 0, 'index' => 1, 'validate' => 1, 'arrayofkeyval' => [0 => 'StatusDraft', 1 => 'ValidatePendingSignature', 2 => 'Expired', 3 => 'Archived']],
-        'label'         => ['type' => 'varchar(255)', 'label' => 'Label',            'enabled' => 1, 'position' => 70,  'notnull' => 1, 'visible' => 1, 'searchall' => 1, 'css' => 'minwidth300', 'cssview' => 'wordbreak', 'showoncombobox' => 2, 'validate' => 1, 'autofocusoncreate' => 1],
-        'date_start'    => ['type' => 'date',         'label' => 'DateStart',        'enabled' => 1, 'position' => 100, 'notnull' => 0, 'visible' => 1],
-        'date_end'      => ['type' => 'date',         'label' => 'DateEnd',          'enabled' => 1, 'position' => 110, 'notnull' => 0, 'visible' => 1],
-        'description'   => ['type' => 'html',         'label' => 'Description',      'enabled' => 1, 'position' => 130, 'notnull' => 0, 'visible' => 3, 'validate' => 1],
-        'note_public'   => ['type' => 'html',         'label' => 'NotePublic',       'enabled' => 1, 'position' => 140, 'notnull' => 0, 'visible' => 0, 'cssview' => 'wordbreak', 'validate' => 1],
-        'note_private'  => ['type' => 'html',         'label' => 'NotePrivate',      'enabled' => 1, 'position' => 150, 'notnull' => 0, 'visible' => 0, 'cssview' => 'wordbreak', 'validate' => 1],
-        'element_type'  => ['type' => 'text',         'label' => 'ElementType',      'enabled' => 1, 'position' => 125, 'notnull' => 0, 'visible' => 0],
-        'fk_element'    => ['type' => 'integer',      'label' => 'FkElement',        'enabled' => 1, 'position' => 120, 'notnull' => 0, 'visible' => 3, 'index' => 1, 'css' => 'maxwidth500 widthcentpercentminusxx'],
-        'fk_soc'        => ['type' => 'integer:Societe:societe/class/societe.class.php:1', 'label' => 'ThirdParty', 'picto' => 'company', 'enabled' => '$conf->societe->enabled', 'position' => 80,  'notnull' => 0, 'visible' => 1, 'index' => 1, 'css' => 'maxwidth500 widthcentpercentminusxx', 'validate' => 1, 'foreignkey' => 'societe.rowid'],
-        'fk_project'    => ['type' => 'integer:Project:projet/class/project.class.php:1',  'label' => 'Project',    'picto' => 'project', 'enabled' => '$conf->project->enabled', 'position' => 90,  'notnull' => 0, 'visible' => 1, 'index' => 1, 'css' => 'maxwidth500 widthcentpercentminusxx', 'validate' => 1, 'foreignkey' => 'projet.rowid'],
-        'fk_user_creat' => ['type' => 'integer:User:user/class/user.class.php',            'label' => 'UserAuthor', 'picto' => 'user',    'enabled' => 1,                         'position' => 160, 'notnull' => 1, 'visible' => 0, 'foreignkey' => 'user.rowid'],
-        'fk_user_modif' => ['type' => 'integer:User:user/class/user.class.php',            'label' => 'UserModif',  'picto' => 'user',    'enabled' => 1,                         'position' => 170, 'notnull' => 0, 'visible' => 0, 'foreignkey' => 'user.rowid'],
+        'rowid'             => ['type' => 'integer',      'label' => 'TechnicalID',      'enabled' => 1, 'position' => 1,   'notnull' => 1, 'visible' => 0, 'noteditable' => 1, 'index' => 1, 'comment' => 'Id'],
+        'ref'               => ['type' => 'varchar(128)', 'label' => 'Ref',              'enabled' => 1, 'position' => 10,  'notnull' => 1, 'visible' => 4, 'noteditable' => 1, 'default' => '(PROV)', 'index' => 1, 'searchall' => 1, 'showoncombobox' => 1, 'validate' => 1, 'comment' => 'Reference of object'],
+        'ref_ext'           => ['type' => 'varchar(128)', 'label' => 'RefExt',           'enabled' => 1, 'position' => 20,  'notnull' => 0, 'visible' => 0],
+        'entity'            => ['type' => 'integer',      'label' => 'Entity',           'enabled' => 1, 'position' => 30,  'notnull' => 1, 'visible' => 0, 'index' => 1],
+        'date_creation'     => ['type' => 'datetime',     'label' => 'DateCreation',     'enabled' => 1, 'position' => 40,  'notnull' => 1, 'visible' => 0],
+        'tms'               => ['type' => 'timestamp',    'label' => 'DateModification', 'enabled' => 1, 'position' => 50,  'notnull' => 1, 'visible' => 0],
+        'import_key'        => ['type' => 'varchar(14)',  'label' => 'ImportId',         'enabled' => 1, 'position' => 60,  'notnull' => 0, 'visible' => 0, 'index' => 0],
+        'status'            => ['type' => 'smallint',     'label' => 'Status',           'enabled' => 1, 'position' => 220, 'notnull' => 1, 'visible' => 2, 'default' => 0, 'index' => 1, 'validate' => 1, 'arrayofkeyval' => [0 => 'StatusDraft', 1 => 'ValidatePendingSignature', 2 => 'Expired', 3 => 'Archived']],
+        'label'             => ['type' => 'varchar(255)', 'label' => 'Label',            'enabled' => 1, 'position' => 70,  'notnull' => 1, 'visible' => 1, 'searchall' => 1, 'css' => 'minwidth300', 'cssview' => 'wordbreak', 'showoncombobox' => 2, 'validate' => 1, 'autofocusoncreate' => 1],
+        'date_start'        => ['type' => 'date',         'label' => 'DateStart',        'enabled' => 1, 'position' => 100, 'notnull' => 0, 'visible' => 1],
+        'date_end'          => ['type' => 'date',         'label' => 'DateEnd',          'enabled' => 1, 'position' => 110, 'notnull' => 0, 'visible' => 1],
+        'description'       => ['type' => 'html',         'label' => 'Description',      'enabled' => 1, 'position' => 130, 'notnull' => 0, 'visible' => 3, 'validate' => 1],
+        'note_public'       => ['type' => 'html',         'label' => 'NotePublic',       'enabled' => 1, 'position' => 140, 'notnull' => 0, 'visible' => 0, 'cssview' => 'wordbreak', 'validate' => 1],
+        'note_private'      => ['type' => 'html',         'label' => 'NotePrivate',      'enabled' => 1, 'position' => 150, 'notnull' => 0, 'visible' => 0, 'cssview' => 'wordbreak', 'validate' => 1],
+        'element_type'      => ['type' => 'varchar(255)', 'label' => 'ElementType',      'enabled' => 1, 'position' => 125, 'notnull' => 0, 'visible' => 0],
+        'fk_element'        => ['type' => 'integer',      'label' => 'FkElement',        'enabled' => 1, 'position' => 120, 'notnull' => 0, 'visible' => 3, 'index' => 1, 'css' => 'maxwidth500 widthcentpercentminusxx'],
+        'sha256'            => ['type' => 'text',         'label' => 'Sha256',           'enabled' => 1, 'position' => 160, 'notnull' => 0, 'visible' => 0],
+        'url'               => ['type' => 'text',         'label' => 'Url',              'enabled' => 1, 'position' => 170, 'notnull' => 0, 'visible' => 0],
+        'public_url'        => ['type' => 'text',         'label' => 'PublicUrl',        'enabled' => 1, 'position' => 180, 'notnull' => 0, 'visible' => 0],
+        'status_validation' => ['type' => 'smallint',     'label' => 'StatusValidation', 'enabled' => 1, 'position' => 190, 'notnull' => 0, 'visible' => 0],
+        'fk_soc'            => ['type' => 'integer:Societe:societe/class/societe.class.php:1', 'label' => 'ThirdParty', 'picto' => 'company', 'enabled' => '$conf->societe->enabled', 'position' => 80,  'notnull' => 0, 'visible' => 1, 'index' => 1, 'css' => 'maxwidth500 widthcentpercentminusxx', 'validate' => 1, 'foreignkey' => 'societe.rowid'],
+        'fk_project'        => ['type' => 'integer:Project:projet/class/project.class.php:1',  'label' => 'Project',    'picto' => 'project', 'enabled' => '$conf->project->enabled', 'position' => 90,  'notnull' => 0, 'visible' => 1, 'index' => 1, 'css' => 'maxwidth500 widthcentpercentminusxx', 'validate' => 1, 'foreignkey' => 'projet.rowid'],
+        'fk_user_creat'     => ['type' => 'integer:User:user/class/user.class.php',            'label' => 'UserAuthor', 'picto' => 'user',    'enabled' => 1,                         'position' => 200, 'notnull' => 1, 'visible' => 0, 'foreignkey' => 'user.rowid'],
+        'fk_user_modif'     => ['type' => 'integer:User:user/class/user.class.php',            'label' => 'UserModif',  'picto' => 'user',    'enabled' => 1,                         'position' => 210, 'notnull' => 0, 'visible' => 0, 'foreignkey' => 'user.rowid'],
     ];
 
     /**
@@ -215,7 +219,28 @@ class SaturneCertificate extends CommonObject
 	public $fk_element;
 
     /**
-     * @var int|string  ThirdParty ID.
+     * @var string Sha256.
+     */
+    public string $sha256;
+
+    /**
+     * @var string Url.
+     */
+    public string $url;
+
+    /**
+     * @var string Public url.
+     */
+    public string $public_url;
+
+    /**
+     * @var int Status validation.
+     */
+    public int $status_validation;
+
+
+    /**
+     * @var int|string ThirdParty ID.
      */
     public $fk_soc;
 
