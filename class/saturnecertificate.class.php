@@ -214,29 +214,29 @@ class SaturneCertificate extends CommonObject
 	public string $element_type;
 
     /**
-     * @var int|string  Element ID.
+     * @var int|string Element ID.
      */
 	public $fk_element;
 
     /**
      * @var string Sha256.
      */
-    public string $sha256;
+    public string $sha256 = '';
 
     /**
      * @var string Url.
      */
-    public string $url;
+    public string $url = '';
 
     /**
      * @var string Public url.
      */
-    public string $public_url;
+    public string $public_url = '';
 
     /**
-     * @var int Status validation.
+     * @var int|null Status validation.
      */
-    public int $status_validation;
+    public ?int $status_validation;
 
 
     /**
