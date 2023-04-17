@@ -222,3 +222,61 @@ function saturne_load_langs(array $domains = [])
 		}
 	}
 }
+
+// phpcs:disable PEAR.NamingConventions.ValidFunctionName.ScopeNotCamelCaps
+/**
+ *  Return a HTML select list of a dictionary
+ *
+ *  @param  string	$htmlname          	Name of select zone
+ *  @param	string	$dictionarytable	Dictionary table
+ *  @param	string	$keyfield			Field for key
+ *  @param	string	$labelfield			Label field
+ *  @param	string	$selected			Selected value
+ *  @param  int		$useempty          	1=Add an empty value in list, 2=Add an empty value in list only if there is more than 2 entries.
+ *  @param  string  $moreattrib         More attributes on HTML select tag
+ * 	@return	void
+ */
+function saturne_select_dictionary($htmlname, $dictionarytable, $keyfield = 'code', $labelfield = 'label', $selected = '', $showLabel = 0, $useempty = 0, $moreattrib = '', $placeholder = '', $morecss = '')
+{
+	// phpcs:enable
+	global $langs, $db;
+
+	$langs->load("admin");
+
+	$out = '';
+	$sql  = "SELECT rowid, " . $keyfield . ", " . $labelfield;
+	$sql .= " FROM " . MAIN_DB_PREFIX . $dictionarytable;
+	$sql .= " ORDER BY " . $labelfield;
+
+	$result = $db->query($sql);
+	if ($result) {
+		$num = $db->num_rows($result);
+		$i   = 0;
+		if ($num) {
+			$out .= '<select id="select' . $htmlname . '" class="flat selectdictionary' . ($morecss ? ' ' . $morecss : '') . '" name="' . $htmlname . '"' . ($moreattrib ? ' ' . $moreattrib : '') . '>';
+			if ($useempty == 1 || ($useempty == 2 && $num > 1)) {
+				$out .= '<option value="-1">'. (dol_strlen($placeholder) > 0 ? $langs->transnoentities($placeholder) : '') .'&nbsp;</option>';
+			}
+
+			while ($i < $num) {
+				$obj = $db->fetch_object($result);
+				if ($selected == $obj->rowid || $selected == $langs->transnoentities($obj->$keyfield)) {
+					$out .= '<option value="' . $langs->transnoentities($obj->$keyfield) . '" selected>';
+				} else {
+					$out .= '<option value="' . $langs->transnoentities($obj->$keyfield) . '">';
+				}
+				$out .= $langs->transnoentities($obj->$keyfield) . (($showLabel > 0) ? ' - ' .  $langs->transnoentities($obj->$labelfield) : '');
+				$out .= '</option>';
+				$i++;
+			}
+			$out .= "</select>";
+			$out .= ajax_combobox('select'.$htmlname);
+
+		} else {
+			$out .= $langs->trans("DictionaryEmpty");
+		}
+	} else {
+		dol_print_error($db);
+	}
+	return $out;
+}
