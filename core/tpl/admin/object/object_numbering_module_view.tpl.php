@@ -15,7 +15,15 @@ print '</tr>';
 
 clearstatcache();
 
-$dir = dol_buildpath('/custom/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $object->element . '/');
+if (empty($documentPath)) {
+    $elementType = $object->element;
+    $path = '/custom/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $elementType . '/';
+} else {
+    $elementType = $documentParentType;
+    $path = '/custom/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $elementType . '/';
+}
+
+$dir = dol_buildpath($path);
 if (is_dir($dir)) {
     $handle = opendir($dir);
     if (is_resource($handle)) {
@@ -26,7 +34,7 @@ if (is_dir($dir)) {
         arsort($filelist);
         if (is_array($filelist) && !empty($filelist)) {
             foreach ($filelist as $file) {
-                if (preg_match('/mod_/', $file) && preg_match('/' . $object->element . '/i', $file)) {
+                if (preg_match('/mod_/', $file) && preg_match('/' . $elementType . '/i', $file)) {
                     if (file_exists($dir . '/' . $file)) {
                         $classname = substr($file, 0, dol_strlen($file) - 4);
 
@@ -53,11 +61,11 @@ if (is_dir($dir)) {
                             print '</td>';
 
                             print '<td class="center">';
-                            $confType = strtoupper($moduleName) . '_' . strtoupper($object->element) . '_ADDON';
+                            $confType = strtoupper($moduleName) . '_' . strtoupper($elementType) . '_ADDON';
                             if ($conf->global->$confType == $file || $conf->global->$confType . '.php' == $file) {
                                 print img_picto($langs->trans('Activated'), 'switch_on');
                             } else {
-                                print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setmod&value=' . preg_replace('/\.php$/', '', $file) . '&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), 'switch_off') . '</a>';
+                                print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setmod&value=' . preg_replace('/\.php$/', '', $file) . '&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&module_name=' . $moduleName . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), 'switch_off') . '</a>';
                             }
                             print '</td>';
 
