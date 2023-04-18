@@ -282,9 +282,9 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 				}
 
 				if ($show_favorite_button) {
-					$favorite = (($object->$favorite_field == '' || $favoriteExists == 0) && $i == 0 ? 'favorite' : ($object->$favorite_field == $photo ? 'favorite' : ''));
+					$favorite = (($object->$favorite_field == '' || $favoriteExists == 0) && $i == 0 && (!property_exists($object, 'photo') && empty($object->photo)) ? 'favorite' : ($object->$favorite_field == $photo ? 'favorite' : ''));
 					$return .=
-						'<div class="wpeo-button button-square-50 button-blue media-gallery-favorite '. $favorite .'" value="' . $object->id . '">
+						'<div class="wpeo-button button-square-50 button-blue ' . $object->element . ' media-gallery-favorite ' . $favorite . '" value="' . $object->id . '">
 							<input class="element-linked-id" type="hidden" value="' . ($object->id > 0 ? $object->id : 0) . '">
 							<input class="filename" type="hidden" value="' . $photo . '">
 							<i class="' . ($favorite == 'favorite' ? 'fas' : 'far') . ' fa-star button-icon"></i>
@@ -292,7 +292,7 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 				}
 				if ($show_unlink_button) {
 					$return .=
-						'<div class="wpeo-button button-square-50 button-grey media-gallery-unlink" value="' . $object->id . '">
+						'<div class="wpeo-button button-square-50 button-grey ' . $object->element . ' media-gallery-unlink" value="' . $object->id . '">
 							<input class="element-linked-id" type="hidden" value="' . ($object->id > 0 ? $object->id : 0) . '">
 							<input class="filename" type="hidden" value="' . $photo . '">
 							<i class="fas fa-unlink button-icon"></i>
