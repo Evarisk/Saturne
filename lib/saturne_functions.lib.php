@@ -179,10 +179,15 @@ function saturne_banner_tab(object $object, string $paramid = 'ref', string $mor
     }
 
     // Project
-    if (isModEnabled('project') && array_key_exists('fk_project', $object->fields)) {
-        if (!empty($object->fk_project)) {
+    if (isModEnabled('project')) {
+        if (array_key_exists('fk_project', $object->fields)) {
+            $key = 'fk_project';
+        } elseif (array_key_exists('projectid', $object->fields)) {
+            $key = 'projectid';
+        }
+        if (!empty($object->$key)) {
             $project = new Project($db);
-            $project->fetch($object->fk_project);
+            $project->fetch($object->$key);
             $saturneMorehtmlref .= $langs->trans('Project') . ' : ' . $project->getNomUrl(1, '', 1) . '<br>';
         } else {
             $saturneMorehtmlref .= $langs->trans('Project') . ' : ' . '<br>';
