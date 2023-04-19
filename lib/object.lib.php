@@ -109,6 +109,7 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
  * Prepare array of tabs for Object.
  *
  * @param  CommonObject $object            Object.
+ * @param  array        $moreparam         More parameters.
  * @param  bool         $showAttendantsTab Show attendants tab.
  * @param  bool         $showNoteTab       Show note tab.
  * @param  bool         $showDocumentTab   Show document tab.
@@ -116,7 +117,7 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
  * @return array                           Array of tabs.
  * @throws Exception
  */
-function saturne_object_prepare_head(CommonObject $object, bool $showAttendantsTab = false, bool $showNoteTab = true, bool $showDocumentTab = true, bool $showAgendaTab = true): array
+function saturne_object_prepare_head(CommonObject $object, array $moreparam = [], bool $showAttendantsTab = false, bool $showNoteTab = true, bool $showDocumentTab = true, bool $showAgendaTab = true): array
 {
     // Global variables definitions.
     global $conf, $db, $moduleName, $moduleNameLowerCase, $langs, $user;
@@ -150,7 +151,7 @@ function saturne_object_prepare_head(CommonObject $object, bool $showAttendantsT
             }
 
             $head[$h][0] = dol_buildpath('/saturne/view/saturne_attendants.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType;
-            $head[$h][1] = '<i class="fas fa-file-signature pictofixedwidth"></i>' . $langs->trans('Attendants');
+            $head[$h][1] = '<i class="fas fa-file-signature pictofixedwidth"></i>' . $langs->trans((empty($moreparam['attendantTabName']) ? 'Attendants' : $moreparam['attendantTabName']));
             if ($nbAttendants > 0) {
                 $head[$h][1] .= '<span class="badge marginleftonlyshort">' . $nbAttendants . '</span>';
             }
