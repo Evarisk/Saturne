@@ -116,28 +116,24 @@ if ( ! $error && $subaction == "addFiles") {
 if ( ! $error && $subaction == "unlinkFile") {
 	$data = json_decode(file_get_contents('php://input'), true);
 
-	$filepath = $data['filepath'];
+	$filePath = $data['filepath'];
+	$fileName = $data['filename'];
+	$fullPath = $filePath . '/' . $fileName;
 
-	if (is_file($filepath)) {
-		unlink($filepath);
-
-		// Split filepath and filename
-		$filepath         = explode('/', $filepath);
-		$filename         = end($filepath);
-		array_pop($filepath);
-		$filepath         = implode('/', $filepath);
-		$filesInDirectory = dol_dir_list($filepath, "files", 1);
+	if (is_file($fullPath)) {
+		unlink($fullPath);
+		$filesInDirectory = dol_dir_list($filePath, "files", 1);
 
 		// Check if file has thumbs and unlink them
 		if (is_array($filesInDirectory) && !empty($filesInDirectory)) {
 			foreach ($filesInDirectory as $file) {
-				if ($file['name'] == saturne_get_thumb_name($filename, 'mini')) {
+				if ($file['name'] == saturne_get_thumb_name($fileName, 'mini')) {
 					unlink($file['fullname']);
-				} else if ($file['name'] == saturne_get_thumb_name($filename, 'small')) {
+				} else if ($file['name'] == saturne_get_thumb_name($fileName, 'small')) {
 					unlink($file['fullname']);
-				} else if ($file['name'] == saturne_get_thumb_name($filename, 'medium')) {
+				} else if ($file['name'] == saturne_get_thumb_name($fileName, 'medium')) {
 					unlink($file['fullname']);
-				} else if ($file['name'] == saturne_get_thumb_name($filename, 'large')) {
+				} else if ($file['name'] == saturne_get_thumb_name($fileName, 'large')) {
 					unlink($file['fullname']);
 				}
 			}
