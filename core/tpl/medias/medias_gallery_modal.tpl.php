@@ -120,6 +120,28 @@ if ( ! $error && $subaction == "unlinkFile") {
 
 	if (is_file($filepath)) {
 		unlink($filepath);
+
+		// Split filepath and filename
+		$filepath         = explode('/', $filepath);
+		$filename         = end($filepath);
+		array_pop($filepath);
+		$filepath         = implode('/', $filepath);
+		$filesInDirectory = dol_dir_list($filepath, "files", 1);
+
+		// Check if file has thumbs and unlink them
+		if (is_array($filesInDirectory) && !empty($filesInDirectory)) {
+			foreach ($filesInDirectory as $file) {
+				if ($file['name'] == saturne_get_thumb_name($filename, 'mini')) {
+					unlink($file['fullname']);
+				} else if ($file['name'] == saturne_get_thumb_name($filename, 'small')) {
+					unlink($file['fullname']);
+				} else if ($file['name'] == saturne_get_thumb_name($filename, 'medium')) {
+					unlink($file['fullname']);
+				} else if ($file['name'] == saturne_get_thumb_name($filename, 'large')) {
+					unlink($file['fullname']);
+				}
+			}
+		}
 	}
 }
 
