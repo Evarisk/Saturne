@@ -1,6 +1,6 @@
 <?php
 
-global $action, $conf, $db, $langs, $moduleName, $moduleNameLowerCase, $subaction;
+global $action, $conf, $db, $langs, $moduleName, $moduleNameLowerCase, $moduleNameUpperCase, $subaction;
 
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmdirectory.class.php';
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
@@ -100,14 +100,14 @@ if ( ! $error && $subaction == "addFiles") {
 
 					$destfull = $pathToObjectPhoto . '/' . $filename;
 
-					$confWidthMini    = strtoupper($moduleName) . '_MEDIA_MAX_WIDTH_MINI';
-					$confHeightMini   = strtoupper($moduleName)  . '_MEDIA_MAX_HEIGHT_MINI';
-					$confWidthSmall   = strtoupper($moduleName)  . '_MEDIA_MAX_WIDTH_SMALL';
-					$confHeightSmall  = strtoupper($moduleName)  . '_MEDIA_MAX_HEIGHT_SMALL';
-					$confWidthMedium  = strtoupper($moduleName)  . '_MEDIA_MAX_WIDTH_MEDIUM';
-					$confHeightMedium = strtoupper($moduleName)  . '_MEDIA_MAX_HEIGHT_MEDIUM';
-					$confWidthLarge   = strtoupper($moduleName)  . '_MEDIA_MAX_WIDTH_LARGE';
-					$confHeightLarge  = strtoupper($moduleName)  . '_MEDIA_MAX_HEIGHT_LARGE';
+					$confWidthMini    = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_MINI';
+					$confHeightMini   = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_MINI';
+					$confWidthSmall   = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_SMALL';
+					$confHeightSmall  = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_SMALL';
+					$confWidthMedium  = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_MEDIUM';
+					$confHeightMedium = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_MEDIUM';
+					$confWidthLarge   = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_LARGE';
+					$confHeightLarge  = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_LARGE';
 
 					// Create thumbs
 					$imgThumbSmall  = vignette($destfull, $conf->global->$confWidthMini, $conf->global->$confHeightMini, '_mini');
