@@ -141,7 +141,7 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
             require_once __DIR__ . '/../class/saturnesignature.class.php';
 
             // Initialize technical objects
-            $signatory = new SaturneSignature($db);
+            $signatory = new SaturneSignature($db, $moduleNameLowerCase);
 
             $signatoriesArray = $signatory->fetchSignatories($object->id, $objectType);
             if (is_array($signatoriesArray) && !empty($signatoriesArray)) {

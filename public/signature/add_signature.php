@@ -83,7 +83,7 @@ $source   = GETPOST('source', 'aZ09');
 $classname       = ucfirst($objectType);
 $object          = new $classname($db);
 //$sessiondocument = new SessionDocument($db, $objectType);
-$signatory       = new SaturneSignature($db);
+$signatory       = new SaturneSignature($db, $moduleNameLowerCase);
 $user            = new User($db);
 
 // Initialize view objects

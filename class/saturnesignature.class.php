@@ -47,7 +47,7 @@ class SaturneSignature extends CommonObject
     /**
      * @var string Element type of object.
      */
-    public $element = 'object_signature';
+    public $element = 'saturne_signature';
 
     /**
      * @var string Name of table without prefix where object is stored. This is also the key used for extrafields management.
@@ -247,11 +247,13 @@ class SaturneSignature extends CommonObject
      *
      * @param DoliDb $db Database handler
      */
-    public function __construct(DoliDB $db)
+    public function __construct(DoliDB $db, string $moduleNameLowerCase = 'saturne', string $objectType = 'saturne_signature')
     {
         global $conf, $langs;
 
-        $this->db = $db;
+        $this->db      = $db;
+        $this->module  = $moduleNameLowerCase;
+        $this->element = $objectType;
 
         if (empty($conf->global->MAIN_SHOW_TECHNICAL_ID) && isset($this->fields['rowid'])) {
             $this->fields['rowid']['visible'] = 0;
