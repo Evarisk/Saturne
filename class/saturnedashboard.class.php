@@ -63,7 +63,8 @@ class SaturneDashboard
         require_once __DIR__ . '/../../' . $this->module . '/class/' . $this->module . 'dashboard.class.php';
 
         $className      = ucfirst($this->module) . 'Dashboard';
-        $dashboardDatas = $className::load_dashboard();
+        $dashboard      = new $className($this->db);
+        $dashboardDatas = $dashboard->load_dashboard();
         $dashboardInfos = [];
         if (is_array($dashboardDatas) && !empty($dashboardDatas)) {
             foreach ($dashboardDatas as $key => $dashboardData) {
@@ -176,10 +177,16 @@ class SaturneDashboard
                                 }
                             }
                             if ($nbdata > 0) {
-                                $arraykeys = array_keys($datagraph2['labels']);
+                                if (is_array($datagraph2['labels']) && !empty($datagraph2['labels'])) {
+                                    foreach ($datagraph2['labels'] as $label) {
+                                        $datalegend[$keyelement2][] = $langs->trans($label['label']);
+                                        $datacolor[$keyelement2][]  = $langs->trans($label['color']);
+                                    }
+                                }
+
+                                $arraykeys = array_keys($datagraph2['data']);
                                 foreach ($arraykeys as $key) {
                                     if ($datagraph2['dataset'] >= 2) {
-                                        $datalegend[$keyelement2][] = $langs->trans($datagraph2['labels'][$key]['label']);
                                         $data[$keyelement2][] = $datagraph2['data'][$key];
                                     } else {
                                         $data[$keyelement2][] = [
@@ -187,8 +194,6 @@ class SaturneDashboard
                                             1 => $datagraph2['data'][$key]
                                         ];
                                     }
-
-                                    $datacolor[$keyelement2][] = $langs->trans($datagraph2['labels'][$key]['color']);
                                 }
 
                                 $filename[$keyelement2] = $keyelement2 . '.png';
