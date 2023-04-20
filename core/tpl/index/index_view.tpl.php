@@ -8,7 +8,9 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/includes/parsedown/Parsedown.php';
 
 // Load Saturne libraries.
-require_once __DIR__ . '/../../../class/saturnedashboard.class.php';
+if (!isset($showDashboard) || $showDashboard === true) {
+    require_once __DIR__ . '/../../../class/saturnedashboard.class.php';
+ }
 
 // Load Module libraries.
 require_once __DIR__ . '/../../../../' . $moduleNameLowerCase . '/core/modules/mod' . $moduleName . '.class.php';
@@ -23,7 +25,9 @@ $action = GETPOST('action', 'aZ09');
 $classname = 'mod' . $moduleName;
 $modModule = new $classname($db);
 $parse     = new Parsedown();
-$dashboard = new SaturneDashboard($db, $moduleNameLowerCase);
+if (!isset($showDashboard) || $showDashboard === true) {
+    $dashboard = new SaturneDashboard($db, $moduleNameLowerCase);
+}
 
 $hookmanager->initHooks([$moduleNameLowerCase . 'index', 'globalcard']); // Note that conf->hooks_modules contains array.
 
@@ -152,7 +156,9 @@ if (empty($reshook)) {
     print $hookmanager->resPrint;
 }
 
-$dashboard->show_dashboard();
+if (!isset($showDashboard) || $showDashboard === true) {
+    $dashboard->show_dashboard();
+}
 
 // End of page
 llxFooter();
