@@ -1,13 +1,13 @@
 <?php
 $parameters = [];
 $reshook    = $hookmanager->executeHooks('SaturneAdminObjectConst', $parameters); // Note that $action and $object may have been modified by some hooks
-if (empty($reshook)) {
+if ($reshook > 0) {
     $constArray = $hookmanager->resArray;
 }
 
 if (is_array($constArray) && !empty($constArray)) {
     // Config Data
-    print load_fiche_titre($langs->transnoentities('ConfigData'), '', '');
+    print load_fiche_titre($langs->transnoentities('Config'), '', '');
 
     print '<table class="noborder centpercent">';
     print '<tr class="liste_titre">';

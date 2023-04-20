@@ -83,7 +83,7 @@ $preHead = $moduleNameLowerCase . '_admin_prepare_head';
 $head = $preHead();
 print dol_get_fiche_head($head, $object->element, $title, -1, $moduleNameLowerCase . '_color@' . $moduleNameLowerCase);
 
-print load_fiche_titre($langs->trans('Configs', $langs->trans(ucfirst($object->element) . 'Min')), '', 'object_' . $object->picto);
+print load_fiche_titre($title, '', 'object_' . $object->picto);
 print '<hr>';
 
 require_once __DIR__ . '/../core/tpl/admin/object/object_numbering_module_view.tpl.php';
