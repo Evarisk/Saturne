@@ -129,13 +129,14 @@ class SaturneCertificate extends CommonObject
         'element_type'      => ['type' => 'select',       'label' => 'ElementType',      'enabled' => 1, 'position' => 120, 'notnull' => 0, 'visible' => 3, 'css' => 'maxwidth150 widthcentpercentminusxx'],
         'fk_element'        => ['type' => 'integer',      'label' => 'FkElement',        'enabled' => 1, 'position' => 125, 'notnull' => 0, 'visible' => 3, 'index' => 1, 'css' => 'maxwidth500 widthcentpercentminusxx'],
         'sha256'            => ['type' => 'text',         'label' => 'Sha256',           'enabled' => 1, 'position' => 160, 'notnull' => 0, 'visible' => 0],
-        'url'               => ['type' => 'text',         'label' => 'Url',              'enabled' => 1, 'position' => 170, 'notnull' => 0, 'visible' => 0],
-        'public_url'        => ['type' => 'text',         'label' => 'PublicUrl',        'enabled' => 1, 'position' => 180, 'notnull' => 0, 'visible' => 0],
-        'status_validation' => ['type' => 'smallint',     'label' => 'StatusValidation', 'enabled' => 1, 'position' => 190, 'notnull' => 0, 'visible' => 0],
+        'json'              => ['type' => 'text',         'label' => 'Json',             'enabled' => 1, 'position' => 170, 'notnull' => 0, 'visible' => 0],
+        'url'               => ['type' => 'text',         'label' => 'Url',              'enabled' => 1, 'position' => 180, 'notnull' => 0, 'visible' => 0],
+        'public_url'        => ['type' => 'text',         'label' => 'PublicUrl',        'enabled' => 1, 'position' => 190, 'notnull' => 0, 'visible' => 0],
+        'status_validation' => ['type' => 'smallint',     'label' => 'StatusValidation', 'enabled' => 1, 'position' => 200, 'notnull' => 0, 'visible' => 0],
         'fk_soc'            => ['type' => 'integer:Societe:societe/class/societe.class.php:1', 'label' => 'ThirdParty', 'picto' => 'company', 'enabled' => '$conf->societe->enabled', 'position' => 80,  'notnull' => 0, 'visible' => 1, 'index' => 1, 'css' => 'maxwidth500 widthcentpercentminusxx', 'validate' => 1, 'foreignkey' => 'societe.rowid'],
         'fk_project'        => ['type' => 'integer:Project:projet/class/project.class.php:1',  'label' => 'Project',    'picto' => 'project', 'enabled' => '$conf->project->enabled', 'position' => 90,  'notnull' => 0, 'visible' => 1, 'index' => 1, 'css' => 'maxwidth500 widthcentpercentminusxx', 'validate' => 1, 'foreignkey' => 'projet.rowid'],
-        'fk_user_creat'     => ['type' => 'integer:User:user/class/user.class.php',            'label' => 'UserAuthor', 'picto' => 'user',    'enabled' => 1,                         'position' => 200, 'notnull' => 1, 'visible' => 0, 'foreignkey' => 'user.rowid'],
-        'fk_user_modif'     => ['type' => 'integer:User:user/class/user.class.php',            'label' => 'UserModif',  'picto' => 'user',    'enabled' => 1,                         'position' => 210, 'notnull' => 0, 'visible' => 0, 'foreignkey' => 'user.rowid'],
+        'fk_user_creat'     => ['type' => 'integer:User:user/class/user.class.php',            'label' => 'UserAuthor', 'picto' => 'user',    'enabled' => 1,                         'position' => 210, 'notnull' => 1, 'visible' => 0, 'foreignkey' => 'user.rowid'],
+        'fk_user_modif'     => ['type' => 'integer:User:user/class/user.class.php',            'label' => 'UserModif',  'picto' => 'user',    'enabled' => 1,                         'position' => 220, 'notnull' => 0, 'visible' => 0, 'foreignkey' => 'user.rowid'],
     ];
 
     /**
@@ -222,6 +223,11 @@ class SaturneCertificate extends CommonObject
      * @var string Sha256.
      */
     public string $sha256 = '';
+
+    /**
+     * @var string Json.
+     */
+    public string $json = '';
 
     /**
      * @var string Url.
