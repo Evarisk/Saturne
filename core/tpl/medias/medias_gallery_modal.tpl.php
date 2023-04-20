@@ -110,8 +110,8 @@ if ( ! $error && $subaction == "addFiles") {
 					$confHeightLarge  = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_LARGE';
 
 					// Create thumbs
-					$imgThumbSmall  = vignette($destfull, $conf->global->$confWidthMini, $conf->global->$confHeightMini, '_mini');
-					$imgThumbMini   = vignette($destfull, $conf->global->$confWidthSmall, $conf->global->$confHeightSmall, '_small');
+					$imgThumbMini   = vignette($destfull, $conf->global->$confWidthMini, $conf->global->$confHeightMini, '_mini');
+					$imgThumbSmall  = vignette($destfull, $conf->global->$confWidthSmall, $conf->global->$confHeightSmall, '_small');
 					$imgThumbMedium = vignette($destfull, $conf->global->$confWidthMedium, $conf->global->$confHeightMedium, '_medium');
 					$imgThumbLarge  = vignette($destfull, $conf->global->$confWidthLarge, $conf->global->$confHeightLarge, '_large');
 					// Create mini thumbs for image (Ratio is near 16/9)
