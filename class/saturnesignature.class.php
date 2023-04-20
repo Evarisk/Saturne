@@ -158,19 +158,19 @@ class SaturneSignature extends CommonObject
     public $lastname;
 
     /**
-     * @var string Email
+     * @var string|null Email
      */
-    public string $email;
+    public ?string $email;
 
     /**
-     * @var string Phone
+     * @var string|null Phone
      */
-    public string $phone;
+    public ?string $phone = '';
 
     /**
      * @var string Society name
      */
-    public string $society_name;
+    public string $society_name = '';
 
     /**
      * @var string Signature date
@@ -243,9 +243,11 @@ class SaturneSignature extends CommonObject
     public int $fk_object;
 
     /**
-     * Constructor
+     * Constructor.
      *
-     * @param DoliDb $db Database handler
+     * @param DoliDb $db                  Database handler.
+     * @param string $moduleNameLowerCase Module name.
+     * @param string $objectType          Object element type.
      */
     public function __construct(DoliDB $db, string $moduleNameLowerCase = 'saturne', string $objectType = 'saturne_signature')
     {
