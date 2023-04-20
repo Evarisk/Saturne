@@ -42,12 +42,12 @@ class SaturneDocuments extends CommonObject
     /**
      * @var string Element type of object.
      */
-    public $element = 'saturnedocuments';
+    public $element = 'saturne_documents';
 
     /**
      * @var string Name of table without prefix where object is stored. This is also the key used for extrafields management.
      */
-    public $table_element = 'saturne_saturnedocuments';
+    public $table_element = 'saturne_object_documents';
 
     /**
      * @var int Does this object support multicompany module ?
@@ -136,7 +136,7 @@ class SaturneDocuments extends CommonObject
     /**
      * @var string Json.
      */
-    public string $json;
+    public string $json = '';
 
     /**
      * @var string Pdf model name.
@@ -146,7 +146,7 @@ class SaturneDocuments extends CommonObject
     /**
      * @var string ODT model name.
      */
-    public string $model_odt;
+    public string $model_odt = '';
 
     /**
      * @var string Last document name.
@@ -169,15 +169,19 @@ class SaturneDocuments extends CommonObject
     public int $fk_user_creat;
 
     /**
-     * Constructor
+     * Constructor.
      *
-     * @param DoliDb $db Database handler
+     * @param DoliDb $db                  Database handler.
+     * @param string $moduleNameLowerCase Module name.
+     * @param string $objectType          Object element type.
      */
-    public function __construct(DoliDB $db)
+    public function __construct(DoliDB $db, string $moduleNameLowerCase = 'saturne', string $objectType = 'saturne_documents')
     {
         global $conf, $langs;
 
-        $this->db = $db;
+        $this->db      = $db;
+        $this->module  = $moduleNameLowerCase;
+        $this->element = $objectType;
 
         if (empty($conf->global->MAIN_SHOW_TECHNICAL_ID) && isset($this->fields['rowid'])) {
             $this->fields['rowid']['visible'] = 0;

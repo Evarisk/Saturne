@@ -16,9 +16,9 @@
  */
 
 /**
- *       \file       public/signature/add_signature.php
- *       \ingroup    saturne
- *       \brief      Public page to add signature
+ * \file    public/signature/add_signature.php
+ * \ingroup saturne
+ * \brief   Public page to add signature.
  */
 
 if (!defined('NOREQUIREUSER')) {
@@ -39,14 +39,14 @@ if (!defined('NOLOGIN')) { // This means this output page does not require to be
 if (!defined('NOCSRFCHECK')) { // We accept to go on this page from external website.
     define('NOCSRFCHECK', '1');
 }
-if (!defined('NOIPCHECK')) { // Do not check IP defined into conf $dolibarr_main_restrict_ip
+if (!defined('NOIPCHECK')) { // Do not check IP defined into conf $dolibarr_main_restrict_ip.
     define('NOIPCHECK', '1');
 }
 if (!defined('NOBROWSERNOTIF')) {
     define('NOBROWSERNOTIF', '1');
 }
 
-// Load Saturne environment
+// Load Saturne environment.
 if (file_exists('../../saturne.main.inc.php')) {
     require_once __DIR__ . '/../../saturne.main.inc.php';
 } elseif (file_exists('../../../saturne.main.inc.php')) {
@@ -55,41 +55,46 @@ if (file_exists('../../saturne.main.inc.php')) {
     die('Include of saturne main fails');
 }
 
-// Get module parameters
+// Get module parameters.
 $moduleName = GETPOST('module_name', 'alpha');
 $objectType = GETPOST('object_type', 'alpha');
 
 $moduleNameLowerCase = strtolower($moduleName);
 
+// Load Dolibarr libraries.
 require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
 
+// Load Saturne libraries.
+require_once __DIR__ . '/../../class/saturnedocuments.class.php';
 require_once __DIR__ . '/../../class/saturnesignature.class.php';
+
+// Load Module libraries.
 require_once __DIR__ . '/../../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
 
-// Global variables definitions
+// Global variables definitions.
 global $conf, $db, $hookmanager, $langs;
 
-// Load translation files required by the page
+// Load translation files required by the page.
 saturne_load_langs();
 
-// Get parameters
+// Get parameters.
 $track_id = GETPOST('track_id', 'alpha');
 $action   = GETPOST('action', 'aZ09');
 $source   = GETPOST('source', 'aZ09');
 
-// Initialize technical objects
-$classname       = ucfirst($objectType);
-$object          = new $classname($db);
-//$sessiondocument = new SessionDocument($db, $objectType);
-$signatory       = new SaturneSignature($db);
-$user            = new User($db);
+// Initialize technical objects.
+$classname = ucfirst($objectType);
+$object    = new $classname($db);
+$document  = new SaturneDocuments($db, $moduleNameLowerCase, $objectType);
+$signatory = new SaturneSignature($db, $moduleNameLowerCase, $objectType);
+$user      = new User($db);
 
-// Initialize view objects
+// Initialize view objects.
 $form = new Form($db);
 
-$hookmanager->initHooks([$objectType . 'publicsignature', 'saturnepublicsignature', 'saturnepublicinterface', 'saturneglobal', 'globalcard']); // Note that conf->hooks_modules contains array
+$hookmanager->initHooks([$objectType . 'publicsignature', 'saturnepublicsignature', 'saturnepublicinterface', 'saturneglobal', 'globalcard']); // Note that conf->hooks_modules contains array.
 
 $signatory->fetch(0, '', ' AND signature_url =' . "'" . $track_id . "'");
 $object->fetch($signatory->fk_object);
@@ -105,7 +110,7 @@ $reshook    = $hookmanager->executeHooks('doActions', $parameters, $object, $act
 if ($reshook < 0) setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 
 if (empty($reshook)) {
-    // Action to add signature
+    // Action to add signature.
     if ($action == 'add_signature') {
         $data        = json_decode(file_get_contents('php://input'), true);
         $signatoryID = GETPOST('signatoryID');
@@ -115,10 +120,11 @@ if (empty($reshook)) {
         $signatory->signature      = $data['signature'];
         $signatory->signature_date = dol_now('tzuser');
 
-//        // Check Captcha code if is enabled
-//        if (!empty($conf->global->DIGIRISKDOLIBARR_USE_CAPTCHA)) {
-//            $sessionkey = 'dol_antispam_value';
-//            $ok = (array_key_exists($sessionkey, $_SESSION) === true && (strtolower($_SESSION[$sessionkey]) === strtolower($data['code'])));
+//        // Check Captcha code if is enabled.
+//        $error    = 0;
+//        if (!empty($conf->global->SATURNE_USE_CAPTCHA)) {
+//            $sessionKey = 'dol_antispam_value';
+//            $ok = (array_key_exists($sessionKey, $_SESSION) === true && (strtolower($_SESSION[$sessionKey]) === strtolower($data['code'])));
 //
 //            if (!$ok) {
 //                $error++;
@@ -132,10 +138,10 @@ if (empty($reshook)) {
         if (!$error) {
             $result = $signatory->update($user, true);
             if ($result > 0) {
-                // Creation signature OK
+                // Creation signature OK.
                 $signatory->setSigned($user, false, 'public');
                 exit;
-            } elseif (!empty($signatory->errors)) { // Creation signature KO
+            } elseif (!empty($signatory->errors)) { // Creation signature KO.
                 setEventMessages('', $signatory->errors, 'errors');
             } else {
                 setEventMessages($signatory->error, [], 'errors');
@@ -145,60 +151,60 @@ if (empty($reshook)) {
         }
     }
 
-    // Action to build doc
-//    if ($action == 'builddoc') {
-//        $outputlangs = $langs;
-//        $newlang     = '';
-//
-//        if ($conf->global->MAIN_MULTILANGS && empty($newlang) && GETPOST('lang_id', 'aZ09')) {
-//            $newlang = GETPOST('lang_id', 'aZ09');
-//        }
-//        if (!empty($newlang)) {
-//            $outputlangs = new Translate('', $conf);
-//            $outputlangs->setDefaultLang($newlang);
-//        }
-//
-//        // To be sure vars is defined
-//        if (empty($hidedetails)){
-//            $hidedetails = 0;
-//        }
-//        if (empty($hidedesc)) {
-//            $hidedesc = 0;
-//        }
-//        if (empty($hideref)) {
-//            $hideref = 0;
-//        }
-//        if (empty($moreparams)) {
-//            $moreparams = null;
-//        }
-//
-//        $constforval = 'DOLIMEET_' . strtoupper('attendancesheetdocument') . '_ADDON_ODT_PATH';
-//        $template    = preg_replace('/DOL_DOCUMENT_ROOT/', DOL_DOCUMENT_ROOT, $conf->global->$constforval);
-//        $model       = 'attendancesheetdocument_odt:' . $template .'template_attendancesheetdocument.odt';
-//
-//        $moreparams['object']   = $object;
-//        $moreparams['user']     = $user;
-//        $moreparams['specimen'] = 1;
-//        $moreparams['zone']     = 'public';
-//
-//        $result = $sessiondocument->generateDocument($model, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
-//
-//        if ($result <= 0) {
-//            setEventMessages($sessiondocument->error, $sessiondocument->errors, 'errors');
-//            $action = '';
-//        } elseif (empty($donotredirect)) {
-//            copy($upload_dir . '/' . $object->element . 'document' . '/' . $object->ref . '/specimen/' . $sessiondocument->last_main_doc, DOL_DOCUMENT_ROOT . '/custom/dolimeet/documents/temp/' . $object->element . '_specimen_' . $track_id . '.odt');
-//            setEventMessages($langs->trans('FileGenerated') . ' - ' . $sessiondocument->last_main_doc, []);
-//            $urltoredirect = $_SERVER['REQUEST_URI'];
-//            $urltoredirect = preg_replace('/#builddoc$/', '', $urltoredirect);
-//            $urltoredirect = preg_replace('/action=builddoc&?/', '', $urltoredirect); // To avoid infinite loop
-//            header('Location: ' . $urltoredirect . '#builddoc');
-//            exit;
-//        }
-//    }
+    // Action to build doc.
+    if ($action == 'builddoc') {
+        $outputlangs = $langs;
+        $newlang     = '';
+
+        if ($conf->global->MAIN_MULTILANGS && empty($newlang) && GETPOST('lang_id', 'aZ09')) {
+            $newlang = GETPOST('lang_id', 'aZ09');
+        }
+        if (!empty($newlang)) {
+            $outputlangs = new Translate('', $conf);
+            $outputlangs->setDefaultLang($newlang);
+        }
+
+        // To be sure vars is defined.
+        if (empty($hidedetails)){
+            $hidedetails = 0;
+        }
+        if (empty($hidedesc)) {
+            $hidedesc = 0;
+        }
+        if (empty($hideref)) {
+            $hideref = 0;
+        }
+        if (empty($moreparams)) {
+            $moreparams = [];
+        }
+
+        $constforval = strtoupper($moduleName) . '_' . strtoupper($objectType . 'document') . '_ADDON_ODT_PATH';
+        $template    = preg_replace('/DOL_DOCUMENT_ROOT/', DOL_DOCUMENT_ROOT, $conf->global->$constforval);
+        $model       = $objectType . 'document_odt:' . $template .'template_' . $objectType . 'document.odt';
+
+        $moreparams['object']   = $object;
+        $moreparams['user']     = $user;
+        $moreparams['specimen'] = 1;
+        $moreparams['zone']     = 'public';
+
+        $result = $document->generateDocument($model, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
+
+        if ($result <= 0) {
+            setEventMessages($document->error, $document->errors, 'errors');
+            $action = '';
+        } elseif (empty($donotredirect)) {
+            copy($upload_dir . '/' . $objectType . 'document' . '/' . $object->ref . '/specimen/' . $document->last_main_doc, DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $objectType . '_specimen_' . $track_id . '.odt');
+            setEventMessages($langs->trans('FileGenerated') . ' - ' . $document->last_main_doc, []);
+            $urltoredirect = $_SERVER['REQUEST_URI'];
+            $urltoredirect = preg_replace('/#builddoc$/', '', $urltoredirect);
+            $urltoredirect = preg_replace('/action=builddoc&?/', '', $urltoredirect); // To avoid infinite loop.
+            header('Location: ' . $urltoredirect . '#builddoc');
+            exit;
+        }
+    }
 
     if ($action == 'remove_file') {
-        $files = dol_dir_list(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/'); // get all file names
+        $files = dol_dir_list(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/'); // get all file names.
 
         foreach ($files as $file) {
             if (is_file($file['fullname'])) {
@@ -228,11 +234,11 @@ $element = $signatory; ?>
         <input type="hidden" name="token" value="<?php echo newToken(); ?>">
         <div class="wpeo-gridlayout grid-2">
             <div class="informations">
-    <!--			<input type="hidden" id="confCAPTCHA" value="--><?php //echo $conf->global->DIGIRISKDOLIBARR_USE_CAPTCHA ?><!--"/>-->
+<!--                <input type="hidden" id="confCAPTCHA" value="--><?php //echo $conf->global->SATURNE_USE_CAPTCHA ?><!--">-->
                 <div class="wpeo-gridlayout grid-2 file-generation">
                     <strong class="grid-align-middle"><?php echo $langs->trans('Document'); ?></strong>
                     <?php $path = DOL_MAIN_URL_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/'; ?>
-                    <input type="hidden" class="specimen-name" value="<?php echo $object->element . '_specimen_' . $track_id . '.odt' ?>">
+                    <input type="hidden" class="specimen-name" value="<?php echo $objectType . '_specimen_' . $track_id . '.odt' ?>">
                     <input type="hidden" class="specimen-path" value="<?php echo $path ?>">
                     <span class="wpeo-button button-primary  button-radius-2 grid-align-right auto-download"><i class="button-icon fas fa-print"></i></span>
                 </div>
@@ -243,7 +249,7 @@ $element = $signatory; ?>
                         <div class="table-cell table-end"><?php echo strtoupper($signatory->lastname) . ' ' . $signatory->firstname; ?></div>
                     </div>
                     <div class="table-row">
-                        <div class="table-cell"><?php echo $langs->trans($langs->trans(ucfirst($object->element))); ?></div>
+                        <div class="table-cell"><?php echo $langs->trans($langs->trans(ucfirst($objectType))); ?></div>
                         <div class="table-cell table-end"><?php echo $object->ref . ' ' . $object->label; ?></div>
                     </div>
                 </div>
@@ -265,21 +271,21 @@ $element = $signatory; ?>
                 </div>
             </div>
         </div>
-<!--	--><?php
-//	if ( ! empty($conf->global->DIGIRISKDOLIBARR_USE_CAPTCHA)) {
-//		require_once DOL_DOCUMENT_ROOT . '/core/lib/security2.lib.php';
-//		print '<div class="center"><label for="email"><span class="fieldrequired">' . $langs->trans("SecurityCode") . '</span></label>';
-//		print '<span class="span-icon-security inline-block">';
-//		print '<input id="securitycode" placeholder="' . $langs->trans("SecurityCode") . '" class="flat input-icon-security width125" type="text" maxlength="5" name="code" tabindex="3" />';
-//		print '<input type="hidden" id="sessionCode" value="' . $_SESSION['dol_antispam_value'] . '"/>';
-//		print '<input type="hidden" id="redirectSignatureError" value="' . $_SERVER['REQUEST_URI'] . '"/>';
-//		print '</span>';
-//		print '<span class="nowrap inline-block">';
-//		print '<img class="inline-block valignmiddle" src="' . DOL_URL_ROOT . '/core/antispamimage.php" border="0" width="80" height="32" id="img_securitycode" />';
-//		print '<a class="inline-block valignmiddle" href="" tabindex="4" data-role="button">' . img_picto($langs->trans("Refresh"), 'refresh', 'id="captcha_refresh_img"') . '</a>';
-//		print '</span>';
-//		print '</div>';
-//	}?>
+<!--        --><?php
+//        if (!empty($conf->global->SATURNE_USE_CAPTCHA)) {
+//            require_once DOL_DOCUMENT_ROOT . '/core/lib/security2.lib.php';
+//            print '<div class="center"><label for="email"><span class="fieldrequired">' . $langs->trans('SecurityCode') . '</span></label>';
+//            print '<span class="span-icon-security inline-block">';
+//            print '<input id="securitycode" placeholder="' . $langs->trans('SecurityCode') . '" class="flat input-icon-security width125" type="text" maxlength="5" name="code" tabindex="3" />';
+//            print '<input type="hidden" id="sessionCode" value="' . $_SESSION['dol_antispam_value'] . '"/>';
+//            print '<input type="hidden" id="redirectSignatureError" value="' . $_SERVER['REQUEST_URI'] . '"/>';
+//            print '</span>';
+//            print '<span class="nowrap inline-block">';
+//            print '<img class="inline-block valignmiddle" src="' . DOL_URL_ROOT . '/core/antispamimage.php" border="0" width="80" height="32" id="img_securitycode" />';
+//            print '<a class="inline-block valignmiddle" href="" tabindex="4" data-role="button">' . img_picto($langs->trans('Refresh'), 'refresh', 'id="captcha_refresh_img"') . '</a>';
+//            print '</span>';
+//            print '</div>';
+//        } ?>
     <?php else :
         print '<div class="center">' . $langs->trans('SignaturePublicInterfaceForbidden') . '</div>';
     endif; ?>
