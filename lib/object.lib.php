@@ -109,6 +109,7 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
  * Prepare array of tabs for Object.
  *
  * @param  CommonObject $object            Object.
+ * @param  array        $head              Tab menu entry.
  * @param  array        $moreparam         More parameters.
  * @param  bool         $showAttendantsTab Show attendants tab.
  * @param  bool         $showNoteTab       Show note tab.
@@ -117,7 +118,7 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
  * @return array                           Array of tabs.
  * @throws Exception
  */
-function saturne_object_prepare_head(CommonObject $object, array $moreparam = [], bool $showAttendantsTab = false, bool $showNoteTab = true, bool $showDocumentTab = true, bool $showAgendaTab = true): array
+function saturne_object_prepare_head(CommonObject $object, $head = [], array $moreparam = [], bool $showAttendantsTab = false, bool $showNoteTab = true, bool $showDocumentTab = true, bool $showAgendaTab = true): array
 {
     // Global variables definitions.
     global $conf, $db, $moduleName, $moduleNameLowerCase, $langs, $user;
@@ -127,14 +128,13 @@ function saturne_object_prepare_head(CommonObject $object, array $moreparam = []
 
     // Initialize values.
     $h          = 0;
-    $head       = [];
     $objectType = $object->element;
 
     if ($user->rights->$moduleNameLowerCase->$objectType->read) {
         $head[$h][0] = dol_buildpath('/' . $moduleNameLowerCase . '/view/' . $objectType . '/' . $objectType . '_card.php', 1) . '?id=' . $object->id;
         $head[$h][1] = '<i class="fas fa-info-circle pictofixedwidth"></i>' . $langs->trans(ucfirst($objectType));
         $head[$h][2] = 'card';
-        $h++;
+        $h = $h + 10;
 
         if ($showAttendantsTab) {
             // Libraries
@@ -156,7 +156,7 @@ function saturne_object_prepare_head(CommonObject $object, array $moreparam = []
                 $head[$h][1] .= '<span class="badge marginleftonlyshort">' . $nbAttendants . '</span>';
             }
             $head[$h][2] = 'attendants';
-            $h++;
+            $h = $h + 10;
         }
 
         if ((isset($object->fields['note_public']) || isset($object->fields['note_private'])) && $showNoteTab) {
@@ -173,7 +173,7 @@ function saturne_object_prepare_head(CommonObject $object, array $moreparam = []
                 $head[$h][1] .= (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '<span class="badge marginleftonlyshort">' . $nbNote . '</span>' : '');
             }
             $head[$h][2] = 'note';
-            $h++;
+            $h = $h + 10;
         }
 
         if ($showDocumentTab) {
@@ -188,7 +188,7 @@ function saturne_object_prepare_head(CommonObject $object, array $moreparam = []
                 $head[$h][1] .= '<span class="badge marginleftonlyshort">' . ($nbFiles + $nbLinks) . '</span>';
             }
             $head[$h][2] = 'document';
-            $h++;
+            $h = $h + 10;
         }
 
         if ($showAgendaTab) {
@@ -223,7 +223,7 @@ function saturne_object_prepare_head(CommonObject $object, array $moreparam = []
                 }
             }
             $head[$h][2] = 'agenda';
-            $h++;
+            ksort($head);
         }
 
         complete_head_from_modules($conf, $langs, $object, $head, $h, $objectType . '@' . $moduleNameLowerCase);
