@@ -90,10 +90,10 @@ class SaturneDashboard
     {
         global $conf, $form, $langs, $moduleNameLowerCase, $user;
 
-        $WIDTH  = DolGraph::getDefaultGraphSizeForStats('width');
-        $HEIGHT = DolGraph::getDefaultGraphSizeForStats('height');
+        $width  = DolGraph::getDefaultGraphSizeForStats('width');
+        $height = DolGraph::getDefaultGraphSizeForStats('height');
 
-        $dashboardData = $this->load_dashboard();
+        $dashboardDatas = $this->load_dashboard();
 
         print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '" class="dashboard" id="dashBoardForm">';
         print '<input type="hidden" name="token" value="' . newToken() . '">';
@@ -102,8 +102,8 @@ class SaturneDashboard
         $confName            = strtoupper($moduleNameLowerCase) . '_DISABLED_DASHBOARD_INFO';
         $disableWidgetList   = json_decode($user->conf->$confName);
         $dashboardLinesArray = [];
-        if (is_array($dashboardData['widgets']) && !empty($dashboardData['widgets'])) {
-            foreach ($dashboardData['widgets'] as $dashboardLines) {
+        if (is_array($dashboardDatas['widgets']) && !empty($dashboardDatas['widgets'])) {
+            foreach ($dashboardDatas['widgets'] as $dashboardLines) {
                 foreach ($dashboardLines as $key => $dashboardLine) {
                     if (isset($disableWidgetList->$key) && $disableWidgetList->$key == 0) {
                         $dashboardLinesArray[$key] = $dashboardLine['widgetName'];
@@ -121,9 +121,9 @@ class SaturneDashboard
         print '</div>';
         print '<div class="fichecenter">';
 
-        if (is_array($dashboardData['widgets']) && !empty($dashboardData['widgets'])) {
+        if (is_array($dashboardDatas['widgets']) && !empty($dashboardDatas['widgets'])) {
             $openedDashBoard = '';
-            foreach ($dashboardData['widgets'] as $dashboardLines) {
+            foreach ($dashboardDatas['widgets'] as $dashboardLines) {
                 foreach ($dashboardLines as $key => $dashboardLine) {
                     if (!isset($disableWidgetList->$key) && is_array($dashboardLine) && !empty($dashboardLine)) {
                         $openedDashBoard .= '<div class="box-flex-item"><div class="box-flex-item-with-margin">';
@@ -156,63 +156,63 @@ class SaturneDashboard
 
         print '<div class="graph-dashboard wpeo-gridlayout grid-2">';
 
-        if (is_array($dashboardData['graphs']) && !empty($dashboardData['graphs'])) {
-            foreach ($dashboardData['graphs'] as $keyelement => $datagraph) {
-                if (is_array($datagraph) && !empty($datagraph)) {
-                    foreach ($datagraph as $keyelement2 => $datagraph2) {
-                        $nbdata = 0;
-                        if (is_array($datagraph2['data']) && !empty($datagraph2['data'])) {
-                            if ($datagraph2['dataset'] >= 2) {
-                                foreach ($datagraph2['data'] as $datagrapharray) {
-                                    unset($datagrapharray[0]);
-                                    foreach ($datagrapharray as $datagraphsingle) {
-                                        if (!empty($datagraphsingle)) {
-                                            $nbdata = 1;
+        if (is_array($dashboardDatas['graphs']) && !empty($dashboardDatas['graphs'])) {
+            foreach ($dashboardDatas['graphs'] as $dashboardData) {
+                if (is_array($dashboardData) && !empty($dashboardData)) {
+                    foreach ($dashboardData as $keyElement => $GraphData) {
+                        $nbData = 0;
+                        if (is_array($GraphData['data']) && !empty($GraphData['data'])) {
+                            if ($GraphData['dataset'] >= 2) {
+                                foreach ($GraphData['data'] as $arrayGraphData) {
+                                    unset($arrayGraphData[0]);
+                                    foreach ($arrayGraphData as $dataGraphSingle) {
+                                        if (!empty($dataGraphSingle)) {
+                                            $nbData = 1;
                                         }
                                     }
                                 }
                             } else {
-                                foreach ($datagraph2['data'] as $datagraphsingle) {
-                                    $nbdata += $datagraphsingle;
+                                foreach ($GraphData['data'] as $dataGraphSingle) {
+                                    $nbData += $dataGraphSingle;
                                 }
                             }
-                            if ($nbdata > 0) {
-                                if (is_array($datagraph2['labels']) && !empty($datagraph2['labels'])) {
-                                    foreach ($datagraph2['labels'] as $label) {
-                                        $datalegend[$keyelement2][] = $langs->trans($label['label']);
-                                        $datacolor[$keyelement2][]  = $langs->trans($label['color']);
+                            if ($nbData > 0) {
+                                if (is_array($GraphData['labels']) && !empty($GraphData['labels'])) {
+                                    foreach ($GraphData['labels'] as $label) {
+                                        $dataLegend[$keyElement][] = $langs->trans($label['label']);
+                                        $dataColor[$keyElement][]  = $langs->trans($label['color']);
                                     }
                                 }
 
-                                $arraykeys = array_keys($datagraph2['data']);
-                                foreach ($arraykeys as $key) {
-                                    if ($datagraph2['dataset'] >= 2) {
-                                        $data[$keyelement2][] = $datagraph2['data'][$key];
+                                $arrayKeys = array_keys($GraphData['data']);
+                                foreach ($arrayKeys as $key) {
+                                    if ($GraphData['dataset'] >= 2) {
+                                        $data[$keyElement][] = $GraphData['data'][$key];
                                     } else {
-                                        $data[$keyelement2][] = [
-                                            0 => $langs->trans($datagraph2['labels'][$key]['label']),
-                                            1 => $datagraph2['data'][$key]
+                                        $data[$keyElement][] = [
+                                            0 => $langs->trans($GraphData['labels'][$key]['label']),
+                                            1 => $GraphData['data'][$key]
                                         ];
                                     }
                                 }
 
-                                $filename[$keyelement2] = $keyelement2 . '.png';
-                                $fileurl[$keyelement2] = DOL_URL_ROOT . '/viewimage.php?modulepart=' . $moduleNameLowerCase . '&file=' . $keyelement2 . '.png';
+                                $filename[$keyElement] = $keyElement . '.png';
+                                $fileurl[$keyElement]  = DOL_URL_ROOT . '/viewimage.php?modulepart=' . $moduleNameLowerCase . '&file=' . $keyElement . '.png';
 
                                 $graph = new DolGraph();
-                                $graph->SetData($data[$keyelement2]);
+                                $graph->SetData($data[$keyElement]);
 
-                                if ($datagraph2['dataset'] >= 2) {
-                                    $graph->SetLegend($datalegend[$keyelement2]);
+                                if ($GraphData['dataset'] >= 2) {
+                                    $graph->SetLegend($dataLegend[$keyElement]);
                                 }
-                                $graph->SetDataColor($datacolor[$keyelement2]);
-                                $graph->SetType([$datagraph2['type'] ?? 'pie']);
-                                $graph->SetWidth($datagraph2['width'] ?? $WIDTH);
-                                $graph->SetHeight($datagraph2['height'] ?? $HEIGHT);
+                                $graph->SetDataColor($dataColor[$keyElement]);
+                                $graph->SetType([$GraphData['type'] ?? 'pie']);
+                                $graph->SetWidth($GraphData['width'] ?? $width);
+                                $graph->SetHeight($GraphData['height'] ?? $height);
                                 $graph->setShowLegend(2);
-                                $graph->draw($filename[$keyelement2], $fileurl[$keyelement2]);
+                                $graph->draw($filename[$keyElement], $fileurl[$keyElement]);
                                 print '<div>';
-                                print load_fiche_titre($datagraph2['title'], $datagraph2['morehtmlright'], $datagraph2['picto']);
+                                print load_fiche_titre($GraphData['title'], $GraphData['morehtmlright'], $GraphData['picto']);
                                 print $graph->show();
                                 print '</div>';
                             }
