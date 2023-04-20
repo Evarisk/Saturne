@@ -76,11 +76,10 @@ window.saturne.dashboard.event = function() {
  */
 window.saturne.dashboard.addDashBoardInfo = function() {
     const dashboardWidgetForm = document.getElementById('dashBoardForm');
-    const formData = new FormData(dashboardWidgetForm);
-    let dashboardWidgetName = formData.get('boxcombo');
-    let querySeparator = '?';
-    let token = $('.dashboard').find('input[name="token"]').val();
-    document.URL.match(/\?/) ? querySeparator = '&' : 1;
+    const formData            = new FormData(dashboardWidgetForm);
+    let dashboardWidgetName   = formData.get('boxcombo');
+    let token                 = window.saturne.toolbox.getToken();
+    let querySeparator        = window.saturne.toolbox.getQuerySeparator(document.URL);
 
     $.ajax({
         url: document.URL + querySeparator + 'action=adddashboardinfo&token=' + token,
@@ -110,9 +109,8 @@ window.saturne.dashboard.addDashBoardInfo = function() {
 window.saturne.dashboard.closeDashBoardInfo = function() {
     let box = $(this);
     let dashboardWidgetName = box.attr('data-widgetname');
-    let querySeparator = '?';
-    let token = $('.dashboard').find('input[name="token"]').val();
-    document.URL.match(/\?/) ? querySeparator = '&' : 1;
+    let token = window.saturne.toolbox.getToken();
+    let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
 
     $.ajax({
         url: document.URL + querySeparator + 'action=closedashboardinfo&token=' + token,
@@ -146,9 +144,8 @@ window.saturne.dashboard.selectDatasetDashboardInfo = function() {
     let year   = $('#search_year').val();
     let month  = $('#search_month').val();
 
-    let querySeparator = '?';
-    let token = $('.dashboard').find('input[name="token"]').val();
-    document.URL.match(/\?/) ? querySeparator = '&' : 1;
+    let token          = window.saturne.toolbox.getToken();
+    let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
 
     window.saturne.loader.display($('.fichecenter'));
 
