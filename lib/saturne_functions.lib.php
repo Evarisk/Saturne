@@ -148,7 +148,7 @@ function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', st
  *  @param  string $morehtmlref More html to show after the ref (see $morehtmlleft for before)
  *  @return void
  */
-function saturne_banner_tab(object $object, string $paramid = 'ref', string $morehtml = '', int $shownav = 1, string $fieldid = 'ref', string $fieldref = 'ref', string $morehtmlref = ''): void
+function saturne_banner_tab(object $object, string $paramid = 'ref', string $morehtml = '', int $shownav = 1, string $fieldid = 'ref', string $fieldref = 'ref', string $morehtmlref = '', bool $handlePhoto = false): void
 {
     global $db, $langs, $hookmanager, $moduleName, $moduleNameLowerCase;
 
@@ -205,7 +205,16 @@ function saturne_banner_tab(object $object, string $paramid = 'ref', string $mor
 
     $moreparam = '&module_name=' . $moduleName . '&object_type=' . $object->element;
 
-    dol_banner_tab($object, $paramid, $morehtml, $shownav, $fieldid, $fieldref, $saturneMorehtmlref, $moreparam);
+	if (!$handlePhoto) {
+		dol_banner_tab($object, $paramid, $morehtml, $shownav, $fieldid, $fieldref, $saturneMorehtmlref, $moreparam);
+	} else {
+		global $conf, $form;
+
+		print '<div class="arearef heightref valignmiddle centpercent">';
+		$morehtmlleft = '<div class="floatleft inline-block valignmiddle divphotoref">' . saturne_show_medias_linked($moduleNameLowerCase, $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $object->element . '/'. $object->ref . '/photos/', 'small', '', 0, 0, 0, 88, 88, 0, 0, 0, $object->element . '/'. $object->ref . '/photos/', $object, 'photo', 0, 0,0, 1) . '</div>';
+		print $form->showrefnav($object, $paramid, $morehtml, $shownav, $fieldid, $fieldref, $morehtmlref, $moreparam, 0, $morehtmlleft, $object->getLibStatut(6));
+		print '</div>';
+	}
 
     print '<div class="underbanner clearboth"></div>';
 }
