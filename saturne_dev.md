@@ -31,3 +31,48 @@ Pour faire un commit sur les repositories d'Evarisk il faut respecter la convent
 Pour simplifier l'utilisation et la compréhension du CSS/JS, nous avons utilisé un minifier avec la libraire npm gulpfile.
 Par conséquent, il ne faut pas oublier de lancer le terminal et d'exécuter la commande npm i (si c'est la première utilisation) ou npm start.
 - Ex: C:\wamp64\www\dolibarr-16.0.3\htdocs\custom\saturne> npm start
+
+## Utilisation du Framework
+### Objects Générique
+#### Object (SaturneObject)
+
+Pour implémenter un object sur un module il faut se référer à la classe SaturneObject.
+Cette dernière dispose d'un CRUD générique étendu de CommonObject + des fonctions utilitaires
+- getNomUrl
+- FetchAll
+- etc
+
+#### Documents (SaturneDocuments)
+
+Pour implémenter un object documents sur un module il faut se référer à la classe SaturneDocuments.
+Cette dernière dispose d'un CRUD générique étendu de CommonObject + des fonctions utilitaires suivantes :
+- GenerateDocument
+
+#### Signature (SaturneSignature)
+
+Pour implémenter un object signature sur un module il faut se référer à la classe SaturneSignature.
+Cette dernière dispose d'un CRUD générique étendu de CommonObject + des fonctions utilitaires suivantes :
+- setSignatory
+- fetchSignatory
+- fetchSignatories
+- checkSignatoriesSignatures
+- deleteSignatoriesSignatures
+- deletePreviousSignatories
+
+A venir: (builder d'objets) + exemple
+
+#### Schedules (SaturneSchedules)
+
+Pour implémenter un object horaires sur un module il faut se référer à la classe SaturneSchedules.
+Cette dernière dispose d'un CRUD générique étendu de CommonObject
+
+A venir: (builder d'objets) + exemple
+
+#### Dashboard (SaturneDashboard)
+
+Pour implémenter un object tableau de bord sur un module il faut se référer à la classe SaturneDashboard.
+Cette dernière dispose des fonctions utilitaires suivantes :
+- load_dashboard - Charger les infos du tableau de board
+- show_dashboard - Afficher le tableau de board
+
+A venir: (builder d'objets) + exemple
