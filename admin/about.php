@@ -21,55 +21,61 @@
  * \brief   About page of module Saturne.
  */
 
-// Load Saturne environment
+// Load Saturne environment.
 if (file_exists('../saturne.main.inc.php')) {
-	require_once __DIR__ . '/../saturne.main.inc.php';
+    require_once __DIR__ . '/../saturne.main.inc.php';
 } elseif (file_exists('../../saturne.main.inc.php')) {
-	require_once __DIR__ . '/../../saturne.main.inc.php';
+    require_once __DIR__ . '/../../saturne.main.inc.php';
 } else {
     die('Include of saturne main fails');
 }
 
-// Libraries
-require_once __DIR__ . '/../lib/saturne.lib.php';
-require_once __DIR__ . '/../core/modules/modSaturne.class.php';
+// Get module parameters.
+$moduleName          = GETPOST('module_name', 'alpha');
+$moduleNameLowerCase = strtolower($moduleName);
 
-// Global variables definitions
+// Load Module Libraries.
+require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '.lib.php';
+require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/core/modules/mod' . $moduleName . '.class.php';
+
+// Global variables definitions.
 global $db, $langs, $user;
 
-// Load translation files required by the page
+// Load translation files required by the page.
 saturne_load_langs(['admin']);
 
-// Initialize technical objects
-$modSaturne = new modSaturne($db);
+// Initialize technical objects.
+$className = 'mod' . $moduleName;
+$modModule = new $className($db);
 
-// Get parameters
+// Get parameters.
 $backtopage = GETPOST('backtopage', 'alpha');
 
-// Security check - Protection if external user
-$permissiontoread = $user->rights->saturne->adminpage->read;
+// Security check - Protection if external user.
+$permissiontoread = $user->rights->$moduleNameLowerCase->adminpage->read;
 saturne_check_access($permissiontoread);
 
 /*
  * View
  */
 
-$title    = $langs->trans('ModuleAbout', 'Saturne');
-$help_url = 'FR:Module_Saturne';
+$title    = $langs->trans('ModuleAbout', $moduleName);
+$help_url = 'FR:Module_' . $moduleName;
 
 saturne_header(0, '', $title, $help_url);
 
-// Subheader
+// Subheader.
 $linkback = '<a href="' . ($backtopage ?: DOL_URL_ROOT . '/admin/modules.php?restore_lastsearch_values=1') . '">' . $langs->trans('BackToModuleList') . '</a>';
-print load_fiche_titre($title, $linkback, 'saturne_color@saturne');
+print load_fiche_titre($title, $linkback, $moduleNameLowerCase . '_color@' . $moduleNameLowerCase);
 
-// Configuration header
-$head = saturne_admin_prepare_head();
-print dol_get_fiche_head($head, 'about', $title, -1, 'saturne_color@saturne');
+// Configuration header.
+$preHead = $moduleNameLowerCase . '_admin_prepare_head';
+$head = $preHead();
+print dol_get_fiche_head($head, 'about', $title, -1, $moduleNameLowerCase . '_color@' . $moduleNameLowerCase);
 
-print $modSaturne->getDescLong();
+print $modModule->getDescLong();
 
-// Page end
+// Page end.
 print dol_get_fiche_end();
 llxFooter();
 $db->close();
