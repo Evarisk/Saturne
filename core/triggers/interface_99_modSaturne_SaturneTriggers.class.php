@@ -105,6 +105,49 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
         $actioncomm->percentage  = -1;
 
         switch ($action) {
+            // CERTIFICATE
+            case 'SATURNECERTIFICATE_CREATE' :
+                $actioncomm->code  = 'AC_SATURNECERTIFICATE_CREATE';
+                $actioncomm->label = $langs->trans('ObjectCreateTrigger', $langs->transnoentities(ucfirst($object->element)));
+                $actioncomm->create($user);
+                break;
+
+            case 'SATURNECERTIFICATE_MODIFY' :
+                $actioncomm->code  = 'AC_SATURNECERTIFICATE_MODIFY';
+                $actioncomm->label = $langs->trans('ObjectModifyTrigger', $langs->transnoentities(ucfirst($object->element)));
+                $actioncomm->create($user);
+                break;
+
+            case 'SATURNECERTIFICATE_DELETE' :
+                $actioncomm->code  = 'AC_SATURNECERTIFICATE_DELETE';
+                $actioncomm->label = $langs->trans('ObjectDeleteTrigger', $langs->transnoentities(ucfirst($object->element)));
+                $actioncomm->create($user);
+                break;
+
+            case 'SATURNECERTIFICATE_VALIDATE' :
+                $actioncomm->code  = 'AC_SATURNECERTIFICATE_VALIDATE';
+                $actioncomm->label = $langs->trans('ObjectValidateTrigger', $langs->transnoentities(ucfirst($object->element)));
+                $actioncomm->create($user);
+                break;
+
+            case 'SATURNECERTIFICATE_UNVALIDATE' :
+                $actioncomm->code  = 'AC_SATURNECERTIFICATE_UNVALIDATE';
+                $actioncomm->label = $langs->trans('ObjectUnValidateTrigger', $langs->transnoentities(ucfirst($object->element)));
+                $actioncomm->create($user);
+                break;
+
+            case 'SATURNECERTIFICATE_ARCHIVED' :
+                $actioncomm->code  = 'AC_SATURNECERTIFICATE_ARCHIVED';
+                $actioncomm->label = $langs->trans('ObjectArchivedTrigger', $langs->transnoentities(ucfirst($object->element)));
+                $actioncomm->create($user);
+                break;
+
+            case 'SATURNECERTIFICATE_SENTBYMAIL' :
+                $actioncomm->code  = 'AC_SATURNECERTIFICATE_SENTBYMAIL';
+                $actioncomm->label = $langs->trans('ObjectSentByMailTrigger', $langs->transnoentities(ucfirst($object->element)));
+                $actioncomm->create($user);
+                break;
+
             // SIGNATURE
             case 'SATURNESIGNATURE_ADDATTENDANT' :
                 $actioncomm->elementtype = $object->object_type . '@' . $moduleNameLowerCase;
