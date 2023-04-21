@@ -283,6 +283,7 @@ window.saturne.mediaGallery.unlinkFile = function( event ) {
 
 	let mediaContainer = $(this).closest('.media-container')
 	let filepath       = mediaContainer.find('.file-path').val()
+	let filename       = mediaContainer.find('.file-name').val()
 
 	window.saturne.loader.display(mediaContainer);
 
@@ -293,6 +294,7 @@ window.saturne.mediaGallery.unlinkFile = function( event ) {
 		type: "POST",
 		data: JSON.stringify({
 			filepath: filepath,
+			filename: filename,
 		}),
 		processData: false,
 		success: function ( resp ) {
