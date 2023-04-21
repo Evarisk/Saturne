@@ -126,7 +126,7 @@ class SaturneDocuments extends CommonObject
     /**
      * @var string Type.
      */
-    public string $type;
+    public string $type = '';
 
     /**
      * @var string Module name.

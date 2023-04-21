@@ -198,9 +198,9 @@ class SaturneSignature extends CommonObject
     public string $element_type;
 
     /**
-     * @var string Module name
+     * @var string|null Module name
      */
-    public string $module_name;
+    public ?string $module_name;
 
     /**
      * @var string|null Signature
