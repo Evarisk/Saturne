@@ -104,7 +104,7 @@ function saturne_check_access($permission, object $object = null, bool $allowExt
         }
     }
 
-	if ($conf->multicompany->enabled) {
+	if (isModEnabled('multicompany')) {
 		if ($object->id > 0) {
 			if ($object->entity != $conf->entity) {
 				setEventMessage($langs->trans('ChangeEntityRedirection'), 'warnings');
