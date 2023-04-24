@@ -237,57 +237,58 @@ function saturne_load_langs(array $domains = [])
 	}
 }
 
-// phpcs:disable PEAR.NamingConventions.ValidFunctionName.ScopeNotCamelCaps
 /**
- *  Return a HTML select list of a dictionary
+ *  Return HTML select list of a dictionary.
  *
- *  @param  string	$htmlname          	Name of select zone
- *  @param	string	$dictionarytable	Dictionary table
- *  @param	string	$keyfield			Field for key
- *  @param	string	$labelfield			Label field
- *  @param	string	$selected			Selected value
- *  @param  int		$useempty          	1=Add an empty value in list, 2=Add an empty value in list only if there is more than 2 entries.
- *  @param  string  $moreattrib         More attributes on HTML select tag
- * 	@return	void
+ * @param  string $htmlName        Name of select zone.
+ * @param  string $dictionaryTable Dictionary table.
+ * @param  string $keyField        Field for key.
+ * @param  string $labelField      Label field.
+ * @param  string $selected        Selected value.
+ * @param  int    $showLabel       Show label.
+ * @param  int    $useEmpty        1 = Add an empty value in list, 2 = Add an empty value in list only if there is more than 2 entries.
+ * @param  string $moreAttrib      More attributes on HTML select tag.
+ * @param  string $placeHolder     Placeholder.
+ * @param  string $moreCSS         More css.
+ * @return string
  */
-function saturne_select_dictionary($htmlname, $dictionarytable, $keyfield = 'code', $labelfield = 'label', $selected = '', $showLabel = 0, $useempty = 0, $moreattrib = '', $placeholder = '', $morecss = '')
+function saturne_select_dictionary(string $htmlName, string $dictionaryTable, string $keyField = 'code', string $labelField = 'label', string $selected = '', int $showLabel = 0, int $useEmpty = 0, string $moreAttrib = '', string $placeHolder = '', string $moreCSS = 'minwidth150'): string
 {
-	// phpcs:enable
 	global $langs, $db;
 
-	$langs->load("admin");
+	$langs->load('admin');
 
-	$out = '';
-	$sql  = "SELECT rowid, " . $keyfield . ", " . $labelfield;
-	$sql .= " FROM " . MAIN_DB_PREFIX . $dictionarytable;
-	$sql .= " ORDER BY " . $labelfield;
+    $out = '';
+	$sql = 'SELECT rowid, ' . $keyField . ', ' . $labelField;
+	$sql .= ' FROM ' . MAIN_DB_PREFIX . $dictionaryTable;
+    $sql .= $db->order('position', 'ASC');
 
 	$result = $db->query($sql);
 	if ($result) {
 		$num = $db->num_rows($result);
 		$i   = 0;
 		if ($num) {
-			$out .= '<select id="select' . $htmlname . '" class="flat selectdictionary' . ($morecss ? ' ' . $morecss : '') . '" name="' . $htmlname . '"' . ($moreattrib ? ' ' . $moreattrib : '') . '>';
-			if ($useempty == 1 || ($useempty == 2 && $num > 1)) {
-				$out .= '<option value="-1">'. (dol_strlen($placeholder) > 0 ? $langs->transnoentities($placeholder) : '') .'&nbsp;</option>';
+			$out = '<select id="select' . $htmlName . '" class="flat selectdictionary' . ($moreCSS ? ' ' . $moreCSS : '') . '" name="' . $htmlName . '"' . ($moreAttrib ? ' ' . $moreAttrib : '') . '>';
+			if ($useEmpty == 1 || ($useEmpty == 2 && $num > 1)) {
+				$out .= '<option value="-1">'. (dol_strlen($placeHolder) > 0 ? $langs->transnoentities($placeHolder) : '') .'</option>';
 			}
 
 			while ($i < $num) {
 				$obj = $db->fetch_object($result);
-				if ($selected == $obj->rowid || $selected == $langs->transnoentities($obj->$keyfield)) {
-					$out .= '<option value="' . $langs->transnoentities($obj->$keyfield) . '" selected>';
+				if ($selected == $obj->rowid || $selected == $langs->transnoentities($obj->$keyField)) {
+					$out .= '<option value="' . $obj->$keyField . '" selected>';
 				} else {
-					$out .= '<option value="' . $langs->transnoentities($obj->$keyfield) . '">';
+					$out .= '<option value="' . $obj->$keyField . '">';
 				}
-				$out .= $langs->transnoentities($obj->$keyfield) . (($showLabel > 0) ? ' - ' .  $langs->transnoentities($obj->$labelfield) : '');
+				$out .= $langs->transnoentities($obj->$keyField) . (($showLabel > 0) ? ' - ' .  $langs->transnoentities($obj->$labelField) : '');
 				$out .= '</option>';
 				$i++;
 			}
-			$out .= "</select>";
-			$out .= ajax_combobox('select'.$htmlname);
+			$out .= '</select>';
+			$out .= ajax_combobox('select' . $htmlName);
 
 		} else {
-			$out .= $langs->trans("DictionaryEmpty");
+			$out = $langs->trans('DictionaryEmpty');
 		}
 	} else {
 		dol_print_error($db);
@@ -296,25 +297,30 @@ function saturne_select_dictionary($htmlname, $dictionarytable, $keyfield = 'cod
 }
 
 /**
- *  Load dictionnary from database
+ * Load dictionary from database.
  *
- * @param  string    $tablename SQL table name
- * @return array|int            0< if KO, >0 if OK
+ * @param  string    $tableName SQL table name.
+ * @param  string    $sortOrder Sort Order.
+ * @param  string    $sortField Sort field.
+ * @return array|int            0< if KO, >0 if OK.
  */
-function saturne_fetch_dictionary(string $tablename)
+function saturne_fetch_dictionary(string $tableName, string $sortOrder = 'ASC', string $sortField = 't.position')
 {
 	global $db;
 
-	$sql  = 'SELECT t.rowid, t.entity, t.ref, t.label, t.description, t.active';
-	$sql .= ' FROM ' . MAIN_DB_PREFIX . $tablename . ' as t';
+	$sql  = 'SELECT t.rowid, t.entity, t.ref, t.label, t.description, t.active, t.position';
+	$sql .= ' FROM ' . MAIN_DB_PREFIX . $tableName . ' as t';
 	$sql .= ' WHERE 1 = 1';
-	$sql .= ' AND entity IN (0, ' . getEntity($tablename) . ')';
+	$sql .= ' AND entity IN (0, ' . getEntity($tableName) . ')';
+
+    if (!empty($sortField)) {
+        $sql .= $db->order($sortField, $sortOrder);
+    }
 
 	$resql = $db->query($sql);
-
 	if ($resql) {
-		$num = $db->num_rows($resql);
-		$i = 0;
+		$num     = $db->num_rows($resql);
+		$i       = 0;
 		$records = [];
 		while ($i < $num) {
 			$obj = $db->fetch_object($resql);
@@ -327,6 +333,7 @@ function saturne_fetch_dictionary(string $tablename)
 			$record->label       = $obj->label;
 			$record->description = $obj->description;
 			$record->active      = $obj->active;
+            $record->position    = $obj->position;
 
 			$records[$record->id] = $record;
 
