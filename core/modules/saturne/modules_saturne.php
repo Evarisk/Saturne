@@ -84,10 +84,10 @@ abstract class ModeleNumRefSaturne
      * Checks if the numbers already in the database do not
      * cause conflicts that would prevent this numbering working.
      *
-     * @param  CommonObject $object Object we need next value for.
-     * @return bool                 False if conflicted, true if OK.
+     * @param  object $object Object we need next value for.
+     * @return bool           False if conflicted, true if OK.
      */
-    public function canBeActivated(CommonObject $object): bool
+    public function canBeActivated(object $object): bool
     {
         global $conf, $langs, $db;
 
@@ -119,11 +119,11 @@ abstract class ModeleNumRefSaturne
     /**
      * Return next free value.
      *
-     * @param  CommonObject $object Object we need next value for.
-     * @return string               Value if OK, <0 if KO.
+     * @param  object    $object Object we need next value for.
+     * @return string            Value if OK, <0 if KO.
      * @throws Exception
      */
-    public function getNextValue(CommonObject $object)
+    public function getNextValue(object $object)
     {
         global $db, $conf;
 
