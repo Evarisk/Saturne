@@ -137,6 +137,9 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 			$('.wpeo-loader').removeClass('wpeo-loader')
 			mediaGallery.removeClass('modal-active')
 
+			if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
+				$('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
+			}
 			//refresh medias container after adding
 			$('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
 
@@ -279,11 +282,16 @@ window.saturne.mediaGallery.unlinkFile = function( event ) {
 
 	let token = window.saturne.toolbox.getToken();
 
-	let objectSubtype = $(this).closest('.linked-medias').find('.from-subtype').length ? $(this).closest('.linked-medias').find('.from-subtype').val() : ''
+	let mediaInfos = $(this).closest('.linked-medias')
+	let objectSubtype = mediaInfos.find('.from-subtype').val()
+	let objectType    = mediaInfos.find('.from-type').val()
+	let objectSubdir  = mediaInfos.find('.from-subdir').length ? mediaInfos.find('.from-subdir').val() : ''
+	let objectId      = mediaInfos.find('.from-id').val()
 
-	let mediaContainer = $(this).closest('.media-container')
-	let filepath       = mediaContainer.find('.file-path').val()
-	let filename       = mediaContainer.find('.file-name').val()
+	let mediaContainer   = $(this).closest('.media-container')
+	let filepath         = mediaContainer.find('.file-path').val()
+	let filename         = mediaContainer.find('.file-name').val()
+	let previousFavorite = $('.media-gallery-favorite').closest('.media-container').find('.file-name').val()
 
 	window.saturne.loader.display(mediaContainer);
 
@@ -295,9 +303,18 @@ window.saturne.mediaGallery.unlinkFile = function( event ) {
 		data: JSON.stringify({
 			filepath: filepath,
 			filename: filename,
+			objectSubtype: objectSubtype,
+			objectType: objectType,
+			objectSubdir: objectSubdir,
+			objectId: objectId
 		}),
 		processData: false,
 		success: function ( resp ) {
+
+			if (previousFavorite == filename && $('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
+				$('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
+			}
+
 			$('.wpeo-loader').removeClass('wpeo-loader')
 			$('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
 		}
@@ -390,6 +407,10 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
 						success: function ( resp ) {
 							$('.wpeo-loader').removeClass('wpeo-loader')
 							mediaGallery.removeClass('modal-active')
+
+							if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
+								$('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
+							}
 
 							//refresh medias container after adding
 							$('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
