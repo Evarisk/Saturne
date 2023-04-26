@@ -64,7 +64,7 @@ $attendantTableMode = (GETPOSTISSET('attendant_table_mode') ? GETPOST('attendant
 // Initialize technical objects
 $classname = ucfirst($objectType);
 $object    = new $classname($db);
-$signatory = new SaturneSignature($db);
+$signatory = new SaturneSignature($db, $moduleNameLowerCase);
 $usertmp   = new User($db);
 if (isModEnabled('societe')) {
     $thirdparty = new Societe($db);
