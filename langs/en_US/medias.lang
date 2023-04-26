@@ -25,6 +25,14 @@ ErrorThisFileExists       = The file %s already exists
 EmptyMediaGallery         = The media library is empty
 
 # Config page
+MediaMaxWidthMini                    = Minimum media width
+MediaMaxWidthMiniDescription         = Media width (minimum size) with 16:9 ratio
+MediaMaxHeightMini                   = Minimum media height
+MediaMaxHeightMiniDescription        = Media height (minimum dimension) with 16:9 ratio
+MediaMaxWidthSmall                   = Media width small
+MediaMaxWidthSmallDescription        = Media width (dimension small) with ratio 16:9
+MediaMaxHeightSmall                  = Media height small
+MediaMaxHeightSmallDescription       = Media height (dimension small) with ratio 16:9
 MediaMaxWidthMedium                  = Width of medium media
 MediaMaxWidthMediumDescription       = Media width (medium size) with 16:9 ratio
 MediaMaxHeightMedium                 = Height of medium media

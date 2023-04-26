@@ -25,6 +25,14 @@ ErrorThisFileExists       = Le fichier %s existe déjà
 EmptyMediaGallery         = La bibliothèque de médias est vide
 
 # Config page - Page d'administration
+MediaMaxWidthMini                    = Largeur du média mini
+MediaMaxWidthMiniDescription         = Largeur du média (dimension mini) avec pour ratio 16:9
+MediaMaxHeightMini                   = Hauteur du média mini
+MediaMaxHeightMiniDescription        = Hauteur du média (dimension mini) avec pour ratio 16:9
+MediaMaxWidthSmall                   = Largeur du média small
+MediaMaxWidthSmallDescription        = Largeur du média (dimension small) avec pour ratio 16:9
+MediaMaxHeightSmall                  = Hauteur du média small
+MediaMaxHeightSmallDescription       = Hauteur du média (dimension small) avec pour ratio 16:9
 MediaMaxWidthMedium                  = Largeur du média medium
 MediaMaxWidthMediumDescription       = Largeur du média (dimension medium) avec pour ratio 16:9
 MediaMaxHeightMedium                 = Hauteur du média medium
