@@ -1,6 +1,6 @@
 <?php
 
-global $action, $conf, $db, $langs, $moduleName, $moduleNameLowerCase, $subaction;
+global $action, $conf, $db, $langs, $moduleName, $moduleNameLowerCase, $moduleNameUpperCase, $subaction;
 
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmdirectory.class.php';
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
@@ -98,14 +98,22 @@ if ( ! $error && $subaction == "addFiles") {
 					$date      = dol_print_date(dol_now(),'dayxcard');
 					$extension = pathinfo($filename, PATHINFO_EXTENSION);
 
-					global $maxwidthmini, $maxheightmini, $maxwidthsmall,$maxheightsmall ;
 					$destfull = $pathToObjectPhoto . '/' . $filename;
 
+					$confWidthMini    = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_MINI';
+					$confHeightMini   = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_MINI';
+					$confWidthSmall   = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_SMALL';
+					$confHeightSmall  = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_SMALL';
+					$confWidthMedium  = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_MEDIUM';
+					$confHeightMedium = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_MEDIUM';
+					$confWidthLarge   = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_LARGE';
+					$confHeightLarge  = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_LARGE';
+
 					// Create thumbs
-					$imgThumbSmall  = vignette($destfull, $maxwidthsmall, $maxheightsmall);
-					$imgThumbMini   = vignette($destfull, $maxwidthmini, $maxheightmini, '_mini');
-					$imgThumbLarge  = vignette($destfull, $conf->global->SATURNE_MEDIA_MAX_WIDTH_LARGE, $conf->global->SATURNE_MEDIA_MAX_HEIGHT_LARGE, '_large');
-					$imgThumbMedium = vignette($destfull, $conf->global->SATURNE_MEDIA_MAX_WIDTH_MEDIUM, $conf->global->SATURNE_MEDIA_MAX_HEIGHT_MEDIUM, '_medium');
+					$imgThumbMini   = vignette($destfull, $conf->global->$confWidthMini, $conf->global->$confHeightMini, '_mini');
+					$imgThumbSmall  = vignette($destfull, $conf->global->$confWidthSmall, $conf->global->$confHeightSmall, '_small');
+					$imgThumbMedium = vignette($destfull, $conf->global->$confWidthMedium, $conf->global->$confHeightMedium, '_medium');
+					$imgThumbLarge  = vignette($destfull, $conf->global->$confWidthLarge, $conf->global->$confHeightLarge, '_large');
 					// Create mini thumbs for image (Ratio is near 16/9)
 				}
 			}
