@@ -276,9 +276,6 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 						$return .= '<img width="' . $conf->global->$widthName . '" height="' . $conf->global->$heightName . '" class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '">';
 						if ($showfilename) $return .= '<br>' . $viewfilename;
 					}
-
-					// On continue ou on arrete de boucler ?
-					if ($nbmax && $nbphoto >= $nbmax) break;
 				}
 
 				if ($show_favorite_button) {
@@ -301,6 +298,10 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 				if ($showdiv) {
 					$return .= "</div>\n";
 				}
+
+                // On continue ou on arrete de boucler ?
+                if ($nbmax && $nbphoto >= $nbmax) break;
+
 				$i++;
 			}
 		}
