@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2021-2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,12 +16,12 @@
  */
 
 /**
- * \file    admin/about.php
+ * \file    admin/object/object.php
  * \ingroup saturne
- * \brief   About page of module Saturne.
+ * \brief   Saturne object config page.
  */
 
-// Load Saturne environment.
+// Load Saturne environment
 if (file_exists('../saturne.main.inc.php')) {
     require_once __DIR__ . '/../saturne.main.inc.php';
 } elseif (file_exists('../../saturne.main.inc.php')) {
@@ -30,28 +30,38 @@ if (file_exists('../saturne.main.inc.php')) {
     die('Include of saturne main fails');
 }
 
-// Get module parameters.
-$moduleName          = GETPOST('module_name', 'alpha');
+// Get module parameters
+$moduleName = GETPOST('module_name', 'alpha');
+$objectType = GETPOST('object_type', 'alpha');
+
 $moduleNameLowerCase = strtolower($moduleName);
 
-// Load Module Libraries.
+// Libraries
+require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
+
 require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '.lib.php';
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/core/modules/mod' . $moduleName . '.class.php';
+require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
 
-// Global variables definitions.
-global $db, $langs, $user;
+// Global variables definitions
+global $conf, $db, $hookmanager, $langs, $user;
 
-// Load translation files required by the page.
+// Load translation files required by the page
 saturne_load_langs(['admin']);
 
-// Initialize technical objects.
-$className = 'mod' . $moduleName;
-$modModule = new $className($db);
-
-// Get parameters.
+// Get parameters
+$action     = GETPOST('action', 'alpha');
 $backtopage = GETPOST('backtopage', 'alpha');
 
-// Security check - Protection if external user.
+// Initialize technical objects
+$classname = ucfirst($objectType);
+$object    = new $classname($db);
+
+// Initialize view objects
+$form = new Form($db);
+
+$hookmanager->initHooks([$objectType . 'admin']); // Note that conf->hooks_modules contains array.
+
+// Security check - Protection if external user
 $permissiontoread = $user->rights->$moduleNameLowerCase->adminpage->read;
 saturne_check_access($permissiontoread);
 
@@ -59,23 +69,28 @@ saturne_check_access($permissiontoread);
  * View
  */
 
-$title    = $langs->trans('ModuleAbout', $moduleName);
+$title    = $langs->trans(ucfirst($object->element));
 $help_url = 'FR:Module_' . $moduleName;
 
-saturne_header(0, '', $title, $help_url);
+saturne_header(0,'', $title, $help_url);
 
-// Subheader.
+// Subheader
 $linkback = '<a href="' . ($backtopage ?: DOL_URL_ROOT . '/admin/modules.php?restore_lastsearch_values=1') . '">' . $langs->trans('BackToModuleList') . '</a>';
 print load_fiche_titre($title, $linkback, $moduleNameLowerCase . '_color@' . $moduleNameLowerCase);
 
-// Configuration header.
+// Configuration header
 $preHead = $moduleNameLowerCase . '_admin_prepare_head';
 $head = $preHead();
-print dol_get_fiche_head($head, 'about', $title, -1, $moduleNameLowerCase . '_color@' . $moduleNameLowerCase);
+print dol_get_fiche_head($head, $object->element, $title, -1, $moduleNameLowerCase . '_color@' . $moduleNameLowerCase);
 
-print $modModule->getDescLong();
+print load_fiche_titre($title, '', 'object_' . $object->picto);
+print '<hr>';
 
-// Page end.
+require_once __DIR__ . '/../core/tpl/admin/object/object_numbering_module_view.tpl.php';
+
+require_once __DIR__ . '/../core/tpl/admin/object/object_const_view.tpl.php';
+
+// Page end
 print dol_get_fiche_end();
 llxFooter();
 $db->close();

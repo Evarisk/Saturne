@@ -166,28 +166,28 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 		}
 
 		foreach ($filearray as $file) {
-			$photo   = '';
-			$filename    = $file['name'];
+			$photo    = '';
+			$fileName = $file['name'];
+			$filePath = $file['path'];
 
-			$fileFullName = $file['fullname'];
-
-			if (($show_only_favorite && $object->$favorite_field == $filename) || !$show_only_favorite) {
+			if (($show_only_favorite && $object->$favorite_field == $fileName) || !$show_only_favorite) {
 				if ($showdiv) {
 					$return .= '<div class="media-container">';
 				}
 
-				$return .= '<input hidden class="file-path" value="'. $fileFullName .'">';
-				if (image_format_supported($filename) >= 0) {
+				$return .= '<input hidden class="file-path" value="'. $filePath .'">';
+				$return .= '<input hidden class="file-name" value="'. $fileName .'">';
+				if (image_format_supported($fileName) >= 0) {
 					$nbphoto++;
-					$photo        = $filename;
-					$viewfilename = $filename;
+					$photo        = $fileName;
+					$viewfilename = $fileName;
 
 					if ($size == 1 || $size == 'small') {   // Format vignette
 						// Find name of thumb file
 						if ($use_mini_format) {
-							$photo_vignette = basename(getImageFileNameForSize($dir . $filename, '_mini'));
+							$photo_vignette = basename(getImageFileNameForSize($dir . $fileName, '_mini'));
 						} else {
-							$photo_vignette = basename(getImageFileNameForSize($dir . $filename, '_small'));
+							$photo_vignette = basename(getImageFileNameForSize($dir . $fileName, '_small'));
 						}
 
 						if ( ! dol_is_file($dirthumb . $photo_vignette)) $photo_vignette = '';
@@ -282,9 +282,9 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 				}
 
 				if ($show_favorite_button) {
-					$favorite = (($object->$favorite_field == '' || $favoriteExists == 0) && $i == 0 ? 'favorite' : ($object->$favorite_field == $photo ? 'favorite' : ''));
+					$favorite = (($object->$favorite_field == '' || $favoriteExists == 0) && $i == 0 && (!property_exists($object, 'photo') && empty($object->photo)) ? 'favorite' : ($object->$favorite_field == $photo ? 'favorite' : ''));
 					$return .=
-						'<div class="wpeo-button button-square-50 button-blue media-gallery-favorite '. $favorite .'" value="' . $object->id . '">
+						'<div class="wpeo-button button-square-50 button-blue ' . $object->element . ' media-gallery-favorite ' . $favorite . '" value="' . $object->id . '">
 							<input class="element-linked-id" type="hidden" value="' . ($object->id > 0 ? $object->id : 0) . '">
 							<input class="filename" type="hidden" value="' . $photo . '">
 							<i class="' . ($favorite == 'favorite' ? 'fas' : 'far') . ' fa-star button-icon"></i>
@@ -292,7 +292,7 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 				}
 				if ($show_unlink_button) {
 					$return .=
-						'<div class="wpeo-button button-square-50 button-grey media-gallery-unlink" value="' . $object->id . '">
+						'<div class="wpeo-button button-square-50 button-grey ' . $object->element . ' media-gallery-unlink" value="' . $object->id . '">
 							<input class="element-linked-id" type="hidden" value="' . ($object->id > 0 ? $object->id : 0) . '">
 							<input class="filename" type="hidden" value="' . $photo . '">
 							<i class="fas fa-unlink button-icon"></i>

@@ -18,44 +18,44 @@
 /**
  * \file    lib/saturne.lib.php
  * \ingroup saturne
- * \brief   Library files with common functions for Saturne
+ * \brief   Library files with common functions for Saturne.
  */
 
 /**
- * Prepare admin pages header
+ * Prepare admin pages header.
  *
- * @return array $head 	Selectable tabs
+ * @return array $head Selectable tabs.
  */
 function saturne_admin_prepare_head(): array
 {
-    // Global variables definitions
-	global $langs, $conf;
+    // Global variables definitions.
+    global $langs, $conf;
 
-    // Load translation files required by the page
+    // Load translation files required by the page.
     saturne_load_langs();
 
-    // Initialize values
-	$h = 0;
-	$head = [];
+    // Initialize values.
+    $h    = 0;
+    $head = [];
 
-	$head[$h][0] = dol_buildpath('/saturne/admin/media_gallery.php', 1);
-	$head[$h][1] = '<i class="fas fa-image pictofixedwidth"></i>' . $langs->trans('MediaGallery');
-	$head[$h][2] = 'media_gallery';
-	$h++;
+    $head[$h][0] = dol_buildpath('/saturne/admin/media_gallery.php', 1);
+    $head[$h][1] = '<i class="fas fa-image pictofixedwidth"></i>' . $langs->trans('MediaGallery');
+    $head[$h][2] = 'media_gallery';
+    $h++;
 
     $head[$h][0] = dol_buildpath('/saturne/admin/setup.php', 1);
     $head[$h][1] = '<i class="fas fa-cog pictofixedwidth"></i>' . $langs->trans('ModuleSettings');
     $head[$h][2] = 'settings';
     $h++;
 
-    $head[$h][0] = dol_buildpath('/saturne/admin/about.php', 1);
+    $head[$h][0] = dol_buildpath('/saturne/admin/about.php', 1) . '?module_name=Saturne';
     $head[$h][1] = '<i class="fab fa-readme pictofixedwidth"></i>' . $langs->trans('About');
     $head[$h][2] = 'about';
     $h++;
 
-	complete_head_from_modules($conf, $langs, null, $head, $h, 'saturne@saturne');
+    complete_head_from_modules($conf, $langs, null, $head, $h, 'saturne@saturne');
 
     complete_head_from_modules($conf, $langs, null, $head, $h, 'saturne@saturne', 'remove');
 
-	return $head;
+    return $head;
 }

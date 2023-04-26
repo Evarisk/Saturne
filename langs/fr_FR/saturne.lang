@@ -143,3 +143,11 @@ ConfigEmail     = Cliquez sur ce lien pour vous rendre à la configuration des e
 
 # Data - Donnée
 CloseModal = Fermer
+
+
+
+#
+# Certificate - Certificat
+#
+# Data - Donnée
+FkElement = Élément lié

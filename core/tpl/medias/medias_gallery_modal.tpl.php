@@ -116,10 +116,26 @@ if ( ! $error && $subaction == "addFiles") {
 if ( ! $error && $subaction == "unlinkFile") {
 	$data = json_decode(file_get_contents('php://input'), true);
 
-	$filepath = $data['filepath'];
+	$filePath = $data['filepath'];
+	$fileName = $data['filename'];
+	$fullPath = $filePath . '/' . $fileName;
 
-	if (is_file($filepath)) {
-		unlink($filepath);
+	if (is_file($fullPath)) {
+		unlink($fullPath);
+	}
+
+	$sizesArray = [
+		'mini',
+		'small',
+		'medium',
+		'large'
+	];
+
+	foreach($sizesArray as $size) {
+		$thumbName = $filePath . '/thumbs/' . saturne_get_thumb_name($fileName, $size);
+		if (is_file($thumbName)) {
+			unlink($thumbName);
+		};
 	}
 }
 

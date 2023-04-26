@@ -104,7 +104,7 @@ function saturne_check_access($permission, object $object = null, bool $allowExt
         }
     }
 
-	if ($conf->multicompany->enabled) {
+	if (isModEnabled('multicompany')) {
 		if ($object->id > 0) {
 			if ($object->entity != $conf->entity) {
 				setEventMessage($langs->trans('ChangeEntityRedirection'), 'warnings');
@@ -148,7 +148,7 @@ function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', st
  *  @param  string $morehtmlref More html to show after the ref (see $morehtmlleft for before)
  *  @return void
  */
-function saturne_banner_tab(object $object, string $paramid = 'ref', string $morehtml = '', int $shownav = 1, string $fieldid = 'ref', string $fieldref = 'ref', string $morehtmlref = ''): void
+function saturne_banner_tab(object $object, string $paramid = 'ref', string $morehtml = '', int $shownav = 1, string $fieldid = 'ref', string $fieldref = 'ref', string $morehtmlref = '', bool $handlePhoto = false): void
 {
     global $db, $langs, $hookmanager, $moduleName, $moduleNameLowerCase;
 
@@ -179,10 +179,15 @@ function saturne_banner_tab(object $object, string $paramid = 'ref', string $mor
     }
 
     // Project
-    if (isModEnabled('project') && array_key_exists('fk_project', $object->fields)) {
-        if (!empty($object->fk_project)) {
+    if (isModEnabled('project')) {
+        if (array_key_exists('fk_project', $object->fields)) {
+            $key = 'fk_project';
+        } elseif (array_key_exists('projectid', $object->fields)) {
+            $key = 'projectid';
+        }
+        if (!empty($object->$key)) {
             $project = new Project($db);
-            $project->fetch($object->fk_project);
+            $project->fetch($object->$key);
             $saturneMorehtmlref .= $langs->trans('Project') . ' : ' . $project->getNomUrl(1, '', 1) . '<br>';
         } else {
             $saturneMorehtmlref .= $langs->trans('Project') . ' : ' . '<br>';
@@ -200,7 +205,16 @@ function saturne_banner_tab(object $object, string $paramid = 'ref', string $mor
 
     $moreparam = '&module_name=' . $moduleName . '&object_type=' . $object->element;
 
-    dol_banner_tab($object, $paramid, $morehtml, $shownav, $fieldid, $fieldref, $saturneMorehtmlref, $moreparam);
+	if (!$handlePhoto) {
+		dol_banner_tab($object, $paramid, $morehtml, $shownav, $fieldid, $fieldref, $saturneMorehtmlref, $moreparam);
+	} else {
+		global $conf, $form;
+
+		print '<div class="arearef heightref valignmiddle centpercent">';
+		$morehtmlleft = '<div class="floatleft inline-block valignmiddle divphotoref">' . saturne_show_medias_linked($moduleNameLowerCase, $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $object->element . '/'. $object->ref . '/photos/', 'small', '', 0, 0, 0, 88, 88, 0, 0, 0, $object->element . '/'. $object->ref . '/photos/', $object, 'photo', 0, 0,0, 1) . '</div>';
+		print $form->showrefnav($object, $paramid, $morehtml, $shownav, $fieldid, $fieldref, $morehtmlref, $moreparam, 0, $morehtmlleft, $object->getLibStatut(6));
+		print '</div>';
+	}
 
     print '<div class="underbanner clearboth"></div>';
 }
