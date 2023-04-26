@@ -268,7 +268,9 @@ class SaturneCertificate extends CommonObject
 	/**
 	 * Constructor.
 	 *
-	 * @param DoliDb $db Database handler.
+	 * @param DoliDb $db                  Database handler.
+     * @param string $moduleNameLowerCase Module name.
+     * @param string $objectType          Object element type.
 	 */
 	public function __construct(DoliDB $db, string $moduleNameLowerCase = 'saturne', string $objectType = 'saturne_certificate')
 	{
