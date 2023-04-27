@@ -166,11 +166,32 @@ if ( ! $error && $subaction == "unlinkFile") {
 					$firstFileName = array_shift($fileArray);
 					$object->$objectSubtype = $firstFileName['name'];
 				} else {
-					$object->$objectSubtype = '';
+					unset($object->$objectSubtype);
 				}
 
 				$object->update($user, true);
 			}
+		}
+	}
+}
+
+if ( ! $error && $subaction == "addToFavorite") {
+	global $user;
+
+	$data = json_decode(file_get_contents('php://input'), true);
+
+	$fileName      = $data['filename'];
+	$objectId      = $data['objectId'];
+	$objectType    = $data['objectType'];
+	$objectSubtype = $data['objectSubtype'];
+	$objectSubdir  = $data['objectSubdir'];
+
+	if ($objectId > 0) {
+		$object = new $objectType($db);
+		$object->fetch($objectId);
+		if (property_exists($object, $objectSubtype)) {
+			$object->$objectSubtype = $fileName;
+			$object->update($user, true);
 		}
 	}
 }
