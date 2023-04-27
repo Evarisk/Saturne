@@ -55,6 +55,7 @@ UseAllEmailModeDescription        = Autorise l'utilisation de tous les modes de 
 SignaturePublicInterfaceForbidden = Accès interdit à l'interface publique de signature
 ObjectVisibleDescription          = Afficher le champ %s
 SavedConfig                       = Configuration sauvegardée
+Extrafields                       = Attributs supplémentaires
 
 # Mod Numbering - Modèle de numérotation
 NumberingModule = Modèle de numérotation
