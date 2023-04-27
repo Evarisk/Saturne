@@ -41,6 +41,8 @@ global $conf, $db, $langs, $user;
 // Load translation files required by the page
 saturne_load_langs(['admin']);
 
+$form       = new Form($db);
+
 // Parameters
 $action     = GETPOST('action', 'alpha');
 $value      = GETPOST('value', 'alpha');
@@ -55,25 +57,34 @@ saturne_check_access($permissiontoread);
  */
 
 if ($action == 'setMediaDimension') {
-	$MediaMaxWidthMedium  = GETPOST('MediaMaxWidthMedium', 'alpha');
-	$MediaMaxHeightMedium = GETPOST('MediaMaxHeightMedium', 'alpha');
-	$MediaMaxWidthLarge   = GETPOST('MediaMaxWidthLarge', 'alpha');
-	$MediaMaxHeightLarge  = GETPOST('MediaMaxHeightLarge', 'alpha');
+	$error = 0;
+	$mediasMax['SATURNE_MEDIA_MAX_WIDTH_MINI']         = GETPOST('MediaMaxWidthMini', 'alpha');
+	$mediasMax['SATURNE_MEDIA_MAX_HEIGHT_MINI']        = GETPOST('MediaMaxHeightMini', 'alpha');
+	$mediasMax['SATURNE_MEDIA_MAX_WIDTH_SMALL']        = GETPOST('MediaMaxWidthSmall', 'alpha');
+	$mediasMax['SATURNE_MEDIA_MAX_HEIGHT_SMALL']       = GETPOST('MediaMaxHeightSmall', 'alpha');
+	$mediasMax['SATURNE_MEDIA_MAX_WIDTH_MEDIUM']       = GETPOST('MediaMaxWidthMedium', 'alpha');
+	$mediasMax['SATURNE_MEDIA_MAX_HEIGHT_MEDIUM']      = GETPOST('MediaMaxHeightMedium', 'alpha');
+	$mediasMax['SATURNE_MEDIA_MAX_WIDTH_LARGE']        = GETPOST('MediaMaxWidthLarge', 'alpha');
+	$mediasMax['SATURNE_MEDIA_MAX_HEIGHT_LARGE']       = GETPOST('MediaMaxHeightLarge', 'alpha');
+	$mediasMax['SATURNE_DISPLAY_NUMBER_MEDIA_GALLERY'] = GETPOST('DisplayNumberMediaGallery', 'alpha');
 
-	if (!empty($MediaMaxWidthMedium) || $MediaMaxWidthMedium === '0') {
-		dolibarr_set_const($db, 'SATURNE_MEDIA_MAX_WIDTH_MEDIUM', $MediaMaxWidthMedium, 'integer', 0, '', $conf->entity);
-	}
-	if (!empty($MediaMaxHeightMedium) || $MediaMaxHeightMedium === '0') {
-		dolibarr_set_const($db, 'SATURNE_MEDIA_MAX_HEIGHT_MEDIUM', $MediaMaxHeightMedium, 'integer', 0, '', $conf->entity);
-	}
-	if (!empty($MediaMaxWidthLarge) || $MediaMaxWidthLarge === '0') {
-		dolibarr_set_const($db, 'SATURNE_MEDIA_MAX_WIDTH_LARGE', $MediaMaxWidthLarge, 'integer', 0, '', $conf->entity);
-	}
-	if (!empty($MediaMaxHeightLarge) || $MediaMaxHeightLarge === '0') {
-		dolibarr_set_const($db, 'SATURNE_MEDIA_MAX_HEIGHT_LARGE', $MediaMaxHeightLarge, 'integer', 0, '', $conf->entity);
+	foreach($mediasMax as $key => $valueMax) {
+		if (empty($valueMax)) {
+			setEventMessages('MediaDimensionEmptyError', [], 'errors');
+			$error++;
+			break;
+		} else if ($valueMax < 0) {
+			setEventMessages('MediaDimensionNegativeError', [], 'errors');
+			$error++;
+			break;
+		} else {
+			dolibarr_set_const($db, $key, $valueMax, 'integer', 0, '', $conf->entity);
+		}
 	}
 
-    setEventMessage($langs->trans('SavedMediaData'));
+	if (empty($error)) {
+		setEventMessages('MediaDimensionSetWithSuccess', []);
+	}
 }
 
 /*
@@ -107,31 +118,54 @@ print '<td>' . $langs->trans('Value') . '</td>';
 print '<td>' . $langs->trans('Action') . '</td>';
 print '</tr>';
 
+print '<tr class="oddeven"><td><label for="MediaMaxWidthMini">' . $langs->trans('MediaMaxWidthMini') . '</label></td>';
+print '<td>' . $langs->trans('MediaMaxWidthMiniDescription') . '</td>';
+print '<td><input type="number" name="MediaMaxWidthMini" value="' . $conf->global->SATURNE_MEDIA_MAX_WIDTH_MINI . '"></td>';
+print '</td></tr>';
+
+print '<tr class="oddeven"><td><label for="MediaMaxHeightMini">' . $langs->trans('MediaMaxHeightMini') . '</label></td>';
+print '<td>' . $langs->trans('MediaMaxHeightMiniDescription') . '</td>';
+print '<td><input type="number" name="MediaMaxHeightMini" value="' . $conf->global->SATURNE_MEDIA_MAX_HEIGHT_MINI . '"></td>';
+print '</td></tr>';
+
+print '<tr class="oddeven"><td><label for="MediaMaxWidthSmall">' . $langs->trans('MediaMaxWidthSmall') . '</label></td>';
+print '<td>' . $langs->trans('MediaMaxWidthSmallDescription') . '</td>';
+print '<td><input type="number" name="MediaMaxWidthSmall" value="' . $conf->global->SATURNE_MEDIA_MAX_WIDTH_SMALL . '"></td>';
+print '</td></tr>';
+
+print '<tr class="oddeven"><td><label for="MediaMaxHeightSmall">' . $langs->trans('MediaMaxHeightSmall') . '</label></td>';
+print '<td>' . $langs->trans('MediaMaxHeightSmallDescription') . '</td>';
+print '<td><input type="number" name="MediaMaxHeightSmall" value="' . $conf->global->SATURNE_MEDIA_MAX_HEIGHT_SMALL . '"></td>';
+print '</td></tr>';
+
 print '<tr class="oddeven"><td><label for="MediaMaxWidthMedium">' . $langs->trans('MediaMaxWidthMedium') . '</label></td>';
 print '<td>' . $langs->trans('MediaMaxWidthMediumDescription') . '</td>';
 print '<td><input type="number" name="MediaMaxWidthMedium" value="' . $conf->global->SATURNE_MEDIA_MAX_WIDTH_MEDIUM . '"></td>';
-print '<td><input type="submit" class="button" name="save" value="' . $langs->trans('Save') . '">';
 print '</td></tr>';
 
 print '<tr class="oddeven"><td><label for="MediaMaxHeightMedium">' . $langs->trans('MediaMaxHeightMedium') . '</label></td>';
 print '<td>' . $langs->trans('MediaMaxHeightMediumDescription') . '</td>';
 print '<td><input type="number" name="MediaMaxHeightMedium" value="' . $conf->global->SATURNE_MEDIA_MAX_HEIGHT_MEDIUM . '"></td>';
-print '<td><input type="submit" class="button" name="save" value="' . $langs->trans('Save') . '">';
 print '</td></tr>';
 
 print '<tr class="oddeven"><td><label for="MediaMaxWidthLarge">' . $langs->trans('MediaMaxWidthLarge') . '</label></td>';
 print '<td>' . $langs->trans('MediaMaxWidthLargeDescription') . '</td>';
 print '<td><input type="number" name="MediaMaxWidthLarge" value="' . $conf->global->SATURNE_MEDIA_MAX_WIDTH_LARGE . '"></td>';
-print '<td><input type="submit" class="button" name="save" value="' . $langs->trans('Save') . '">';
 print '</td></tr>';
 
 print '<tr class="oddeven"><td><label for="MediaMaxHeightLarge">' . $langs->trans('MediaMaxHeightLarge') . '</label></td>';
 print '<td>' . $langs->trans('MediaMaxHeightLargeDescription') . '</td>';
 print '<td><input type="number" name="MediaMaxHeightLarge" value="' . $conf->global->SATURNE_MEDIA_MAX_HEIGHT_LARGE . '"></td>';
-print '<td><input type="submit" class="button" name="save" value="' . $langs->trans('Save') . '">';
+print '</td></tr>';
+
+print '<tr class="oddeven"><td><label for="DisplayNumberMediaGallery">' . $langs->trans('DisplayNumberMediaGallery') . '</label></td>';
+print '<td>' . $langs->trans('DisplayNumberMediaGalleryDescription') . '</td>';
+print '<td><input type="number" name="DisplayNumberMediaGallery" value="' . $conf->global->SATURNE_DISPLAY_NUMBER_MEDIA_GALLERY . '"></td>';
 print '</td></tr>';
 
 print '</table>';
+
+print $form->buttonsSaveCancel('Save', '');
 print '</form>';
 
 // Page end
