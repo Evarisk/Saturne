@@ -333,6 +333,11 @@ if ($id > 0 || !empty($ref) && empty($action)) {
         print '</div>';
     }
 
+    print '<div class="tabsAction" style="margin-bottom: 0">';
+    print '<a class="btnTitle reposition ' . (($attendantTableMode == 'advanced') ? '' : 'btnTitleSelected') . '" href="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&attendant_table_mode=simple" title="' . $langs->trans('AttendantTableModeSimple') . '"><span class="fa fa-minus imgforviewmode valignmiddle btnTitle-icon"></span></a>';
+    print '<a class="btnTitle reposition ' . (($attendantTableMode == 'advanced') ? 'btnTitleSelected' : '') . '"  href="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&attendant_table_mode=advanced" title="' . $langs->trans('AttendantTableModeAdvanced') . '"><span class="fa fa-th-list imgforviewmode valignmiddle btnTitle-icon"></span></a>';
+    print '</div>';
+
     $zone = 'private';
 
     $parameters = [];
@@ -348,8 +353,14 @@ if ($id > 0 || !empty($ref) && empty($action)) {
     }
 
     $alreadyAddedUsers = [];
-    foreach ($signatoriesByRole as $attendantRole => $signatories) {
-        require __DIR__ . '/../core/tpl/attendants/attendants_table_view.tpl.php';
+    if (is_array($signatoriesByRole) && !empty($signatoriesByRole)) {
+        foreach ($signatoriesByRole as $attendantRole => $signatories) {
+            require __DIR__ . '/../core/tpl/attendants/attendants_table_view.tpl.php';
+        }
+    } else {
+        print load_fiche_titre($langs->trans('Attendants') . ' - ' . $langs->trans('Attendant'), '', '');
+
+        print '<div class="opacitymedium">' . $langs->trans('NoAttendants') . '</div>';
     }
 
     print '</div>';
