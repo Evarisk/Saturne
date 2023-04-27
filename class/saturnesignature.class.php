@@ -168,9 +168,9 @@ class SaturneSignature extends CommonObject
     public ?string $phone = '';
 
     /**
-     * @var string Society name
+     * @var string|null Society name
      */
-    public string $society_name = '';
+    public ?string $society_name = '';
 
     /**
      * @var string Signature date
