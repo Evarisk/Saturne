@@ -112,7 +112,10 @@ class modSaturne extends DolibarrModules
             // Set this to relative path of css file if module has its own css file
             'css' => ['/saturne/css/scss/modules/picto/_picto.scss'],
             // Set this to relative path of js file if module must load a js on all pages
-            'js' => [],
+            'js' => [
+				'/saturne/js/saturne.js',
+				'/saturne/js/modules/menu.js'
+			],
             // Set here all hooks context managed by module. To find available hook context, make a "grep -r '>initHooks(' *" on source code. You can also set hook context to 'all'
             'hooks' => [
                 'saturnepublicinterface',
