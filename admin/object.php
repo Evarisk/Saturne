@@ -69,7 +69,7 @@ saturne_check_access($permissiontoread);
  * View
  */
 
-$title    = $langs->trans(ucfirst($object->element));
+$title    = $langs->trans('ModuleSetup', $moduleName);
 $help_url = 'FR:Module_' . $moduleName;
 
 saturne_header(0,'', $title, $help_url);
@@ -82,9 +82,6 @@ print load_fiche_titre($title, $linkback, 'title_setup');
 $preHead = $moduleNameLowerCase . '_admin_prepare_head';
 $head = $preHead();
 print dol_get_fiche_head($head, $object->element, $title, -1, $moduleNameLowerCase . '_color@' . $moduleNameLowerCase);
-
-print load_fiche_titre($title, '', 'object_' . $object->picto);
-print '<hr>';
 
 require_once __DIR__ . '/../core/tpl/admin/object/object_numbering_module_view.tpl.php';
 
