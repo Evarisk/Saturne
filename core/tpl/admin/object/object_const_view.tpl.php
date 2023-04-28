@@ -5,6 +5,22 @@ if ($reshook > 0) {
     $constArray = $hookmanager->resArray;
 }
 
+if ($action == 'addConf') {
+	foreach ($constArray[$object->element] as $const) {
+		if (empty($conf->global->$const['code'])) {
+			dolibarr_set_const($db, $const['code'], 1, 'integer', 0, '', $conf->entity);
+		}
+	}
+}
+
+if ($action == 'delConf') {
+	foreach ($constArray[$object->element] as $const) {
+		if (empty($conf->global->$const['code'])) {
+			dolibarr_set_const($db, $const['code'], 0, 'integer', 0, '', $conf->entity);
+		}
+	}
+}
+
 if (is_array($constArray) && !empty($constArray)) {
     // Config Data
     print load_fiche_titre($langs->transnoentities('Config'), '', '');
@@ -13,7 +29,11 @@ if (is_array($constArray) && !empty($constArray)) {
     print '<tr class="liste_titre">';
     print '<td>' . $langs->transnoentities('Parameters') . '</td>';
     print '<td>' . $langs->transnoentities('Description') . '</td>';
-    print '<td class="center">' . $langs->transnoentities('Status') . '</td>';
+	print '<td class="center nowrap">';
+	print '<a class="reposition commonlink" title="'.dol_escape_htmltag($langs->trans("All")).'" alt="'.dol_escape_htmltag($langs->trans("All")).'" href="'.$_SERVER["PHP_SELF"].'?action=addConf&token='.newToken().'&confirm=yes"> <u>'.$langs->trans("All")."</u> </a>";
+	print ' / ';
+	print '<a class="reposition commonlink" title="'.dol_escape_htmltag($langs->trans("None")).'" alt="'.dol_escape_htmltag($langs->trans("None")).'" href="'.$_SERVER["PHP_SELF"].'?&action=delConf&token='.newToken().'&confirm=yes"> <u>'.$langs->trans("None")."</u> </a>";
+	print '</td>';
     print '</tr>';
 
     foreach ($constArray[$object->element] as $const) {
