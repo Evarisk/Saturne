@@ -29,6 +29,7 @@ CREATE TABLE llx_saturne_object_certificate(
     note_public       text,
     note_private      text,
     element_type      varchar(255),
+    type              varchar(255),
     sha256            text,
     json              text,
     url               text,
