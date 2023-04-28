@@ -63,16 +63,32 @@ if ($action != 'create' && $action != 'edit') {
     print '<div class="tabsAction">';
     print '<div class="inline-block divButAction"><a class="butAction" href="' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleNameLowerCase . '&object_type=' . $objectType . '&action=create">' . $langs->trans('NewAttribute') . '</a></div>';
     print '</div>';
+	?>
+	<script>
+		$('.editfielda').attr('href', $('.editfielda').attr('href').replace('#formeditextrafield', '') + '&module_name=' + <?php echo json_encode(GETPOST('module_name')); ?> + '&object_type=' + <?php echo json_encode(GETPOST('object_type')); ?> + '#formeditextrafield')
+		$('.pictodelete').closest('.paddingleft').attr('href', $('.pictodelete').closest('.paddingleft').attr('href') + '&module_name=' + <?php echo json_encode(GETPOST('module_name')); ?> + '&object_type=' + <?php echo json_encode(GETPOST('object_type')); ?>)
+	</script>
+	<?php
 }
 
 // Creation of an optional field.
 if ($action == 'create') {
     print load_fiche_titre($langs->trans('NewAttribute'));
     require_once DOL_DOCUMENT_ROOT . '/core/tpl/admin_extrafields_add.tpl.php';
+	?>
+	<script>
+		$('form').attr('action', $('form').attr('action') + '?module_name=' + <?php echo json_encode(GETPOST('module_name')); ?> + '&object_type=' + <?php echo json_encode(GETPOST('object_type')); ?>)
+	</script>
+	<?php
 }
 
 // Edition of an optional field.
 if ($action == 'edit' && !empty($attrname)) {
     print load_fiche_titre($langs->trans('FieldEdition', $attrname));
     require_once DOL_DOCUMENT_ROOT . '/core/tpl/admin_extrafields_edit.tpl.php';
+	?>
+	<script>
+		$('form').attr('action', $('form').attr('action') + '&module_name=' + <?php echo json_encode(GETPOST('module_name')); ?> + '&object_type=' + <?php echo json_encode(GETPOST('object_type')); ?>)
+	</script>
+	<?php
 }
