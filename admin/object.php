@@ -69,7 +69,7 @@ saturne_check_access($permissiontoread);
  * View
  */
 
-$title    = $langs->transnoentities(ucfirst($object->element));
+$title    = $langs->trans(ucfirst($object->element));
 $help_url = 'FR:Module_' . $moduleName;
 
 saturne_header(0,'', $title, $help_url);
@@ -89,10 +89,6 @@ print '<hr>';
 require_once __DIR__ . '/../core/tpl/admin/object/object_numbering_module_view.tpl.php';
 
 require_once __DIR__ . '/../core/tpl/admin/object/object_const_view.tpl.php';
-
-if ($object->isextrafieldmanaged > 0) {
-    require_once __DIR__ . '/../core/tpl/admin/object/object_extrafields_view.tpl.php';
-}
 
 // Page end
 print dol_get_fiche_end();
