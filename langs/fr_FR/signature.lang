@@ -56,13 +56,15 @@ Attendance       = Présence
 SignatureActions = Actions
 
 # Button - Bouton
-GoToValidate            = Valider %s
-GoToLock                = Verrouiller %s
-SendEmail               = Envoyer un email
-SendGlobalSignatureMail = Envoyer un email de signature à tous les participants
-DeleteAttendant         = Supprimer le participant
-Sign                    = Signer
-Erase                   = Effacer
+GoToValidate               = Valider %s
+GoToLock                   = Verrouiller %s
+SendEmail                  = Envoyer un email
+SendGlobalSignatureMail    = Envoyer un email de signature à tous les participants
+DeleteAttendant            = Supprimer le participant
+Sign                       = Signer
+Erase                      = Effacer
+AttendantTableModeSimple   = Vue simplifiée
+AttendantTableModeAdvanced = Vue avancée
 
 # Data - Donnée
 Attendant          = Participant

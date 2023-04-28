@@ -207,7 +207,8 @@ $selectorAnchor .= '</select>';
 print load_fiche_titre($title, $selectorAnchor, $moduleNameLowerCase . '_color.png@' . $moduleNameLowerCase);
 
 // Configuration header
-$head = dolisirh_admin_prepare_head();
+$preHead = $moduleNameLowerCase . '_admin_prepare_head';
+$head    = $preHead();
 print dol_get_fiche_head($head, 'documents', $title, -1, $moduleNameLowerCase . '_color@' . $moduleNameLowerCase);
 
 print load_fiche_titre($langs->trans('Configs', $langs->trans('DocumentsMin')), '', '');

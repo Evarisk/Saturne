@@ -119,24 +119,25 @@ class SaturneCertificate extends CommonObject
         'date_creation'     => ['type' => 'datetime',     'label' => 'DateCreation',     'enabled' => 1, 'position' => 40,  'notnull' => 1, 'visible' => 0],
         'tms'               => ['type' => 'timestamp',    'label' => 'DateModification', 'enabled' => 1, 'position' => 50,  'notnull' => 1, 'visible' => 0],
         'import_key'        => ['type' => 'varchar(14)',  'label' => 'ImportId',         'enabled' => 1, 'position' => 60,  'notnull' => 0, 'visible' => 0, 'index' => 0],
-        'status'            => ['type' => 'smallint',     'label' => 'Status',           'enabled' => 1, 'position' => 220, 'notnull' => 1, 'visible' => 2, 'default' => 0, 'index' => 1, 'validate' => 1, 'arrayofkeyval' => [0 => 'StatusDraft', 1 => 'ValidatePendingSignature', 2 => 'Expired', 3 => 'Archived']],
+        'status'            => ['type' => 'smallint',     'label' => 'Status',           'enabled' => 1, 'position' => 240, 'notnull' => 1, 'visible' => 2, 'default' => 0, 'index' => 1, 'validate' => 1, 'arrayofkeyval' => [0 => 'StatusDraft', 1 => 'ValidatePendingSignature', 2 => 'Expired', 3 => 'Archived']],
         'label'             => ['type' => 'varchar(255)', 'label' => 'Label',            'enabled' => 1, 'position' => 70,  'notnull' => 1, 'visible' => 1, 'searchall' => 1, 'css' => 'minwidth300', 'cssview' => 'wordbreak', 'showoncombobox' => 2, 'validate' => 1, 'autofocusoncreate' => 1],
         'date_start'        => ['type' => 'date',         'label' => 'DateStart',        'enabled' => 1, 'position' => 100, 'notnull' => 0, 'visible' => 1],
         'date_end'          => ['type' => 'date',         'label' => 'DateEnd',          'enabled' => 1, 'position' => 110, 'notnull' => 0, 'visible' => 1],
-        'description'       => ['type' => 'html',         'label' => 'Description',      'enabled' => 1, 'position' => 130, 'notnull' => 0, 'visible' => 3, 'validate' => 1],
-        'note_public'       => ['type' => 'html',         'label' => 'NotePublic',       'enabled' => 1, 'position' => 140, 'notnull' => 0, 'visible' => 0, 'cssview' => 'wordbreak', 'validate' => 1],
-        'note_private'      => ['type' => 'html',         'label' => 'NotePrivate',      'enabled' => 1, 'position' => 150, 'notnull' => 0, 'visible' => 0, 'cssview' => 'wordbreak', 'validate' => 1],
+        'description'       => ['type' => 'html',         'label' => 'Description',      'enabled' => 1, 'position' => 140, 'notnull' => 0, 'visible' => 3, 'validate' => 1],
+        'note_public'       => ['type' => 'html',         'label' => 'NotePublic',       'enabled' => 1, 'position' => 150, 'notnull' => 0, 'visible' => 0, 'cssview' => 'wordbreak', 'validate' => 1],
+        'note_private'      => ['type' => 'html',         'label' => 'NotePrivate',      'enabled' => 1, 'position' => 160, 'notnull' => 0, 'visible' => 0, 'cssview' => 'wordbreak', 'validate' => 1],
         'element_type'      => ['type' => 'select',       'label' => 'ElementType',      'enabled' => 1, 'position' => 120, 'notnull' => 0, 'visible' => 3, 'css' => 'maxwidth150 widthcentpercentminusxx'],
-        'fk_element'        => ['type' => 'integer',      'label' => 'FkElement',        'enabled' => 1, 'position' => 125, 'notnull' => 0, 'visible' => 3, 'index' => 1, 'css' => 'maxwidth500 widthcentpercentminusxx'],
-        'sha256'            => ['type' => 'text',         'label' => 'Sha256',           'enabled' => 1, 'position' => 160, 'notnull' => 0, 'visible' => 0],
-        'json'              => ['type' => 'text',         'label' => 'Json',             'enabled' => 1, 'position' => 170, 'notnull' => 0, 'visible' => 0],
-        'url'               => ['type' => 'text',         'label' => 'Url',              'enabled' => 1, 'position' => 180, 'notnull' => 0, 'visible' => 0],
-        'public_url'        => ['type' => 'text',         'label' => 'PublicUrl',        'enabled' => 1, 'position' => 190, 'notnull' => 0, 'visible' => 0],
-        'status_validation' => ['type' => 'smallint',     'label' => 'StatusValidation', 'enabled' => 1, 'position' => 200, 'notnull' => 0, 'visible' => 0],
+        'type'              => ['type' => 'varchar(255)', 'label' => 'Type',             'enabled' => 1, 'position' => 130, 'notnull' => 0, 'visible' => 1, 'css' => 'minwidth300'],
+        'fk_element'        => ['type' => 'integer',      'label' => 'FkElement',        'enabled' => 1, 'position' => 135, 'notnull' => 0, 'visible' => 3, 'index' => 1, 'css' => 'maxwidth500 widthcentpercentminusxx'],
+        'sha256'            => ['type' => 'text',         'label' => 'Sha256',           'enabled' => 1, 'position' => 170, 'notnull' => 0, 'visible' => 0],
+        'json'              => ['type' => 'text',         'label' => 'Json',             'enabled' => 1, 'position' => 180, 'notnull' => 0, 'visible' => 0],
+        'url'               => ['type' => 'text',         'label' => 'Url',              'enabled' => 1, 'position' => 190, 'notnull' => 0, 'visible' => 0],
+        'public_url'        => ['type' => 'text',         'label' => 'PublicUrl',        'enabled' => 1, 'position' => 200, 'notnull' => 0, 'visible' => 0],
+        'status_validation' => ['type' => 'smallint',     'label' => 'StatusValidation', 'enabled' => 1, 'position' => 210, 'notnull' => 0, 'visible' => 0],
         'fk_soc'            => ['type' => 'integer:Societe:societe/class/societe.class.php:1', 'label' => 'ThirdParty', 'picto' => 'company', 'enabled' => '$conf->societe->enabled', 'position' => 80,  'notnull' => 0, 'visible' => 1, 'index' => 1, 'css' => 'maxwidth500 widthcentpercentminusxx', 'validate' => 1, 'foreignkey' => 'societe.rowid'],
         'fk_project'        => ['type' => 'integer:Project:projet/class/project.class.php:1',  'label' => 'Project',    'picto' => 'project', 'enabled' => '$conf->project->enabled', 'position' => 90,  'notnull' => 0, 'visible' => 1, 'index' => 1, 'css' => 'maxwidth500 widthcentpercentminusxx', 'validate' => 1, 'foreignkey' => 'projet.rowid'],
-        'fk_user_creat'     => ['type' => 'integer:User:user/class/user.class.php',            'label' => 'UserAuthor', 'picto' => 'user',    'enabled' => 1,                         'position' => 210, 'notnull' => 1, 'visible' => 0, 'foreignkey' => 'user.rowid'],
-        'fk_user_modif'     => ['type' => 'integer:User:user/class/user.class.php',            'label' => 'UserModif',  'picto' => 'user',    'enabled' => 1,                         'position' => 220, 'notnull' => 0, 'visible' => 0, 'foreignkey' => 'user.rowid'],
+        'fk_user_creat'     => ['type' => 'integer:User:user/class/user.class.php',            'label' => 'UserAuthor', 'picto' => 'user',    'enabled' => 1,                         'position' => 220, 'notnull' => 1, 'visible' => 0, 'foreignkey' => 'user.rowid'],
+        'fk_user_modif'     => ['type' => 'integer:User:user/class/user.class.php',            'label' => 'UserModif',  'picto' => 'user',    'enabled' => 1,                         'position' => 230, 'notnull' => 0, 'visible' => 0, 'foreignkey' => 'user.rowid'],
     ];
 
     /**
@@ -213,6 +214,11 @@ class SaturneCertificate extends CommonObject
      * @var string Element type.
      */
 	public string $element_type;
+
+    /**
+     * @var string Type.
+     */
+    public string $type = '';
 
     /**
      * @var int|string Element ID.
