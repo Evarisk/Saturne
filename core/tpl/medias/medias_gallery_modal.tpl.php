@@ -122,10 +122,17 @@ if ( ! $error && $subaction == "addFiles") {
 }
 
 if ( ! $error && $subaction == "unlinkFile") {
+	global $user;
+
 	$data = json_decode(file_get_contents('php://input'), true);
 
-	$filePath = $data['filepath'];
-	$fileName = $data['filename'];
+	$filePath      = $data['filepath'];
+	$fileName      = $data['filename'];
+	$objectId      = $data['objectId'];
+	$objectType    = $data['objectType'];
+	$objectSubtype = $data['objectSubtype'];
+	$objectSubdir  = $data['objectSubdir'];
+
 	$fullPath = $filePath . '/' . $fileName;
 
 	if (is_file($fullPath)) {
@@ -144,6 +151,48 @@ if ( ! $error && $subaction == "unlinkFile") {
 		if (is_file($thumbName)) {
 			unlink($thumbName);
 		};
+	}
+
+	if ($objectId > 0) {
+		$object = new $objectType($db);
+		$object->fetch($objectId);
+		if (property_exists($object, $objectSubtype)) {
+
+			if ($object->$objectSubtype == $fileName) {
+				$pathPhotos = $conf->dolismq->multidir_output[$conf->entity] . '/'. $objectType .'/'. $object->ref . '/photos/';
+				$fileArray  = dol_dir_list($pathPhotos, 'files', 0, '', $fileName);
+
+				if (count($fileArray) > 0) {
+					$firstFileName = array_shift($fileArray);
+					$object->$objectSubtype = $firstFileName['name'];
+				} else {
+					unset($object->$objectSubtype);
+				}
+
+				$object->update($user, true);
+			}
+		}
+	}
+}
+
+if ( ! $error && $subaction == "addToFavorite") {
+	global $user;
+
+	$data = json_decode(file_get_contents('php://input'), true);
+
+	$fileName      = $data['filename'];
+	$objectId      = $data['objectId'];
+	$objectType    = $data['objectType'];
+	$objectSubtype = $data['objectSubtype'];
+	$objectSubdir  = $data['objectSubdir'];
+
+	if ($objectId > 0) {
+		$object = new $objectType($db);
+		$object->fetch($objectId);
+		if (property_exists($object, $objectSubtype)) {
+			$object->$objectSubtype = $fileName;
+			$object->update($user, true);
+		}
 	}
 }
 

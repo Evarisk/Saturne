@@ -142,8 +142,8 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 	//	$dir  = $sdir . '/' . (dol_strlen($object->ref) > 0 ? $object->ref . '/' : '');
 	//	$pdir = $subdir . '/' . (dol_strlen($object->ref) > 0 ? $object->ref . '/' : '');
 
-	$dir  = $sdir . '/';
-	$pdir = $subdir . '/';
+	$dir  = $sdir . (substr($sdir, -1) == '/' ? '' : '/');
+	$pdir = $subdir . (substr($subdir, -1) == '/' ? '' : '/');
 
 	$dirthumb  = $dir . 'thumbs/';
 	$pdirthumb = $pdir . 'thumbs/';
