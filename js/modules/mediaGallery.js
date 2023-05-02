@@ -473,6 +473,11 @@ window.saturne.mediaGallery.selectPage = function( event ) {
 
 	let mediaGallery = $('#' + containerToRefresh);
 
+	let objectId         = mediaGallery.find('.from-id').val()
+	let objectType       = mediaGallery.find('.from-type').val()
+	let objectSubtype    = mediaGallery.find('.from-subtype').length ? mediaGallery.find('.from-subtype').val() : ''
+	let objectSubdir     = mediaGallery.find('.from-subdir').length ? mediaGallery.find('.from-subdir').val() : ''
+
 	let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
 
 	if (!$(this).hasClass('arrow')) {
@@ -494,6 +499,11 @@ window.saturne.mediaGallery.selectPage = function( event ) {
 		success: function ( resp ) {
 			$('.wpeo-loader').removeClass('wpeo-loader')
 			mediaGallery.html($(resp).find('#' + containerToRefresh).children());
+			
+			mediaGallery.find('.from-id').val(objectId)
+			mediaGallery.find('.from-type').val(objectType)
+			mediaGallery.find('.from-subtype').val(objectSubtype)
+			mediaGallery.find('.from-subdir').val(objectSubdir)
 		},
 		error: function ( ) {
 		}
