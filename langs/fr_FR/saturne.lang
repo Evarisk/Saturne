@@ -60,6 +60,7 @@ Config                            = Configuration
 
 # Mod Numbering - Modèle de numérotation
 NumberingModule = Modèle de numérotation
+NumberingModuleDet = Modèle de numérotation des lignes
 StandardModel   = Renvoie le numéro sous la forme %syymm-nnnn où yy est l'année, mm le mois et nnnn est un compteur séquentiel sans rupture et sans remise à 0.
 
 # ODT Template - Template ODT
