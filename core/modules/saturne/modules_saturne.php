@@ -420,6 +420,9 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
                 $signatoriesArray = $signatory->fetchSignatories($moreParam['object']->id, $moreParam['object']->element);
                 if (!empty($signatoriesArray) && is_array($signatoriesArray)) {
                     $tempDir = $conf->$moduleNameLowerCase->multidir_output[$moreParam['object']->entity ?? 1] . '/temp/';
+                    if (empty($moreParam['excludeAttendantsRole'])) {
+                        $moreParam['excludeAttendantsRole'] = [];
+                    }
                     foreach ($signatoriesArray as $objectSignatory) {
                         if (!in_array($objectSignatory->role, $moreParam['excludeAttendantsRole'])) {
                             $tmpArray['attendant_lastname']  = strtoupper($objectSignatory->lastname);
