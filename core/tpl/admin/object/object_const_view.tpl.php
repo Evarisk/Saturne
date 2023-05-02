@@ -34,6 +34,7 @@ if (is_array($constArray) && !empty($constArray)) {
     print '<td>' . $langs->transnoentities('Parameters') . '</td>';
     print '<td>' . $langs->transnoentities('Description') . '</td>';
 	print '<td class="center nowrap">';
+	print $langs->transnoentities('Status') . '</br>';
 	print '<a class="reposition commonlink" title="' . dol_escape_htmltag($langs->trans("All")) . '" href="' . $_SERVER["PHP_SELF"].'?action=add_all_conf&token=' . newToken() . '"> <u>' . $langs->trans("All") . "</u> </a>";
 	print ' / ';
 	print '<a class="reposition commonlink" title="' . dol_escape_htmltag($langs->trans("None")) . '" href="' . $_SERVER["PHP_SELF"] . '?&action=delete_all_conf&token=' . newToken() . '"> <u>' . $langs->trans("None")."</u> </a>";
