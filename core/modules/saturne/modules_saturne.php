@@ -192,7 +192,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/commondocgenerator.class.php';
 /**
  * Parent class for documents models.
  */
-abstract class ModeleDocSaturne extends CommonDocGenerator
+abstract class SaturneDocumentModel extends CommonDocGenerator
 {
     /**
      * @var string Document name.
@@ -364,8 +364,7 @@ abstract class ModeleDocSaturne extends CommonDocGenerator
                     // Image.
                     if (file_exists($val)) {
                         $listLines->setImage($key, $val);
-                    }
-                    else {
+                    } else {
                         $listLines->setVars($key, $outputLangs->transnoentities('ErrorFileNotFound'), true, 'UTF-8');
                     }
                 } elseif (preg_match('/signature/', $key) && is_file($val)) {
@@ -422,7 +421,7 @@ abstract class ModeleDocSaturne extends CommonDocGenerator
                 if (!empty($signatoriesArray) && is_array($signatoriesArray)) {
                     $tempDir = $conf->$moduleNameLowerCase->multidir_output[$moreParam['object']->entity ?? 1] . '/temp/';
                     foreach ($signatoriesArray as $objectSignatory) {
-                        if ($objectSignatory->role != 'Controller') {
+                        if (!in_array($objectSignatory->role, $moreParam['excludeAttendantsRole'])) {
                             $tmpArray['attendant_lastname']  = strtoupper($objectSignatory->lastname);
                             $tmpArray['attendant_firstname'] = $objectSignatory->firstname;
                             switch ($objectSignatory->attendance) {
@@ -656,7 +655,7 @@ abstract class ModeleDocSaturne extends CommonDocGenerator
                         dol_syslog($e->getMessage());
                         setEventMessages($langs->transnoentities('FileCouldNotBeGeneratedInPDF') . '<br>' . $langs->transnoentities('CheckDocumentationToEnablePDFGeneration'), [], 'errors');
                     }
-                }  else {
+                } else {
                     try {
                         $odfHandler->saveToDisk($file);
                     } catch (Exception $e) {
