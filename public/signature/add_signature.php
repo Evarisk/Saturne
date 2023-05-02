@@ -193,7 +193,7 @@ if (empty($reshook)) {
             setEventMessages($document->error, $document->errors, 'errors');
             $action = '';
         } elseif (empty($donotredirect)) {
-            copy($upload_dir . '/' . $objectType . 'document' . '/' . $object->ref . '/specimen/' . $document->last_main_doc, DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $objectType . '_specimen_' . $track_id . '.odt');
+            copy($upload_dir . '/' . $objectType . 'document' . '/' . $object->ref . '/public_specimen/' . $document->last_main_doc, DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $objectType . '_specimen_' . $track_id . '.odt');
             setEventMessages($langs->trans('FileGenerated') . ' - ' . $document->last_main_doc, []);
             $urltoredirect = $_SERVER['REQUEST_URI'];
             $urltoredirect = preg_replace('/#builddoc$/', '', $urltoredirect);
