@@ -55,6 +55,7 @@ UseAllEmailModeDescription        = Allow the use of all email configuration mod
 SignaturePublicInterfaceForbidden = No access to the public signature interface
 ObjectVisibleDescription          = Display the %s field
 SavedConfig                       = Saved configuration
+Config                            = Configuration
 
 # Mod Numbering
 NumberingModule = Numbering model
