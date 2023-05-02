@@ -45,16 +45,20 @@ abstract class SaturneObject extends CommonObject
      */
     public int $isextrafieldmanaged = 1;
 
-	/**
-	 * Constructor.
-	 *
-	 * @param DoliDb $db Database handler.
-	 */
-	public function __construct(DoliDB $db)
+    /**
+     * Constructor.
+     *
+     * @param DoliDb $db                  Database handler.
+     * @param string $moduleNameLowerCase Module name.
+     * @param string $objectType          Object element type.
+     */
+    public function __construct(DoliDB $db, string $moduleNameLowerCase = 'saturne', string $objectType = 'saturne_objet')
 	{
 		global $conf, $langs;
 
 		$this->db = $db;
+        $this->module  = $moduleNameLowerCase;
+        $this->element = $objectType;
 
 		if (empty($conf->global->MAIN_SHOW_TECHNICAL_ID) && isset($this->fields['rowid'])) {
 			$this->fields['rowid']['visible'] = 0;
