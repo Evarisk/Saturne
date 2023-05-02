@@ -169,6 +169,10 @@ class modSaturne extends DolibarrModules
         $i = 0;
 		$this->const = [
 			// CONST MEDIAS
+			$i++ => ['SATURNE_MEDIA_MAX_WIDTH_MINI', 'integer', 128, '', 0, 'current'],
+			$i++ => ['SATURNE_MEDIA_MAX_HEIGHT_MINI', 'integer', 72, '', 0, 'current'],
+			$i++ => ['SATURNE_MEDIA_MAX_WIDTH_SMALL', 'integer', 480, '', 0, 'current'],
+			$i++ => ['SATURNE_MEDIA_MAX_HEIGHT_SMALL', 'integer', 270, '', 0, 'current'],
 			$i++ => ['SATURNE_MEDIA_MAX_WIDTH_MEDIUM', 'integer', 854, '', 0, 'current'],
 			$i++ => ['SATURNE_MEDIA_MAX_HEIGHT_MEDIUM', 'integer', 480, '', 0, 'current'],
 			$i++ => ['SATURNE_MEDIA_MAX_WIDTH_LARGE', 'integer', 1280, '', 0, 'current'],
