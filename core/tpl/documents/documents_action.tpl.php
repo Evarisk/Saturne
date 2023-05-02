@@ -57,7 +57,7 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
     }
 
     if (GETPOST('forcebuilddoc')) {
-        $model  = '';
+        $model     = '';
         $modelList = saturne_get_list_of_models($db, $object->element . 'document');
         if (!empty($modelList)) {
             asort($modelList);
@@ -85,12 +85,12 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
         setEventMessages($document->error, $document->errors, 'errors');
         $action = '';
     } else {
-        setEventMessages($langs->transnoentities('FileGenerated') . ' - ' . $document->last_main_doc, []);
+        setEventMessages($langs->trans('FileGenerated') . ' - ' . '<a href=' . DOL_URL_ROOT . '/document.php?modulepart='. $object->module . '&file=' . urlencode($object->element . 'document/' . $object->ref . '/' . $document->last_main_doc) . '&entity=' . $conf->entity . '"' . '>' . $document->last_main_doc, []);
         $urlToRedirect = $_SERVER['REQUEST_URI'];
         $urlToRedirect = preg_replace('/#builddoc$/', '', $urlToRedirect);
         $urlToRedirect = preg_replace('/action=builddoc&?/', '', $urlToRedirect); // To avoid infinite loop.
         $urlToRedirect = preg_replace('/forcebuilddoc=1&?/', '', $urlToRedirect); // To avoid infinite loop.
-        header('Location: ' . $urlToRedirect . '#builddoc');
+        header('Location: ' . $urlToRedirect);
         exit;
     }
 }
