@@ -220,13 +220,20 @@ abstract class SaturneObject extends CommonObject
     /**
      * Delete object in database.
      *
-     * @param  User $user      User that deletes.
-     * @param  bool $notrigger false = launch triggers after, true = disable triggers.
-     * @return int             0 < if KO, > 0 if OK.
+     * @param  User $user       User that deletes.
+     * @param  bool $notrigger  false = launch triggers after, true = disable triggers.
+     * @param  bool $softDelete Don't delete object.
+     * @return int              0 < if KO, > 0 if OK.
      */
-    public function delete(User $user, bool $notrigger = false): int
+    public function delete(User $user, bool $notrigger = false, bool $softDelete = true): int
     {
-        return $this->deleteCommon($user, $notrigger);
+        if ($softDelete) {
+            $this->status = $this::STATUS_DELETED;
+            $result = $this->update($user, $notrigger);
+        } else {
+            $result = $this->deleteCommon($user, $notrigger);
+        }
+        return $result;
     }
 
     /**
