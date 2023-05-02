@@ -58,6 +58,7 @@ SavedConfig                       = Saved configuration
 
 # Mod Numbering
 NumberingModule = Numbering model
+NumberingModuleDet = Numbering model lines
 StandardModel   = Returns the number in the form %syymm-nnnn where yy is the year, mm is the month and nnnn is a sequential counter without break and without reset.
 
 # ODT Template
