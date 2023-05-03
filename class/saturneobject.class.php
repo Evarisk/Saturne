@@ -45,16 +45,20 @@ abstract class SaturneObject extends CommonObject
      */
     public int $isextrafieldmanaged = 1;
 
-	/**
-	 * Constructor.
-	 *
-	 * @param DoliDb $db Database handler.
-	 */
-	public function __construct(DoliDB $db)
+    /**
+     * Constructor.
+     *
+     * @param DoliDb $db                  Database handler.
+     * @param string $moduleNameLowerCase Module name.
+     * @param string $objectType          Object element type.
+     */
+    public function __construct(DoliDB $db, string $moduleNameLowerCase = 'saturne', string $objectType = 'saturne_objet')
 	{
 		global $conf, $langs;
 
 		$this->db = $db;
+        $this->module  = $moduleNameLowerCase;
+        $this->element = $objectType;
 
 		if (empty($conf->global->MAIN_SHOW_TECHNICAL_ID) && isset($this->fields['rowid'])) {
 			$this->fields['rowid']['visible'] = 0;
@@ -216,13 +220,20 @@ abstract class SaturneObject extends CommonObject
     /**
      * Delete object in database.
      *
-     * @param  User $user      User that deletes.
-     * @param  bool $notrigger false = launch triggers after, true = disable triggers.
-     * @return int             0 < if KO, > 0 if OK.
+     * @param  User $user       User that deletes.
+     * @param  bool $notrigger  false = launch triggers after, true = disable triggers.
+     * @param  bool $softDelete Don't delete object.
+     * @return int              0 < if KO, > 0 if OK.
      */
-    public function delete(User $user, bool $notrigger = false): int
+    public function delete(User $user, bool $notrigger = false, bool $softDelete = true): int
     {
-        return $this->deleteCommon($user, $notrigger);
+        if ($softDelete) {
+            $this->status = $this::STATUS_DELETED;
+            $result = $this->update($user, $notrigger);
+        } else {
+            $result = $this->deleteCommon($user, $notrigger);
+        }
+        return $result;
     }
 
     /**
