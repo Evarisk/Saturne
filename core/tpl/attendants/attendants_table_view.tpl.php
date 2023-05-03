@@ -87,7 +87,7 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
         print '</td><td class="center copy-signatureurl-container">';
         if ($object->status == $object::STATUS_VALIDATED) {
             if ((!$user->rights->$moduleNameLowerCase->$objectType->read && $user->rights->$moduleNameLowerCase->assignedtome->$objectType && ($element->element_id == $user->id || $element->element_id == $user->contact_id)) || $permissiontoadd) {
-                $signatureUrl = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $element->signature_url . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element, 3);
+                $signatureUrl = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $element->signature_url . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
                 print '<a href=' . $signatureUrl . ' target="_blank"><div class="wpeo-button button-primary"><i class="fas' . (($element->status == SaturneSignature::STATUS_SIGNED) ? ' fa-eye' : ' fa-signature') . '"></i></div></a>';
                 print ' <i class="fas fa-clipboard copy-signatureurl" data-signature-url="' . $signatureUrl . '" style="color: #666"></i>';
                 print '<span class="copied-to-clipboard" style="display:none">' . '  ' . $langs->trans('CopiedToClipboard') . '</span>';
@@ -190,9 +190,9 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
         $alreadyAddedUsers[$element->element_id] = $element->element_id;
     }
 
-    require __DIR__ . '/attendants_table_add _view.tpl.php';
+    require __DIR__ . '/attendants_table_add_view.tpl.php';
 } else {
     print '<div class="opacitymedium">' . $langs->trans('NoAttendants') . '</div>';
 
-    require __DIR__ . '/attendants_table_add _view.tpl.php';
+    require __DIR__ . '/attendants_table_add_view.tpl.php';
 }

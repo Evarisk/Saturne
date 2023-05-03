@@ -31,8 +31,9 @@ if (file_exists('../saturne.main.inc.php')) {
 }
 
 // Get module parameters
-$moduleName = GETPOST('module_name', 'alpha');
-$objectType = GETPOST('object_type', 'alpha');
+$moduleName   = GETPOST('module_name', 'alpha');
+$objectType   = GETPOST('object_type', 'alpha');
+$documentType = GETPOST('document_type', 'alpha');
 
 $moduleNameLowerCase = strtolower($moduleName);
 
@@ -210,7 +211,7 @@ if (empty($reshook)) {
             require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
 
             $from = $conf->global->MAIN_MAIL_EMAIL_FROM;
-            $url  = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $signatory->signature_url  . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element, 3);
+            $url  = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $signatory->signature_url  . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
 
             $message = $langs->trans('SignatureEmailMessage', $url);
             $subject = $langs->trans('SignatureEmailSubject', $langs->transnoentities('The' . ucfirst($object->element)), $object->ref);
@@ -505,7 +506,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
                 foreach ($signatories as $objectSignatory) {
                     if ($objectSignatory->role == $attendantRole) {
                         $mesg .= $outputlangs->trans($objectSignatory->role) . ' : ' . strtoupper($objectSignatory->lastname) . ' ' . $objectSignatory->firstname . '<br>';
-                        $signatureUrl = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $objectSignatory->signature_url . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element, 3);
+                        $signatureUrl = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $objectSignatory->signature_url . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
                         $mesg .= '<a href=' . $signatureUrl . ' target="_blank">' . $signatureUrl . '</a><br><br>';
                     }
                 }

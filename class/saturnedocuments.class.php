@@ -116,7 +116,7 @@ class SaturneDocuments extends SaturneObject
     /**
      * @var string Import key.
      */
-    public $import_key;
+    public $import_key = 0;
 
     /**
      * @var int Status.
@@ -134,9 +134,9 @@ class SaturneDocuments extends SaturneObject
     public string $module_name;
 
     /**
-     * @var string Json.
+     * @var string|null Json.
      */
-    public string $json = '';
+    public ?string $json = null;
 
     /**
      * @var string Pdf model name.
@@ -144,9 +144,9 @@ class SaturneDocuments extends SaturneObject
     public $model_pdf;
 
     /**
-     * @var string ODT model name.
+     * @var string|null ODT model name.
      */
-    public string $model_odt = '';
+    public ?string $model_odt = null;
 
     /**
      * @var string Last document name.
@@ -183,11 +183,12 @@ class SaturneDocuments extends SaturneObject
     /**
      * Create object into database
      *
-     * @param  User $user      User that creates
-     * @param  bool $notrigger false=launch triggers after, true=disable triggers
-     * @return int             0 < if KO, ID of created object if OK
+     * @param  User        $user         User that creates
+     * @param  bool        $notrigger    false=launch triggers after, true=disable triggers
+     * @param  object|null $parentObject Current object
+     * @return int                       0 < if KO, ID of created object if OK
      */
-    public function create(User $user, bool $notrigger = false, $parentObject = 0): int
+    public function create(User $user, bool $notrigger = false, object $parentObject = null): int
     {
         $now = dol_now();
 
@@ -242,7 +243,7 @@ class SaturneDocuments extends SaturneObject
      */
     public function generateDocument(string $modele, Translate $outputlangs, int $hidedetails = 0, int $hidedesc = 0, int $hideref = 0, array $moreparams = null): int
     {
-        $modelpath = 'custom/' . $this->module . '/core/modules/' . $this->module . '/' . $this->module . 'documents/' . $this->element . 'document/';
+        $modelpath = 'custom/' . $this->module . '/core/modules/' . $this->module . '/' . $this->module . 'documents/' . $this->element . '/';
 
         $result = $this->commonGenerateDocument($modelpath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
 

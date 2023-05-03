@@ -56,8 +56,9 @@ if (file_exists('../../saturne.main.inc.php')) {
 }
 
 // Get module parameters.
-$moduleName = GETPOST('module_name', 'alpha');
-$objectType = GETPOST('object_type', 'alpha');
+$moduleName   = GETPOST('module_name', 'alpha');
+$objectType   = GETPOST('object_type', 'alpha');
+$documentType = GETPOST('document_type', 'alpha');
 
 $moduleNameLowerCase = strtolower($moduleName);
 
@@ -72,6 +73,7 @@ require_once __DIR__ . '/../../class/saturnesignature.class.php';
 
 // Load Module libraries.
 require_once __DIR__ . '/../../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
+require_once __DIR__ . '/../../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . strtolower($documentType) . '.class.php';
 
 // Global variables definitions.
 global $conf, $db, $hookmanager, $langs;
@@ -87,7 +89,7 @@ $source   = GETPOST('source', 'aZ09');
 // Initialize technical objects.
 $classname = ucfirst($objectType);
 $object    = new $classname($db);
-$document  = new SaturneDocuments($db, $moduleNameLowerCase, $objectType);
+$document  = new $documentType($db);
 $signatory = new SaturneSignature($db, $moduleNameLowerCase, $objectType);
 $user      = new User($db);
 
@@ -178,9 +180,9 @@ if (empty($reshook)) {
             $moreparams = [];
         }
 
-        $constforval = strtoupper($moduleName) . '_' . strtoupper($objectType . 'document') . '_ADDON_ODT_PATH';
+        $constforval = strtoupper($moduleName) . '_' . strtoupper($documentType) . '_ADDON_ODT_PATH';
         $template    = preg_replace('/DOL_DOCUMENT_ROOT/', DOL_DOCUMENT_ROOT, $conf->global->$constforval);
-        $model       = $objectType . 'document_odt:' . $template .'template_' . $objectType . 'document.odt';
+        $model       = strtolower($documentType) . '_odt:' . $template .'template_' . strtolower($documentType) . '.odt';
 
         $moreparams['object']   = $object;
         $moreparams['user']     = $user;
@@ -193,7 +195,7 @@ if (empty($reshook)) {
             setEventMessages($document->error, $document->errors, 'errors');
             $action = '';
         } elseif (empty($donotredirect)) {
-            copy($upload_dir . '/' . $objectType . 'document' . '/' . $object->ref . '/public_specimen/' . $document->last_main_doc, DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $objectType . '_specimen_' . $track_id . '.odt');
+            copy($upload_dir . '/' . strtolower($documentType) . '/' . $object->ref . '/public_specimen/' . $document->last_main_doc, DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $objectType . '_specimen_' . $track_id . '.odt');
             setEventMessages($langs->trans('FileGenerated') . ' - ' . $document->last_main_doc, []);
             $urltoredirect = $_SERVER['REQUEST_URI'];
             $urltoredirect = preg_replace('/#builddoc$/', '', $urltoredirect);
