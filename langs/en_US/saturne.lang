@@ -56,6 +56,7 @@ SignaturePublicInterfaceForbidden = No access to the public signature interface
 ObjectVisibleDescription          = Display the %s field
 SavedConfig                       = Saved configuration
 Config                            = Configuration
+Extrafields                       = Extra attributes
 
 # Mod Numbering
 NumberingModule = Numbering model
