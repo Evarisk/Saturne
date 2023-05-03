@@ -17,5 +17,5 @@ ALTER TABLE llx_saturne_object_documents ADD INDEX idx_saturne_object_documents_
 ALTER TABLE llx_saturne_object_documents ADD INDEX idx_saturne_object_documents_ref (ref);
 ALTER TABLE llx_saturne_object_documents ADD INDEX idx_saturne_object_documents_status (status);
 ALTER TABLE llx_saturne_object_documents ADD INDEX idx_saturne_object_documents_parent_id (parent_id);
-ALTER TABLE llx_saturne_object_documents ADD UNIQUE uk_saturne_object_documents_ref (ref, entity);
+ALTER TABLE llx_saturne_object_documents ADD UNIQUE uk_saturne_object_documents_ref (ref, entity, module_name);
 ALTER TABLE llx_saturne_object_documents ADD CONSTRAINT llx_saturne_object_documents_fk_user_creat FOREIGN KEY (fk_user_creat) REFERENCES llx_user (rowid);
