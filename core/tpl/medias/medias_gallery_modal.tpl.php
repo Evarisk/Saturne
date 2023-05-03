@@ -46,6 +46,8 @@ if ( ! $error && $subaction == "uploadPhoto" && ! empty($conf->global->MAIN_UPLO
 }
 
 if ( ! $error && $subaction == "addFiles") {
+	global $user;
+
 	$data = json_decode(file_get_contents('php://input'), true);
 
 	$filenames     = $data['filenames'];
@@ -85,6 +87,9 @@ if ( ! $error && $subaction == "addFiles") {
 		foreach ($filenames as $filename) {
 			$entity = ($conf->entity > 1) ? '/' . $conf->entity : '';
 			$filename = dol_sanitizeFileName($filename);
+			if (empty($object->$objectSubtype)) {
+				$object->$objectSubtype = $filename;
+			}
 			if (is_file($conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias/' . $filename)) {
 				$pathToECMPhoto = $conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias/' . $filename;
 
@@ -118,6 +123,7 @@ if ( ! $error && $subaction == "addFiles") {
 				}
 			}
 		}
+		$object->update($user);
 	}
 }
 
