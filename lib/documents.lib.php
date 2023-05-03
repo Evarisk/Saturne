@@ -470,7 +470,7 @@ function saturne_get_list_of_models(DoliDB $db, string $type, int $maxfilenamele
 
 				if (count($listoffiles)) {
 					foreach ($listoffiles as $record) {
-						$max = ($maxfilenamelength ?: 28);
+						$max = ($maxfilenamelength ?: 50);
 						$liste[$obj->id.':'.$record['fullname']] = dol_trunc($record['name'], $max, 'middle');
 					}
 				} else {
