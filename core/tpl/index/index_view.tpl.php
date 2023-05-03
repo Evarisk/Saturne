@@ -87,8 +87,8 @@ $moduleShowPatchNote = strtoupper($moduleName) . '_SHOW_PATCH_NOTE';
 if ($conf->global->$moduleJustUpdated == 1) : ?>
     <div class="wpeo-notice notice-success">
         <div class="notice-content">
-            <div class="notice-subtitle"><strong><?php echo $langs->trans('ModuleUpdate'); ?></strong>
-                <?php echo $langs->trans('ModuleHasBeenUpdatedTo', $modModule->version) ?>
+            <div class="notice-subtitle"><strong><?php echo $langs->trans('ModuleUpdate', $moduleName); ?></strong>
+                <?php echo $langs->trans('ModuleHasBeenUpdatedTo', $moduleName, $modModule->version) ?>
             </div>
         </div>
     </div>
@@ -107,7 +107,7 @@ if ($conf->global->$moduleShowPatchNote > 0) : ?>
     <div class="wpeo-notice notice-info">
         <input type="hidden" name="token" value="<?php echo newToken(); ?>">
         <div class="notice-content">
-            <div class="notice-title"><?php echo $langs->trans('ModulePatchNote', $modModule->version); ?>
+            <div class="notice-title"><?php echo $langs->trans('ModulePatchNote', $moduleName, $modModule->version); ?>
                 <div class="show-patchnote wpeo-button button-square-40 button-blue wpeo-tooltip-event modal-open" aria-label="<?php echo $langs->trans('ShowPatchNote'); ?>">
                     <input hidden class="modal-to-open" value="patch-note">
                     <i class="fas fa-list button-icon"></i>
@@ -121,7 +121,7 @@ if ($conf->global->$moduleShowPatchNote > 0) : ?>
         <div class="modal-container wpeo-modal-event" style="max-width: 1280px; max-height: 1000px">
             <!-- Modal-Header -->
             <div class="modal-header">
-                <h2 class="modal-title"><?php echo $langs->trans('ModulePatchNote', $modModule->version);  ?></h2>
+                <h2 class="modal-title"><?php echo $langs->trans('ModulePatchNote', $moduleName, $modModule->version);  ?></h2>
                 <div class="modal-close"><i class="fas fa-times"></i></div>
             </div>
             <!-- Modal Content-->
