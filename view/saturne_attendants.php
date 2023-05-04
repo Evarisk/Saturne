@@ -353,7 +353,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
         }
     }
 
-    $alreadyAddedUsers = [];
+	$alreadyAddedSignatories = [];
     if (is_array($signatoriesByRole) && !empty($signatoriesByRole)) {
         foreach ($signatoriesByRole as $attendantRole => $signatories) {
             require __DIR__ . '/../core/tpl/attendants/attendants_table_view.tpl.php';
