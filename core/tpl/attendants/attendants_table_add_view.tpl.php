@@ -26,7 +26,7 @@
  * Global     : $conf, $langs, $user,
  * Parameters : $attendantTableMode, $id,
  * Objects    : $object, $formcompany, $form,
- * Variable   : $attendantRole, $moduleNane, $alreadyAddedUsers, $permissiontoadd
+ * Variable   : $signatoryRole, $moduleNane, $alreadyAddedUsers, $permissiontoadd
  */
 
 if ($object->status == $object::STATUS_DRAFT && $permissiontoadd) {
@@ -34,25 +34,25 @@ if ($object->status == $object::STATUS_DRAFT && $permissiontoadd) {
     print '<input type="hidden" name="token" value="' . newToken() . '">';
     print '<input type="hidden" name="action" value="add_attendant">';
     if ($attendantTableMode == 'advanced') {
-        print '<input type="hidden" name="attendant_role" value="' . $attendantRole . '">';
+        print '<input type="hidden" name="attendant_role" value="' . $signatoryRole . '">';
     }
     if (!empty($backtopage)) {
         print '<input type="hidden" name="backtopage" value="' . $backtopage . '">';
     }
 
     print '<tr class="oddeven"><td>';
-    $selectedCompany = GETPOSTISSET('newcompany' . (($attendantTableMode == 'advanced') ? $attendantRole : '')) ? GETPOST('newcompany' . (($attendantTableMode == 'advanced') ? $attendantRole : ''), 'int') : (empty($object->socid) ? 0 : $object->socid);
+    $selectedCompany = GETPOSTISSET('newcompany' . (($attendantTableMode == 'advanced') ? $signatoryRole : '')) ? GETPOST('newcompany' . (($attendantTableMode == 'advanced') ? $signatoryRole : ''), 'int') : (empty($object->socid) ? 0 : $object->socid);
     $moreparam       = '&module_name=' . urlencode($moduleName) . '&object_type=' . urlencode($object->element) . '&attendant_table_mode=' . urlencode($attendantTableMode);
     $moreparam       .= '&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?id=' . $object->id . $moreparam);
-    $formcompany->selectCompaniesForNewContact($object, 'id', $selectedCompany, 'newcompany' . (($attendantTableMode == 'advanced') ? $attendantRole : ''), '', 0, $moreparam, 'minwidth300imp');
+    $formcompany->selectCompaniesForNewContact($object, 'id', $selectedCompany, 'newcompany' . (($attendantTableMode == 'advanced') ? $signatoryRole : ''), '', 0, $moreparam, 'minwidth300imp');
     print '</td>';
     print '<td class=minwidth400">';
     if ($selectedCompany <= 0) {
-        print img_picto('', 'user', 'class="pictofixedwidth"') . $form->select_dolusers('', 'attendant' . (($attendantTableMode == 'advanced') ? $attendantRole : '_') . 'user', 1, $alreadyAddedUsers, 0, '', '', $conf->entity, 0, 0, '', 0, '', 'minwidth200 widthcentpercentminusx maxwidth300') . '<br>';
+        print img_picto('', 'user', 'class="pictofixedwidth"') . $form->select_dolusers('', 'attendant' . (($attendantTableMode == 'advanced') ? $signatoryRole : '_') . 'user', 1, $alreadyAddedUsers, 0, '', '', $conf->entity, 0, 0, '', 0, '', 'minwidth200 widthcentpercentminusx maxwidth300') . '<br>';
     }
-    print img_object('', 'contact', 'class="pictofixedwidth"') . $form->selectcontacts(($selectedCompany > 0 ? $selectedCompany : -1), GETPOST('contactID'), 'attendant' . (($attendantTableMode == 'advanced') ? $attendantRole : '_') . 'contact', 1, $alreadyAddedUsers, '', 1, 'minwidth200 widthcentpercentminusx maxwidth300');
+    print img_object('', 'contact', 'class="pictofixedwidth"') . $form->selectcontacts(($selectedCompany > 0 ? $selectedCompany : -1), GETPOST('contactID'), 'attendant' . (($attendantTableMode == 'advanced') ? $signatoryRole : '_') . 'contact', 1, $alreadyAddedUsers, '', 1, 'minwidth200 widthcentpercentminusx maxwidth300');
     if (!empty($selectedCompany) && $selectedCompany > 0 && $user->rights->societe->creer) {
-        $newcardbutton = '<a href="' . DOL_URL_ROOT . '/contact/card.php?socid=' . $selectedCompany . '&action=create' . $moreparam . urlencode('&newcompany' . (($attendantTableMode == 'advanced') ? $attendantRole : '') . '=' . GETPOST('newcompany' . (($attendantTableMode == 'advanced') ? $attendantRole : '')) . '&contactID=&#95;&#95;ID&#95;&#95;') . '" title="' . $langs->trans('NewContact') . '"><span class="fa fa-plus-circle valignmiddle paddingleft"></span></a>';
+        $newcardbutton = '<a href="' . DOL_URL_ROOT . '/contact/card.php?socid=' . $selectedCompany . '&action=create' . $moreparam . urlencode('&newcompany' . (($attendantTableMode == 'advanced') ? $signatoryRole : '') . '=' . GETPOST('newcompany' . (($attendantTableMode == 'advanced') ? $signatoryRole : '')) . '&contactID=&#95;&#95;ID&#95;&#95;') . '" title="' . $langs->trans('NewContact') . '"><span class="fa fa-plus-circle valignmiddle paddingleft"></span></a>';
         print $newcardbutton;
     }
     if ($attendantTableMode == 'simple') {

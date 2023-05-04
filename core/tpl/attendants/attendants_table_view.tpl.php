@@ -26,10 +26,10 @@
  * Global     : $conf, $db, $langs, $user,
  * Parameters : $attendantTableMode, $moduleNameLowerCase, $objectType, $id, $backtopage,
  * Objects    : $thirdparty, $object
- * Variable   : $attendantRole, $signatories, $moduleNane, $permissiontoadd
+ * Variable   : $signatoryRole, $signatories, $moduleNane, $permissiontoadd
  */
 
-print load_fiche_titre($langs->trans('Attendants') . (($attendantTableMode == 'advanced') ? ' - ' . $langs->trans($attendantRole) : ''), '', '');
+print load_fiche_titre($langs->trans('Attendants') . (($attendantTableMode == 'advanced') ? ' - ' . $langs->trans($signatoryRole) : ''), '', '');
 
 if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
     print '<table class="border centpercent tableforfield">';
