@@ -135,7 +135,7 @@ abstract class ModeleNumRefSaturne
         if ($object->ismultientitymanaged == 1) {
             $sql .= ' AND entity = ' . $conf->entity;
         }
-        
+
         $resql = $db->query($sql);
         if ($resql) {
             $obj = $db->fetch_object($resql);
@@ -365,7 +365,11 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
                     if (file_exists($val)) {
                         $listLines->setImage($key, $val);
                     } else {
-                        $listLines->setVars($key, $outputLangs->transnoentities('ErrorFileNotFound'), true, 'UTF-8');
+						if ($key == 'mycompany_logo') {
+							$listLines->setVars($key, $outputLangs->transnoentities('ErrorNoSocietyLogo'), true, 'UTF-8');
+						} else {
+							$listLines->setVars($key, $outputLangs->transnoentities('ErrorFileNotFound'), true, 'UTF-8');
+						}
                     }
                 } elseif (preg_match('/signature/', $key) && is_file($val)) {
                     $imageSize = getimagesize($val);
