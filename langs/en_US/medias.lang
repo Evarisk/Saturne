@@ -18,11 +18,17 @@
 #
 
 # Data
-MediasMin                 = media
-MediaGallery              = Media Library
-ErrorThisFileSizeTooLarge = The %s file is too big
-ErrorThisFileExists       = The file %s already exists
-EmptyMediaGallery         = The media library is empty
+MediasMin                    = media
+MediaGallery                 = Media Library
+ErrorThisFileSizeTooLarge    = The %s file is too big
+ErrorThisFileExists          = The file %s already exists
+EmptyMediaGallery            = The media library is empty
+SearchFile                   = Search for a file
+PhotoWellSent                = The photo has been added to the media library
+PhotoNotSent                 = The photo was not sent correctly
+MediaDimensionSetWithSuccess = Successfully modified media dimensions
+MediaDimensionNegativeError  = The values of the dimensions cannot be negative
+MediaDimensionEmptyError     = The values of the dimensions cannot be empty
 
 # Config page
 MediaMaxWidthMini                    = Minimum media width
