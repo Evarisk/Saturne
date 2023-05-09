@@ -140,7 +140,7 @@ function saturne_show_documents(string $modulepart, string $modulesubdir, string
 
 		$out .= '<input type="hidden" name="action" value="'. $action .'">';
 		$out .= '<input type="hidden" name="token" value="' . newToken() . '">';
-		$out .= load_fiche_titre($titletoshow, '', '');
+		$out .= load_fiche_titre($titletoshow, '', '', 0, 'builddoc');
 		$out .= '<div class="div-table-responsive-no-min">';
 		$out .= '<table class="liste formdoc noborder centpercent">';
 
