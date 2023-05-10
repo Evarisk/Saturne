@@ -210,6 +210,8 @@ function saturne_banner_tab(object $object, string $paramid = 'ref', string $mor
 						$saturneMorehtmlref .= $form->form_project($_SERVER['PHP_SELF'] . '?id=' .$object->id, 0, $object->$key, 'none', 0, 0, 0, 1);
 						$saturneMorehtmlref .= '<a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=edit_project&token=' . newToken() . '&id=' . $object->id . $objectTypePost .'">' . img_edit($langs->transnoentitiesnoconv('SetProject')) . '</a>';
 					}
+				} else {
+					$saturneMorehtmlref .= $form->form_project($_SERVER['PHP_SELF'] . '?id=' .$object->id, 0, $object->$key, 'none', 0, 0, 0, 1);
 				}
 			}
 			$saturneMorehtmlref .= '<br>';
