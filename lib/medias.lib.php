@@ -317,7 +317,10 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 				if ($nbphoto) $return .= '</table>';
 			}
 		}
+	} else {
+		$return .= '<br><br>';
 	}
+	
 	if (is_object($object)) {
 		$object->nbphoto = $nbphoto;
 	}
