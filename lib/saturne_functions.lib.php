@@ -236,7 +236,7 @@ function saturne_banner_tab(object $object, string $paramid = 'ref', string $mor
 
 		print '<div class="arearef heightref valignmiddle centpercent">';
 		$morehtmlleft = '<div class="floatleft inline-block valignmiddle divphotoref">' . saturne_show_medias_linked($moduleNameLowerCase, $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $object->element . '/'. $object->ref . '/photos/', 'small', '', 0, 0, 0, 88, 88, 0, 0, 0, $object->element . '/'. $object->ref . '/photos/', $object, 'photo', 0, 0,0, 1) . '</div>';
-		print $form->showrefnav($object, $paramid, $morehtml, $shownav, $fieldid, $fieldref, $morehtmlref, $moreparam, 0, $morehtmlleft, $object->getLibStatut(6));
+		print $form->showrefnav($object, $paramid, $morehtml, $shownav, $fieldid, $fieldref, $saturneMorehtmlref, $moreparam, 0, $morehtmlleft, $object->getLibStatut(6));
 		print '</div>';
 	}
 
