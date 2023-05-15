@@ -44,14 +44,19 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
 
     $records = [];
 
+	$objectFields = $object->getFieldList('t');
+	if (strstr($objectFields, 't.fk_prospectlevel')) {
+		$objectFields = preg_replace('/t.fk_prospectlevel,/','', $objectFields);
+	}
     $sql = 'SELECT ';
-    $sql .= $object->getFieldList('t');
-    $sql .= ' FROM ' . MAIN_DB_PREFIX . $object->table_element . ' as t';
+    $sql .= $objectFields;
+    $sql .= ' FROM `' . MAIN_DB_PREFIX . $object->table_element . '` as t';
     if (isset($object->ismultientitymanaged) && $object->ismultientitymanaged == 1) {
         $sql .= ' WHERE entity IN (' . getEntity($object->table_element) . ')';
     } else {
         $sql .= ' WHERE 1 = 1';
     }
+
     // Manage filter
     $sqlwhere = [];
     if (count($filter) > 0) {
@@ -69,6 +74,7 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
             }
         }
     }
+
     if (count($sqlwhere) > 0) {
         $sql .= ' AND (' . implode(' ' . $filtermode . ' ', $sqlwhere) . ')';
     }
