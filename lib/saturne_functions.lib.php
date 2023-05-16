@@ -129,7 +129,15 @@ function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', st
 {
     // Configuration header
     if (property_exists($object, 'element')) {
-        $prepareHead = $object->element . '_prepare_head';
+		$element = $object->element;
+
+		if ($object->element == 'contrat') {
+			$element = 'contract';
+		} else if ($object->element == 'project_task') {
+			$element = 'task';
+		}
+		
+        $prepareHead = $element . '_prepare_head';
         $head = $prepareHead($object);
     }
     if (property_exists($object, 'picto')) {
