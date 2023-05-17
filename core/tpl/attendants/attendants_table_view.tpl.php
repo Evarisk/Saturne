@@ -187,7 +187,7 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
         }
         print '</td>';
         print '</tr>';
-        $alreadyAddedUsers[$element->element_id] = $element->element_id;
+        $alreadyAddedSignatories[$element->element_type][$element->element_id] = $element->element_id;
     }
 
     require __DIR__ . '/attendants_table_add_view.tpl.php';

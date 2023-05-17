@@ -194,16 +194,18 @@ if (empty($reshook)) {
                 if (dol_strlen($usertmp->email)) {
                     $signatory->email = $usertmp->email;
                     $signatory->update($user, true);
-                }
+                } else {
+					setEventMessage($langs->trans('NoEmailSet', $langs->transnoentities($signatory->role) . ' ' . strtoupper($signatory->lastname) . ' ' . $signatory->firstname), 'warnings');
+				}
             } elseif ($signatory->element_type == 'socpeople') {
                 $contact->fetch($signatory->element_id);
                 if (dol_strlen($contact->email)) {
                     $signatory->email = $contact->email;
                     $signatory->update($user, true);
-                }
+                } else {
+					setEventMessage($langs->trans('NoEmailSet', $langs->transnoentities($signatory->role) . ' ' . strtoupper($signatory->lastname) . ' ' . $signatory->firstname), 'warnings');
+				}
             }
-        } else {
-            setEventMessage($langs->trans('NoEmailSet', $langs->transnoentities($signatory->role) . ' ' . strtoupper($signatory->lastname) . ' ' . $signatory->firstname), 'warnings');
         }
 
         $sendto = $signatory->email;
@@ -353,7 +355,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
         }
     }
 
-    $alreadyAddedUsers = [];
+	$alreadyAddedSignatories = [];
     if (is_array($signatoriesByRole) && !empty($signatoriesByRole)) {
         foreach ($signatoriesByRole as $signatoryRole => $signatories) {
             require __DIR__ . '/../core/tpl/attendants/attendants_table_view.tpl.php';
@@ -489,7 +491,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
         $formmail->withto              = $liste;
         $formmail->withtofree          = (GETPOST('sendto', 'alphawithlgt') ? GETPOST('sendto', 'alphawithlgt') : '1');
         $formmail->withtocc            = $liste;
-        $formmail->withtopic           = $outputlangs->trans('SendMailSubject', '__REF__');
+        $formmail->withtopic           = $outputlangs->trans('GlobalSignatureEmailSubject', '__MYCOMPANY_NAME__', $langs->transnoentities('The' . ucfirst($object->element)), $object->ref);
         $formmail->withbody            = 1;
         $formmail->withcancel          = 1;
 

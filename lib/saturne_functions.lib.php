@@ -21,6 +21,8 @@
  * \brief   Library files with common functions for Saturne
  */
 
+require_once DOL_DOCUMENT_ROOT . '/core/class/html.formprojet.class.php';
+
 require_once __DIR__ . '/medias.lib.php';
 require_once __DIR__ . '/pagination.lib.php';
 require_once __DIR__ . '/documents.lib.php';
@@ -168,14 +170,17 @@ function saturne_banner_tab(object $object, string $paramid = 'ref', string $mor
     $saturneMorehtmlref .= '<div class="refidno">';
 
 	$saturneMorehtmlref .= $morehtmlref;
+
     // Thirdparty
     if (isModEnabled('societe') && array_key_exists('fk_soc', $object->fields)) {
+		$saturneMorehtmlref .= $langs->trans('ThirdParty') . ' : ';
         if (!empty($object->fk_soc)) {
             $object->fetch_thirdparty();
-            $saturneMorehtmlref .= $langs->trans('ThirdParty') . ' : ' . (is_object($object->thirdparty) ? $object->thirdparty->getNomUrl(1) : '') . '<br>';
-        } else {
-            $saturneMorehtmlref .= $langs->trans('ThirdParty') . ' : ' . '<br>';
+			if (is_object($object->thirdparty)) {
+				$saturneMorehtmlref .= $object->thirdparty->getNomUrl(1);
+			}
         }
+		$saturneMorehtmlref .= '<br>';
     }
 
     // Project
@@ -185,13 +190,32 @@ function saturne_banner_tab(object $object, string $paramid = 'ref', string $mor
         } elseif (array_key_exists('projectid', $object->fields)) {
             $key = 'projectid';
         }
-        if (!empty($object->$key)) {
-            $project = new Project($db);
-            $project->fetch($object->$key);
-            $saturneMorehtmlref .= $langs->trans('Project') . ' : ' . $project->getNomUrl(1, '', 1) . '<br>';
-        } else {
-            $saturneMorehtmlref .= $langs->trans('Project') . ' : ' . '<br>';
-        }
+		if (dol_strlen($key)) {
+			$saturneMorehtmlref .= $langs->trans('Project') . ' : ';
+			if (array_key_exists('status', $object->fields)) {
+				$formproject = new FormProjets($db);
+				$form        = new Form($db);
+				if ($object->status < $object::STATUS_LOCKED) {
+					$objectTypePost = GETPOST('object_type') ? '&object_type=' . GETPOST('object_type') : '';
+					$saturneMorehtmlref .= ' ';
+					if (GETPOST('action') == 'edit_project') {
+						$saturneMorehtmlref .= '<form method="post" action="' . $_SERVER['PHP_SELF'] . '?id=' . $object->id . $objectTypePost .'">';
+						$saturneMorehtmlref .= '<input type="hidden" name="action" value="save_project">';
+						$saturneMorehtmlref .= '<input type="hidden" name="key" value="'. $key .'">';
+						$saturneMorehtmlref .= '<input type="hidden" name="token" value="'.newToken().'">';
+						$saturneMorehtmlref .= $formproject->select_projects(0, $object->$key, $key, 0, 0, 1, 0, 1, 0, 0, '', 1, 0, 'maxwidth500');
+						$saturneMorehtmlref .= '<input type="submit" class="button valignmiddle" value="' . $langs->trans("Modify") . '">';
+						$saturneMorehtmlref .= '</form>';
+					} else {
+						$saturneMorehtmlref .= $form->form_project($_SERVER['PHP_SELF'] . '?id=' .$object->id, 0, $object->$key, 'none', 0, 0, 0, 1);
+						$saturneMorehtmlref .= '<a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=edit_project&token=' . newToken() . '&id=' . $object->id . $objectTypePost .'">' . img_edit($langs->transnoentitiesnoconv('SetProject')) . '</a>';
+					}
+				} else {
+					$saturneMorehtmlref .= $form->form_project($_SERVER['PHP_SELF'] . '?id=' .$object->id, 0, $object->$key, 'none', 0, 0, 0, 1);
+				}
+			}
+			$saturneMorehtmlref .= '<br>';
+		}
     }
 
     $parameters = [];
@@ -212,7 +236,7 @@ function saturne_banner_tab(object $object, string $paramid = 'ref', string $mor
 
 		print '<div class="arearef heightref valignmiddle centpercent">';
 		$morehtmlleft = '<div class="floatleft inline-block valignmiddle divphotoref">' . saturne_show_medias_linked($moduleNameLowerCase, $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $object->element . '/'. $object->ref . '/photos/', 'small', '', 0, 0, 0, 88, 88, 0, 0, 0, $object->element . '/'. $object->ref . '/photos/', $object, 'photo', 0, 0,0, 1) . '</div>';
-		print $form->showrefnav($object, $paramid, $morehtml, $shownav, $fieldid, $fieldref, $morehtmlref, $moreparam, 0, $morehtmlleft, $object->getLibStatut(6));
+		print $form->showrefnav($object, $paramid, $morehtml, $shownav, $fieldid, $fieldref, $saturneMorehtmlref, $moreparam, 0, $morehtmlleft, $object->getLibStatut(6));
 		print '</div>';
 	}
 
