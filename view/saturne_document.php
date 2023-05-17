@@ -124,7 +124,7 @@ saturne_header(0, '', $title, $helpUrl);
 
 if ($id > 0 || !empty($ref)) {
     saturne_get_fiche_head($object, 'document', $title);
-    saturne_banner_tab($object);
+    saturne_banner_tab($object, 'ref', '', 1, 'ref', 'ref', '', !empty($object->photo));
 
     // Build file list
     $filearray = dol_dir_list($upload_dir, 'files', 0, '', '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_DESC : SORT_ASC), 1);

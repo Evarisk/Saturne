@@ -295,7 +295,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
     $object->fetch_optionals();
 
     saturne_get_fiche_head($object, 'attendants', $title);
-    saturne_banner_tab($object);
+    saturne_banner_tab($object, 'ref', '', 1, 'ref', 'ref', '', !empty($object->photo));
 
     print '<div class="fichecenter">';
 
