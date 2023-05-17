@@ -43,3 +43,5 @@ MediaMaxHeightLarge                  = Height of the wide media
 MediaMaxHeightLargeDescription       = Media height (wide dimension) with 16:9 ratio
 DisplayNumberMediaGallery            = Number of media displayed in the media library
 DisplayNumberMediaGalleryDescription = Displays 8 media (default) per page in the media library
+MediaSizeDocument                    = Media size
+MediaSizeDocumentDescription         = Selection of media size in documents

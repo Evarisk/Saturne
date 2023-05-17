@@ -57,6 +57,7 @@ ShowSpecimen                      = See signatures on specimen documents
 ShowSpecimenDescription           = Allows viewing of signatures on specimen documents
 ObjectVisibleDescription          = Display the %s field
 SavedConfig                       = Saved configuration
+ErrorSavedConfig                  = An error occurred during the configuration
 Config                            = Configuration
 Extrafields                       = Extra attributes
 
