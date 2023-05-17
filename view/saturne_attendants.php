@@ -329,7 +329,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
 
     if ($object->status == $object::STATUS_VALIDATED && $permissiontoadd) {
         print '<div class="tabsAction" style="margin-bottom: 0">';
-        print '<a class="butAction" href="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&attendant_table_mode=' . $attendantTableMode . '&action=presend&mode=init&token=' .newToken() . '#formmailbeforetitle' . '"><i class="fas fa-paper-plane"></i> ' . $langs->trans('SendGlobalSignatureMail') . '</a>';
+        print '<a class="butAction" href="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode . '&action=presend&mode=init&token=' .newToken() . '#formmailbeforetitle' . '"><i class="fas fa-paper-plane"></i> ' . $langs->trans('SendGlobalSignatureMail') . '</a>';
         if ($signatory->checkSignatoriesSignatures($object->id, $object->element)) {
             print '<a class="butAction" href="' . $backtocard . '"><i class="fas fa-lock"></i> ' . $langs->trans('GoToLock', $langs->transnoentities('The' . ucfirst($object->element))) . '</a>';
         }
@@ -357,7 +357,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
 
 	$alreadyAddedSignatories = [];
     if (is_array($signatoriesByRole) && !empty($signatoriesByRole)) {
-        foreach ($signatoriesByRole as $attendantRole => $signatories) {
+        foreach ($signatoriesByRole as $signatoryRole => $signatories) {
             require __DIR__ . '/../core/tpl/attendants/attendants_table_view.tpl.php';
         }
     } else {
@@ -500,17 +500,14 @@ if ($id > 0 || !empty($ref) && empty($action)) {
             $_POST['receiver'] = $receiver;
         }
 
-        $mesg = $outputlangs->transnoentities('GlobalSignatureEmailMessage', strtolower($outputlangs->trans(ucfirst($object->element))), $object->label, dol_print_date($object->date_start, 'dayhour', 'tzuser'), strtolower($outputlangs->trans('AttendanceSheetDocument')));
+        $mesg = $outputlangs->transnoentities('GlobalSignatureEmailMessage', strtolower($outputlangs->trans(ucfirst($object->element))), $object->label ?: $object->ref, dol_print_date($object->date_start ?: $object->date_creation, 'dayhour', 'tzuser'), strtolower($outputlangs->trans($documentType)));
 
-        foreach ($attendantsRole as $attendantRole) {
-            $signatories = $signatory->fetchSignatory($attendantRole, $object->id, $object->element);
-            if (is_array($signatories) && !empty($signatories)) {
-                foreach ($signatories as $objectSignatory) {
-                    if ($objectSignatory->role == $attendantRole) {
-                        $mesg .= $outputlangs->trans($objectSignatory->role) . ' : ' . strtoupper($objectSignatory->lastname) . ' ' . $objectSignatory->firstname . '<br>';
-                        $signatureUrl = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $objectSignatory->signature_url . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
-                        $mesg .= '<a href=' . $signatureUrl . ' target="_blank">' . $signatureUrl . '</a><br><br>';
-                    }
+        if (is_array($signatoriesByRole) && !empty($signatoriesByRole)) {
+            foreach ($signatoriesByRole as $signatoryRole) {
+                foreach ($signatoryRole as $attendant) {
+                    $mesg .= $outputlangs->trans($attendant->role) . ' : ' . strtoupper($attendant->lastname) . ' ' . $attendant->firstname . '<br>';
+                    $signatureUrl = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $attendant->signature_url . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
+                    $mesg .= '<a href=' . $signatureUrl . ' target="_blank">' . $signatureUrl . '</a><br><br>';
                 }
             }
         }
