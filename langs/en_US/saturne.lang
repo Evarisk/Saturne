@@ -69,7 +69,8 @@ StandardModel   = Returns the number in the form %syymm-nnnn where yy is the yea
 YourDocuments          = Documents
 DocumentTemplate       = Model documents
 ODTDefaultTemplateName = Default ODT of documents
-
+ErrorFileNotFound      = File not found
+ErrorNoSocietyLogo     = No company logo found
 
 
 #
