@@ -70,6 +70,7 @@ DeleteObject          = Supprimer %s
 
 # Data - Donnée
 ActionsOnObject = Événements sur %s
+DisplayMoreInfo = Afficher plus d'informations
 
 # Email - Mail
 ObjectLabel     = Récapitulatif
