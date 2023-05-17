@@ -194,16 +194,18 @@ if (empty($reshook)) {
                 if (dol_strlen($usertmp->email)) {
                     $signatory->email = $usertmp->email;
                     $signatory->update($user, true);
-                }
+                } else {
+					setEventMessage($langs->trans('NoEmailSet', $langs->transnoentities($signatory->role) . ' ' . strtoupper($signatory->lastname) . ' ' . $signatory->firstname), 'warnings');
+				}
             } elseif ($signatory->element_type == 'socpeople') {
                 $contact->fetch($signatory->element_id);
                 if (dol_strlen($contact->email)) {
                     $signatory->email = $contact->email;
                     $signatory->update($user, true);
-                }
+                } else {
+					setEventMessage($langs->trans('NoEmailSet', $langs->transnoentities($signatory->role) . ' ' . strtoupper($signatory->lastname) . ' ' . $signatory->firstname), 'warnings');
+				}
             }
-        } else {
-            setEventMessage($langs->trans('NoEmailSet', $langs->transnoentities($signatory->role) . ' ' . strtoupper($signatory->lastname) . ' ' . $signatory->firstname), 'warnings');
         }
 
         $sendto = $signatory->email;
@@ -353,7 +355,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
         }
     }
 
-    $alreadyAddedUsers = [];
+	$alreadyAddedSignatories = [];
     if (is_array($signatoriesByRole) && !empty($signatoriesByRole)) {
         foreach ($signatoriesByRole as $attendantRole => $signatories) {
             require __DIR__ . '/../core/tpl/attendants/attendants_table_view.tpl.php';
