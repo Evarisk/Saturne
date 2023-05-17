@@ -59,14 +59,14 @@ saturne_check_access($permissiontoread);
  * View
  */
 
-$title    = $langs->trans('ModuleAbout', $moduleName);
+$title    = $langs->trans('ModuleSetup', $moduleName);
 $help_url = 'FR:Module_' . $moduleName;
 
 saturne_header(0, '', $title, $help_url);
 
 // Subheader.
 $linkback = '<a href="' . ($backtopage ?: DOL_URL_ROOT . '/admin/modules.php?restore_lastsearch_values=1') . '">' . $langs->trans('BackToModuleList') . '</a>';
-print load_fiche_titre($title, $linkback, $moduleNameLowerCase . '_color@' . $moduleNameLowerCase);
+print load_fiche_titre($title, $linkback, 'title_setup');
 
 // Configuration header.
 $preHead = $moduleNameLowerCase . '_admin_prepare_head';

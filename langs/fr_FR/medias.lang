@@ -49,3 +49,5 @@ MediaMaxHeightLarge                  = Hauteur du média large
 MediaMaxHeightLargeDescription       = Hauteur du média (dimension large) avec pour ratio 16:9
 DisplayNumberMediaGallery            = Nombre de médias affichés dans la bibliothèque de médias
 DisplayNumberMediaGalleryDescription = Affiche 8 médias (par défaut) par page dans la bibliothèque de médias
+MediaSizeDocument                    = Taille des médias
+MediaSizeDocumentDescription         = Sélection de la taille des médias dans les documents

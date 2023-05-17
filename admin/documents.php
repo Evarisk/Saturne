@@ -182,11 +182,23 @@ if ($action == 'setModuleOptions') {
 
 }
 
+if ($action == 'update_documents_config') {
+    $vignette = GETPOST('vignette', 'alpha');
+    $result   = dolibarr_set_const($db, strtoupper($moduleName) . '_DOCUMENT_MEDIA_VIGNETTE_USED', $vignette, 'chaine', 0, '', $conf->entity);
+
+    if ($result > 0) {
+        setEventMessage($langs->trans('SavedConfig'));
+    } else {
+        setEventMessage($langs->trans('ErrorSavedConfig'), 'errors');
+    }
+}
+
+
 /*
  * View
  */
 
-$title    = $langs->trans('YourDocuments');
+$title    = $langs->trans('ModuleSetup', $moduleName);
 $help_url = 'FR:Module_' . $moduleName;
 
 saturne_header(0, '', $title, $help_url);
@@ -204,7 +216,7 @@ foreach ($types as $type => $documentType) {
 }
 $selectorAnchor .= '</select>';
 
-print load_fiche_titre($title, $selectorAnchor, $moduleNameLowerCase . '_color.png@' . $moduleNameLowerCase);
+print load_fiche_titre($title, $selectorAnchor, 'title_setup');
 
 // Configuration header
 $preHead = $moduleNameLowerCase . '_admin_prepare_head';
@@ -213,46 +225,59 @@ print dol_get_fiche_head($head, 'documents', $title, -1, $moduleNameLowerCase . 
 
 print load_fiche_titre($langs->trans('Configs', $langs->trans('DocumentsMin')), '', '');
 
+print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '" name="documents_form">';
+print '<input type="hidden" name="token" value="' . newToken() . '">';
+print '<input type="hidden" name="action" value="update_documents_config">';
 print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
 print '<td>' . $langs->trans('Name') . '</td>';
 print '<td>' . $langs->trans('Description') . '</td>';
 print '<td class="center">' . $langs->trans('Status') . '</td>';
+print '<td class="center">' . $langs->trans('Action') . '</td>';
 print '</tr>';
 
 // Automatic PDF generation
 print '<tr class="oddeven"><td>';
-print  $langs->trans('AutomaticPdfGeneration');
+print $langs->trans('AutomaticPdfGeneration');
 print '</td><td>';
 print $langs->trans('AutomaticPdfGenerationDescription');
 print '</td>';
 print '<td class="center">';
 print ajax_constantonoff(strtoupper($moduleName) . '_AUTOMATIC_PDF_GENERATION');
-print '</td>';
-print '</tr>';
+print '</td></td><td></tr>';
 
 // Manual PDF generation
 print '<tr class="oddeven"><td>';
-print  $langs->trans('ManualPdfGeneration');
+print $langs->trans('ManualPdfGeneration');
 print '</td><td>';
 print $langs->trans('ManualPdfGenerationDescription');
 print '</td>';
 print '<td class="center">';
 print ajax_constantonoff(strtoupper($moduleName) . '_MANUAL_PDF_GENERATION');
-print '</td>';
-print '</tr>';
+print '</td></td><td></tr>';
 
 // Show signature specimen
 print '<tr class="oddeven"><td>';
-print  $langs->trans('ShowSignatureSpecimen');
+print $langs->trans('ShowSignatureSpecimen');
 print '</td><td>';
 print $langs->trans('ShowSignatureSpecimenDescription');
 print '</td>';
 print '<td class="center">';
 print ajax_constantonoff(strtoupper($moduleName) . '_SHOW_SIGNATURE_SPECIMEN');
-print '</td>';
-print '</tr>';
+print '</td></td><td></tr>';
 
+$vignetteType = ['Mini', 'Small', 'Medium', 'Large'];
+$vignetteConf = strtoupper($moduleName) . '_DOCUMENT_MEDIA_VIGNETTE_USED';
+print '<tr class="oddeven"><td>';
+print $langs->trans('MediaSizeDocument');
+print '</td><td>';
+print $langs->trans('MediaSizeDocumentDescription');
+print '<td class="center">';
+print $form::selectarray('vignette', $vignetteType, (!empty($conf->global->$vignetteConf) ? $conf->global->$vignetteConf : 'Small'), 0, 0, 1, '', 1);
+print '</td><td class="center">';
+print '<input type="submit" class="button" name="save" value="' . $langs->trans('Save') . '">';
+print '</td></tr>';
+print '</form>';
 print '</table>';
 
 foreach ($types as $type => $documentData) {
@@ -272,6 +297,8 @@ foreach ($types as $type => $documentData) {
     print load_fiche_titre($langs->trans($type), '', $documentData['picto'], 0, $langs->trans($type));
 
     $documentPath = true;
+
+    require __DIR__ . '/../core/tpl/admin/object/object_const_view.tpl.php';
 
     require __DIR__ . '/../core/tpl/admin/object/object_numbering_module_view.tpl.php';
 
