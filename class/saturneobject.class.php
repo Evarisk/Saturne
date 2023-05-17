@@ -52,7 +52,7 @@ abstract class SaturneObject extends CommonObject
      * @param string $moduleNameLowerCase Module name.
      * @param string $objectType          Object element type.
      */
-    public function __construct(DoliDB $db, string $moduleNameLowerCase = 'saturne', string $objectType = 'saturne_objet')
+    public function __construct(DoliDB $db, string $moduleNameLowerCase = 'saturne', string $objectType = 'saturne_object')
 	{
 		global $conf, $langs;
 
