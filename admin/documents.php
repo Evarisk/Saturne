@@ -184,7 +184,7 @@ if ($action == 'setModuleOptions') {
 
 if ($action == 'update_documents_config') {
     $vignette = GETPOST('vignette', 'alpha');
-    $result   = dolibarr_set_const($db, 'DOLISMQ_DOCUMENT_MEDIA_VIGNETTE_USED', $vignette, 'chaine', 0, '', $conf->entity);
+    $result   = dolibarr_set_const($db, strtoupper($moduleName) . '_DOCUMENT_MEDIA_VIGNETTE_USED', $vignette, 'chaine', 0, '', $conf->entity);
 
     if ($result > 0) {
         setEventMessage($langs->trans('SavedConfig'));
