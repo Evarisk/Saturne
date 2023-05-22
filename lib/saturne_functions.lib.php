@@ -171,7 +171,7 @@ function saturne_banner_tab(object $object, string $paramid = 'ref', string $mor
     }
 
 	$saturneMorehtmlref = '';
-	if (array_key_exists('label', $object->fields)) {
+	if (array_key_exists('label', $object->fields) && dol_strlen($object->label)) {
 		$saturneMorehtmlref .= ' - ' . $object->label . '<br>';
 	}
 
