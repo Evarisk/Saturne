@@ -172,7 +172,7 @@ if ( ! $error && $subaction == "unlinkFile") {
 					$firstFileName = array_shift($fileArray);
 					$object->$objectSubtype = $firstFileName['name'];
 				} else {
-					unset($object->$objectSubtype);
+					$object->$objectSubtype = '';
 				}
 
 				$object->update($user, true);
