@@ -31,7 +31,7 @@
 
 print load_fiche_titre($langs->trans('Attendants') . (($attendantTableMode == 'advanced') ? ' - ' . $langs->trans($signatoryRole) : ''), '', '');
 
-if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
+if (!empty($signatories) || (empty($signatories) && $object->status == $object::STATUS_DRAFT)) {
     print '<table class="border centpercent tableforfield">';
 
     print '<tr class="liste_titre">';
@@ -47,7 +47,9 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
     print '<td class="center">' . $langs->trans('Attendance') . '</td>';
     print '<td class="center">' . $langs->trans('SignatureActions') . '</td>';
     print '</tr>';
+}
 
+if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
     foreach ($signatories as $element) {
         $usertmp = new User($db);
         $contact = new Contact($db);
@@ -192,7 +194,7 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
 
     require __DIR__ . '/attendants_table_add_view.tpl.php';
 } else {
-    print '<div class="opacitymedium">' . $langs->trans('NoAttendants') . '</div>';
+    print '<div class="opacitymedium">' . $langs->trans('NoAttendants') . '</div><br>';
 
     require __DIR__ . '/attendants_table_add_view.tpl.php';
 }
