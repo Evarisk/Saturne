@@ -132,7 +132,7 @@ if (empty($reshook)) {
                 setEventMessages($langs->trans('AddAttendantMessage', $langs->transnoentities($attendantRole) . ' ' . $contact->getFullName($langs, 1)), []);
             }
             // Prevent form reloading page
-            header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&attendant_table_mode=' . $attendantTableMode);
+            header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode);
             exit;
         } elseif (!empty($signatory->errors)) {
             // Creation attendant KO
@@ -231,7 +231,7 @@ if (empty($reshook)) {
                     $signatory->setPending($user, false);
                     setEventMessages($langs->trans('SendEmailAt', $signatory->email), []);
                     // Prevent form reloading page
-                    header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&attendant_table_mode=' . $attendantTableMode);
+                    header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode);
                     exit;
                 } else {
                     $langs->load('other');
@@ -254,7 +254,7 @@ if (empty($reshook)) {
         }
     }
 
-    $paramname2 = 'module_name=' . $moduleName . '&object_type=' . $object->element . '&attendant_table_mode';
+    $paramname2 = 'module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode';
     $paramval2  = $attendantTableMode;
     $trackid    = $object->element . '_' . $object->id;
     include DOL_DOCUMENT_ROOT . '/core/actions_sendmails.inc.php';
@@ -269,7 +269,7 @@ if (empty($reshook)) {
         if ($result > 0) {
             setEventMessages($langs->trans('DeleteAttendantMessage', $langs->transnoentities($signatory->role) . ' ' . strtoupper($signatory->lastname) . ' ' . $signatory->firstname), []);
             // Prevent form reloading page
-            header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&attendant_table_mode=' . $attendantTableMode);
+            header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode);
             exit;
         } elseif (!empty($signatory->errors)) {
             // Deletion attendant KO
@@ -337,8 +337,8 @@ if ($id > 0 || !empty($ref) && empty($action)) {
     }
 
     print '<div class="tabsAction" style="margin-bottom: 0">';
-    print '<a class="btnTitle reposition ' . (($attendantTableMode == 'advanced') ? '' : 'btnTitleSelected') . '" href="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&attendant_table_mode=simple" title="' . $langs->trans('AttendantTableModeSimple') . '"><span class="fa fa-minus imgforviewmode valignmiddle btnTitle-icon"></span></a>';
-    print '<a class="btnTitle reposition ' . (($attendantTableMode == 'advanced') ? 'btnTitleSelected' : '') . '"  href="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&attendant_table_mode=advanced" title="' . $langs->trans('AttendantTableModeAdvanced') . '"><span class="fa fa-th-list imgforviewmode valignmiddle btnTitle-icon"></span></a>';
+    print '<a class="btnTitle reposition ' . (($attendantTableMode == 'advanced') ? '' : 'btnTitleSelected') . '" href="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=simple" title="' . $langs->trans('AttendantTableModeSimple') . '"><span class="fa fa-minus imgforviewmode valignmiddle btnTitle-icon"></span></a>';
+    print '<a class="btnTitle reposition ' . (($attendantTableMode == 'advanced') ? 'btnTitleSelected' : '') . '"  href="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=advanced" title="' . $langs->trans('AttendantTableModeAdvanced') . '"><span class="fa fa-th-list imgforviewmode valignmiddle btnTitle-icon"></span></a>';
     print '</div>';
 
     $zone = 'private';
@@ -532,7 +532,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
         $formmail->param['action']    = 'send';
         $formmail->param['id']        = $object->id;
         $formmail->trackid            = $object->element . '_' . $object->id;
-        $formmail->param['returnurl'] = $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&attendant_table_mode=' . $attendantTableMode;
+        $formmail->param['returnurl'] = $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode;
 
         // Show form
         print $formmail->get_form();

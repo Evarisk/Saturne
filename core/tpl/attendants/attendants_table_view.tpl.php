@@ -24,9 +24,9 @@
 /**
  * The following vars must be defined:
  * Global     : $conf, $db, $langs, $user,
- * Parameters : $attendantTableMode, $moduleNameLowerCase, $objectType, $id, $backtopage,
+ * Parameters : $attendantTableMode, $objectType, $documentType, $id, $backtopage,
  * Objects    : $thirdparty, $object
- * Variable   : $signatoryRole, $signatories, $moduleNane, $permissiontoadd
+ * Variable   : $signatoryRole, $signatories, $moduleNameLowerCase, $permissiontoadd
  */
 
 print load_fiche_titre($langs->trans('Attendants') . (($attendantTableMode == 'advanced') ? ' - ' . $langs->trans($signatoryRole) : ''), '', '');
@@ -127,7 +127,7 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
                     dol_setcache($cacheKey, $nbEmailSent, 120); // If setting cache fails, this is not a problem, so we do not test result.
                 }
 
-                print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&attendant_table_mode=' . $attendantTableMode . '">';
+                print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode . '">';
                 print '<input type="hidden" name="token" value="' . newToken() . '">';
                 print '<input type="hidden" name="action" value="send_email">';
                 print '<input type="hidden" name="signatoryID" value="' . $element->id . '">';
@@ -177,7 +177,7 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
         }
         print '</td><td class="center">';
         if ($object->status == $object::STATUS_DRAFT && $permissiontoadd) {
-            print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&attendant_table_mode=' . $attendantTableMode . '">';
+            print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode . '">';
             print '<input type="hidden" name="token" value="' . newToken() . '">';
             print '<input type="hidden" name="action" value="delete_attendant">';
             print '<input type="hidden" name="signatoryID" value="' . $element->id . '">';
