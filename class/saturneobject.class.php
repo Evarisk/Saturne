@@ -375,7 +375,7 @@ abstract class SaturneObject extends CommonObject
      */
     public function setLocked(User $user, int $notrigger = 0): int
     {
-        return $this->setStatusCommon($user, $this::STATUS_LOCKED, $notrigger, strtoupper($this->element) . '_LOCKED');
+        return $this->setStatusCommon($user, $this::STATUS_LOCKED, $notrigger, strtoupper($this->element) . '_LOCK');
     }
 
     /**
@@ -387,7 +387,7 @@ abstract class SaturneObject extends CommonObject
      */
     public function setArchived(User $user, int $notrigger = 0): int
     {
-        return $this->setStatusCommon($user, $this::STATUS_ARCHIVED, $notrigger, strtoupper($this->element) . '_ARCHIVED');
+        return $this->setStatusCommon($user, $this::STATUS_ARCHIVED, $notrigger, strtoupper($this->element) . '_ARCHIVE');
     }
 
     /**
