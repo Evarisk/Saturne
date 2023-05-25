@@ -216,7 +216,7 @@ if (empty($reshook)) {
             $url  = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $signatory->signature_url  . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
 
             $message = $langs->trans('SignatureEmailMessage', $url);
-            $subject = $langs->trans('SignatureEmailSubject', $langs->transnoentities('The' . ucfirst($object->element)), $object->ref);
+            $subject = $langs->trans('SignatureEmailSubject', $langs->transnoentities('Of' . ucfirst($object->element)), $object->ref);
 
             // Create form object
             // Send mail (substitutionarray must be done just before this)
