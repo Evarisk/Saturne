@@ -110,7 +110,7 @@ class modSaturne extends DolibarrModules
             // Set this to 1 if module has its own theme directory (theme)
             'theme' => 0,
             // Set this to relative path of css file if module has its own css file
-            'css' => ['/saturne/css/scss/modules/picto/_picto.scss'],
+            'css' => ['/saturne/css/scss/modules/picto/_picto.min.css'],
             // Set this to relative path of js file if module must load a js on all pages
             'js' => [
 				'/saturne/js/saturne.js',
