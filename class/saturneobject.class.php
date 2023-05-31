@@ -606,4 +606,36 @@ abstract class SaturneObject extends CommonObject
     {
         return parent::setCategoriesCommon($categories, $this->element);
     }
+
+	/**
+	 *	Fetch array of objects linked to current object type (object of enabled modules only)
+	 */
+	public function fetchAllLinksForObjectType()
+	{
+		$targettype = $this->table_element;
+
+		// Links between objects are stored in table element_element
+		$sql = "SELECT rowid, fk_source, sourcetype, fk_target, targettype";
+		$sql .= " FROM ".$this->db->prefix()."element_element";
+		$sql .= " WHERE targettype = '" . $targettype . "'";
+
+		dol_syslog(get_class($this)."::fetchObjectLink", LOG_DEBUG);
+		$resql = $this->db->query($sql);
+
+		if ($resql) {
+			$num = $this->db->num_rows($resql);
+			$i = 0;
+			while ($i < $num) {
+				$obj = $this->db->fetch_object($resql);
+				$linksForObject[$obj->fk_target][$obj->sourcetype] = $obj->fk_source;
+				$i++;
+			}
+
+			return $linksForObject;
+		} else {
+			dol_print_error($this->db);
+			return -1;
+		}
+	}
+
 }
