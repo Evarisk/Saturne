@@ -140,9 +140,8 @@ function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', st
         $prepareHead = $element . '_prepare_head';
         $head = $prepareHead($object);
     }
-    if (property_exists($object, 'picto')) {
-        $picto = $object->picto;
-    }
+    $picto = $moduleNameLowerCase . '@' . $moduleNameLowerCase;
+
     print dol_get_fiche_head($head, $tabactive, $title, -1, $picto);
 }
 
