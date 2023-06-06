@@ -123,7 +123,9 @@ if ( ! $error && $subaction == "addFiles") {
 				}
 			}
 		}
-		$object->update($user);
+        if ($objectId != 0){
+            $object->update($user);
+        }
 	}
 }
 
