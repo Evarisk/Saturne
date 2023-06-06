@@ -136,13 +136,14 @@ function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', st
 		} else if ($object->element == 'project_task') {
 			$element = 'task';
 		}
-		
+
         $prepareHead = $element . '_prepare_head';
         $head = $prepareHead($object);
     }
-    $picto = $moduleNameLowerCase . '@' . $moduleNameLowerCase;
-
-    print dol_get_fiche_head($head, $tabactive, $title, -1, $picto);
+	if (property_exists($object, 'picto')) {
+		$picto = $object->picto;
+	}
+    print dol_get_fiche_head($head, $tabactive, $title, -1, $picto, 0, '', '', 0, 'saturne');
 }
 
 /**
