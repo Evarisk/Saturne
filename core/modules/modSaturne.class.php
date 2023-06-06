@@ -182,7 +182,11 @@ class modSaturne extends DolibarrModules
             $i++ => ['SATURNE_ENABLE_PUBLIC_INTERFACE', 'integer', 1, '', 0, 'current'],
             $i++ => ['SATURNE_SHOW_COMPANY_LOGO', 'integer', 0, '', 0, 'current'],
             $i++ => ['SATURNE_USE_CAPTCHA', 'integer', 0, '', 0, 'current'],
-            $i   => ['SATURNE_USE_ALL_EMAIL_MODE', 'integer', 1, '', 0, 'current']
+            $i++ => ['SATURNE_USE_ALL_EMAIL_MODE', 'integer', 1, '', 0, 'current'],
+
+            // CONST DOLIBARR
+            $i   => ['MAIN_ALLOW_SVG_FILES_AS_IMAGES', 'integer', 1, '', 0, 'current']
+
 		];
 
 		if (!isset($conf->saturne) || !isset($conf->saturne->enabled)) {
