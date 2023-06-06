@@ -72,7 +72,7 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
 					$file_infos = pathinfo($file);
                     // svg files aren't handled by vignette functions in images.lib, so they don't have thumbs
                     if ($file_infos['extension'] == 'svg') {
-                        $path = preg_replace('/%2Fthumbs/', '', $path);
+                        $path = preg_replace('/\/thumbs/', '', $path);
                         $filename = $file_infos['filename'] . '.' . $file_infos['extension'];
                     } else {
                         $filename = $file_infos['filename'] . '_' . $size . '.' . $file_infos['extension'];
