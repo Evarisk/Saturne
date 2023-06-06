@@ -37,7 +37,7 @@ ErrorSetupEmail         = Erreur de configuration des mails, vous n'avez pas con
 NoEmailSet              = Aucun email renseigné : %s
 
 # Mail - Mail
-SignatureEmailSubject          = Signature de %s %s
+SignatureEmailSubject          = Signature %s %s
 SignatureEmailMessage          = Bonjour, <br><br> Veuillez trouver ci-joint le lien de signature du document.<br> %s
 GlobalSignatureEmailSubject    = [%s] Liens de signature pour %s %s
 GlobalSignatureEmailMessage    = Bonjour, <br><br> Suite à votre %s "%s" en date du %s, veuillez trouver ci-dessous les liens de signature du document "%s" des différents participants : <br><br>
