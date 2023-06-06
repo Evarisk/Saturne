@@ -120,7 +120,7 @@ if (empty($reshook)) {
         $signatory->fetch($signatoryID);
 
         $signatory->signature      = $data['signature'];
-        $signatory->signature_date = dol_now('tzuser');
+        $signatory->signature_date = dol_now();
 
 //        // Check Captcha code if is enabled.
 //        $error    = 0;
