@@ -266,14 +266,14 @@ print '<td class="center">';
 print ajax_constantonoff(strtoupper($moduleName) . '_SHOW_SIGNATURE_SPECIMEN');
 print '</td></td><td></tr>';
 
-$vignetteType = ['Mini', 'Small', 'Medium', 'Large'];
+$vignetteType = ['mini' => 'Mini', 'small' => 'Small', 'medium' => 'Medium', 'large' => 'Large'];
 $vignetteConf = strtoupper($moduleName) . '_DOCUMENT_MEDIA_VIGNETTE_USED';
 print '<tr class="oddeven"><td>';
 print $langs->trans('MediaSizeDocument');
 print '</td><td>';
 print $langs->trans('MediaSizeDocumentDescription');
 print '<td class="center">';
-print $form::selectarray('vignette', $vignetteType, (!empty($conf->global->$vignetteConf) ? $conf->global->$vignetteConf : 'Small'), 0, 0, 1, '', 1);
+print $form::selectarray('vignette', $vignetteType, (!empty($conf->global->$vignetteConf) ? $conf->global->$vignetteConf : 'small'), 0, 0, 0, '', 1);
 print '</td><td class="center">';
 print '<input type="submit" class="button" name="save" value="' . $langs->trans('Save') . '">';
 print '</td></tr>';
