@@ -70,16 +70,17 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
         $model = GETPOST('model', 'alpha');
     }
 
-    $moreparams['object'] = $object;
-    $moreparams['user']   = $user;
+    $moreParams['object'] = $object;
+    $moreParams['user']   = $user;
 
-    if ($object->status < $object::STATUS_LOCKED) {
-        $moreparams['specimen'] = 1;
-        $moreparams['zone']     = 'private';
+    $constName = get_class($object) . '::STATUS_LOCKED';
+    if (defined($constName) && $object->status < $object::STATUS_LOCKED) {
+        $moreParams['specimen'] = 1;
+        $moreParams['zone']     = 'private';
     } else {
-        $moreparams['specimen'] = 0;
+        $moreParams['specimen'] = 0;
     }
-
+    
     $result = $document->generateDocument((!empty($models) ? $models[0] : $model), $outputLangs, $hideDetails, $hideDesc, $hideRef, $moreParams);
     if ($result <= 0) {
         setEventMessages($document->error, $document->errors, 'errors');
