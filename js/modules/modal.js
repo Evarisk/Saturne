@@ -72,6 +72,7 @@ window.saturne.modal.openModal = function ( event ) {
 	let fromType    = $(this).find('.from-type').length ? $(this).find('.from-type').val() : '';
 	let fromSubtype = $(this).find('.from-subtype').length ? $(this).find('.from-subtype').val() : '';
 	let fromSubdir  = $(this).find('.from-subdir').length ? $(this).find('.from-subdir').val() : '';
+	let fromModule  = $(this).find('.from-module').length ? $(this).find('.from-module').val() : '';
 
 	let urlWithoutTag = '';
 	if (document.URL.match(/#/)) {
@@ -85,7 +86,14 @@ window.saturne.modal.openModal = function ( event ) {
 	$('#'+modalToOpen).find('.from-id').attr('value', fromId);
 	$('#'+modalToOpen).find('.from-type').attr('value', fromType);
 	$('#'+modalToOpen).find('.from-subtype').attr('value', fromSubtype);
-	$('#'+modalToOpen).find('.from-subdir').attr('value', fromSubdir);
+    $('#'+modalToOpen).find('.from-subdir').attr('value', fromSubdir);
+
+    if (fromModule) {
+        if (typeof window.saturne.modal.addMoreOpenModalData == 'function') {
+            window.saturne.modal.addMoreOpenModalData(modalToOpen, $(this));
+        }
+    }
+
 	$('#'+modalToOpen).find('.wpeo-button').attr('value', fromId);
 	$('#'+modalToOpen).addClass('modal-active');
 
