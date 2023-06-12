@@ -380,7 +380,7 @@ class SaturneSignature extends SaturneObject
      */
     public function setSigned(User $user, int $notrigger = 0, string $zone = 'private'): int
     {
-        return $this->setStatusCommon($user, self::STATUS_SIGNED, $notrigger, 'SATURNESIGNATURE_SIGNED' . (($zone == 'public') ? '_PUBLIC' : ''));
+        return $this->setStatusCommon($user, self::STATUS_SIGNED, $notrigger, 'SATURNESIGNATURE_SIGN' . (($zone == 'public') ? '_PUBLIC' : ''));
     }
 
     /**
@@ -392,7 +392,7 @@ class SaturneSignature extends SaturneObject
      */
     public function setDeleted(User $user, int $notrigger = 0): int
     {
-        return $this->setStatusCommon($user, self::STATUS_DELETED, $notrigger, 'SATURNESIGNATURE_DELETED');
+        return $this->setStatusCommon($user, self::STATUS_DELETED, $notrigger, 'SATURNESIGNATURE_DELETE');
     }
 
     /**
