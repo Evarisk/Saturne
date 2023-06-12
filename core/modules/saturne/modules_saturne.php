@@ -197,7 +197,7 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
     /**
      * @var string Document description.
      */
-    public string $description = '';
+    //public string $description = '';
 
     /**
      * @var string Module.
