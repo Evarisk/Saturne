@@ -217,7 +217,7 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
     /**
      * @var array Document format.
      */
-    public array $format = [];
+    //public array $format = [];
 
     /**
      * Constructor.
