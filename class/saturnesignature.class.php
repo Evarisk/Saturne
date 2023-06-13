@@ -86,7 +86,7 @@ class SaturneSignature extends SaturneObject
     /**
      * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
      */
-    public array $fields = [
+   /* public array $fields = [
         'rowid'                => ['type' => 'integer',      'label' => 'TechnicalID',       'enabled' => 1, 'position' => 1,   'notnull' => 1, 'visible' => 0, 'noteditable' => 1, 'index' => 1, 'comment' => 'Id'],
         'entity'               => ['type' => 'integer',      'label' => 'Entity',            'enabled' => 1, 'position' => 10,  'notnull' => 1, 'visible' => 0, 'index' => 1],
         'date_creation'        => ['type' => 'datetime',     'label' => 'DateCreation',      'enabled' => 1, 'position' => 20,  'notnull' => 1, 'visible' => 0],
@@ -113,7 +113,7 @@ class SaturneSignature extends SaturneObject
         'attendance'           => ['type' => 'smallint',     'label' => 'Attendance',        'enabled' => 1, 'position' => 194, 'notnull' => 0, 'visible' => 3],
         'object_type'          => ['type' => 'varchar(255)', 'label' => 'object_type',       'enabled' => 1, 'position' => 195, 'notnull' => 0, 'visible' => 0],
         'fk_object'            => ['type' => 'integer',      'label' => 'FKObject',          'enabled' => 1, 'position' => 200, 'notnull' => 1, 'visible' => 0, 'index' => 1],
-    ];
+    ];*/
 
     /**
      * @var int ID
