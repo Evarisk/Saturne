@@ -85,7 +85,7 @@ $moduleJustUpdated   = strtoupper($moduleName) . '_JUST_UPDATED';
 $moduleVersion       = strtoupper($moduleName) . '_VERSION';
 $moduleShowPatchNote = strtoupper($moduleName) . '_SHOW_PATCH_NOTE';
 
-if ($conf->global->$moduleJustUpdated == 1) : ?>
+if (getDolGlobalInt('DOLISMQ_JUST_UPDATED ') == 1) : ?>
     <div class="wpeo-notice notice-success">
         <div class="notice-content">
             <div class="notice-subtitle"><strong><?php echo $langs->trans('ModuleUpdate', $moduleName); ?></strong>
