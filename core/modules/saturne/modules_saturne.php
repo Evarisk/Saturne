@@ -294,7 +294,10 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
         // List of directories area.
         $info        .= '<tr><td>';
         $infoTitle   = $langs->trans('ListOfDirectories');
-        $listOfDir   = explode(',', preg_replace('/[\r\n]+/', ',', trim($conf->global->$confName)));
+        $listOfDir = [];
+        if (isset($conf->global->$confName)) {
+            $listOfDir = explode(',', preg_replace('/[\r\n]+/', ',', trim($conf->global->$confName)));
+        }
         $listOfFiles = [];
         foreach ($listOfDir as $key => $tmpDir) {
             $tmpDir = trim($tmpDir);
