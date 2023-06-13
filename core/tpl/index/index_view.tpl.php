@@ -75,6 +75,7 @@ if (empty($reshook)) {
 
 $title   = $langs->trans('ModuleArea', $moduleName);
 $helpUrl = 'FR:Module_' . $moduleName;
+$morehtmlright = '';
 
 saturne_header(0, '', $title . ' ' . $modModule->version, $helpUrl);
 
