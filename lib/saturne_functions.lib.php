@@ -211,7 +211,7 @@ function saturne_banner_tab(object $object, string $paramid = 'ref', string $mor
 						$saturneMorehtmlref .= '<input type="hidden" name="action" value="save_project">';
 						$saturneMorehtmlref .= '<input type="hidden" name="key" value="'. $key .'">';
 						$saturneMorehtmlref .= '<input type="hidden" name="token" value="'.newToken().'">';
-						$saturneMorehtmlref .= $formproject->select_projects(0, $object->$key, $key, 0, 0, 1, 0, 1, 0, 0, '', 1, 0, 'maxwidth500');
+						$saturneMorehtmlref .= $formproject->select_projects(-1, $object->$key, $key, 0, 0, 1, 0, 1, 0, 0, '', 1, 0, 'maxwidth500');
 						$saturneMorehtmlref .= '<input type="submit" class="button valignmiddle" value="' . $langs->trans("Modify") . '">';
 						$saturneMorehtmlref .= '</form>';
 					} else {
