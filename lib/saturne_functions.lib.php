@@ -136,14 +136,14 @@ function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', st
 		} else if ($object->element == 'project_task') {
 			$element = 'task';
 		}
-		
+
         $prepareHead = $element . '_prepare_head';
         $head = $prepareHead($object);
     }
-    if (property_exists($object, 'picto')) {
-        $picto = $object->picto;
-    }
-    print dol_get_fiche_head($head, $tabactive, $title, -1, $picto);
+	if (property_exists($object, 'picto')) {
+		$picto = $object->picto;
+	}
+    print dol_get_fiche_head($head, $tabactive, $title, -1, $picto, 0, '', '', 0, 'saturne');
 }
 
 /**
@@ -171,7 +171,7 @@ function saturne_banner_tab(object $object, string $paramid = 'ref', string $mor
     }
 
 	$saturneMorehtmlref = '';
-	if (array_key_exists('label', $object->fields)) {
+	if (array_key_exists('label', $object->fields) && dol_strlen($object->label)) {
 		$saturneMorehtmlref .= ' - ' . $object->label . '<br>';
 	}
 
@@ -277,14 +277,13 @@ function saturne_load_langs(array $domains = [])
  * @param  string $keyField        Field for key.
  * @param  string $labelField      Label field.
  * @param  string $selected        Selected value.
- * @param  int    $showLabel       Show label.
  * @param  int    $useEmpty        1 = Add an empty value in list, 2 = Add an empty value in list only if there is more than 2 entries.
  * @param  string $moreAttrib      More attributes on HTML select tag.
  * @param  string $placeHolder     Placeholder.
  * @param  string $moreCSS         More css.
  * @return string
  */
-function saturne_select_dictionary(string $htmlName, string $dictionaryTable, string $keyField = 'code', string $labelField = 'label', string $selected = '', int $showLabel = 0, int $useEmpty = 0, string $moreAttrib = '', string $placeHolder = '', string $moreCSS = 'minwidth150'): string
+function saturne_select_dictionary(string $htmlName, string $dictionaryTable, string $keyField = 'code', string $labelField = 'label', string $selected = '', int $useEmpty = 0, string $moreAttrib = '', string $placeHolder = '', string $moreCSS = 'minwidth150'): string
 {
 	global $langs, $db;
 
@@ -307,12 +306,12 @@ function saturne_select_dictionary(string $htmlName, string $dictionaryTable, st
 
 			while ($i < $num) {
 				$obj = $db->fetch_object($result);
-				if ($selected == $obj->rowid || $selected == $langs->transnoentities($obj->$keyField)) {
+				if ($selected == $obj->rowid || $selected == $obj->$keyField) {
 					$out .= '<option value="' . $obj->$keyField . '" selected>';
 				} else {
 					$out .= '<option value="' . $obj->$keyField . '">';
 				}
-				$out .= $langs->transnoentities($obj->$keyField) . (($showLabel > 0) ? ' - ' .  $langs->transnoentities($obj->$labelField) : '');
+				$out .= $langs->transnoentities($obj->$labelField);
 				$out .= '</option>';
 				$i++;
 			}

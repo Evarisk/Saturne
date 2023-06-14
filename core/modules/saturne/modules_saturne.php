@@ -538,6 +538,10 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
             return -1;
         }
 
+        if (empty($moduleNameLowerCase)) {
+            $moduleNameLowerCase = $objectDocument->module;
+        }
+
         // Add ODT generation hook.
         $hookmanager->initHooks(['odtgeneration']);
 

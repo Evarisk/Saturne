@@ -123,7 +123,9 @@ if ( ! $error && $subaction == "addFiles") {
 				}
 			}
 		}
-		$object->update($user);
+        if ($objectId != 0){
+            $object->update($user);
+        }
 	}
 }
 
@@ -172,7 +174,7 @@ if ( ! $error && $subaction == "unlinkFile") {
 					$firstFileName = array_shift($fileArray);
 					$object->$objectSubtype = $firstFileName['name'];
 				} else {
-					unset($object->$objectSubtype);
+					$object->$objectSubtype = '';
 				}
 
 				$object->update($user, true);

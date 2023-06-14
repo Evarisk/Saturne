@@ -24,14 +24,14 @@
 /**
  * The following vars must be defined:
  * Global     : $conf, $db, $langs, $user,
- * Parameters : $attendantTableMode, $moduleNameLowerCase, $objectType, $id, $backtopage,
+ * Parameters : $attendantTableMode, $objectType, $documentType, $id, $backtopage,
  * Objects    : $thirdparty, $object
- * Variable   : $signatoryRole, $signatories, $moduleNane, $permissiontoadd
+ * Variable   : $signatoryRole, $signatories, $moduleNameLowerCase, $permissiontoadd
  */
 
 print load_fiche_titre($langs->trans('Attendants') . (($attendantTableMode == 'advanced') ? ' - ' . $langs->trans($signatoryRole) : ''), '', '');
 
-if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
+if (!empty($signatories) || (empty($signatories) && $object->status == $object::STATUS_DRAFT)) {
     print '<table class="border centpercent tableforfield">';
 
     print '<tr class="liste_titre">';
@@ -47,7 +47,9 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
     print '<td class="center">' . $langs->trans('Attendance') . '</td>';
     print '<td class="center">' . $langs->trans('SignatureActions') . '</td>';
     print '</tr>';
+}
 
+if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
     foreach ($signatories as $element) {
         $usertmp = new User($db);
         $contact = new Contact($db);
@@ -96,7 +98,7 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
         print '</td><td class="center">';
         if ($object->status == $object::STATUS_VALIDATED) {
             if (dol_strlen($element->email) || dol_strlen($usertmp->email) || dol_strlen($contact->email)) {
-                print dol_print_date($element->last_email_sent_date, 'dayhour');
+                print dol_print_date($element->last_email_sent_date, 'dayhour', 'tzuser');
                 $nbEmailSent = 0;
                 // Enable caching of emails sent count actioncomm
                 require_once DOL_DOCUMENT_ROOT . '/core/lib/memory.lib.php';
@@ -125,7 +127,7 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
                     dol_setcache($cacheKey, $nbEmailSent, 120); // If setting cache fails, this is not a problem, so we do not test result.
                 }
 
-                print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&attendant_table_mode=' . $attendantTableMode . '">';
+                print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode . '">';
                 print '<input type="hidden" name="token" value="' . newToken() . '">';
                 print '<input type="hidden" name="action" value="send_email">';
                 print '<input type="hidden" name="signatoryID" value="' . $element->id . '">';
@@ -142,7 +144,7 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
             }
         }
         print '</td><td>';
-        print dol_print_date($element->signature_date, 'dayhour');
+        print dol_print_date($element->signature_date, 'dayhour', 'tzuser');
         print '</td><td class="center">';
         print $element->getLibStatut(5);
         print '</td><td class="center">';
@@ -175,7 +177,7 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
         }
         print '</td><td class="center">';
         if ($object->status == $object::STATUS_DRAFT && $permissiontoadd) {
-            print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&attendant_table_mode=' . $attendantTableMode . '">';
+            print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode . '">';
             print '<input type="hidden" name="token" value="' . newToken() . '">';
             print '<input type="hidden" name="action" value="delete_attendant">';
             print '<input type="hidden" name="signatoryID" value="' . $element->id . '">';
@@ -192,7 +194,7 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
 
     require __DIR__ . '/attendants_table_add_view.tpl.php';
 } else {
-    print '<div class="opacitymedium">' . $langs->trans('NoAttendants') . '</div>';
+    print '<div class="opacitymedium">' . $langs->trans('NoAttendants') . '</div><br>';
 
     require __DIR__ . '/attendants_table_add_view.tpl.php';
 }

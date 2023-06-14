@@ -71,6 +71,9 @@ class SaturneDashboard
                 if (key_exists('widgets', $dashboardData)) {
                     $dashboardInfos['widgets'][$key] = $dashboardData['widgets'];
                 }
+                if (key_exists('lists', $dashboardData)) {
+                    $dashboardInfos['lists'][$key] = $dashboardData['lists'];
+                }
                 if (key_exists('graphs', $dashboardData)) {
                     $dashboardInfos['graphs'][$key] = $dashboardData['graphs'];
                 }
@@ -153,6 +156,29 @@ class SaturneDashboard
             }
             print '<div class="opened-dash-board-wrap"><div class="box-flex-container">' . $widget . '</div></div>';
         }
+
+        print '<div class="wpeo-gridlayout grid-2">';
+        if (is_array($dashboards['lists']) && !empty($dashboards['lists'])) {
+            foreach ($dashboards['lists'] as $dashboardLists) {
+                foreach ($dashboardLists as $dashboardList) {
+                    print '<table class="noborder centpercent">';
+                    print '<tr class="liste_titre">';
+                    foreach ($dashboardList['labels'] as $key => $dashboardListLabel) {
+                        print '<td class="minwidth200' . (($key != 'Ref') ? ' center' : '') . '">' . $langs->transnoentities($dashboardListLabel) . '</td>';
+                    }
+                    print '</tr>';
+                    foreach ($dashboardList['data'] as $dashboardListDatasets) {
+                        print '<tr class="oddeven">';
+                        foreach ($dashboardListDatasets as $key => $dashboardGraphDataset) {
+                            print '<td class="minwidth200' . (($key != 'Ref') ? ' center' : '') . '">' . $dashboardGraphDataset . '</td>';
+                        }
+                        print '</tr>';
+                    }
+                    print '</table>';
+                }
+            }
+        }
+        print '</div>';
 
         print '<div class="graph-dashboard wpeo-gridlayout grid-2">';
 

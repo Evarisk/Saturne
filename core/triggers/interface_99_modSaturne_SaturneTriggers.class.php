@@ -189,6 +189,9 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
                 $actioncomm->label       = $langs->transnoentities('PendingSignatureTrigger', $langs->transnoentities($object->role) . ' ' . strtoupper($object->lastname) . ' ' . $object->firstname);
                 if ($object->element_type == 'socpeople') {
                     $actioncomm->socpeopleassigned = [$object->element_id => $object->element_id];
+                    $actioncomm->fk_contact        = $object->element_id;
+                } else {
+                    $actioncomm->fk_user_action = $object->element_id;
                 }
                 $actioncomm->fk_element = $object->fk_object;
                 $actioncomm->create($user);

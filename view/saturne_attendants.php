@@ -132,7 +132,7 @@ if (empty($reshook)) {
                 setEventMessages($langs->trans('AddAttendantMessage', $langs->transnoentities($attendantRole) . ' ' . $contact->getFullName($langs, 1)), []);
             }
             // Prevent form reloading page
-            header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&attendant_table_mode=' . $attendantTableMode);
+            header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode);
             exit;
         } elseif (!empty($signatory->errors)) {
             // Creation attendant KO
@@ -216,7 +216,7 @@ if (empty($reshook)) {
             $url  = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $signatory->signature_url  . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
 
             $message = $langs->trans('SignatureEmailMessage', $url);
-            $subject = $langs->trans('SignatureEmailSubject', $langs->transnoentities('The' . ucfirst($object->element)), $object->ref);
+            $subject = $langs->trans('SignatureEmailSubject', $langs->transnoentities('Of' . ucfirst($object->element)), $object->ref);
 
             // Create form object
             // Send mail (substitutionarray must be done just before this)
@@ -226,12 +226,12 @@ if (empty($reshook)) {
             } elseif (!empty($conf->global->MAIN_MAIL_SMTPS_ID) || $conf->global->SATURNE_USE_ALL_EMAIL_MODE > 0) {
                 $result = $mailfile->sendfile();
                 if ($result) {
-                    $signatory->last_email_sent_date = dol_now('tzuser');
+                    $signatory->last_email_sent_date = dol_now();
                     $signatory->update($user, true);
                     $signatory->setPending($user, false);
                     setEventMessages($langs->trans('SendEmailAt', $signatory->email), []);
                     // Prevent form reloading page
-                    header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&attendant_table_mode=' . $attendantTableMode);
+                    header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode);
                     exit;
                 } else {
                     $langs->load('other');
@@ -254,7 +254,7 @@ if (empty($reshook)) {
         }
     }
 
-    $paramname2 = 'module_name=' . $moduleName . '&object_type=' . $object->element . '&attendant_table_mode';
+    $paramname2 = 'module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode';
     $paramval2  = $attendantTableMode;
     $trackid    = $object->element . '_' . $object->id;
     include DOL_DOCUMENT_ROOT . '/core/actions_sendmails.inc.php';
@@ -269,7 +269,7 @@ if (empty($reshook)) {
         if ($result > 0) {
             setEventMessages($langs->trans('DeleteAttendantMessage', $langs->transnoentities($signatory->role) . ' ' . strtoupper($signatory->lastname) . ' ' . $signatory->firstname), []);
             // Prevent form reloading page
-            header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&attendant_table_mode=' . $attendantTableMode);
+            header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode);
             exit;
         } elseif (!empty($signatory->errors)) {
             // Deletion attendant KO
@@ -337,25 +337,34 @@ if ($id > 0 || !empty($ref) && empty($action)) {
     }
 
     print '<div class="tabsAction" style="margin-bottom: 0">';
-    print '<a class="btnTitle reposition ' . (($attendantTableMode == 'advanced') ? '' : 'btnTitleSelected') . '" href="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&attendant_table_mode=simple" title="' . $langs->trans('AttendantTableModeSimple') . '"><span class="fa fa-minus imgforviewmode valignmiddle btnTitle-icon"></span></a>';
-    print '<a class="btnTitle reposition ' . (($attendantTableMode == 'advanced') ? 'btnTitleSelected' : '') . '"  href="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&attendant_table_mode=advanced" title="' . $langs->trans('AttendantTableModeAdvanced') . '"><span class="fa fa-th-list imgforviewmode valignmiddle btnTitle-icon"></span></a>';
+    print '<a class="btnTitle reposition ' . (($attendantTableMode == 'advanced') ? '' : 'btnTitleSelected') . '" href="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=simple" title="' . $langs->trans('AttendantTableModeSimple') . '"><span class="fa fa-minus imgforviewmode valignmiddle btnTitle-icon"></span></a>';
+    print '<a class="btnTitle reposition ' . (($attendantTableMode == 'advanced') ? 'btnTitleSelected' : '') . '"  href="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=advanced" title="' . $langs->trans('AttendantTableModeAdvanced') . '"><span class="fa fa-th-list imgforviewmode valignmiddle btnTitle-icon"></span></a>';
     print '</div>';
 
     $zone = 'private';
 
-    $parameters = [];
+    $parameters = ['signatory' => $signatory];
     $reshook    = $hookmanager->executeHooks('saturneAttendantsRole', $parameters, $object); // Note that $action and $object may have been modified by some hooks
-    if ($reshook > 0) {
+    if ($reshook > 0 && $attendantTableMode == 'advanced') {
         $signatoriesByRole = $hookmanager->resArray;
-    } else {
-        if ($attendantTableMode == 'advanced') {
-            $signatoriesByRole = $signatory->fetchSignatory('', $object->id, $object->element);
-        } else {
-            $signatoriesByRole['Attendant'] = $signatory->fetchSignatories($object->id, $object->element);
+    } elseif ($attendantTableMode == 'advanced') {
+        $signatoriesByRole = $signatory->fetchSignatory('', $object->id, $object->element);
+        if ($signatoriesByRole == 0) {
+            $signatoriesInDictionary = saturne_fetch_dictionary('c_' . $object->element . '_attendants_role');
+            $signatoriesByRole       = [];
+            if (is_array($signatoriesInDictionary) && !empty($signatoriesInDictionary)) {
+                foreach ($signatoriesInDictionary as $signatoryInDictionary) {
+                    $signatoriesByRole[$signatoryInDictionary->ref] = [];
+                }
+            } else {
+                $signatoriesByRole = ['Attendant' => []];
+            }
         }
+    } else {
+        $signatoriesByRole['Attendant'] = $signatory->fetchSignatories($object->id, $object->element);
     }
 
-	$alreadyAddedSignatories = [];
+    $alreadyAddedSignatories = [];
     if (is_array($signatoriesByRole) && !empty($signatoriesByRole)) {
         foreach ($signatoriesByRole as $signatoryRole => $signatories) {
             require __DIR__ . '/../core/tpl/attendants/attendants_table_view.tpl.php';
@@ -365,7 +374,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
 
         print '<div class="opacitymedium">' . $langs->trans('NoAttendants') . '</div>';
     }
-
+    
     print '</div>';
 
     print dol_get_fiche_end();
@@ -523,7 +532,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
         $formmail->param['action']    = 'send';
         $formmail->param['id']        = $object->id;
         $formmail->trackid            = $object->element . '_' . $object->id;
-        $formmail->param['returnurl'] = $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&attendant_table_mode=' . $attendantTableMode;
+        $formmail->param['returnurl'] = $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode;
 
         // Show form
         print $formmail->get_form();
