@@ -213,6 +213,7 @@ if ( ! $error && $subaction == "pagination") {
 	$loadedPageArray = saturne_load_pagination($pagesCounter, [], $offset);
 }
 
+$submitFileErrorText = isset($submitFileErrorText) ? $submitFileErrorText : [];
 if (is_array($submitFileErrorText)) {
 	print '<input class="error-medias" value="'. htmlspecialchars(json_encode($submitFileErrorText)) .'">';
 }
