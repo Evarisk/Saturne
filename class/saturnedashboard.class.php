@@ -103,7 +103,7 @@ class SaturneDashboard
         print '<input type="hidden" name="action" value="view">';
 
         $confName            = strtoupper($moduleNameLowerCase) . '_DISABLED_DASHBOARD_INFO';
-        $disableWidgetList   = json_decode($user->conf->$confName);
+        $disableWidgetList   = isset($user->conf->$confName) ? json_decode($user->conf->$confName) : null;
         $dashboardWidgetsArray = [];
         if (is_array($dashboards['widgets']) && !empty($dashboards['widgets'])) {
             foreach ($dashboards['widgets'] as $dashboardWidgets) {
