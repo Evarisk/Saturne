@@ -187,7 +187,7 @@ class SaturneDashboard
                 if (is_array($dashboardGraphs) && !empty($dashboardGraphs)) {
                     foreach ($dashboardGraphs as $keyElement => $dashboardGraph) {
                         $nbDataset = 0;
-                        if (is_array($dashboardGraph['data']) && !empty($dashboardGraph['data'])) {
+                        if (isset($dashboardGraph['data']) && is_array($dashboardGraph['data']) && !empty($dashboardGraph['data'])) {
                             if ($dashboardGraph['dataset'] >= 2) {
                                 foreach ($dashboardGraph['data'] as $dashboardGraphDatasets) {
                                     unset($dashboardGraphDatasets[0]);
