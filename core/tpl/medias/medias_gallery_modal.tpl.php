@@ -7,7 +7,7 @@ require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
 
 $ecmdir           = new EcmDirectory($db);
 $ecmfile          = new EcmFiles($db);
-
+$error = 0;
 if ( ! $error && $subaction == "uploadPhoto" && ! empty($conf->global->MAIN_UPLOAD_DOC)) {
 
 	// Define relativepath and upload_dir
