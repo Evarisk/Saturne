@@ -105,7 +105,7 @@ class SaturneDashboard
         $confName            = strtoupper($moduleNameLowerCase) . '_DISABLED_DASHBOARD_INFO';
         $disableWidgetList   = isset($user->conf->$confName) ? json_decode($user->conf->$confName) : null;
         $dashboardWidgetsArray = [];
-        if (is_array($dashboards['widgets']) && !empty($dashboards['widgets'])) {
+        if (isset($dashboards['widgets']) && is_array($dashboards['widgets']) && !empty($dashboards['widgets'])) {
             foreach ($dashboards['widgets'] as $dashboardWidgets) {
                 foreach ($dashboardWidgets as $key => $dashboardWidget) {
                     if (isset($disableWidgetList->$key) && $disableWidgetList->$key == 0) {
