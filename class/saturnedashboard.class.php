@@ -124,7 +124,7 @@ class SaturneDashboard
         print '</div>';
         print '<div class="fichecenter">';
 
-        if (is_array($dashboards['widgets']) && !empty($dashboards['widgets'])) {
+        if (isset($dashboards['widgets']) && is_array($dashboards['widgets']) && !empty($dashboards['widgets'])) {
             $widget = '';
             foreach ($dashboards['widgets'] as $dashboardWidgets) {
                 foreach ($dashboardWidgets as $key => $dashboardWidget) {
