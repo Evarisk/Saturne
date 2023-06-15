@@ -158,7 +158,7 @@ class SaturneDashboard
         }
 
         print '<div class="wpeo-gridlayout grid-2">';
-        if (is_array($dashboards['lists']) && !empty($dashboards['lists'])) {
+        if (isset($dashboards['lists']) && is_array($dashboards['lists']) && !empty($dashboards['lists'])) {
             foreach ($dashboards['lists'] as $dashboardLists) {
                 foreach ($dashboardLists as $dashboardList) {
                     print '<table class="noborder centpercent">';
