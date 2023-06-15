@@ -127,20 +127,25 @@ if ($conf->global->$moduleShowPatchNote > 0) : ?>
             </div>
             <!-- Modal Content-->
             <div class="modal-content">
-                <?php $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, 'https://api.github.com/repos/' . strtolower($modModule->editor_name) . '/' . $moduleNameLowerCase . '/releases/tags/' . $modModule->version);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                curl_setopt($ch, CURLOPT_USERAGENT, $moduleName);
-                $output = curl_exec($ch);
-                curl_close($ch);
-                $data = json_decode($output);
+            <?php 
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, 'https://api.github.com/repos/' . strtolower($modModule->editor_name) . '/' . $moduleNameLowerCase . '/releases/tags/' . $modModule->version);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_USERAGENT, $moduleName);
+            $output = curl_exec($ch);
+            curl_close($ch);
+            $data = json_decode($output);
+            
+            if (isset($data->body)) { // Check if the 'body' property exists
                 $data->body = preg_replace('/- #\b\d{1,4}\b/', '-', $data->body);
                 $data->body = preg_replace('/- #\b\d{1,4}\b/', '-', $data->body);
                 $html = $parse->text($data->body);
                 print $html;
-                ?>
+            }
+            ?>
             </div>
+
             <!-- Modal-Footer -->
             <div class="modal-footer">
                 <div class="wpeo-button button-grey button-uppercase modal-close">
