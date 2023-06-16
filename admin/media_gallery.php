@@ -159,7 +159,7 @@ print '</td></tr>';
 
 print '<tr class="oddeven"><td><label for="DisplayNumberMediaGallery">' . $langs->trans('DisplayNumberMediaGallery') . '</label></td>';
 print '<td>' . $langs->trans('DisplayNumberMediaGalleryDescription') . '</td>';
-print '<td><input type="number" name="DisplayNumberMediaGallery" value="' . $conf->global->SATURNE_DISPLAY_NUMBER_MEDIA_GALLERY . '"></td>';
+print '<td><input type="number" name="DisplayNumberMediaGallery" value="' . getDolGlobalInt('SATURNE_DISPLAY_NUMBER_MEDIA_GALLERY') . '"></td>';
 print '</td></tr>';
 
 print '</table>';

@@ -103,9 +103,9 @@ class SaturneDashboard
         print '<input type="hidden" name="action" value="view">';
 
         $confName            = strtoupper($moduleNameLowerCase) . '_DISABLED_DASHBOARD_INFO';
-        $disableWidgetList   = json_decode($user->conf->$confName);
+        $disableWidgetList   = isset($user->conf->$confName) ? json_decode($user->conf->$confName) : null;
         $dashboardWidgetsArray = [];
-        if (is_array($dashboards['widgets']) && !empty($dashboards['widgets'])) {
+        if (isset($dashboards['widgets']) && is_array($dashboards['widgets']) && !empty($dashboards['widgets'])) {
             foreach ($dashboards['widgets'] as $dashboardWidgets) {
                 foreach ($dashboardWidgets as $key => $dashboardWidget) {
                     if (isset($disableWidgetList->$key) && $disableWidgetList->$key == 0) {
@@ -124,7 +124,7 @@ class SaturneDashboard
         print '</div>';
         print '<div class="fichecenter">';
 
-        if (is_array($dashboards['widgets']) && !empty($dashboards['widgets'])) {
+        if (isset($dashboards['widgets']) && is_array($dashboards['widgets']) && !empty($dashboards['widgets'])) {
             $widget = '';
             foreach ($dashboards['widgets'] as $dashboardWidgets) {
                 foreach ($dashboardWidgets as $key => $dashboardWidget) {
@@ -158,7 +158,7 @@ class SaturneDashboard
         }
 
         print '<div class="wpeo-gridlayout grid-2">';
-        if (is_array($dashboards['lists']) && !empty($dashboards['lists'])) {
+        if (isset($dashboards['lists']) && is_array($dashboards['lists']) && !empty($dashboards['lists'])) {
             foreach ($dashboards['lists'] as $dashboardLists) {
                 foreach ($dashboardLists as $dashboardList) {
                     print '<table class="noborder centpercent">';
@@ -187,7 +187,7 @@ class SaturneDashboard
                 if (is_array($dashboardGraphs) && !empty($dashboardGraphs)) {
                     foreach ($dashboardGraphs as $keyElement => $dashboardGraph) {
                         $nbDataset = 0;
-                        if (is_array($dashboardGraph['data']) && !empty($dashboardGraph['data'])) {
+                        if (isset($dashboardGraph['data']) && is_array($dashboardGraph['data']) && !empty($dashboardGraph['data'])) {
                             if ($dashboardGraph['dataset'] >= 2) {
                                 foreach ($dashboardGraph['data'] as $dashboardGraphDatasets) {
                                     unset($dashboardGraphDatasets[0]);

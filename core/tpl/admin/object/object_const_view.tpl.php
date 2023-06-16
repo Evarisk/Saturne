@@ -1,5 +1,6 @@
 <?php
 $parameters = [];
+$constArray = []; // initialize $constArray as an empty array
 $reshook    = $hookmanager->executeHooks('SaturneAdminObjectConst', $parameters); // Note that $action and $object may have been modified by some hooks
 if ($reshook > 0) {
     $constArray = $hookmanager->resArray;

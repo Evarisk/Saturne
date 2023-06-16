@@ -197,7 +197,7 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
     /**
      * @var string Document description.
      */
-    public string $description = '';
+    //public string $description = '';
 
     /**
      * @var string Module.
@@ -212,12 +212,12 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
     /**
      * @var string Extension document type.
      */
-    public string $type = '';
+    //public string $type = '';
 
     /**
      * @var array Document format.
      */
-    public array $format = [];
+    //public array $format = [];
 
     /**
      * Constructor.
@@ -294,7 +294,10 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
         // List of directories area.
         $info        .= '<tr><td>';
         $infoTitle   = $langs->trans('ListOfDirectories');
-        $listOfDir   = explode(',', preg_replace('/[\r\n]+/', ',', trim($conf->global->$confName)));
+        $listOfDir = [];
+        if (isset($conf->global->$confName)) {
+            $listOfDir = explode(',', preg_replace('/[\r\n]+/', ',', trim($conf->global->$confName)));
+        }
         $listOfFiles = [];
         foreach ($listOfDir as $key => $tmpDir) {
             $tmpDir = trim($tmpDir);

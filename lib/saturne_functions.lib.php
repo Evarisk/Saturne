@@ -193,6 +193,7 @@ function saturne_banner_tab(object $object, string $paramid = 'ref', string $mor
 
     // Project
     if (isModEnabled('project')) {
+		$key = ''; // initialize $key with an empty string
         if (array_key_exists('fk_project', $object->fields)) {
             $key = 'fk_project';
         } elseif (array_key_exists('projectid', $object->fields)) {
