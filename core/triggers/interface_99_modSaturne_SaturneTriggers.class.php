@@ -136,8 +136,8 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
                 $actioncomm->create($user);
                 break;
 
-            case 'SATURNECERTIFICATE_ARCHIVED' :
-                $actioncomm->code  = 'AC_SATURNECERTIFICATE_ARCHIVED';
+            case 'SATURNECERTIFICATE_ARCHIVE' :
+                $actioncomm->code  = 'AC_SATURNECERTIFICATE_ARCHIVE';
                 $actioncomm->label = $langs->transnoentities('ObjectArchivedTrigger', $langs->transnoentities(ucfirst($object->element)));
                 $actioncomm->create($user);
                 break;
@@ -160,9 +160,9 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
                 $actioncomm->create($user);
                 break;
 
-            case 'SATURNESIGNATURE_SIGNED' :
+            case 'SATURNESIGNATURE_SIGN' :
                 $actioncomm->elementtype = $object->object_type . '@' . $moduleNameLowerCase;
-                $actioncomm->code        = 'AC_SATURNESIGNATURE_SIGNED';
+                $actioncomm->code        = 'AC_SATURNESIGNATURE_SIGN';
                 $actioncomm->label       = $langs->transnoentities('SignedTrigger', $langs->transnoentities($object->role) . ' ' . strtoupper($object->lastname) . ' ' . $object->firstname);
                 if ($object->element_type == 'socpeople') {
                     $actioncomm->socpeopleassigned = [$object->element_id => $object->element_id];
@@ -171,9 +171,9 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
                 $actioncomm->create($user);
                 break;
 
-            case 'SATURNESIGNATURE_SIGNED_PUBLIC' :
+            case 'SATURNESIGNATURE_SIGN_PUBLIC' :
                 $actioncomm->elementtype = $object->object_type . '@' . $moduleNameLowerCase;
-                $actioncomm->code        = 'AC_SATURNESIGNATURE_SIGNED_PUBLIC';
+                $actioncomm->code        = 'AC_SATURNESIGNATURE_SIGN_PUBLIC';
                 $actioncomm->label       = $langs->transnoentities('SignedTrigger', $langs->transnoentities($object->role) . ' ' . strtoupper($object->lastname) . ' ' . $object->firstname);
                 if ($object->element_type == 'socpeople') {
                     $actioncomm->socpeopleassigned = [$object->element_id => $object->element_id];
@@ -219,9 +219,9 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
                 $actioncomm->create($user);
                 break;
 
-            case 'SATURNESIGNATURE_DELETED' :
+            case 'SATURNESIGNATURE_DELETE' :
                 $actioncomm->elementtype = $object->object_type . '@' . $moduleNameLowerCase;
-                $actioncomm->code        = 'AC_SATURNESIGNATURE_DELETED';
+                $actioncomm->code        = 'AC_SATURNESIGNATURE_DELETE';
                 $actioncomm->label       = $langs->transnoentities('DeletedTrigger', $langs->transnoentities($object->role) . ' ' . strtoupper($object->lastname) . ' ' . $object->firstname);
                 if ($object->element_type == 'socpeople') {
                     $actioncomm->socpeopleassigned = [$object->element_id => $object->element_id];
