@@ -46,3 +46,5 @@ INSERT INTO `llx_saturne_object_documents` (ref, ref_ext, entity, date_creation,
 SELECT ref, ref_ext, entity, date_creation, tms, import_key, status, type, module_name, json, model_pdf, model_odt, last_main_doc, parent_type, parent_id, fk_user_creat FROM `llx_dolimeet_dolimeetdocuments`;
 DROP TABLE `llx_dolimeet_dolimeetdocuments`;
 DROP TABLE `llx_dolimeet_dolimeetdocuments_extrafields`;
+
+ALTER TABLE `llx_saturne_object_signature` ADD `attendance` SMALLINT NULL AFTER `transaction_url`;
