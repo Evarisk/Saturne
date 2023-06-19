@@ -96,7 +96,7 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
             }
         }
         print '</td><td class="center">';
-        if ($object->status == $object::STATUS_VALIDATED) {
+        if ($object->status == $object::STATUS_VALIDATED && $element->signature == '') {
             if (dol_strlen($element->email) || dol_strlen($usertmp->email) || dol_strlen($contact->email)) {
                 print dol_print_date($element->last_email_sent_date, 'dayhour', 'tzuser');
                 $nbEmailSent = 0;
