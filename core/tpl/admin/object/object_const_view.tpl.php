@@ -48,7 +48,7 @@ if (is_array($constArray) && !empty($constArray)) {
         print $langs->trans($const['description']);
         print '</td>';
         print '<td class="center">';
-        print ajax_constantonoff($const['code']);
+        print ajax_constantonoff($const['code'], $input ?? 0, $entity ?? 0, $revertonoff ?? 0, $strict ?? 0, $forceReload ?? 0, $marginleftonlyshort ?? 0 , $forcenoajax ?? 0, $setzeroinsteadofdel ?? 0, $suffix ?? '', $mode ?? '');
         print '</td>';
         print '</tr>';
     }
