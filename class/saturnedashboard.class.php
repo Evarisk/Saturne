@@ -130,7 +130,7 @@ class SaturneDashboard
                 foreach ($dashboardWidgets as $key => $dashboardWidget) {
                     if (!isset($disableWidgetList->$key) && is_array($dashboardWidget) && !empty($dashboardWidget)) {
                         $widget .= '<div class="box-flex-item"><div class="box-flex-item-with-margin">';
-                        $widget .= '<div class="info-box info-box-sm">';
+                        $widget .= '<div class="info-box">';
                         $widget .= '<span class="info-box-icon">';
                         $widget .= '<i class="' . $dashboardWidget['picto'] . '"></i>';
                         $widget .= '</span>';
