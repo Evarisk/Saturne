@@ -110,16 +110,17 @@ class modSaturne extends DolibarrModules
             // Set this to 1 if module has its own theme directory (theme)
             'theme' => 0,
             // Set this to relative path of css file if module has its own css file
-            'css' => ['/saturne/css/scss/modules/picto/_picto.min.css'],
+			'css' => ['/saturne/css/scss/modules/picto/_picto.min.css'],
             // Set this to relative path of js file if module must load a js on all pages
             'js' => [
 				'/saturne/js/saturne.js',
-				'/saturne/js/modules/menu.js'
+				'/saturne/js/modules/menu.js',
 			],
             // Set here all hooks context managed by module. To find available hook context, make a "grep -r '>initHooks(' *" on source code. You can also set hook context to 'all'
             'hooks' => [
                 'saturnepublicinterface',
-                'emailtemplates'
+                'emailtemplates',
+				'usercard'
             ],
             // Set this to 1 if features of module are opened to external users
             'moduleforexternal' => 0,
@@ -287,6 +288,8 @@ class modSaturne extends DolibarrModules
      */
 	public function init($options = ''): int
     {
+		global $langs;
+
 		// Permissions
 		$this->remove($options);
 		$sql = [];
@@ -298,6 +301,14 @@ class modSaturne extends DolibarrModules
 				$this->_load_tables('/saturne/sql/' . $subFolder . '/');
 			}
 		}
+
+		// Create extrafields during init
+		include_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
+		$extra_fields = new ExtraFields($this->db);
+
+//		$extra_fields->update('electronic_signature', $langs->transnoentities('TrainingSessionLocation'), 'varchar', '', 'contrat', 0, 0, 1850, '', '', '', 1);
+		$extra_fields->addExtraField('electronic_signature', $langs->transnoentities('ElectronicSignature'), 'text', '','', 'user', 0, 0, '', '', '', '', 1);
+
 
 		$result = $this->_load_tables('/saturne/sql/');
 		if ($result < 0) {
