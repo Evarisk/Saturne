@@ -234,7 +234,6 @@ class ActionsSaturne
 		global $db, $user;
 
 		if ($parameters['currentcontext'] == 'usercard' && GETPOST('action') == 'add_signature') {
-
 			require_once __DIR__ . '/saturnesignature.class.php';
 			$signatory = new SaturneSignature($db);
 			$data        = json_decode(file_get_contents('php://input'), true);
@@ -264,6 +263,6 @@ class ActionsSaturne
 			}
 
 		}
-		return 1;
+		return 0;
 	}
 }
