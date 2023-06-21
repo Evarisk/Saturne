@@ -88,6 +88,10 @@ window.saturne.modal.openModal = function ( event ) {
 	$('#'+modalToOpen).find('.from-subtype').attr('value', fromSubtype);
     $('#'+modalToOpen).find('.from-subdir').attr('value', fromSubdir);
 
+	if (modalToOpen.match(/signature/)) {
+		window.saturne.signature.modalSignatureOpened($(this))
+	}
+
     if (fromModule) {
         if (typeof window.saturne.modal.addMoreOpenModalData == 'function') {
             window.saturne.modal.addMoreOpenModalData(modalToOpen, $(this));
