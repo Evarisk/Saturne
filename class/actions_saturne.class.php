@@ -206,7 +206,7 @@ class ActionsSaturne
 				</div>
 
 				<script>
-					$('#user_extras_electronic_signature_1').html(<?php echo json_encode($out) ?>);
+					$('.user_extras_electronic_signature').html(<?php echo json_encode($out) ?>);
 				</script>
 
 				<?php
