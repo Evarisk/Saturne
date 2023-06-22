@@ -150,22 +150,23 @@ class ActionsSaturne
 			print '<!-- Includes CSS added by page -->'."\n".'<link rel="stylesheet" type="text/css" title="default" href="'.$urltofile;
 			print '">'."\n";
 
-			if ($user->id == $id) {
-				require_once __DIR__ . '/saturnesignature.class.php';
-				$signatory = new SaturneSignature($db);
-				$result = $signatory->fetchSignatory('UserSignature', $user->id, 'user');
-				if (!is_array($result) || empty($result)) {
-					$userSignatory = $signatory->setSignatory($user->id, $user->element, 'user', [$user->id], 'UserSignature');
-				} else {
-					$userSignatory = array_shift($result);
-				}
+			require_once __DIR__ . '/saturnesignature.class.php';
+			$signatory = new SaturneSignature($db);
+			$result = $signatory->fetchSignatory('UserSignature', $id, 'user');
+			if (!is_array($result) || empty($result)) {
+				$userSignatory = $signatory->setSignatory($id, $user->element, 'user', [$id], 'UserSignature');
+			} else {
+				$userSignatory = array_shift($result);
+			}
 
-				if (dol_strlen($userSignatory->signature) > 0) {
-					$out = '<div class="signatures-container">';
-					$out .= '<input type="hidden" class="modal-to-open" value="modal-signature'. $userSignatory->id .'">';
-					$out .= '<img class="wpeo-modal-event modal-signature-open modal-open" value="'. $userSignatory->id .'" src="'. $userSignatory->signature .'" width="100px" height="100px" style="border: #0b419b solid 2px">';
-					$out .= '</div>';
-				}
+			if (dol_strlen($userSignatory->signature) > 0) {
+				$out = '<div class="signatures-container">';
+				$out .= '<input type="hidden" class="modal-to-open" value="modal-signature'. $userSignatory->id .'">';
+				$out .= '<img class="wpeo-modal-event modal-signature-open modal-open" value="'. $userSignatory->id .'" src="'. $userSignatory->signature .'" width="100px" height="100px" style="border: #0b419b solid 2px">';
+				$out .= '</div>';
+			}
+			if ($user->id == $id) {
+
 				$out .= '<div class="wpeo-button button-blue wpeo-modal-event modal-signature-open modal-open" value="'. $userSignatory->id .'">';
 				$out .= '<input type="hidden" class="modal-to-open" value="modal-signature'. $userSignatory->id .'">';
 				$out .= '<input type="hidden" class="from-id" value="'. $userSignatory->id .'">';

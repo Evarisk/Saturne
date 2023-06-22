@@ -67,18 +67,19 @@ AttendantTableModeSimple   = Vue simplifiée
 AttendantTableModeAdvanced = Vue avancée
 
 # Data - Donnée
-Attendant          = Participant
-Attendants         = Participants
-InternalAttendant  = Participant interne
-InternalAttendants = Participants internes
-ExternalAttendant  = Participant externe
-ExternalAttendants = Participants externes
-NoAttendants       = Pas de participants liés. Pour ajouter des participants, le statut doit être "Brouillon (à valider)".
-CloneAttendants    = Cloner les participants
-NoAttendant        = Aucun %s présent pour %s.
-Present            = Présent
-Absent             = Absent
-Delay              = En retard
+Attendant           = Participant
+Attendants          = Participants
+InternalAttendant   = Participant interne
+InternalAttendants  = Participants internes
+ExternalAttendant   = Participant externe
+ExternalAttendants  = Participants externes
+NoAttendants        = Pas de participants liés. Pour ajouter des participants, le statut doit être "Brouillon (à valider)".
+CloneAttendants     = Cloner les participants
+NoAttendant         = Aucun %s présent pour %s.
+Present             = Présent
+Absent              = Absent
+Delay               = En retard
+ElectronicSignature = Signature électronique
 
 # Public interface - Interface publique
 FullName = NOM Prénom
