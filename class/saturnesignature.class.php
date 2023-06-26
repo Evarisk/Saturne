@@ -178,7 +178,7 @@ class SaturneSignature extends SaturneObject
     /**
      * @var string Signature date
      */
-    public string $signature_date;
+    public string $signature_date = '';
 
     /**
      * @var string|null Signature location
@@ -228,7 +228,7 @@ class SaturneSignature extends SaturneObject
     /**
      * @var string Last email sent date
      */
-    public string $last_email_sent_date;
+    public string $last_email_sent_date = '';
 
     /**
      * @var int|null Attendance
