@@ -160,3 +160,10 @@ CloseModal = Fermer
 #
 # Data - Donnée
 FkElement = Élément lié
+
+#
+# Tools - Outils
+#
+
+# Data- Donnée
+ExportData = Exporter mes données
