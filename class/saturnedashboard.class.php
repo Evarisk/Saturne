@@ -170,7 +170,7 @@ class SaturneDashboard
                     foreach ($dashboardList['data'] as $dashboardListDatasets) {
                         print '<tr class="oddeven">';
                         foreach ($dashboardListDatasets as $key => $dashboardGraphDataset) {
-                            print '<td class="minwidth200' . (($key != 'Ref') ? ' center' : '') . '">' . $dashboardGraphDataset . '</td>';
+                            print '<td class="minwidth200' . (($key != 'Ref') ? ' center ' : '') . $dashboardGraphDataset['morecss'] . '">' . $dashboardGraphDataset['value'] . '</td>';
                         }
                         print '</tr>';
                     }
