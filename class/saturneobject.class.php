@@ -638,4 +638,38 @@ abstract class SaturneObject extends CommonObject
 		}
 	}
 
+	/**
+	 * Write generic informations of the description of a trigger
+	 *
+	 * @param  Object $object Object calling the trigger
+	 * @return string         Description to display in actioncomm->note_private
+	 */
+	public function getTriggerDescription(object $object)
+	{
+		global $conf, $db, $langs, $mysoc;
+
+		$langs->load('other');
+
+		$user = new User($db);
+		$now  = dol_now();
+
+		$ret  = $langs->trans('Ref') . ' : ' . $object->ref . '</br>';
+		$ret .= (!empty($object->label) ? $langs->trans('Label') . ' : ' . $object->label . '</br>' : '');
+		$ret .= (!empty($object->description) ? $langs->trans('Description') . ' : ' . $object->description . '</br>' : '');
+		$ret .= $langs->trans('DateCreation') . ' : ' . dol_print_date($object->date_creation ?: $now, 'dayhoursec', 'tzuser') . '</br>';
+		$ret .= $langs->trans('DateModification') . ' : ' . dol_print_date($object->tms ?: $now, 'dayhoursec', 'tzuser') . '</br>';
+		if (!empty($object->fk_user_creat)) {
+			$user->fetch($object->fk_user_creat);
+			$ret .= $langs->trans('CreatedByLogin') . ' : ' . $user->getNomUrl(0, 'nolink', -1, 1, 24, 0, 'firstelselast') . '</br>';
+		}
+		if (!empty($object->fk_user_modif)) {
+			$user->fetch($object->fk_user_modif);
+			$ret .= $langs->trans('ModifiedByLogin') . ' : ' . $user->getNomUrl(0, 'nolink', -1, 1, 24, 0, 'firstelselast') . '</br>';
+		}
+		$ret .= $langs->trans('EntityNumber') . ' : ' . $conf->entity . '</br>';
+		$ret .= $langs->trans('EntityName') . ' : ' . $mysoc->name . '</br>';
+
+		return $ret;
+	}
+
 }
