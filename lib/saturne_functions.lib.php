@@ -84,18 +84,6 @@ function saturne_check_access($permission, object $object = null, bool $allowExt
         $moduleNameLowerCase = 'saturne';
     }
 
-    if (!isModEnabled($moduleNameLowerCase) || !isModEnabled('saturne')) {
-        if (!isModEnabled($moduleNameLowerCase)) {
-            setEventMessage($langs->transnoentitiesnoconv('Enable' . ucfirst($moduleNameLowerCase)), 'warnings');
-        }
-        if (!isModEnabled('saturne')) {
-            setEventMessage($langs->trans('EnableSaturne'), 'warnings');
-        }
-        $urltogo = dol_buildpath('/admin/modules.php?search_nature=external_Evarisk', 1);
-        header('Location: ' . $urltogo);
-        exit;
-    }
-
     if (!$permission) {
         accessforbidden();
     }
@@ -115,6 +103,31 @@ function saturne_check_access($permission, object $object = null, bool $allowExt
 				exit;
 			}
 		}
+	}
+}
+
+/**
+ * Check if saturne and current module are enabled
+ *
+ */
+function saturne_check_modules_enabled()
+{
+	global $langs, $moduleNameLowerCase;
+
+	if (empty($moduleNameLowerCase)) {
+		$moduleNameLowerCase = 'saturne';
+	}
+
+	if (!isModEnabled($moduleNameLowerCase) || !isModEnabled('saturne')) {
+		if (!isModEnabled($moduleNameLowerCase)) {
+			setEventMessage($langs->transnoentitiesnoconv('Enable' . ucfirst($moduleNameLowerCase)), 'warnings');
+		}
+		if (!isModEnabled('saturne')) {
+			setEventMessage($langs->trans('EnableSaturne'), 'warnings');
+		}
+		$urltogo = dol_buildpath('/admin/modules.php?search_nature=external_Evarisk', 1);
+		header('Location: ' . $urltogo);
+		exit;
 	}
 }
 
