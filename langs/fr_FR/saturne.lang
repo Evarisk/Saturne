@@ -161,7 +161,6 @@ CloseModal = Fermer
 # Data - Donnée
 FkElement = Élément lié
 
-
 #
 # Triggers
 #
@@ -169,3 +168,11 @@ FkElement = Élément lié
 # Data - Donnée
 EntityNumber = Numéro de l'entité
 EntityName   = Nom de l'entité
+
+#
+# Tools - Outils
+#
+
+# Data- Donnée
+Tools      = Outils
+ExportData = Exporter mes données
