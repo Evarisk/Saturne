@@ -30,6 +30,11 @@ require_once DOL_DOCUMENT_ROOT . '/projet/class/task.class.php';
  */
 class SaturneTask extends Task
 {
+    /**
+     * @var int Does this object support multicompany module ?
+     * 0=No test on entity, 1=Test with field entity, 'field@table'=Test with link by field@table
+     */
+    public int $ismultientitymanaged = 1;
 
 	/**
 	 * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
