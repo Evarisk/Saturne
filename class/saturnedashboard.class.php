@@ -157,29 +157,6 @@ class SaturneDashboard
             print '<div class="opened-dash-board-wrap"><div class="box-flex-container">' . $widget . '</div></div>';
         }
 
-        print '<div class="wpeo-gridlayout grid-2">';
-        if (is_array($dashboards['lists']) && !empty($dashboards['lists'])) {
-            foreach ($dashboards['lists'] as $dashboardLists) {
-                foreach ($dashboardLists as $dashboardList) {
-                    print '<table class="noborder centpercent">';
-                    print '<tr class="liste_titre">';
-                    foreach ($dashboardList['labels'] as $key => $dashboardListLabel) {
-                        print '<td class="minwidth200' . (($key != 'Ref') ? ' center' : '') . '">' . $langs->transnoentities($dashboardListLabel) . '</td>';
-                    }
-                    print '</tr>';
-                    foreach ($dashboardList['data'] as $dashboardListDatasets) {
-                        print '<tr class="oddeven">';
-                        foreach ($dashboardListDatasets as $key => $dashboardGraphDataset) {
-                            print '<td class="minwidth200' . (($key != 'Ref') ? ' center ' : '') . $dashboardGraphDataset['morecss'] . '">' . $dashboardGraphDataset['value'] . '</td>';
-                        }
-                        print '</tr>';
-                    }
-                    print '</table>';
-                }
-            }
-        }
-        print '</div>';
-
         print '<div class="graph-dashboard wpeo-gridlayout grid-2">';
 
         if (is_array($dashboards['graphs']) && !empty($dashboards['graphs'])) {
@@ -244,6 +221,29 @@ class SaturneDashboard
                             }
                         }
                     }
+                }
+            }
+        }
+
+        if (is_array($dashboards['lists']) && !empty($dashboards['lists'])) {
+            foreach ($dashboards['lists'] as $dashboardLists) {
+                foreach ($dashboardLists as $dashboardList) {
+                    print '<div>';
+                    print load_fiche_titre($dashboardList['title'], $dashboardList['morehtmlright'], $dashboardList['picto']);
+                    print '<table class="noborder centpercent">';
+                    print '<tr class="liste_titre">';
+                    foreach ($dashboardList['labels'] as $key => $dashboardListLabel) {
+                        print '<td class="minwidth200' . (($key != 'Ref') ? ' center' : '') . '">' . $langs->transnoentities($dashboardListLabel) . '</td>';
+                    }
+                    print '</tr>';
+                    foreach ($dashboardList['data'] as $dashboardListDatasets) {
+                        print '<tr class="oddeven">';
+                        foreach ($dashboardListDatasets as $key => $dashboardGraphDataset) {
+                            print '<td class="minwidth200' . (($key != 'Ref') ? ' center ' : '') . $dashboardGraphDataset['morecss'] . '">' . $dashboardGraphDataset['value'] . '</td>';
+                        }
+                        print '</tr>';
+                    }
+                    print '</table></div>';
                 }
             }
         }
