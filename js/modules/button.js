@@ -60,7 +60,7 @@ window.saturne.button.init = function() {
  * @return {void}
  */
 window.saturne.button.event = function() {
-    $(document).on('click', '.wpeo-button:submit', window.saturne.button.addLoader);
+    $(document).on('click', '.wpeo-button:submit, .wpeo-button.auto-download', window.saturne.button.addLoader);
 };
 
 /**
