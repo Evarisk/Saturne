@@ -149,3 +149,30 @@ ConfigEmail     = Click on this link to go to the email configuration
 
 # Data
 CloseModal = Close
+
+#
+# Certificate
+#
+
+# Data
+FkElement = Linked element
+
+
+
+#
+# Triggers
+#
+
+# Data
+EntityNumber = Entity number
+EntityName   = Entity name
+
+
+
+#
+# Tools
+#
+
+# Data
+Tools      = Tools
+ExportData = Export my data

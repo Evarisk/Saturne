@@ -23,13 +23,14 @@ CreateObjects = Create/Modidy %s
 DeleteObjects = Delete %s
 
 # Trigger
-ObjectCreateTrigger     = Creation of %s
-ObjectModifyTrigger     = Modification of %s
-ObjectDeleteTrigger     = Deletion of %s
-ObjectUnValidateTrigger = Reopening of %s
-ObjectValidateTrigger   = Pending signature of the participants of %s
-ObjectLockedTrigger     = Locking %s - Ready for document generation
-ObjectArchivedTrigger   = Archiving %s
+ObjectCreateTrigger     = Creation of %s %s
+ObjectModifyTrigger     = Modification of %s %s
+ObjectDeleteTrigger     = Deletion of %s %s
+ObjectUnValidateTrigger = Reopening of %s %s
+ObjectValidateTrigger   = Pending signature of the participants of %s %s
+ObjectLockedTrigger     = Locking %s %s - Ready for document generation
+ObjectArchivedTrigger   = Archiving %s %s
+ObjectGenerateTrigger   = Generating %s %s
 
 # SetEventMessage
 
