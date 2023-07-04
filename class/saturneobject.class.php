@@ -639,12 +639,12 @@ abstract class SaturneObject extends CommonObject
 	}
 
 	/**
-	 * Write generic information of the description of a trigger
+	 * Write generic information of trigger description
 	 *
-	 * @param  Object $object Object calling the trigger
-	 * @return string         Description to display in actioncomm->note_private
+	 * @param  SaturneObject $object Object calling the trigger
+	 * @return string                Description to display in actioncomm->note_private
 	 */
-	public function getTriggerDescription(object $object): string
+	public function getTriggerDescription(SaturneObject $object): string
 	{
 		global $conf, $db, $langs, $mysoc;
 
@@ -653,24 +653,33 @@ abstract class SaturneObject extends CommonObject
 		$user = new User($db);
 		$now  = dol_now();
 
-		$ret  = $langs->trans('Ref') . ' : ' . $object->ref . '</br>';
-		$ret .= (isset($object->label) && !empty($object->label) ? $langs->trans('Label') . ' : ' . $object->label . '</br>' : '');
-		$ret .= (isset($object->description) && !empty($object->description) ? $langs->trans('Description') . ' : ' . $object->description . '</br>' : '');
-		$ret .= (isset($object->type) && !empty($object->type) ? $langs->trans('Type') . ' : ' . $object->type . '</br>' : '');
-		$ret .= (isset($object->value) && !empty($object->value) ? $langs->trans('Value') . ' : ' . $object->value . '</br>' : '');
-		$ret .= $langs->trans('DateCreation') . ' : ' . dol_print_date($object->date_creation ?: $now, 'dayhoursec', 'tzuser') . '</br>';
-		$ret .= $langs->trans('DateModification') . ' : ' . dol_print_date($object->tms ?: $now, 'dayhoursec', 'tzuser') . '</br>';
+		$ret  = $langs->transnoentities('Ref') . ' : ' . $object->ref . '</br>';
+		$ret .= (isset($object->label) && !empty($object->label) ? $langs->transnoentities('Label') . ' : ' . $object->label . '</br>' : '');
+		$ret .= (isset($object->description) && !empty($object->description) ? $langs->transnoentities('Description') . ' : ' . $object->description . '</br>' : '');
+		$ret .= (isset($object->type) && !empty($object->type) ? $langs->transnoentities('Type') . ' : ' . $object->type . '</br>' : '');
+		$ret .= (isset($object->value) && !empty($object->value) ? $langs->transnoentities('Value') . ' : ' . $object->value . '</br>' : '');
+		$ret .= $langs->transnoentities('DateCreation') . ' : ' . dol_print_date($object->date_creation ?: $now, 'dayhoursec', 'tzuser') . '</br>';
+		$ret .= $langs->transnoentities('DateModification') . ' : ' . dol_print_date($object->tms ?: $now, 'dayhoursec', 'tzuser') . '</br>';
 		if (!empty($object->fk_user_creat)) {
 			$user->fetch($object->fk_user_creat);
-			$ret .= $langs->trans('CreatedByLogin') . ' : ' . $user->firstname . ' ' . $user->lastname . '</br>';
+			$ret .= $langs->transnoentities('CreatedByLogin') . ' : ' . ucfirst($user->firstname) . ' ' . dol_strtoupper($user->lastname) . '</br>';
 		}
 		if (!empty($object->fk_user_modif)) {
 			$user->fetch($object->fk_user_modif);
-			$ret .= $langs->trans('ModifiedByLogin') . ' : ' . $user->firstname . ' ' . $user->lastname . '</br>';
+			$ret .= $langs->transnoentities('ModifiedByLogin') . ' : ' . ucfirst($user->firstname) . ' ' . dol_strtoupper($user->lastname) . '</br>';
 		}
-		$ret .= $langs->trans('EntityNumber') . ' : ' . $conf->entity . '</br>';
-		$ret .= $langs->trans('EntityName') . ' : ' . $mysoc->name . '</br>';
-
+		$ret .= $langs->transnoentities('EntityNumber') . ' : ' . $conf->entity . '</br>';
+		$ret .= $langs->transnoentities('EntityName') . ' : ' . $mysoc->name . '</br>';
+		if (array_key_exists('fk_soc', $object->fields) && isModEnabled('societe')) {
+			$societe = new Societe($db);
+			$societe->fetch($object->fk_soc);
+			$ret .= $langs->transnoentities('ThirdParty') . ' : ' . dol_strlen($societe->name) > 0 ? $societe->name : $langs->transnoentities('NoData') . '</br>';
+		}
+		if (!empty($object->fk_project) && isModEnabled('project')) {
+			$project = new Project($db);
+			$project->fetch($object->fk_project);
+			$ret .= $langs->transnoentities('Project') . ' : ' . $project->ref . ' ' . $project->title . '</br>';
+		}
 		return $ret;
 	}
 
