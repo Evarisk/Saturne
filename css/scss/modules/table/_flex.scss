@@ -54,7 +54,7 @@
 .wpeo-table.table-flex {
   @for $i from 1 through 10 {
     &.table-#{$i} .table-cell {
-      width: 100%/$i;
+      width: calc(100% / $i);
     }
   }
 }

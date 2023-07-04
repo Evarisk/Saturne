@@ -157,7 +157,7 @@ class SaturneDashboard
             print '<div class="opened-dash-board-wrap"><div class="box-flex-container">' . $widget . '</div></div>';
         }
 
-        print '<div class="graph-dashboard wpeo-gridlayout grid-2">';
+        print '<div class="graph-dashboard wpeo-grid grid-2">';
 
         if (is_array($dashboards['graphs']) && !empty($dashboards['graphs'])) {
             foreach ($dashboards['graphs'] as $dashboardGraphs) {
@@ -225,6 +225,8 @@ class SaturneDashboard
             }
         }
 
+        print '</div>';
+
         if (is_array($dashboards['lists']) && !empty($dashboards['lists'])) {
             foreach ($dashboards['lists'] as $dashboardLists) {
                 foreach ($dashboardLists as $dashboardList) {
@@ -233,13 +235,13 @@ class SaturneDashboard
                     print '<table class="noborder centpercent">';
                     print '<tr class="liste_titre">';
                     foreach ($dashboardList['labels'] as $key => $dashboardListLabel) {
-                        print '<td class="minwidth200' . (($key != 'Ref') ? ' center' : '') . '">' . $langs->transnoentities($dashboardListLabel) . '</td>';
+                        print '<td class="nowraponall tdoverflowmax200' . (($key != 'Ref') ? ' center' : '') . '">' . $langs->transnoentities($dashboardListLabel) . '</td>';
                     }
                     print '</tr>';
                     foreach ($dashboardList['data'] as $dashboardListDatasets) {
                         print '<tr class="oddeven">';
                         foreach ($dashboardListDatasets as $key => $dashboardGraphDataset) {
-                            print '<td class="minwidth200' . (($key != 'Ref') ? ' center ' : '') . $dashboardGraphDataset['morecss'] . '">' . $dashboardGraphDataset['value'] . '</td>';
+                            print '<td class="nowraponall tdoverflowmax200' . (($key != 'Ref') ? ' center ' : '') . $dashboardGraphDataset['morecss'] . '">' . $dashboardGraphDataset['value'] . '</td>';
                         }
                         print '</tr>';
                     }
@@ -248,7 +250,7 @@ class SaturneDashboard
             }
         }
 
-        print '</div></div></div>';
+        print '</div></div>';
         print '</form>';
     }
 }
