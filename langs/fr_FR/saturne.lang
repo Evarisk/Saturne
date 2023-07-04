@@ -162,6 +162,14 @@ CloseModal = Fermer
 FkElement = Élément lié
 
 #
+# Triggers
+#
+
+# Data - Donnée
+EntityNumber = Numéro de l'entité
+EntityName   = Nom de l'entité
+
+#
 # Tools - Outils
 #
 
