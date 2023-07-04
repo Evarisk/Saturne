@@ -653,10 +653,10 @@ abstract class SaturneObject extends CommonObject
 		$user = new User($db);
 		$now  = dol_now();
 
-		$ret  = $langs->transnoentities('Ref') . ' : ' . $object->ref . '</br>';
+		$ret  = $langs->trans('Ref') . ' : ' . $object->ref . '</br>';
 		$ret .= (isset($object->label) && !empty($object->label) ? $langs->transnoentities('Label') . ' : ' . $object->label . '</br>' : '');
 		$ret .= (isset($object->description) && !empty($object->description) ? $langs->transnoentities('Description') . ' : ' . $object->description . '</br>' : '');
-		$ret .= (isset($object->type) && !empty($object->type) ? $langs->transnoentities('Type') . ' : ' . $object->type . '</br>' : '');
+		$ret .= (isset($object->type) && !empty($object->type) ? $langs->transnoentities('Type') . ' : ' .  $langs->transnoentities($object->type) . '</br>' : '');
 		$ret .= (isset($object->value) && !empty($object->value) ? $langs->transnoentities('Value') . ' : ' . $object->value . '</br>' : '');
 		$ret .= $langs->transnoentities('DateCreation') . ' : ' . dol_print_date($object->date_creation ?: $now, 'dayhoursec', 'tzuser') . '</br>';
 		$ret .= $langs->transnoentities('DateModification') . ' : ' . dol_print_date($object->tms ?: $now, 'dayhoursec', 'tzuser') . '</br>';
