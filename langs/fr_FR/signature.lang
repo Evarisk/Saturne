@@ -80,6 +80,7 @@ Present             = Présent
 Absent              = Absent
 Delay               = En retard
 ElectronicSignature = Signature électronique
+Signatory           = Signataire
 
 # Public interface - Interface publique
 FullName = NOM Prénom
