@@ -137,7 +137,7 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
  */
 function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $size = 0, $nbmax = 0, int $nbbyrow = 5, int $showfilename = 0, int $showaction = 0, int $maxHeight = 120, int $maxWidth = 160, int $nolink = 0, int $notitle = 0, int $usesharelink = 0, string $subdir = '', object $object = null, string $favorite_field = 'photo', int $show_favorite_button = 1, int $show_unlink_button = 1 , int $use_mini_format = 0, int $show_only_favorite = 0, string $morecss = '', int $showdiv = 1): string
 {
-	global $conf, $langs;
+	global $conf, $langs, $moduleNameUpperCase;
 
 	include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 	include_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
@@ -277,10 +277,12 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 							if ($urladvanced) $return .= '<a href="' . $urladvanced . '">';
 							else $return              .= '<a href="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" class="aphoto" target="_blank">';
 						}
-						$widthName = 'SATURNE_MEDIA_MAX_WIDTH_' . strtoupper($size);
-						$heightName = 'SATURNE_MEDIA_MAX_HEIGHT_' . strtoupper($size);
+						$widthName  = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_' . strtoupper($size);
+						$heightName = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_' . strtoupper($size);
 						$return .= '<img width="' . $conf->global->$widthName . '" height="' . $conf->global->$heightName . '" class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '">';
-						if ($showfilename) $return .= '<br>' . $viewfilename;
+						if ($showfilename) {
+                            $return .= '<br>' . $viewfilename;
+                        }
 					}
 				}
 
