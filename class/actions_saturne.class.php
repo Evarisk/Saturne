@@ -161,15 +161,14 @@ class ActionsSaturne
 
 			if (dol_strlen($userSignatory->signature) > 0) {
 				$out = '<div class="signatures-container">';
-				$out .= '<input type="hidden" class="modal-to-open" value="modal-signature'. $userSignatory->id .'">';
+				$out .= '<input type="hidden" class="modal-options" data-modal-to-open="modal-signature'. $userSignatory->id .'">';
 				$out .= '<img class="wpeo-modal-event modal-signature-open modal-open" value="'. $userSignatory->id .'" src="'. $userSignatory->signature .'" width="100px" height="100px" style="border: #0b419b solid 2px">';
 				$out .= '</div>';
 			}
 			if ($user->id == $id) {
 
 				$out .= '<div class="wpeo-button button-blue wpeo-modal-event modal-signature-open modal-open" value="'. $userSignatory->id .'">';
-				$out .= '<input type="hidden" class="modal-to-open" value="modal-signature'. $userSignatory->id .'">';
-				$out .= '<input type="hidden" class="from-id" value="'. $userSignatory->id .'">';
+				$out .= '<input type="hidden" class="modal-options" data-modal-to-open="modal-signature'. $userSignatory->id .'" data-from-id="'. $userSignatory->id .'">';
 				$out .= '<span><i class="fas fa-signature"></i>'. $langs->trans('Sign') .'</span>';
 				$out .= '</div>';
 

@@ -104,10 +104,10 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 	let filesLinked       = mediaGalleryModal.find('.clicked-photo')
 	let token             = window.saturne.toolbox.getToken();
 
-	let objectId         = $(this).find('.from-id').val()
-	let objectType       = $(this).find('.from-type').val()
-	let objectSubtype    = $(this).find('.from-subtype').length ? $(this).find('.from-subtype').val() : ''
-	let objectSubdir     = $(this).find('.from-subdir').length ? $(this).find('.from-subdir').val() : ''
+	let objectId         = mediaGallery.attr('data-from-id');
+	let objectType       = mediaGallery.attr('data-from-type')
+	let objectSubtype    = mediaGallery.attr('data-from-subtype')
+	let objectSubdir     = mediaGallery.attr('data-from-subdir')
 
 	let filenames = ''
 	if (filesLinked.length > 0) {
@@ -185,10 +185,10 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 	let requestCompleted = 0
 	let progress   = 0
 
-	let objectId         = mediaGallery.find('.from-id').val()
-	let objectType       = mediaGallery.find('.from-type').val()
-	let objectSubtype    = mediaGallery.find('.from-subtype').length ? mediaGallery.find('.from-subtype').val() : ''
-	let objectSubdir     = mediaGallery.find('.from-subdir').length ? mediaGallery.find('.from-subdir').val() : ''
+	let objectId         = mediaGallery.attr('data-from-id')
+	let objectType       = mediaGallery.attr('data-from-type')
+	let objectSubtype    = mediaGallery.attr('data-from-subtype')
+	let objectSubdir     = mediaGallery.attr('data-from-subdir')
 
 	let token = window.saturne.toolbox.getToken();
 
@@ -238,11 +238,11 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 							} else {
 								$('.messageSuccessSendPhoto').removeClass('hidden');
 							}
-							$('#media_gallery').find('.from-id').attr('value', objectId);
-							$('#media_gallery').find('.from-type').attr('value', objectType);
-							$('#media_gallery').find('.from-subtype').attr('value', objectSubtype);
-							$('#media_gallery').find('.from-subdir').attr('value', objectSubdir);
-							$('#media_gallery').find('.wpeo-button').attr('value', objectId);
+							mediaGallery.attr('data-from-id', objectId);
+							mediaGallery.attr('data-from-type', objectType);
+							mediaGallery.attr('data-from-subtype', objectSubtype);
+							mediaGallery.attr('data-from-subdir', objectSubdir);
+							mediaGallery.find('.wpeo-button').attr('value', objectId);
 						})
 					}, 800)
 				}
@@ -282,11 +282,11 @@ window.saturne.mediaGallery.unlinkFile = function( event ) {
 
 	let token = window.saturne.toolbox.getToken();
 
-	let mediaInfos = $(this).closest('.linked-medias')
-	let objectSubtype = mediaInfos.find('.from-subtype').val()
-	let objectType    = mediaInfos.find('.from-type').val()
-	let objectSubdir  = mediaInfos.find('.from-subdir').length ? mediaInfos.find('.from-subdir').val() : ''
-	let objectId      = mediaInfos.find('.from-id').val()
+	let mediaInfos = $(this).closest('.linked-medias').find('.modal-options')
+	let objectSubtype = mediaInfos.attr('data-from-subtype')
+	let objectType    = mediaInfos.attr('data-from-type')
+	let objectSubdir  = mediaInfos.attr('data-from-subdir')
+	let objectId      = mediaInfos.attr('data-from-id')
 
 	let mediaContainer   = $(this).closest('.media-container')
 	let filepath         = mediaContainer.find('.file-path').val()
@@ -338,11 +338,11 @@ window.saturne.mediaGallery.addToFavorite = function( event ) {
 	let previousFavorite = $(this).closest('.linked-medias').find('.fas.fa-star')
 	let newFavorite = $(this).find('.far.fa-star')
 
-	let mediaInfos = $(this).closest('.linked-medias')
-	let objectSubtype = mediaInfos.find('.from-subtype').val()
-	let objectType    = mediaInfos.find('.from-type').val()
-	let objectSubdir  = mediaInfos.find('.from-subdir').length ? mediaInfos.find('.from-subdir').val() : ''
-	let objectId      = mediaInfos.find('.from-id').val()
+	let mediaInfos = $(this).closest('.linked-medias').find('.modal-options')
+	let objectSubtype = mediaInfos.attr('data-from-subtype')
+	let objectType    = mediaInfos.attr('data-from-type')
+	let objectSubdir  = mediaInfos.attr('data-from-subdir')
+	let objectId      = mediaInfos.attr('data-from-id')
 
 	let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
 
@@ -391,10 +391,10 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
 
 	let formdata = new FormData();
 
-	let objectId         = $(this).closest('.linked-medias').find('.from-id').val()
-	let objectType       = $(this).closest('.linked-medias').find('.from-type').val()
-	let objectSubtype    = $(this).closest('.linked-medias').find('.from-subtype').length ? $(this).closest('.linked-medias').find('.from-subtype').val() : ''
-	let objectSubdir     = $(this).closest('.linked-medias').find('.from-subdir').length ? $(this).closest('.linked-medias').find('.from-subdir').val() : ''
+	let objectId         = $(this).closest('.linked-medias').find('.modal-options').attr('data-from-id')
+	let objectType       = $(this).closest('.linked-medias').find('.modal-options').attr('data-from-type')
+	let objectSubtype    = $(this).closest('.linked-medias').find('.modal-options').attr('data-from-subtype')
+	let objectSubdir     = $(this).closest('.linked-medias').find('.modal-options').attr('data-from-subdir')
 
 	window.saturne.loader.display($('.linked-medias.'+objectSubtype));
 
@@ -473,10 +473,10 @@ window.saturne.mediaGallery.selectPage = function( event ) {
 
 	let mediaGallery = $('#' + containerToRefresh);
 
-	let objectId         = mediaGallery.find('.from-id').val()
-	let objectType       = mediaGallery.find('.from-type').val()
-	let objectSubtype    = mediaGallery.find('.from-subtype').length ? mediaGallery.find('.from-subtype').val() : ''
-	let objectSubdir     = mediaGallery.find('.from-subdir').length ? mediaGallery.find('.from-subdir').val() : ''
+	let objectId         = mediaGallery.find('.modal-options').attr('data-from-id')
+	let objectType       = mediaGallery.find('.modal-options').attr('data-from-type')
+	let objectSubtype    = mediaGallery.find('.modal-options').attr('data-from-subtype')
+	let objectSubdir     = mediaGallery.find('.modal-options').attr('data-from-subdir')
 
 	let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
 
@@ -500,10 +500,10 @@ window.saturne.mediaGallery.selectPage = function( event ) {
 			$('.wpeo-loader').removeClass('wpeo-loader')
 			mediaGallery.html($(resp).find('#' + containerToRefresh).children());
 			
-			mediaGallery.find('.from-id').val(objectId)
-			mediaGallery.find('.from-type').val(objectType)
-			mediaGallery.find('.from-subtype').val(objectSubtype)
-			mediaGallery.find('.from-subdir').val(objectSubdir)
+			mediaGallery.find('.modal-options').attr('data-from-id', objectId)
+			mediaGallery.find('.modal-options').attr('data-from-type', objectType)
+			mediaGallery.find('.modal-options').attr('data-from-subtype', objectSubtype)
+			mediaGallery.find('.modal-options').attr('data-from-subdir', objectSubdir)
 		},
 		error: function ( ) {
 		}
