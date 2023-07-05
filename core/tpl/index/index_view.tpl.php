@@ -109,7 +109,7 @@ if ($conf->global->$moduleShowPatchNote > 0) : ?>
         <div class="notice-content">
             <div class="notice-title"><?php echo $langs->trans('ModulePatchNote', $moduleName, $modModule->version); ?>
                 <div class="show-patchnote wpeo-button button-square-40 button-blue wpeo-tooltip-event modal-open" aria-label="<?php echo $langs->trans('ShowPatchNote'); ?>">
-                    <input hidden class="modal-to-open" value="patch-note">
+                    <input hidden class="modal-options" data-modal-to-open="patch-note">
                     <i class="fas fa-list button-icon"></i>
                 </div>
             </div>
