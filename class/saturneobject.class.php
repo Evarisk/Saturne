@@ -264,9 +264,11 @@ abstract class SaturneObject extends CommonObject
 
 		// Define new ref.
 		if ((preg_match('/^\(?PROV/i', $this->ref) || empty($this->ref))) { // empty should not happen, but when it occurs, the test save life.
-			$num = $this->getNextNumRef();
+            $oldRef = $this->ref;
+			$num    = $this->getNextNumRef();
 		} else {
-			$num = $this->ref;
+            $oldRef = $this->ref;
+			$num    = $this->ref;
 		}
 		$this->newref = $num;
 
@@ -296,25 +298,25 @@ abstract class SaturneObject extends CommonObject
 		}
 
 		if (!$error) {
-			$this->oldref = $this->ref;
-
 			// Rename directory if dir was a temporary ref.
-			if (preg_match('/^\(?PROV/i', $this->ref)) {
+			if (preg_match('/^\(?PROV/i', $oldRef)) {
+
 				// Now we rename also files into index.
 				$sql = 'UPDATE ' . MAIN_DB_PREFIX . 'ecm_files';
-				$sql .= " SET filename = CONCAT('" . $this->db->escape($this->newref) . "', SUBSTR(filename, " . (strlen($this->ref) + 1) . ')),';
-				$sql .= " filepath = '" . $this->db->escape($objectType . '/' . $this->ref) . "'";
-				$sql .= " WHERE filename LIKE '" . $this->db->escape($this->ref) . "%' AND filepath = '" . $this->db->escape($objectType . '/' . $this->ref) . "' AND entity = " . $conf->entity;
+				$sql .= " SET filename = CONCAT('" . $this->db->escape($this->newref) . "', SUBSTR(filename, " . (strlen($oldRef) + 1) . ')),';
+				$sql .= " filepath = '" . $this->db->escape($objectType . '/' . $oldRef) . "'";
+				$sql .= " WHERE filename LIKE '" . $this->db->escape($oldRef) . "%' AND filepath = '" . $this->db->escape($objectType . '/' . $oldRef) . "' AND entity = " . $conf->entity;
 				$resql = $this->db->query($sql);
 				if (!$resql) {
 					$error++; $this->error = $this->db->lasterror();
 				}
 
-				// We rename directory ($this->ref = old ref, $num = new ref) in order not to lose the attachments.
-				$oldRef    = dol_sanitizeFileName($this->ref);
+				// We rename directory ($oldRef = old ref, $num = new ref) in order not to lose the attachments.
+				$oldRef    = dol_sanitizeFileName($oldRef);
 				$newRef    = dol_sanitizeFileName($num);
 				$dirSource = $conf->$moduleNameLowerCase->dir_output . '/' . $objectType . '/' . $oldRef;
 				$dirDest   = $conf->$moduleNameLowerCase->dir_output . '/' . $objectType . '/' . $newRef;
+
 				if (!$error && file_exists($dirSource)) {
 					dol_syslog(get_class($this) . '::validate() rename dir ' . $dirSource . ' into ' . $dirDest);
 
