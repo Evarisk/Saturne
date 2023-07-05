@@ -243,7 +243,7 @@ class SaturneSignature extends SaturneObject
     /**
      * @var int Object id
      */
-    public int $fk_object;
+    public int $fk_object = 0;
 
     /**
      * Constructor.
