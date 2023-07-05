@@ -38,11 +38,6 @@ function saturne_admin_prepare_head(): array
     $h    = 0;
     $head = [];
 
-    $head[$h][0] = dol_buildpath('/saturne/admin/media_gallery.php', 1);
-    $head[$h][1] = '<i class="fas fa-image pictofixedwidth"></i>' . $langs->trans('MediaGallery');
-    $head[$h][2] = 'media_gallery';
-    $h++;
-
     $head[$h][0] = dol_buildpath('/saturne/admin/setup.php', 1);
     $head[$h][1] = '<i class="fas fa-cog pictofixedwidth"></i>' . $langs->trans('ModuleSettings');
     $head[$h][2] = 'settings';
