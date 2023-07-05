@@ -292,7 +292,7 @@ $element = $signatory; ?>
     endif; ?>
 
 	<div class="center">
-		<button type="submit" class="button" onclick="window.close();"> <?php echo $langs->trans('CloseModal') ?> </button>
+		<button type="submit" class="wpeo-button" onclick="window.close();"> <?php echo $langs->trans('CloseModal') ?> </button>
 	</div>
 </div>
 
