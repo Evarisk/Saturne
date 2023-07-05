@@ -230,22 +230,24 @@ class SaturneDashboard
         if (is_array($dashboards['lists']) && !empty($dashboards['lists'])) {
             foreach ($dashboards['lists'] as $dashboardLists) {
                 foreach ($dashboardLists as $dashboardList) {
-                    print '<div>';
-                    print load_fiche_titre($dashboardList['title'], $dashboardList['morehtmlright'], $dashboardList['picto']);
-                    print '<table class="noborder centpercent">';
-                    print '<tr class="liste_titre">';
-                    foreach ($dashboardList['labels'] as $key => $dashboardListLabel) {
-                        print '<td class="nowraponall tdoverflowmax200' . (($key != 'Ref') ? ' center' : '') . '">' . $langs->transnoentities($dashboardListLabel) . '</td>';
-                    }
-                    print '</tr>';
-                    foreach ($dashboardList['data'] as $dashboardListDatasets) {
-                        print '<tr class="oddeven">';
-                        foreach ($dashboardListDatasets as $key => $dashboardGraphDataset) {
-                            print '<td class="nowraponall tdoverflowmax200' . (($key != 'Ref') ? ' center ' : '') . $dashboardGraphDataset['morecss'] . '">' . $dashboardGraphDataset['value'] . '</td>';
+                    if (is_array($dashboardList['data']) && !empty($dashboardList['data'])) {
+                        print '<div>';
+                        print load_fiche_titre($dashboardList['title'], $dashboardList['morehtmlright'], $dashboardList['picto']);
+                        print '<table class="noborder centpercent">';
+                        print '<tr class="liste_titre">';
+                        foreach ($dashboardList['labels'] as $key => $dashboardListLabel) {
+                            print '<td class="nowraponall tdoverflowmax200' . (($key != 'Ref') ? ' center' : '') . '">' . $langs->transnoentities($dashboardListLabel) . '</td>';
                         }
                         print '</tr>';
+                        foreach ($dashboardList['data'] as $dashboardListDatasets) {
+                            print '<tr class="oddeven">';
+                            foreach ($dashboardListDatasets as $key => $dashboardGraphDataset) {
+                                print '<td class="nowraponall tdoverflowmax200' . (($key != 'Ref') ? ' center ' : '') . $dashboardGraphDataset['morecss'] . '">' . $dashboardGraphDataset['value'] . '</td>';
+                            }
+                            print '</tr>';
+                        }
+                        print '</table></div>';
                     }
-                    print '</table></div>';
                 }
             }
         }
