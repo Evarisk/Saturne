@@ -290,6 +290,10 @@ $element = $signatory; ?>
     <?php else :
         print '<div class="center">' . $langs->trans('SignaturePublicInterfaceForbidden') . '</div>';
     endif; ?>
+
+	<div class="center">
+		<button type="submit" class="wpeo-button" onclick="window.close();"> <?php echo $langs->trans('CloseModal') ?> </button>
+	</div>
 </div>
 
 <?php
