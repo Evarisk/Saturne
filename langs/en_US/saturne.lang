@@ -90,7 +90,7 @@ ModuleAbout = About %s
 
 # Data
 ChangeEntityRedirection = You have been redirected because you have changed entity
-EnableSaturne           = Please activate the Saturn module to see this page
+EnableSaturne           = Please activate the Saturn module to access this page
 
 
 
@@ -149,3 +149,30 @@ ConfigEmail     = Click on this link to go to the email configuration
 
 # Data
 CloseModal = Close
+
+#
+# Certificate
+#
+
+# Data
+FkElement = Linked element
+
+
+
+#
+# Triggers
+#
+
+# Data
+EntityNumber = Entity number
+EntityName   = Entity name
+
+
+
+#
+# Tools
+#
+
+# Data
+Tools      = Tools
+ExportData = Export my data

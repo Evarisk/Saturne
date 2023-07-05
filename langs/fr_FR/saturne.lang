@@ -92,7 +92,7 @@ ModuleAbout = À propos de %s
 
 # Data - Donnée
 ChangeEntityRedirection = Vous avez été redirigé car vous avez changé d'entité
-EnableSaturne           = Veuillez activer le module Saturne pour voir cette page
+EnableSaturne           = Veuillez activer le module Saturne pour accéder à cette page
 
 
 
@@ -161,6 +161,8 @@ CloseModal = Fermer
 # Data - Donnée
 FkElement = Élément lié
 
+
+
 #
 # Triggers
 #
@@ -169,10 +171,12 @@ FkElement = Élément lié
 EntityNumber = Numéro de l'entité
 EntityName   = Nom de l'entité
 
+
+
 #
 # Tools - Outils
 #
 
-# Data- Donnée
+# Data - Donnée
 Tools      = Outils
 ExportData = Exporter mes données
