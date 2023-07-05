@@ -231,6 +231,8 @@ window.saturne.signature.autoDownloadSpecimen = function() {
             let filename = element.find('.specimen-name').attr('value');
             let path     = element.find('.specimen-path').attr('value');
             window.saturne.signature.download(path + filename, filename);
+			$('.button-blue.button-disable.wpeo-loader').removeClass('wpeo-loader').removeClass('button-disable').removeClass('button-blue')
+			$('.loader-spin').remove()
             $.ajax({
                 url: document.URL + querySeparator + 'action=remove_file&token=' + token,
                 type: 'POST',
