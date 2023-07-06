@@ -152,7 +152,7 @@ if ($conf->global->$moduleShowPatchNote > 0) : ?>
 <?php endif;
 
 $parameters = [];
-$reshook    = $hookmanager->executeHooks('SaturneIndex', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+$reshook    = $hookmanager->executeHooks('saturneIndex', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
 if (empty($reshook)) {
     print $hookmanager->resPrint;
 }
