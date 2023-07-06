@@ -18,13 +18,27 @@
 #
 
 # Data
-MediasMin                 = media
-MediaGallery              = Media Library
-ErrorThisFileSizeTooLarge = The %s file is too big
-ErrorThisFileExists       = The file %s already exists
-EmptyMediaGallery         = The media library is empty
+MediasMin                    = media
+MediaGallery                 = Media Library
+ErrorThisFileSizeTooLarge    = The %s file is too big
+ErrorThisFileExists          = The file %s already exists
+EmptyMediaGallery            = The media library is empty
+SearchFile                   = Search for a file
+PhotoWellSent                = The photo has been added to the media library
+PhotoNotSent                 = The photo was not sent correctly
+MediaDimensionSetWithSuccess = Successfully modified media dimensions
+MediaDimensionNegativeError  = The values of the dimensions cannot be negative
+MediaDimensionEmptyError     = The values of the dimensions cannot be empty
 
 # Config page
+MediaMaxWidthMini                    = Minimum media width
+MediaMaxWidthMiniDescription         = Media width (minimum size) with 16:9 ratio
+MediaMaxHeightMini                   = Minimum media height
+MediaMaxHeightMiniDescription        = Media height (minimum dimension) with 16:9 ratio
+MediaMaxWidthSmall                   = Media width small
+MediaMaxWidthSmallDescription        = Media width (dimension small) with ratio 16:9
+MediaMaxHeightSmall                  = Media height small
+MediaMaxHeightSmallDescription       = Media height (dimension small) with ratio 16:9
 MediaMaxWidthMedium                  = Width of medium media
 MediaMaxWidthMediumDescription       = Media width (medium size) with 16:9 ratio
 MediaMaxHeightMedium                 = Height of medium media
@@ -35,3 +49,5 @@ MediaMaxHeightLarge                  = Height of the wide media
 MediaMaxHeightLargeDescription       = Media height (wide dimension) with 16:9 ratio
 DisplayNumberMediaGallery            = Number of media displayed in the media library
 DisplayNumberMediaGalleryDescription = Displays 8 media (default) per page in the media library
+MediaSizeDocument                    = Media size
+MediaSizeDocumentDescription         = Selection of media size in documents

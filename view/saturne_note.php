@@ -68,7 +68,7 @@ include DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php'; // Must be incl
 
 // Security check - Protection if external user
 $permissiontoread = $user->rights->$moduleNameLowerCase->$objectType->read;
-$permissionnote   = $user->rights->$moduleNameLowerCase->$objectType->write; // Used by include of actions_setnotes.inc.php
+$permissionnote   = (($object->status >= $object::STATUS_LOCKED) ? 0 : $user->rights->$moduleNameLowerCase->$objectType->write); // Used by include of actions_setnotes.inc.php
 saturne_check_access($permissiontoread);
 
 /*
@@ -96,7 +96,7 @@ saturne_header(0, '', $title, $help_url);
 
 if ($id > 0 || !empty($ref)) {
     saturne_get_fiche_head($object, 'note', $title);
-    saturne_banner_tab($object);
+    saturne_banner_tab($object, 'ref', '', 1, 'ref', 'ref', '', !empty($object->photo));
 
     print '<div class="fichecenter">';
 

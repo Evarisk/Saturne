@@ -40,6 +40,21 @@
   }
 }
 
+/** RED Warning */
+.wpeo-notice.notice-warning.notice-red {
+  border-left: solid $color__red 6px;
+  color: $color__red;
+  background: rgba( $color__red, 0.05 );
+
+  &::before {
+    content: '\f071';
+  }
+  .notice-title, .notice-subtitle, a {
+    color: $color__red;
+    font-size: 18px;
+  }
+}
+
 /** Success */
 .wpeo-notice.notice-success {
   border-left: solid $color__green 6px;

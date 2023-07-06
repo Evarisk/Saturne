@@ -140,7 +140,7 @@ function saturne_show_documents(string $modulepart, string $modulesubdir, string
 
 		$out .= '<input type="hidden" name="action" value="'. $action .'">';
 		$out .= '<input type="hidden" name="token" value="' . newToken() . '">';
-		$out .= load_fiche_titre($titletoshow, '', '');
+		$out .= load_fiche_titre($titletoshow, '', '', 0, 'builddoc');
 		$out .= '<div class="div-table-responsive-no-min">';
 		$out .= '<table class="liste formdoc noborder centpercent">';
 
@@ -310,11 +310,11 @@ function saturne_show_documents(string $modulepart, string $modulesubdir, string
 				if ($conf->global->$manualPdfGenerationConf > 0) {
 					$extension = pathinfo($file['name'], PATHINFO_EXTENSION);
 
-					$out .= '<td class="right pdf-generation">';
+					$out .= '<td class="right">';
 
 					if ($extension == 'odt') {
 						$tmpurlsource = preg_replace('/#[a-zA-Z0-9_]*$/', '', $urlsource);
-						$out .= '<a href="' . $tmpurlsource . ((strpos($tmpurlsource, '?') === false) ? '?' : '&amp;') . 'action=pdfGeneration&amp;file=' . urlencode($relativepath) . '&token=' . newToken();
+						$out .= '<a class="pdf-generation" href="' . $tmpurlsource . ((strpos($tmpurlsource, '?') === false) ? '?' : '&amp;') . 'action=pdfGeneration&amp;file=' . urlencode($relativepath) . '&token=' . newToken();
 						$out .= ($param ? '&amp;' . $param : '');
 						$out .= '">' . img_picto($langs->trans("PDFGeneration"), 'fontawesome_fa-file-pdf_fas_red') . '</a>';
 						$out .= ' ' . $form->textwithpicto('', $langs->trans('PDFGenerationTooltip'));
@@ -470,7 +470,7 @@ function saturne_get_list_of_models(DoliDB $db, string $type, int $maxfilenamele
 
 				if (count($listoffiles)) {
 					foreach ($listoffiles as $record) {
-						$max = ($maxfilenamelength ?: 28);
+						$max = ($maxfilenamelength ?: 50);
 						$liste[$obj->id.':'.$record['fullname']] = dol_trunc($record['name'], $max, 'middle');
 					}
 				} else {

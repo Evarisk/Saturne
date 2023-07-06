@@ -30,6 +30,41 @@ require_once DOL_DOCUMENT_ROOT . '/projet/class/task.class.php';
  */
 class SaturneTask extends Task
 {
+    /**
+     * @var int Does this object support multicompany module ?
+     * 0=No test on entity, 1=Test with field entity, 'field@table'=Test with link by field@table
+     */
+    public int $ismultientitymanaged = 1;
+
+	/**
+	 * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
+	 */
+	public $fields = [
+		'rowid'              => ['type' => 'integer', 'label' => 'TechnicalID', 'enabled' => '1', 'position' => 1, 'notnull' => 1, 'visible' => 0, 'noteditable' => '1', 'index' => 1, 'css' => 'left', 'comment' => 'Id'],
+		'ref'                => ['type' => 'varchar(128)', 'label' => 'Ref', 'enabled' => '1', 'position' => 10, 'notnull' => 1, 'visible' => 4, 'noteditable' => '1', 'default' => '(PROV)', 'index' => 1, 'searchall' => 1, 'showoncombobox' => '1', 'comment' => 'Reference of object'],
+		'label'              => ['type' => 'varchar(255)', 'label' => 'Label', 'enabled' => '1', 'position' => 20, 'notnull' => 0, 'visible' => 1, 'searchall' => 1, 'css' => 'minwidth200', 'help' => "Help text", 'showoncombobox' => '1',],
+		'description'        => ['type' => 'text', 'label' => 'Description', 'enabled' => '1', 'position' => 30, 'notnull' => 0, 'visible' => 3,],
+		'entity'             => ['type' => 'integer', 'label' => 'Entity', 'enabled' => '1', 'position' => 40, 'notnull' => 1, 'visible' => 0],
+		'datec'              => ['type' => 'datetime', 'label' => 'DateCreation', 'enabled' => '1', 'position' => 50, 'positioncard' => 10, 'notnull' => 1, 'visible' => 5],
+		'dateo'              => ['type' => 'datetime', 'label' => 'DateStart', 'enabled' => '1', 'position' => 60, 'positioncard' => 10, 'notnull' => 1, 'visible' => 5],
+		'datee'              => ['type' => 'datetime', 'label' => 'DateEnd', 'enabled' => '1', 'position' => 70, 'positioncard' => 10, 'notnull' => 1, 'visible' => 5],
+		'tms'                => ['type' => 'timestamp', 'label' => 'DateModification', 'enabled' => '1', 'position' => 80, 'notnull' => 0, 'visible' => 0],
+		'duration_effective' => ['type' => 'integer', 'label' => 'EffectiveDuration', 'enabled' => '1', 'position' => 90, 'notnull' => 0, 'visible' => 0],
+		'planned_workload'   => ['type' => 'integer', 'label' => 'PlannedWorkload', 'enabled' => '1', 'position' => 100, 'notnull' => 0, 'visible' => 0],
+		'progress'           => ['type' => 'integer', 'label' => 'Progress', 'enabled' => '1', 'position' => 110, 'notnull' => 0, 'visible' => 0],
+		'budget_amount'      => ['type' => 'integer', 'label' => 'Budget', 'enabled' => '1', 'position' => 120, 'notnull' => 0, 'visible' => 0],
+		'priority'           => ['type' => 'integer', 'label' => 'Priority', 'enabled' => '1', 'position' => 130, 'notnull' => 0, 'visible' => 0],
+		'note_public'        => ['type' => 'html', 'label' => 'PublicNote', 'enabled' => '1', 'position' => 140, 'notnull' => 0, 'visible' => 0],
+		'note_private'       => ['type' => 'html', 'label' => 'PrivateNote', 'enabled' => '1', 'position' => 150, 'notnull' => 0, 'visible' => 0],
+		'rang'               => ['type' => 'integer', 'label' => 'Rank', 'enabled' => '1', 'position' => 160, 'notnull' => 0, 'visible' => 0],
+		'fk_statut'          => ['type' => 'smallint', 'label' => 'Status', 'enabled' => '1', 'position' => 170, 'notnull' => 1, 'visible' => 5, 'index' => 1, 'default' => '0', 'arrayofkeyval' => ['0' => 'Draft', '1' => 'Validated', '2' => 'Locked']],
+		'fk_projet'          => ['type' => 'integer', 'label' => 'Project', 'enabled' => '1', 'position' => 180, 'notnull' => 1, 'visible' => 5, 'index' => 1, 'default' => '0', 'arrayofkeyval' => ['0' => 'Draft', '1' => 'Validated', '2' => 'Locked']],
+		'fk_task_parent'     => ['type' => 'integer', 'label' => 'TaskParent', 'enabled' => '1', 'position' => 190, 'notnull' => 1, 'visible' => 5, 'index' => 1, 'default' => '0', 'arrayofkeyval' => ['0' => 'Draft', '1' => 'Validated', '2' => 'Locked']],
+		'fk_user_creat'      => ['type' => 'integer:User:user/class/user.class.php', 'label' => 'UserAuthor', 'enabled' => '1', 'position' => 200, 'notnull' => 1, 'visible' => 0, 'foreignkey' => 'user.rowid'],
+		'fk_user_valid'      => ['type' => 'integer:User:user/class/user.class.php', 'label' => 'UserModif', 'enabled' => '1', 'position' => 210, 'notnull' => -1, 'visible' => 0],
+	];
+
+
 	/**
 	 * 	Constructor
 	 *

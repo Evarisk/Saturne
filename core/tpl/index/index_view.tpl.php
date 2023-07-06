@@ -1,34 +1,72 @@
 <?php
-// Global variables definitions
-global $conf, $db, $langs, $moduleName, $moduleNameLowerCase, $user;
+// Global variables definitions.
+global $conf, $db, $langs, $hookmanager, $moduleName, $moduleNameLowerCase, $user;
 
-// Libraries
+// Load Dolibarr libraries.
 require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
+require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/includes/parsedown/Parsedown.php';
 
+// Load Saturne libraries.
+if (!isset($showDashboard) || $showDashboard === true) {
+    require_once __DIR__ . '/../../../class/saturnedashboard.class.php';
+ }
+
+// Load Module libraries.
 require_once __DIR__ . '/../../../../' . $moduleNameLowerCase . '/core/modules/mod' . $moduleName . '.class.php';
 
-// Load translation files required by the page
+// Load translation files required by the page.
 saturne_load_langs();
 
-// Get parameters
+// Get parameters.
 $action = GETPOST('action', 'aZ09');
 
-// Initialize technical objects
+// Initialize technical objects.
 $classname = 'mod' . $moduleName;
 $modModule = new $classname($db);
 $parse     = new Parsedown();
+if (!isset($showDashboard) || $showDashboard === true) {
+    $dashboard = new SaturneDashboard($db, $moduleNameLowerCase);
+}
 
-// Security check
+$hookmanager->initHooks([$moduleNameLowerCase . 'index', 'globalcard']); // Note that conf->hooks_modules contains array.
+
+// Security check.
 $permissiontoread = $user->rights->$moduleNameLowerCase->read;
 saturne_check_access($permissiontoread, null, true);
 
 /*
- *  Actions
+ * Actions
 */
 
-if ($action == 'closenotice') {
-    dolibarr_set_const($db, strtoupper($moduleName) . '_SHOW_PATCH_NOTE', 0, 'integer', 0, '', $conf->entity);
+$parameters = [];
+$reshook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks.
+if ($reshook < 0) {
+    setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+}
+
+if (empty($reshook)) {
+    if ($action == 'closenotice') {
+        dolibarr_set_const($db, strtoupper($moduleName) . '_SHOW_PATCH_NOTE', 0, 'integer', 0, '', $conf->entity);
+    }
+
+    if ($action == 'adddashboardinfo' || $action == 'closedashboardinfo') {
+        $data                = json_decode(file_get_contents('php://input'), true);
+        $dashboardWidgetName = $data['dashboardWidgetName'];
+        $confName            = strtoupper($moduleName) . '_DISABLED_DASHBOARD_INFO';
+        $visible             = json_decode($user->conf->$confName);
+
+        if ($action == 'adddashboardinfo') {
+            unset($visible->$dashboardWidgetName);
+        } else {
+            $visible->$dashboardWidgetName = 0;
+        }
+
+        $tabparam[$confName] = json_encode($visible);
+
+        dol_set_user_param($db, $conf, $user, $tabparam);
+        $action = '';
+    }
 }
 
 /*
@@ -40,7 +78,7 @@ $helpUrl = 'FR:Module_' . $moduleName;
 
 saturne_header(0, '', $title . ' ' . $modModule->version, $helpUrl);
 
-print load_fiche_titre($title . ' ' . $modModule->version, '', $moduleNameLowerCase . '_color.png@' . $moduleNameLowerCase);
+print load_fiche_titre($title . ' ' . $modModule->version, $morehtmlright, $moduleNameLowerCase . '_color.png@' . $moduleNameLowerCase);
 
 $moduleJustUpdated   = strtoupper($moduleName) . '_JUST_UPDATED';
 $moduleVersion       = strtoupper($moduleName) . '_VERSION';
@@ -49,8 +87,8 @@ $moduleShowPatchNote = strtoupper($moduleName) . '_SHOW_PATCH_NOTE';
 if ($conf->global->$moduleJustUpdated == 1) : ?>
     <div class="wpeo-notice notice-success">
         <div class="notice-content">
-            <div class="notice-subtitle"><strong><?php echo $langs->trans('ModuleUpdate'); ?></strong>
-                <?php echo $langs->trans('ModuleHasBeenUpdatedTo', $modModule->version) ?>
+            <div class="notice-subtitle"><strong><?php echo $langs->trans('ModuleUpdate', $moduleName); ?></strong>
+                <?php echo $langs->trans('ModuleHasBeenUpdatedTo', $moduleName, $modModule->version) ?>
             </div>
         </div>
     </div>
@@ -69,9 +107,9 @@ if ($conf->global->$moduleShowPatchNote > 0) : ?>
     <div class="wpeo-notice notice-info">
         <input type="hidden" name="token" value="<?php echo newToken(); ?>">
         <div class="notice-content">
-            <div class="notice-title"><?php echo $langs->trans('ModulePatchNote', $modModule->version); ?>
+            <div class="notice-title"><?php echo $langs->trans('ModulePatchNote', $moduleName, $modModule->version); ?>
                 <div class="show-patchnote wpeo-button button-square-40 button-blue wpeo-tooltip-event modal-open" aria-label="<?php echo $langs->trans('ShowPatchNote'); ?>">
-                    <input hidden class="modal-to-open" value="patch-note">
+                    <input hidden class="modal-options" data-modal-to-open="patch-note">
                     <i class="fas fa-list button-icon"></i>
                 </div>
             </div>
@@ -83,7 +121,7 @@ if ($conf->global->$moduleShowPatchNote > 0) : ?>
         <div class="modal-container wpeo-modal-event" style="max-width: 1280px; max-height: 1000px">
             <!-- Modal-Header -->
             <div class="modal-header">
-                <h2 class="modal-title"><?php echo $langs->trans('ModulePatchNote', $modModule->version);  ?></h2>
+                <h2 class="modal-title"><?php echo $langs->trans('ModulePatchNote', $moduleName, $modModule->version);  ?></h2>
                 <div class="modal-close"><i class="fas fa-times"></i></div>
             </div>
             <!-- Modal Content-->
@@ -111,6 +149,16 @@ if ($conf->global->$moduleShowPatchNote > 0) : ?>
         </div>
     </div>
 <?php endif;
+
+$parameters = [];
+$reshook    = $hookmanager->executeHooks('SaturneIndex', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+if (empty($reshook)) {
+    print $hookmanager->resPrint;
+}
+
+if (!isset($showDashboard) || $showDashboard === true) {
+    $dashboard->show_dashboard();
+}
 
 // End of page
 llxFooter();

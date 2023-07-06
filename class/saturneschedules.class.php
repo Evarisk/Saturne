@@ -16,17 +16,18 @@
  */
 
 /**
- * \file        class/saturneschedules.class.php
- * \ingroup     saturne
- * \brief       This file is a CRUD class file for SaturneSchedules (Create/Read/Update/Delete)
+ * \file    class/saturneschedules.class.php
+ * \ingroup saturne
+ * \brief   This file is a CRUD class file for SaturneSchedules (Create/Read/Update/Delete.
  */
 
-require_once DOL_DOCUMENT_ROOT . '/core/class/commonobject.class.php';
+// Load Saturne libraries.
+require_once __DIR__ . '/saturneobject.class.php';
 
 /**
  * Class for SaturneSchedules
  */
-class SaturneSchedules extends CommonObject
+class SaturneSchedules extends SaturneObject
 {
 	/**
 	 * @var DoliDB Database handler.
@@ -156,66 +157,15 @@ class SaturneSchedules extends CommonObject
      */
     public ?int $fk_user_modif;
 
-	/**
-	 * Constructor
-	 *
-	 * @param DoliDb $db Database handler
-	 */
-	public function __construct(DoliDB $db)
-	{
-		global $conf;
-
-		$this->db = $db;
-
-		if (empty($conf->global->MAIN_SHOW_TECHNICAL_ID) && isset($this->fields['rowid'])){
-            $this->fields['rowid']['visible'] = 0;
-        }
-		if (empty($conf->multicompany->enabled) && isset($this->fields['entity'])) {
-            $this->fields['entity']['enabled'] = 0;
-        }
-
-		// Unset fields that are disabled
-		foreach ($this->fields as $key => $val) {
-			if (isset($val['enabled']) && empty($val['enabled'])) {
-				unset($this->fields[$key]);
-			}
-		}
-	}
-
     /**
-     * Create object into database
+     * Constructor.
      *
-     * @param  User $user      User that creates
-     * @param  bool $notrigger false=launch triggers after, true=disable triggers
-     * @return int             0 < if KO, ID of created object if OK
+     * @param DoliDb $db                  Database handler.
+     * @param string $moduleNameLowerCase Module name.
+     * @param string $objectType          Object element type.
      */
-	public function create(User $user, bool $notrigger = false): int
+    public function __construct(DoliDB $db, string $moduleNameLowerCase = 'saturne', string $objectType = 'saturne_schedules')
     {
-		return $this->createCommon($user, $notrigger);
-	}
-
-    /**
-     * Load object in memory from the database
-     *
-     * @param  int         $id        Id object
-     * @param  string|null $ref       Ref
-     * @param  string      $morewhere More SQL filters (' AND ...')
-     * @return int                    0 < if KO, 0 if not found, >0 if OK
-     */
-	public function fetch(int $id, string $ref = null, string $morewhere = ''): int
-    {
-		return $this->fetchCommon($id, $ref, $morewhere);
-	}
-
-    /**
-     * Update object into database
-     *
-     * @param  User $user      User that modifies
-     * @param  bool $notrigger false=launch triggers after, true=disable triggers
-     * @return int             0 < if KO, >0 if OK
-     */
-    public function update(User $user, bool $notrigger = false): int
-    {
-        return $this->updateCommon($user, $notrigger);
+        parent::__construct($db, $moduleNameLowerCase, $objectType);
     }
 }

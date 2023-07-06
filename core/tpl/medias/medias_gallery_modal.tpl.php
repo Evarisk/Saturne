@@ -1,6 +1,6 @@
 <?php
 
-global $action, $conf, $db, $langs, $moduleName, $moduleNameLowerCase, $subaction;
+global $action, $conf, $db, $langs, $moduleName, $moduleNameLowerCase, $moduleNameUpperCase, $subaction;
 
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmdirectory.class.php';
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
@@ -34,9 +34,15 @@ if ( ! $error && $subaction == "uploadPhoto" && ! empty($conf->global->MAIN_UPLO
 			$generatethumbs = 1;
 			$res = dol_add_file_process($uploadDir, 0, 1, 'userfile', '', null, '', $generatethumbs);
 			if ($res > 0) {
-				$imgThumbLarge  = vignette($uploadDir . '/' . $_FILES['userfile']['name'][$key], $conf->global->SATURNE_MEDIA_MAX_WIDTH_LARGE, $conf->global->SATURNE_MEDIA_MAX_HEIGHT_LARGE, '_large');
-				$imgThumbMedium = vignette($uploadDir . '/' . $_FILES['userfile']['name'][$key], $conf->global->SATURNE_MEDIA_MAX_WIDTH_MEDIUM, $conf->global->SATURNE_MEDIA_MAX_HEIGHT_MEDIUM, '_medium');
-				$result = $ecmdir->changeNbOfFiles('+');
+                $confWidthMedium  = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_MEDIUM';
+                $confHeightMedium = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_MEDIUM';
+                $confWidthLarge   = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_LARGE';
+                $confHeightLarge  = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_LARGE';
+
+                // Create thumbs
+				$imgThumbLarge  = vignette($uploadDir . '/' . $_FILES['userfile']['name'][$key], $conf->global->$confWidthLarge, $conf->global->$confHeightLarge, '_large');
+				$imgThumbMedium = vignette($uploadDir . '/' . $_FILES['userfile']['name'][$key], $conf->global->$confWidthMedium, $conf->global->$confHeightMedium, '_medium');
+				$result         = $ecmdir->changeNbOfFiles('+');
 			} else {
 				setEventMessages($langs->transnoentitiesnoconv("ErrorThisFileExists", $_FILES['userfile']['name'][$key], $langs->transnoentitiesnoconv("File")), null, 'errors');
 				$submitFileErrorText = array('message' => $langs->transnoentities('ErrorThisFileExists', $_FILES['userfile']['name'][$key]), 'code' => '1337');
@@ -46,6 +52,8 @@ if ( ! $error && $subaction == "uploadPhoto" && ! empty($conf->global->MAIN_UPLO
 }
 
 if ( ! $error && $subaction == "addFiles") {
+	global $user;
+
 	$data = json_decode(file_get_contents('php://input'), true);
 
 	$filenames     = $data['filenames'];
@@ -85,6 +93,9 @@ if ( ! $error && $subaction == "addFiles") {
 		foreach ($filenames as $filename) {
 			$entity = ($conf->entity > 1) ? '/' . $conf->entity : '';
 			$filename = dol_sanitizeFileName($filename);
+			if (empty($object->$objectSubtype)) {
+				$object->$objectSubtype = $filename;
+			}
 			if (is_file($conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias/' . $filename)) {
 				$pathToECMPhoto = $conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias/' . $filename;
 
@@ -98,28 +109,104 @@ if ( ! $error && $subaction == "addFiles") {
 					$date      = dol_print_date(dol_now(),'dayxcard');
 					$extension = pathinfo($filename, PATHINFO_EXTENSION);
 
-					global $maxwidthmini, $maxheightmini, $maxwidthsmall,$maxheightsmall ;
 					$destfull = $pathToObjectPhoto . '/' . $filename;
 
+					$confWidthMini    = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_MINI';
+					$confHeightMini   = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_MINI';
+					$confWidthSmall   = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_SMALL';
+					$confHeightSmall  = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_SMALL';
+					$confWidthMedium  = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_MEDIUM';
+					$confHeightMedium = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_MEDIUM';
+					$confWidthLarge   = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_LARGE';
+					$confHeightLarge  = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_LARGE';
+
 					// Create thumbs
-					$imgThumbSmall  = vignette($destfull, $maxwidthsmall, $maxheightsmall);
-					$imgThumbMini   = vignette($destfull, $maxwidthmini, $maxheightmini, '_mini');
-					$imgThumbLarge  = vignette($destfull, $conf->global->SATURNE_MEDIA_MAX_WIDTH_LARGE, $conf->global->SATURNE_MEDIA_MAX_HEIGHT_LARGE, '_large');
-					$imgThumbMedium = vignette($destfull, $conf->global->SATURNE_MEDIA_MAX_WIDTH_MEDIUM, $conf->global->SATURNE_MEDIA_MAX_HEIGHT_MEDIUM, '_medium');
+					$imgThumbMini   = vignette($destfull, $conf->global->$confWidthMini, $conf->global->$confHeightMini, '_mini');
+					$imgThumbSmall  = vignette($destfull, $conf->global->$confWidthSmall, $conf->global->$confHeightSmall, '_small');
+					$imgThumbMedium = vignette($destfull, $conf->global->$confWidthMedium, $conf->global->$confHeightMedium, '_medium');
+					$imgThumbLarge  = vignette($destfull, $conf->global->$confWidthLarge, $conf->global->$confHeightLarge, '_large');
 					// Create mini thumbs for image (Ratio is near 16/9)
 				}
+			}
+		}
+        if ($objectId != 0){
+            $object->update($user);
+        }
+	}
+}
+
+if ( ! $error && $subaction == "unlinkFile") {
+	global $user;
+
+	$data = json_decode(file_get_contents('php://input'), true);
+
+	$filePath      = $data['filepath'];
+	$fileName      = $data['filename'];
+	$objectId      = $data['objectId'];
+	$objectType    = $data['objectType'];
+	$objectSubtype = $data['objectSubtype'];
+	$objectSubdir  = $data['objectSubdir'];
+
+	$fullPath = $filePath . '/' . $fileName;
+
+	if (is_file($fullPath)) {
+		unlink($fullPath);
+	}
+
+	$sizesArray = [
+		'mini',
+		'small',
+		'medium',
+		'large'
+	];
+
+	foreach($sizesArray as $size) {
+		$thumbName = $filePath . '/thumbs/' . saturne_get_thumb_name($fileName, $size);
+		if (is_file($thumbName)) {
+			unlink($thumbName);
+		};
+	}
+
+	if ($objectId > 0) {
+		$object = new $objectType($db);
+		$object->fetch($objectId);
+		if (property_exists($object, $objectSubtype)) {
+
+			if ($object->$objectSubtype == $fileName) {
+				$pathPhotos = $conf->dolismq->multidir_output[$conf->entity] . '/'. $objectType .'/'. $object->ref . '/photos/';
+				$fileArray  = dol_dir_list($pathPhotos, 'files', 0, '', $fileName);
+
+				if (count($fileArray) > 0) {
+					$firstFileName = array_shift($fileArray);
+					$object->$objectSubtype = $firstFileName['name'];
+				} else {
+					$object->$objectSubtype = '';
+				}
+
+				$object->update($user, true);
 			}
 		}
 	}
 }
 
-if ( ! $error && $subaction == "unlinkFile") {
+if ( ! $error && $subaction == "addToFavorite") {
+	global $user;
+
 	$data = json_decode(file_get_contents('php://input'), true);
 
-	$filepath = $data['filepath'];
+	$fileName      = $data['filename'];
+	$objectId      = $data['objectId'];
+	$objectType    = $data['objectType'];
+	$objectSubtype = $data['objectSubtype'];
+	$objectSubdir  = $data['objectSubdir'];
 
-	if (is_file($filepath)) {
-		unlink($filepath);
+	if ($objectId > 0) {
+		$object = new $objectType($db);
+		$object->fetch($objectId);
+		if (property_exists($object, $objectSubtype)) {
+			$object->$objectSubtype = $fileName;
+			$object->update($user, true);
+		}
 	}
 }
 

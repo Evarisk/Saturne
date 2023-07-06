@@ -37,9 +37,9 @@ ErrorSetupEmail         = Mail configuration error, you have not configured your
 NoEmailSet              = No email entered: %s
 
 # Mail
-SignatureEmailSubject          = Signature of %s %s
+SignatureEmailSubject          = Signature %s %s
 SignatureEmailMessage          = Hello, <br><br> Please find attached the link to sign the document.<br> %s
-GlobalSignatureEmailSubject    = Global signature of %s %s
+GlobalSignatureEmailSubject    = [%s] Signature links for %s %s
 GlobalSignatureEmailMessage    = Hello, <br><br> Further to your %s"%s" dated %s, please find below the %s"%s" document signature links of the various participants: <br><br>
 GlobalSignatureEmailMessageEnd = We thank you to transmit them. <br><br> Wishing you an excellent reception, <br><br> Sincerely
 
@@ -56,13 +56,15 @@ Attendance       = Attendance
 SignatureActions = Actions
 
 # Button
-GoToValidate            = Validate %s
-GoToLock                = Lock %s
-SendEmail               = Send an email
-SendGlobalSignatureMail = Send a signature email to all participants
-DeleteAttendant         = Delete the participant
-Sign                    = Sign
-Erase                   = Erase
+GoToValidate               = Validate %s
+GoToLock                   = Lock %s
+SendEmail                  = Send an email
+SendGlobalSignatureMail    = Send a signature email to all participants
+DeleteAttendant            = Delete the participant
+Sign                       = Sign
+Erase                      = Erase
+AttendantTableModeSimple   = Simplified view
+AttendantTableModeAdvanced = Advanced view
 
 # Data
 Attendant          = Participant

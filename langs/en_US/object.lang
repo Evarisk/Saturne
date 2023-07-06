@@ -18,18 +18,19 @@
 #
 
 # Right
-ReadObject   = Read %s
-CreateObject = Create/Modidy %s
-DeleteObject = Delete %s
+ReadObjects   = Read %s
+CreateObjects = Create/Modidy %s
+DeleteObjects = Delete %s
 
 # Trigger
-ObjectCreateTrigger     = Creation of %s
-ObjectModifyTrigger     = Modification of %s
-ObjectDeleteTrigger     = Deletion of %s
-ObjectUnValidateTrigger = Reopening of %s
-ObjectValidateTrigger   = Pending signature of the participants of %s
-ObjectLockedTrigger     = Locking %s - Ready for document generation
-ObjectArchivedTrigger   = Archiving %s
+ObjectCreateTrigger     = Creation of %s %s
+ObjectModifyTrigger     = Modification of %s %s
+ObjectDeleteTrigger     = Deletion of %s %s
+ObjectUnValidateTrigger = Reopening of %s %s
+ObjectValidateTrigger   = Pending signature of the participants of %s %s
+ObjectLockedTrigger     = Locking %s %s - Ready for document generation
+ObjectArchivedTrigger   = Archiving %s %s
+ObjectGenerateTrigger   = Generating %s %s
 
 # SetEventMessage
 
@@ -46,8 +47,9 @@ Sign                            = Sign
 Lock                            = Lock
 Archive                         = Archive
 Clone                           = Clone
-ObjectMustBeDraft               = %s must be in (draft) status
+ObjectMustBeDraft               = %s must be in status (draft)
 ObjectMustBeValidated           = %s must be in status (validated)
+ObjectMustBeLocked              = %s must be in status (locked)
 ObjectMustBeValidatedToGenerate = %s must be in status (validated) to generate the document
 ObjectMustBeValidatedToSign     = %s must be in status (validated) for participants to sign
 AllSignatoriesMustHaveSigned    = All participants must have signed to lock %s
@@ -64,9 +66,11 @@ ConfirmLockObject     = Are you sure you want to lock %s?<br>This lock allows yo
 CloneObject           = Clone %s
 NewLabelForClone      = New %s label
 ConfirmCloneObject    = Are you sure you want to clone %s <b>%s</b>?
+DeleteObject          = Delete %s
 
 # Data
 ActionsOnObject = Events on %s
+DisplayMoreInfo = View more information
 
 # Email - Mail
 ObjectLabel     = Summary

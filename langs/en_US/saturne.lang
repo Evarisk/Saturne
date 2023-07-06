@@ -53,18 +53,25 @@ UseCaptchaDescription             = Use of graphic code (CAPTCHA) on public inte
 UseAllEmailMode                   = Use of all email configuration modes
 UseAllEmailModeDescription        = Allow the use of all email configuration modes by default, only SMTP mode is allowed
 SignaturePublicInterfaceForbidden = No access to the public signature interface
+ShowSpecimen                      = See signatures on specimen documents
+ShowSpecimenDescription           = Allows viewing of signatures on specimen documents
 ObjectVisibleDescription          = Display the %s field
 SavedConfig                       = Saved configuration
+ErrorSavedConfig                  = An error occurred during the configuration
+Config                            = Configuration
+Extrafields                       = Extra attributes
 
 # Mod Numbering
 NumberingModule = Numbering model
+NumberingModuleDet = Numbering model lines
 StandardModel   = Returns the number in the form %syymm-nnnn where yy is the year, mm is the month and nnnn is a sequential counter without break and without reset.
 
 # ODT Template
 YourDocuments          = Documents
 DocumentTemplate       = Model documents
 ODTDefaultTemplateName = Default ODT of documents
-
+ErrorFileNotFound      = File not found
+ErrorNoSocietyLogo     = No company logo found
 
 
 #
@@ -83,7 +90,7 @@ ModuleAbout = About %s
 
 # Data
 ChangeEntityRedirection = You have been redirected because you have changed entity
-EnableSaturne           = Please activate the Saturn module to see this page
+EnableSaturne           = Please activate the Saturn module to access this page
 
 
 
@@ -142,3 +149,30 @@ ConfigEmail     = Click on this link to go to the email configuration
 
 # Data
 CloseModal = Close
+
+#
+# Certificate
+#
+
+# Data
+FkElement = Linked element
+
+
+
+#
+# Triggers
+#
+
+# Data
+EntityNumber = Entity number
+EntityName   = Entity name
+
+
+
+#
+# Tools
+#
+
+# Data
+Tools      = Tools
+ExportData = Export my data

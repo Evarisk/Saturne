@@ -18,19 +18,20 @@
 #
 
 # Right - Droit
-ReadObject   = Consulter les %s
-CreateObject = Créer/Modifier les %s
-DeleteObject = Supprimer les %s
+ReadObjects   = Consulter les %s
+CreateObjects = Créer/Modifier les %s
+DeleteObjects = Supprimer les %s
 
 # Trigger - Déclencheur
-ObjectCreateTrigger     = %s créé(e)
-ObjectModifyTrigger     = %s modifié(e)
-ObjectDeleteTrigger     = %s supprimé(e)
-ObjectUnValidateTrigger = %s réouvert(e)
-ObjectValidateTrigger   = %s validé(e)
-ObjectLockedTrigger     = %s verrouillé(e) - Prêt pour la génération du document
+ObjectCreateTrigger     = %s %s créé(e)
+ObjectModifyTrigger     = %s %s modifié(e)
+ObjectDeleteTrigger     = %s %s supprimé(e)
+ObjectUnValidateTrigger = %s %s réouvert(e)
+ObjectValidateTrigger   = %s %s validé(e)
+ObjectLockedTrigger     = %s %s verrouillé(e) - Prêt pour la génération du document
 ObjectSentByMailTrigger = Mail envoyé
-ObjectArchivedTrigger   = %s archivé(e)
+ObjectArchivedTrigger   = %s %s archivé(e)
+ObjectGenerateTrigger   = %s %s généré(e)
 
 # SetEventMessage - Notice info
 
@@ -49,6 +50,7 @@ Archive                         = Archiver
 Clone                           = Cloner
 ObjectMustBeDraft               = %s doit être au statut (brouillon)
 ObjectMustBeValidated           = %s doit être au statut (validé)
+ObjectMustBeLocked              = %s doit être au statut (verrouillé)
 ObjectMustBeValidatedToGenerate = %s doit être au statut (validé) pour générer le document
 ObjectMustBeValidatedToSign     = %s doit être au statut (validé) pour que les participants puissent signer
 AllSignatoriesMustHaveSigned    = Tous les participants doivent avoir signé pour verrouiller %s
@@ -65,9 +67,11 @@ ConfirmLockObject     = Êtes-vous sûr de vouloir verrouiller %s ?<br>Ce verrou
 CloneObject           = Cloner %s
 NewLabelForClone      = Nouveau libellé de %s
 ConfirmCloneObject    = Êtes-vous sûr de vouloir cloner %s <b>%s</b> ?
+DeleteObject          = Supprimer %s
 
 # Data - Donnée
 ActionsOnObject = Événements sur %s
+DisplayMoreInfo = Afficher plus d'informations
 
 # Email - Mail
 ObjectLabel     = Récapitulatif

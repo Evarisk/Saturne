@@ -70,7 +70,13 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
 					$path         = DOL_URL_ROOT . '/document.php?modulepart=' . $modulepart . '&attachment=0&file=' . str_replace('/', '%2F', $relativepath);
 
 					$file_infos = pathinfo($file);
-					$filename = $file_infos['filename'].'_'.$size.'.'.$file_infos['extension'];
+                    // svg files aren't handled by vignette functions in images.lib, so they don't have thumbs
+                    if ($file_infos['extension'] == 'svg') {
+                        $path = preg_replace('/\/thumbs/', '', $path);
+                        $filename = $file_infos['filename'] . '.' . $file_infos['extension'];
+                    } else {
+                        $filename = $file_infos['filename'] . '_' . $size . '.' . $file_infos['extension'];
+                    }
 
 					?>
 
@@ -131,7 +137,7 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
  */
 function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $size = 0, $nbmax = 0, int $nbbyrow = 5, int $showfilename = 0, int $showaction = 0, int $maxHeight = 120, int $maxWidth = 160, int $nolink = 0, int $notitle = 0, int $usesharelink = 0, string $subdir = '', object $object = null, string $favorite_field = 'photo', int $show_favorite_button = 1, int $show_unlink_button = 1 , int $use_mini_format = 0, int $show_only_favorite = 0, string $morecss = '', int $showdiv = 1): string
 {
-	global $conf, $langs;
+	global $conf, $langs, $moduleNameUpperCase;
 
 	include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 	include_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
@@ -142,8 +148,8 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 	//	$dir  = $sdir . '/' . (dol_strlen($object->ref) > 0 ? $object->ref . '/' : '');
 	//	$pdir = $subdir . '/' . (dol_strlen($object->ref) > 0 ? $object->ref . '/' : '');
 
-	$dir  = $sdir . '/';
-	$pdir = $subdir . '/';
+	$dir  = $sdir . (substr($sdir, -1) == '/' ? '' : '/');
+	$pdir = $subdir . (substr($subdir, -1) == '/' ? '' : '/');
 
 	$dirthumb  = $dir . 'thumbs/';
 	$pdirthumb = $pdir . 'thumbs/';
@@ -166,28 +172,28 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 		}
 
 		foreach ($filearray as $file) {
-			$photo   = '';
-			$filename    = $file['name'];
+			$photo    = '';
+			$fileName = $file['name'];
+			$filePath = $file['path'];
 
-			$fileFullName = $file['fullname'];
-
-			if (($show_only_favorite && $object->$favorite_field == $filename) || !$show_only_favorite) {
+			if (($show_only_favorite && $object->$favorite_field == $fileName) || !$show_only_favorite) {
 				if ($showdiv) {
 					$return .= '<div class="media-container">';
 				}
 
-				$return .= '<input hidden class="file-path" value="'. $fileFullName .'">';
-				if (image_format_supported($filename) >= 0) {
+				$return .= '<input hidden class="file-path" value="'. $filePath .'">';
+				$return .= '<input hidden class="file-name" value="'. $fileName .'">';
+				if (image_format_supported($fileName) >= 0) {
 					$nbphoto++;
-					$photo        = $filename;
-					$viewfilename = $filename;
+					$photo        = $fileName;
+					$viewfilename = $fileName;
 
 					if ($size == 1 || $size == 'small') {   // Format vignette
 						// Find name of thumb file
 						if ($use_mini_format) {
-							$photo_vignette = basename(getImageFileNameForSize($dir . $filename, '_mini'));
+							$photo_vignette = basename(getImageFileNameForSize($dir . $fileName, '_mini'));
 						} else {
-							$photo_vignette = basename(getImageFileNameForSize($dir . $filename, '_small'));
+							$photo_vignette = basename(getImageFileNameForSize($dir . $fileName, '_small'));
 						}
 
 						if ( ! dol_is_file($dirthumb . $photo_vignette)) $photo_vignette = '';
@@ -271,20 +277,19 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 							if ($urladvanced) $return .= '<a href="' . $urladvanced . '">';
 							else $return              .= '<a href="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" class="aphoto" target="_blank">';
 						}
-						$widthName = 'SATURNE_MEDIA_MAX_WIDTH_' . strtoupper($size);
-						$heightName = 'SATURNE_MEDIA_MAX_HEIGHT_' . strtoupper($size);
+						$widthName  = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_' . strtoupper($size);
+						$heightName = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_' . strtoupper($size);
 						$return .= '<img width="' . $conf->global->$widthName . '" height="' . $conf->global->$heightName . '" class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '">';
-						if ($showfilename) $return .= '<br>' . $viewfilename;
+						if ($showfilename) {
+                            $return .= '<br>' . $viewfilename;
+                        }
 					}
-
-					// On continue ou on arrete de boucler ?
-					if ($nbmax && $nbphoto >= $nbmax) break;
 				}
 
 				if ($show_favorite_button) {
-					$favorite = (($object->$favorite_field == '' || $favoriteExists == 0) && $i == 0 ? 'favorite' : ($object->$favorite_field == $photo ? 'favorite' : ''));
+					$favorite = (($object->$favorite_field == '' || $favoriteExists == 0) && $i == 0 && (!property_exists($object, 'photo') && empty($object->photo)) ? 'favorite' : ($object->$favorite_field == $photo ? 'favorite' : ''));
 					$return .=
-						'<div class="wpeo-button button-square-50 button-blue media-gallery-favorite '. $favorite .'" value="' . $object->id . '">
+						'<div class="wpeo-button button-square-50 button-blue ' . $object->element . ' media-gallery-favorite ' . $favorite . '" value="' . $object->id . '">
 							<input class="element-linked-id" type="hidden" value="' . ($object->id > 0 ? $object->id : 0) . '">
 							<input class="filename" type="hidden" value="' . $photo . '">
 							<i class="' . ($favorite == 'favorite' ? 'fas' : 'far') . ' fa-star button-icon"></i>
@@ -292,7 +297,7 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 				}
 				if ($show_unlink_button) {
 					$return .=
-						'<div class="wpeo-button button-square-50 button-grey media-gallery-unlink" value="' . $object->id . '">
+						'<div class="wpeo-button button-square-50 button-grey ' . $object->element . ' media-gallery-unlink" value="' . $object->id . '">
 							<input class="element-linked-id" type="hidden" value="' . ($object->id > 0 ? $object->id : 0) . '">
 							<input class="filename" type="hidden" value="' . $photo . '">
 							<i class="fas fa-unlink button-icon"></i>
@@ -301,6 +306,10 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 				if ($showdiv) {
 					$return .= "</div>\n";
 				}
+
+                // On continue ou on arrete de boucler ?
+                if ($nbmax && $nbphoto >= $nbmax) break;
+
 				$i++;
 			}
 		}
@@ -316,7 +325,10 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 				if ($nbphoto) $return .= '</table>';
 			}
 		}
-	}
+	} else {
+        $return .= '<img  width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo '. $morecss .' photowithmargin" src="' . DOL_URL_ROOT . '/public/theme/common/nophoto.png" title="' . $langs->trans('NoPhotoYet') . '">';
+    }
+
 	if (is_object($object)) {
 		$object->nbphoto = $nbphoto;
 	}

@@ -66,12 +66,14 @@ window.saturne.modal.event = function() {
  * @return {void}
  */
 window.saturne.modal.openModal = function ( event ) {
-	let modalToOpen = $(this).find('.modal-to-open').val();
+    let modalOptions = $(this).find('.modal-options');
+	let modalToOpen  = modalOptions.attr('data-modal-to-open');
 
-	let fromId      = $(this).find('.from-id').length ? $(this).find('.from-id').val() : 0;
-	let fromType    = $(this).find('.from-type').length ? $(this).find('.from-type').val() : '';
-	let fromSubtype = $(this).find('.from-subtype').length ? $(this).find('.from-subtype').val() : '';
-	let fromSubdir  = $(this).find('.from-subdir').length ? $(this).find('.from-subdir').val() : '';
+	let fromId      = modalOptions.attr('data-from-id');
+	let fromType    = modalOptions.attr('data-from-type');
+	let fromSubtype = modalOptions.attr('data-from-subtype');
+	let fromSubdir  = modalOptions.attr('data-from-subdir');
+	let fromModule  = modalOptions.attr('data-from-module');
 
 	let urlWithoutTag = '';
 	if (document.URL.match(/#/)) {
@@ -82,10 +84,21 @@ window.saturne.modal.openModal = function ( event ) {
 	history.pushState({ path:  document.URL}, '', urlWithoutTag);
 
 	// Open modal media gallery.
-	$('#'+modalToOpen).find('.from-id').attr('value', fromId);
-	$('#'+modalToOpen).find('.from-type').attr('value', fromType);
-	$('#'+modalToOpen).find('.from-subtype').attr('value', fromSubtype);
-	$('#'+modalToOpen).find('.from-subdir').attr('value', fromSubdir);
+	$('#'+modalToOpen).attr('data-from-id', fromId);
+	$('#'+modalToOpen).attr('data-from-type', fromType);
+	$('#'+modalToOpen).attr('data-from-subtype', fromSubtype);
+    $('#'+modalToOpen).attr('data-from-subdir', fromSubdir);
+
+	if (modalToOpen.match(/signature/)) {
+		window.saturne.signature.modalSignatureOpened($(this))
+	}
+
+    if (fromModule) {
+        if (typeof window.saturne.modal.addMoreOpenModalData == 'function') {
+            window.saturne.modal.addMoreOpenModalData(modalToOpen, $(this));
+        }
+    }
+
 	$('#'+modalToOpen).find('.wpeo-button').attr('value', fromId);
 	$('#'+modalToOpen).addClass('modal-active');
 

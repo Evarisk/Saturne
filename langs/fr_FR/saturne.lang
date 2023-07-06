@@ -54,16 +54,25 @@ UseAllEmailMode                   = Utilisation de tous les modes de configurati
 UseAllEmailModeDescription        = Autorise l'utilisation de tous les modes de configuration des emails par défaut, seul le mode SMTP est autorisé
 SignaturePublicInterfaceForbidden = Accès interdit à l'interface publique de signature
 ObjectVisibleDescription          = Afficher le champ %s
+ShowSignatureSpecimen             = Voir les signatures sur les documents specimens
+ShowSignatureSpecimenDescription  = Permet la visualisation des signatures sur les documents specimens
 SavedConfig                       = Configuration sauvegardée
+ErrorSavedConfig                  = Une erreur est survenue lors de la configuration
+Config                            = Configuration
+Extrafields                       = Attributs supplémentaires
+
 
 # Mod Numbering - Modèle de numérotation
 NumberingModule = Modèle de numérotation
+NumberingModuleDet = Modèle de numérotation des lignes
 StandardModel   = Renvoie le numéro sous la forme %syymm-nnnn où yy est l'année, mm le mois et nnnn est un compteur séquentiel sans rupture et sans remise à 0.
 
 # ODT Template - Template ODT
 YourDocuments          = Documents
 DocumentTemplate       = Modèle de documents
 ODTDefaultTemplateName = ODT par défaut
+ErrorFileNotFound      = Fichier non trouvé
+ErrorNoSocietyLogo     = Aucun logo de la société renseigné
 
 
 
@@ -83,7 +92,7 @@ ModuleAbout = À propos de %s
 
 # Data - Donnée
 ChangeEntityRedirection = Vous avez été redirigé car vous avez changé d'entité
-EnableSaturne           = Veuillez activer le module Saturne pour voir cette page
+EnableSaturne           = Veuillez activer le module Saturne pour accéder à cette page
 
 
 
@@ -143,3 +152,31 @@ ConfigEmail     = Cliquez sur ce lien pour vous rendre à la configuration des e
 
 # Data - Donnée
 CloseModal = Fermer
+
+
+
+#
+# Certificate - Certificat
+#
+# Data - Donnée
+FkElement = Élément lié
+
+
+
+#
+# Triggers
+#
+
+# Data - Donnée
+EntityNumber = Numéro de l'entité
+EntityName   = Nom de l'entité
+
+
+
+#
+# Tools - Outils
+#
+
+# Data - Donnée
+Tools      = Outils
+ExportData = Exporter mes données

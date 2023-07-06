@@ -109,7 +109,6 @@ window.saturne.signature.modalSignatureOpened = function(triggeredElement) {
     window.saturne.signature.buttonSignature = triggeredElement;
 
     let ratio =  Math.max(window.devicePixelRatio || 1, 1);
-
     window.saturne.signature.canvas = document.querySelector('#modal-signature' + triggeredElement.attr('value') + ' canvas');
 
     window.saturne.signature.canvas.signaturePad = new SignaturePad(window.saturne.signature.canvas, {
@@ -232,6 +231,8 @@ window.saturne.signature.autoDownloadSpecimen = function() {
             let filename = element.find('.specimen-name').attr('value');
             let path     = element.find('.specimen-path').attr('value');
             window.saturne.signature.download(path + filename, filename);
+			$('.button-blue.button-disable.wpeo-loader').removeClass('wpeo-loader').removeClass('button-disable').removeClass('button-blue')
+			$('.loader-spin').remove()
             $.ajax({
                 url: document.URL + querySeparator + 'action=remove_file&token=' + token,
                 type: 'POST',

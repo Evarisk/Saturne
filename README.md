@@ -1,23 +1,23 @@
-# Saturne sur [DOLIBARR ERP CRM](https://www.dolibarr.org)
+# Saturne sur [DOLIBARR ERP CRM](https://dolibarr.org)
 
 ## Informations
 
 - Numéro du module : 436318
-- Version :  1.0.0
-- Dernière mise à jour : 04/04/2023
-- Éditeur : [Evarisk](https://www.evarisk.com)
-- Compatibilité : Dolibarr 16.0.0 - 16.0.5
+- Version :  1.1.0
+- Dernière mise à jour : 06/07/2023
+- Éditeur : [Evarisk](https://evarisk.com)
+- Compatibilité : Dolibarr 16.0.0 - 17.0.2
 - Thème : eldy
 - Licence : GPLv3
 - Disponible sur : Windows - MacOS - Linux
 
 ## Liens
 
-- Support & Assistance : [Forum www.dolibarr.fr](https://www.dolibarr.fr) / Par mail à contact@evarisk.com
-- Demo : [Demo Saturne](https://www.demodoli.digirisk.com) - ID: demo - Password: demo
+- Support & Assistance : [Forum dolibarr.fr](https://dolibarr.fr) / Par mail à contact@evarisk.com
+- Demo : [Demo Saturne](https://demodoli.digirisk.com) - ID: demo - Password: demo
 - Documentation : [Wiki Saturne](https://wiki.dolibarr.org/index.php/Module_Saturne)
 - Projet GitHub : [Projet Saturne](https://github.com/Evarisk/Saturne/projects?query=is%3Aopen)
-- D'autres modules développés par Evarisk disponible sur [Dolistore.com](https://www.dolistore.com)
+- D'autres modules développés par Evarisk disponibles sur [Dolistore.com](https://dolistore.com)
 
 ## Fonctionnalités
 

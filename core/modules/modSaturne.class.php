@@ -75,7 +75,7 @@ class modSaturne extends DolibarrModules
 		$this->editor_url  = 'https://evarisk.com/';
 
         // Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
-		$this->version = '1.0.0';
+		$this->version = '1.1.0';
 
         // Url to the file with your last numberversion of this module
         //$this->url_last_version = 'http://www.example.com/versionmodule.txt';
@@ -92,7 +92,7 @@ class modSaturne extends DolibarrModules
         // Define some features supported by module (triggers, login, substitutions, menus, css, etc...)
         $this->module_parts = [
             // Set this to 1 if module has its own trigger directory (core/triggers)
-            'triggers' => 0,
+            'triggers' => 1,
             // Set this to 1 if module has its own login method file (core/login)
             'login' => 0,
             // Set this to 1 if module has its own substitution function file (core/substitutions)
@@ -110,13 +110,17 @@ class modSaturne extends DolibarrModules
             // Set this to 1 if module has its own theme directory (theme)
             'theme' => 0,
             // Set this to relative path of css file if module has its own css file
-            'css' => ['/saturne/css/scss/modules/picto/_picto.scss'],
+			'css' => ['/saturne/css/scss/modules/picto/_picto.min.css'],
             // Set this to relative path of js file if module must load a js on all pages
-            'js' => [],
+            'js' => [
+				'/saturne/js/saturne.js',
+				'/saturne/js/modules/menu.js',
+			],
             // Set here all hooks context managed by module. To find available hook context, make a "grep -r '>initHooks(' *" on source code. You can also set hook context to 'all'
             'hooks' => [
                 'saturnepublicinterface',
-                'emailtemplates'
+                'emailtemplates',
+				'usercard'
             ],
             // Set this to 1 if features of module are opened to external users
             'moduleforexternal' => 0,
@@ -134,7 +138,8 @@ class modSaturne extends DolibarrModules
             'DoliSMQ'  => 'dolismq',
             'DoliMeet' => 'dolimeet',
             'DoliCar'  => 'dolicar',
-            'EasyCRM'  => 'easycrm'
+            'EasyCRM'  => 'easycrm',
+            'DoliSIRH' => 'dolisirh',
         ];
 
         // A condition to hide module
@@ -164,17 +169,15 @@ class modSaturne extends DolibarrModules
         // );
         $i = 0;
 		$this->const = [
-			// CONST MEDIAS
-			$i++ => ['SATURNE_MEDIA_MAX_WIDTH_MEDIUM', 'integer', 854, '', 0, 'current'],
-			$i++ => ['SATURNE_MEDIA_MAX_HEIGHT_MEDIUM', 'integer', 480, '', 0, 'current'],
-			$i++ => ['SATURNE_MEDIA_MAX_WIDTH_LARGE', 'integer', 1280, '', 0, 'current'],
-            $i++ => ['SATURNE_MEDIA_MAX_HEIGHT_LARGE', 'integer', 720, '', 0, 'current'],
-
             // CONST MODULE
             $i++ => ['SATURNE_ENABLE_PUBLIC_INTERFACE', 'integer', 1, '', 0, 'current'],
             $i++ => ['SATURNE_SHOW_COMPANY_LOGO', 'integer', 0, '', 0, 'current'],
             $i++ => ['SATURNE_USE_CAPTCHA', 'integer', 0, '', 0, 'current'],
-            $i   => ['SATURNE_USE_ALL_EMAIL_MODE', 'integer', 1, '', 0, 'current']
+            $i++ => ['SATURNE_USE_ALL_EMAIL_MODE', 'integer', 1, '', 0, 'current'],
+
+            // CONST DOLIBARR
+            $i   => ['MAIN_ALLOW_SVG_FILES_AS_IMAGES', 'integer', 1, '', 0, 'current']
+
 		];
 
 		if (!isset($conf->saturne) || !isset($conf->saturne->enabled)) {
@@ -275,6 +278,8 @@ class modSaturne extends DolibarrModules
      */
 	public function init($options = ''): int
     {
+		global $langs;
+
 		// Permissions
 		$this->remove($options);
 		$sql = [];
@@ -286,6 +291,14 @@ class modSaturne extends DolibarrModules
 				$this->_load_tables('/saturne/sql/' . $subFolder . '/');
 			}
 		}
+
+		// Create extrafields during init
+		include_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
+		$extra_fields = new ExtraFields($this->db);
+
+//		$extra_fields->update('electronic_signature', $langs->transnoentities('TrainingSessionLocation'), 'varchar', '', 'contrat', 0, 0, 1850, '', '', '', 1);
+		$extra_fields->addExtraField('electronic_signature', $langs->transnoentities('ElectronicSignature'), 'text', '','', 'user', 0, 0, '', '', '', '', 1);
+
 
 		$result = $this->_load_tables('/saturne/sql/');
 		if ($result < 0) {

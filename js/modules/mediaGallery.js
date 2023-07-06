@@ -104,10 +104,10 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 	let filesLinked       = mediaGalleryModal.find('.clicked-photo')
 	let token             = window.saturne.toolbox.getToken();
 
-	let objectId         = $(this).find('.from-id').val()
-	let objectType       = $(this).find('.from-type').val()
-	let objectSubtype    = $(this).find('.from-subtype').length ? $(this).find('.from-subtype').val() : ''
-	let objectSubdir     = $(this).find('.from-subdir').length ? $(this).find('.from-subdir').val() : ''
+	let objectId         = mediaGallery.attr('data-from-id');
+	let objectType       = mediaGallery.attr('data-from-type')
+	let objectSubtype    = mediaGallery.attr('data-from-subtype')
+	let objectSubdir     = mediaGallery.attr('data-from-subdir')
 
 	let filenames = ''
 	if (filesLinked.length > 0) {
@@ -137,6 +137,9 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 			$('.wpeo-loader').removeClass('wpeo-loader')
 			mediaGallery.removeClass('modal-active')
 
+			if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
+				$('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
+			}
 			//refresh medias container after adding
 			$('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
 
@@ -182,10 +185,10 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 	let requestCompleted = 0
 	let progress   = 0
 
-	let objectId         = mediaGallery.find('.from-id').val()
-	let objectType       = mediaGallery.find('.from-type').val()
-	let objectSubtype    = mediaGallery.find('.from-subtype').length ? mediaGallery.find('.from-subtype').val() : ''
-	let objectSubdir     = mediaGallery.find('.from-subdir').length ? mediaGallery.find('.from-subdir').val() : ''
+	let objectId         = mediaGallery.attr('data-from-id')
+	let objectType       = mediaGallery.attr('data-from-type')
+	let objectSubtype    = mediaGallery.attr('data-from-subtype')
+	let objectSubdir     = mediaGallery.attr('data-from-subdir')
 
 	let token = window.saturne.toolbox.getToken();
 
@@ -235,11 +238,11 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 							} else {
 								$('.messageSuccessSendPhoto').removeClass('hidden');
 							}
-							$('#media_gallery').find('.from-id').attr('value', objectId);
-							$('#media_gallery').find('.from-type').attr('value', objectType);
-							$('#media_gallery').find('.from-subtype').attr('value', objectSubtype);
-							$('#media_gallery').find('.from-subdir').attr('value', objectSubdir);
-							$('#media_gallery').find('.wpeo-button').attr('value', objectId);
+							mediaGallery.attr('data-from-id', objectId);
+							mediaGallery.attr('data-from-type', objectType);
+							mediaGallery.attr('data-from-subtype', objectSubtype);
+							mediaGallery.attr('data-from-subdir', objectSubdir);
+							mediaGallery.find('.wpeo-button').attr('value', objectId);
 						})
 					}, 800)
 				}
@@ -279,10 +282,16 @@ window.saturne.mediaGallery.unlinkFile = function( event ) {
 
 	let token = window.saturne.toolbox.getToken();
 
-	let objectSubtype = $(this).closest('.linked-medias').find('.from-subtype').length ? $(this).closest('.linked-medias').find('.from-subtype').val() : ''
+	let mediaInfos = $(this).closest('.linked-medias').find('.modal-options')
+	let objectSubtype = mediaInfos.attr('data-from-subtype')
+	let objectType    = mediaInfos.attr('data-from-type')
+	let objectSubdir  = mediaInfos.attr('data-from-subdir')
+	let objectId      = mediaInfos.attr('data-from-id')
 
-	let mediaContainer = $(this).closest('.media-container')
-	let filepath       = mediaContainer.find('.file-path').val()
+	let mediaContainer   = $(this).closest('.media-container')
+	let filepath         = mediaContainer.find('.file-path').val()
+	let filename         = mediaContainer.find('.file-name').val()
+	let previousFavorite = $('.media-gallery-favorite.favorite').closest('.media-container').find('.file-name').val()
 
 	window.saturne.loader.display(mediaContainer);
 
@@ -293,9 +302,18 @@ window.saturne.mediaGallery.unlinkFile = function( event ) {
 		type: "POST",
 		data: JSON.stringify({
 			filepath: filepath,
+			filename: filename,
+			objectSubtype: objectSubtype,
+			objectType: objectType,
+			objectSubdir: objectSubdir,
+			objectId: objectId
 		}),
 		processData: false,
 		success: function ( resp ) {
+			if (previousFavorite == filename && $('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
+				$('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
+			}
+
 			$('.wpeo-loader').removeClass('wpeo-loader')
 			$('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
 		}
@@ -311,23 +329,51 @@ window.saturne.mediaGallery.unlinkFile = function( event ) {
  * @return {void}
  */
 window.saturne.mediaGallery.addToFavorite = function( event ) {
-		event.preventDefault()
-		let filename = $(this).closest('.media-gallery-favorite').find('.filename').attr('value')
+	event.preventDefault()
+	let filename = $(this).closest('.media-gallery-favorite').find('.filename').attr('value')
 
-		//change star button style
-		let previousFavorite = $(this).closest('.linked-medias').find('.fas.fa-star')
-		let newFavorite = $(this).find('.far.fa-star')
+	let token = window.saturne.toolbox.getToken();
 
-		previousFavorite.removeClass('fas')
-		previousFavorite.addClass('far')
-		previousFavorite.closest('.media-gallery-favorite').removeClass('favorite')
-		newFavorite.addClass('fas')
-		newFavorite.removeClass('far')
-		newFavorite.closest('.media-gallery-favorite').addClass('favorite')
+	//change star button style
+	let previousFavorite = $(this).closest('.linked-medias').find('.fas.fa-star')
+	let newFavorite = $(this).find('.far.fa-star')
 
-		if (filename.length > 0) {
-			$(this).closest('.linked-medias').find('.favorite-photo').val(filename)
+	let mediaInfos = $(this).closest('.linked-medias').find('.modal-options')
+	let objectSubtype = mediaInfos.attr('data-from-subtype')
+	let objectType    = mediaInfos.attr('data-from-type')
+	let objectSubdir  = mediaInfos.attr('data-from-subdir')
+	let objectId      = mediaInfos.attr('data-from-id')
+
+	let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
+
+	previousFavorite.removeClass('fas')
+	previousFavorite.addClass('far')
+	previousFavorite.closest('.media-gallery-favorite').removeClass('favorite')
+	newFavorite.addClass('fas')
+	newFavorite.removeClass('far')
+	newFavorite.closest('.media-gallery-favorite').addClass('favorite')
+
+	if (filename.length > 0) {
+		$(this).closest('.linked-medias').find('.favorite-photo').val(filename)
+	}
+
+	$.ajax({
+		url: document.URL + querySeparator + "subaction=addToFavorite&token=" + token,
+		type: "POST",
+		data: JSON.stringify({
+			filename: filename,
+			objectSubtype: objectSubtype,
+			objectType: objectType,
+			objectSubdir: objectSubdir,
+			objectId: objectId
+		}),
+		processData: false,
+		success: function ( resp ) {
+			if (previousFavorite != filename && $('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
+				$('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
+			}
 		}
+	});
 };
 
 /**
@@ -345,10 +391,10 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
 
 	let formdata = new FormData();
 
-	let objectId         = $(this).closest('.linked-medias').find('.from-id').val()
-	let objectType       = $(this).closest('.linked-medias').find('.from-type').val()
-	let objectSubtype    = $(this).closest('.linked-medias').find('.from-subtype').length ? $(this).closest('.linked-medias').find('.from-subtype').val() : ''
-	let objectSubdir     = $(this).closest('.linked-medias').find('.from-subdir').length ? $(this).closest('.linked-medias').find('.from-subdir').val() : ''
+	let objectId         = $(this).closest('.linked-medias').find('.modal-options').attr('data-from-id')
+	let objectType       = $(this).closest('.linked-medias').find('.modal-options').attr('data-from-type')
+	let objectSubtype    = $(this).closest('.linked-medias').find('.modal-options').attr('data-from-subtype')
+	let objectSubdir     = $(this).closest('.linked-medias').find('.modal-options').attr('data-from-subdir')
 
 	window.saturne.loader.display($('.linked-medias.'+objectSubtype));
 
@@ -389,6 +435,10 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
 							$('.wpeo-loader').removeClass('wpeo-loader')
 							mediaGallery.removeClass('modal-active')
 
+							if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
+								$('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
+							}
+
 							//refresh medias container after adding
 							$('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
 
@@ -423,6 +473,11 @@ window.saturne.mediaGallery.selectPage = function( event ) {
 
 	let mediaGallery = $('#' + containerToRefresh);
 
+	let objectId         = mediaGallery.find('.modal-options').attr('data-from-id')
+	let objectType       = mediaGallery.find('.modal-options').attr('data-from-type')
+	let objectSubtype    = mediaGallery.find('.modal-options').attr('data-from-subtype')
+	let objectSubdir     = mediaGallery.find('.modal-options').attr('data-from-subdir')
+
 	let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
 
 	if (!$(this).hasClass('arrow')) {
@@ -444,6 +499,11 @@ window.saturne.mediaGallery.selectPage = function( event ) {
 		success: function ( resp ) {
 			$('.wpeo-loader').removeClass('wpeo-loader')
 			mediaGallery.html($(resp).find('#' + containerToRefresh).children());
+			
+			mediaGallery.find('.modal-options').attr('data-from-id', objectId)
+			mediaGallery.find('.modal-options').attr('data-from-type', objectType)
+			mediaGallery.find('.modal-options').attr('data-from-subtype', objectSubtype)
+			mediaGallery.find('.modal-options').attr('data-from-subdir', objectSubdir)
 		},
 		error: function ( ) {
 		}
