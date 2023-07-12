@@ -239,3 +239,298 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
 
     return $head;
 }
+
+/**
+ * Get list of objects and their linked class and other infos
+ *
+ * @param  string    $object Object to get the metadatafrom
+ * @return array             Array of objects with infos
+ * @throws Exception
+ */
+function get_objects_metadata($object = ''): array
+{
+    global $db, $hookmanager, $langs;
+
+    //To add an object :
+
+    //	'langs'         => Object translation
+    //	'langfile'      => File lang translation
+    //	'picto'         => Object picto for img_picto() function (equals $this->picto)
+    //	'className'     => Class name
+    //	'name_field'    => Object name to be shown (ref, label, firstname, etc.)
+    //	'post_name'     => Name of post sent retrieved by GETPOST() function
+    //	'link_name'     => Name of object sourcetype in llx_element_element
+    //	'tab_type'      => Tab type element for prepare_head function
+    //	'fk_parent'     => OPTIONAL : Name of parent for objects as productlot, contact, task
+    //	'parent_post'   => OPTIONAL : Name of parent post (retrieved by GETPOST() function, it can be different from fk_parent
+    //	'create_url'    => Path to creation card, no need to add "?action=create"
+    //	'class_path'    => Path to object class
+    //	'lib_path'    => Path to object lib
+
+    $linkableObjectTypes = [];
+
+    if (isModEnabled('product')) {
+        $linkableObjectTypes['product'] = [
+            'langs'      => 'ProductOrService',
+            'langfile'   => 'products',
+            'picto'      => 'product',
+            'className'  => 'Product',
+            'post_name'  => 'fk_product',
+            'link_name'  => 'product',
+            'tab_type'   => 'product',
+            'name_field' => 'ref',
+            'create_url' => 'product/card.php',
+            'class_path' => 'product/class/product.class.php',
+            'lib_path'   => 'core/lib/product.lib.php',
+        ];
+    }
+
+    if (isModEnabled('productbatch')) {
+        $linkableObjectTypes['productlot'] = [
+            'langs'       => 'Batch',
+            'langfile'    => 'products',
+            'picto'       => 'lot',
+            'className'   => 'ProductLot',
+            'post_name'   => 'fk_productlot',
+            'link_name'   => 'productbatch',
+            'tab_type'    => 'productlot',
+            'name_field'  => 'batch',
+            'fk_parent'   => 'fk_product',
+            'parent_post' => 'fk_product',
+            'create_url'  => 'product/stock/productlot_card.php',
+            'class_path'  => 'product/stock/class/productlot.class.php',
+            'lib_path'    => 'core/lib/product.lib.php',
+        ];
+    }
+
+    if (isModEnabled('user')) {
+        $linkableObjectTypes['user'] = [
+            'langs'      => 'User',
+            'picto'      => 'user',
+            'className'  => 'User',
+            'post_name'  => 'fk_user',
+            'link_name'  => 'user',
+            'tab_type'   => 'user',
+            'name_field' => 'lastname, firstname',
+            'create_url' => 'user/card.php',
+            'class_path' => 'user/class/user.class.php',
+            'lib_path'   => 'core/lib/user.lib.php',
+        ];
+    }
+
+    if (isModEnabled('societe')) {
+        $linkableObjectTypes['thirdparty'] = [
+            'langs'      => 'ThirdParty',
+            'langfile'   => 'companies',
+            'picto'      => 'building',
+            'className'  => 'Societe',
+            'post_name'  => 'fk_soc',
+            'link_name'  => 'societe',
+            'tab_type'   => 'thirdparty',
+            'name_field' => 'nom',
+            'create_url' => 'societe/card.php',
+            'class_path' => 'societe/class/societe.class.php',
+            'lib_path'   => '',
+        ];
+        $linkableObjectTypes['contact'] = [
+            'langs'       => 'Contact',
+            'langfile'    => 'companies',
+            'picto'       => 'address',
+            'className'   => 'Contact',
+            'post_name'   => 'fk_contact',
+            'link_name'   => 'contact',
+            'tab_type'    => 'contact',
+            'name_field'  => 'lastname, firstname',
+            'fk_parent'   => 'fk_soc',
+            'parent_post' => 'fk_soc',
+            'create_url'  => 'contact/card.php',
+            'class_path'  => 'contact/class/contact.class.php',
+            'lib_path'    => 'core/lib/contact.lib.php',
+        ];
+    }
+
+    if (isModEnabled('project')) {
+        $linkableObjectTypes['project'] = [
+            'langs'      => 'Project',
+            'langfile'   => 'projects',
+            'picto'      => 'project',
+            'className'  => 'Project',
+            'post_name'  => 'fk_project',
+            'link_name'  => 'project',
+            'tab_type'   => 'project',
+            'name_field' => 'ref, title',
+            'create_url' => 'projet/card.php',
+            'class_path' => 'projet/class/project.class.php',
+            'lib_path'   => 'core/lib/project.lib.php',
+        ];
+        $linkableObjectTypes['task'] = [
+            'langs'       => 'Task',
+            'langfile'    => 'projects',
+            'picto'       => 'projecttask',
+            'className'   => 'SaturneTask',
+            'post_name'   => 'fk_task',
+            'link_name'   => 'project_task',
+            'tab_type'    => 'task',
+            'name_field'  => 'label',
+            'fk_parent'   => 'fk_projet',
+            'parent_post' => 'fk_project',
+            'create_url'  => 'projet/tasks.php',
+            'class_path'  => 'projet/class/task.class.php',
+            'lib_path'    => 'core/lib/project.lib.php',
+        ];
+    }
+
+    if (isModEnabled('facture')) {
+        $linkableObjectTypes['invoice'] = [
+            'langs'      => 'Invoice',
+            'langfile'   => 'bills',
+            'picto'      => 'bill',
+            'className'  => 'Facture',
+            'post_name'  => 'fk_invoice',
+            'link_name'  => 'facture',
+            'tab_type'   => 'invoice',
+            'name_field' => 'ref',
+            'create_url' => 'compta/facture/card.php',
+            'class_path' => 'compta/facture/class/facture.class.php',
+            'lib_path'   => '',
+        ];
+    }
+
+    if (isModEnabled('order')) {
+        $linkableObjectTypes['order'] = [
+            'langs'      => 'Order',
+            'langfile'   => 'orders',
+            'picto'      => 'order',
+            'className'  => 'Commande',
+            'post_name'  => 'fk_order',
+            'link_name'  => 'commande',
+            'tab_type'   => 'order',
+            'name_field' => 'ref',
+            'create_url' => 'commande/card.php',
+            'class_path' => 'commande/class/commande.class.php',
+            'lib_path'   => 'core/lib/order.lib.php',
+        ];
+    }
+
+    if (isModEnabled('contract')) {
+        $linkableObjectTypes['contract'] = [
+            'langs'      => 'Contract',
+            'langfile'   => 'contracts',
+            'picto'      => 'contract',
+            'className'  => 'Contrat',
+            'post_name'  => 'fk_contract',
+            'link_name'  => 'contrat',
+            'tab_type'   => 'contract',
+            'name_field' => 'ref',
+            'create_url' => 'contrat/card.php',
+            'class_path' => 'contrat/class/contrat.class.php',
+            'lib_path'   => 'core/lib/contract.lib.php',
+        ];
+    }
+
+    if (isModEnabled('ticket')) {
+        $linkableObjectTypes['ticket'] = [
+            'langs'      => 'Ticket',
+            'picto'      => 'ticket',
+            'className'  => 'Ticket',
+            'post_name'  => 'fk_ticket',
+            'link_name'  => 'ticket',
+            'tab_type'   => 'ticket',
+            'name_field' => 'ref, subject',
+            'create_url' => 'ticket/card.php',
+            'class_path' => 'ticket/class/ticket.class.php',
+            'lib_path'   => 'core/lib/contact.lib.php',
+        ];
+    }
+
+    if (isModEnabled('stock')) {
+        $linkableObjectTypes['entrepot'] = [
+            'langs'      => 'Warehouse',
+            'langfile'   => 'stocks',
+            'picto'      => 'stock',
+            'className'  => 'Entrepot',
+            'post_name'  => 'fk_entrepot',
+            'link_name'  => 'stock',
+            'tab_type'   => 'stock',
+            'name_field' => 'ref',
+            'create_url' => 'product/stock/entrepot/card.php',
+            'class_path' => 'product/stock/class/entrepot.class.php',
+            'lib_path'   => 'core/lib/stock.lib.php',
+        ];
+    }
+
+    if (isModEnabled('expedition')) {
+        $linkableObjectTypes['expedition'] = [
+            'langs'      => 'Shipments',
+            'langfile'   => 'sendings',
+            'picto'      => 'dolly',
+            'className'  => 'DoliSMQExpedition',
+            'post_name'  => 'fk_expedition',
+            'link_name'  => 'expedition',
+            'tab_type'   => 'delivery',
+            'name_field' => 'ref',
+            'class_path' => 'expedition/class/expedition.class.php',
+            'lib_path'   => 'core/lib/expedition.lib.php',
+        ];
+    }
+
+    if (isModEnabled('propal')) {
+        $linkableObjectTypes['propal'] = [
+            'langs'      => 'Proposal',
+            'langfile'   => 'propal',
+            'picto'      => 'propal',
+            'className'  => 'Propal',
+            'post_name'  => 'fk_propal',
+            'link_name'  => 'propal',
+            'tab_type'   => 'propal',
+            'name_field' => 'ref',
+            'create_url' => 'comm/propal/card.php',
+            'class_path' => 'comm/propal/class/propal.class.php',
+            'lib_path'    => 'core/lib/propal.lib.php',
+        ];
+    }
+
+    // Hook to add controllable objects from other modules
+    if ( ! is_object($hookmanager)) {
+        include_once DOL_DOCUMENT_ROOT . '/core/class/hookmanager.class.php';
+        $hookmanager = new HookManager($db);
+    }
+    $hookmanager->initHooks(['get_objects_metadata']);
+
+    $reshook = $hookmanager->executeHooks('extendGetObjectsMetadata', $linkableObjectTypes);
+
+    if ($reshook && (is_array($hookmanager->resArray) && !empty($hookmanager->resArray))) {
+        $linkableObjectTypes = $hookmanager->resArray;
+    }
+
+    $linkableObjects = [];
+    if (is_array($linkableObjectTypes) && !empty($linkableObjectTypes)) {
+        foreach($linkableObjectTypes as $linkableObjectType => $linkableObjectInformations) {
+            if ($linkableObjectType != 'context' && $linkableObjectType != 'currentcontext') {
+                require_once DOL_DOCUMENT_ROOT . '/' . $linkableObjectInformations['class_path'];
+
+                $linkableObjects[$linkableObjectType] = [
+                    'name'          => ucfirst($linkableObjectType),
+                    'langs'         => $linkableObjectInformations['langs'] ?? '',
+                    'langfile'      => $linkableObjectInformations['langfile'] ?? '',
+                    'picto'         => $linkableObjectInformations['picto'] ?? '',
+                    'className'     => $linkableObjectInformations['className'] ?? '',
+                    'name_field'    => $linkableObjectInformations['name_field'] ?? '',
+                    'post_name'     => $linkableObjectInformations['post_name'] ?? '',
+                    'link_name'     => $linkableObjectInformations['link_name'] ?? '',
+                    'tab_type'      => $linkableObjectInformations['tab_type'] ?? '',
+                    'fk_parent'     => $linkableObjectInformations['fk_parent'] ?? '',
+                    'parent_post'   => $linkableObjectInformations['parent_post'] ?? '',
+                    'create_url'    => $linkableObjectInformations['create_url'] ?? '',
+                    'class_path'    => $linkableObjectInformations['class_path'] ?? '',
+                    'lib_path'      => $linkableObjectInformations['lib_path'] ?? '',
+                ];
+                if (!empty($linkableObjectInformations['langfile'])) {
+                    $langs->load($linkableObjectInformations['langfile']);
+                }
+            }
+        }
+    }
+
+    return dol_strlen($object) > 0 ? $linkableObjects[$object] : $linkableObjects;
+}
