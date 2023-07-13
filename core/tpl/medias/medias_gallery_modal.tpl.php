@@ -173,7 +173,7 @@ if ( ! $error && $subaction == "unlinkFile") {
 		if (property_exists($object, $objectSubtype)) {
 
 			if ($object->$objectSubtype == $fileName) {
-				$pathPhotos = $conf->dolismq->multidir_output[$conf->entity] . '/'. $objectType .'/'. $object->ref . '/photos/';
+				$pathPhotos = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType .'/'. $object->ref . '/photos/';
 				$fileArray  = dol_dir_list($pathPhotos, 'files', 0, '', $fileName);
 
 				if (count($fileArray) > 0) {
