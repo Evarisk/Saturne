@@ -555,44 +555,39 @@ abstract class SaturneObject extends CommonObject
 			$conf->global->$moduleName = 'mod_' . $objectType . '_standard';
 		}
 
-		if (!empty($conf->global->$moduleName)) {
-            $result    = false;
-			$file      = $conf->global->$moduleName . '.php';
-			$className = $conf->global->$moduleName;
+        $result    = false;
+        $file      = $conf->global->$moduleName . '.php';
+        $className = $conf->global->$moduleName;
 
-			// Include file with class.
-			$dirModels = array_merge(['/'], $conf->modules_parts['models']);
-			foreach ($dirModels as $relDir) {
-				$dir = dol_buildpath($relDir . 'core/modules/'. $moduleNameLowerCase . '/' . $objectType . '/');
+        // Include file with class.
+        $dirModels = array_merge(['/'], $conf->modules_parts['models']);
+        foreach ($dirModels as $relDir) {
+            $dir = dol_buildpath($relDir . 'core/modules/'. $moduleNameLowerCase . '/' . $objectType . '/');
 
-				// Load file with numbering class (if found).
-				$result |= @include_once $dir . $file;
-			}
+            // Load file with numbering class (if found).
+            $result |= @include_once $dir . $file;
+        }
 
-			if ($result === false) {
-				dol_print_error('', 'Failed to include file ' . $file);
-				return '';
-			}
+        if ($result === false) {
+            dol_print_error('', 'Failed to include file ' . $file);
+            return '';
+        }
 
-			if (class_exists($className)) {
-				$obj    = new $className();
-				$numRef = $obj->getNextValue($this);
+        if (class_exists($className)) {
+            $obj    = new $className();
+            $numRef = $obj->getNextValue($this);
 
-				if ($numRef != '' && $numRef != '-1') {
-					return $numRef;
-				} else {
-					$this->error = $obj->error;
-					return '';
-				}
-			} else {
-				print $langs->trans('Error') . ' ' . $langs->trans('ClassNotFound') . ' ' . $className;
-				return '';
-			}
-		} else {
-			print $langs->trans('ErrorNumberingModuleNotSetup', $this->element);
-			return '';
-		}
-	}
+            if ($numRef != '' && $numRef != '-1') {
+                return $numRef;
+            } else {
+                $this->error = $obj->error;
+                return '';
+            }
+        } else {
+            print $langs->trans('Error') . ' ' . $langs->trans('ClassNotFound') . ' ' . $className;
+            return '';
+        }
+    }
 
     /**
      * Sets object to supplied categories.
