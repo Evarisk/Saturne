@@ -24,6 +24,9 @@
 // Load Dolibarr Libraries.
 require_once DOL_DOCUMENT_ROOT . '/core/class/commonobject.class.php';
 
+// Load Saturne libraries
+require_once __DIR__ . '/../lib/object.lib.php';
+
 /**
  * Class for SaturneObject.
  */

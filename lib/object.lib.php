@@ -243,10 +243,10 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
 /**
  * Require numbering modules of given objects
  *
- * @param  array $object            Object.
- * @throws Exception
+ * @param  array      $numberingModulesNames Array of numbering modules names
+ * @return array      $variablesToReturn     Numbering modules classes
  */
-function saturne_require_objects_mod(array $numberingModulesNames)
+function saturne_require_objects_mod(array $numberingModulesNames): array
 {
     global $db, $moduleNameLowerCase;
 
