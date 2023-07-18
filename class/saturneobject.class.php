@@ -24,6 +24,9 @@
 // Load Dolibarr Libraries.
 require_once DOL_DOCUMENT_ROOT . '/core/class/commonobject.class.php';
 
+// Load Saturne libraries
+require_once __DIR__ . '/../lib/object.lib.php';
+
 /**
  * Class for SaturneObject.
  */
@@ -547,7 +550,6 @@ abstract class SaturneObject extends CommonObject
 		global $langs, $conf;
 
         $moduleName          = strtoupper($this->module);
-        $moduleNameLowerCase = $this->module;
         $objectType          = $this->element;
         $numRefConf          = $moduleName . '_' . strtoupper($objectType) . '_ADDON';
 
@@ -555,44 +557,26 @@ abstract class SaturneObject extends CommonObject
 			$conf->global->$moduleName = 'mod_' . $objectType . '_standard';
 		}
 
-		if (!empty($conf->global->$moduleName)) {
-            $result    = false;
-			$file      = $conf->global->$moduleName . '.php';
-			$className = $conf->global->$moduleName;
+        //Numbering modules
+        $numberingModuleName = [
+            $objectType => $conf->global->$numRefConf,
+        ];
+        list($objNumberingModule) = saturne_require_objects_mod($numberingModuleName);
 
-			// Include file with class.
-			$dirModels = array_merge(['/'], $conf->modules_parts['models']);
-			foreach ($dirModels as $relDir) {
-				$dir = dol_buildpath($relDir . 'core/modules/'. $moduleNameLowerCase . '/' . $objectType . '/');
+        if (is_object($objNumberingModule)) {
+            $numRef = $objNumberingModule->getNextValue($this);
 
-				// Load file with numbering class (if found).
-				$result |= @include_once $dir . $file;
-			}
-
-			if ($result === false) {
-				dol_print_error('', 'Failed to include file ' . $file);
-				return '';
-			}
-
-			if (class_exists($className)) {
-				$obj    = new $className();
-				$numRef = $obj->getNextValue($this);
-
-				if ($numRef != '' && $numRef != '-1') {
-					return $numRef;
-				} else {
-					$this->error = $obj->error;
-					return '';
-				}
-			} else {
-				print $langs->trans('Error') . ' ' . $langs->trans('ClassNotFound') . ' ' . $className;
-				return '';
-			}
-		} else {
-			print $langs->trans('ErrorNumberingModuleNotSetup', $this->element);
-			return '';
-		}
-	}
+            if ($numRef != '' && $numRef != '-1') {
+                return $numRef;
+            } else {
+                $this->error = $objNumberingModule->error;
+                return '';
+            }
+        } else {
+            print $langs->trans('Error') . ' ' . $langs->trans('ClassNotFound') . ' ' . $conf->global->$moduleName;
+            return '';
+        }
+    }
 
     /**
      * Sets object to supplied categories.
