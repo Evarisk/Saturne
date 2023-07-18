@@ -673,11 +673,13 @@ abstract class SaturneObject extends CommonObject
 		$ret .= $langs->transnoentities('EntityNumber') . ' : ' . $conf->entity . '</br>';
 		$ret .= $langs->transnoentities('EntityName') . ' : ' . $mysoc->name . '</br>';
 		if (array_key_exists('fk_soc', $object->fields) && isModEnabled('societe')) {
+            require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 			$societe = new Societe($db);
 			$societe->fetch($object->fk_soc);
 			$ret .= $langs->transnoentities('ThirdParty') . ' : ' . dol_strlen($societe->name) > 0 ? $societe->name : $langs->transnoentities('NoData') . '</br>';
 		}
 		if (array_key_exists('fk_project', $object->fields) && isModEnabled('project')) {
+            require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
 			$project = new Project($db);
 			$project->fetch($object->fk_project);
 			$ret .= $langs->transnoentities('Project') . ' : ' . $project->ref . ' ' . $project->title . '</br>';
