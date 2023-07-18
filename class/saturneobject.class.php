@@ -547,7 +547,6 @@ abstract class SaturneObject extends CommonObject
 		global $langs, $conf;
 
         $moduleName          = strtoupper($this->module);
-        $moduleNameLowerCase = $this->module;
         $objectType          = $this->element;
         $numRefConf          = $moduleName . '_' . strtoupper($objectType) . '_ADDON';
 
@@ -555,36 +554,23 @@ abstract class SaturneObject extends CommonObject
 			$conf->global->$moduleName = 'mod_' . $objectType . '_standard';
 		}
 
-        $result    = false;
-        $file      = $conf->global->$moduleName . '.php';
-        $className = $conf->global->$moduleName;
+        //Numbering modules
+        $numberingModuleName = [
+            $objectType => $conf->global->$numRefConf,
+        ];
+        list($objNumberingModule) = saturne_require_objects_mod($numberingModuleName);
 
-        // Include file with class.
-        $dirModels = array_merge(['/'], $conf->modules_parts['models']);
-        foreach ($dirModels as $relDir) {
-            $dir = dol_buildpath($relDir . 'core/modules/'. $moduleNameLowerCase . '/' . $objectType . '/');
-
-            // Load file with numbering class (if found).
-            $result |= @include_once $dir . $file;
-        }
-
-        if ($result === false) {
-            dol_print_error('', 'Failed to include file ' . $file);
-            return '';
-        }
-
-        if (class_exists($className)) {
-            $obj    = new $className();
-            $numRef = $obj->getNextValue($this);
+        if (is_object($objNumberingModule)) {
+            $numRef = $objNumberingModule->getNextValue($this);
 
             if ($numRef != '' && $numRef != '-1') {
                 return $numRef;
             } else {
-                $this->error = $obj->error;
+                $this->error = $objNumberingModule->error;
                 return '';
             }
         } else {
-            print $langs->trans('Error') . ' ' . $langs->trans('ClassNotFound') . ' ' . $className;
+            print $langs->trans('Error') . ' ' . $langs->trans('ClassNotFound') . ' ' . $conf->global->$moduleName;
             return '';
         }
     }
