@@ -30,6 +30,7 @@ ObjectUnValidateTrigger = Reopening of %s %s
 ObjectValidateTrigger   = Pending signature of the participants of %s %s
 ObjectLockedTrigger     = Locking %s %s - Ready for document generation
 ObjectArchivedTrigger   = Archiving %s %s
+ObjectExpiredTrigger    = Expiring %s %s
 ObjectGenerateTrigger   = Generating %s %s
 
 # SetEventMessage
@@ -40,6 +41,7 @@ Validated                = Validated
 ValidatePendingSignature = Validated (pending signature)
 Locked                   = Locked
 Archived                 = Archived
+Expired                  = Expired
 
 # Button
 ReOpenDoli                      = Reopen
