@@ -269,10 +269,10 @@ function get_objects_metadata(string $type = ''): array
     //	'class_path'    => Path to object class
     //	'lib_path'      => Path to object lib
 
-    $objectsMetadataType = [];
+    $objectsMetadata = [];
 
     if (isModEnabled('product')) {
-        $objectsMetadataType['product'] = [
+        $objectsMetadata['product'] = [
             'mainmenu'      => 'products',
             'leftmenu'      => 'product',
             'langs'         => 'ProductOrService',
@@ -291,7 +291,7 @@ function get_objects_metadata(string $type = ''): array
     }
 
     if (isModEnabled('productbatch')) {
-        $objectsMetadataType['productlot'] = [
+        $objectsMetadata['productlot'] = [
             'mainmenu'      => '',
             'leftmenu'      => '',
             'langs'         => 'Batch',
@@ -312,7 +312,7 @@ function get_objects_metadata(string $type = ''): array
     }
 
     if (isModEnabled('user')) {
-        $objectsMetadataType['user'] = [
+        $objectsMetadata['user'] = [
             'mainmenu'      => 'user',
             'leftmenu'      => 'users',
             'langs'         => 'User',
@@ -330,7 +330,7 @@ function get_objects_metadata(string $type = ''): array
     }
 
     if (isModEnabled('societe')) {
-        $objectsMetadataType['thirdparty'] = [
+        $objectsMetadata['thirdparty'] = [
             'mainmenu'      => 'companies',
             'leftmenu'      => 'thirdparties',
             'langs'         => 'ThirdParty',
@@ -346,7 +346,7 @@ function get_objects_metadata(string $type = ''): array
             'class_path'    => 'societe/class/societe.class.php',
             'lib_path'      => 'core/lib/company.lib.php',
         ];
-        $objectsMetadataType['contact'] = [
+        $objectsMetadata['contact'] = [
             'mainmenu'      => 'companies',
             'leftmenu'      => 'contacts',
             'langs'         => 'Contact',
@@ -367,7 +367,7 @@ function get_objects_metadata(string $type = ''): array
     }
 
     if (isModEnabled('project')) {
-        $objectsMetadataType['project'] = [
+        $objectsMetadata['project'] = [
             'mainmenu'      => 'project',
             'leftmenu'      => 'projects',
             'langs'         => 'Project',
@@ -383,7 +383,7 @@ function get_objects_metadata(string $type = ''): array
             'class_path'    => 'projet/class/project.class.php',
             'lib_path'      => 'core/lib/project.lib.php',
         ];
-        $objectsMetadataType['task'] = [
+        $objectsMetadata['task'] = [
             'mainmenu'      => 'project',
             'leftmenu'      => 'tasks',
             'langs'         => 'Task',
@@ -404,7 +404,7 @@ function get_objects_metadata(string $type = ''): array
     }
 
     if (isModEnabled('facture')) {
-        $objectsMetadataType['invoice'] = [
+        $objectsMetadata['invoice'] = [
             'mainmenu'      => 'billing',
             'leftmenu'      => 'customers_bills',
             'langs'         => 'Invoice',
@@ -423,7 +423,7 @@ function get_objects_metadata(string $type = ''): array
     }
 
     if (isModEnabled('order')) {
-        $objectsMetadataType['order'] = [
+        $objectsMetadata['order'] = [
             'mainmenu'      => 'billing',
             'leftmenu'      => 'orders',
             'langs'         => 'Order',
@@ -442,7 +442,7 @@ function get_objects_metadata(string $type = ''): array
     }
 
     if (isModEnabled('contract')) {
-        $objectsMetadataType['contract'] = [
+        $objectsMetadata['contract'] = [
             'mainmenu'      => 'commercial',
             'leftmenu'      => 'contracts',
             'langs'         => 'Contract',
@@ -461,7 +461,7 @@ function get_objects_metadata(string $type = ''): array
     }
 
     if (isModEnabled('ticket')) {
-        $objectsMetadataType['ticket'] = [
+        $objectsMetadata['ticket'] = [
             'mainmenu'      => 'ticket',
             'leftmenu'      => 'ticket',
             'langs'         => 'Ticket',
@@ -479,7 +479,7 @@ function get_objects_metadata(string $type = ''): array
     }
 
     if (isModEnabled('stock')) {
-        $objectsMetadataType['entrepot'] = [
+        $objectsMetadata['entrepot'] = [
             'mainmenu'      => 'products',
             'leftmenu'      => 'stock',
             'langs'         => 'Warehouse',
@@ -498,7 +498,7 @@ function get_objects_metadata(string $type = ''): array
     }
 
     if (isModEnabled('expedition')) {
-        $objectsMetadataType['expedition'] = [
+        $objectsMetadata['expedition'] = [
             'mainmenu'      => 'products',
             'leftmenu'      => 'sendings',
             'langs'         => 'Shipments',
@@ -516,7 +516,7 @@ function get_objects_metadata(string $type = ''): array
     }
 
     if (isModEnabled('propal')) {
-        $objectsMetadataType['propal'] = [
+        $objectsMetadata['propal'] = [
             'mainmenu'      => 'commercial',
             'leftmenu'      => 'propals',
             'langs'         => 'Proposal',
@@ -541,46 +541,46 @@ function get_objects_metadata(string $type = ''): array
     }
     $hookmanager->initHooks(['get_objects_metadata']);
 
-    $reshook = $hookmanager->executeHooks('extendGetObjectsMetadata', $objectsMetadataType);
+    $reshook = $hookmanager->executeHooks('extendGetObjectsMetadata', $objectsMetadata);
 
     if ($reshook && (is_array($hookmanager->resArray) && !empty($hookmanager->resArray))) {
-        $objectsMetadataType = $hookmanager->resArray;
+        $objectsMetadata = $hookmanager->resArray;
     }
 
-    $objectsMetadata = [];
-    if (is_array($objectsMetadataType) && !empty($objectsMetadataType)) {
-        foreach($objectsMetadataType as $objectMetadata => $objectMetadataInformations) {
-            if ($objectMetadata != 'context' && $objectMetadata != 'currentcontext') {
-                require_once DOL_DOCUMENT_ROOT . '/' . $objectMetadataInformations['class_path'];
-                require_once DOL_DOCUMENT_ROOT . '/' . $objectMetadataInformations['lib_path'];
+    $objectsMetadataArray = [];
+    if (is_array($objectsMetadata) && !empty($objectsMetadata)) {
+        foreach($objectsMetadata as $objectType => $objectMetadata) {
+            if ($objectType != 'context' && $objectType != 'currentcontext') {
+                require_once DOL_DOCUMENT_ROOT . '/' . $objectMetadata['class_path'];
+                require_once DOL_DOCUMENT_ROOT . '/' . $objectMetadata['lib_path'];
 
-                $objectsMetadata[$objectMetadata] = [
-                    'name'          => ucfirst($objectMetadata),
-                    'mainmenu'      => $objectMetadataInformations['mainmenu'] ?? '',
-                    'leftmenu'      => $objectMetadataInformations['leftmenu'] ?? '',
-                    'langs'         => $objectMetadataInformations['langs'] ?? '',
-                    'langfile'      => $objectMetadataInformations['langfile'] ?? '',
-                    'picto'         => $objectMetadataInformations['picto'] ?? '',
-                    'class_name'    => $objectMetadataInformations['class_name'] ?? '',
-                    'name_field'    => $objectMetadataInformations['name_field'] ?? '',
-                    'post_name'     => $objectMetadataInformations['post_name'] ?? '',
-                    'link_name'     => $objectMetadataInformations['link_name'] ?? '',
-                    'tab_type'      => $objectMetadataInformations['tab_type'] ?? '',
-                    'table_element' => $objectMetadataInformations['table_element'] ?? '',
-                    'fk_parent'     => $objectMetadataInformations['fk_parent'] ?? '',
-                    'parent_post'   => $objectMetadataInformations['parent_post'] ?? '',
-                    'create_url'    => $objectMetadataInformations['create_url'] ?? '',
-                    'class_path'    => $objectMetadataInformations['class_path'] ?? '',
-                    'lib_path'      => $objectMetadataInformations['lib_path'] ?? '',
+                $objectsMetadataArray[$objectType] = [
+                    'name'          => ucfirst($objectType),
+                    'mainmenu'      => $objectMetadata['mainmenu'] ?? '',
+                    'leftmenu'      => $objectMetadata['leftmenu'] ?? '',
+                    'langs'         => $objectMetadata['langs'] ?? '',
+                    'langfile'      => $objectMetadata['langfile'] ?? '',
+                    'picto'         => $objectMetadata['picto'] ?? '',
+                    'class_name'    => $objectMetadata['class_name'] ?? '',
+                    'name_field'    => $objectMetadata['name_field'] ?? '',
+                    'post_name'     => $objectMetadata['post_name'] ?? '',
+                    'link_name'     => $objectMetadata['link_name'] ?? '',
+                    'tab_type'      => $objectMetadata['tab_type'] ?? '',
+                    'table_element' => $objectMetadata['table_element'] ?? '',
+                    'fk_parent'     => $objectMetadata['fk_parent'] ?? '',
+                    'parent_post'   => $objectMetadata['parent_post'] ?? '',
+                    'create_url'    => $objectMetadata['create_url'] ?? '',
+                    'class_path'    => $objectMetadata['class_path'] ?? '',
+                    'lib_path'      => $objectMetadata['lib_path'] ?? '',
                 ];
-                if (!empty($objectMetadataInformations['langfile'])) {
-                    $langs->load($objectMetadataInformations['langfile']);
+                if (!empty($objectMetadata['langfile'])) {
+                    $langs->load($objectMetadata['langfile']);
                 }
             }
         }
     }
 
-    return dol_strlen($type) > 0 ? $objectsMetadata[$type] : $objectsMetadata;
+    return dol_strlen($type) > 0 ? $objectsMetadataArray[$type] : $objectsMetadataArray;
 }
 
 /**
