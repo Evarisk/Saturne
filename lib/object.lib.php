@@ -582,3 +582,39 @@ function get_objects_metadata(string $type = ''): array
 
     return dol_strlen($type) > 0 ? $objectsMetadata[$type] : $objectsMetadata;
 }
+
+/**
+ * Require numbering modules of given objects
+ *
+ * @param  array      $numberingModulesNames Array of numbering modules names
+ * @return array      $variablesToReturn     Numbering modules classes
+ */
+function saturne_require_objects_mod(array $numberingModulesNames): array
+{
+    global $db, $moduleNameLowerCase;
+
+    $variablesToReturn = [];
+    if (!empty($numberingModulesNames)) {
+        foreach($numberingModulesNames as $objectType => $numberingModulesName) {
+
+            if (strstr($objectType, '_')) {
+                $objectType = str_replace('_', '', $objectType);
+            }
+
+            $modPathCustom   = dirname(__FILE__) . '/../../' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $objectType . '/' . $numberingModulesName . '.php';
+            $modPathDolibarr = DOL_DOCUMENT_ROOT . '/core/modules/' . $objectType . '/'. $numberingModulesName . '.php';
+
+            if (file_exists($modPathCustom)) {
+                require_once $modPathCustom;
+            } else if (file_exists($modPathDolibarr)) {
+                require_once $modPathDolibarr;
+            }
+
+            $varName             = 'ref' . ucfirst($objectType) . 'Mod';
+            $$varName            = new $numberingModulesName($db);
+            $variablesToReturn[] = $$varName;
+        }
+    }
+
+    return $variablesToReturn;
+}
