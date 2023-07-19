@@ -48,3 +48,15 @@ DROP TABLE `llx_dolimeet_dolimeetdocuments`;
 DROP TABLE `llx_dolimeet_dolimeetdocuments_extrafields`;
 
 ALTER TABLE `llx_saturne_object_signature` ADD `attendance` SMALLINT NULL AFTER `transaction_url`;
+
+-- 1.1.1
+UPDATE llx_saturne_object_signature SET role = 'Responsible' WHERE role = 'TIMESHEET_SOCIETY_RESPONSIBLE';
+UPDATE llx_saturne_object_signature SET role = 'Signatory' WHERE role = 'TIMESHEET_SOCIETY_ATTENDANT';
+
+UPDATE llx_saturne_object_signature SET role = 'SessionTrainer' WHERE role = 'TRAININGSESSION_SESSION_TRAINER';
+UPDATE llx_saturne_object_signature SET role = 'Trainee' WHERE role = 'TRAININGSESSION_EXTERNAL_ATTENDANT';
+UPDATE llx_saturne_object_signature SET role = 'Trainee' WHERE role = 'TRAININGSESSION_SOCIETY_ATTENDANT';
+UPDATE llx_saturne_object_signature SET role = 'Contributor' WHERE role = 'MEETING_EXTERNAL_ATTENDANT';
+UPDATE llx_saturne_object_signature SET role = 'Responsible' WHERE role = 'MEETING_SOCIETY_ATTENDANT';
+UPDATE llx_saturne_object_signature SET role = 'Attendant' WHERE role = 'AUDIT_EXTERNAL_ATTENDANT';
+UPDATE llx_saturne_object_signature SET role = 'Auditor' WHERE role = 'AUDIT_SOCIETY_ATTENDANT';
