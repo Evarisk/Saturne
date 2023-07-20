@@ -161,7 +161,7 @@ CloseModal = Fermer
 # Data - Donnée
 FkElement              = Élément lié
 CertificateExpired     = Il y a %s certificat(s) expiré(s)
-NoCertificateExpired   = Aucun certificat expiré
+NoCertificate          = Aucun certificat
 checkDateEndJob        = Vérification de la date de fin des certificats
 checkDateEndJobComment = Vérification et mise à jour du statut des certificats expirés en fonction de la date de fin
 

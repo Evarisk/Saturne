@@ -157,7 +157,7 @@ CloseModal = Close
 # Data
 FkElement              = Linked element
 CertificateExpired     = There are %s expired certificate(s)
-NoCertificateExpired   = No expired certificate
+NoCertificate          = No certificate
 checkDateEndJob        = Checking certificate expiry dates
 checkDateEndJobComment = Checking and updating the status of expired certificates by end date
 

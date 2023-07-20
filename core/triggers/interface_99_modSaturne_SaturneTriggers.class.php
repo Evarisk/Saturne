@@ -154,7 +154,7 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
                 break;
 
             case 'SATURNE_CERTIFICATE_SENTBYMAIL' :
-                $actioncomm->code  = 'AC_SATURNECERTIFICATE_SENTBYMAIL';
+                $actioncomm->code  = 'AC_SATURNE_CERTIFICATE_SENTBYMAIL';
                 $actioncomm->label = $langs->transnoentities('ObjectSentByMailTrigger', $langs->transnoentities(ucfirst($object->element)), $object->ref);
                 $actioncomm->create($user);
                 break;

@@ -375,7 +375,7 @@ class SaturneCertificate extends SaturneObject
 
         $certificates = self::fetchAll();
         if (is_array($certificates) && !empty($certificates)){
-            $i = 0;
+            $nbCertificate = 0;
             foreach ($certificates as $certificate) {
                 if ($certificate->date_end > 0 && $certificate->date_end < dol_now() && $certificate->status != self::STATUS_ARCHIVED) {
                     $certificate->element = $objectType;
@@ -384,13 +384,13 @@ class SaturneCertificate extends SaturneObject
                         $this->output = $certificate->error;
                         return -1;
                     } elseif ($result > 0) {
-                        $i++;
+                        $nbCertificate++;
                     }
                 }
             }
-            $this->output = $langs->transnoentities('CertificateExpired', $i);
+            $this->output = $langs->transnoentities('CertificateExpired', $nbCertificate);
         } else {
-            $this->output = $langs->transnoentities('NoCertificateExpired');
+            $this->output = $langs->transnoentities('NoCertificate');
         }
 
         return 0;
