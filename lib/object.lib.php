@@ -539,7 +539,7 @@ function saturne_get_objects_metadata(string $type = ''): array
         include_once DOL_DOCUMENT_ROOT . '/core/class/hookmanager.class.php';
         $hookmanager = new HookManager($db);
     }
-    $hookmanager->initHooks(['saturne_get_objects_metadata']);
+    $hookmanager->initHooks(['saturnegetobjectsmetadata']);
 
     $reshook = $hookmanager->executeHooks('extendGetObjectsMetadata', $objectsMetadata);
 
