@@ -31,6 +31,7 @@ ObjectValidateTrigger   = %s %s validé(e)
 ObjectLockedTrigger     = %s %s verrouillé(e) - Prêt pour la génération du document
 ObjectSentByMailTrigger = Mail envoyé
 ObjectArchivedTrigger   = %s %s archivé(e)
+ObjectExpiredTrigger    = %s %s expiré(e)
 ObjectGenerateTrigger   = %s %s généré(e)
 
 # SetEventMessage - Notice info
@@ -41,6 +42,7 @@ Validated                = Validé
 ValidatePendingSignature = Validé (en attente de signature)
 Locked                   = Verrouillé
 Archived                 = Archivé
+Expired                  = Expiré
 
 # Button - Bouton
 ReOpenDoli                      = Rouvrir
