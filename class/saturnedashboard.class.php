@@ -96,6 +96,8 @@ class SaturneDashboard
         $width  = DolGraph::getDefaultGraphSizeForStats('width');
         $height = DolGraph::getDefaultGraphSizeForStats('height');
 
+        $conf->global->MAIN_DISABLE_TRUNC = 1;
+
         $dashboards = $this->load_dashboard();
 
         print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '" class="dashboard" id="dashBoardForm">';
