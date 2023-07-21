@@ -53,6 +53,7 @@ ObjectMustBeDraft               = %s must be in status (draft)
 ObjectMustBeValidated           = %s must be in status (validated)
 ObjectMustBeLocked              = %s must be in status (locked)
 ObjectMustBeValidatedToGenerate = %s must be in status (validated) to generate the document
+ObjectMustBeLockedToGenerate    = %s must be in status (locked) to generate the document
 ObjectMustBeValidatedToSign     = %s must be in status (validated) for participants to sign
 AllSignatoriesMustHaveSigned    = All participants must have signed to lock %s
 ObjectMustBeLockedToSendEmail   = %s must be in (locked) status to send an email
