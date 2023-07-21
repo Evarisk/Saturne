@@ -60,6 +60,11 @@ class SaturneCertificate extends SaturneObject
 	 */
 	public int $isextrafieldmanaged = 1;
 
+    /**
+     * @var string Last output from end job execution.
+     */
+    public string $output = '';
+
 	/**
 	 * @var string Name of icon for certificate. Must be a 'fa-xxx' fontawesome code (or 'fa-xxx_fa_color_size') or 'certificate@saturne' if picto is file 'img/object_certificate.png'.
 	 */
@@ -68,8 +73,9 @@ class SaturneCertificate extends SaturneObject
     public const STATUS_DELETED   = -1;
     public const STATUS_DRAFT     = 0;
     public const STATUS_VALIDATED = 1;
-    public const STATUS_EXPIRED   = 2;
+    public const STATUS_LOCKED    = 2;
     public const STATUS_ARCHIVED  = 3;
+    public const STATUS_EXPIRED   = 4;
 
     /**
      *  'type' field format:
@@ -128,7 +134,7 @@ class SaturneCertificate extends SaturneObject
         'note_public'       => ['type' => 'html',         'label' => 'NotePublic',       'enabled' => 1, 'position' => 150, 'notnull' => 0, 'visible' => 0, 'cssview' => 'wordbreak', 'validate' => 1],
         'note_private'      => ['type' => 'html',         'label' => 'NotePrivate',      'enabled' => 1, 'position' => 160, 'notnull' => 0, 'visible' => 0, 'cssview' => 'wordbreak', 'validate' => 1],
         'element_type'      => ['type' => 'select',       'label' => 'ElementType',      'enabled' => 1, 'position' => 120, 'notnull' => 0, 'visible' => 3, 'css' => 'maxwidth150 widthcentpercentminusxx'],
-        'type'              => ['type' => 'varchar(255)', 'label' => 'Type',             'enabled' => 1, 'position' => 130, 'notnull' => 0, 'visible' => 1, 'css' => 'minwidth300'],
+        'type'              => ['type' => 'varchar(255)', 'label' => 'Type',             'enabled' => 0, 'position' => 130, 'notnull' => 0, 'visible' => 1, 'css' => 'minwidth300'],
         'fk_element'        => ['type' => 'integer',      'label' => 'FkElement',        'enabled' => 1, 'position' => 135, 'notnull' => 0, 'visible' => 3, 'index' => 1, 'css' => 'maxwidth500 widthcentpercentminusxx'],
         'sha256'            => ['type' => 'text',         'label' => 'Sha256',           'enabled' => 1, 'position' => 170, 'notnull' => 0, 'visible' => 0],
         'json'              => ['type' => 'text',         'label' => 'Json',             'enabled' => 1, 'position' => 180, 'notnull' => 0, 'visible' => 0],
@@ -298,14 +304,16 @@ class SaturneCertificate extends SaturneObject
             $this->labelStatus[self::STATUS_DELETED]   = $langs->transnoentitiesnoconv('Deleted');
 			$this->labelStatus[self::STATUS_DRAFT]     = $langs->transnoentitiesnoconv('StatusDraft');
 			$this->labelStatus[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('ValidatePendingSignature');
-            $this->labelStatus[self::STATUS_EXPIRED]   = $langs->transnoentitiesnoconv('Expired');
+            $this->labelStatus[self::STATUS_LOCKED]    = $langs->transnoentitiesnoconv('Locked');
             $this->labelStatus[self::STATUS_ARCHIVED]  = $langs->transnoentitiesnoconv('Archived');
+            $this->labelStatus[self::STATUS_EXPIRED]   = $langs->transnoentitiesnoconv('Expired');
 
             $this->labelStatusShort[self::STATUS_DELETED]   = $langs->transnoentitiesnoconv('Deleted');
 			$this->labelStatusShort[self::STATUS_DRAFT]     = $langs->transnoentitiesnoconv('StatusDraft');
 			$this->labelStatusShort[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('ValidatePendingSignature');
-            $this->labelStatusShort[self::STATUS_EXPIRED]   = $langs->transnoentitiesnoconv('Expired');
+            $this->labelStatusShort[self::STATUS_LOCKED]    = $langs->transnoentitiesnoconv('Locked');
             $this->labelStatusShort[self::STATUS_ARCHIVED]  = $langs->transnoentitiesnoconv('Archived');
+            $this->labelStatusShort[self::STATUS_EXPIRED]   = $langs->transnoentitiesnoconv('Expired');
 		}
 
 		$statusType = 'status' . $status;
@@ -315,8 +323,8 @@ class SaturneCertificate extends SaturneObject
         if ($status == self::STATUS_VALIDATED) {
             $statusType = 'status3';
         }
-        if ($status == self::STATUS_EXPIRED || $status == self::STATUS_ARCHIVED) {
-            $statusType  = 'status8';
+        if ($status == self::STATUS_LOCKED || $status == self::STATUS_EXPIRED || $status == self::STATUS_ARCHIVED) {
+            $statusType = 'status8';
         }
 
 		return dolGetStatus($this->labelStatus[$status], $this->labelStatusShort[$status], '', $statusType, $mode);
@@ -335,5 +343,56 @@ class SaturneCertificate extends SaturneObject
     public function setCategories($categories): string
     {
         return '';
+    }
+
+    /**
+     * Set expired status.
+     *
+     * @param  User $user      Object user that modify.
+     * @param  int  $notrigger 1 = Does not execute triggers, 0 = Execute triggers.
+     * @return int             0 < if KO, > 0 if OK.
+     */
+    public function setExpired(User $user, int $notrigger = 0): int
+    {
+        // Protection.
+        if ($this->status == self::STATUS_EXPIRED) {
+            return 0;
+        }
+
+        return $this->setStatusCommon($user, $this::STATUS_EXPIRED, $notrigger, strtoupper($this->element) . '_EXPIRE');
+    }
+
+    /**
+     * check date end and setExpired (Cronjob).
+     *
+     * @param  string    $objectType Object element type.
+     * @return int                   0 < if KO, > 0 if OK.
+     * @throws Exception
+     */
+    public function checkDateEnd(string $objectType = 'saturne_certificate'): int
+    {
+        global $langs, $user;
+
+        $certificates = self::fetchAll();
+        if (is_array($certificates) && !empty($certificates)){
+            $nbCertificate = 0;
+            foreach ($certificates as $certificate) {
+                if ($certificate->date_end > 0 && $certificate->date_end < dol_now() && $certificate->status != self::STATUS_ARCHIVED) {
+                    $certificate->element = $objectType;
+                    $result = $certificate->setExpired($user);
+                    if ($result < 0) {
+                        $this->output = $certificate->error;
+                        return -1;
+                    } elseif ($result > 0) {
+                        $nbCertificate++;
+                    }
+                }
+            }
+            $this->output = $langs->transnoentities('CertificateExpired', $nbCertificate);
+        } else {
+            $this->output = $langs->transnoentities('NoCertificate');
+        }
+
+        return 0;
     }
 }

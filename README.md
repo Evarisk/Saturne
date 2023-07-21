@@ -3,17 +3,20 @@
 ## Informations
 
 - Numéro du module : 436318
-- Version :  1.1.0
-- Dernière mise à jour : 06/07/2023
+- Dernière mise à jour : 20/07/2023
 - Éditeur : [Evarisk](https://evarisk.com)
-- Compatibilité : Dolibarr 16.0.0 - 17.0.2
-- Thème : eldy
+- Thème : Eldy Menu
 - Licence : GPLv3
 - Disponible sur : Windows - MacOS - Linux
 
+### Version
+
+- Version :  1.1.0
+- Compatibilité : Dolibarr 16.0.0 - 17.0.2
+
 ## Liens
 
-- Support & Assistance : [Forum dolibarr.fr](https://dolibarr.fr) / Par mail à contact@evarisk.com
+- Support & Assistance : [Forum dolibarr.fr](https://dolibarr.fr) / Par mail à technique@evarisk.com
 - Demo : [Demo Saturne](https://demodoli.digirisk.com) - ID: demo - Password: demo
 - Documentation : [Wiki Saturne](https://wiki.dolibarr.org/index.php/Module_Saturne)
 - Projet GitHub : [Projet Saturne](https://github.com/Evarisk/Saturne/projects?query=is%3Aopen)

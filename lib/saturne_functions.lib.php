@@ -26,6 +26,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/html.formprojet.class.php';
 require_once __DIR__ . '/medias.lib.php';
 require_once __DIR__ . '/pagination.lib.php';
 require_once __DIR__ . '/documents.lib.php';
+require_once __DIR__ . '/object.lib.php';
 
 /**
  * Print llxHeader with Saturne custom enhancements

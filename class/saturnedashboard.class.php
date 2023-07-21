@@ -96,6 +96,8 @@ class SaturneDashboard
         $width  = DolGraph::getDefaultGraphSizeForStats('width');
         $height = DolGraph::getDefaultGraphSizeForStats('height');
 
+        $conf->global->MAIN_DISABLE_TRUNC = 1;
+
         $dashboards = $this->load_dashboard();
 
         print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '" class="dashboard" id="dashBoardForm">';
@@ -212,7 +214,7 @@ class SaturneDashboard
                                 $graph->SetType([$dashboardGraph['type'] ?? 'pie']);
                                 $graph->SetWidth($dashboardGraph['width'] ?? $width);
                                 $graph->SetHeight($dashboardGraph['height'] ?? $height);
-                                $graph->setShowLegend(2);
+                                $graph->setShowLegend($dashboardGraph['showlegend'] ?? 2);
                                 $graph->draw($fileName[$keyElement], $fileUrl[$keyElement]);
                                 print '<div>';
                                 print load_fiche_titre($dashboardGraph['title'], $dashboardGraph['morehtmlright'], $dashboardGraph['picto']);

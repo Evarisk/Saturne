@@ -66,7 +66,11 @@ if ( ! $error && $subaction == "addFiles") {
 	$object->fetch($objectId);
 
 	$modObjectName = strtoupper($moduleNameLowerCase) . '_' . strtoupper($objectType) . '_ADDON';
-	$modObject     = new $conf->global->$modObjectName($db);
+
+    $numberingModuleName = [
+        $object->element => $conf->global->$modObjectName,
+    ];
+    list($modObject) = saturne_require_objects_mod($numberingModuleName);
 
 	if (dol_strlen($object->ref) > 0) {
 		$pathToObjectPhoto = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType .'/' . $object->ref . '/' . $objectSubdir;
@@ -173,7 +177,7 @@ if ( ! $error && $subaction == "unlinkFile") {
 		if (property_exists($object, $objectSubtype)) {
 
 			if ($object->$objectSubtype == $fileName) {
-				$pathPhotos = $conf->dolismq->multidir_output[$conf->entity] . '/'. $objectType .'/'. $object->ref . '/photos/';
+				$pathPhotos = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType .'/'. $object->ref . '/photos/';
 				$fileArray  = dol_dir_list($pathPhotos, 'files', 0, '', $fileName);
 
 				if (count($fileArray) > 0) {
