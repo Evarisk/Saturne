@@ -214,7 +214,7 @@ class SaturneDashboard
                                 $graph->SetType([$dashboardGraph['type'] ?? 'pie']);
                                 $graph->SetWidth($dashboardGraph['width'] ?? $width);
                                 $graph->SetHeight($dashboardGraph['height'] ?? $height);
-                                $graph->setShowLegend(2);
+                                $graph->setShowLegend($dashboardGraph['showlegend'] ?? 2);
                                 $graph->draw($fileName[$keyElement], $fileUrl[$keyElement]);
                                 print '<div>';
                                 print load_fiche_titre($dashboardGraph['title'], $dashboardGraph['morehtmlright'], $dashboardGraph['picto']);
