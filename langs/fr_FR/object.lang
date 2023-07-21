@@ -54,6 +54,7 @@ ObjectMustBeDraft               = %s doit être au statut (brouillon)
 ObjectMustBeValidated           = %s doit être au statut (validé)
 ObjectMustBeLocked              = %s doit être au statut (verrouillé)
 ObjectMustBeValidatedToGenerate = %s doit être au statut (validé) pour générer le document
+ObjectMustBeLockedToGenerate    = %s doit être au statut (verrouillé) pour générer le document
 ObjectMustBeValidatedToSign     = %s doit être au statut (validé) pour que les participants puissent signer
 AllSignatoriesMustHaveSigned    = Tous les participants doivent avoir signé pour verrouiller %s
 ObjectMustBeLockedToSendEmail   = %s doit être au statut (verrouillé) pour envoyer un email
