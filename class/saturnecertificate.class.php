@@ -373,7 +373,7 @@ class SaturneCertificate extends SaturneObject
     {
         global $langs, $user;
 
-        $certificates = self::fetchAll();
+        $certificates = self::fetchAll('', '', 0, 0, ['customsql' => 't.status >= 0']);
         if (is_array($certificates) && !empty($certificates)){
             $nbCertificate = 0;
             foreach ($certificates as $certificate) {
