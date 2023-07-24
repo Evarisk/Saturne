@@ -67,18 +67,21 @@ AttendantTableModeSimple   = Simplified view
 AttendantTableModeAdvanced = Advanced view
 
 # Data
-Attendant          = Participant
-Attendants         = Participants
-InternalAttendant  = Internal participant
-InternalAttendants = Internal participants
-ExternalAttendant  = External participant
-ExternalAttendants = External participants
-NoAttendants       = No linked participants. To add participants, the status must be "Draft (to be validated)".
-CloneAttendants    = Clone participants
-NoAttendant        = No %s present for %s.
-Present            = Present
-Absent             = Absent
-Delay              = Delay
+Attendant           = Participant
+Attendants          = Participants
+InternalAttendant   = Internal participant
+InternalAttendants  = Internal participants
+ExternalAttendant   = External participant
+ExternalAttendants  = External participants
+NoAttendants        = No linked participants. To add participants, the status must be "Draft (to be validated)".
+CloneAttendants     = Clone participants
+NoAttendant         = No %s present for %s.
+Present             = Present
+Absent              = Absent
+Delay               = Delay
+ElectronicSignature = Electronic signature
+Signatory           = Signatory
+Responsible         = Responsible
 
 # Public interface
 FullName = Last name First name
