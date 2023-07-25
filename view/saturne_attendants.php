@@ -65,7 +65,7 @@ $attendantTableMode = (GETPOSTISSET('attendant_table_mode') ? GETPOST('attendant
 // Initialize technical objects
 $classname = ucfirst($objectType);
 $object    = new $classname($db);
-$signatory = new SaturneSignature($db, $moduleNameLowerCase);
+$signatory = new SaturneSignature($db, $moduleNameLowerCase, $object->element);
 $usertmp   = new User($db);
 if (isModEnabled('societe')) {
     $thirdparty = new Societe($db);
@@ -171,7 +171,7 @@ if (empty($reshook)) {
 
         if ($result > 0) {
             // Set attendance OK
-            $signatory->call_trigger('SATURNESIGNATURE_' . $triggerName, $user);
+            $signatory->call_trigger('SATURNE_SIGNATURE_' . $triggerName, $user);
         } elseif (!empty($signatory->errors)) {
             // Set attendance KO
             setEventMessages('', $signatory->errors, 'errors');
@@ -304,7 +304,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
     $parameters = ['backtocard' => $backtocard];
     $reshook    = $hookmanager->executeHooks('saturneAttendantsBackToCard', $parameters, $object); // Note that $action and $object may have been modified by some hooks
     if ($reshook > 0) {
-        $backtocard = $hookmanager->results;
+        $backtocard = $hookmanager->resPrint;
     }
 
     if ($object->status == $object::STATUS_DRAFT && $permissiontoadd) : ?>
@@ -374,7 +374,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
 
         print '<div class="opacitymedium">' . $langs->trans('NoAttendants') . '</div>';
     }
-    
+
     print '</div>';
 
     print dol_get_fiche_end();
