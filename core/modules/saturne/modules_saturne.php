@@ -679,6 +679,14 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
                     @chmod($file, octdec($conf->global->MAIN_UMASK));
                 }
 
+                $tempDir   = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?? 1] . '/temp/';
+                $fileArray = dol_dir_list($tempDir, 'files');
+                if (!empty($fileArray)) {
+                    foreach ($fileArray as $file) {
+                        unlink($file['fullname']);
+                    }
+                }
+
                 $odfHandler = null; // Destroy object.
 
                 return 1; // Success.
