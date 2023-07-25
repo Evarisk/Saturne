@@ -407,7 +407,7 @@ abstract class SaturneObject extends CommonObject
      */
 	public function getNomUrl(int $withpicto = 0, string $option = '', int $notooltip = 0, string $morecss = '', int $save_lastsearch_value = -1): string
 	{
-		global $conf, $langs;
+		global $conf, $langs, $url;
 
 		if (!empty($conf->dol_no_mouse_hover)) {
 			$notooltip = 1; // Force disable tooltips.
@@ -422,7 +422,9 @@ abstract class SaturneObject extends CommonObject
 		$label .= '<br>';
 		$label .= '<b>' . $langs->trans('Ref') . ' : </b> ' . $this->ref;
 
-		$url = dol_buildpath('/' . $this->module . '/view/' . $this->element . '/' . $this->element . '_card.php', 1) . '?id=' . $this->id;
+        if (empty($url)) {
+            $url = dol_buildpath('/' . $this->module . '/view/' . $this->element . '/' . $this->element . '_card.php', 1) . '?id=' . $this->id;
+        }
 
 		if ($option != 'nolink') {
 			// Add param to save lastsearch_values or not.
