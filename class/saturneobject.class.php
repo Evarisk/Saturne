@@ -549,19 +549,20 @@ abstract class SaturneObject extends CommonObject
 	{
 		global $langs, $conf;
 
-        $moduleName          = strtoupper($this->module);
+        $moduleNameUpperCase = strtoupper($this->module);
+        $moduleNameLowerCase = strtolower($this->module);
         $objectType          = $this->element;
-        $numRefConf          = $moduleName . '_' . strtoupper($objectType) . '_ADDON';
+        $numRefConf          = $moduleNameUpperCase . '_' . strtoupper($objectType) . '_ADDON';
 
-		if (empty($conf->global->$moduleName)) {
-			$conf->global->$moduleName = 'mod_' . $objectType . '_standard';
+		if (empty($conf->global->$moduleNameUpperCase)) {
+			$conf->global->$moduleNameUpperCase = 'mod_' . $objectType . '_standard';
 		}
 
         //Numbering modules
         $numberingModuleName = [
             $objectType => $conf->global->$numRefConf,
         ];
-        list($objNumberingModule) = saturne_require_objects_mod($numberingModuleName);
+        list($objNumberingModule) = saturne_require_objects_mod($numberingModuleName, $moduleNameLowerCase);
 
         if (is_object($objNumberingModule)) {
             $numRef = $objNumberingModule->getNextValue($this);
@@ -573,7 +574,7 @@ abstract class SaturneObject extends CommonObject
                 return '';
             }
         } else {
-            print $langs->trans('Error') . ' ' . $langs->trans('ClassNotFound') . ' ' . $conf->global->$moduleName;
+            print $langs->trans('Error') . ' ' . $langs->trans('ClassNotFound') . ' ' . $conf->global->$moduleNameUpperCase;
             return '';
         }
     }
