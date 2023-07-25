@@ -586,6 +586,7 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
                     $newFileTmp .= '_specimen';
                 }
                 $newFileTmp = str_replace(' ', '_', $newFileTmp);
+                $newFileTmp = dol_sanitizeFileName($newFileTmp);
 
                 // Get extension (ods or odt).
                 $newFileFormat = substr($newFile, strrpos($newFile, '.') + 1);
