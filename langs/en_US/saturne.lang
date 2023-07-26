@@ -38,6 +38,8 @@ ReadAdminPage = Access the module configuration %s
 # Data
 ModuleSettings                    = Settings
 ModuleSetup                       = Module configuration %s
+Contributing                      = Contributing
+SaturneModule                     = %s module
 GeneralConfig                     = General configuration
 ConfigData                        = Configurable data from %s
 Configs                           = Configurable % data

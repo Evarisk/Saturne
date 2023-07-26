@@ -48,6 +48,21 @@ function saturne_admin_prepare_head(): array
     $head[$h][2] = 'about';
     $h++;
 
+    $head[$h][0] = dol_buildpath('/saturne/admin/information.php', 1) . '?filename=saturne_dev&tab_name=information';
+    $head[$h][1] = '<i class="fas fa-hands-helping pictofixedwidth"></i>' . $langs->trans('Contributing');
+    $head[$h][2] = 'information';
+    $h++;
+
+    $head[$h][0] = dol_buildpath('/saturne/admin/information.php', 1) . '?filename=evarisk_modules&tab_name=evariskModule';
+    $head[$h][1] = '<i class="fas fa-cogs pictofixedwidth"></i>' . $langs->trans('SaturneModule', 'Evarisk');
+    $head[$h][2] = 'evariskModule';
+
+    $h++;
+    $head[$h][0] = dol_buildpath('/saturne/admin/information.php', 1) . '?filename=eoxia_modules&tab_name=eoxiaModule';
+    $head[$h][1] = '<i class="fas fa-cogs pictofixedwidth"></i>' . $langs->trans('SaturneModule', 'Eoxia');
+    $head[$h][2] = 'eoxiaModule';
+    $h++;
+
     complete_head_from_modules($conf, $langs, null, $head, $h, 'saturne@saturne');
 
     complete_head_from_modules($conf, $langs, null, $head, $h, 'saturne@saturne', 'remove');
