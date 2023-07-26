@@ -589,11 +589,12 @@ function saturne_get_objects_metadata(string $type = ''): array
  * Require numbering modules of given objects
  *
  * @param  array      $numberingModulesNames Array of numbering modules names
+ * @param  string     $moduleNameLowerCase   Module name in lower case
  * @return array      $variablesToReturn     Numbering modules classes
  */
-function saturne_require_objects_mod(array $numberingModulesNames): array
+function saturne_require_objects_mod(array $numberingModulesNames, string $moduleNameLowerCase): array
 {
-    global $db, $moduleNameLowerCase;
+    global $db;
 
     $variablesToReturn = [];
     if (!empty($numberingModulesNames)) {
