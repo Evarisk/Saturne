@@ -355,7 +355,7 @@ class SaturneSignature extends SaturneObject
      */
     public function setRegistered(User $user, int $notrigger = 0): int
     {
-        return $this->setStatusCommon($user, self::STATUS_REGISTERED, $notrigger, 'SATURNESIGNATURE_REGISTERED');
+        return $this->setStatusCommon($user, self::STATUS_REGISTERED, $notrigger, 'SATURNE_SIGNATURE_REGISTERED');
     }
 
     /**
@@ -367,7 +367,7 @@ class SaturneSignature extends SaturneObject
      */
     public function setPending(User $user, int $notrigger = 0): int
     {
-        return $this->setStatusCommon($user, self::STATUS_PENDING_SIGNATURE, $notrigger, 'SATURNESIGNATURE_PENDING_SIGNATURE');
+        return $this->setStatusCommon($user, self::STATUS_PENDING_SIGNATURE, $notrigger, 'SATURNE_SIGNATURE_PENDING_SIGNATURE');
     }
 
     /**
@@ -380,7 +380,7 @@ class SaturneSignature extends SaturneObject
      */
     public function setSigned(User $user, int $notrigger = 0, string $zone = 'private'): int
     {
-        return $this->setStatusCommon($user, self::STATUS_SIGNED, $notrigger, 'SATURNESIGNATURE_SIGN' . (($zone == 'public') ? '_PUBLIC' : ''));
+        return $this->setStatusCommon($user, self::STATUS_SIGNED, $notrigger, 'SATURNE_SIGNATURE_SIGN' . (($zone == 'public') ? '_PUBLIC' : ''));
     }
 
     /**
@@ -392,7 +392,7 @@ class SaturneSignature extends SaturneObject
      */
     public function setDeleted(User $user, int $notrigger = 0): int
     {
-        return $this->setStatusCommon($user, self::STATUS_DELETED, $notrigger, 'SATURNESIGNATURE_DELETE');
+        return $this->setStatusCommon($user, self::STATUS_DELETED, $notrigger, 'SATURNE_SIGNATURE_DELETE');
     }
 
     /**
@@ -497,7 +497,7 @@ class SaturneSignature extends SaturneObject
 
                     $result = $this->create($user);
                     if ($result > 0) {
-                        $this->call_trigger(strtoupper(get_class($this)) . '_ADDATTENDANT', $user);
+                        $this->call_trigger('SATURNE_SIGNATURE_ADDATTENDANT', $user);
                     }
                 }
             }
