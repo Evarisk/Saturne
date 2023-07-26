@@ -167,7 +167,7 @@ class SaturneTask extends Task
 	 * @param  int      $saveLastSearchValue    -1=Auto, 0=No save of lastsearch_values when clicking, 1=Save lastsearch_values whenclicking
 	 * @return string					        Chaine avec URL
 	 */
-	public function saturneGetNomUrl($withpicto = 0, $option = '', $mode = 'task', $addlabel = 0, $sep = ' - ', $notooltip = 0, $saveLastSearchValue = -1, $showFavorite = 1)
+	public function getNomUrl($withpicto = 0, $option = '', $mode = 'task', $addlabel = 0, $sep = ' - ', $notooltip = 0, $saveLastSearchValue = -1, $showFavorite = 0)
 	{
 		global $conf, $langs, $user;
 
@@ -214,7 +214,7 @@ class SaturneTask extends Task
 		if ($withpicto != 2) $result .= (($addlabel && $this->label) ? $sep . dol_trunc($this->label, ($addlabel > 1 ? $addlabel : 0)) : '');
 
 		if ($showFavorite) {
-			if (isTaskFavorite($this->id, $user->id)) {
+			if (is_task_favorite($this->id, $user->id)) {
 				$favoriteStar = '<span class="fas fa-star toggleTaskFavorite" onclick="toggleTaskFavorite()"></span>';
 			} else {
 				$favoriteStar = '<span class="far fa-star toggleTaskFavorite" onclick="toggleTaskFavorite()"></span>';
