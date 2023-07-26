@@ -236,7 +236,7 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
         $this->document_type = $objectDocumentType;
         $this->name          = $langs->trans('ODTDefaultTemplateName');
         $this->description   = $langs->trans('DocumentModelOdt');
-        $this->scandir       = dol_strtoupper($this->module) . '_' . dol_strtoupper($this->document_type) . '_ADDON_PDF_ODT_PATH'; // Name of constant that is used to save list of directories to scan.
+        $this->scandir       = dol_strtoupper($this->module) . '_' . dol_strtoupper($this->document_type) . '_ADDON_ODT_PATH'; // Name of constant that is used to save list of directories to scan.
 
         // Page size for A4 format.
         $this->type         = 'odt';
@@ -418,12 +418,14 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
                 $signatory        = new SaturneSignature($this->db, $this->module, $moreParam['object']->element);
                 $signatoriesArray = $signatory->fetchSignatories($moreParam['object']->id, $moreParam['object']->element);
                 if (!empty($signatoriesArray) && is_array($signatoriesArray)) {
-                    $tempDir = $conf->$moduleNameLowerCase->multidir_output[$moreParam['object']->entity ?? 1] . '/temp/';
+                    $nbAttendant = 0;
+                    $tempDir     = $conf->$moduleNameLowerCase->multidir_output[$moreParam['object']->entity ?? 1] . '/temp/';
                     if (empty($moreParam['excludeAttendantsRole'])) {
                         $moreParam['excludeAttendantsRole'] = [];
                     }
                     foreach ($signatoriesArray as $objectSignatory) {
                         if (!in_array($objectSignatory->role, $moreParam['excludeAttendantsRole'])) {
+                            $tmpArray['attendant_number']    = ++$nbAttendant;
                             $tmpArray['attendant_lastname']  = strtoupper($objectSignatory->lastname);
                             $tmpArray['attendant_firstname'] = $objectSignatory->firstname;
                             switch ($objectSignatory->attendance) {
@@ -458,6 +460,7 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
                         }
                     }
                 } else {
+                    $tmpArray['attendant_number']         = '';
                     $tmpArray['attendant_lastname']       = '';
                     $tmpArray['attendant_firstname']      = '';
                     $tmpArray['attendant_role']           = '';
