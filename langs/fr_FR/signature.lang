@@ -81,6 +81,7 @@ Absent              = Absent
 Delay               = En retard
 ElectronicSignature = Signature électronique
 Signatory           = Signataire
+Responsible         = Responsable
 
 # Public interface - Interface publique
 FullName = NOM Prénom

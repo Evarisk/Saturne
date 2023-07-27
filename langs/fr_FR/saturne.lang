@@ -160,6 +160,7 @@ CloseModal = Fermer
 #
 # Data - Donnée
 FkElement              = Élément lié
+ElementType            = Type d'élément
 CertificateExpired     = Il y a %s certificat(s) expiré(s)
 NoCertificate          = Aucun certificat
 checkDateEndJob        = Vérification de la date de fin des certificats
