@@ -31,7 +31,8 @@ if ($action == 'pdfGeneration') {
 
 	$fileInfos = pathinfo($filename);
 	$pdfName   = $fileInfos['filename'] . '.pdf';
-
+    $pdfName   = dol_sanitizeFileName($pdfName);
+    
 	$manualPdfGenerationConf = $moduleNameUpperCase . '_MANUAL_PDF_GENERATION';
 
 	// Write new file
