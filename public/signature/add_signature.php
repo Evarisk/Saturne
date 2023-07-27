@@ -189,10 +189,11 @@ if (empty($reshook)) {
         $template    = preg_replace('/DOL_DOCUMENT_ROOT/', DOL_DOCUMENT_ROOT, $conf->global->$constforval);
         $model       = strtolower($documentType) . '_odt:' . $template .'template_' . strtolower($documentType) . '.odt';
 
-        $moreparams['object']   = $object;
-        $moreparams['user']     = $user;
-        $moreparams['specimen'] = 1;
-        $moreparams['zone']     = 'public';
+        $moreparams['object']     = $object;
+        $moreparams['user']       = $user;
+        $moreparams['specimen']   = 1;
+        $moreparams['zone']       = 'public';
+        $moreparams['objectType'] = $objectType;
 
         $result = $document->generateDocument($model, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
 
@@ -200,7 +201,7 @@ if (empty($reshook)) {
             setEventMessages($document->error, $document->errors, 'errors');
             $action = '';
         } elseif (empty($donotredirect)) {
-            copy($upload_dir . '/' . strtolower($documentType) . '/' . $object->ref . '/public_specimen/' . $document->last_main_doc, DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $objectType . '_specimen_' . $track_id . '.odt');
+            copy($upload_dir . '/' . strtolower($objectType) . 'document' . '/' . $object->ref . '/public_specimen/' . $document->last_main_doc, DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $objectType . '_specimen_' . $track_id . '.odt');
             setEventMessages($langs->trans('FileGenerated') . ' - ' . $document->last_main_doc, []);
             $urltoredirect = $_SERVER['REQUEST_URI'];
             $urltoredirect = preg_replace('/#builddoc$/', '', $urltoredirect);

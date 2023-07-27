@@ -243,7 +243,11 @@ class SaturneDocuments extends SaturneObject
      */
     public function generateDocument(string $modele, Translate $outputlangs, int $hidedetails = 0, int $hidedesc = 0, int $hideref = 0, array $moreparams = null): int
     {
-        $modelpath = 'custom/' . $this->module . '/core/modules/' . $this->module . '/' . $this->module . 'documents/' . $this->element . '/';
+        if (is_dir(__DIR__ . '/../../' . $this->module . '/core/modules/' . $this->module . '/' . $this->module . 'documents/' . $this->element . '/') && $moreparams['zone'] == 'private') {
+            $modelpath = 'custom/' . $this->module . '/core/modules/' . $this->module . '/' . $this->module . 'documents/' . $this->element . '/';
+        } else {
+            $modelpath = 'custom/' . $this->module . '/core/modules/' . $this->module . '/' . $this->module . 'documents/' . $moreparams['objectType'] . 'document/';
+        }
 
         $result = $this->commonGenerateDocument($modelpath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
 
