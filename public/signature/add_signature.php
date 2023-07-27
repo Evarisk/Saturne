@@ -73,7 +73,10 @@ require_once __DIR__ . '/../../class/saturnesignature.class.php';
 
 // Load Module libraries.
 require_once __DIR__ . '/../../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
-require_once __DIR__ . '/../../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . strtolower($documentType) . '.class.php';
+$fileExists = file_exists('../../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . strtolower($documentType) . '.class.php');
+if ($fileExists && GETPOSTISSET('document_type')) {
+    require_once __DIR__ . '/../../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . strtolower($documentType) . '.class.php';
+}
 
 // Global variables definitions.
 global $conf, $db, $hookmanager, $langs;
@@ -89,7 +92,9 @@ $source   = GETPOST('source', 'aZ09');
 // Initialize technical objects.
 $classname = ucfirst($objectType);
 $object    = new $classname($db);
-$document  = new $documentType($db);
+if (GETPOSTISSET('document_type') && $fileExists) {
+    $document = new $documentType($db);
+}
 $signatory = new SaturneSignature($db, $moduleNameLowerCase, $objectType);
 $user      = new User($db);
 
@@ -116,7 +121,7 @@ if (empty($reshook)) {
     if ($action == 'add_signature') {
         $data        = json_decode(file_get_contents('php://input'), true);
         $signatoryID = GETPOST('signatoryID');
-        
+
         $signatory->fetch($signatoryID);
 
         $signatory->signature      = $data['signature'];
@@ -242,7 +247,11 @@ $element = $signatory; ?>
                     <?php $path = DOL_MAIN_URL_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/'; ?>
                     <input type="hidden" class="specimen-name" value="<?php echo $objectType . '_specimen_' . $track_id . '.odt' ?>">
                     <input type="hidden" class="specimen-path" value="<?php echo $path ?>">
-                    <span class="wpeo-button button-primary  button-radius-2 grid-align-right auto-download"><i class="button-icon fas fa-print"></i></span>
+                    <?php if (GETPOSTISSET('document_type') && $fileExists) : ?>
+                        <span class="wpeo-button button-primary button-radius-2 grid-align-right auto-download"><i class="button-icon fas fa-print"></i></span>
+                    <?php else : ?>
+                        <span class="wpeo-button button-grey button-radius-2 grid-align-right"><i class="button-icon fas fa-print"></i></span>
+                    <?php endif; ?>
                 </div>
                 <br>
                 <div class="wpeo-table table-flex table-2">
