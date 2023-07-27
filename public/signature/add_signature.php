@@ -73,11 +73,9 @@ require_once __DIR__ . '/../../class/saturnesignature.class.php';
 
 // Load Module libraries.
 require_once __DIR__ . '/../../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
-if (file_exists('../../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . strtolower($documentType) . '.class.php') && GETPOSTISSET('document_type')) {
+$fileExists = file_exists('../../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . strtolower($documentType) . '.class.php');
+if ($fileExists && GETPOSTISSET('document_type')) {
     require_once __DIR__ . '/../../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . strtolower($documentType) . '.class.php';
-    $fileExist = true;
-} else {
-    $fileExist = false;
 }
 
 // Global variables definitions.
@@ -94,7 +92,7 @@ $source   = GETPOST('source', 'aZ09');
 // Initialize technical objects.
 $classname = ucfirst($objectType);
 $object    = new $classname($db);
-if (GETPOSTISSET('document_type') && $fileExist) {
+if (GETPOSTISSET('document_type') && $fileExists) {
     $document = new $documentType($db);
 }
 $signatory = new SaturneSignature($db, $moduleNameLowerCase, $objectType);
@@ -249,7 +247,7 @@ $element = $signatory; ?>
                     <?php $path = DOL_MAIN_URL_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/'; ?>
                     <input type="hidden" class="specimen-name" value="<?php echo $objectType . '_specimen_' . $track_id . '.odt' ?>">
                     <input type="hidden" class="specimen-path" value="<?php echo $path ?>">
-                    <?php if (GETPOSTISSET('document_type') && $fileExist) : ?>
+                    <?php if (GETPOSTISSET('document_type') && $fileExists) : ?>
                         <span class="wpeo-button button-primary button-radius-2 grid-align-right auto-download"><i class="button-icon fas fa-print"></i></span>
                     <?php else : ?>
                         <span class="wpeo-button button-grey button-radius-2 grid-align-right"><i class="button-icon fas fa-print"></i></span>
