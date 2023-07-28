@@ -70,29 +70,26 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
         $model = GETPOST('model', 'alpha');
     }
 
-    $moreParams['object'] = $object;
-    $moreParams['user']   = $user;
+    $moreParams['object']   = $object;
+    $moreParams['user']     = $user;
+    $moreParams['zone']     = 'private';
+    $constName              = get_class($object) . '::STATUS_LOCKED';
+    $moreParams['specimen'] = defined($constName) && $object->status < $object::STATUS_LOCKED;
 
-    $constName = get_class($object) . '::STATUS_LOCKED';
-    if (defined($constName) && $object->status < $object::STATUS_LOCKED) {
-        $moreParams['specimen'] = 1;
-        $moreParams['zone']     = 'private';
-    } else {
-        $moreParams['specimen'] = 0;
-    }
-    
-    $result = $document->generateDocument((!empty($models) ? $models[0] : $model), $outputLangs, $hideDetails, $hideDesc, $hideRef, $moreParams);
-    if ($result <= 0) {
-        setEventMessages($document->error, $document->errors, 'errors');
-        $action = '';
-    } else {
-        setEventMessages($langs->trans('FileGenerated') . ' - ' . '<a href=' . DOL_URL_ROOT . '/document.php?modulepart='. $moduleNameLowerCase . '&file=' . urlencode($object->element . 'document/' . $object->ref . '/' . $document->last_main_doc) . '&entity=' . $conf->entity . '"' . '>' . $document->last_main_doc, []);
-        $urlToRedirect = $_SERVER['REQUEST_URI'];
-        $urlToRedirect = preg_replace('/#builddoc$/', '', $urlToRedirect);
-        $urlToRedirect = preg_replace('/action=builddoc&?/', '', $urlToRedirect); // To avoid infinite loop.
-        $urlToRedirect = preg_replace('/forcebuilddoc=1&?/', '', $urlToRedirect); // To avoid infinite loop.
-        header('Location: ' . $urlToRedirect);
-        exit;
+    if (!empty($models) || !empty(($model))) {
+        $result = $document->generateDocument((!empty($models) ? $models[0] : $model), $outputLangs, $hideDetails, $hideDesc, $hideRef, $moreParams);
+        if ($result <= 0) {
+            setEventMessages($document->error, $document->errors, 'errors');
+            $action = '';
+        } else {
+            setEventMessages($langs->trans('FileGenerated') . ' - ' . '<a href=' . DOL_URL_ROOT . '/document.php?modulepart='. $moduleNameLowerCase . '&file=' . urlencode($object->element . 'document/' . $object->ref . '/' . $document->last_main_doc) . '&entity=' . $conf->entity . '"' . '>' . $document->last_main_doc, []);
+            $urlToRedirect = $_SERVER['REQUEST_URI'];
+            $urlToRedirect = preg_replace('/#builddoc$/', '', $urlToRedirect);
+            $urlToRedirect = preg_replace('/action=builddoc&?/', '', $urlToRedirect); // To avoid infinite loop.
+            $urlToRedirect = preg_replace('/forcebuilddoc=1&?/', '', $urlToRedirect); // To avoid infinite loop.
+            header('Location: ' . $urlToRedirect);
+            exit;
+        }
     }
 }
 
