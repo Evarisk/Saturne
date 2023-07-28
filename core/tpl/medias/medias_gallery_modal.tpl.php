@@ -70,7 +70,7 @@ if ( ! $error && $subaction == "addFiles") {
     $numberingModuleName = [
         $object->element => $conf->global->$modObjectName,
     ];
-    list($modObject) = saturne_require_objects_mod($numberingModuleName);
+    list($modObject) = saturne_require_objects_mod($numberingModuleName, $moduleNameLowerCase);
 
 	if (dol_strlen($object->ref) > 0) {
 		$pathToObjectPhoto = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType .'/' . $object->ref . '/' . $objectSubdir;
