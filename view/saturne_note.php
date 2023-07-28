@@ -54,8 +54,11 @@ $cancel     = GETPOST('cancel', 'aZ09');
 $backtopage = GETPOST('backtopage', 'alpha');
 
 // Initialize technical objects
-$classname   = ucfirst($objectType);
-$object      = new $classname($db);
+$className   = ucfirst($objectType);
+if (strstr($className, '_')) {
+    $className = preg_replace('/_/', '', $className);
+}
+$object      = new $className($db);
 $extrafields = new ExtraFields($db);
 
 $hookmanager->initHooks([$objectType . 'note', $object->element . 'note', 'saturneglobal', 'globalcard']); // Note that conf->hooks_modules contains array

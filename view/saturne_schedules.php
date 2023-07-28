@@ -70,6 +70,9 @@ $object = new SaturneSchedules($db);
 
 if (isModEnabled($elementType)) {
     $className = ucfirst($elementType);
+    if (strstr($className, '_')) {
+        $className = preg_replace('/_/', '', $className);
+    }
     $objectLinked = new $className($db);
 }
 

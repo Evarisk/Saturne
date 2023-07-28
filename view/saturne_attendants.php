@@ -63,8 +63,11 @@ $backtopage         = GETPOST('backtopage', 'alpha');
 $attendantTableMode = (GETPOSTISSET('attendant_table_mode') ? GETPOST('attendant_table_mode', 'alpha') : 'advanced');
 
 // Initialize technical objects
-$classname = ucfirst($objectType);
-$object    = new $classname($db);
+$className = ucfirst($objectType);
+if (strstr($className, '_')) {
+    $className = preg_replace('/_/', '', $className);
+}
+$object    = new $className($db);
 $signatory = new SaturneSignature($db, $moduleNameLowerCase, $object->element);
 $usertmp   = new User($db);
 if (isModEnabled('societe')) {
