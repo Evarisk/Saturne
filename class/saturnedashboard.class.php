@@ -143,10 +143,12 @@ class SaturneDashboard
                         $widget .= '<div class="info-box-lines">';
                         $widget .= '<div class="info-box-line" style="font-size : 20px;">';
                         for ($i = 0; $i < count($dashboardWidget['label']); $i++) {
-                            $widget .= '<span class=""><strong>' . $dashboardWidget['label'][$i] . ' : ' . '</strong>';
-                            $widget .= '<span class="classfortooltip badge badge-info" title="' . $dashboardWidget['label'][$i] . ' : ' . $dashboardWidget['content'][$i] . '" >' . $dashboardWidget['content'][$i] . '</span>';
-                            $widget .= (!empty($dashboardWidget['tooltip'][$i]) ? $form->textwithpicto('', $langs->transnoentities($dashboardWidget['tooltip'][$i])) : '') . '</span>';
-                            $widget .= '<br>';
+                            if (!empty($dashboardWidget['label'][$i])) {
+                                $widget .= '<span class=""><strong>' . $dashboardWidget['label'][$i] . ' : ' . '</strong>';
+                                $widget .= '<span class="classfortooltip badge badge-info" title="' . $dashboardWidget['label'][$i] . ' : ' . $dashboardWidget['content'][$i] . '" >' . $dashboardWidget['content'][$i] . '</span>';
+                                $widget .= (!empty($dashboardWidget['tooltip'][$i]) ? $form->textwithpicto('', $langs->transnoentities($dashboardWidget['tooltip'][$i])) : '') . '</span>';
+                                $widget .= '<br>';
+                            }
                         }
                         $widget .= '</div>';
                         $widget .= '</div><!-- /.info-box-lines --></div><!-- /.info-box-content -->';
