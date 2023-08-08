@@ -93,6 +93,7 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
 								<img class="photo photo<?php echo $j ?>" height="<?php echo $maxHeight; ?>" width="<?php echo $maxWidth; ?>" src="<?php echo $fullpath; ?>">
 							<?php endif; ?>
 						</figure>
+                    <?php print saturne_get_media_linked_element($moduleName, $file); ?>
 					<div class="title"><?php echo $file; ?></div>
 					</div><?php
 					$j++;
@@ -348,4 +349,45 @@ function saturne_get_thumb_name(string $filename, string $thumbType = 'small'): 
 	$imgName       = pathinfo($filename, PATHINFO_FILENAME);
 	$imgExtension  = pathinfo($filename, PATHINFO_EXTENSION);
     return $imgName . '_' . $thumbType . '.' . $imgExtension;
+}
+
+/**
+ * Return media linked element count
+ *
+ * @param  string $moduleName Module name
+ * @param  string $file       File name
+ * @return string $output     Show media linked element
+ *
+ */
+function saturne_get_media_linked_element(string $moduleName, string $file): string
+{
+    global $conf, $db, $langs;
+
+    $moduleNameLowerCase = dol_strtolower($moduleName);
+    $dir                 = $conf->$moduleNameLowerCase->multidir_output[$conf->entity];
+    $fileArrays          = dol_dir_list($dir, 'files', 1, $file, '.odt|.pdf|barcode|_mini|_medium|_small|_large');
+    $mediaLinkedElements = [];
+    foreach ($fileArrays as $fileArray) {
+        $element = preg_split('/\//', $fileArray['relativename']);
+
+        require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $element[0] . '.class.php';
+
+        $className = ucfirst($element[0]);
+        $object    = new $className($db);
+
+        $mediaLinkedElements[$fileArray['name']][$element[0]]['picto'] = $object->picto;
+        $mediaLinkedElements[$fileArray['name']][$element[0]]['value']++;
+    }
+
+    $output = '<div class="linked-element">';
+    foreach ($mediaLinkedElements as $mediaLinkedElement) {
+        foreach ($mediaLinkedElement as $key => $linkedElement) {
+            $output .= '<span class="paddingleft paddingright">' . img_picto($langs->trans(ucfirst($key)), $linkedElement['picto'], 'class="paddingright"');
+            $output .= $linkedElement['value'];
+            $output .= '</span>';
+        }
+    }
+    $output .= '</div>';
+
+    return $output;
 }
