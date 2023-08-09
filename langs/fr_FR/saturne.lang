@@ -113,6 +113,7 @@ DontShowPatchNote      = Ne plus afficher la note de mise à jour
 #
 
 # Data - Donnée
+Schedules      = Horaires
 SchedulesSaved = Les horaires ont bien été enregistrés
 
 
