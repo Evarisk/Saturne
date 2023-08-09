@@ -93,7 +93,7 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
 								<img class="photo photo<?php echo $j ?>" height="<?php echo $maxHeight; ?>" width="<?php echo $maxWidth; ?>" src="<?php echo $fullpath; ?>">
 							<?php endif; ?>
 						</figure>
-                    <?php print saturne_get_media_linked_element($moduleName, $file); ?>
+                    <?php print saturne_get_media_linked_elements($moduleName, $file); ?>
 					<div class="title"><?php echo $file; ?></div>
 					</div><?php
 					$j++;
@@ -352,19 +352,19 @@ function saturne_get_thumb_name(string $filename, string $thumbType = 'small'): 
 }
 
 /**
- * Return media linked element count
+ * Return media linked elements count
  *
  * @param  string $moduleName Module name
  * @param  string $file       File name
- * @return string $output     Show media linked element
+ * @return string $output     Show media linked element count
  *
  */
-function saturne_get_media_linked_element(string $moduleName, string $file): string
+function saturne_get_media_linked_elements(string $moduleName, string $file): string
 {
     global $conf, $db, $langs;
 
     $moduleNameLowerCase = dol_strtolower($moduleName);
-    $dir                 = $conf->$moduleNameLowerCase->multidir_output[$conf->entity];
+    $dir                 = $conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1];
     $fileArrays          = dol_dir_list($dir, 'files', 1, $file, '.odt|.pdf|barcode|_mini|_medium|_small|_large');
     $mediaLinkedElements = [];
     foreach ($fileArrays as $fileArray) {
