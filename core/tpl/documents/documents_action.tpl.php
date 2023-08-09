@@ -77,6 +77,9 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
     $moreParams['specimen'] = defined($constName) && $object->status < $object::STATUS_LOCKED;
 
     if (!empty($models) || !empty(($model))) {
+        $parameters = ['models' => $models, 'model' => $model, 'outputlangs' => $outputLangs, 'hidedetails' => $hideDetails, 'hidedesc' => $hideDesc, 'hideref' => $hideRef, 'moreparams' => $moreParams];
+        $hookmanager->executeHooks('saturneBuildDoc', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+
         $result = $document->generateDocument((!empty($models) ? $models[0] : $model), $outputLangs, $hideDetails, $hideDesc, $hideRef, $moreParams);
         if ($result <= 0) {
             setEventMessages($document->error, $document->errors, 'errors');
