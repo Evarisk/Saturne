@@ -231,8 +231,7 @@ abstract class SaturneObject extends CommonObject
     public function delete(User $user, bool $notrigger = false, bool $softDelete = true): int
     {
         if ($softDelete) {
-            $this->status = $this::STATUS_DELETED;
-            $result = $this->update($user, $notrigger);
+            $result = $this->setDeleted($user, $notrigger);
         } else {
             $result = $this->deleteCommon($user, $notrigger);
         }
@@ -353,6 +352,18 @@ abstract class SaturneObject extends CommonObject
 			return -1;
 		}
 	}
+
+    /**
+     * Set deleted status
+     *
+     * @param  User $user      Object user that modify
+     * @param  int  $notrigger 1 = Does not execute triggers, 0 = Execute triggers
+     * @return int             0 < if KO, > 0 if OK
+     */
+    public function setDeleted(User $user, int $notrigger = 0): int
+    {
+        return $this->setStatusCommon($user, $this::STATUS_DELETED, $notrigger, strtoupper($this->element) . '_DELETE');
+    }
 
     /**
      * Set draft status.
