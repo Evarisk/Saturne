@@ -34,7 +34,7 @@
  * @return int|array               0 < if KO, array of pages if OK
  * @throws Exception
  */
-function saturne_fetch_all_object_type(string $className = '', string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = [], string $filtermode = 'AND')
+function saturne_fetch_all_object_type(string $className = '', string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = [], string $filtermode = 'AND', $manageExtraFields = false)
 {
     dol_syslog(__METHOD__, LOG_DEBUG);
 
@@ -42,15 +42,35 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
 
     $object = new $className($db);
 
-    $records = [];
+    $records      = [];
+    $optionsArray = [];
+
+    if ($manageExtraFields) {
+        require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
+
+        $extraFields = new ExtraFields($db);
+
+        $extraFields->fetch_name_optionals_label($object->table_element);
+        $optionsArray = (!empty($extraFields->attributes[$object->table_element]['label']) ? $extraFields->attributes[$object->table_element]['label'] : null);
+    }
 
 	$objectFields = $object->getFieldList('t');
 	if (strstr($objectFields, 't.fk_prospectlevel')) {
 		$objectFields = preg_replace('/t.fk_prospectlevel,/','', $objectFields);
 	}
+    if (is_array($optionsArray) && !empty($optionsArray) && $manageExtraFields) {
+        foreach ($optionsArray as $name => $label) {
+            if (empty($extrafields->attributes[$object->table_element]['type'][$name]) || $extrafields->attributes[$object->table_element]['type'][$name] != 'separate') {
+                $objectFields .= ", eft." . $name;
+            }
+        }
+    }
     $sql = 'SELECT ';
     $sql .= $objectFields;
     $sql .= ' FROM `' . MAIN_DB_PREFIX . $object->table_element . '` as t';
+    if ($manageExtraFields) {
+        $sql .= ' LEFT JOIN `' . MAIN_DB_PREFIX . $object->table_element . '_extrafields` as eft ON t.rowid = eft.fk_object';
+    }
     if (isset($object->ismultientitymanaged) && $object->ismultientitymanaged == 1) {
         $sql .= ' WHERE entity IN (' . getEntity($object->table_element) . ')';
     } else {
@@ -95,6 +115,12 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
 
             $record = new $className($db);
             $record->setVarsFromFetchObj($obj);
+
+            if (is_array($optionsArray) && !empty($optionsArray) && $manageExtraFields) {
+                foreach ($optionsArray as $key => $value) {
+                    $record->array_options['options_' . $key] = $obj->$key;
+                }
+            }
 
             $records[$record->id] = $record;
 
@@ -592,7 +618,7 @@ function saturne_get_objects_metadata(string $type = ''): array
  * @param  string     $moduleNameLowerCase   Module name in lower case
  * @return array      $variablesToReturn     Numbering modules classes
  */
-function saturne_require_objects_mod(array $numberingModulesNames, string $moduleNameLowerCase): array
+function saturne_require_objects_mod(array $numberingModulesNames, string $moduleNameLowerCase = ''): array
 {
     global $db;
 
