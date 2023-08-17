@@ -86,6 +86,7 @@ saturne_load_langs();
 
 // Get parameters.
 $track_id = GETPOST('track_id', 'alpha');
+$entity   = GETPOST('entity');
 $action   = GETPOST('action', 'aZ09');
 $source   = GETPOST('source', 'aZ09');
 
@@ -102,6 +103,12 @@ $user      = new User($db);
 $form = new Form($db);
 
 $hookmanager->initHooks([$objectType . 'publicsignature', 'saturnepublicsignature', 'saturnepublicinterface', 'saturneglobal', 'globalcard']); // Note that conf->hooks_modules contains array.
+
+if (!isModEnabled('multicompany')) {
+    $entity = $conf->entity;
+}
+
+$conf->setEntityValues($db, $entity);
 
 $signatory->fetch(0, '', ' AND signature_url =' . "'" . $track_id . "'");
 $object->fetch($signatory->fk_object);
