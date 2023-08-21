@@ -24,14 +24,15 @@
 /**
  * Load list of objects in memory from the database.
  *
- * @param  string      $className  Object className
- * @param  string      $sortorder  Sort Order
- * @param  string      $sortfield  Sort field
- * @param  int         $limit      Limit
- * @param  int         $offset     Offset
- * @param  array       $filter     Filter array. Example array('field'=>'value', 'customurl'=>...)
- * @param  string      $filtermode Filter mode (AND/OR)
- * @return int|array               0 < if KO, array of pages if OK
+ * @param  string     $className         Object className
+ * @param  string     $sortorder         Sort Order
+ * @param  string     $sortfield         Sort field
+ * @param  int        $limit             Limit
+ * @param  int        $offset            Offset
+ * @param  array      $filter            Filter array. Example array('field'=>'value', 'customurl'=>...)
+ * @param  string     $filtermode        Filter mode (AND/OR)
+ * @param  bool       $manageExtraFields Option for manage extrafields with LEFT JOIN SQL
+ * @return int|array                     0 < if KO, array of pages if OK
  * @throws Exception
  */
 function saturne_fetch_all_object_type(string $className = '', string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = [], string $filtermode = 'AND', $manageExtraFields = false)
