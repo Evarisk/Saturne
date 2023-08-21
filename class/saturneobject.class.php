@@ -411,13 +411,13 @@ abstract class SaturneObject extends CommonObject
      *
      *  @param  int     $withpicto              Include picto in link (0 = No picto, 1 = Include picto into link, 2 = Only picto).
      *  @param  string  $option                 On what the link point to ('nolink', ...).
-     * 	@param	int     $addLabel               0 = Default, 1 = Add label into string, >1 = Add first chars into string
      *  @param  int     $notooltip              1 = Disable tooltip.
      *  @param  string  $morecss                Add more css on link.
      *  @param  int     $save_lastsearch_value -1 = Auto, 0 = No save of lastsearch_values when clicking, 1 = Save lastsearch_values whenclicking.
+     * 	@param	int     $addLabel               0 = Default, 1 = Add label into string, >1 = Add first chars into string
      *  @return	string                          String with URL.
      */
-	public function getNomUrl(int $withpicto = 0, string $option = '', int $addLabel = 0, int $notooltip = 0, string $morecss = '', int $save_lastsearch_value = -1): string
+	public function getNomUrl(int $withpicto = 0, string $option = '', int $notooltip = 0, string $morecss = '', int $save_lastsearch_value = -1, int $addLabel = 0): string
 	{
 		global $action, $conf, $hookmanager, $langs;
 
