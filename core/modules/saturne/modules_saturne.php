@@ -195,11 +195,6 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/commondocgenerator.class.php';
 abstract class SaturneDocumentModel extends CommonDocGenerator
 {
     /**
-     * @var string Document description.
-     */
-    public string $description = '';
-
-    /**
      * @var string Module.
      */
     public string $module = '';
@@ -208,16 +203,6 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
      * @var string Document type.
      */
     public string $document_type = '';
-
-    /**
-     * @var string Extension document type.
-     */
-    public string $type = '';
-
-    /**
-     * @var array Document format.
-     */
-    public array $format = [];
 
     /**
      * Constructor.
