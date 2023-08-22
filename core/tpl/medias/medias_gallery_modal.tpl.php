@@ -224,10 +224,10 @@ if ( ! $error && $subaction == "pagination") {
 	$loadedPageArray = saturne_load_pagination($pagesCounter, [], $offset);
 }
 
-if ( ! $error && $subaction == "toggleTodayPictures") {
-    $toggleValue = GETPOST('toggle_today_pictures');
+if ( ! $error && $subaction == "toggleTodayMedias") {
+    $toggleValue = GETPOST('toggle_today_medias');
 
-    $tabparam['SATURNE_MEDIA_GALLERY_SHOW_TODAY_PICTURES'] = $toggleValue;
+    $tabparam['SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS'] = $toggleValue;
 
     dol_set_user_param($db, $conf,$user, $tabparam);
 }
@@ -290,18 +290,24 @@ if (is_array($submitFileErrorText)) {
 				</div>
                 <div>
                     <div>
-<!--                        --><?php
-//                        print img_picto('fa-time', 'link')
-//                        ?>
+                    <?php
+                        print img_picto($langs->trans('Calendar'), 'calendar') . ' ' . $form->textwithpicto($langs->trans('Today'), $langs->trans('ShowOnlyMediasAddedToday'));
+                        $code = 'SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS';
+                        if (getDolUserInt($code)) {
+                            print '<span id="del_today_medias" value="0" class="valignmiddle linkobject toggle-today-medias '.(!empty($user->conf->$code) ? '' : 'hideobject').'">'. img_picto($langs->trans("Enabled"), 'switch_on', '', false, 0, 0, '', '', '').'</span>';
+                        } else {
+                            print '<span id="set_today_medias" value="1" class="valignmiddle linkobject toggle-today-medias'.(!empty($user->conf->$code) ? 'hideobject' : '').'">'. img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', '', '').'</span>';
+                        }
+                    ?>
                     </div>
                     <div>
                         <?php
-                        print img_picto($langs->trans('Calendar'), 'calendar') . ' ' . $form->textwithpicto($langs->trans('Today'), $langs->trans('ShowOnlyPicturesAddedToday'));
-                        $code = 'SATURNE_MEDIA_GALLERY_SHOW_TODAY_PICTURES';
+                        print img_picto($langs->trans('Calendar'), 'calendar') . ' ' . $form->textwithpicto($langs->trans('Today'), $langs->trans('ShowOnlyMediasAddedToday'));
+                        $code = 'SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS';
                         if (getDolUserInt($code)) {
-                            print '<span id="del_today_pictures" value="0" class="valignmiddle linkobject toggle-today-pictures '.(!empty($user->conf->$code) ? '' : 'hideobject').'">'. img_picto($langs->trans("Enabled"), 'switch_on', '', false, 0, 0, '', '', '').'</span>';
+                            print '<span id="del_today_medias" value="0" class="valignmiddle linkobject toggle-today-medias '.(!empty($user->conf->$code) ? '' : 'hideobject').'">'. img_picto($langs->trans("Enabled"), 'switch_on', '', false, 0, 0, '', '', '').'</span>';
                         } else {
-                            print '<span id="set_today_pictures" value="1" class="valignmiddle linkobject toggle-today-pictures'.(!empty($user->conf->$code) ? 'hideobject' : '').'">'. img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', '', '').'</span>';
+                            print '<span id="set_today_medias" value="1" class="valignmiddle linkobject toggle-today-medias'.(!empty($user->conf->$code) ? 'hideobject' : '').'">'. img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', '', '').'</span>';
                         }
                         ?>
                     </div>
@@ -322,7 +328,7 @@ if (is_array($submitFileErrorText)) {
 			<?php
 			$filearray                    = dol_dir_list($conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias/', "files", 0, '', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC);
 			$moduleImageNumberPerPageConf = strtoupper($moduleNameLowerCase) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
-            if (getDolUserInt('SATURNE_MEDIA_GALLERY_SHOW_TODAY_PICTURES') == 1) {
+            if (getDolUserInt('SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS') == 1) {
                 $yesterdayTimeStamp = dol_time_plus_duree(dol_now(), -1, 'd');
                 $filearray = array_filter($filearray, function($file) use ($yesterdayTimeStamp) {
                     return $file['date'] > $yesterdayTimeStamp;

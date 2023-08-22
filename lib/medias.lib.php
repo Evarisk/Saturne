@@ -61,7 +61,7 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
 		for ($i = (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf); $i < ($conf->global->$moduleImageNumberPerPageConf + (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf));  $i++) {
 			$yesterdayTimeStamp = dol_time_plus_duree(dol_now(), -1, 'd');
 
-            if ((getDolUserInt('SATURNE_MEDIA_GALLERY_SHOW_TODAY_PICTURES') && ($filearray[$i]['date'] > $yesterdayTimeStamp)) || getDolUserInt('SATURNE_MEDIA_GALLERY_SHOW_TODAY_PICTURES') == 0) {
+            if ((getDolUserInt('SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS') && ($filearray[$i]['date'] > $yesterdayTimeStamp)) || getDolUserInt('SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS') == 0) {
                 $fileName = $filearray[$i]['name'];
 
                 if (image_format_supported($fileName) >= 0) {

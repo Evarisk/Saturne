@@ -51,4 +51,4 @@ DisplayNumberMediaGallery            = Nombre de médias affichés dans la bibli
 DisplayNumberMediaGalleryDescription = Affiche 8 médias (par défaut) par page dans la bibliothèque de médias
 MediaSizeDocument                    = Taille des médias
 MediaSizeDocumentDescription         = Sélection de la taille des médias dans les documents
-ShowOnlyPicturesAddedToday           = N'afficher que les médias ajoutés aujourd'hui
+ShowOnlyMediasAddedToday           = N'afficher que les médias ajoutés aujourd'hui

@@ -61,7 +61,7 @@ window.saturne.mediaGallery.event = function() {
   $( document ).on( 'click', '.media-gallery-favorite', window.saturne.mediaGallery.addToFavorite );
   $( document ).on( 'change', '.fast-upload', window.saturne.mediaGallery.fastUpload );
   $( document ).on( 'click', '.select-page', window.saturne.mediaGallery.selectPage );
-  $( document ).on( 'click', '.toggle-today-pictures', window.saturne.mediaGallery.toggleTodayPictures );
+  $( document ).on( 'click', '.toggle-today-medias', window.saturne.mediaGallery.toggleTodayMedias );
 }
 
 /**
@@ -519,7 +519,7 @@ window.saturne.mediaGallery.selectPage = function( event ) {
  *
  * @return {void}
  */
-window.saturne.mediaGallery.toggleTodayPictures = function( event ) {
+window.saturne.mediaGallery.toggleTodayMedias = function( event ) {
 
   let token          = window.saturne.toolbox.getToken();
   let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
@@ -530,12 +530,12 @@ window.saturne.mediaGallery.toggleTodayPictures = function( event ) {
   window.saturne.loader.display($('.wpeo-pagination'))
 
   $.ajax({
-    url: document.URL + querySeparator + "subaction=toggleTodayPictures&toggle_today_pictures=" + toggleValue + "&token=" + token,
+    url: document.URL + querySeparator + "subaction=toggleTodayMedias&toggle_today_medias=" + toggleValue + "&token=" + token,
     type: "POST",
     processData: false,
     contentType: false,
     success: function ( resp ) {
-      $('.toggle-today-pictures').replaceWith($(resp).find('.toggle-today-pictures'))
+      $('.toggle-today-medias').replaceWith($(resp).find('.toggle-today-medias'))
       $('.ecm-photo-list-content').replaceWith($(resp).find('.ecm-photo-list-content'))
       $('.wpeo-pagination').replaceWith($(resp).find('.wpeo-pagination'))
     },
