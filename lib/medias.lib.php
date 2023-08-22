@@ -59,9 +59,9 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
 
 		$moduleImageNumberPerPageConf = strtoupper($moduleName) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
 		for ($i = (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf); $i < ($conf->global->$moduleImageNumberPerPageConf + (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf));  $i++) {
-			$file = $filearray[$i]['name'];
+			$fileName = $filearray[$i]['name'];
 
-			if (image_format_supported($file) >= 0) {
+			if (image_format_supported($fileName) >= 0) {
 				$nbphoto++;
 
 				if ($size == 'mini' || $size == 'small') {   // Format vignette
@@ -69,13 +69,14 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
 					$modulepart   = 'ecm';
 					$path         = DOL_URL_ROOT . '/document.php?modulepart=' . $modulepart . '&attachment=0&file=' . str_replace('/', '%2F', $relativepath);
 
-					$file_infos = pathinfo($file);
+					$file_infos = pathinfo($fileName);
+
                     // svg files aren't handled by vignette functions in images.lib, so they don't have thumbs
                     if ($file_infos['extension'] == 'svg') {
                         $path = preg_replace('/\/thumbs/', '', $path);
-                        $filename = $file_infos['filename'] . '.' . $file_infos['extension'];
+                        $shownFileName = $file_infos['filename'] . '.' . $file_infos['extension'];
                     } else {
-                        $filename = $file_infos['filename'] . '_' . $size . '.' . $file_infos['extension'];
+                        $shownFileName = $file_infos['filename'] . '_' . $size . '.' . $file_infos['extension'];
                     }
 
 					?>
@@ -83,18 +84,21 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
 					<div class="center clickable-photo clickable-photo<?php echo $j; ?>" value="<?php echo $j; ?>">
 						<figure class="photo-image">
 							<?php
-							$filePreviewUrl = urlencode($file);
+							$filePreviewUrl = urlencode($fileName);
 							$urladvanced = getAdvancedPreviewUrl($modulepart, $moduleName . '/medias/' . $filePreviewUrl, 0, 'entity=' . $conf->entity);
 							?>
 							<a class="clicked-photo-preview" href="<?php echo $urladvanced; ?>"><i class="fas fa-2x fa-search-plus"></i></a>
-							<?php if (image_format_supported($file) >= 0) : ?>
-								<?php $fullpath = $path . '/' . urlencode($filename) . '&entity=' . $conf->entity; ?>
-								<input class="filename" type="hidden" value="<?php echo $file; ?>">
+							<?php if (image_format_supported($fileName) >= 0) : ?>
+								<?php $fullpath = $path . '/' . urlencode($shownFileName) . '&entity=' . $conf->entity; ?>
+								<input class="filename" type="hidden" value="<?php echo $fileName; ?>">
+                            <?php
+
+                                ?>
 								<img class="photo photo<?php echo $j ?>" height="<?php echo $maxHeight; ?>" width="<?php echo $maxWidth; ?>" src="<?php echo $fullpath; ?>">
 							<?php endif; ?>
 						</figure>
-                    <?php print saturne_get_media_linked_elements($moduleName, $file); ?>
-					<div class="title"><?php echo $file; ?></div>
+                    <?php print saturne_get_media_linked_elements($moduleName, $fileName); ?>
+					<div class="title"><?php echo $fileName; ?></div>
 					</div><?php
 					$j++;
 				}
@@ -355,17 +359,19 @@ function saturne_get_thumb_name(string $filename, string $thumbType = 'small'): 
  * Return media linked elements count
  *
  * @param  string $moduleName Module name
- * @param  string $file       File name
+ * @param  string $fileName       File name
  * @return string $output     Show media linked element count
  *
  */
-function saturne_get_media_linked_elements(string $moduleName, string $file): string
+function saturne_get_media_linked_elements(string $moduleName, string $fileName): string
 {
     global $conf, $db, $langs;
 
-    $moduleNameLowerCase = dol_strtolower($moduleName);
+    $moduleNameLowerCase    = dol_strtolower($moduleName);
+    $regexFormattedFileName = preg_quote($fileName, '/');
+
     $dir                 = $conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1];
-    $fileArrays          = dol_dir_list($dir, 'files', 1, $file, '.odt|.pdf|barcode|_mini|_medium|_small|_large');
+    $fileArrays          = dol_dir_list($dir, 'files', 1, $regexFormattedFileName, '.odt|.pdf|barcode|_mini|_medium|_small|_large');
     $mediaLinkedElements = [];
     foreach ($fileArrays as $fileArray) {
         $element = preg_split('/\//', $fileArray['relativename']);
