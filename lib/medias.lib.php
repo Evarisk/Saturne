@@ -373,7 +373,10 @@ function saturne_get_media_linked_elements(string $moduleName, string $file): st
         require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $element[0] . '.class.php';
 
         $className = ucfirst($element[0]);
-        $object    = new $className($db);
+        if (strstr($className, '_')) {
+            $className = preg_replace('/_/', '', $className);
+        }
+        $object = new $className($db);
 
         $mediaLinkedElements[$fileArray['name']][$element[0]]['picto'] = $object->picto;
         $mediaLinkedElements[$fileArray['name']][$element[0]]['value']++;
