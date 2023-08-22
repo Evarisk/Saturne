@@ -62,8 +62,12 @@ if ( ! $error && $subaction == "addFiles") {
 	$objectSubtype = $data['objectSubtype'];
 	$objectSubdir  = $data['objectSubdir'];
 
-	$object = new $objectType($db);
-	$object->fetch($objectId);
+    if (strstr($objectType, '_')) {
+        $className = preg_replace('/_/', '', $objectType);
+    }
+
+    $object = new $className($db);
+    $object->fetch($objectId);
 
 	$modObjectName = strtoupper($moduleNameLowerCase) . '_' . strtoupper($objectType) . '_ADDON';
 
