@@ -35,7 +35,7 @@
  */
 function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', string $sdir = '',string $size = '', int $maxHeight = 80, int $maxWidth = 80, int $offset = 1)
 {
-	global $conf, $langs;
+	global $conf, $langs, $user;
 
 	include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 	include_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
@@ -47,10 +47,10 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
 	$nbphoto = 0;
 
 	$filearray = dol_dir_list($dir, 'files', 0, '', '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_DESC : SORT_ASC));
+
 	$j         = 0;
 
 	if (count($filearray)) {
-
 		print '<div class="wpeo-gridlayout grid-5 grid-gap-3 grid-margin-2 ecm-photo-list ecm-photo-list">';
 
 		if ($sortfield && $sortorder) {
@@ -59,51 +59,55 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
 
 		$moduleImageNumberPerPageConf = strtoupper($moduleName) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
 		for ($i = (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf); $i < ($conf->global->$moduleImageNumberPerPageConf + (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf));  $i++) {
-			$fileName = $filearray[$i]['name'];
+			$yesterdayTimeStamp = dol_time_plus_duree(dol_now(), -1, 'd');
 
-			if (image_format_supported($fileName) >= 0) {
-				$nbphoto++;
+            if ((getDolUserInt('SATURNE_MEDIA_GALLERY_SHOW_TODAY_PICTURES') && ($filearray[$i]['date'] > $yesterdayTimeStamp)) || getDolUserInt('SATURNE_MEDIA_GALLERY_SHOW_TODAY_PICTURES') == 0) {
+                $fileName = $filearray[$i]['name'];
 
-				if ($size == 'mini' || $size == 'small') {   // Format vignette
-					$relativepath = $moduleName . '/medias/thumbs';
-					$modulepart   = 'ecm';
-					$path         = DOL_URL_ROOT . '/document.php?modulepart=' . $modulepart . '&attachment=0&file=' . str_replace('/', '%2F', $relativepath);
+                if (image_format_supported($fileName) >= 0) {
+                    $nbphoto++;
 
-					$file_infos = pathinfo($fileName);
+                    if ($size == 'mini' || $size == 'small') {   // Format vignette
+                        $relativepath = $moduleName . '/medias/thumbs';
+                        $modulepart   = 'ecm';
+                        $path         = DOL_URL_ROOT . '/document.php?modulepart=' . $modulepart . '&attachment=0&file=' . str_replace('/', '%2F', $relativepath);
 
-                    // svg files aren't handled by vignette functions in images.lib, so they don't have thumbs
-                    if ($file_infos['extension'] == 'svg') {
-                        $path = preg_replace('/\/thumbs/', '', $path);
-                        $shownFileName = $file_infos['filename'] . '.' . $file_infos['extension'];
-                    } else {
-                        $shownFileName = $file_infos['filename'] . '_' . $size . '.' . $file_infos['extension'];
-                    }
+                        $file_infos = pathinfo($fileName);
 
-					?>
+                        // svg files aren't handled by vignette functions in images.lib, so they don't have thumbs
+                        if ($file_infos['extension'] == 'svg') {
+                            $path = preg_replace('/\/thumbs/', '', $path);
+                            $shownFileName = $file_infos['filename'] . '.' . $file_infos['extension'];
+                        } else {
+                            $shownFileName = $file_infos['filename'] . '_' . $size . '.' . $file_infos['extension'];
+                        }
 
-					<div class="center clickable-photo clickable-photo<?php echo $j; ?>" value="<?php echo $j; ?>">
-						<figure class="photo-image">
-							<?php
-							$filePreviewUrl = urlencode($fileName);
-							$urladvanced = getAdvancedPreviewUrl($modulepart, $moduleName . '/medias/' . $filePreviewUrl, 0, 'entity=' . $conf->entity);
-							?>
-							<a class="clicked-photo-preview" href="<?php echo $urladvanced; ?>"><i class="fas fa-2x fa-search-plus"></i></a>
-							<?php if (image_format_supported($fileName) >= 0) : ?>
-								<?php $fullpath = $path . '/' . urlencode($shownFileName) . '&entity=' . $conf->entity; ?>
-								<input class="filename" type="hidden" value="<?php echo $fileName; ?>">
+                        ?>
+
+                    <div class="center clickable-photo clickable-photo<?php echo $j; ?>" value="<?php echo $j; ?>">
+                        <figure class="photo-image">
                             <?php
+                            $filePreviewUrl = urlencode($fileName);
+                            $urladvanced = getAdvancedPreviewUrl($modulepart, $moduleName . '/medias/' . $filePreviewUrl, 0, 'entity=' . $conf->entity);
+                            ?>
+                            <a class="clicked-photo-preview" href="<?php echo $urladvanced; ?>"><i class="fas fa-2x fa-search-plus"></i></a>
+                            <?php if (image_format_supported($fileName) >= 0) : ?>
+                                <?php $fullpath = $path . '/' . urlencode($shownFileName) . '&entity=' . $conf->entity; ?>
+                                <input class="filename" type="hidden" value="<?php echo $fileName; ?>">
+                                <?php
 
                                 ?>
-								<img class="photo photo<?php echo $j ?>" height="<?php echo $maxHeight; ?>" width="<?php echo $maxWidth; ?>" src="<?php echo $fullpath; ?>">
-							<?php endif; ?>
-						</figure>
-                    <?php print saturne_get_media_linked_elements($moduleName, $fileName); ?>
-					<div class="title"><?php echo $fileName; ?></div>
-					</div><?php
-					$j++;
-				}
+                                <img class="photo photo<?php echo $j ?>" height="<?php echo $maxHeight; ?>" width="<?php echo $maxWidth; ?>" src="<?php echo $fullpath; ?>">
+                            <?php endif; ?>
+                        </figure>
+                        <?php print saturne_get_media_linked_elements($moduleName, $fileName); ?>
+                        <div class="title"><?php echo $fileName; ?></div>
+                        </div><?php
+                        $j++;
+                    }
 
-			}
+                }
+            }
 		}
 		print '</div>';
 	} else {
