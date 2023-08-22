@@ -92,6 +92,9 @@ $source   = GETPOST('source', 'aZ09');
 
 // Initialize technical objects.
 $classname = ucfirst($objectType);
+if (strstr($classname, '_')) {
+    $classname = preg_replace('/_/', '', $classname);
+}
 $object    = new $classname($db);
 if (GETPOSTISSET('document_type') && $fileExists) {
     $document = new $documentType($db);
