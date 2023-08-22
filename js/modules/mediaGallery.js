@@ -62,6 +62,7 @@ window.saturne.mediaGallery.event = function() {
   $( document ).on( 'change', '.fast-upload', window.saturne.mediaGallery.fastUpload );
   $( document ).on( 'click', '.select-page', window.saturne.mediaGallery.selectPage );
   $( document ).on( 'click', '.toggle-today-medias', window.saturne.mediaGallery.toggleTodayMedias );
+  $( document ).on( 'click', '.toggle-unlinked-medias', window.saturne.mediaGallery.toggleUnlinkedMedias );
 }
 
 /**
@@ -512,7 +513,7 @@ window.saturne.mediaGallery.selectPage = function( event ) {
 };
 
 /**
- * Action select page.
+ * Action toggle today medias.
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -536,6 +537,39 @@ window.saturne.mediaGallery.toggleTodayMedias = function( event ) {
     contentType: false,
     success: function ( resp ) {
       $('.toggle-today-medias').replaceWith($(resp).find('.toggle-today-medias'))
+      $('.ecm-photo-list-content').replaceWith($(resp).find('.ecm-photo-list-content'))
+      $('.wpeo-pagination').replaceWith($(resp).find('.wpeo-pagination'))
+    },
+    error: function ( ) {
+    }
+  })
+};
+
+/**
+ * Action toggle unlinked medias.
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @return {void}
+ */
+window.saturne.mediaGallery.toggleUnlinkedMedias = function( event ) {
+
+  let token          = window.saturne.toolbox.getToken();
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
+
+  let toggleValue = $(this).attr('value')
+
+  window.saturne.loader.display($('.ecm-photo-list-content'))
+  window.saturne.loader.display($('.wpeo-pagination'))
+
+  $.ajax({
+    url: document.URL + querySeparator + "subaction=toggleUnlinkedMedias&toggle_unlinked_medias=" + toggleValue + "&token=" + token,
+    type: "POST",
+    processData: false,
+    contentType: false,
+    success: function ( resp ) {
+      $('.toggle-unlinked-medias').replaceWith($(resp).find('.toggle-unlinked-medias'))
       $('.ecm-photo-list-content').replaceWith($(resp).find('.ecm-photo-list-content'))
       $('.wpeo-pagination').replaceWith($(resp).find('.wpeo-pagination'))
     },

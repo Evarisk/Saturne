@@ -232,6 +232,14 @@ if ( ! $error && $subaction == "toggleTodayMedias") {
     dol_set_user_param($db, $conf,$user, $tabparam);
 }
 
+if ( ! $error && $subaction == "toggleUnlinkedMedias") {
+    $toggleValue = GETPOST('toggle_unlinked_medias');
+
+    $tabparam['SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS'] = $toggleValue;
+
+    dol_set_user_param($db, $conf,$user, $tabparam);
+}
+
 if (is_array($submitFileErrorText)) {
 	print '<input class="error-medias" value="'. htmlspecialchars(json_encode($submitFileErrorText)) .'">';
 }
@@ -291,12 +299,12 @@ if (is_array($submitFileErrorText)) {
                 <div>
                     <div>
                     <?php
-                        print img_picto($langs->trans('Calendar'), 'calendar') . ' ' . $form->textwithpicto($langs->trans('Today'), $langs->trans('ShowOnlyMediasAddedToday'));
+                        print img_picto($langs->trans('Link'), 'link') . ' ' . $form->textwithpicto($langs->trans('UnlinkedMedias'), $langs->trans('ShowOnlyUnlinkedMedias'));
                         $code = 'SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS';
                         if (getDolUserInt($code)) {
-                            print '<span id="del_today_medias" value="0" class="valignmiddle linkobject toggle-today-medias '.(!empty($user->conf->$code) ? '' : 'hideobject').'">'. img_picto($langs->trans("Enabled"), 'switch_on', '', false, 0, 0, '', '', '').'</span>';
+                            print '<span id="del_unlinked_medias" value="0" class="valignmiddle linkobject toggle-unlinked-medias '.(!empty($user->conf->$code) ? '' : 'hideobject').'">'. img_picto($langs->trans("Enabled"), 'switch_on', '', false, 0, 0, '', '', '').'</span>';
                         } else {
-                            print '<span id="set_today_medias" value="1" class="valignmiddle linkobject toggle-today-medias'.(!empty($user->conf->$code) ? 'hideobject' : '').'">'. img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', '', '').'</span>';
+                            print '<span id="set_unlinked_medias" value="1" class="valignmiddle linkobject toggle-unlinked-medias'.(!empty($user->conf->$code) ? 'hideobject' : '').'">'. img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', '', '').'</span>';
                         }
                     ?>
                     </div>
@@ -334,7 +342,15 @@ if (is_array($submitFileErrorText)) {
                     return $file['date'] > $yesterdayTimeStamp;
                 });
             }
-			$allMediasNumber              = count($filearray);
+            if (getDolUserInt('SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS') == 1) {
+                $filearray = array_filter($filearray, function($file) use ($conf, $moduleNameLowerCase) {
+                    $regexFormattedFileName = preg_quote($file['name'], '/');
+                    $fileArrays             = dol_dir_list($conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1], 'files', 1, $regexFormattedFileName, '.odt|.pdf|barcode|_mini|_medium|_small|_large');
+
+                    return count($fileArrays);
+                });
+           }
+            $allMediasNumber              = count($filearray);
 			$pagesCounter                 = $conf->global->$moduleImageNumberPerPageConf ? ceil($allMediasNumber/($conf->global->$moduleImageNumberPerPageConf ?: 1)) : 1;
 			$page_array                   = saturne_load_pagination($pagesCounter, $loadedPageArray, $offset);
 
