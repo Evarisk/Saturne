@@ -61,16 +61,20 @@ ObjectMustBeLockedToSendEmail   = %s doit être au statut (verrouillé) pour env
 ObjectMustBeLockedToArchive     = %s doit être au statut (verrouillé) et le document généré afin de pouvoir l'archiver
 
 # Confirm box - Boite de confirmation
-ValidateObject        = Valider %s
-ConfirmValidateObject = Êtes-vous sûr de vouloir valider %s ? <br> La validation permet aux participants de signer le document mais <b> empêche l'ajout de nouveaux participants ou la modification de %s. </b>
-ReOpenObject          = Ouvrir à nouveau %s
-ConfirmReOpenObject   = Êtes-vous sûr de vouloir rouvrir %s ? La réouverture permet la modification de %s et l'ajout de nouveaux participants mais <b>toutes les signatures du document seront perdues</b>.
-LockObject            = Verrouiller %s
-ConfirmLockObject     = Êtes-vous sûr de vouloir verrouiller %s ?<br>Ce verrouillage permet de figer les données et la génération du document.
-CloneObject           = Cloner %s
-NewLabelForClone      = Nouveau libellé de %s
-ConfirmCloneObject    = Êtes-vous sûr de vouloir cloner %s <b>%s</b> ?
-DeleteObject          = Supprimer %s
+ValidateObject          = Valider %s
+ConfirmValidateObject   = Êtes-vous sûr de vouloir valider %s ? <br> La validation permet aux participants de signer le document mais <b> empêche l'ajout de nouveaux participants ou la modification de %s. </b>
+ReOpenObject            = Ouvrir à nouveau %s
+ConfirmReOpenObject     = Êtes-vous sûr de vouloir rouvrir %s ? La réouverture permet la modification de %s et l'ajout de nouveaux participants mais <b>toutes les signatures du document seront perdues</b>.
+LockObject              = Verrouiller %s
+ConfirmLockObject       = Êtes-vous sûr de vouloir verrouiller %s ?<br>Ce verrouillage permet de figer les données et la génération du document.
+CloneObject             = Cloner %s
+NewLabelForClone        = Nouveau libellé de %s
+ConfirmCloneObject      = Êtes-vous sûr de vouloir cloner %s <b>%s</b> ?
+DeleteObject            = Supprimer %s
+RemoveFileObject        = Supprimer le document
+ConfirmRemoveFileObject = Êtes-vous sûr de vouloir <b>supprimer</b> le document %s ?<br><b> Cette action est irréversible. Le document sera définitivement supprimé. </b>
+ArchiveObject           = Archiver %s
+ConfirmArchiveObject    = Êtes-vous sûr de vouloir archiver %s ?
 
 # Data - Donnée
 ActionsOnObject = Événements sur %s

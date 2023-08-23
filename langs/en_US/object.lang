@@ -29,6 +29,7 @@ ObjectDeleteTrigger     = Deletion of %s %s
 ObjectUnValidateTrigger = Reopening of %s %s
 ObjectValidateTrigger   = Pending signature of the participants of %s %s
 ObjectLockedTrigger     = Locking %s %s - Ready for document generation
+ObjectSentByMailTrigger = Mail sent
 ObjectArchivedTrigger   = Archiving %s %s
 ObjectExpiredTrigger    = Expiring %s %s
 ObjectGenerateTrigger   = Generating %s %s
@@ -60,16 +61,20 @@ ObjectMustBeLockedToSendEmail   = %s must be in (locked) status to send an email
 ObjectMustBeLockedToArchive     = %s must be in status (locked) and the document generated in order to archive it
 
 # Confirm box
-ValidateObject        = Validate %s
-ConfirmValidateObject = Are you sure you want to validate %s? <br> La validation permet aux participants de signer le document mais <b> empêche l'ajout de nouveaux participants ou la modification de %s. </b>
-ReOpenObject          = Open %s again
-ConfirmReOpenObject   = Are you sure you want to reopen %s ? Reopening allows %s to be modified and new participants to be added but all document signatures will be lost
-LockObject            = Lock %s
-ConfirmLockObject     = Are you sure you want to lock %s?<br>This lock allows you to freeze the data and the document generation.
-CloneObject           = Clone %s
-NewLabelForClone      = New %s label
-ConfirmCloneObject    = Are you sure you want to clone %s <b>%s</b>?
-DeleteObject          = Delete %s
+ValidateObject          = Validate %s
+ConfirmValidateObject   = Are you sure you want to validate %s? <br> La validation permet aux participants de signer le document mais <b> empêche l'ajout de nouveaux participants ou la modification de %s. </b>
+ReOpenObject            = Open %s again
+ConfirmReOpenObject     = Are you sure you want to reopen %s ? Reopening allows %s to be modified and new participants to be added but all document signatures will be lost
+LockObject              = Lock %s
+ConfirmLockObject       = Are you sure you want to lock %s?<br>This lock allows you to freeze the data and the document generation.
+CloneObject             = Clone %s
+NewLabelForClone        = New %s label
+ConfirmCloneObject      = Are you sure you want to clone %s <b>%s</b>?
+DeleteObject            = Delete %s
+RemoveFileObject        = Delete the document
+ConfirmRemoveFileObject = Are you sure you want to <b>delete</b> the document %s ?<br><b> This action is irreversible. The document will be deleted forever. </b>
+ArchiveObject           = Archive %s
+ConfirmArchiveObject    = Are you sure you want to archive %s ?
 
 # Data
 ActionsOnObject = Events on %s
