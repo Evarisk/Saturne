@@ -400,7 +400,7 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
      */
     public function setAttendantsSegment(Odf $odfHandler, Translate $outputLangs, array $moreParam)
     {
-        global $conf, $db, $moduleNameLowerCase, $langs;
+        global $conf, $moduleNameLowerCase, $langs;
 
         // Get attendants.
         $foundTagForLines = 1;
@@ -427,7 +427,7 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
                         if (!in_array($objectSignatory->role, $moreParam['excludeAttendantsRole'])) {
                             $tmpArray['attendant_number']    = ++$nbAttendant;
                             $tmpArray['attendant_lastname']  = strtoupper($objectSignatory->lastname);
-                            $tmpArray['attendant_firstname'] = dol_strlen($objectSignatory->firstname) > 0 ? $objectSignatory->firstname : '';
+                            $tmpArray['attendant_firstname'] = dol_strlen($objectSignatory->firstname) > 0 ? ucfirst($objectSignatory->firstname) : '';
                             switch ($objectSignatory->attendance) {
                                 case 1:
                                     $attendance = $outputLangs->trans('Delay');
@@ -441,8 +441,8 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
                             }
                             switch ($objectSignatory->element_type) {
                                 case 'user':
-                                    $user    = new User($db);
-                                    $societe = new Societe($db);
+                                    $user    = new User($this->db);
+                                    $societe = new Societe($this->db);
                                     $user->fetch($objectSignatory->element_id);
                                     $tmpArray['attendant_job'] = $user->job;
                                     if ($user->fk_soc > 0) {
@@ -453,8 +453,8 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
                                     }
                                     break;
                                 case 'socpeople':
-                                    $contact = new Contact($db);
-                                    $societe = new Societe($db);
+                                    $contact = new Contact($this->db);
+                                    $societe = new Societe($this->db);
                                     $contact->fetch($objectSignatory->element_id);
                                     $tmpArray['attendant_job'] = $contact->poste;
                                     if ($contact->fk_soc > 0) {
