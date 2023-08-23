@@ -48,6 +48,21 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
 
 	$filearray = dol_dir_list($dir, 'files', 0, '', '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_DESC : SORT_ASC));
 
+    if (getDolUserInt('SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS') == 1) {
+        $yesterdayTimeStamp = dol_time_plus_duree(dol_now(), -1, 'd');
+        $filearray = array_filter($filearray, function($file) use ($yesterdayTimeStamp) {
+            return $file['date'] > $yesterdayTimeStamp;
+        });
+    }
+    if (getDolUserInt('SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS') == 1) {
+        $filearray = array_filter($filearray, function($file) use ($conf, $moduleNameLowerCase) {
+            $regexFormattedFileName = preg_quote($file['name'], '/');
+            $fileArrays             = dol_dir_list($conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1], 'files', 1, $regexFormattedFileName, '.odt|.pdf|barcode|_mini|_medium|_small|_large');
+
+            return count($fileArrays) == 0;
+        });
+    }
+    
 	$j         = 0;
 
 	if (count($filearray)) {
@@ -59,56 +74,48 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
 
 		$moduleImageNumberPerPageConf = strtoupper($moduleName) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
 		for ($i = (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf); $i < ($conf->global->$moduleImageNumberPerPageConf + (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf));  $i++) {
-			$yesterdayTimeStamp     = dol_time_plus_duree(dol_now(), -1, 'd');
-            $regexFormattedFileName = preg_quote($filearray[$i]['name'], '/');
-            $fileArrays             = dol_dir_list($conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1], 'files', 1, $regexFormattedFileName, '.odt|.pdf|barcode|_mini|_medium|_small|_large');
 
-            if (((getDolUserInt('SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS') && ($filearray[$i]['date'] > $yesterdayTimeStamp)) || getDolUserInt('SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS') == 0)) {
-               if ((getDolUserInt('SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS') && count($fileArrays) == 0) || getDolUserInt('SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS') == 0) {
-                    $fileName = $filearray[$i]['name'];
-                    if (image_format_supported($fileName) >= 0) {
-                        $nbphoto++;
+            $fileName = $filearray[$i]['name'];
+            if (image_format_supported($fileName) >= 0) {
+                $nbphoto++;
 
-                        if ($size == 'mini' || $size == 'small') {   // Format vignette
-                            $relativepath = $moduleName . '/medias/thumbs';
-                            $modulepart   = 'ecm';
-                            $path         = DOL_URL_ROOT . '/document.php?modulepart=' . $modulepart . '&attachment=0&file=' . str_replace('/', '%2F', $relativepath);
+                if ($size == 'mini' || $size == 'small') {   // Format vignette
+                    $relativepath = $moduleName . '/medias/thumbs';
+                    $modulepart   = 'ecm';
+                    $path         = DOL_URL_ROOT . '/document.php?modulepart=' . $modulepart . '&attachment=0&file=' . str_replace('/', '%2F', $relativepath);
 
-                            $file_infos = pathinfo($fileName);
+                    $file_infos = pathinfo($fileName);
 
-                            // svg files aren't handled by vignette functions in images.lib, so they don't have thumbs
-                            if ($file_infos['extension'] == 'svg') {
-                                $path = preg_replace('/\/thumbs/', '', $path);
-                                $shownFileName = $file_infos['filename'] . '.' . $file_infos['extension'];
-                            } else {
-                                $shownFileName = $file_infos['filename'] . '_' . $size . '.' . $file_infos['extension'];
-                            }
-
-                            ?>
-
-                        <div class="center clickable-photo clickable-photo<?php echo $j; ?>" value="<?php echo $j; ?>">
-                            <figure class="photo-image">
-                                <?php
-                                $filePreviewUrl = urlencode($fileName);
-                                $urladvanced = getAdvancedPreviewUrl($modulepart, $moduleName . '/medias/' . $filePreviewUrl, 0, 'entity=' . $conf->entity);
-                                ?>
-                                <a class="clicked-photo-preview" href="<?php echo $urladvanced; ?>"><i class="fas fa-2x fa-search-plus"></i></a>
-                                <?php if (image_format_supported($fileName) >= 0) : ?>
-                                    <?php $fullpath = $path . '/' . urlencode($shownFileName) . '&entity=' . $conf->entity; ?>
-                                    <input class="filename" type="hidden" value="<?php echo $fileName; ?>">
-                                    <?php
-
-                                    ?>
-                                    <img class="photo photo<?php echo $j ?>" height="<?php echo $maxHeight; ?>" width="<?php echo $maxWidth; ?>" src="<?php echo $fullpath; ?>">
-                                <?php endif; ?>
-                            </figure>
-                            <?php print saturne_get_media_linked_elements($moduleName, $fileName); ?>
-                            <div class="title"><?php echo $fileName; ?></div>
-                            </div><?php
-                            $j++;
-                        }
-
+                    // svg files aren't handled by vignette functions in images.lib, so they don't have thumbs
+                    if ($file_infos['extension'] == 'svg') {
+                        $path = preg_replace('/\/thumbs/', '', $path);
+                        $shownFileName = $file_infos['filename'] . '.' . $file_infos['extension'];
+                    } else {
+                        $shownFileName = $file_infos['filename'] . '_' . $size . '.' . $file_infos['extension'];
                     }
+
+                    ?>
+
+                    <div class="center clickable-photo clickable-photo<?php echo $j; ?>" value="<?php echo $j; ?>">
+                        <figure class="photo-image">
+                            <?php
+                            $filePreviewUrl = urlencode($fileName);
+                            $urladvanced = getAdvancedPreviewUrl($modulepart, $moduleName . '/medias/' . $filePreviewUrl, 0, 'entity=' . $conf->entity);
+                            ?>
+                            <a class="clicked-photo-preview" href="<?php echo $urladvanced; ?>"><i class="fas fa-2x fa-search-plus"></i></a>
+                            <?php if (image_format_supported($fileName) >= 0) : ?>
+                                <?php $fullpath = $path . '/' . urlencode($shownFileName) . '&entity=' . $conf->entity; ?>
+                                <input class="filename" type="hidden" value="<?php echo $fileName; ?>">
+                                <?php
+
+                                ?>
+                                <img class="photo photo<?php echo $j ?>" height="<?php echo $maxHeight; ?>" width="<?php echo $maxWidth; ?>" src="<?php echo $fullpath; ?>">
+                            <?php endif; ?>
+                        </figure>
+                        <?php print saturne_get_media_linked_elements($moduleName, $fileName); ?>
+                        <div class="title"><?php echo $fileName; ?></div>
+                    </div><?php
+                    $j++;
                 }
             }
 		}

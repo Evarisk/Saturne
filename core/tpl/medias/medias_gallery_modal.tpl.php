@@ -342,12 +342,12 @@ if (is_array($submitFileErrorText)) {
                     return $file['date'] > $yesterdayTimeStamp;
                 });
             }
-            if (getDolUserInt('SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS') == 1) {
+            if (getDolUserInt('SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS') == 1) {
                 $filearray = array_filter($filearray, function($file) use ($conf, $moduleNameLowerCase) {
                     $regexFormattedFileName = preg_quote($file['name'], '/');
                     $fileArrays             = dol_dir_list($conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1], 'files', 1, $regexFormattedFileName, '.odt|.pdf|barcode|_mini|_medium|_small|_large');
 
-                    return count($fileArrays);
+                    return count($fileArrays) == 0;
                 });
            }
             $allMediasNumber              = count($filearray);
