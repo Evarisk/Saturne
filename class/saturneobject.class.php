@@ -569,8 +569,8 @@ abstract class SaturneObject extends CommonObject
         $objectType          = $this->element;
         $numRefConf          = $moduleNameUpperCase . '_' . strtoupper($objectType) . '_ADDON';
 
-		if (empty($conf->global->$moduleNameUpperCase)) {
-			$conf->global->$moduleNameUpperCase = 'mod_' . $objectType . '_standard';
+		if (empty($conf->global->$numRefConf)) {
+			$conf->global->$numRefConf = 'mod_' . $objectType . '_standard';
 		}
 
         //Numbering modules
