@@ -85,7 +85,7 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
             setEventMessages($document->error, $document->errors, 'errors');
             $action = '';
         } else {
-            setEventMessages($langs->trans('FileGenerated') . ' - ' . '<a href=' . DOL_URL_ROOT . '/document.php?modulepart='. $moduleNameLowerCase . '&file=' . urlencode($object->element . 'document/' . $object->ref . '/' . $document->last_main_doc) . '&entity=' . $conf->entity . '"' . '>' . $document->last_main_doc, []);
+            setEventMessages($langs->trans('FileGenerated') . ' - ' . '<a href=' . DOL_URL_ROOT . '/document.php?modulepart='. $moduleNameLowerCase . '&file=' . urlencode($object->element . 'document/' . $object->ref . '/' . $document->last_main_doc) . '&entity=' . $conf->entity . '"' . '>' . $document->last_main_doc . '</a>', []);
             $urlToRedirect = $_SERVER['REQUEST_URI'];
             $urlToRedirect = preg_replace('/#builddoc$/', '', $urlToRedirect);
             $urlToRedirect = preg_replace('/action=builddoc&?/', '', $urlToRedirect); // To avoid infinite loop.
