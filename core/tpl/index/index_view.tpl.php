@@ -84,6 +84,15 @@ $moduleJustUpdated   = strtoupper($moduleName) . '_JUST_UPDATED';
 $moduleVersion       = strtoupper($moduleName) . '_VERSION';
 $moduleShowPatchNote = strtoupper($moduleName) . '_SHOW_PATCH_NOTE';
 
+
+if ($conf->global->$moduleVersion != $modModule->version) {
+    $modModule->remove();
+    $modModule->init();
+
+    dolibarr_set_const($db, $moduleJustUpdated, 1, 'integer', 0, '', $conf->entity);
+    dolibarr_set_const($db, $moduleShowPatchNote, 1, 'integer', 0, '', $conf->entity);
+}
+
 if ($conf->global->$moduleJustUpdated == 1) : ?>
     <div class="wpeo-notice notice-success">
         <div class="notice-content">
@@ -94,14 +103,6 @@ if ($conf->global->$moduleJustUpdated == 1) : ?>
     </div>
     <?php dolibarr_set_const($db, $moduleJustUpdated, 0, 'integer', 0, '', $conf->entity);
 endif;
-
-if ($conf->global->$moduleVersion != $modModule->version) {
-    $modModule->remove();
-    $modModule->init();
-
-    dolibarr_set_const($db, $moduleJustUpdated, 1, 'integer', 0, '', $conf->entity);
-    dolibarr_set_const($db, $moduleShowPatchNote, 1, 'integer', 0, '', $conf->entity);
-}
 
 if ($conf->global->$moduleShowPatchNote > 0) : ?>
     <div class="wpeo-notice notice-info">
