@@ -1,9 +1,10 @@
 <?php
 
-global $action, $conf, $db, $langs, $moduleName, $moduleNameLowerCase, $moduleNameUpperCase, $subaction;
+global $action, $conf, $db, $form, $langs, $moduleName, $moduleNameLowerCase, $moduleNameUpperCase, $subaction, $user;
 
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmdirectory.class.php';
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
+require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
 
 $ecmdir           = new EcmDirectory($db);
 $ecmfile          = new EcmFiles($db);
@@ -227,6 +228,22 @@ if ( ! $error && $subaction == "pagination") {
 	$loadedPageArray = saturne_load_pagination($pagesCounter, [], $offset);
 }
 
+if ( ! $error && $subaction == "toggleTodayMedias") {
+    $toggleValue = GETPOST('toggle_today_medias');
+
+    $tabparam['SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS'] = $toggleValue;
+
+    dol_set_user_param($db, $conf,$user, $tabparam);
+}
+
+if ( ! $error && $subaction == "toggleUnlinkedMedias") {
+    $toggleValue = GETPOST('toggle_unlinked_medias');
+
+    $tabparam['SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS'] = $toggleValue;
+
+    dol_set_user_param($db, $conf,$user, $tabparam);
+}
+
 if (is_array($submitFileErrorText)) {
 	print '<input class="error-medias" value="'. htmlspecialchars(json_encode($submitFileErrorText)) .'">';
 }
@@ -258,7 +275,7 @@ if (is_array($submitFileErrorText)) {
 					<div class="notice-close"><i class="fas fa-times"></i></div>
 				</div>
 			</div>
-			<div class="wpeo-gridlayout grid-2">
+			<div class="wpeo-gridlayout grid-3">
 				<div class="modal-add-media">
 					<?php
 					print '<input type="hidden" name="token" value="'.newToken().'">';
@@ -283,6 +300,30 @@ if (is_array($submitFileErrorText)) {
 						</div>
 					</div>
 				</div>
+                <div>
+                    <div>
+                    <?php
+                        print img_picto($langs->trans('Link'), 'link') . ' ' . $form->textwithpicto($langs->trans('UnlinkedMedias'), $langs->trans('ShowOnlyUnlinkedMedias'));
+                        $code = 'SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS';
+                        if (getDolUserInt($code)) {
+                            print '<span id="del_unlinked_medias" value="0" class="valignmiddle linkobject toggle-unlinked-medias '.(!empty($user->conf->$code) ? '' : 'hideobject').'">'. img_picto($langs->trans("Enabled"), 'switch_on', '', false, 0, 0, '', '', '').'</span>';
+                        } else {
+                            print '<span id="set_unlinked_medias" value="1" class="valignmiddle linkobject toggle-unlinked-medias'.(!empty($user->conf->$code) ? 'hideobject' : '').'">'. img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', '', '').'</span>';
+                        }
+                    ?>
+                    </div>
+                    <div>
+                        <?php
+                        print img_picto($langs->trans('Calendar'), 'calendar') . ' ' . $form->textwithpicto($langs->trans('Today'), $langs->trans('ShowOnlyMediasAddedToday'));
+                        $code = 'SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS';
+                        if (getDolUserInt($code)) {
+                            print '<span id="del_today_medias" value="0" class="valignmiddle linkobject toggle-today-medias '.(!empty($user->conf->$code) ? '' : 'hideobject').'">'. img_picto($langs->trans("Enabled"), 'switch_on', '', false, 0, 0, '', '', '').'</span>';
+                        } else {
+                            print '<span id="set_today_medias" value="1" class="valignmiddle linkobject toggle-today-medias'.(!empty($user->conf->$code) ? 'hideobject' : '').'">'. img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', '', '').'</span>';
+                        }
+                        ?>
+                    </div>
+                </div>
 			</div>
 			<div id="progressBarContainer" style="display:none">
 				<div id="progressBar"></div>
@@ -299,7 +340,21 @@ if (is_array($submitFileErrorText)) {
 			<?php
 			$filearray                    = dol_dir_list($conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias/', "files", 0, '', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC);
 			$moduleImageNumberPerPageConf = strtoupper($moduleNameLowerCase) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
-			$allMediasNumber              = count($filearray);
+            if (getDolUserInt('SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS') == 1) {
+                $yesterdayTimeStamp = dol_time_plus_duree(dol_now(), -1, 'd');
+                $filearray = array_filter($filearray, function($file) use ($yesterdayTimeStamp) {
+                    return $file['date'] > $yesterdayTimeStamp;
+                });
+            }
+            if (getDolUserInt('SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS') == 1) {
+                $filearray = array_filter($filearray, function($file) use ($conf, $moduleNameLowerCase) {
+                    $regexFormattedFileName = preg_quote($file['name'], '/');
+                    $fileArrays             = dol_dir_list($conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1], 'files', 1, $regexFormattedFileName, '.odt|.pdf|barcode|_mini|_medium|_small|_large');
+
+                    return count($fileArrays) == 0;
+                });
+           }
+            $allMediasNumber              = count($filearray);
 			$pagesCounter                 = $conf->global->$moduleImageNumberPerPageConf ? ceil($allMediasNumber/($conf->global->$moduleImageNumberPerPageConf ?: 1)) : 1;
 			$page_array                   = saturne_load_pagination($pagesCounter, $loadedPageArray, $offset);
 

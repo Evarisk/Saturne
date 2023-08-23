@@ -52,15 +52,17 @@ window.saturne.mediaGallery.init = function() {
  */
 window.saturne.mediaGallery.event = function() {
 	// Photos
-	$( document ).on( 'click', '.clickable-photo', window.saturne.mediaGallery.selectPhoto );
-	$( document ).on( 'click', '.save-photo', window.saturne.mediaGallery.savePhoto );
-	$( document ).on( 'change', '.flat.minwidth400.maxwidth200onsmartphone', window.saturne.mediaGallery.sendPhoto );
-	$( document ).on( 'click', '.clicked-photo-preview', window.saturne.mediaGallery.previewPhoto );
-	$( document ).on( 'input', '.form-element #search_in_gallery', window.saturne.mediaGallery.handleSearch );
-	$( document ).on( 'click', '.media-gallery-unlink', window.saturne.mediaGallery.unlinkFile );
-	$( document ).on( 'click', '.media-gallery-favorite', window.saturne.mediaGallery.addToFavorite );
-	$( document ).on( 'change', '.fast-upload', window.saturne.mediaGallery.fastUpload );
-	$( document ).on( 'click', '.select-page', window.saturne.mediaGallery.selectPage );
+  $( document ).on( 'click', '.clickable-photo', window.saturne.mediaGallery.selectPhoto );
+  $( document ).on( 'click', '.save-photo', window.saturne.mediaGallery.savePhoto );
+  $( document ).on( 'change', '.flat.minwidth400.maxwidth200onsmartphone', window.saturne.mediaGallery.sendPhoto );
+  $( document ).on( 'click', '.clicked-photo-preview', window.saturne.mediaGallery.previewPhoto );
+  $( document ).on( 'input', '.form-element #search_in_gallery', window.saturne.mediaGallery.handleSearch );
+  $( document ).on( 'click', '.media-gallery-unlink', window.saturne.mediaGallery.unlinkFile );
+  $( document ).on( 'click', '.media-gallery-favorite', window.saturne.mediaGallery.addToFavorite );
+  $( document ).on( 'change', '.fast-upload', window.saturne.mediaGallery.fastUpload );
+  $( document ).on( 'click', '.select-page', window.saturne.mediaGallery.selectPage );
+  $( document ).on( 'click', '.toggle-today-medias', window.saturne.mediaGallery.toggleTodayMedias );
+  $( document ).on( 'click', '.toggle-unlinked-medias', window.saturne.mediaGallery.toggleUnlinkedMedias );
 }
 
 /**
@@ -499,7 +501,7 @@ window.saturne.mediaGallery.selectPage = function( event ) {
 		success: function ( resp ) {
 			$('.wpeo-loader').removeClass('wpeo-loader')
 			mediaGallery.html($(resp).find('#' + containerToRefresh).children());
-			
+
 			mediaGallery.find('.modal-options').attr('data-from-id', objectId)
 			mediaGallery.find('.modal-options').attr('data-from-type', objectType)
 			mediaGallery.find('.modal-options').attr('data-from-subtype', objectSubtype)
@@ -510,3 +512,68 @@ window.saturne.mediaGallery.selectPage = function( event ) {
 	})
 };
 
+/**
+ * Action toggle today medias.
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @return {void}
+ */
+window.saturne.mediaGallery.toggleTodayMedias = function( event ) {
+
+  let token          = window.saturne.toolbox.getToken();
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
+
+  let toggleValue = $(this).attr('value')
+
+  window.saturne.loader.display($('.ecm-photo-list-content'))
+  window.saturne.loader.display($('.wpeo-pagination'))
+
+  $.ajax({
+    url: document.URL + querySeparator + "subaction=toggleTodayMedias&toggle_today_medias=" + toggleValue + "&token=" + token,
+    type: "POST",
+    processData: false,
+    contentType: false,
+    success: function ( resp ) {
+      $('.toggle-today-medias').replaceWith($(resp).find('.toggle-today-medias'))
+      $('.ecm-photo-list-content').replaceWith($(resp).find('.ecm-photo-list-content'))
+      $('.wpeo-pagination').replaceWith($(resp).find('.wpeo-pagination'))
+    },
+    error: function ( ) {
+    }
+  })
+};
+
+/**
+ * Action toggle unlinked medias.
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @return {void}
+ */
+window.saturne.mediaGallery.toggleUnlinkedMedias = function( event ) {
+
+  let token          = window.saturne.toolbox.getToken();
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
+
+  let toggleValue = $(this).attr('value')
+
+  window.saturne.loader.display($('.ecm-photo-list-content'))
+  window.saturne.loader.display($('.wpeo-pagination'))
+
+  $.ajax({
+    url: document.URL + querySeparator + "subaction=toggleUnlinkedMedias&toggle_unlinked_medias=" + toggleValue + "&token=" + token,
+    type: "POST",
+    processData: false,
+    contentType: false,
+    success: function ( resp ) {
+      $('.toggle-unlinked-medias').replaceWith($(resp).find('.toggle-unlinked-medias'))
+      $('.ecm-photo-list-content').replaceWith($(resp).find('.ecm-photo-list-content'))
+      $('.wpeo-pagination').replaceWith($(resp).find('.wpeo-pagination'))
+    },
+    error: function ( ) {
+    }
+  })
+};
