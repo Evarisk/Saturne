@@ -493,6 +493,8 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
                     $tmpArray['attendant_number']         = '';
                     $tmpArray['attendant_lastname']       = '';
                     $tmpArray['attendant_firstname']      = '';
+                    $tmpArray['attendant_job']            = '';
+                    $tmpArray['attendant_company']        = '';
                     $tmpArray['attendant_role']           = '';
                     $tmpArray['attendant_signature_date'] = '';
                     $tmpArray['attendant_attendance']     = '';
