@@ -427,7 +427,7 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
                         if (!in_array($objectSignatory->role, $moreParam['excludeAttendantsRole'])) {
                             $tmpArray['attendant_number']    = ++$nbAttendant;
                             $tmpArray['attendant_lastname']  = strtoupper($objectSignatory->lastname);
-                            $tmpArray['attendant_firstname'] = $objectSignatory->firstname;
+                            $tmpArray['attendant_firstname'] = dol_strlen($objectSignatory->firstname) > 0 ? ucfirst($objectSignatory->firstname) : '';
                             switch ($objectSignatory->attendance) {
                                 case 1:
                                     $attendance = $outputLangs->trans('Delay');
@@ -437,6 +437,36 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
                                     break;
                                 default:
                                     $attendance = $outputLangs->transnoentities('Present');
+                                    break;
+                            }
+                            switch ($objectSignatory->element_type) {
+                                case 'user':
+                                    $user    = new User($this->db);
+                                    $societe = new Societe($this->db);
+                                    $user->fetch($objectSignatory->element_id);
+                                    $tmpArray['attendant_job'] = $user->job;
+                                    if ($user->fk_soc > 0) {
+                                        $societe->fetch($user->fk_soc);
+                                        $tmpArray['attendant_company'] = $societe->name;
+                                    } else {
+                                        $tmpArray['attendant_company'] = $conf->global->MAIN_INFO_SOCIETE_NOM;
+                                    }
+                                    break;
+                                case 'socpeople':
+                                    $contact = new Contact($this->db);
+                                    $societe = new Societe($this->db);
+                                    $contact->fetch($objectSignatory->element_id);
+                                    $tmpArray['attendant_job'] = $contact->poste;
+                                    if ($contact->fk_soc > 0) {
+                                        $societe->fetch($contact->fk_soc);
+                                        $tmpArray['attendant_company'] = $societe->name;
+                                    } else {
+                                        $tmpArray['attendant_company'] = $conf->global->MAIN_INFO_SOCIETE_NOM;
+                                    }
+                                    break;
+                                default:
+                                    $tmpArray['attendant_job']     = '';
+                                    $tmpArray['attendant_company'] = '';
                                     break;
                             }
                             $tmpArray['attendant_role']           = $outputLangs->transnoentities($objectSignatory->role);
@@ -463,6 +493,8 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
                     $tmpArray['attendant_number']         = '';
                     $tmpArray['attendant_lastname']       = '';
                     $tmpArray['attendant_firstname']      = '';
+                    $tmpArray['attendant_job']            = '';
+                    $tmpArray['attendant_company']        = '';
                     $tmpArray['attendant_role']           = '';
                     $tmpArray['attendant_signature_date'] = '';
                     $tmpArray['attendant_attendance']     = '';
