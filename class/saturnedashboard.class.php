@@ -38,7 +38,7 @@ class SaturneDashboard
     /**
      * @var string Module name.
      */
-    public string $module = 'saturne';
+    public $module = 'saturne';
 
     /**
      * Constructor.
