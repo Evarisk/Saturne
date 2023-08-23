@@ -65,12 +65,14 @@ if ( ! $error && $subaction == "addFiles") {
 
     if (strstr($objectType, '_')) {
         $className = preg_replace('/_/', '', $objectType);
+    } else {
+        $className = $objectType;
     }
 
     $object = new $className($db);
     $object->fetch($objectId);
 
-	$modObjectName = strtoupper($moduleNameLowerCase) . '_' . strtoupper($objectType) . '_ADDON';
+	$modObjectName = strtoupper($moduleNameLowerCase) . '_' . strtoupper($className) . '_ADDON';
 
     $numberingModuleName = [
         $object->element => $conf->global->$modObjectName,
