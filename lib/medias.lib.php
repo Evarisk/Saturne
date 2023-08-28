@@ -381,11 +381,15 @@ function saturne_get_media_linked_elements(string $moduleName, string $fileName)
 
     $dir                 = $conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1];
     $fileArrays          = dol_dir_list($dir, 'files', 1, $regexFormattedFileName, '.odt|.pdf|barcode|_mini|_medium|_small|_large');
+    $moduleClasses      = dol_dir_list(__DIR__ . '/../../' . $moduleNameLowerCase . '/class/', 'files', 1);
+
     $mediaLinkedElements = [];
     foreach ($fileArrays as $fileArray) {
-        $element = preg_split('/\//', $fileArray['relativename']);
+        $element   = preg_split('/\//', $fileArray['relativename']);
+        $classKey = array_search($element[0] . '.class.php', array_column($moduleClasses, 'name'));
+        $classPath = $moduleClasses[$classKey]['fullname'];
 
-        require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $element[0] . '.class.php';
+        require_once $classPath;
 
         $className = ucfirst($element[0]);
         if (strstr($className, '_')) {
