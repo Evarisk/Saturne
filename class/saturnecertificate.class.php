@@ -63,7 +63,7 @@ class SaturneCertificate extends SaturneObject
     /**
      * @var string Last output from end job execution.
      */
-    public string $output = '';
+    public $output = '';
 
 	/**
 	 * @var string Name of icon for certificate. Must be a 'fa-xxx' fontawesome code (or 'fa-xxx_fa_color_size') or 'certificate@saturne' if picto is file 'img/object_certificate.png'.
