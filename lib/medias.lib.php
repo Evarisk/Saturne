@@ -39,6 +39,7 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
 
 	include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 	include_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
+	require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
 
 	$sortfield = 'date';
 	$sortorder = 'desc';

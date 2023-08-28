@@ -1,13 +1,41 @@
 <?php
+/* Copyright (C) 2023 EVARISK <technique@evarisk.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
-global $action, $conf, $db, $form, $langs, $moduleName, $moduleNameLowerCase, $moduleNameUpperCase, $subaction, $user;
+/**
+ * \file    core/tpl/medias/object/medias_gallery_modal.tpl.php
+ * \ingroup saturne
+ * \brief   Saturne medias gallery modal
+ */
 
+// Load Dolibarr libraries
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmdirectory.class.php';
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
+require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 
-$ecmdir           = new EcmDirectory($db);
-$ecmfile          = new EcmFiles($db);
+// Global variables definitions
+global $action, $conf, $db, $langs, $moduleName, $moduleNameLowerCase, $moduleNameUpperCase, $subaction, $user;
+
+// Initialize technical objects
+$ecmdir  = new EcmDirectory($db);
+$ecmfile = new EcmFiles($db);
+
+// Initialize view objects
+$form = new Form($db);
 
 if ( ! $error && $subaction == "uploadPhoto" && ! empty($conf->global->MAIN_UPLOAD_DOC)) {
 
@@ -304,26 +332,22 @@ if (is_array($submitFileErrorText)) {
 				</div>
                 <div>
                     <div>
-                    <?php
-                        print img_picto($langs->trans('Link'), 'link') . ' ' . $form->textwithpicto($langs->trans('UnlinkedMedias'), $langs->trans('ShowOnlyUnlinkedMedias'));
+                        <?php print img_picto($langs->trans('Link'), 'link') . ' ' . $form->textwithpicto($langs->trans('UnlinkedMedias'), $langs->trans('ShowOnlyUnlinkedMedias'));
                         $code = 'SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS';
                         if (getDolUserInt($code)) {
-                            print '<span id="del_unlinked_medias" value="0" class="valignmiddle linkobject toggle-unlinked-medias '.(!empty($user->conf->$code) ? '' : 'hideobject').'">'. img_picto($langs->trans("Enabled"), 'switch_on', '', false, 0, 0, '', '', '').'</span>';
+                            print '<span id="del_unlinked_medias" value="0" class="valignmiddle linkobject toggle-unlinked-medias ' . (!empty($user->conf->$code) ? '' : 'hideobject') . '">' . img_picto($langs->trans("Enabled"), 'switch_on') . '</span>';
                         } else {
-                            print '<span id="set_unlinked_medias" value="1" class="valignmiddle linkobject toggle-unlinked-medias'.(!empty($user->conf->$code) ? 'hideobject' : '').'">'. img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', '', '').'</span>';
-                        }
-                    ?>
+                            print '<span id="set_unlinked_medias" value="1" class="valignmiddle linkobject toggle-unlinked-medias ' . (!empty($user->conf->$code) ? 'hideobject' : '') . '">' . img_picto($langs->trans("Disabled"), 'switch_off') . '</span>';
+                        } ?>
                     </div>
                     <div>
-                        <?php
-                        print img_picto($langs->trans('Calendar'), 'calendar') . ' ' . $form->textwithpicto($langs->trans('Today'), $langs->trans('ShowOnlyMediasAddedToday'));
+                        <?php print img_picto($langs->trans('Calendar'), 'calendar') . ' ' . $form->textwithpicto($langs->trans('Today'), $langs->trans('ShowOnlyMediasAddedToday'));
                         $code = 'SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS';
                         if (getDolUserInt($code)) {
-                            print '<span id="del_today_medias" value="0" class="valignmiddle linkobject toggle-today-medias '.(!empty($user->conf->$code) ? '' : 'hideobject').'">'. img_picto($langs->trans("Enabled"), 'switch_on', '', false, 0, 0, '', '', '').'</span>';
+                            print '<span id="del_today_medias" value="0" class="valignmiddle linkobject toggle-today-medias ' . (!empty($user->conf->$code) ? '' : 'hideobject') . '">' . img_picto($langs->trans("Enabled"), 'switch_on') . '</span>';
                         } else {
-                            print '<span id="set_today_medias" value="1" class="valignmiddle linkobject toggle-today-medias'.(!empty($user->conf->$code) ? 'hideobject' : '').'">'. img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', '', '').'</span>';
-                        }
-                        ?>
+                            print '<span id="set_today_medias" value="1" class="valignmiddle linkobject toggle-today-medias ' . (!empty($user->conf->$code) ? 'hideobject' : '') . '">' . img_picto($langs->trans("Disabled"), 'switch_off') . '</span>';
+                        } ?>
                     </div>
                 </div>
 			</div>
