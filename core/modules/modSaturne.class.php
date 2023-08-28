@@ -135,11 +135,12 @@ class modSaturne extends DolibarrModules
 
         // Dependencies
         $modulesList = [
-            'DigiQuali' => 'digiquali',
-            'DoliMeet'  => 'dolimeet',
-            'DoliCar'   => 'dolicar',
-            'EasyCRM'   => 'easycrm',
-            'DoliSIRH'  => 'dolisirh',
+            'DigiQuali'        => 'digiquali',
+            'DoliMeet'         => 'dolimeet',
+            'DoliCar'          => 'dolicar',
+            'EasyCRM'          => 'easycrm',
+            'DoliSIRH'         => 'dolisirh',
+            'DigiriskDolibarr' => 'digiriskdolibarr'
         ];
 
         // A condition to hide module
