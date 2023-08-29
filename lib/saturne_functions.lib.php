@@ -141,6 +141,8 @@ function saturne_check_modules_enabled()
  */
 function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', string $title = '')
 {
+    global $conf;
+
     // Configuration header
     if (property_exists($object, 'element')) {
 		$element = $object->element;
@@ -157,7 +159,8 @@ function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', st
 	if (property_exists($object, 'picto')) {
 		$picto = $object->picto;
 	}
-    print dol_get_fiche_head($head, $tabactive, $title, -1, $picto, 0, '', '', 0, 'saturne');
+
+    print dol_get_fiche_head($head, $tabactive, $title, -1, $picto, 0, '', '', $conf->browser->layout != 'phone' ? 0 : 5, 'saturne');
 }
 
 /**
