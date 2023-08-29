@@ -291,7 +291,7 @@ abstract class SaturneObject extends CommonObject
 
 			if (!$error && !$notrigger) {
 				// Call trigger.
-				$result = $this->call_trigger(strtoupper($this->element) . '_VALIDATE', $user);
+				$result = $this->call_trigger(dol_strtoupper(get_class($this)) . '_VALIDATE', $user);
 				if ($result < 0) {
 					$error++;
 				}
@@ -362,7 +362,7 @@ abstract class SaturneObject extends CommonObject
      */
     public function setDeleted(User $user, int $notrigger = 0): int
     {
-        return $this->setStatusCommon($user, $this::STATUS_DELETED, $notrigger, strtoupper($this->element) . '_DELETE');
+        return $this->setStatusCommon($user, $this::STATUS_DELETED, $notrigger, dol_strtoupper(get_class($this)) . '_DELETE');
     }
 
     /**
@@ -379,7 +379,7 @@ abstract class SaturneObject extends CommonObject
 			return 0;
 		}
 
-		return $this->setStatusCommon($user, $this::STATUS_DRAFT, $notrigger, strtoupper($this->element) . '_UNVALIDATE');
+		return $this->setStatusCommon($user, $this::STATUS_DRAFT, $notrigger, dol_strtoupper(get_class($this)) . '_UNVALIDATE');
 	}
 
     /**
@@ -391,7 +391,7 @@ abstract class SaturneObject extends CommonObject
      */
     public function setLocked(User $user, int $notrigger = 0): int
     {
-        return $this->setStatusCommon($user, $this::STATUS_LOCKED, $notrigger, strtoupper($this->element) . '_LOCK');
+        return $this->setStatusCommon($user, $this::STATUS_LOCKED, $notrigger, dol_strtoupper(get_class($this)) . '_LOCK');
     }
 
     /**
@@ -403,7 +403,7 @@ abstract class SaturneObject extends CommonObject
      */
     public function setArchived(User $user, int $notrigger = 0): int
     {
-        return $this->setStatusCommon($user, $this::STATUS_ARCHIVED, $notrigger, strtoupper($this->element) . '_ARCHIVE');
+        return $this->setStatusCommon($user, $this::STATUS_ARCHIVED, $notrigger, dol_strtoupper(get_class($this)) . '_ARCHIVE');
     }
 
     /**
