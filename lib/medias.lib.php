@@ -197,7 +197,7 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 
 			if (($show_only_favorite && $object->$favorite_field == $fileName) || !$show_only_favorite) {
 				if ($showdiv) {
-					$return .= '<div class="media-container">';
+					$return .= '<div class="media-container" style="margin-right: 20px">';
 				}
 
 				$return .= '<input hidden class="file-path" value="'. $filePath .'">';
@@ -301,7 +301,8 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 				}
 
 				if ($show_favorite_button) {
-					$favorite = (($object->$favorite_field == '' || $favoriteExists == 0) && $i == 0 && (!property_exists($object, 'photo') && empty($object->photo)) ? 'favorite' : ($object->$favorite_field == $photo ? 'favorite' : ''));
+
+					$favorite = (($object->$favorite_field == '' || $favoriteExists == 0) && $i == 0) ? 'favorite' : ($object->$favorite_field == $photo ? 'favorite' : '');
 					$return .=
 						'<div class="wpeo-button button-square-50 button-blue ' . $object->element . ' media-gallery-favorite ' . $favorite . '" value="' . $object->id . '">
 							<input class="element-linked-id" type="hidden" value="' . ($object->id > 0 ? $object->id : 0) . '">

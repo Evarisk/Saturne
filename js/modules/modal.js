@@ -73,7 +73,8 @@ window.saturne.modal.openModal = function ( event ) {
 	let fromType    = modalOptions.attr('data-from-type');
 	let fromSubtype = modalOptions.attr('data-from-subtype');
 	let fromSubdir  = modalOptions.attr('data-from-subdir');
-	let fromModule  = modalOptions.attr('data-from-module');
+  let fromModule  = modalOptions.attr('data-from-module');
+  let photoClass  = modalOptions.attr('data-photo-class');
 
 	let urlWithoutTag = '';
 	if (document.URL.match(/#/)) {
@@ -87,7 +88,8 @@ window.saturne.modal.openModal = function ( event ) {
 	$('#'+modalToOpen).attr('data-from-id', fromId);
 	$('#'+modalToOpen).attr('data-from-type', fromType);
 	$('#'+modalToOpen).attr('data-from-subtype', fromSubtype);
-    $('#'+modalToOpen).attr('data-from-subdir', fromSubdir);
+  $('#'+modalToOpen).attr('data-from-subdir', fromSubdir);
+  $('#'+modalToOpen).attr('data-photo-class', photoClass);
 
 	if (modalToOpen.match(/signature/)) {
 		window.saturne.signature.modalSignatureOpened($(this))
