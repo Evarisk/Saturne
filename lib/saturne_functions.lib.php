@@ -163,16 +163,17 @@ function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', st
 /**
  * Print dol_banner_tab with Saturne custom enhancements
  *
- *  @param  Object $object      Object to show
- *  @param  string $paramid     Name of parameter to use to name the id into the URL next/previous link
- *  @param  string $morehtml    More html content to output just before the nav bar
- *  @param  int    $shownav     Show Condition (navigation is shown if value is 1)
- *  @param  string $fieldid     Field name for select next et previous (we make the select max and min on this field). Use 'none' for no prev/next search.
- *  @param  string $fieldref    Field name objet ref (object->ref) for select next and previous
- *  @param  string $morehtmlref More html to show after the ref (see $morehtmlleft for before)
- *  @return void
+ * @param  Object $object      Object to show
+ * @param  string $paramId     Name of parameter to use to name the id into the URL next/previous link
+ * @param  string $moreHtml    More html content to output just before the nav bar
+ * @param  int    $showNav     Show Condition (navigation is shown if value is 1)
+ * @param  string $fieldId     Field name for select next et previous (we make the select max and min on this field). Use 'none' for no prev/next search.
+ * @param  string $fieldRef    Field name objet ref (object->ref) for select next and previous
+ * @param  string $moreHtmlRef More html to show after the ref (see $morehtmlleft for before)
+ * @param  bool   $handlePhoto Manage photo
+ * @return void
  */
-function saturne_banner_tab(object $object, string $paramid = 'ref', string $morehtml = '', int $shownav = 1, string $fieldid = 'ref', string $fieldref = 'ref', string $morehtmlref = '', bool $handlePhoto = false): void
+function saturne_banner_tab(object $object, string $paramId = 'ref', string $moreHtml = '', int $showNav = 1, string $fieldId = 'ref', string $fieldRef = 'ref', string $moreHtmlRef = '', bool $handlePhoto = false): void
 {
     global $db, $langs, $hookmanager, $moduleName, $moduleNameLowerCase;
 
@@ -180,87 +181,99 @@ function saturne_banner_tab(object $object, string $paramid = 'ref', string $mor
         require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
     }
 
-    if (empty($morehtml)) {
-        $morehtml = '<a href="' . dol_buildpath('/' . $moduleNameLowerCase . '/view/' . $object->element . '/' . $object->element . '_list.php', 1) . '?restore_lastsearch_values=1&object_type=' . $object->element . '">' . $langs->trans('BackToList') . '</a>';
+    if (empty($moreHtml)) {
+        $moreHtml = '<a href="' . dol_buildpath('/' . $moduleNameLowerCase . '/view/' . $object->element . '/' . $object->element . '_list.php', 1) . '?restore_lastsearch_values=1&object_type=' . $object->element . '">' . $langs->trans('BackToList') . '</a>';
     }
 
-	$saturneMorehtmlref = '';
-	if (array_key_exists('label', $object->fields) && dol_strlen($object->label)) {
-		$saturneMorehtmlref .= ' - ' . $object->label . '<br>';
-	}
-
-    $saturneMorehtmlref .= '<div class="refidno">';
-
-	$saturneMorehtmlref .= $morehtmlref;
-
-    // Thirdparty
-    if (isModEnabled('societe') && array_key_exists('fk_soc', $object->fields)) {
-		$saturneMorehtmlref .= $langs->trans('ThirdParty') . ' : ';
-        if (!empty($object->fk_soc)) {
-            $object->fetch_thirdparty();
-			if (is_object($object->thirdparty)) {
-				$saturneMorehtmlref .= $object->thirdparty->getNomUrl(1);
-			}
-        }
-		$saturneMorehtmlref .= '<br>';
+    $saturneMoreHtmlRef = '';
+    if (array_key_exists('label', $object->fields) && dol_strlen($object->label)) {
+        $saturneMoreHtmlRef .= ' - ' . $object->label . '<br>';
     }
 
-    // Project
-    if (isModEnabled('project')) {
-        if (array_key_exists('fk_project', $object->fields)) {
-            $key = 'fk_project';
-        } elseif (array_key_exists('projectid', $object->fields)) {
-            $key = 'projectid';
+    $saturneMoreHtmlRef .= '<div class="refidno">';
+
+    $saturneMoreHtmlRef .= $moreHtmlRef;
+
+    // Banner
+    $objectKey      = '';
+    $possibleKeys   = [];
+    $bannerElements = ['societe', 'project'];
+    foreach ($bannerElements as $bannerElement) {
+        if (isModEnabled($bannerElement)) {
+            if ($bannerElement == 'societe') {
+                $possibleKeys = ['socid', 'fk_soc'];
+            } elseif ($bannerElement == 'project') {
+                $possibleKeys = ['projectid', 'fk_project'];
+            }
+
+            foreach ($possibleKeys as $key) {
+                if (property_exists($object, $key)) {
+                    $objectKey = $key;
+                    break;
+                }
+            }
+            if (dol_strlen($objectKey)) {
+                $className           = ucfirst($bannerElement);
+                $BannerElementObject = new $className($db);
+                $constName           = get_class($object) . '::STATUS_LOCKED';
+                if (defined($constName) && $object->status < $object::STATUS_LOCKED) {
+                    if (GETPOST('action') == 'edit_' . $bannerElement) {
+                        $saturneMoreHtmlRef .= '<form method="post" action="' . $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . GETPOST('object_type') . '">';
+                        $saturneMoreHtmlRef .= '<input type="hidden" name="action" value="set_' . $bannerElement . '">';
+                        $saturneMoreHtmlRef .= '<input type="hidden" name="' . $bannerElement . '_key" value="' . $objectKey . '">';
+                        $saturneMoreHtmlRef .= '<input type="hidden" name="token" value="' . newToken() . '">';
+                        if ($bannerElement == 'societe') {
+                            $form = new Form($db);
+                            $saturneMoreHtmlRef .= $form->select_company($object->$objectKey, $objectKey, '', 1, 0, 0, [], 0, 'minwidth300');
+                        } elseif ($bannerElement == 'project') {
+                            $formProject = new FormProjets($db);
+                            $saturneMoreHtmlRef .= $formProject->select_projects(-1, $object->$objectKey, $objectKey, 0, 0, 1, 0, 1, 0, 0, '', 1, 0, 'minwidth300');
+                        }
+                        $saturneMoreHtmlRef .= '<input type="submit" class="button valignmiddle" value="' . $langs->trans('Modify') . '">';
+                        $saturneMoreHtmlRef .= '</form>';
+                    } else {
+                        $BannerElementObject->fetch($object->$objectKey);
+                        if ($bannerElement == 'societe') {
+                            $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1) : img_picto($langs->trans('ThirdParty'), 'company');
+                        } elseif ($bannerElement == 'project') {
+                            $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1, '', 1) : img_picto($langs->trans('Project'), 'project');
+                        }
+                        $saturneMoreHtmlRef .= ' <a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=edit_' . $bannerElement . '&id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . GETPOST('object_type') . '&token=' . newToken() . '">' . img_edit($langs->transnoentitiesnoconv($bannerElement == 'societe' ? 'SetThirdParty' : 'SetProject')) . '</a>';
+                    }
+                } else {
+                    $BannerElementObject->fetch($object->$objectKey);
+                    if ($bannerElement == 'societe') {
+                        $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1) : '';
+                    } elseif ($bannerElement == 'project') {
+                        $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1, '', 1) : '';
+                    }
+                }
+                $saturneMoreHtmlRef .= '<br>';
+            }
         }
-		if (dol_strlen($key)) {
-			$saturneMorehtmlref .= $langs->trans('Project') . ' : ';
-			if (array_key_exists('status', $object->fields)) {
-				$formproject = new FormProjets($db);
-				$form        = new Form($db);
-				if ($object->status < $object::STATUS_LOCKED) {
-					$objectTypePost = GETPOST('object_type') ? '&object_type=' . GETPOST('object_type') : '';
-					$saturneMorehtmlref .= ' ';
-					if (GETPOST('action') == 'edit_project') {
-						$saturneMorehtmlref .= '<form method="post" action="' . $_SERVER['PHP_SELF'] . '?id=' . $object->id . $objectTypePost .'">';
-						$saturneMorehtmlref .= '<input type="hidden" name="action" value="save_project">';
-						$saturneMorehtmlref .= '<input type="hidden" name="key" value="'. $key .'">';
-						$saturneMorehtmlref .= '<input type="hidden" name="token" value="'.newToken().'">';
-						$saturneMorehtmlref .= $formproject->select_projects(-1, $object->$key, $key, 0, 0, 1, 0, 1, 0, 0, '', 1, 0, 'maxwidth500');
-						$saturneMorehtmlref .= '<input type="submit" class="button valignmiddle" value="' . $langs->trans("Modify") . '">';
-						$saturneMorehtmlref .= '</form>';
-					} else {
-						$saturneMorehtmlref .= $form->form_project($_SERVER['PHP_SELF'] . '?id=' .$object->id, 0, $object->$key, 'none', 0, 0, 0, 1);
-						$saturneMorehtmlref .= ' <a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=edit_project&token=' . newToken() . '&id=' . $object->id . $objectTypePost .'">' . img_edit($langs->transnoentitiesnoconv('SetProject')) . '</a>';
-					}
-				} else {
-					$saturneMorehtmlref .= $form->form_project($_SERVER['PHP_SELF'] . '?id=' .$object->id, 0, $object->$key, 'none', 0, 0, 0, 1);
-				}
-			}
-			$saturneMorehtmlref .= '<br>';
-		}
     }
 
     $parameters = [];
-    $reshook = $hookmanager->executeHooks('saturneBannerTab', $parameters, $object); // Note that $action and $object may have been modified by some hooks
-    if ($reshook < 0) {
+    $resHook    = $hookmanager->executeHooks('saturneBannerTab', $parameters, $object); // Note that $action and $object may have been modified by some hooks
+    if ($resHook < 0) {
         setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
     } else {
-        $saturneMorehtmlref .= $hookmanager->resPrint;
+        $saturneMoreHtmlRef .= $hookmanager->resPrint;
     }
-    $saturneMorehtmlref .= '</div>';
+    $saturneMoreHtmlRef .= '</div>';
 
-    $moreparam = '&module_name=' . $moduleName . '&object_type=' . $object->element;
+    $moreParams = '&module_name=' . $moduleName . '&object_type=' . $object->element;
 
-	if (!$handlePhoto) {
-		dol_banner_tab($object, $paramid, $morehtml, $shownav, $fieldid, $fieldref, $saturneMorehtmlref, $moreparam);
-	} else {
-		global $conf, $form;
+    if (!$handlePhoto) {
+        dol_banner_tab($object, $paramId, $moreHtml, $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, $moreParams);
+    } else {
+        global $conf, $form;
 
-		print '<div class="arearef heightref valignmiddle centpercent">';
-		$morehtmlleft = '<div class="floatleft inline-block valignmiddle divphotoref">' . saturne_show_medias_linked($moduleNameLowerCase, $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $object->element . '/'. $object->ref . '/photos/', 'small', '', 0, 0, 0, 88, 88, 0, 0, 0, $object->element . '/'. $object->ref . '/photos/', $object, 'photo', 0, 0,0, 1) . '</div>';
-		print $form->showrefnav($object, $paramid, $morehtml, $shownav, $fieldid, $fieldref, $saturneMorehtmlref, $moreparam, 0, $morehtmlleft, $object->getLibStatut(6));
-		print '</div>';
-	}
+        print '<div class="arearef heightref valignmiddle centpercent">';
+        $moreHtmlLeft = '<div class="floatleft inline-block valignmiddle divphotoref">' . saturne_show_medias_linked($moduleNameLowerCase, $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $object->element . '/'. $object->ref . '/photos/', 'small', '', 0, 0, 0, 88, 88, 0, 0, 0, $object->element . '/'. $object->ref . '/photos/', $object, 'photo', 0, 0,0, 1) . '</div>';
+        print $form->showrefnav($object, $paramId, $moreHtml, $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, $moreParams, 0, $moreHtmlLeft, $object->getLibStatut(6));
+        print '</div>';
+    }
 
     print '<div class="underbanner clearboth"></div>';
 }

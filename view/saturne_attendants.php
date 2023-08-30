@@ -95,17 +95,20 @@ saturne_check_access($permissiontoread, null, true);
 */
 
 $parameters = ['id' => $id];
-$reshook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
-if ($reshook < 0) {
+$resHook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+if ($resHook < 0) {
     setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 }
 
-if (empty($reshook)) {
+if (empty($resHook)) {
     // Cancel
     if ($cancel && !empty($backtopage)) {
         header('Location: ' . $backtopage);
         exit;
     }
+
+    // Actions set_thirdparty, set_project
+    require_once __DIR__ . '/../core/tpl/actions/banner_actions.tpl.php';
 
     // Action to add attendant
     if ($action == 'add_attendant') {
