@@ -359,7 +359,7 @@ class SaturneCertificate extends SaturneObject
             return 0;
         }
 
-        return $this->setStatusCommon($user, $this::STATUS_EXPIRED, $notrigger, strtoupper($this->element) . '_EXPIRE');
+        return $this->setStatusCommon($user, $this::STATUS_EXPIRED, $notrigger, dol_strtoupper(get_class($this)) . '_EXPIRE');
     }
 
     /**
