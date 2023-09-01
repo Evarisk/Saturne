@@ -188,6 +188,12 @@ if ( ! $error && $subaction == "unlinkFile") {
 
 	$fullPath = $filePath . '/' . $fileName;
 
+    if (strstr($objectType, '_')) {
+        $className = preg_replace('/_/', '', $objectType);
+    } else {
+        $className = $objectType;
+    }
+
 	if (is_file($fullPath)) {
 		unlink($fullPath);
 	}
@@ -207,8 +213,9 @@ if ( ! $error && $subaction == "unlinkFile") {
 	}
 
 	if ($objectId > 0) {
-		$object = new $objectType($db);
+		$object = new $className($db);
 		$object->fetch($objectId);
+
 		if (property_exists($object, $objectSubtype)) {
 
 			if ($object->$objectSubtype == $fileName) {
@@ -239,8 +246,14 @@ if ( ! $error && $subaction == "addToFavorite") {
 	$objectSubtype = $data['objectSubtype'];
 	$objectSubdir  = $data['objectSubdir'];
 
+    if (strstr($objectType, '_')) {
+        $className = preg_replace('/_/', '', $objectType);
+    } else {
+        $className = $objectType;
+    }
+
 	if ($objectId > 0) {
-		$object = new $objectType($db);
+		$object = new $className($db);
 		$object->fetch($objectId);
 		if (property_exists($object, $objectSubtype)) {
 			$object->$objectSubtype = $fileName;
