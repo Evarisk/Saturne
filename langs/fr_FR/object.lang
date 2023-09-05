@@ -33,6 +33,7 @@ ObjectSentByMailTrigger = Mail envoyé
 ObjectArchivedTrigger   = %s %s archivé(e)
 ObjectExpiredTrigger    = %s %s expiré(e)
 ObjectGenerateTrigger   = %s %s généré(e)
+ObjectSignedTrigger     = %s %s signé(e)
 
 # SetEventMessage - Notice info
 
@@ -45,20 +46,25 @@ Archived                 = Archivé
 Expired                  = Expiré
 
 # Button - Bouton
-ReOpenDoli                      = Rouvrir
-Sign                            = Signer
-Lock                            = Verrouiller
-Archive                         = Archiver
-Clone                           = Cloner
-ObjectMustBeDraft               = %s doit être au statut (brouillon)
-ObjectMustBeValidated           = %s doit être au statut (validé)
-ObjectMustBeLocked              = %s doit être au statut (verrouillé)
-ObjectMustBeValidatedToGenerate = %s doit être au statut (validé) pour générer le document
-ObjectMustBeLockedToGenerate    = %s doit être au statut (verrouillé) pour générer le document
-ObjectMustBeValidatedToSign     = %s doit être au statut (validé) pour que les participants puissent signer
-AllSignatoriesMustHaveSigned    = Tous les participants doivent avoir signé pour verrouiller %s
-ObjectMustBeLockedToSendEmail   = %s doit être au statut (verrouillé) pour envoyer un email
-ObjectMustBeLockedToArchive     = %s doit être au statut (verrouillé) et le document généré afin de pouvoir l'archiver
+ReOpenDoli                       = Rouvrir
+Sign                             = Signer
+Lock                             = Verrouiller
+Archive                          = Archiver
+Clone                            = Cloner
+NewVersion                       = Versionner
+Classify                         = Classifier
+ObjectMustBeDraft                = %s doit être au statut (brouillon)
+ObjectMustBeValidated            = %s doit être au statut (validé)
+ObjectMustBeLocked               = %s doit être au statut (verrouillé)
+ObjectMustBeValidatedToGenerate  = %s doit être au statut (validé) pour générer le document
+ObjectMustBeLockedToGenerate     = %s doit être au statut (verrouillé) pour générer le document
+ObjectMustBeValidatedToSign      = %s doit être au statut (validé) pour que les participants puissent signer
+AllSignatoriesMustHaveSigned     = Tous les participants doivent avoir signé pour verrouiller %s
+ObjectMustBeValidatedToSendEmail = %s doit être au statut (validé) pour envoyer un email
+ObjectMustBeLockedToSendEmail    = %s doit être au statut (verrouillé) pour envoyer un email
+ObjectMustBeValidatedToArchive   = %s doit être au statut (validé) afin de pouvoir l'archiver
+ObjectMustBeLockedToArchive      = %s doit être au statut (verrouillé) et le document généré afin de pouvoir l'archiver
+ObjectMustBeArchivedToOpen       = %s doit être au statut (archivé) afin de pouvoir l'ouvrir de nouveau
 
 # Confirm box - Boite de confirmation
 ValidateObject          = Valider %s

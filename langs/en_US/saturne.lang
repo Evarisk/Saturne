@@ -169,9 +169,12 @@ checkDateEndJobComment = Checking and updating the status of expired certificate
 #
 
 # Data
-EntityNumber = Entity number
-EntityName   = Entity name
-
+EntityNumber                = Entity number
+EntityName                  = Entity name
+ConfTrigger                 = Event configuration
+ConfEventAuto               = Automatic event configuration
+AdvancedTriggers            = Advanced trigger content
+AdvancedTriggersDescription = Enable a detailed description of %s trigger
 
 
 #
