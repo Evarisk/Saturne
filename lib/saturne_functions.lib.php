@@ -217,7 +217,8 @@ function saturne_banner_tab(object $object, string $paramid = 'ref', string $mor
 			if (array_key_exists('status', $object->fields)) {
 				$formproject = new FormProjets($db);
 				$form        = new Form($db);
-				if ($object->status < $object::STATUS_LOCKED) {
+                $project     = new Project($db);
+                if ($object->status < $object::STATUS_LOCKED) {
 					$objectTypePost = GETPOST('object_type') ? '&object_type=' . GETPOST('object_type') : '';
 					$saturneMorehtmlref .= ' ';
 					if (GETPOST('action') == 'edit_project') {
@@ -229,7 +230,7 @@ function saturne_banner_tab(object $object, string $paramid = 'ref', string $mor
 						$saturneMorehtmlref .= '<input type="submit" class="button valignmiddle" value="' . $langs->trans("Modify") . '">';
 						$saturneMorehtmlref .= '</form>';
 					} else {
-						$saturneMorehtmlref .= $form->form_project($_SERVER['PHP_SELF'] . '?id=' .$object->id, 0, $object->$key, 'none', 0, 0, 0, 1);
+						$saturneMorehtmlref .= img_picto('project', $project->picto) . ' ' . $form->form_project($_SERVER['PHP_SELF'] . '?id=' .$object->id, 0, $object->$key, 'none', 0, 0, 0, 1);
 						$saturneMorehtmlref .= ' <a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=edit_project&token=' . newToken() . '&id=' . $object->id . $objectTypePost .'">' . img_edit($langs->transnoentitiesnoconv('SetProject')) . '</a>';
 					}
 				} else {

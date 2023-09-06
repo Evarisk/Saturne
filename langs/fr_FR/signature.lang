@@ -35,6 +35,7 @@ SignAttendantMessage    = Le participant %s a signé
 SendEmailAt             = Envoi de l'email à %s
 ErrorSetupEmail         = Erreur de configuration des mails, vous n'avez pas configuré votre serveur d'envoi de mail en mode SMTP <br> Veuillez utiliser le mode SMTP pour une meilleure délivrabilité et sécurisation des emails
 NoEmailSet              = Aucun email renseigné : %s
+AddAttendants           = Ajouter participants
 
 # Mail - Mail
 SignatureEmailSubject          = Signature %s %s
