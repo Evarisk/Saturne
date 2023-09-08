@@ -235,7 +235,7 @@ if (!empty($objectLinked) && empty($action)) {
     print '</table>';
 
     $parameters = [];
-    $reshook = $hookmanager->executeHooks('saturneSchedules', $parameters, $object); // Note that $action and $object may have been modified by some hooks
+    $reshook = $hookmanager->executeHooks('saturneSchedules', $parameters, $objectLinked); // Note that $action and $object may have been modified by some hooks
     if ($reshook < 0) {
         setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
     } elseif (empty($reshook)) {
