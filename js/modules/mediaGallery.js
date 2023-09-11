@@ -121,11 +121,12 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 
 	window.saturne.loader.display($(this));
   if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
-    window.saturne.loader.display($( '.linked-medias.'+objectPhotoClass));
+    if ($('.linked-medias.'+objectPhotoClass).length > 0) {
+      window.saturne.loader.display($('.linked-medias.'+objectPhotoClass));
+    }
   } else {
     window.saturne.loader.display($('.linked-medias.'+objectSubtype));
   }
-
 	let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
 
 	$.ajax({
@@ -152,9 +153,6 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
         }
         $('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
       }
-
-			//refresh medias container after adding
-      // $('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
 
 			//refresh media gallery & unselect selected medias
 			mediaGallery.html($(resp).find('#media_gallery').children())
@@ -446,8 +444,13 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
 	let objectType       = $(this).closest('.linked-medias').find('.modal-options').attr('data-from-type')
 	let objectSubtype    = $(this).closest('.linked-medias').find('.modal-options').attr('data-from-subtype')
 	let objectSubdir     = $(this).closest('.linked-medias').find('.modal-options').attr('data-from-subdir')
+  let objectPhotoClass = $(this).closest('.linked-medias').find('.modal-options').attr('data-photo-class')
 
-	window.saturne.loader.display($('.linked-medias.'+objectSubtype));
+  if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
+    window.saturne.loader.display($('.linked-medias.'+objectPhotoClass));
+  } else {
+    window.saturne.loader.display($('.linked-medias.'+objectSubtype));
+  }
 
 	let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
 
@@ -483,18 +486,20 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
 						processData: false,
 						contentType: false,
 						success: function ( resp ) {
-							$('.wpeo-loader').removeClass('wpeo-loader')
-							mediaGallery.removeClass('modal-active')
+              $('.wpeo-loader').removeClass('wpeo-loader')
+              mediaGallery.removeClass('modal-active')
+              if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
+                $('.photo.'+objectPhotoClass).replaceWith($(resp).find('.photo.'+objectPhotoClass).first())
+                $('.linked-medias.'+objectPhotoClass).replaceWith($(resp).find('.linked-medias.'+objectPhotoClass))
+              } else {
+                if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
+                  $('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
+                }
+                $('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
+              }
 
-							if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
-								$('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
-							}
-
-							//refresh medias container after adding
-							$('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
-
-							//refresh media gallery & unselect selected medias
-							mediaGallery.html($(resp).find('#media_gallery').children())
+              //refresh media gallery & unselect selected medias
+              mediaGallery.html($(resp).find('#media_gallery').children())
 						},
 					});
 				}
