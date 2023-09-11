@@ -84,3 +84,14 @@ DisplayMoreInfo = Afficher plus d'informations
 ObjectLabel     = Récapitulatif
 ObjectSubject   = Email document
 ObjectContent   = Veuillez trouver ci-joint le/les document(s) ODT lié(s) à __THETYPE__.
+
+# Popup message
+ObjectValidated = %s a été validé(e)
+ObjectReOpened  = %s a été rouvert(e)
+
+# Trigger info
+ObjectCreated  = Création d'un(e) %s
+ObjectModified = Modifcation d'un(e) %s
+ObjectDeleted  = Suppression d'un(e) %s
+ObjectValidate = Validation d'un(e) %s
+ObjectLock     = Verrouillage d'un(e) %s
