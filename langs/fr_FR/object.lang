@@ -36,6 +36,8 @@ ObjectGenerateTrigger   = %s %s généré(e)
 ObjectSignedTrigger     = %s %s signé(e)
 
 # SetEventMessage - Notice info
+ObjectValidated = %s a été validé(e)
+ObjectReOpened  = %s a été rouvert(e)
 
 # Status - Statut
 StatusDraft              = Brouillon (à valider)
@@ -93,3 +95,10 @@ DisplayMoreInfo = Afficher plus d'informations
 ObjectLabel     = Récapitulatif
 ObjectSubject   = Email document
 ObjectContent   = Veuillez trouver ci-joint le/les document(s) ODT lié(s) à __THETYPE__.
+
+# Config Trigger Info - Configuration Infos Événements
+ObjectCreated  = Création d'un(e) %s
+ObjectModified = Modifcation d'un(e) %s
+ObjectDeleted  = Suppression d'un(e) %s
+ObjectValidate = Validation d'un(e) %s
+ObjectLock     = Verrouillage d'un(e) %s

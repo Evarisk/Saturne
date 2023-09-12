@@ -36,6 +36,8 @@ ObjectGenerateTrigger   = Generating %s %s
 ObjectSignedTrigger     = Signing %s %s
 
 # SetEventMessage
+ObjectValidated = %s has been validated
+ObjectReOpened  = %s has been re-opened
 
 # Status
 StatusDraft              = Draft (to be validated)
@@ -93,3 +95,10 @@ DisplayMoreInfo = View more information
 ObjectLabel     = Summary
 ObjectSubject   = Email document
 ObjectContent   = Please find attached the ODT document(s) related to __THETYPE__.
+
+# Config Trigger Info
+ObjectCreated  = Creation of %s
+ObjectModified = Modification of %s
+ObjectDeleted  = Deletion of %s
+ObjectValidate = Validation of %s
+ObjectLock     = Locking of %s
