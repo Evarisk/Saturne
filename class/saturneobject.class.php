@@ -684,6 +684,9 @@ abstract class SaturneObject extends CommonObject
 			$project->fetch($object->fk_project);
 			$ret .= $langs->transnoentities('Project') . ' : ' . $project->ref . ' ' . $project->title . '</br>';
 		}
+        $ret .= (isset($object->note_public) && dol_strlen($object->note_public) > 0 ? $langs->transnoentities('NotePublic') . ' : ' . $object->note_public . '</br>' : '');
+        $ret .= (isset($object->note_private) && dol_strlen($object->note_private) > 0 ? $langs->transnoentities('NotePrivate') . ' : ' . $object->note_private . '</br>' : '');
+
 		return $ret;
 	}
 

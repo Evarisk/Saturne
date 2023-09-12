@@ -61,6 +61,7 @@ ErrorSavedConfig                  = An error occurred during the configuration
 Config                            = Configuration
 Extrafields                       = Extra attributes
 
+
 # Mod Numbering
 NumberingModule = Numbering model
 NumberingModuleDet = Numbering model lines
@@ -72,6 +73,12 @@ DocumentTemplate       = Model documents
 ODTDefaultTemplateName = Default ODT of documents
 ErrorFileNotFound      = File not found
 ErrorNoSocietyLogo     = No company logo found
+
+# Trigger
+ConfTrigger                 = Event configuration
+ConfEventAuto               = Automatic event configuration
+AdvancedTriggers            = Advanced trigger content
+AdvancedTriggersDescription = Enable a detailed description of %s trigger
 
 
 #
@@ -171,7 +178,6 @@ checkDateEndJobComment = Checking and updating the status of expired certificate
 # Data
 EntityNumber = Entity number
 EntityName   = Entity name
-
 
 
 #

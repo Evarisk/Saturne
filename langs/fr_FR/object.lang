@@ -33,6 +33,7 @@ ObjectSentByMailTrigger = Mail envoyé
 ObjectArchivedTrigger   = %s %s archivé(e)
 ObjectExpiredTrigger    = %s %s expiré(e)
 ObjectGenerateTrigger   = %s %s généré(e)
+ObjectSignedTrigger     = %s %s signé(e)
 
 # SetEventMessage - Notice info
 
@@ -43,22 +44,28 @@ ValidatePendingSignature = Validé (en attente de signature)
 Locked                   = Verrouillé
 Archived                 = Archivé
 Expired                  = Expiré
+Classified               = Classifié
 
 # Button - Bouton
-ReOpenDoli                      = Rouvrir
-Sign                            = Signer
-Lock                            = Verrouiller
-Archive                         = Archiver
-Clone                           = Cloner
-ObjectMustBeDraft               = %s doit être au statut (brouillon)
-ObjectMustBeValidated           = %s doit être au statut (validé)
-ObjectMustBeLocked              = %s doit être au statut (verrouillé)
-ObjectMustBeValidatedToGenerate = %s doit être au statut (validé) pour générer le document
-ObjectMustBeLockedToGenerate    = %s doit être au statut (verrouillé) pour générer le document
-ObjectMustBeValidatedToSign     = %s doit être au statut (validé) pour que les participants puissent signer
-AllSignatoriesMustHaveSigned    = Tous les participants doivent avoir signé pour verrouiller %s
-ObjectMustBeLockedToSendEmail   = %s doit être au statut (verrouillé) pour envoyer un email
-ObjectMustBeLockedToArchive     = %s doit être au statut (verrouillé) et le document généré afin de pouvoir l'archiver
+ReOpenDoli                       = Rouvrir
+Sign                             = Signer
+Lock                             = Verrouiller
+Archive                          = Archiver
+Clone                            = Cloner
+NewVersion                       = Versionner
+Classify                         = Classifier
+ObjectMustBeDraft                = %s doit être au statut (brouillon)
+ObjectMustBeValidated            = %s doit être au statut (validé)
+ObjectMustBeLocked               = %s doit être au statut (verrouillé)
+ObjectMustBeValidatedToGenerate  = %s doit être au statut (validé) pour générer le document
+ObjectMustBeLockedToGenerate     = %s doit être au statut (verrouillé) pour générer le document
+ObjectMustBeValidatedToSign      = %s doit être au statut (validé) pour que les participants puissent signer
+AllSignatoriesMustHaveSigned     = Tous les participants doivent avoir signé pour verrouiller %s
+ObjectMustBeValidatedToSendEmail = %s doit être au statut (validé) pour envoyer un email
+ObjectMustBeLockedToSendEmail    = %s doit être au statut (verrouillé) pour envoyer un email
+ObjectMustBeValidatedToClassify  = %s doit être au statut (validé) afin de pouvoir la classifier
+ObjectMustBeLockedToArchive      = %s doit être au statut (verrouillé) et le document généré afin de pouvoir l'archiver
+ObjectMustBeClassifiedToOpen     = %s doit être au statut (classifié) afin de pouvoir l'ouvrir de nouveau
 
 # Confirm box - Boite de confirmation
 ValidateObject          = Valider %s
@@ -75,6 +82,8 @@ RemoveFileObject        = Supprimer le document
 ConfirmRemoveFileObject = Êtes-vous sûr de vouloir <b>supprimer</b> le document %s ?<br><b> Cette action est irréversible. Le document sera définitivement supprimé. </b>
 ArchiveObject           = Archiver %s
 ConfirmArchiveObject    = Êtes-vous sûr de vouloir archiver %s ?
+ClassifyObject          = Classifier %s
+ConfirmClassifyObject   = Êtes-vous sûr de vouloir classifier %s ?
 
 # Data - Donnée
 ActionsOnObject = Événements sur %s

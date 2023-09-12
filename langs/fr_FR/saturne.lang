@@ -74,6 +74,11 @@ ODTDefaultTemplateName = ODT par défaut
 ErrorFileNotFound      = Fichier non trouvé
 ErrorNoSocietyLogo     = Aucun logo de la société renseigné
 
+# Trigger - Événements
+ConfTrigger                 = Configuration des événements
+ConfEventAuto               = Configuration des événements automatiques
+AdvancedTriggers            = Contenu des événéments avancé
+AdvancedTriggersDescription = Active une description détaillée des événements de %s
 
 
 #
@@ -176,7 +181,6 @@ checkDateEndJobComment = Vérification et mise à jour du statut des certificats
 # Data - Donnée
 EntityNumber = Numéro de l'entité
 EntityName   = Nom de l'entité
-
 
 
 #
