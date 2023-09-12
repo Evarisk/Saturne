@@ -35,6 +35,8 @@ ObjectExpiredTrigger    = Expiring %s %s
 ObjectGenerateTrigger   = Generating %s %s
 
 # SetEventMessage
+ObjectValidated = %s has been validated
+ObjectReOpened  = %s has been re-opened
 
 # Status
 StatusDraft              = Draft (to be validated)
@@ -85,11 +87,7 @@ ObjectLabel     = Summary
 ObjectSubject   = Email document
 ObjectContent   = Please find attached the ODT document(s) related to __THETYPE__.
 
-# Popup message
-ObjectValidated = %s has been validated
-ObjectReOpened  = %s has been re-opened
-
-# Trigger info
+# Config Trigger Info
 ObjectCreated  = Creation of %s
 ObjectModified = Modification of %s
 ObjectDeleted  = Deletion of %s
