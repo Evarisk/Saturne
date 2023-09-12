@@ -74,7 +74,7 @@ ODTDefaultTemplateName = ODT par défaut
 ErrorFileNotFound      = Fichier non trouvé
 ErrorNoSocietyLogo     = Aucun logo de la société renseigné
 
-# Trigger - évenement
+# Trigger - Événements
 ConfTrigger                 = Configuration des événements
 ConfEventAuto               = Configuration des événements automatiques
 AdvancedTriggers            = Contenu des événéments avancé
