@@ -68,3 +68,4 @@ INSERT INTO `llx_saturne_object_documents` (ref, ref_ext, entity, date_creation,
 SELECT ref, ref_ext, entity, date_creation, tms, import_key, status, type, module_name, json, model_pdf, model_odt, last_main_doc, parent_type, parent_id, fk_user_creat FROM `llx_digiriskdolibarr_digiriskdocuments`;
 DROP TABLE `llx_digiriskdolibarr_digiriskdocuments`;
 DROP TABLE `llx_digiriskdolibarr_digiriskdocuments_extrafields`;
+ALTER TABLE `llx_saturne_object_documents` CHANGE json json longtext;
