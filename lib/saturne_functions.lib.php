@@ -224,10 +224,10 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
                         $saturneMoreHtmlRef .= '<input type="hidden" name="token" value="' . newToken() . '">';
                         if ($bannerElement == 'societe') {
                             $form = new Form($db);
-                            $saturneMoreHtmlRef .= $form->select_company($object->$objectKey, $objectKey, '', 1, 0, 0, [], 0, 'minwidth300');
+                            $saturneMoreHtmlRef .= img_picto($langs->trans('ThirdParty'), 'company', 'class="pictofixedwidth"') . $form->select_company($object->$objectKey, $objectKey, '', 1, 0, 0, [], 0, 'maxwidth500 widthcentpercentminusx');
                         } elseif ($bannerElement == 'project') {
                             $formProject = new FormProjets($db);
-                            $saturneMoreHtmlRef .= $formProject->select_projects(-1, $object->$objectKey, $objectKey, 0, 0, 1, 0, 1, 0, 0, '', 1, 0, 'minwidth300');
+                            $saturneMoreHtmlRef .= img_picto($langs->trans('Project'), 'project', 'class="pictofixedwidth"') . $formProject->select_projects(-1, $object->$objectKey, $objectKey, 0, 0, 1, 0, 1, 0, 0, '', 1, 0, 'maxwidth500 widthcentpercentminusx');
                         }
                         $saturneMoreHtmlRef .= '<input type="submit" class="button valignmiddle" value="' . $langs->trans('Modify') . '">';
                         $saturneMoreHtmlRef .= '</form>';
