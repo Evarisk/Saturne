@@ -277,6 +277,24 @@ print $form::selectarray('vignette', $vignetteType, (!empty($conf->global->$vign
 print '</td><td class="center">';
 print '<input type="submit" class="button" name="save" value="' . $langs->trans('Save') . '">';
 print '</td></tr>';
+
+$reshook = $hookmanager->executeHooks('SaturneAdminAdditionalConfig', $parameters); // Note that $action and $object may have been modified by some hooks
+if (empty($reshook)) {
+    $additionalConfig = $hookmanager->resArray;
+}
+if (is_array($additionalConfig) && !empty($additionalConfig)) {
+    foreach($additionalConfig as $configName => $configCode) {
+        print '<tr class="oddeven"><td>';
+        print $langs->trans($configName);
+        print '</td><td>';
+        print $langs->trans($configName . 'Description');
+        print '</td>';
+        print '<td class="center">';
+        print ajax_constantonoff($configCode);
+        print '</td></td><td></tr>';
+    }
+}
+
 print '</form>';
 print '</table>';
 
