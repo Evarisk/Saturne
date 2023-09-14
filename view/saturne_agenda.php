@@ -144,9 +144,15 @@ if (empty($resHook)) {
 */
 
 $title    = $langs->trans('Agenda') . ' - ' . $langs->trans(ucfirst($object->element));
-$help_url = 'FR:Module_' . $moduleName;
+$helpUrl = 'FR:Module_' . $moduleName;
 
-saturne_header(0,'', $title, $help_url);
+$reshook  = $hookmanager->executeHooks('SaturneCustomHeaderFunction', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+if ($reshook > 0) {
+    $customHeaderFunction = $hookmanager->resPrint;
+    $customHeaderFunction($title, $helpUrl);
+} else {
+    saturne_header(0, '', $title, $helpUrl);
+}
 
 if ($id > 0 || !empty($ref)) {
     saturne_get_fiche_head($object, 'agenda', $title);
