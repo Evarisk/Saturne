@@ -54,8 +54,8 @@ Sign                             = Signer
 Lock                             = Verrouiller
 Archive                          = Archiver
 Clone                            = Cloner
-NewVersion                       = Versionner
-Classify                         = Classifier
+NewVersion                       = Nouvelle version
+Versioning                       = Versionner
 ObjectMustBeDraft                = %s doit être au statut (brouillon)
 ObjectMustBeValidated            = %s doit être au statut (validé)
 ObjectMustBeLocked               = %s doit être au statut (verrouillé)
@@ -65,7 +65,6 @@ ObjectMustBeValidatedToSign      = %s doit être au statut (validé) pour que le
 AllSignatoriesMustHaveSigned     = Tous les participants doivent avoir signé pour verrouiller %s
 ObjectMustBeValidatedToSendEmail = %s doit être au statut (validé) pour envoyer un email
 ObjectMustBeLockedToSendEmail    = %s doit être au statut (verrouillé) pour envoyer un email
-ObjectMustBeValidatedToClassify  = %s doit être au statut (validé) afin de pouvoir la classifier
 ObjectMustBeLockedToArchive      = %s doit être au statut (verrouillé) et le document généré afin de pouvoir l'archiver
 ObjectMustBeClassifiedToOpen     = %s doit être au statut (classifié) afin de pouvoir l'ouvrir de nouveau
 
@@ -84,8 +83,8 @@ RemoveFileObject        = Supprimer le document
 ConfirmRemoveFileObject = Êtes-vous sûr de vouloir <b>supprimer</b> le document %s ?<br><b> Cette action est irréversible. Le document sera définitivement supprimé. </b>
 ArchiveObject           = Archiver %s
 ConfirmArchiveObject    = Êtes-vous sûr de vouloir archiver %s ?
-ClassifyObject          = Classifier %s
-ConfirmClassifyObject   = Êtes-vous sûr de vouloir classifier %s ?
+VersionObject           = Versionner %s
+ConfirmVersionObject    = Êtes-vous sûr de vouloir versionner %s ?
 
 # Data - Donnée
 ActionsOnObject = Événements sur %s
