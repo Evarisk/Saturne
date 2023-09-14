@@ -3,7 +3,7 @@
 ## Informations
 
 - Numéro du module : 436318
-- Dernière mise à jour : 24/08/2023
+- Dernière mise à jour : 14/09/2023
 - Éditeur : [Evarisk](https://evarisk.com)
 - Thème : Eldy Menu
 - Licence : GPLv3
@@ -12,7 +12,7 @@
 ### Version
 
 - Version :  1.1.2
-- Compatibilité : Dolibarr 16.0.0 - 18.0.0
+- Compatibilité : Dolibarr 16.0.0 - 18.0.1
 
 ## Liens
 
@@ -43,6 +43,6 @@ Framework et librairie d'objets et fonctions d'Evarisk
 
 - Dans le dossier "dolibarr/htdocs/custom" copier la ligne suivante :
 ``` 
-git clone https://github.com/Evarisk/saturne.git
+git clone -b main https://github.com/Evarisk/saturne.git saturne
 ```
 - Activer le module dans la liste des Modules/Applications installés
