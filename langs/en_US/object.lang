@@ -55,7 +55,7 @@ Lock                             = Lock
 Archive                          = Archive
 Clone                            = Clone
 NewVersion                       = New Version
-Classify                         = Classify
+Versioning                       = Versioning
 ObjectMustBeDraft                = %s must be in status (draft)
 ObjectMustBeValidated            = %s must be in status (validated)
 ObjectMustBeLocked               = %s must be in status (locked)
@@ -65,7 +65,6 @@ ObjectMustBeValidatedToSign      = %s must be in status (validated) for particip
 AllSignatoriesMustHaveSigned     = All participants must have signed to lock %s
 ObjectMustBeValidatedToSendEmail = %s must be in (validated) status to send an email
 ObjectMustBeLockedToSendEmail    = %s must be in (locked) status to send an email
-ObjectMustBeValidatedToClassify  = %s must be in status (validated) in order to classify it
 ObjectMustBeLockedToArchive      = %s must be in status (locked) and the document generated in order to archive it
 ObjectMustBeClassifiedToOpen     = %s must be in status (classified) in order to open it again
 
@@ -84,8 +83,8 @@ RemoveFileObject        = Delete the document
 ConfirmRemoveFileObject = Are you sure you want to <b>delete</b> the document %s ?<br><b> This action is irreversible. The document will be deleted forever. </b>
 ArchiveObject           = Archive %s
 ConfirmArchiveObject    = Are you sure you want to archive %s ?
-ClassifyObject          = Classify %s
-ConfirmClassifyObject   = Are you sure you want to classify %s ?
+VersionObject           = Version %s
+ConfirmVersionObject   = Are you sure you want to version %s ?
 
 # Data
 ActionsOnObject = Events on %s
