@@ -49,13 +49,13 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
 
 	$filearray = dol_dir_list($dir, 'files', 0, '', '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_DESC : SORT_ASC));
 
-    if (getDolUserInt('SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS') == 1) {
+    if ($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS == 1) {
         $yesterdayTimeStamp = dol_time_plus_duree(dol_now(), -1, 'd');
         $filearray = array_filter($filearray, function($file) use ($yesterdayTimeStamp) {
             return $file['date'] > $yesterdayTimeStamp;
         });
     }
-    if (getDolUserInt('SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS') == 1) {
+    if ($user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS == 1) {
         $moduleObjectMedias = dol_dir_list($conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1], 'files', 1, '', '.odt|.pdf|barcode|_mini|_medium|_small|_large');
         $filearray          = array_filter($filearray, function($file) use ($conf, $moduleNameLowerCase, $moduleObjectMedias) {
             $fileExists = array_search($file['name'], array_column($moduleObjectMedias, 'name'));
