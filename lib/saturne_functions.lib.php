@@ -299,11 +299,18 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
     } else {
         global $conf, $form;
 
-        print '<div class="arearef heightref valignmiddle centpercent">';
-        $moreHtmlLeft = '<div class="floatleft inline-block valignmiddle divphotoref">' . saturne_show_medias_linked($moduleNameLowerCase, $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $object->element . '/'. $object->ref . '/photos/', 'small', '', 0, 0, 0, 88, 88, 0, 0, 0, $object->element . '/'. $object->ref . '/photos/', $object, 'photo', 0, 0,0, 1) . '</div>';
-        print $form->showrefnav($object, $paramId, $moreHtml, $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, $moreParams, 0, $moreHtmlLeft, $object->getLibStatut(6));
-        print '</div>';
-    }
+		print '<div class="arearef heightref valignmiddle centpercent">';
+        $subdir = $object->element . '/'. $object->ref . '/photos/';
+        $reshook  = $hookmanager->executeHooks('SaturneBannerTabCustomSubdir', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+        if ($reshook > 0) {
+            $subdir = $hookmanager->resPrint;
+        }
+        $sdir = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $subdir;
+
+		$morehtmlleft = '<div class="floatleft inline-block valignmiddle divphotoref">' . saturne_show_medias_linked($moduleNameLowerCase, $sdir, 'small', '', 0, 0, 0, 88, 88, 0, 0, 0, $subdir, $object, 'photo', 0, 0,0, 1) . '</div>';
+		print $form->showrefnav($object, $paramid, $morehtml, $shownav, $fieldid, $fieldref, $saturneMorehtmlref, $moreparam, 0, $morehtmlleft, $object->getLibStatut(6));
+		print '</div>';
+	}
 
     print '<div class="underbanner clearboth"></div>';
 }
