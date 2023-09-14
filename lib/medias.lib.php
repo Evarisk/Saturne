@@ -56,14 +56,13 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
         });
     }
     if (getDolUserInt('SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS') == 1) {
-        $filearray = array_filter($filearray, function($file) use ($conf, $moduleNameLowerCase) {
-            $regexFormattedFileName = preg_quote($file['name'], '/');
-            $fileArrays             = dol_dir_list($conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1], 'files', 1, $regexFormattedFileName, '.odt|.pdf|barcode|_mini|_medium|_small|_large');
-
-            return count($fileArrays) == 0;
+        $moduleObjectMedias = dol_dir_list($conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1], 'files', 1, '', '.odt|.pdf|barcode|_mini|_medium|_small|_large');
+        $filearray          = array_filter($filearray, function($file) use ($conf, $moduleNameLowerCase, $moduleObjectMedias) {
+            $fileExists = array_search($file['name'], array_column($moduleObjectMedias, 'name'));
+            return !$fileExists;
         });
     }
-    
+
 	$j         = 0;
 
 	if (count($filearray)) {
@@ -378,15 +377,19 @@ function saturne_get_media_linked_elements(string $moduleName, string $fileName)
     global $conf, $db, $langs;
 
     $moduleNameLowerCase    = dol_strtolower($moduleName);
-    $regexFormattedFileName = preg_quote($fileName, '/');
+    $regexFormattedFileName = '^' . preg_quote($fileName, '/');
 
     $dir                 = $conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1];
     $fileArrays          = dol_dir_list($dir, 'files', 1, $regexFormattedFileName, '.odt|.pdf|barcode|_mini|_medium|_small|_large');
+    $moduleClasses       = dol_dir_list(__DIR__ . '/../../' . $moduleNameLowerCase . '/class/', 'files', 1);
+
     $mediaLinkedElements = [];
     foreach ($fileArrays as $fileArray) {
-        $element = preg_split('/\//', $fileArray['relativename']);
+        $element   = preg_split('/\//', $fileArray['relativename']);
+        $classKey  = array_search($element[0] . '.class.php', array_column($moduleClasses, 'name'));
+        $classPath = $moduleClasses[$classKey]['fullname'];
 
-        require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $element[0] . '.class.php';
+        require_once $classPath;
 
         $className = ucfirst($element[0]);
         if (strstr($className, '_')) {
