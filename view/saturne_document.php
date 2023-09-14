@@ -79,8 +79,11 @@ if (!$sortorder) {
 }
 
 // Initialize technical objects
-$classname   = ucfirst($objectType);
-$object      = new $classname($db);
+$className   = ucfirst($objectType);
+if (strstr($className, '_')) {
+    $className = preg_replace('/_/', '', $className);
+}
+$object      = new $className($db);
 $extrafields = new ExtraFields($db);
 
 $hookmanager->initHooks([$objectType . 'document', $object->element . 'document', 'saturneglobal', 'globalcard']); // Note that conf->hooks_modules contains array
@@ -104,13 +107,16 @@ saturne_check_access($permissiontoread);
 */
 
 $parameters = ['id' => $id];
-$reshook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
-if ($reshook < 0) {
+$resHook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+if ($resHook < 0) {
     setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 }
 
-if (empty($reshook)) {
+if (empty($resHook)) {
     include DOL_DOCUMENT_ROOT.'/core/actions_linkedfiles.inc.php'; // Must be included, not include_once
+
+    // Actions set_thirdparty, set_project
+    require_once __DIR__ . '/../core/tpl/actions/banner_actions.tpl.php';
 }
 
 /*

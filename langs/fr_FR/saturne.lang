@@ -74,6 +74,11 @@ ODTDefaultTemplateName = ODT par défaut
 ErrorFileNotFound      = Fichier non trouvé
 ErrorNoSocietyLogo     = Aucun logo de la société renseigné
 
+# Trigger - Événements
+ConfTrigger                 = Configuration des événements
+ConfEventAuto               = Configuration des événements automatiques
+AdvancedTriggers            = Contenu des événéments avancé
+AdvancedTriggersDescription = Active une description détaillée des événements de %s
 
 
 #
@@ -113,6 +118,7 @@ DontShowPatchNote      = Ne plus afficher la note de mise à jour
 #
 
 # Data - Donnée
+Schedules      = Horaires
 SchedulesSaved = Les horaires ont bien été enregistrés
 
 
@@ -160,6 +166,7 @@ CloseModal = Fermer
 #
 # Data - Donnée
 FkElement              = Élément lié
+ElementType            = Type d'élément
 CertificateExpired     = Il y a %s certificat(s) expiré(s)
 NoCertificate          = Aucun certificat
 checkDateEndJob        = Vérification de la date de fin des certificats
@@ -174,7 +181,6 @@ checkDateEndJobComment = Vérification et mise à jour du statut des certificats
 # Data - Donnée
 EntityNumber = Numéro de l'entité
 EntityName   = Nom de l'entité
-
 
 
 #

@@ -45,7 +45,7 @@ class SaturneSignature extends SaturneObject
     /**
      * @var string Module name.
      */
-    public string $module = 'saturne';
+    public $module = 'saturne';
 
     /**
      * @var string Element type of object.
@@ -61,7 +61,7 @@ class SaturneSignature extends SaturneObject
      * @var int  Does this object support multicompany module ?
      * 0=No test on entity, 1=Test with field entity, 'field@table'=Test with link by field@table
      */
-    public int $ismultientitymanaged = 1;
+    public $ismultientitymanaged = 1;
 
     /**
      * @var int  Does object support extrafields ? 0=No, 1=Yes
@@ -86,7 +86,7 @@ class SaturneSignature extends SaturneObject
     /**
      * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
      */
-    public array $fields = [
+    public $fields = [
         'rowid'                => ['type' => 'integer',      'label' => 'TechnicalID',       'enabled' => 1, 'position' => 1,   'notnull' => 1, 'visible' => 0, 'noteditable' => 1, 'index' => 1, 'comment' => 'Id'],
         'entity'               => ['type' => 'integer',      'label' => 'Entity',            'enabled' => 1, 'position' => 10,  'notnull' => 1, 'visible' => 0, 'index' => 1],
         'date_creation'        => ['type' => 'datetime',     'label' => 'DateCreation',      'enabled' => 1, 'position' => 20,  'notnull' => 1, 'visible' => 0],
@@ -355,7 +355,7 @@ class SaturneSignature extends SaturneObject
      */
     public function setRegistered(User $user, int $notrigger = 0): int
     {
-        return $this->setStatusCommon($user, self::STATUS_REGISTERED, $notrigger, 'SATURNESIGNATURE_REGISTERED');
+        return $this->setStatusCommon($user, self::STATUS_REGISTERED, $notrigger, 'SATURNE_SIGNATURE_REGISTERED');
     }
 
     /**
@@ -367,7 +367,7 @@ class SaturneSignature extends SaturneObject
      */
     public function setPending(User $user, int $notrigger = 0): int
     {
-        return $this->setStatusCommon($user, self::STATUS_PENDING_SIGNATURE, $notrigger, 'SATURNESIGNATURE_PENDING_SIGNATURE');
+        return $this->setStatusCommon($user, self::STATUS_PENDING_SIGNATURE, $notrigger, 'SATURNE_SIGNATURE_PENDING_SIGNATURE');
     }
 
     /**
@@ -380,7 +380,7 @@ class SaturneSignature extends SaturneObject
      */
     public function setSigned(User $user, int $notrigger = 0, string $zone = 'private'): int
     {
-        return $this->setStatusCommon($user, self::STATUS_SIGNED, $notrigger, 'SATURNESIGNATURE_SIGN' . (($zone == 'public') ? '_PUBLIC' : ''));
+        return $this->setStatusCommon($user, self::STATUS_SIGNED, $notrigger, 'SATURNE_SIGNATURE_SIGN' . (($zone == 'public') ? '_PUBLIC' : ''));
     }
 
     /**
@@ -392,7 +392,7 @@ class SaturneSignature extends SaturneObject
      */
     public function setDeleted(User $user, int $notrigger = 0): int
     {
-        return $this->setStatusCommon($user, self::STATUS_DELETED, $notrigger, 'SATURNESIGNATURE_DELETE');
+        return $this->setStatusCommon($user, self::STATUS_DELETED, $notrigger, 'SATURNE_SIGNATURE_DELETE');
     }
 
     /**
@@ -497,7 +497,7 @@ class SaturneSignature extends SaturneObject
 
                     $result = $this->create($user);
                     if ($result > 0) {
-                        $this->call_trigger(strtoupper(get_class($this)) . '_ADDATTENDANT', $user);
+                        $this->call_trigger('SATURNE_SIGNATURE_ADDATTENDANT', $user);
                     }
                 }
             }

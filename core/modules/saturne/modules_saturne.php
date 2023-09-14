@@ -195,11 +195,6 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/commondocgenerator.class.php';
 abstract class SaturneDocumentModel extends CommonDocGenerator
 {
     /**
-     * @var string Document description.
-     */
-    public string $description = '';
-
-    /**
      * @var string Module.
      */
     public string $module = '';
@@ -208,16 +203,6 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
      * @var string Document type.
      */
     public string $document_type = '';
-
-    /**
-     * @var string Extension document type.
-     */
-    public string $type = '';
-
-    /**
-     * @var array Document format.
-     */
-    public array $format = [];
 
     /**
      * Constructor.
@@ -236,7 +221,7 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
         $this->document_type = $objectDocumentType;
         $this->name          = $langs->trans('ODTDefaultTemplateName');
         $this->description   = $langs->trans('DocumentModelOdt');
-        $this->scandir       = dol_strtoupper($this->module) . '_' . dol_strtoupper($this->document_type) . '_ADDON_PDF_ODT_PATH'; // Name of constant that is used to save list of directories to scan.
+        $this->scandir       = dol_strtoupper($this->module) . '_' . dol_strtoupper($this->document_type) . '_ADDON_ODT_PATH'; // Name of constant that is used to save list of directories to scan.
 
         // Page size for A4 format.
         $this->type         = 'odt';
@@ -418,14 +403,16 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
                 $signatory        = new SaturneSignature($this->db, $this->module, $moreParam['object']->element);
                 $signatoriesArray = $signatory->fetchSignatories($moreParam['object']->id, $moreParam['object']->element);
                 if (!empty($signatoriesArray) && is_array($signatoriesArray)) {
-                    $tempDir = $conf->$moduleNameLowerCase->multidir_output[$moreParam['object']->entity ?? 1] . '/temp/';
+                    $nbAttendant = 0;
+                    $tempDir     = $conf->$moduleNameLowerCase->multidir_output[$moreParam['object']->entity ?? 1] . '/temp/';
                     if (empty($moreParam['excludeAttendantsRole'])) {
                         $moreParam['excludeAttendantsRole'] = [];
                     }
                     foreach ($signatoriesArray as $objectSignatory) {
                         if (!in_array($objectSignatory->role, $moreParam['excludeAttendantsRole'])) {
+                            $tmpArray['attendant_number']    = ++$nbAttendant;
                             $tmpArray['attendant_lastname']  = strtoupper($objectSignatory->lastname);
-                            $tmpArray['attendant_firstname'] = $objectSignatory->firstname;
+                            $tmpArray['attendant_firstname'] = dol_strlen($objectSignatory->firstname) > 0 ? ucfirst($objectSignatory->firstname) : '';
                             switch ($objectSignatory->attendance) {
                                 case 1:
                                     $attendance = $outputLangs->trans('Delay');
@@ -435,6 +422,36 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
                                     break;
                                 default:
                                     $attendance = $outputLangs->transnoentities('Present');
+                                    break;
+                            }
+                            switch ($objectSignatory->element_type) {
+                                case 'user':
+                                    $user    = new User($this->db);
+                                    $societe = new Societe($this->db);
+                                    $user->fetch($objectSignatory->element_id);
+                                    $tmpArray['attendant_job'] = $user->job;
+                                    if ($user->fk_soc > 0) {
+                                        $societe->fetch($user->fk_soc);
+                                        $tmpArray['attendant_company'] = $societe->name;
+                                    } else {
+                                        $tmpArray['attendant_company'] = $conf->global->MAIN_INFO_SOCIETE_NOM;
+                                    }
+                                    break;
+                                case 'socpeople':
+                                    $contact = new Contact($this->db);
+                                    $societe = new Societe($this->db);
+                                    $contact->fetch($objectSignatory->element_id);
+                                    $tmpArray['attendant_job'] = $contact->poste;
+                                    if ($contact->fk_soc > 0) {
+                                        $societe->fetch($contact->fk_soc);
+                                        $tmpArray['attendant_company'] = $societe->name;
+                                    } else {
+                                        $tmpArray['attendant_company'] = $conf->global->MAIN_INFO_SOCIETE_NOM;
+                                    }
+                                    break;
+                                default:
+                                    $tmpArray['attendant_job']     = '';
+                                    $tmpArray['attendant_company'] = '';
                                     break;
                             }
                             $tmpArray['attendant_role']           = $outputLangs->transnoentities($objectSignatory->role);
@@ -458,8 +475,11 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
                         }
                     }
                 } else {
+                    $tmpArray['attendant_number']         = '';
                     $tmpArray['attendant_lastname']       = '';
                     $tmpArray['attendant_firstname']      = '';
+                    $tmpArray['attendant_job']            = '';
+                    $tmpArray['attendant_company']        = '';
                     $tmpArray['attendant_role']           = '';
                     $tmpArray['attendant_signature_date'] = '';
                     $tmpArray['attendant_attendance']     = '';
@@ -586,6 +606,7 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
                     $newFileTmp .= '_specimen';
                 }
                 $newFileTmp = str_replace(' ', '_', $newFileTmp);
+                $newFileTmp = dol_sanitizeFileName($newFileTmp);
 
                 // Get extension (ods or odt).
                 $newFileFormat = substr($newFile, strrpos($newFile, '.') + 1);
@@ -676,6 +697,14 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
 
                 if (!empty($conf->global->MAIN_UMASK)) {
                     @chmod($file, octdec($conf->global->MAIN_UMASK));
+                }
+
+                $tempDir   = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?? 1] . '/temp/';
+                $fileArray = dol_dir_list($tempDir, 'files');
+                if (!empty($fileArray)) {
+                    foreach ($fileArray as $file) {
+                        unlink($file['fullname']);
+                    }
                 }
 
                 $odfHandler = null; // Destroy object.

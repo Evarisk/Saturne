@@ -73,7 +73,10 @@ require_once __DIR__ . '/../../class/saturnesignature.class.php';
 
 // Load Module libraries.
 require_once __DIR__ . '/../../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
-require_once __DIR__ . '/../../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . strtolower($documentType) . '.class.php';
+$fileExists = file_exists('../../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . strtolower($documentType) . '.class.php');
+if ($fileExists && GETPOSTISSET('document_type')) {
+    require_once __DIR__ . '/../../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . strtolower($documentType) . '.class.php';
+}
 
 // Global variables definitions.
 global $conf, $db, $hookmanager, $langs;
@@ -83,13 +86,19 @@ saturne_load_langs();
 
 // Get parameters.
 $track_id = GETPOST('track_id', 'alpha');
+$entity   = GETPOST('entity');
 $action   = GETPOST('action', 'aZ09');
 $source   = GETPOST('source', 'aZ09');
 
 // Initialize technical objects.
 $classname = ucfirst($objectType);
+if (strstr($classname, '_')) {
+    $classname = preg_replace('/_/', '', $classname);
+}
 $object    = new $classname($db);
-$document  = new $documentType($db);
+if (GETPOSTISSET('document_type') && $fileExists) {
+    $document = new $documentType($db);
+}
 $signatory = new SaturneSignature($db, $moduleNameLowerCase, $objectType);
 $user      = new User($db);
 
@@ -97,6 +106,12 @@ $user      = new User($db);
 $form = new Form($db);
 
 $hookmanager->initHooks([$objectType . 'publicsignature', 'saturnepublicsignature', 'saturnepublicinterface', 'saturneglobal', 'globalcard']); // Note that conf->hooks_modules contains array.
+
+if (!isModEnabled('multicompany')) {
+    $entity = $conf->entity;
+}
+
+$conf->setEntityValues($db, $entity);
 
 $signatory->fetch(0, '', ' AND signature_url =' . "'" . $track_id . "'");
 $object->fetch($signatory->fk_object);
@@ -116,7 +131,7 @@ if (empty($reshook)) {
     if ($action == 'add_signature') {
         $data        = json_decode(file_get_contents('php://input'), true);
         $signatoryID = GETPOST('signatoryID');
-        
+
         $signatory->fetch($signatoryID);
 
         $signatory->signature      = $data['signature'];
@@ -184,10 +199,11 @@ if (empty($reshook)) {
         $template    = preg_replace('/DOL_DOCUMENT_ROOT/', DOL_DOCUMENT_ROOT, $conf->global->$constforval);
         $model       = strtolower($documentType) . '_odt:' . $template .'template_' . strtolower($documentType) . '.odt';
 
-        $moreparams['object']   = $object;
-        $moreparams['user']     = $user;
-        $moreparams['specimen'] = 1;
-        $moreparams['zone']     = 'public';
+        $moreparams['object']     = $object;
+        $moreparams['user']       = $user;
+        $moreparams['specimen']   = 1;
+        $moreparams['zone']       = 'public';
+        $moreparams['objectType'] = $objectType;
 
         $result = $document->generateDocument($model, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
 
@@ -195,7 +211,7 @@ if (empty($reshook)) {
             setEventMessages($document->error, $document->errors, 'errors');
             $action = '';
         } elseif (empty($donotredirect)) {
-            copy($upload_dir . '/' . strtolower($documentType) . '/' . $object->ref . '/public_specimen/' . $document->last_main_doc, DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $objectType . '_specimen_' . $track_id . '.odt');
+            copy($upload_dir . '/' . strtolower($objectType) . 'document' . '/' . $object->ref . '/public_specimen/' . $document->last_main_doc, DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $objectType . '_specimen_' . $track_id . '.odt');
             setEventMessages($langs->trans('FileGenerated') . ' - ' . $document->last_main_doc, []);
             $urltoredirect = $_SERVER['REQUEST_URI'];
             $urltoredirect = preg_replace('/#builddoc$/', '', $urltoredirect);
@@ -242,7 +258,11 @@ $element = $signatory; ?>
                     <?php $path = DOL_MAIN_URL_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/'; ?>
                     <input type="hidden" class="specimen-name" value="<?php echo $objectType . '_specimen_' . $track_id . '.odt' ?>">
                     <input type="hidden" class="specimen-path" value="<?php echo $path ?>">
-                    <span class="wpeo-button button-primary  button-radius-2 grid-align-right auto-download"><i class="button-icon fas fa-print"></i></span>
+                    <?php if (GETPOSTISSET('document_type') && $fileExists) : ?>
+                        <span class="wpeo-button button-primary button-radius-2 grid-align-right auto-download"><i class="button-icon fas fa-print"></i></span>
+                    <?php else : ?>
+                        <span class="wpeo-button button-grey button-radius-2 grid-align-right"><i class="button-icon fas fa-print"></i></span>
+                    <?php endif; ?>
                 </div>
                 <br>
                 <div class="wpeo-table table-flex table-2">

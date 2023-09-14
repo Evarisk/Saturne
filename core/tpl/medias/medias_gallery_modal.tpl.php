@@ -1,12 +1,41 @@
 <?php
+/* Copyright (C) 2023 EVARISK <technique@evarisk.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
-global $action, $conf, $db, $langs, $moduleName, $moduleNameLowerCase, $moduleNameUpperCase, $subaction;
+/**
+ * \file    core/tpl/medias/object/medias_gallery_modal.tpl.php
+ * \ingroup saturne
+ * \brief   Saturne medias gallery modal
+ */
 
+// Load Dolibarr libraries
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmdirectory.class.php';
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
+require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
+require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 
-$ecmdir           = new EcmDirectory($db);
-$ecmfile          = new EcmFiles($db);
+// Global variables definitions
+global $action, $conf, $db, $langs, $moduleName, $moduleNameLowerCase, $moduleNameUpperCase, $subaction, $user;
+
+// Initialize technical objects
+$ecmdir  = new EcmDirectory($db);
+$ecmfile = new EcmFiles($db);
+
+// Initialize view objects
+$form = new Form($db);
 
 if ( ! $error && $subaction == "uploadPhoto" && ! empty($conf->global->MAIN_UPLOAD_DOC)) {
 
@@ -62,15 +91,21 @@ if ( ! $error && $subaction == "addFiles") {
 	$objectSubtype = $data['objectSubtype'];
 	$objectSubdir  = $data['objectSubdir'];
 
-	$object = new $objectType($db);
-	$object->fetch($objectId);
+    if (strstr($objectType, '_')) {
+        $className = preg_replace('/_/', '', $objectType);
+    } else {
+        $className = $objectType;
+    }
 
-	$modObjectName = strtoupper($moduleNameLowerCase) . '_' . strtoupper($objectType) . '_ADDON';
+    $object = new $className($db);
+    $object->fetch($objectId);
+
+	$modObjectName = strtoupper($moduleNameLowerCase) . '_' . strtoupper($className) . '_ADDON';
 
     $numberingModuleName = [
         $object->element => $conf->global->$modObjectName,
     ];
-    list($modObject) = saturne_require_objects_mod($numberingModuleName);
+    list($modObject) = saturne_require_objects_mod($numberingModuleName, $moduleNameLowerCase);
 
 	if (dol_strlen($object->ref) > 0) {
 		$pathToObjectPhoto = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType .'/' . $object->ref . '/' . $objectSubdir;
@@ -153,6 +188,12 @@ if ( ! $error && $subaction == "unlinkFile") {
 
 	$fullPath = $filePath . '/' . $fileName;
 
+    if (strstr($objectType, '_')) {
+        $className = preg_replace('/_/', '', $objectType);
+    } else {
+        $className = $objectType;
+    }
+
 	if (is_file($fullPath)) {
 		unlink($fullPath);
 	}
@@ -172,8 +213,9 @@ if ( ! $error && $subaction == "unlinkFile") {
 	}
 
 	if ($objectId > 0) {
-		$object = new $objectType($db);
+		$object = new $className($db);
 		$object->fetch($objectId);
+
 		if (property_exists($object, $objectSubtype)) {
 
 			if ($object->$objectSubtype == $fileName) {
@@ -204,8 +246,14 @@ if ( ! $error && $subaction == "addToFavorite") {
 	$objectSubtype = $data['objectSubtype'];
 	$objectSubdir  = $data['objectSubdir'];
 
+    if (strstr($objectType, '_')) {
+        $className = preg_replace('/_/', '', $objectType);
+    } else {
+        $className = $objectType;
+    }
+
 	if ($objectId > 0) {
-		$object = new $objectType($db);
+		$object = new $className($db);
 		$object->fetch($objectId);
 		if (property_exists($object, $objectSubtype)) {
 			$object->$objectSubtype = $fileName;
@@ -221,6 +269,22 @@ if ( ! $error && $subaction == "pagination") {
 	$pagesCounter = $data['pagesCounter'];
 
 	$loadedPageArray = saturne_load_pagination($pagesCounter, [], $offset);
+}
+
+if ( ! $error && $subaction == "toggleTodayMedias") {
+    $toggleValue = GETPOST('toggle_today_medias');
+
+    $tabparam['SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS'] = $toggleValue;
+
+    dol_set_user_param($db, $conf,$user, $tabparam);
+}
+
+if ( ! $error && $subaction == "toggleUnlinkedMedias") {
+    $toggleValue = GETPOST('toggle_unlinked_medias');
+
+    $tabparam['SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS'] = $toggleValue;
+
+    dol_set_user_param($db, $conf,$user, $tabparam);
 }
 
 if (is_array($submitFileErrorText)) {
@@ -254,7 +318,7 @@ if (is_array($submitFileErrorText)) {
 					<div class="notice-close"><i class="fas fa-times"></i></div>
 				</div>
 			</div>
-			<div class="wpeo-gridlayout grid-2">
+			<div class="wpeo-gridlayout grid-3">
 				<div class="modal-add-media">
 					<?php
 					print '<input type="hidden" name="token" value="'.newToken().'">';
@@ -279,8 +343,26 @@ if (is_array($submitFileErrorText)) {
 						</div>
 					</div>
 				</div>
+                <div>
+                    <div>
+                        <?php print img_picto($langs->trans('Link'), 'link') . ' ' . $form->textwithpicto($langs->trans('UnlinkedMedias'), $langs->trans('ShowOnlyUnlinkedMedias'));
+                        if ($user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS) {
+                            print '<span id="del_unlinked_medias" value="0" class="valignmiddle linkobject toggle-unlinked-medias ' . (!empty($user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS) ? '' : 'hideobject') . '">' . img_picto($langs->trans('Enabled'), 'switch_on') . '</span>';
+                        } else {
+                            print '<span id="set_unlinked_medias" value="1" class="valignmiddle linkobject toggle-unlinked-medias ' . (!empty($user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS) ? 'hideobject' : '') . '">' . img_picto($langs->trans('Disabled'), 'switch_off') . '</span>';
+                        } ?>
+                    </div>
+                    <div>
+                        <?php print img_picto($langs->trans('Calendar'), 'calendar') . ' ' . $form->textwithpicto($langs->trans('Today'), $langs->trans('ShowOnlyMediasAddedToday'));
+                        if ($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS) {
+                            print '<span id="del_today_medias" value="0" class="valignmiddle linkobject toggle-today-medias ' . (!empty($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS) ? '' : 'hideobject') . '">' . img_picto($langs->trans('Enabled'), 'switch_on') . '</span>';
+                        } else {
+                            print '<span id="set_today_medias" value="1" class="valignmiddle linkobject toggle-today-medias ' . (!empty($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS) ? 'hideobject' : '') . '">' . img_picto($langs->trans('Disabled'), 'switch_off') . '</span>';
+                        } ?>
+                    </div>
+                </div>
 			</div>
-			<div id="progressBarContainer" style="display:none">
+			<div id="progressBarContainer" style="display: none;">
 				<div id="progressBar"></div>
 			</div>
 			<div class="ecm-photo-list-content">
@@ -295,7 +377,21 @@ if (is_array($submitFileErrorText)) {
 			<?php
 			$filearray                    = dol_dir_list($conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias/', "files", 0, '', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC);
 			$moduleImageNumberPerPageConf = strtoupper($moduleNameLowerCase) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
-			$allMediasNumber              = count($filearray);
+            if ($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS == 1) {
+                $yesterdayTimeStamp = dol_time_plus_duree(dol_now(), -1, 'd');
+                $filearray = array_filter($filearray, function($file) use ($yesterdayTimeStamp) {
+                    return $file['date'] > $yesterdayTimeStamp;
+                });
+            }
+            if ($user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS == 1) {
+                $filearray = array_filter($filearray, function($file) use ($conf, $moduleNameLowerCase) {
+                    $regexFormattedFileName = preg_quote($file['name'], '/');
+                    $fileArrays             = dol_dir_list($conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1], 'files', 1, $regexFormattedFileName, '.odt|.pdf|barcode|_mini|_medium|_small|_large');
+
+                    return count($fileArrays) == 0;
+                });
+           }
+            $allMediasNumber              = count($filearray);
 			$pagesCounter                 = $conf->global->$moduleImageNumberPerPageConf ? ceil($allMediasNumber/($conf->global->$moduleImageNumberPerPageConf ?: 1)) : 1;
 			$page_array                   = saturne_load_pagination($pagesCounter, $loadedPageArray, $offset);
 

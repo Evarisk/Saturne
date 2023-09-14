@@ -89,8 +89,11 @@ if (!$sortorder) {
 }
 
 // Initialize technical objects
-$classname   = ucfirst($objectType);
-$object      = new $classname($db);
+$className   = ucfirst($objectType);
+if (strstr($className, '_')) {
+    $className = preg_replace('/_/', '', $className);
+}
+$object      = new $className($db);
 $extrafields = new ExtraFields($db);
 
 $hookmanager->initHooks([$objectType . 'agenda', $object->element . 'agenda', 'saturneglobal', 'globalcard']); // Note that conf->hooks_modules contains array
@@ -106,6 +109,7 @@ if ($id > 0 || !empty($ref)) {
 
 // Security check - Protection if external user
 $permissiontoread = $user->rights->$moduleNameLowerCase->$objectType->read;
+$permissiontoadd  = $user->rights->$moduleNameLowerCase->$objectType->write;
 saturne_check_access($permissiontoread);
 
 /*
@@ -113,12 +117,12 @@ saturne_check_access($permissiontoread);
 */
 
 $parameters = ['id' => $id];
-$reshook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
-if ($reshook < 0) {
+$resHook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+if ($resHook < 0) {
     setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 }
 
-if (empty($reshook)) {
+if (empty($resHook)) {
     // Cancel
     if ($cancel && !empty($backtopage)) {
         header('Location: ' . $backtopage);
@@ -130,6 +134,9 @@ if (empty($reshook)) {
         $actioncode          = '';
         $searchAgendaLabel = '';
     }
+
+    // Actions set_thirdparty, set_project
+    require_once __DIR__ . '/../core/tpl/actions/banner_actions.tpl.php';
 }
 
 /*

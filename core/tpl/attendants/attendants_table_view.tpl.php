@@ -89,10 +89,10 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
         print '</td><td class="center copy-signatureurl-container">';
         if ($object->status == $object::STATUS_VALIDATED) {
             if ((!$user->rights->$moduleNameLowerCase->$objectType->read && $user->rights->$moduleNameLowerCase->assignedtome->$objectType && ($element->element_id == $user->id || $element->element_id == $user->contact_id)) || $permissiontoadd) {
-                $signatureUrl = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $element->signature_url . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
+                $signatureUrl = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $element->signature_url . '&entity=' . $conf->entity . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
                 print '<a href=' . $signatureUrl . ' target="_blank"><div class="wpeo-button button-primary"><i class="fas' . (($element->status == SaturneSignature::STATUS_SIGNED) ? ' fa-eye' : ' fa-signature') . '"></i></div></a>';
-                print ' <i class="fas fa-clipboard copy-signatureurl" data-signature-url="' . $signatureUrl . '" style="color: #666"></i>';
-                print '<span class="copied-to-clipboard" style="display:none">' . '  ' . $langs->trans('CopiedToClipboard') . '</span>';
+                print ' <i class="fas fa-clipboard copy-signatureurl" data-signature-url="' . $signatureUrl . '" style="color: #666;"></i>';
+                print '<span class="copied-to-clipboard" style="display: none;">' . '  ' . $langs->trans('CopiedToClipboard') . '</span>';
             }
         }
         print '</td><td class="center">';
@@ -115,7 +115,7 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
                     } else {
                         $sql .= ' AND fk_contact = ' . $element->element_id;
                     }
-                    $sql .= " AND code = '" . 'AC_SATURNESIGNATURE_PENDING_SIGNATURE' . "'";
+                    $sql .= " AND code = '" . 'AC_SATURNE_SIGNATURE_PENDING_SIGNATURE' . "'";
                     $sql .= " AND elementtype = '" . $object->element . '@' . $moduleNameLowerCase . "'";
                     $resql = $db->query($sql);
                     if ($resql) {
@@ -167,9 +167,9 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
             print '<input type="hidden" name="signatoryID" value="' . $element->id . '">';
             print '<div class="dropdown-toggle wpeo-button ' . $cssButton . '"><i class="fas ' . $userIcon . '"></i></div>';
             print '<ul class="dropdown-content wpeo-gridlayout grid-3">';
-            print '<li class="dropdown-item set-attendance" style="padding: 0" value="0"><div class="wpeo-button button-green"><i class="fas fa-user"></i></div></li>';
-            print '<li class="dropdown-item set-attendance" style="padding: 0" value="1"><div class="wpeo-button"><i class="fas fa-user-clock"></i></div></li>';
-            print '<li class="dropdown-item set-attendance" style="padding: 0" value="2"><div class="wpeo-button button-red"><i class="fas fa-user-slash"></i></div></li>';
+            print '<li class="dropdown-item set-attendance" style="padding: 0;" value="0"><div class="wpeo-button button-green"><i class="fas fa-user"></i></div></li>';
+            print '<li class="dropdown-item set-attendance" style="padding: 0;" value="1"><div class="wpeo-button"><i class="fas fa-user-clock"></i></div></li>';
+            print '<li class="dropdown-item set-attendance" style="padding: 0;" value="2"><div class="wpeo-button button-red"><i class="fas fa-user-slash"></i></div></li>';
             print '</ul>';
             print '</div>';
         } else {

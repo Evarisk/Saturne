@@ -63,9 +63,12 @@ $backtopage         = GETPOST('backtopage', 'alpha');
 $attendantTableMode = (GETPOSTISSET('attendant_table_mode') ? GETPOST('attendant_table_mode', 'alpha') : 'advanced');
 
 // Initialize technical objects
-$classname = ucfirst($objectType);
-$object    = new $classname($db);
-$signatory = new SaturneSignature($db, $moduleNameLowerCase);
+$className = ucfirst($objectType);
+if (strstr($className, '_')) {
+    $className = preg_replace('/_/', '', $className);
+}
+$object    = new $className($db);
+$signatory = new SaturneSignature($db, $moduleNameLowerCase, $object->element);
 $usertmp   = new User($db);
 if (isModEnabled('societe')) {
     $thirdparty = new Societe($db);
@@ -92,17 +95,20 @@ saturne_check_access($permissiontoread, null, true);
 */
 
 $parameters = ['id' => $id];
-$reshook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
-if ($reshook < 0) {
+$resHook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+if ($resHook < 0) {
     setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 }
 
-if (empty($reshook)) {
+if (empty($resHook)) {
     // Cancel
     if ($cancel && !empty($backtopage)) {
         header('Location: ' . $backtopage);
         exit;
     }
+
+    // Actions set_thirdparty, set_project
+    require_once __DIR__ . '/../core/tpl/actions/banner_actions.tpl.php';
 
     // Action to add attendant
     if ($action == 'add_attendant') {
@@ -171,7 +177,7 @@ if (empty($reshook)) {
 
         if ($result > 0) {
             // Set attendance OK
-            $signatory->call_trigger('SATURNESIGNATURE_' . $triggerName, $user);
+            $signatory->call_trigger('SATURNE_SIGNATURE_' . $triggerName, $user);
         } elseif (!empty($signatory->errors)) {
             // Set attendance KO
             setEventMessages('', $signatory->errors, 'errors');
@@ -213,7 +219,7 @@ if (empty($reshook)) {
             require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
 
             $from = $conf->global->MAIN_MAIL_EMAIL_FROM;
-            $url  = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $signatory->signature_url  . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
+            $url  = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $signatory->signature_url  . '&entity=' . $conf->entity . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
 
             $message = $langs->trans('SignatureEmailMessage', $url);
             $subject = $langs->trans('SignatureEmailSubject', $langs->transnoentities('Of' . ucfirst($object->element)), $object->ref);
@@ -304,7 +310,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
     $parameters = ['backtocard' => $backtocard];
     $reshook    = $hookmanager->executeHooks('saturneAttendantsBackToCard', $parameters, $object); // Note that $action and $object may have been modified by some hooks
     if ($reshook > 0) {
-        $backtocard = $hookmanager->results;
+        $backtocard = $hookmanager->resPrint;
     }
 
     if ($object->status == $object::STATUS_DRAFT && $permissiontoadd) : ?>
@@ -374,7 +380,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
 
         print '<div class="opacitymedium">' . $langs->trans('NoAttendants') . '</div>';
     }
-    
+
     print '</div>';
 
     print dol_get_fiche_end();
@@ -515,7 +521,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
             foreach ($signatoriesByRole as $signatoryRole) {
                 foreach ($signatoryRole as $attendant) {
                     $mesg .= $outputlangs->trans($attendant->role) . ' : ' . strtoupper($attendant->lastname) . ' ' . $attendant->firstname . '<br>';
-                    $signatureUrl = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $attendant->signature_url . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
+                    $signatureUrl = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $attendant->signature_url . '&entity=' . $conf->entity . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
                     $mesg .= '<a href=' . $signatureUrl . ' target="_blank">' . $signatureUrl . '</a><br><br>';
                 }
             }

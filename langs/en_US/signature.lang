@@ -18,20 +18,20 @@
 #
 
 # Trigger
-AddAttendantTrigger     = Adding a participant : %s
-SignedTrigger           = Signature of participant completed %s
-PendingSignatureTrigger = Email sent, awaiting participant's signature %s
-AttendanceDelayTrigger  = Participant %s delay
-AttendanceAbsentTrigger = Participant %s absent
-DeletedTrigger          = Participant %s deleted
+AddAttendantTrigger     = Adding a attendant : %s
+SignedTrigger           = Signature of attendant completed %s
+PendingSignatureTrigger = Email sent, awaiting attendant's signature %s
+AttendanceDelayTrigger  = Attendant %s delay
+AttendanceAbsentTrigger = Attendant %s absent
+DeletedTrigger          = Attendant %s deleted
 
 # SetEventMessage
 BeCareful               = Attention
-AddSignatureSuccess     = Successful participant signature
+AddSignatureSuccess     = Successful attendant signature
 AddSignatureSuccessText = The signature has been registered for the document
-AddAttendantMessage     = Add participant : %s
-DeleteAttendantMessage  = Participant deletion: %s
-SignAttendantMessage    = The participant %s signed
+AddAttendantMessage     = Add attendant : %s
+DeleteAttendantMessage  = Attendant deletion: %s
+SignAttendantMessage    = The attendant %s signed
 SendEmailAt             = Send email to %s
 ErrorSetupEmail         = Mail configuration error, you have not configured your mail server in SMTP mode <br> Please use SMTP mode for better delivery and security of emails
 NoEmailSet              = No email entered: %s
@@ -40,7 +40,7 @@ NoEmailSet              = No email entered: %s
 SignatureEmailSubject          = Signature %s %s
 SignatureEmailMessage          = Hello, <br><br> Please find attached the link to sign the document.<br> %s
 GlobalSignatureEmailSubject    = [%s] Signature links for %s %s
-GlobalSignatureEmailMessage    = Hello, <br><br> Further to your %s"%s" dated %s, please find below the %s"%s" document signature links of the various participants: <br><br>
+GlobalSignatureEmailMessage    = Hello, <br><br> Further to your %s"%s" dated %s, please find below the %s"%s" document signature links of the various attendants: <br><br>
 GlobalSignatureEmailMessageEnd = We thank you to transmit them. <br><br> Wishing you an excellent reception, <br><br> Sincerely
 
 # Status
@@ -59,26 +59,29 @@ SignatureActions = Actions
 GoToValidate               = Validate %s
 GoToLock                   = Lock %s
 SendEmail                  = Send an email
-SendGlobalSignatureMail    = Send a signature email to all participants
-DeleteAttendant            = Delete the participant
+SendGlobalSignatureMail    = Send a signature email to all attendants
+DeleteAttendant            = Delete the attendant
 Sign                       = Sign
 Erase                      = Erase
 AttendantTableModeSimple   = Simplified view
 AttendantTableModeAdvanced = Advanced view
 
 # Data
-Attendant          = Participant
-Attendants         = Participants
-InternalAttendant  = Internal participant
-InternalAttendants = Internal participants
-ExternalAttendant  = External participant
-ExternalAttendants = External participants
-NoAttendants       = No linked participants. To add participants, the status must be "Draft (to be validated)".
-CloneAttendants    = Clone participants
-NoAttendant        = No %s present for %s.
-Present            = Present
-Absent             = Absent
-Delay              = Delay
+Attendant           = Attendant
+Attendants          = Attendants
+InternalAttendant   = Internal attendant
+InternalAttendants  = Internal attendants
+ExternalAttendant   = External attendant
+ExternalAttendants  = External attendants
+NoAttendants        = No linked attendants. To add attendants, the status must be "Draft (to be validated)".
+CloneAttendants     = Clone attendants
+NoAttendant         = No %s present for %s.
+Present             = Present
+Absent              = Absent
+Delay               = Delay
+ElectronicSignature = Electronic signature
+Signatory           = Signatory
+Responsible         = Responsible
 
 # Public interface
 FullName = Last name First name

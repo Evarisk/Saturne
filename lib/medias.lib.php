@@ -35,10 +35,11 @@
  */
 function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', string $sdir = '',string $size = '', int $maxHeight = 80, int $maxWidth = 80, int $offset = 1)
 {
-	global $conf, $langs;
+	global $conf, $langs, $user, $moduleNameLowerCase;
 
 	include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 	include_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
+	require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
 
 	$sortfield = 'date';
 	$sortorder = 'desc';
@@ -47,10 +48,24 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
 	$nbphoto = 0;
 
 	$filearray = dol_dir_list($dir, 'files', 0, '', '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_DESC : SORT_ASC));
+
+    if ($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS == 1) {
+        $yesterdayTimeStamp = dol_time_plus_duree(dol_now(), -1, 'd');
+        $filearray = array_filter($filearray, function($file) use ($yesterdayTimeStamp) {
+            return $file['date'] > $yesterdayTimeStamp;
+        });
+    }
+    if ($user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS == 1) {
+        $moduleObjectMedias = dol_dir_list($conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1], 'files', 1, '', '.odt|.pdf|barcode|_mini|_medium|_small|_large');
+        $filearray          = array_filter($filearray, function($file) use ($conf, $moduleNameLowerCase, $moduleObjectMedias) {
+            $fileExists = array_search($file['name'], array_column($moduleObjectMedias, 'name'));
+            return !$fileExists;
+        });
+    }
+
 	$j         = 0;
 
 	if (count($filearray)) {
-
 		print '<div class="wpeo-gridlayout grid-5 grid-gap-3 grid-margin-2 ecm-photo-list ecm-photo-list">';
 
 		if ($sortfield && $sortorder) {
@@ -59,46 +74,50 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
 
 		$moduleImageNumberPerPageConf = strtoupper($moduleName) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
 		for ($i = (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf); $i < ($conf->global->$moduleImageNumberPerPageConf + (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf));  $i++) {
-			$file = $filearray[$i]['name'];
 
-			if (image_format_supported($file) >= 0) {
-				$nbphoto++;
+            $fileName = $filearray[$i]['name'];
+            if (image_format_supported($fileName) >= 0) {
+                $nbphoto++;
 
-				if ($size == 'mini' || $size == 'small') {   // Format vignette
-					$relativepath = $moduleName . '/medias/thumbs';
-					$modulepart   = 'ecm';
-					$path         = DOL_URL_ROOT . '/document.php?modulepart=' . $modulepart . '&attachment=0&file=' . str_replace('/', '%2F', $relativepath);
+                if ($size == 'mini' || $size == 'small') {   // Format vignette
+                    $relativepath = $moduleName . '/medias/thumbs';
+                    $modulepart   = 'ecm';
+                    $path         = DOL_URL_ROOT . '/document.php?modulepart=' . $modulepart . '&attachment=0&file=' . str_replace('/', '%2F', $relativepath);
 
-					$file_infos = pathinfo($file);
+                    $file_infos = pathinfo($fileName);
+
                     // svg files aren't handled by vignette functions in images.lib, so they don't have thumbs
                     if ($file_infos['extension'] == 'svg') {
                         $path = preg_replace('/\/thumbs/', '', $path);
-                        $filename = $file_infos['filename'] . '.' . $file_infos['extension'];
+                        $shownFileName = $file_infos['filename'] . '.' . $file_infos['extension'];
                     } else {
-                        $filename = $file_infos['filename'] . '_' . $size . '.' . $file_infos['extension'];
+                        $shownFileName = $file_infos['filename'] . '_' . $size . '.' . $file_infos['extension'];
                     }
 
-					?>
+                    ?>
 
-					<div class="center clickable-photo clickable-photo<?php echo $j; ?>" value="<?php echo $j; ?>">
-						<figure class="photo-image">
-							<?php
-							$filePreviewUrl = urlencode($file);
-							$urladvanced = getAdvancedPreviewUrl($modulepart, $moduleName . '/medias/' . $filePreviewUrl, 0, 'entity=' . $conf->entity);
-							?>
-							<a class="clicked-photo-preview" href="<?php echo $urladvanced; ?>"><i class="fas fa-2x fa-search-plus"></i></a>
-							<?php if (image_format_supported($file) >= 0) : ?>
-								<?php $fullpath = $path . '/' . urlencode($filename) . '&entity=' . $conf->entity; ?>
-								<input class="filename" type="hidden" value="<?php echo $file; ?>">
-								<img class="photo photo<?php echo $j ?>" height="<?php echo $maxHeight; ?>" width="<?php echo $maxWidth; ?>" src="<?php echo $fullpath; ?>">
-							<?php endif; ?>
-						</figure>
-					<div class="title"><?php echo $file; ?></div>
-					</div><?php
-					$j++;
-				}
+                    <div class="center clickable-photo clickable-photo<?php echo $j; ?>" value="<?php echo $j; ?>">
+                        <figure class="photo-image">
+                            <?php
+                            $filePreviewUrl = urlencode($fileName);
+                            $urladvanced = getAdvancedPreviewUrl($modulepart, $moduleName . '/medias/' . $filePreviewUrl, 0, 'entity=' . $conf->entity);
+                            ?>
+                            <a class="clicked-photo-preview" href="<?php echo $urladvanced; ?>"><i class="fas fa-2x fa-search-plus"></i></a>
+                            <?php if (image_format_supported($fileName) >= 0) : ?>
+                                <?php $fullpath = $path . '/' . urlencode($shownFileName) . '&entity=' . $conf->entity; ?>
+                                <input class="filename" type="hidden" value="<?php echo $fileName; ?>">
+                                <?php
 
-			}
+                                ?>
+                                <img class="photo photo<?php echo $j ?>" height="<?php echo $maxHeight; ?>" width="<?php echo $maxWidth; ?>" src="<?php echo $fullpath; ?>">
+                            <?php endif; ?>
+                        </figure>
+                        <?php print saturne_get_media_linked_elements($moduleName, $fileName); ?>
+                        <div class="title"><?php echo $fileName; ?></div>
+                    </div><?php
+                    $j++;
+                }
+            }
 		}
 		print '</div>';
 	} else {
@@ -223,21 +242,16 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 						$alt              .= ' - ' . $langs->transnoentitiesnoconv('Size') . ': ' . $imgarray['width'] . 'x' . $imgarray['height'];
 						if ($notitle) $alt = '';
 						if ($usesharelink) {
-							if ($file['share']) {
-								if (empty($maxHeight) || $photo_vignette && $imgarray['height'] > $maxHeight) {
-									$return .= '<!-- Show original file (thumb not yet available with shared links) -->';
-									$return .= '<img width="65" height="65" class="photo '. $morecss .' photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/viewimage.php?hashp=' . urlencode($file['share']) . '" title="' . dol_escape_htmltag($alt) . '">';
-								} else {
-									$return .= '<!-- Show original file -->';
-									$return .= '<img  width="65" height="65" class="photo '. $morecss .' photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/viewimage.php?hashp=' . urlencode($file['share']) . '" title="' . dol_escape_htmltag($alt) . '">';
-								}
-							} else {
-								$return .= '<!-- Show nophoto file (because file is not shared) -->';
-								$return .= '<img  width="65" height="65" class="photo '. $morecss .' photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/public/theme/common/nophoto.png" title="' . dol_escape_htmltag($alt) . '">';
-							}
+                            if (empty($maxHeight) || $photo_vignette && $imgarray['height'] > $maxHeight) {
+                                $return .= '<!-- Show thumb file -->';
+                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo '. $morecss .' photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/custom/saturne/utils/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdirthumb . $photo_vignette) . '" title="' . dol_escape_htmltag($alt) . '">';
+                            } else {
+                                $return .= '<!-- Show original file -->';
+                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo '. $morecss .' photowithmargin" src="' . DOL_URL_ROOT . '/custom/saturne/utils/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" title="' . dol_escape_htmltag($alt) . '">';
+                            }
 						} else {
 							if (empty($maxHeight) || $photo_vignette && $imgarray['height'] > $maxHeight) {
-								$return .= '<!-- Show thumb -->';
+								$return .= '<!-- Show thumb file -->';
 								$return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo '. $morecss .'"  src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdirthumb . $photo_vignette) . '" title="' . dol_escape_htmltag($alt) . '">';
 							} else {
 								$return .= '<!-- Show original file -->';
@@ -348,4 +362,54 @@ function saturne_get_thumb_name(string $filename, string $thumbType = 'small'): 
 	$imgName       = pathinfo($filename, PATHINFO_FILENAME);
 	$imgExtension  = pathinfo($filename, PATHINFO_EXTENSION);
     return $imgName . '_' . $thumbType . '.' . $imgExtension;
+}
+
+/**
+ * Return media linked elements count
+ *
+ * @param  string $moduleName Module name
+ * @param  string $fileName       File name
+ * @return string $output     Show media linked element count
+ *
+ */
+function saturne_get_media_linked_elements(string $moduleName, string $fileName): string
+{
+    global $conf, $db, $langs;
+
+    $moduleNameLowerCase    = dol_strtolower($moduleName);
+    $regexFormattedFileName = '^' . preg_quote($fileName, '/');
+
+    $dir                 = $conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1];
+    $fileArrays          = dol_dir_list($dir, 'files', 1, $regexFormattedFileName, '.odt|.pdf|barcode|_mini|_medium|_small|_large');
+    $moduleClasses       = dol_dir_list(__DIR__ . '/../../' . $moduleNameLowerCase . '/class/', 'files', 1);
+
+    $mediaLinkedElements = [];
+    foreach ($fileArrays as $fileArray) {
+        $element   = preg_split('/\//', $fileArray['relativename']);
+        $classKey  = array_search($element[0] . '.class.php', array_column($moduleClasses, 'name'));
+        $classPath = $moduleClasses[$classKey]['fullname'];
+
+        require_once $classPath;
+
+        $className = ucfirst($element[0]);
+        if (strstr($className, '_')) {
+            $className = preg_replace('/_/', '', $className);
+        }
+        $object = new $className($db);
+
+        $mediaLinkedElements[$fileArray['name']][$element[0]]['picto'] = $object->picto;
+        $mediaLinkedElements[$fileArray['name']][$element[0]]['value']++;
+    }
+
+    $output = '<div class="linked-element">';
+    foreach ($mediaLinkedElements as $mediaLinkedElement) {
+        foreach ($mediaLinkedElement as $key => $linkedElement) {
+            $output .= '<span class="paddingleft paddingright">' . img_picto($langs->trans(ucfirst($key)), $linkedElement['picto'], 'class="paddingright"');
+            $output .= $linkedElement['value'];
+            $output .= '</span>';
+        }
+    }
+    $output .= '</div>';
+
+    return $output;
 }

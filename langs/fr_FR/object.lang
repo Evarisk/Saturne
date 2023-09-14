@@ -33,8 +33,11 @@ ObjectSentByMailTrigger = Mail envoyé
 ObjectArchivedTrigger   = %s %s archivé(e)
 ObjectExpiredTrigger    = %s %s expiré(e)
 ObjectGenerateTrigger   = %s %s généré(e)
+ObjectSignedTrigger     = %s %s signé(e)
 
 # SetEventMessage - Notice info
+ObjectValidated = %s a été validé(e)
+ObjectReOpened  = %s a été rouvert(e)
 
 # Status - Statut
 StatusDraft              = Brouillon (à valider)
@@ -43,34 +46,45 @@ ValidatePendingSignature = Validé (en attente de signature)
 Locked                   = Verrouillé
 Archived                 = Archivé
 Expired                  = Expiré
+Classified               = Classifié
 
 # Button - Bouton
-ReOpenDoli                      = Rouvrir
-Sign                            = Signer
-Lock                            = Verrouiller
-Archive                         = Archiver
-Clone                           = Cloner
-ObjectMustBeDraft               = %s doit être au statut (brouillon)
-ObjectMustBeValidated           = %s doit être au statut (validé)
-ObjectMustBeLocked              = %s doit être au statut (verrouillé)
-ObjectMustBeValidatedToGenerate = %s doit être au statut (validé) pour générer le document
-ObjectMustBeLockedToGenerate    = %s doit être au statut (verrouillé) pour générer le document
-ObjectMustBeValidatedToSign     = %s doit être au statut (validé) pour que les participants puissent signer
-AllSignatoriesMustHaveSigned    = Tous les participants doivent avoir signé pour verrouiller %s
-ObjectMustBeLockedToSendEmail   = %s doit être au statut (verrouillé) pour envoyer un email
-ObjectMustBeLockedToArchive     = %s doit être au statut (verrouillé) et le document généré afin de pouvoir l'archiver
+ReOpenDoli                       = Rouvrir
+Sign                             = Signer
+Lock                             = Verrouiller
+Archive                          = Archiver
+Clone                            = Cloner
+NewVersion                       = Nouvelle version
+Versioning                       = Versionner
+ObjectMustBeDraft                = %s doit être au statut (brouillon)
+ObjectMustBeValidated            = %s doit être au statut (validé)
+ObjectMustBeLocked               = %s doit être au statut (verrouillé)
+ObjectMustBeValidatedToGenerate  = %s doit être au statut (validé) pour générer le document
+ObjectMustBeLockedToGenerate     = %s doit être au statut (verrouillé) pour générer le document
+ObjectMustBeValidatedToSign      = %s doit être au statut (validé) pour que les participants puissent signer
+AllSignatoriesMustHaveSigned     = Tous les participants doivent avoir signé pour verrouiller %s
+ObjectMustBeValidatedToSendEmail = %s doit être au statut (validé) pour envoyer un email
+ObjectMustBeLockedToSendEmail    = %s doit être au statut (verrouillé) pour envoyer un email
+ObjectMustBeLockedToArchive      = %s doit être au statut (verrouillé) et le document généré afin de pouvoir l'archiver
+ObjectMustBeClassifiedToOpen     = %s doit être au statut (classifié) afin de pouvoir l'ouvrir de nouveau
 
 # Confirm box - Boite de confirmation
-ValidateObject        = Valider %s
-ConfirmValidateObject = Êtes-vous sûr de vouloir valider %s ? <br> La validation permet aux participants de signer le document mais <b> empêche l'ajout de nouveaux participants ou la modification de %s. </b>
-ReOpenObject          = Ouvrir à nouveau %s
-ConfirmReOpenObject   = Êtes-vous sûr de vouloir rouvrir %s ? La réouverture permet la modification de %s et l'ajout de nouveaux participants mais <b>toutes les signatures du document seront perdues</b>.
-LockObject            = Verrouiller %s
-ConfirmLockObject     = Êtes-vous sûr de vouloir verrouiller %s ?<br>Ce verrouillage permet de figer les données et la génération du document.
-CloneObject           = Cloner %s
-NewLabelForClone      = Nouveau libellé de %s
-ConfirmCloneObject    = Êtes-vous sûr de vouloir cloner %s <b>%s</b> ?
-DeleteObject          = Supprimer %s
+ValidateObject          = Valider %s
+ConfirmValidateObject   = Êtes-vous sûr de vouloir valider %s ? <br> La validation permet aux participants de signer le document mais <b> empêche l'ajout de nouveaux participants ou la modification de %s. </b>
+ReOpenObject            = Ouvrir à nouveau %s
+ConfirmReOpenObject     = Êtes-vous sûr de vouloir rouvrir %s ? La réouverture permet la modification de %s et l'ajout de nouveaux participants mais <b>toutes les signatures du document seront perdues</b>.
+LockObject              = Verrouiller %s
+ConfirmLockObject       = Êtes-vous sûr de vouloir verrouiller %s ?<br>Ce verrouillage permet de figer les données et la génération du document.
+CloneObject             = Cloner %s
+NewLabelForClone        = Nouveau libellé de %s
+ConfirmCloneObject      = Êtes-vous sûr de vouloir cloner %s <b>%s</b> ?
+DeleteObject            = Supprimer %s
+RemoveFileObject        = Supprimer le document
+ConfirmRemoveFileObject = Êtes-vous sûr de vouloir <b>supprimer</b> le document %s ?<br><b> Cette action est irréversible. Le document sera définitivement supprimé. </b>
+ArchiveObject           = Archiver %s
+ConfirmArchiveObject    = Êtes-vous sûr de vouloir archiver %s ?
+VersionObject           = Versionner %s
+ConfirmVersionObject    = Êtes-vous sûr de vouloir versionner %s ?
 
 # Data - Donnée
 ActionsOnObject = Événements sur %s
@@ -80,3 +94,10 @@ DisplayMoreInfo = Afficher plus d'informations
 ObjectLabel     = Récapitulatif
 ObjectSubject   = Email document
 ObjectContent   = Veuillez trouver ci-joint le/les document(s) ODT lié(s) à __THETYPE__.
+
+# Config Trigger Info - Configuration Infos Événements
+ObjectCreated  = Création d'un(e) %s
+ObjectModified = Modifcation d'un(e) %s
+ObjectDeleted  = Suppression d'un(e) %s
+ObjectValidate = Validation d'un(e) %s
+ObjectLock     = Verrouillage d'un(e) %s

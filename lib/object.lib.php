@@ -24,17 +24,18 @@
 /**
  * Load list of objects in memory from the database.
  *
- * @param  string      $className  Object className
- * @param  string      $sortorder  Sort Order
- * @param  string      $sortfield  Sort field
- * @param  int         $limit      Limit
- * @param  int         $offset     Offset
- * @param  array       $filter     Filter array. Example array('field'=>'value', 'customurl'=>...)
- * @param  string      $filtermode Filter mode (AND/OR)
- * @return int|array               0 < if KO, array of pages if OK
+ * @param  string     $className         Object className
+ * @param  string     $sortorder         Sort Order
+ * @param  string     $sortfield         Sort field
+ * @param  int        $limit             Limit
+ * @param  int        $offset            Offset
+ * @param  array      $filter            Filter array. Example array('field'=>'value', 'customurl'=>...)
+ * @param  string     $filtermode        Filter mode (AND/OR)
+ * @param  bool       $manageExtraFields Option for manage extrafields with LEFT JOIN SQL
+ * @return int|array                     0 < if KO, array of pages if OK
  * @throws Exception
  */
-function saturne_fetch_all_object_type(string $className = '', string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = [], string $filtermode = 'AND')
+function saturne_fetch_all_object_type(string $className = '', string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = [], string $filtermode = 'AND', $manageExtraFields = false)
 {
     dol_syslog(__METHOD__, LOG_DEBUG);
 
@@ -42,15 +43,35 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
 
     $object = new $className($db);
 
-    $records = [];
+    $records      = [];
+    $optionsArray = [];
+
+    if ($manageExtraFields) {
+        require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
+
+        $extraFields = new ExtraFields($db);
+
+        $extraFields->fetch_name_optionals_label($object->table_element);
+        $optionsArray = (!empty($extraFields->attributes[$object->table_element]['label']) ? $extraFields->attributes[$object->table_element]['label'] : null);
+    }
 
 	$objectFields = $object->getFieldList('t');
 	if (strstr($objectFields, 't.fk_prospectlevel')) {
 		$objectFields = preg_replace('/t.fk_prospectlevel,/','', $objectFields);
 	}
+    if (is_array($optionsArray) && !empty($optionsArray) && $manageExtraFields) {
+        foreach ($optionsArray as $name => $label) {
+            if (empty($extrafields->attributes[$object->table_element]['type'][$name]) || $extrafields->attributes[$object->table_element]['type'][$name] != 'separate') {
+                $objectFields .= ", eft." . $name;
+            }
+        }
+    }
     $sql = 'SELECT ';
     $sql .= $objectFields;
     $sql .= ' FROM `' . MAIN_DB_PREFIX . $object->table_element . '` as t';
+    if ($manageExtraFields) {
+        $sql .= ' LEFT JOIN `' . MAIN_DB_PREFIX . $object->table_element . '_extrafields` as eft ON t.rowid = eft.fk_object';
+    }
     if (isset($object->ismultientitymanaged) && $object->ismultientitymanaged == 1) {
         $sql .= ' WHERE entity IN (' . getEntity($object->table_element) . ')';
     } else {
@@ -96,6 +117,12 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
             $record = new $className($db);
             $record->setVarsFromFetchObj($obj);
 
+            if (is_array($optionsArray) && !empty($optionsArray) && $manageExtraFields) {
+                foreach ($optionsArray as $key => $value) {
+                    $record->array_options['options_' . $key] = $obj->$key;
+                }
+            }
+
             $records[$record->id] = $record;
 
             $i++;
@@ -137,8 +164,8 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
     $objectType = $object->element;
 
     if ($user->rights->$moduleNameLowerCase->$objectType->read) {
-        $head[$h][0] = dol_buildpath('/' . $moduleNameLowerCase . '/view/' . $objectType . '/' . $objectType . '_card.php', 1) . '?id=' . $object->id;
-        $head[$h][1] = '<i class="fas fa-info-circle pictofixedwidth"></i>' . $langs->trans(ucfirst($objectType));
+        $head[$h][0] = dol_buildpath('/' . $moduleNameLowerCase . '/view/' . (!empty($moreparam['parentType']) ? $moreparam['parentType'] : $objectType) . '/' . (!empty($moreparam['parentType']) ? $moreparam['parentType'] : $objectType) . '_card.php', 1) . '?id=' . $object->id . (!empty($moreparam['parentType']) ? '&object_type=' . $objectType : '');
+        $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-info-circle pictofixedwidth"></i>' . $langs->trans(ucfirst($objectType)) : '<i class="fas fa-info-circle"></i>';
         $head[$h][2] = 'card';
         $h = $h + 10;
 
@@ -157,7 +184,7 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
             }
 
             $head[$h][0] = dol_buildpath('/saturne/view/saturne_attendants.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType . '&document_type=' . (!empty($moreparam['documentType']) ? $moreparam['documentType'] : '') . '&attendant_table_mode=' . (empty($moreparam['attendantTableMode']) ? 'advanced' : $moreparam['attendantTableMode']);
-            $head[$h][1] = '<i class="fas fa-file-signature pictofixedwidth"></i>' . $langs->trans((empty($moreparam['attendantTabName']) ? 'Attendants' : $moreparam['attendantTabName']));
+            $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-file-signature pictofixedwidth"></i>' . $langs->trans((empty($moreparam['attendantTabName']) ? 'Attendants' : $moreparam['attendantTabName'])) : '<i class="fas fa-file-signature"></i>';
             if ($nbAttendants > 0) {
                 $head[$h][1] .= '<span class="badge marginleftonlyshort">' . $nbAttendants . '</span>';
             }
@@ -174,7 +201,7 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
                 $nbNote++;
             }
             $head[$h][0] = dol_buildpath('/saturne/view/saturne_note.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType;
-            $head[$h][1] = '<i class="fas fa-comment pictofixedwidth"></i>' . $langs->trans('Notes');
+            $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-comment pictofixedwidth"></i>' . $langs->trans('Notes') : '<i class="fas fa-comment"></i>';
             if ($nbNote > 0) {
                 $head[$h][1] .= (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '<span class="badge marginleftonlyshort">' . $nbNote . '</span>' : '');
             }
@@ -189,7 +216,7 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
             $nbFiles = count(dol_dir_list($upload_dir, 'files', 0, '', '(\.meta|_preview.*\.png)$'));
             $nbLinks = Link::count($db, $objectType, $object->id);
             $head[$h][0] = dol_buildpath('/saturne/view/saturne_document.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType;
-            $head[$h][1] = '<i class="fas fa-file-alt pictofixedwidth"></i>' . $langs->trans('Documents');
+            $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-file-alt pictofixedwidth"></i>' . $langs->trans('Documents') : '<i class="fas fa-file-alt"></i>';
             if (($nbFiles + $nbLinks) > 0) {
                 $head[$h][1] .= '<span class="badge marginleftonlyshort">' . ($nbFiles + $nbLinks) . '</span>';
             }
@@ -199,7 +226,7 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
 
         if ($showAgendaTab) {
             $head[$h][0] = dol_buildpath('/saturne/view/saturne_agenda.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType;
-            $head[$h][1] = '<i class="fas fa-calendar-alt pictofixedwidth"></i>' . $langs->trans('Events');
+            $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-calendar-alt pictofixedwidth"></i>' . $langs->trans('Events') . '/' . $langs->trans('Agenda') : '<i class="fas fa-calendar-alt"></i>';
             if (isModEnabled('agenda') && (!empty($user->rights->agenda->myactions->read) || !empty($user->rights->agenda->allactions->read))) {
                 $nbEvent = 0;
                 // Enable caching of object type count actioncomm
@@ -222,8 +249,6 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
                     }
                     dol_setcache($cacheKey, $nbEvent, 120); // If setting cache fails, this is not a problem, so we do not test result.
                 }
-                $head[$h][1] .= '/';
-                $head[$h][1] .= $langs->trans('Agenda');
                 if ($nbEvent > 0) {
                     $head[$h][1] .= '<span class="badge marginleftonlyshort">' . $nbEvent . '</span>';
                 }
@@ -589,11 +614,12 @@ function saturne_get_objects_metadata(string $type = ''): array
  * Require numbering modules of given objects
  *
  * @param  array      $numberingModulesNames Array of numbering modules names
+ * @param  string     $moduleNameLowerCase   Module name in lower case
  * @return array      $variablesToReturn     Numbering modules classes
  */
-function saturne_require_objects_mod(array $numberingModulesNames): array
+function saturne_require_objects_mod(array $numberingModulesNames, string $moduleNameLowerCase = ''): array
 {
-    global $db, $moduleNameLowerCase;
+    global $db;
 
     $variablesToReturn = [];
     if (!empty($numberingModulesNames)) {

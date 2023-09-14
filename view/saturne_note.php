@@ -54,8 +54,11 @@ $cancel     = GETPOST('cancel', 'aZ09');
 $backtopage = GETPOST('backtopage', 'alpha');
 
 // Initialize technical objects
-$classname   = ucfirst($objectType);
-$object      = new $classname($db);
+$className   = ucfirst($objectType);
+if (strstr($className, '_')) {
+    $className = preg_replace('/_/', '', $className);
+}
+$object      = new $className($db);
 $extrafields = new ExtraFields($db);
 
 $hookmanager->initHooks([$objectType . 'note', $object->element . 'note', 'saturneglobal', 'globalcard']); // Note that conf->hooks_modules contains array
@@ -68,7 +71,8 @@ include DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php'; // Must be incl
 
 // Security check - Protection if external user
 $permissiontoread = $user->rights->$moduleNameLowerCase->$objectType->read;
-$permissionnote   = (($object->status >= $object::STATUS_LOCKED) ? 0 : $user->rights->$moduleNameLowerCase->$objectType->write); // Used by include of actions_setnotes.inc.php
+$permissiontoadd  = (($object->status >= $object::STATUS_LOCKED) ? 0 : $user->rights->$moduleNameLowerCase->$objectType->write);
+$permissionnote   = $permissiontoadd; // Used by include of actions_setnotes.inc.php
 saturne_check_access($permissiontoread);
 
 /*
@@ -76,13 +80,16 @@ saturne_check_access($permissiontoread);
 */
 
 $parameters = ['id' => $id];
-$reshook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
-if ($reshook < 0) {
+$resHook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+if ($resHook < 0) {
     setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 }
 
-if (empty($reshook)) {
+if (empty($resHook)) {
     include DOL_DOCUMENT_ROOT.'/core/actions_setnotes.inc.php'; // Must be included, not include_once
+
+    // Actions set_thirdparty, set_project
+    require_once __DIR__ . '/../core/tpl/actions/banner_actions.tpl.php';
 }
 
 /*

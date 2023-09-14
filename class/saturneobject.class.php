@@ -41,7 +41,7 @@ abstract class SaturneObject extends CommonObject
      * @var int Does this object support multicompany module ?
      * 0 = No test on entity, 1 = Test with field entity, 'field@table' = Test with link by field@table.
      */
-    public int $ismultientitymanaged = 1;
+    public $ismultientitymanaged = 1;
 
     /**
      * @var int Does object support extrafields ? 0 = No, 1 = Yes.
@@ -231,8 +231,7 @@ abstract class SaturneObject extends CommonObject
     public function delete(User $user, bool $notrigger = false, bool $softDelete = true): int
     {
         if ($softDelete) {
-            $this->status = $this::STATUS_DELETED;
-            $result = $this->update($user, $notrigger);
+            $result = $this->setDeleted($user, $notrigger);
         } else {
             $result = $this->deleteCommon($user, $notrigger);
         }
@@ -355,6 +354,18 @@ abstract class SaturneObject extends CommonObject
 	}
 
     /**
+     * Set deleted status
+     *
+     * @param  User $user      Object user that modify
+     * @param  int  $notrigger 1 = Does not execute triggers, 0 = Execute triggers
+     * @return int             0 < if KO, > 0 if OK
+     */
+    public function setDeleted(User $user, int $notrigger = 0): int
+    {
+        return $this->setStatusCommon($user, $this::STATUS_DELETED, $notrigger, strtoupper($this->element) . '_DELETE');
+    }
+
+    /**
      * Set draft status.
      *
      * @param  User $user      Object user that modify.
@@ -403,11 +414,12 @@ abstract class SaturneObject extends CommonObject
      *  @param  int     $notooltip              1 = Disable tooltip.
      *  @param  string  $morecss                Add more css on link.
      *  @param  int     $save_lastsearch_value -1 = Auto, 0 = No save of lastsearch_values when clicking, 1 = Save lastsearch_values whenclicking.
+     * 	@param	int     $addLabel               0 = Default, 1 = Add label into string, >1 = Add first chars into string
      *  @return	string                          String with URL.
      */
-	public function getNomUrl(int $withpicto = 0, string $option = '', int $notooltip = 0, string $morecss = '', int $save_lastsearch_value = -1): string
+	public function getNomUrl(int $withpicto = 0, string $option = '', int $notooltip = 0, string $morecss = '', int $save_lastsearch_value = -1, int $addLabel = 0): string
 	{
-		global $conf, $langs;
+		global $action, $conf, $hookmanager, $langs;
 
 		if (!empty($conf->dol_no_mouse_hover)) {
 			$notooltip = 1; // Force disable tooltips.
@@ -474,7 +486,10 @@ abstract class SaturneObject extends CommonObject
 
 		$result .= $linkend;
 
-		global $action, $hookmanager;
+        if ($withpicto != 2) {
+            $result .= (($addLabel && property_exists($this, 'label')) ? '<span class="opacitymedium">' . ' - ' . dol_trunc($this->label, ($addLabel > 1 ? $addLabel : 0)) . '</span>' : '');
+        }
+
 		$hookmanager->initHooks([$this->element . 'dao']);
 		$parameters = ['id' => $this->id, 'getnomurl' => $result];
 		$reshook = $hookmanager->executeHooks('getNomUrl', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks.
@@ -549,19 +564,20 @@ abstract class SaturneObject extends CommonObject
 	{
 		global $langs, $conf;
 
-        $moduleName          = strtoupper($this->module);
+        $moduleNameUpperCase = strtoupper($this->module);
+        $moduleNameLowerCase = strtolower($this->module);
         $objectType          = $this->element;
-        $numRefConf          = $moduleName . '_' . strtoupper($objectType) . '_ADDON';
+        $numRefConf          = $moduleNameUpperCase . '_' . strtoupper($objectType) . '_ADDON';
 
-		if (empty($conf->global->$moduleName)) {
-			$conf->global->$moduleName = 'mod_' . $objectType . '_standard';
+		if (empty($conf->global->$numRefConf)) {
+			$conf->global->$numRefConf = 'mod_' . $objectType . '_standard';
 		}
 
         //Numbering modules
         $numberingModuleName = [
             $objectType => $conf->global->$numRefConf,
         ];
-        list($objNumberingModule) = saturne_require_objects_mod($numberingModuleName);
+        list($objNumberingModule) = saturne_require_objects_mod($numberingModuleName, $moduleNameLowerCase);
 
         if (is_object($objNumberingModule)) {
             $numRef = $objNumberingModule->getNextValue($this);
@@ -573,7 +589,7 @@ abstract class SaturneObject extends CommonObject
                 return '';
             }
         } else {
-            print $langs->trans('Error') . ' ' . $langs->trans('ClassNotFound') . ' ' . $conf->global->$moduleName;
+            print $langs->trans('Error') . ' ' . $langs->trans('ClassNotFound') . ' ' . $conf->global->$moduleNameUpperCase;
             return '';
         }
     }
@@ -668,6 +684,9 @@ abstract class SaturneObject extends CommonObject
 			$project->fetch($object->fk_project);
 			$ret .= $langs->transnoentities('Project') . ' : ' . $project->ref . ' ' . $project->title . '</br>';
 		}
+        $ret .= (isset($object->note_public) && dol_strlen($object->note_public) > 0 ? $langs->transnoentities('NotePublic') . ' : ' . $object->note_public . '</br>' : '');
+        $ret .= (isset($object->note_private) && dol_strlen($object->note_private) > 0 ? $langs->transnoentities('NotePrivate') . ' : ' . $object->note_private . '</br>' : '');
+
 		return $ret;
 	}
 
