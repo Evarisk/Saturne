@@ -17,7 +17,7 @@ clearstatcache();
 
 if (empty($documentPath)) {
     $elementType = $object->element;
-    $path = '/custom/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $elementType . '/';
+    $path = '/custom/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . ($objectModSubdir ? $objectModSubdir . '/' : '') . $elementType . '/';
 } else {
     $elementType = $documentParentType;
     $path = '/custom/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $elementType . '/';
