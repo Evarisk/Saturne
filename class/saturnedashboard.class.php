@@ -58,14 +58,16 @@ class SaturneDashboard
      * @return array
      * @throws Exception
      */
-    public function load_dashboard(): array
+    public function load_dashboard($moreParams = []): array
     {
         require_once __DIR__ . '/../../' . $this->module . '/class/' . $this->module . 'dashboard.class.php';
 
         $className      = ucfirst($this->module) . 'Dashboard';
         $dashboard      = new $className($this->db);
-        $dashboardDatas = $dashboard->load_dashboard();
+        $dashboardDatas = $dashboard->load_dashboard($moreParams);
+
         $dashboardInfos = [];
+
         if (is_array($dashboardDatas) && !empty($dashboardDatas)) {
             foreach ($dashboardDatas as $key => $dashboardData) {
                 if (key_exists('widgets', $dashboardData)) {
@@ -89,7 +91,7 @@ class SaturneDashboard
      * @return void
      * @throws Exception
      */
-    public function show_dashboard()
+    public function show_dashboard($moreParams = [])
     {
         global $conf, $form, $langs, $moduleNameLowerCase, $user;
 
@@ -98,7 +100,8 @@ class SaturneDashboard
 
         $conf->global->MAIN_DISABLE_TRUNC = 1;
 
-        $dashboards = $this->load_dashboard();
+        $dashboards = $this->load_dashboard($moreParams);
+
 
         print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '" class="dashboard" id="dashBoardForm">';
         print '<input type="hidden" name="token" value="' . newToken() . '">';
@@ -129,32 +132,41 @@ class SaturneDashboard
         if (is_array($dashboards['widgets']) && !empty($dashboards['widgets'])) {
             $widget = '';
             foreach ($dashboards['widgets'] as $dashboardWidgets) {
+
                 foreach ($dashboardWidgets as $key => $dashboardWidget) {
                     if (!isset($disableWidgetList->$key) && is_array($dashboardWidget) && !empty($dashboardWidget)) {
-                        $widget .= '<div class="box-flex-item"><div class="box-flex-item-with-margin">';
-                        $widget .= '<div class="info-box">';
-                        $widget .= '<span class="info-box-icon">';
-                        $widget .= '<i class="' . $dashboardWidget['picto'] . '"></i>';
-                        $widget .= '</span>';
-                        $widget .= '<div class="info-box-content">';
-                        $widget .= '<div class="info-box-title" title="' . $langs->trans('Close') . '">';
-                        $widget .= '<span class="close-dashboard-widget" data-widgetname="' . $key . '"><i class="fas fa-times"></i></span>';
-                        $widget .= '</div>';
-                        $widget .= '<div class="info-box-lines">';
-                        $widget .= '<div class="info-box-line" style="font-size : 20px;">';
-                        for ($i = 0; $i < count($dashboardWidget['label']); $i++) {
-                            if (!empty($dashboardWidget['label'][$i])) {
-                                $widget .= '<span class=""><strong>' . $dashboardWidget['label'][$i] . ' : ' . '</strong>';
-                                $widget .= '<span class="classfortooltip badge badge-info" title="' . $dashboardWidget['label'][$i] . ' : ' . $dashboardWidget['content'][$i] . '" >' . $dashboardWidget['content'][$i] . '</span>';
-                                $widget .= (!empty($dashboardWidget['tooltip'][$i]) ? $form->textwithpicto('', $langs->transnoentities($dashboardWidget['tooltip'][$i])) : '') . '</span>';
-                                $widget .= '<br>';
-                            }
+                        if (array_key_exists('label', $dashboardWidget)) {
+                            $dashboardWidget = [$dashboardWidget];
                         }
-                        $widget .= '</div>';
-                        $widget .= '</div><!-- /.info-box-lines --></div><!-- /.info-box-content -->';
-                        $widget .= '</div><!-- /.info-box -->';
-                        $widget .= '</div><!-- /.box-flex-item-with-margin -->';
-                        $widget .= '</div>';
+
+                        foreach ($dashboardWidget as $widgetSingle) {
+                            $widget .= '<div class="box-flex-item"><div class="box-flex-item-with-margin">';
+                            $widget .= '<div class="info-box">';
+                            $widget .= '<span class="info-box-icon">';
+                            $widget .= '<i class="' . $widgetSingle['picto'] . '"></i>';
+                            $widget .= '</span>';
+                            $widget .= '<div class="info-box-content">';
+                            $widget .= '<div class="info-box-title" title="' . $langs->trans('Close') . '">';
+                            $widget .= '<span class="close-dashboard-widget" data-widgetname="' . $key . '"><i class="fas fa-times"></i></span>';
+                            $widget .= '</div>';
+                            $widget .= '<div class="info-box-lines">';
+                            $widget .= '<div class="info-box-line" style="font-size : 20px;">';
+                            for ($i = 0; $i < count($widgetSingle['label']); $i++) {
+                                if (!empty($widgetSingle['label'][$i])) {
+                                    $widget .= '<span class=""><strong>' . $widgetSingle['label'][$i] . ' : ' . '</strong>';
+                                    $widget .= '<span class="classfortooltip badge badge-info" title="' . $widgetSingle['label'][$i] . ' : ' . $widgetSingle['content'][$i] . '" >' . $widgetSingle['content'][$i] . '</span>';
+                                    $widget .= (!empty($widgetSingle['tooltip'][$i]) ? $form->textwithpicto('', $langs->transnoentities($widgetSingle['tooltip'][$i])) : '') . '</span>';
+                                    $widget .= '<br>';
+                                }
+                            }
+                            $widget .= '</div>';
+                            $widget .= '</div><!-- /.info-box-lines --></div><!-- /.info-box-content -->';
+                            $widget .= '</div><!-- /.info-box -->';
+                            $widget .= '</div><!-- /.box-flex-item-with-margin -->';
+                            $widget .= '</div>';
+                        }
+
+
                     }
                 }
             }
@@ -164,11 +176,15 @@ class SaturneDashboard
         print '<div class="graph-dashboard wpeo-grid grid-2">';
 
         if (is_array($dashboards['graphs']) && !empty($dashboards['graphs'])) {
-            foreach ($dashboards['graphs'] as $dashboardGraphs) {
+            foreach ($dashboards['graphs'] as $objectType => $dashboardGraphs) {
+
                 if (is_array($dashboardGraphs) && !empty($dashboardGraphs)) {
-                    foreach ($dashboardGraphs as $keyElement => $dashboardGraph) {
+                    foreach ($dashboardGraphs as $dashboardGraph) {
+                        $uniqueDashboardKey = uniqid();
+
                         $nbDataset = 0;
                         if (is_array($dashboardGraph['data']) && !empty($dashboardGraph['data'])) {
+
                             if ($dashboardGraph['dataset'] >= 2) {
                                 foreach ($dashboardGraph['data'] as $dashboardGraphDatasets) {
                                     unset($dashboardGraphDatasets[0]);
@@ -186,38 +202,40 @@ class SaturneDashboard
                             if ($nbDataset > 0) {
                                 if (is_array($dashboardGraph['labels']) && !empty($dashboardGraph['labels'])) {
                                     foreach ($dashboardGraph['labels'] as $dashboardGraphLabel) {
-                                        $dashboardGraphLegend[$keyElement][] = $langs->trans($dashboardGraphLabel['label']);
-                                        $dashboardGraphColor[$keyElement][]  = $langs->trans($dashboardGraphLabel['color']);
+                                        $dashboardGraphLegend[$uniqueDashboardKey][] = $langs->trans($dashboardGraphLabel['label']);
+                                        $dashboardGraphColor[$uniqueDashboardKey][]  = $langs->trans($dashboardGraphLabel['color']);
                                     }
                                 }
 
                                 $arrayKeys = array_keys($dashboardGraph['data']);
                                 foreach ($arrayKeys as $key) {
                                     if ($dashboardGraph['dataset'] >= 2) {
-                                        $graphData[$keyElement][] = $dashboardGraph['data'][$key];
+                                        $graphData[$uniqueDashboardKey][] = $dashboardGraph['data'][$key];
                                     } else {
-                                        $graphData[$keyElement][] = [
+                                        $graphData[$uniqueDashboardKey][] = [
                                             0 => $langs->trans($dashboardGraph['labels'][$key]['label']),
                                             1 => $dashboardGraph['data'][$key]
                                         ];
                                     }
                                 }
 
-                                $fileName[$keyElement] = $keyElement . '.png';
-                                $fileUrl[$keyElement]  = DOL_URL_ROOT . '/viewimage.php?modulepart=' . $moduleNameLowerCase . '&file=' . $keyElement . '.png';
+                                $fileName[$uniqueDashboardKey] = $uniqueDashboardKey . '.png';
+                                $fileUrl[$uniqueDashboardKey]  = DOL_URL_ROOT . '/viewimage.php?modulepart=' . $moduleNameLowerCase . '&file=' . $uniqueDashboardKey . '.png';
 
                                 $graph = new DolGraph();
-                                $graph->SetData($graphData[$keyElement]);
+                                $graph->SetData($graphData[$uniqueDashboardKey]);
 
                                 if ($dashboardGraph['dataset'] >= 2) {
-                                    $graph->SetLegend($dashboardGraphLegend[$keyElement]);
+                                    $graph->SetLegend($dashboardGraphLegend[$uniqueDashboardKey]);
                                 }
-                                $graph->SetDataColor($dashboardGraphColor[$keyElement]);
+
+
+                                $graph->SetDataColor($dashboardGraphColor[$uniqueDashboardKey]);
                                 $graph->SetType([$dashboardGraph['type'] ?? 'pie']);
                                 $graph->SetWidth($dashboardGraph['width'] ?? $width);
                                 $graph->SetHeight($dashboardGraph['height'] ?? $height);
                                 $graph->setShowLegend($dashboardGraph['showlegend'] ?? 2);
-                                $graph->draw($fileName[$keyElement], $fileUrl[$keyElement]);
+                                $graph->draw($fileName[$uniqueDashboardKey], $fileUrl[$uniqueDashboardKey]);
                                 print '<div>';
                                 print load_fiche_titre($dashboardGraph['title'], $dashboardGraph['morehtmlright'], $dashboardGraph['picto']);
                                 print $graph->show();
