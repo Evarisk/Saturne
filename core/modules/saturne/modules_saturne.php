@@ -81,6 +81,38 @@ abstract class ModeleNumRefSaturne
     }
 
     /**
+     *    Return last value
+     *
+     * @param Object $object Object we need next value for
+     * @return string                Value if KO, <0 if KO
+     * @throws Exception
+     */
+    public function getLastValue(object $object)
+    {
+        global $db, $conf;
+
+        // first we get the max value
+        $posindice = strlen($this->prefix) + 1;
+        $sql       = "SELECT MAX(CAST(SUBSTRING(ref FROM " . $posindice . ") AS SIGNED)) as max";
+        $sql      .= ' FROM ' . MAIN_DB_PREFIX . $object->table_element;
+        $sql      .= " WHERE ref LIKE '" . $db->escape($this->prefix) . "%'";
+        if ($object->ismultientitymanaged == 1) {
+            $sql .= " AND entity = " . $conf->entity;
+        }
+        $sql .= " ORDER BY rowid DESC LIMIT 1";
+
+        $resql = $db->query($sql);
+
+        if ($resql) {
+            $obj = $db->fetch_object($resql);
+        } else {
+            dol_syslog(get_class($this) . '::getLastValue', LOG_DEBUG);
+            return -1;
+        }
+        return $this->prefix . $obj->max;
+    }
+
+    /**
      * Checks if the numbers already in the database do not
      * cause conflicts that would prevent this numbering working.
      *
@@ -192,7 +224,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/commondocgenerator.class.php';
 /**
  * Parent class for documents models.
  */
-abstract class SaturneDocumentModel extends CommonDocGenerator
+class SaturneDocumentModel extends CommonDocGenerator
 {
     /**
      * @var string Module.
@@ -249,6 +281,7 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
      */
     public static function liste_modeles(DoliDB $db, string $type, int $maxfilenamelength = 0): array
     {
+
         require_once __DIR__ . '/../../../lib/saturne_functions.lib.php';
         return saturne_get_list_of_models($db, $type, $maxfilenamelength);
     }
@@ -573,7 +606,12 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
 
         if ($conf->$moduleNameLowerCase->dir_output) {
             $confRefModName      = dol_strtoupper($this->module) . '_' . dol_strtoupper($this->document_type) . '_ADDON';
-            $refModName          = new $conf->global->$confRefModName($this->db);
+
+            $numberingModules = [
+                $moreParam['subDir'] . $this->document_type => $conf->global->$confRefModName
+            ];
+
+            list($refModName) = saturne_require_objects_mod($numberingModules, $moduleNameLowerCase);
             $objectDocumentRef   = $refModName->getNextValue($objectDocument);
             $objectDocument->ref = $objectDocumentRef;
             $objectDocumentID    = $objectDocument->create($moreParam['user'], true, $object);
@@ -582,7 +620,7 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
 
             $objectDocumentRef = dol_sanitizeFileName($objectDocument->ref);
 
-            $dir = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?? 1] . '/' . $object->element . 'document/' . $object->ref;
+            $dir = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?? 1] . '/' . $this->document_type . (dol_strlen($object->ref) > 0 ? '/' . $object->ref : '');
             if ($moreParam['specimen'] == 1 && $moreParam['zone'] == 'public') {
                 $dir .= '/public_specimen';
             }
@@ -601,7 +639,7 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
                 $societyName = preg_replace('/\./', '_', $conf->global->MAIN_INFO_SOCIETE_NOM);
 
                 $date = dol_print_date(dol_now(), 'dayxcard');
-                $newFileTmp = $date . '_' . $object->ref . '_' . $objectDocumentRef .'_' . $outputLangs->transnoentities($newFileTmp) . '_' . (!empty($moreParam['documentName']) ? $moreParam['documentName'] : '') . $societyName;
+                $newFileTmp = $date . (dol_strlen($object->ref) > 0 ? '_' . $object->ref : '') . '_' . $objectDocumentRef .'_' . ($moreParam['hideTemplateName'] ? '' : $outputLangs->transnoentities($newFileTmp)) . '_' . (!empty($moreParam['documentName']) ? $moreParam['documentName'] : '') . $societyName;
                 if ($moreParam['specimen'] == 1) {
                     $newFileTmp .= '_specimen';
                 }
@@ -612,6 +650,7 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
                 $newFileFormat = substr($newFile, strrpos($newFile, '.') + 1);
                 $fileName      = $newFileTmp . '.' . $newFileFormat;
                 $file          = $dir . '/' . $fileName;
+
 
                 $objectDocument->last_main_doc = $fileName;
                 $objectDocument->update($moreParam['user'], true);
