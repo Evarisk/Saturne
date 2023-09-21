@@ -50,7 +50,7 @@
  */
 function saturne_show_documents(string $modulepart, string $modulesubdir, string $filedir, string $urlsource, $genallowed, int $delallowed = 0, string $modelselected = '', int $allowgenifempty = 1, int $forcenomultilang = 0, int $notused = 0, int $noform = 0, string $param = '', string $title = '', string $buttonlabel = '', string $codelang = '', string $morepicto = '', $object = null, int $hideifempty = 0, string $removeaction = 'remove_file', int $active = 1, string $tooltiptext = ''): string
 {
-	global $conf, $db, $form, $hookmanager, $langs, $moduleNameLowerCase;
+	global $conf, $db, $form, $hookmanager, $langs;
 
 	if (!is_object($form)) {
         $form = new Form($db);
@@ -122,7 +122,7 @@ function saturne_show_documents(string $modulepart, string $modulesubdir, string
                 include_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
                 $modellist = getListOfModels($db, $type);
             } else {
-                $saturneDocumentModel = new SaturneDocumentModel($db, $moduleNameLowerCase, $submodulepart);
+                $saturneDocumentModel = new SaturneDocumentModel($db, $modulepart, $submodulepart);
                 $documentType = strtolower($submodulepart);
                 $modellist = $saturneDocumentModel->liste_modeles($db, $documentType);
             }

@@ -281,7 +281,6 @@ class SaturneDocumentModel extends CommonDocGenerator
      */
     public static function liste_modeles(DoliDB $db, string $type, int $maxfilenamelength = 0): array
     {
-
         require_once __DIR__ . '/../../../lib/saturne_functions.lib.php';
         return saturne_get_list_of_models($db, $type, $maxfilenamelength);
     }
@@ -377,12 +376,14 @@ class SaturneDocumentModel extends CommonDocGenerator
                     // Image.
                     if (file_exists($val)) {
                         $listLines->setImage($key, $val);
-                    } else {
+                    } else if (dol_strlen($val) > 0){
 						if ($key == 'mycompany_logo') {
 							$listLines->setVars($key, $outputLangs->transnoentities('ErrorNoSocietyLogo'), true, 'UTF-8');
 						} else {
 							$listLines->setVars($key, $outputLangs->transnoentities('ErrorFileNotFound'), true, 'UTF-8');
 						}
+                    } else {
+                        $listLines->setVars($key, $outputLangs->transnoentities(''), true, 'UTF-8');
                     }
                 } elseif (preg_match('/signature/', $key) && is_file($val)) {
                     $imageSize = getimagesize($val);
@@ -590,7 +591,6 @@ class SaturneDocumentModel extends CommonDocGenerator
             dol_syslog('doc_' . $this->document_type . '_odt::write_file parameter srctemplatepath empty', LOG_WARNING);
             return -1;
         }
-
         if (empty($moduleNameLowerCase)) {
             $moduleNameLowerCase = $objectDocument->module;
         }
@@ -610,6 +610,7 @@ class SaturneDocumentModel extends CommonDocGenerator
             $numberingModules = [
                 $moreParam['subDir'] . $this->document_type => $conf->global->$confRefModName
             ];
+
 
             list($refModName) = saturne_require_objects_mod($numberingModules, $moduleNameLowerCase);
             $objectDocumentRef   = $refModName->getNextValue($objectDocument);
@@ -639,7 +640,15 @@ class SaturneDocumentModel extends CommonDocGenerator
                 $societyName = preg_replace('/\./', '_', $conf->global->MAIN_INFO_SOCIETE_NOM);
 
                 $date = dol_print_date(dol_now(), 'dayxcard');
-                $newFileTmp = $date . (dol_strlen($object->ref) > 0 ? '_' . $object->ref : '') . '_' . $objectDocumentRef .'_' . ($moreParam['hideTemplateName'] ? '' : $outputLangs->transnoentities($newFileTmp)) . '_' . (!empty($moreParam['documentName']) ? $moreParam['documentName'] : '') . $societyName;
+                $newFileTmp = $date
+                    . (dol_strlen($object->ref) > 0         ? '_' . $object->ref         : '')
+                    . '_' . $objectDocumentRef
+                    . ($moreParam['hideTemplateName']       ? ''                         : '_' . $outputLangs->transnoentities($newFileTmp)) . '_'
+                    . (!empty($moreParam['documentName'])   ? $moreParam['documentName'] : '')
+                    . $societyName
+                    . (!empty($moreParam['additionalName']) ? $moreParam['additionalName'] : '')
+                ;
+
                 if ($moreParam['specimen'] == 1) {
                     $newFileTmp .= '_specimen';
                 }
@@ -694,6 +703,7 @@ class SaturneDocumentModel extends CommonDocGenerator
                 $arraySoc['mycompany_logo'] = preg_replace('/_small/', '_mini', $arraySoc['mycompany_logo']);
 
                 $tmpArray = array_merge($substitutionArray, $arraySoc, $moreParam['tmparray']);
+                $tmpArray['entity'] = $conf->entity;
                 complete_substitutions_array($tmpArray, $outputLangs, $object);
 
                 $this->fillTags($odfHandler, $outputLangs, $tmpArray, $moreParam);
