@@ -99,7 +99,7 @@ if ($id > 0 && !empty($elementType)) {
 }
 
 // Security check - Protection if external user
-$permissiontoread = $user->rights->$moduleNameLowerCase->read;
+$permissiontoread = $user->rights->$moduleNameLowerCase->read || $user->rights->$moduleNameLowerCase->lire;
 $permissiontoadd  = $permissiontoread;
 saturne_check_access($permissiontoread);
 
