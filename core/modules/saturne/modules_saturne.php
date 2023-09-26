@@ -39,6 +39,11 @@ abstract class ModeleNumRefSaturne
     public string $prefix = '';
 
     /**
+     * @var string Numbering module ref suffix.
+     */
+    public string $suffix = '';
+
+    /**
      * @var string Name.
      */
     public string $name = '';
@@ -159,11 +164,25 @@ abstract class ModeleNumRefSaturne
     {
         global $db, $conf;
 
+        if (dol_strlen($this->suffix) > 0) {
+            $underscoreString = '';
+            for ($i = 1; $i < dol_strlen($this->suffix); $i++) {
+                $underscoreString .= '_';
+            }
+            $sqlLike = $underscoreString . '%';
+            $hideDate = 1;
+            $suffixSize = dol_strlen($this->suffix);
+        } else {
+            $sqlLike = '____-%';
+            $hideDate = 0;
+            $suffixSize = 4;
+        }
+
         // First we get the max value.
-        $posIndice = strlen($this->prefix) + 6;
+        $posIndice = dol_strlen($this->prefix) + dol_strlen($sqlLike);
         $sql = 'SELECT MAX(CAST(SUBSTRING(ref FROM ' . $posIndice . ') AS SIGNED)) as max';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . $object->table_element;
-        $sql .= " WHERE ref LIKE '" . $db->escape($this->prefix) . "____-%'";
+        $sql .= " WHERE ref LIKE '" . $db->escape($this->prefix) . $sqlLike . "'";
         if ($object->ismultientitymanaged == 1) {
             $sql .= ' AND entity = ' . $conf->entity;
         }
@@ -187,11 +206,11 @@ abstract class ModeleNumRefSaturne
         if ($max >= (pow(10, 4) - 1)) {
             $num = $max + 1; // If counter > 9999, we do not format on 4 chars, we take number as it is.
         } else {
-            $num = sprintf('%04s', $max + 1);
+            $num = sprintf('%0'. $suffixSize .'s', $max + 1);
         }
 
         dol_syslog(get_class($this) . '::getNextValue return ' . $this->prefix . $yymm . '-' . $num);
-        return $this->prefix . $yymm . '-' . $num;
+        return $this->prefix . ($hideDate ? '' : $yymm . '-') . $num;
     }
 
     /**
