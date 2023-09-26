@@ -50,7 +50,7 @@ if (is_dir($dir)) {
 
                             // Show example of numbering module.
                             print '<td class="nowrap">';
-                            $tmp = $module->getExample();
+                            $tmp = $module->getNextValue($object);
                             if (preg_match('/^Error/', $tmp)) {
                                 print '<div class="error">' . $langs->trans($tmp) . '</div>';
                             } elseif ($tmp == 'NotConfigured') {
