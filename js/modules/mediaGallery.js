@@ -148,12 +148,12 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
         $('.photo.'+objectPhotoClass).replaceWith($(resp).find('.photo.'+objectPhotoClass).first())
         $('.linked-medias.'+objectPhotoClass).replaceWith($(resp).find('.linked-medias.'+objectPhotoClass))
       } else {
-        if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
-        	$('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
-        }
+
         $('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
       }
-
+      if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
+        $('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
+      }
 			//refresh media gallery & unselect selected medias
 			mediaGallery.html($(resp).find('#media_gallery').children())
 		},
@@ -335,7 +335,8 @@ window.saturne.mediaGallery.unlinkFile = function( event ) {
       if (previousFavorite == filename) {
         if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
           $('.photo.'+objectPhotoClass).replaceWith($(resp).find('.photo.'+objectPhotoClass).first())
-        } else if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
+        }
+        if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
           $('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
         }
       }
@@ -413,14 +414,14 @@ window.saturne.mediaGallery.addToFavorite = function( event ) {
 		}),
 		processData: false,
 		success: function ( resp ) {
-
-        if (previousFavorite != filename) {
-          if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
-            $('.photo.'+objectPhotoClass).replaceWith($(resp).find('.photo.'+objectPhotoClass).first())
-          } else if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
-            $('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
-          }
-			}
+      if (previousFavorite != filename) {
+        if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
+          $('.photo.'+objectPhotoClass).replaceWith($(resp).find('.photo.'+objectPhotoClass).first())
+        }
+      }
+      if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
+        $('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
+      }
 		}
 	});
 };
