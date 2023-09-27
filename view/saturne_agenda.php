@@ -156,7 +156,7 @@ if ($reshook > 0) {
 
 if ($id > 0 || !empty($ref)) {
     saturne_get_fiche_head($object, 'agenda', $title);
-    saturne_banner_tab($object, 'ref', '', 1, 'ref', 'ref', '', !empty($object->photo));
+    saturne_banner_tab($object, 'ref', '', 1, 'ref', 'ref', method_exists($object, 'getMoreHtmlRef') ? $object->getMoreHtmlRef($object->id) : '', !empty($object->photo));
 
     print '<div class="fichecenter">';
 
