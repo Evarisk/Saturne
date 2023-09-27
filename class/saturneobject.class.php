@@ -477,7 +477,7 @@ abstract class SaturneObject extends CommonObject
         $result .= $linkstart;
 
         if ($withpicto > 0) {
-            $result .= img_picto('', $this->picto) . ' ';
+            $result .= img_picto('', $this->picto, '', false, 0, 0, '', 'pictoModule') . ' ';
         }
 
         if ($withpicto != 2) {
