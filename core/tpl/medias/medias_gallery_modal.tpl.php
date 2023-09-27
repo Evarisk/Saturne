@@ -25,6 +25,8 @@
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmdirectory.class.php';
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
+require_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
+require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 
 // Global variables definitions
@@ -220,7 +222,7 @@ if ( ! $error && $subaction == "unlinkFile") {
 		if (property_exists($object, $objectSubtype)) {
 
 			if ($object->$objectSubtype == $fileName) {
-				$pathPhotos = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType .'/'. $object->ref . '/photos/';
+				$pathPhotos = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType .'/'. $object->ref . '/' . (dol_strlen($objectSubdir) > 0 ? $objectSubdir . '/' : '');
 				$fileArray  = dol_dir_list($pathPhotos, 'files', 0, '', $fileName);
 
 				if (count($fileArray) > 0) {
