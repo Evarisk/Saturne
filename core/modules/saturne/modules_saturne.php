@@ -76,16 +76,6 @@ abstract class ModeleNumRefSaturne
     }
 
     /**
-     * Return an example of numbering.
-     *
-     * @return string Example.
-     */
-    public function getExample(): string
-    {
-        return $this->prefix . '0501-0001';
-    }
-
-    /**
      *    Return last value
      *
      * @param Object $object Object we need next value for
@@ -164,19 +154,9 @@ abstract class ModeleNumRefSaturne
     {
         global $db, $conf;
 
-        if (dol_strlen($this->suffix) > 0) {
-            $underscoreString = '';
-            for ($i = 1; $i < dol_strlen($this->suffix); $i++) {
-                $underscoreString .= '_';
-            }
-            $sqlLike = $underscoreString . '%';
-            $hideDate = 1;
-            $suffixSize = dol_strlen($this->suffix);
-        } else {
-            $sqlLike = '____-%';
-            $hideDate = 0;
-            $suffixSize = 4;
-        }
+        $sqlLike = '____-%';
+        $hideDate = 0;
+        $suffixSize = 4;
 
         // First we get the max value.
         $posIndice = dol_strlen($this->prefix) + dol_strlen($sqlLike);
@@ -235,6 +215,126 @@ abstract class ModeleNumRefSaturne
             return $this->version;
         }
         return $langs->trans('NotAvailable');
+    }
+}
+
+/**
+ *  Parent class to manage custom numbering rules.
+ */
+abstract class CustomModeleNumRefSaturne extends ModeleNumRefSaturne
+{
+    /**
+     *  Return description of module
+     *
+     *  @return     string      Texte descripif
+     */
+    public function info(): string
+    {
+
+        global $conf, $langs, $db;
+
+        $langs->load("bills");
+
+        $form = new Form($db);
+
+        $texte = $langs->trans('GenericNumRefModelDesc')."<br>\n";
+        $texte .= '<form action="'.$_SERVER["PHP_SELF"].'" method="POST">';
+        $texte .= '<input type="hidden" name="token" value="'.newToken().'">';
+        $texte .= '<input type="hidden" name="action" value="updateMask">';
+        $texte .= '<input type="hidden" name="mask" value="DIGIRISKDOLIBARR_GROUPMENT_SIRIUS_ADDON">';
+        $texte .= '<table class="nobordernopadding" width="100%">';
+
+        $tooltip = $langs->trans("SaturneGenericMaskCodes");
+
+        // Parametrage du prefix
+        $texte .= '<tr><td>'.$langs->trans("Mask").':</td>';
+        $texte .= '<td class="right">'.$form->textwithpicto('<input type="text" class="flat minwidth175" name="addon_value" value="'.$conf->global->DIGIRISKDOLIBARR_GROUPMENT_SIRIUS_ADDON.'">', $tooltip, 1, 1).'</td>';
+
+        $texte .= '<td class="left" rowspan="2">&nbsp; <input type="submit" class="button button-edit" name="Button"value="'.$langs->trans("Modify").'"></td>';
+
+        $texte .= '</tr>';
+
+        $texte .= '</table>';
+        $texte .= '</form>';
+
+        return $texte;
+    }
+
+    /**
+     *    Return last value
+     *
+     * @param Object $object Object we need next value for
+     * @return string                Value if KO, <0 if KO
+     * @throws Exception
+     */
+    public function getLastValue(object $object)
+    {
+        $nextValue = $this->getNextValue($object);
+
+        $nextValueSuffix = preg_replace('/'. $this->prefix .'/', '', $nextValue);
+        $nextValueNumber = ltrim($nextValueSuffix, '0');
+        $nextValueNumber -= 1;
+
+        $nextValueSuffixLength = dol_strlen($nextValueSuffix);
+        $nextValueNumberLength = dol_strlen($nextValueNumber);
+
+        $zeroString = '';
+        for ($i = 0; $i < ($nextValueSuffixLength - $nextValueNumberLength); $i++) {
+            $zeroString .= '0';
+        }
+
+        return $this->prefix . $zeroString . $nextValueNumber;
+    }
+
+    /**
+     *  Return next value
+     *
+     *  @return string      			Value if OK, 0 if KO
+     */
+    public function getNextValue(object $object): string
+    {
+        global $db, $conf;
+
+        $underscoreString = '';
+        for ($i = 1; $i < dol_strlen($this->suffix); $i++) {
+            $underscoreString .= '_';
+        }
+        $sqlLike = '%';
+        $suffixSize = dol_strlen($this->suffix);
+
+        // First we get the max value.
+        $posIndice = dol_strlen($this->prefix) + dol_strlen($sqlLike);
+        $sql = 'SELECT MAX(CAST(SUBSTRING(ref FROM ' . $posIndice . ') AS SIGNED)) as max';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . $object->table_element;
+        $sql .= " WHERE ref LIKE '" . $db->escape($this->prefix) . $sqlLike . "'";
+        if ($object->ismultientitymanaged == 1) {
+            $sql .= ' AND entity = ' . $conf->entity;
+        }
+
+        $resql = $db->query($sql);
+        if ($resql) {
+            $obj = $db->fetch_object($resql);
+            if ($obj) {
+                $max = intval($obj->max);
+            } else {
+                $max = 0;
+            }
+        } else {
+            dol_syslog(get_class($this) . '::getNextValue', LOG_DEBUG);
+            return -1;
+        }
+
+        $date = !empty($object->date_creation) ? $object->date_creation : dol_now();
+        $yymm = strftime('%y%m', $date);
+
+        if ($max >= (pow(10, 4) - 1)) {
+            $num = $max + 1; // If counter > 9999, we do not format on 4 chars, we take number as it is.
+        } else {
+            $num = sprintf('%0'. $suffixSize .'s', $max + 1);
+        }
+
+        dol_syslog(get_class($this) . '::getNextValue return ' . $this->prefix . $yymm . '-' . $num);
+        return $this->prefix . $num;
     }
 }
 
