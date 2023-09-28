@@ -174,9 +174,10 @@ function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', st
  * @param  string $fieldRef    Field name objet ref (object->ref) for select next and previous
  * @param  string $moreHtmlRef More html to show after the ref (see $morehtmlleft for before)
  * @param  bool   $handlePhoto Manage photo
+ * @param  array  $moreParams  More params
  * @return void
  */
-function saturne_banner_tab(object $object, string $paramId = 'ref', string $moreHtml = '', int $showNav = 1, string $fieldId = 'ref', string $fieldRef = 'ref', string $moreHtmlRef = '', bool $handlePhoto = false): void
+function saturne_banner_tab(object $object, string $paramId = 'ref', string $moreHtml = '', int $showNav = 1, string $fieldId = 'ref', string $fieldRef = 'ref', string $moreHtmlRef = '', bool $handlePhoto = false, array $moreParams = []): void
 {
     global $db, $langs, $hookmanager, $moduleName, $moduleNameLowerCase;
 
@@ -197,6 +198,20 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
 
     $saturneMoreHtmlRef .= $moreHtmlRef;
 
+    $parameters = [];
+    $resHook    = $hookmanager->executeHooks('saturneBannerTab', $parameters, $object); // Note that $action and $object may have been modified by some hooks
+    if ($resHook < 0) {
+        setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+    } else {
+        if (!empty($hookmanager->resArray)) {
+            list($customMoreHtmlRef, $moreParams) = $hookmanager->resArray;
+        } else if (!empty($hookmanager->resPrint)) {
+            $customMoreHtmlRef = $hookmanager->resPrint;
+        }
+
+        $saturneMoreHtmlRef .= $customMoreHtmlRef;
+    }
+
     // Banner
     $objectKey      = '';
     $possibleKeys   = [];
@@ -215,6 +230,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
                     break;
                 }
             }
+
             if (dol_strlen($objectKey)) {
                 $className           = ucfirst($bannerElement);
                 $BannerElementObject = new $className($db);
@@ -241,7 +257,9 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
                         } elseif ($bannerElement == 'project') {
                             $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1, '', 1) : img_picto($langs->trans('Project'), 'project');
                         }
-                        $saturneMoreHtmlRef .= ' <a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=edit_' . $bannerElement . '&id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . GETPOST('object_type') . '&token=' . newToken() . '">' . img_edit($langs->transnoentitiesnoconv($bannerElement == 'societe' ? 'SetThirdParty' : 'SetProject')) . '</a>';
+                        if(empty($moreParams[$bannerElement]['disable_edit'])) {
+                            $saturneMoreHtmlRef .= ' <a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=edit_' . $bannerElement . '&id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . GETPOST('object_type') . '&token=' . newToken() . '">' . img_edit($langs->transnoentitiesnoconv($bannerElement == 'societe' ? 'SetThirdParty' : 'SetProject')) . '</a>';
+                        }
                     }
                 } else {
                     $BannerElementObject->fetch($object->$objectKey);
@@ -254,48 +272,15 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
                 $saturneMoreHtmlRef .= '<br>';
             }
         }
-		if (dol_strlen($key)) {
-			$saturneMorehtmlref .= $langs->trans('Project') . ' : ';
-			if (array_key_exists('status', $object->fields)) {
-				$formproject = new FormProjets($db);
-				$form        = new Form($db);
-                $project     = new Project($db);
-                if ($object->status < $object::STATUS_LOCKED) {
-					$objectTypePost = GETPOST('object_type') ? '&object_type=' . GETPOST('object_type') : '';
-					$saturneMorehtmlref .= ' ';
-					if (GETPOST('action') == 'edit_project') {
-						$saturneMorehtmlref .= '<form method="post" action="' . $_SERVER['PHP_SELF'] . '?id=' . $object->id . $objectTypePost .'">';
-						$saturneMorehtmlref .= '<input type="hidden" name="action" value="save_project">';
-						$saturneMorehtmlref .= '<input type="hidden" name="key" value="'. $key .'">';
-						$saturneMorehtmlref .= '<input type="hidden" name="token" value="'.newToken().'">';
-						$saturneMorehtmlref .= $formproject->select_projects(-1, $object->$key, $key, 0, 0, 1, 0, 1, 0, 0, '', 1, 0, 'maxwidth500');
-						$saturneMorehtmlref .= '<input type="submit" class="button valignmiddle" value="' . $langs->trans("Modify") . '">';
-						$saturneMorehtmlref .= '</form>';
-					} else {
-						$saturneMorehtmlref .= img_picto('project', $project->picto) . ' ' . $form->form_project($_SERVER['PHP_SELF'] . '?id=' .$object->id, 0, $object->$key, 'none', 0, 0, 0, 1);
-						$saturneMorehtmlref .= ' <a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=edit_project&token=' . newToken() . '&id=' . $object->id . $objectTypePost .'">' . img_edit($langs->transnoentitiesnoconv('SetProject')) . '</a>';
-					}
-				} else {
-					$saturneMorehtmlref .= $form->form_project($_SERVER['PHP_SELF'] . '?id=' .$object->id, 0, $object->$key, 'none', 0, 0, 0, 1);
-				}
-			}
-			$saturneMorehtmlref .= '<br>';
-		}
     }
 
-    $parameters = [];
-    $resHook    = $hookmanager->executeHooks('saturneBannerTab', $parameters, $object); // Note that $action and $object may have been modified by some hooks
-    if ($resHook < 0) {
-        setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
-    } else {
-        $saturneMoreHtmlRef .= $hookmanager->resPrint;
-    }
     $saturneMoreHtmlRef .= '</div>';
 
-    $moreParams = '&module_name=' . $moduleName . '&object_type=' . $object->element;
+
+    $moreParamsBannerTab = '&module_name=' . $moduleName . '&object_type=' . $object->element;
 
     if (!$handlePhoto) {
-        dol_banner_tab($object, $paramId, $moreHtml, $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, $moreParams);
+        dol_banner_tab($object, $paramId, $moreHtml, $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, $moreParamsBannerTab);
     } else {
         global $conf, $form;
 
