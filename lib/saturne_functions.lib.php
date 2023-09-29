@@ -299,7 +299,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
         $sdir = $baseDir . '/' . $subDir;
 
 		$morehtmlleft = '<div class="floatleft inline-block valignmiddle divphotoref">' . saturne_show_medias_linked($moduleNameLowerCase, $sdir, 'small', '', 0, 0, 0, 88, 88, 0, 0, 0, $subDir, $object, 'photo', 0, 0,0, 1) . '</div>';
-        print $form->showrefnav($object, $paramId, $moreHtml, $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, $moreParams, 0, $morehtmlleft, $object->getLibStatut(6));
+        print $form->showrefnav($object, $paramId, $moreHtml, $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, '', 0, $morehtmlleft, $object->getLibStatut(6));
 		print '</div>';
 	}
 
