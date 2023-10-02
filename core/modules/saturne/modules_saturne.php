@@ -502,7 +502,7 @@ class SaturneDocumentModel extends CommonDocGenerator
 							$listLines->setVars($key, $outputLangs->transnoentities('ErrorFileNotFound'), true, 'UTF-8');
 						}
                     } else {
-                        $listLines->setVars($key, $outputLangs->transnoentities(''), true, 'UTF-8');
+                        $listLines->setVars($key, '', true, 'UTF-8');
                     }
                 } elseif (preg_match('/signature/', $key) && is_file($val)) {
                     $imageSize = getimagesize($val);
