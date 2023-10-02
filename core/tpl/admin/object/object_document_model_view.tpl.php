@@ -32,7 +32,8 @@ print '</tr>';
 
 if (is_array($filelist) && !empty($filelist)) {
     foreach ($filelist as $file) {
-        if (preg_match('/\.modules\.php$/i', $file) && preg_match('/^(pdf_|doc_)/', $file) && preg_match('/' . $documentParentType . '/i', $file) && preg_match('/odt/i', $file)) {
+        if (preg_match('/\.modules\.php$/i', $file) && preg_match('/^(pdf_|doc_)/', $file) && preg_match('/' . $documentParentType . '/i', $file)) {
+
             if (file_exists($dir.'/'.$file)) {
                 $name      = substr($file, 4, dol_strlen($file) - 16);
                 $classname = substr($file, 0, dol_strlen($file) - 12);
@@ -95,7 +96,7 @@ if (is_array($filelist) && !empty($filelist)) {
                     // Preview
                     print '<td class="center">';
                     if ($module->type == 'pdf') {
-                        print '<a href="' . $_SERVER['PHP_SELF'] . '?action=specimen&module=' . $name . '&module_name=' . $moduleName . '">' . img_object($langs->trans('Preview'), 'intervention') . '</a>';
+                        print '<a href="' . $_SERVER['PHP_SELF'] . '?action=specimen&module=' . $name . '&module_name=' . $moduleName . '">' . img_object($langs->trans('Preview'), 'pdf') . '</a>';
                     } else {
                         print img_object($langs->trans('PreviewNotAvailable'), 'generic');
                     }
