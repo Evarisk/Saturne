@@ -176,15 +176,12 @@ class SaturneDashboard
         print '<div class="graph-dashboard wpeo-grid grid-2">';
 
         if (is_array($dashboards['graphs']) && !empty($dashboards['graphs'])) {
-            foreach ($dashboards['graphs'] as $objectType => $dashboardGraphs) {
-
+            foreach ($dashboards['graphs'] as $dashboardGraphs) {
                 if (is_array($dashboardGraphs) && !empty($dashboardGraphs)) {
-                    foreach ($dashboardGraphs as $dashboardGraph) {
-                        $uniqueDashboardKey = uniqid();
-
+                    foreach ($dashboardGraphs as $keyElement => $dashboardGraph) {
                         $nbDataset = 0;
+                        $uniqueKey = $dashboardGraph['title'] . $keyElement;
                         if (is_array($dashboardGraph['data']) && !empty($dashboardGraph['data'])) {
-
                             if ($dashboardGraph['dataset'] >= 2) {
                                 foreach ($dashboardGraph['data'] as $dashboardGraphDatasets) {
                                     unset($dashboardGraphDatasets[0]);
@@ -202,40 +199,38 @@ class SaturneDashboard
                             if ($nbDataset > 0) {
                                 if (is_array($dashboardGraph['labels']) && !empty($dashboardGraph['labels'])) {
                                     foreach ($dashboardGraph['labels'] as $dashboardGraphLabel) {
-                                        $dashboardGraphLegend[$uniqueDashboardKey][] = $langs->trans($dashboardGraphLabel['label']);
-                                        $dashboardGraphColor[$uniqueDashboardKey][]  = $langs->trans($dashboardGraphLabel['color']);
+                                        $dashboardGraphLegend[$uniqueKey][] = $langs->trans($dashboardGraphLabel['label']);
+                                        $dashboardGraphColor[$uniqueKey][]  = $langs->trans($dashboardGraphLabel['color']);
                                     }
                                 }
 
                                 $arrayKeys = array_keys($dashboardGraph['data']);
                                 foreach ($arrayKeys as $key) {
                                     if ($dashboardGraph['dataset'] >= 2) {
-                                        $graphData[$uniqueDashboardKey][] = $dashboardGraph['data'][$key];
+                                        $graphData[$uniqueKey][] = $dashboardGraph['data'][$key];
                                     } else {
-                                        $graphData[$uniqueDashboardKey][] = [
+                                        $graphData[$uniqueKey][] = [
                                             0 => $langs->trans($dashboardGraph['labels'][$key]['label']),
                                             1 => $dashboardGraph['data'][$key]
                                         ];
                                     }
                                 }
 
-                                $fileName[$uniqueDashboardKey] = $uniqueDashboardKey . '.png';
-                                $fileUrl[$uniqueDashboardKey]  = DOL_URL_ROOT . '/viewimage.php?modulepart=' . $moduleNameLowerCase . '&file=' . $uniqueDashboardKey . '.png';
+                                $fileName[$uniqueKey] = $uniqueKey . '.png';
+                                $fileUrl[$uniqueKey]  = DOL_URL_ROOT . '/viewimage.php?modulepart=' . $moduleNameLowerCase . '&file=' . $uniqueKey . '.png';
 
                                 $graph = new DolGraph();
-                                $graph->SetData($graphData[$uniqueDashboardKey]);
+                                $graph->SetData($graphData[$uniqueKey]);
 
                                 if ($dashboardGraph['dataset'] >= 2) {
-                                    $graph->SetLegend($dashboardGraphLegend[$uniqueDashboardKey]);
+                                    $graph->SetLegend($dashboardGraphLegend[$uniqueKey]);
                                 }
-
-
-                                $graph->SetDataColor($dashboardGraphColor[$uniqueDashboardKey]);
+                                $graph->SetDataColor($dashboardGraphColor[$uniqueKey]);
                                 $graph->SetType([$dashboardGraph['type'] ?? 'pie']);
                                 $graph->SetWidth($dashboardGraph['width'] ?? $width);
                                 $graph->SetHeight($dashboardGraph['height'] ?? $height);
                                 $graph->setShowLegend($dashboardGraph['showlegend'] ?? 2);
-                                $graph->draw($fileName[$uniqueDashboardKey], $fileUrl[$uniqueDashboardKey]);
+                                $graph->draw($fileName[$uniqueKey], $fileUrl[$uniqueKey]);
                                 print '<div>';
                                 print load_fiche_titre($dashboardGraph['title'], $dashboardGraph['morehtmlright'], $dashboardGraph['picto']);
                                 print $graph->show();
