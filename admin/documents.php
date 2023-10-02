@@ -311,7 +311,7 @@ print '</td><td class="center">';
 print '<input type="submit" class="button" name="save" value="' . $langs->trans('Save') . '">';
 print '</td></tr>';
 
-$reshook = $hookmanager->executeHooks('SaturneAdminAdditionalConfig', $parameters); // Note that $action and $object may have been modified by some hooks
+$reshook = $hookmanager->executeHooks('saturneAdminAdditionalConfig', $parameters); // Note that $action and $object may have been modified by some hooks
 if (empty($reshook)) {
     $additionalConfig = $hookmanager->resArray;
 }

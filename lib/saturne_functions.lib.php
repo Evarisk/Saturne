@@ -286,15 +286,17 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
 
 		print '<div class="arearef heightref valignmiddle centpercent">';
         $baseDir = $conf->$moduleNameLowerCase->multidir_output[$conf->entity];
-        $reshook  = $hookmanager->executeHooks('SaturneBannerTabCustomDir', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
-        if ($reshook > 0) {
-            $baseDir = $hookmanager->resPrint;
-        }
+
 
         $subDir = $object->element . '/'. $object->ref . '/photos/';
-        $reshook  = $hookmanager->executeHooks('SaturneBannerTabCustomSubdir', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+        $reshook  = $hookmanager->executeHooks('saturneBannerTabCustomSubdir', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
         if ($reshook > 0) {
-            $subDir = $hookmanager->resPrint;
+            if ($hookmanager->resArray['dir']) {
+                $baseDir = $hookmanager->resArray['dir'];
+            }
+            if ($hookmanager->resArray['subdir']) {
+                $subDir = $hookmanager->resArray['subdir'];
+            }
         }
         $sdir = $baseDir . '/' . $subDir;
 
