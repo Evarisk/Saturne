@@ -231,24 +231,28 @@ abstract class CustomModeleNumRefSaturne extends ModeleNumRefSaturne
     public function info(): string
     {
 
-        global $conf, $langs, $db;
+        global $conf, $langs, $db, $moduleNameLowerCase;
 
         $langs->load("bills");
 
         $form = new Form($db);
+        $className = get_class($this);
+
+        $modName = str_replace('mod_', '', $className);
+        $confName = strtoupper($moduleNameLowerCase . '_' . $modName . '_ADDON');
 
         $texte = $langs->trans('GenericNumRefModelDesc')."<br>\n";
         $texte .= '<form action="'.$_SERVER["PHP_SELF"].'" method="POST">';
         $texte .= '<input type="hidden" name="token" value="'.newToken().'">';
         $texte .= '<input type="hidden" name="action" value="updateMask">';
-        $texte .= '<input type="hidden" name="mask" value="DIGIRISKDOLIBARR_GROUPMENT_SIRIUS_ADDON">';
+        $texte .= '<input type="hidden" name="mask" value="'. $confName .'">';
         $texte .= '<table class="nobordernopadding" width="100%">';
 
         $tooltip = $langs->trans("SaturneGenericMaskCodes");
 
         // Parametrage du prefix
         $texte .= '<tr><td>'.$langs->trans("Mask").':</td>';
-        $texte .= '<td class="right">'.$form->textwithpicto('<input type="text" class="flat minwidth175" name="addon_value" value="'.$conf->global->DIGIRISKDOLIBARR_GROUPMENT_SIRIUS_ADDON.'">', $tooltip, 1, 1).'</td>';
+        $texte .= '<td class="right">'.$form->textwithpicto('<input type="text" class="flat minwidth175" name="addon_value" value="'.$conf->global->$confName.'">', $tooltip, 1, 1).'</td>';
 
         $texte .= '<td class="left" rowspan="2">&nbsp; <input type="submit" class="button button-edit" name="Button"value="'.$langs->trans("Modify").'"></td>';
 
@@ -299,7 +303,7 @@ abstract class CustomModeleNumRefSaturne extends ModeleNumRefSaturne
         for ($i = 1; $i < dol_strlen($this->suffix); $i++) {
             $underscoreString .= '_';
         }
-        $sqlLike = '%';
+        $sqlLike = $underscoreString . '%';
         $suffixSize = dol_strlen($this->suffix);
 
         // First we get the max value.
