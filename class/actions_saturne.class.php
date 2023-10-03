@@ -141,7 +141,7 @@ class ActionsSaturne
 		$error = 0; // Error counter
 
 		if ($parameters['currentcontext'] == 'usercard') {
-			$id = GETPOST('id');
+			$id = GETPOSTISSET('id') ? GETPOST('id') : 0;
 
 			print '<script src="'.dol_buildpath($resourcesRequired['js'], 1).((strpos($resourcesRequired['js'], '?') === false) ? '?' : '&amp;').'lang='.$langs->defaultlang.'"></script>'."\n";
 			print '<script src="'.dol_buildpath($resourcesRequired['signature'], 1).((strpos($resourcesRequired['signature'], '?') === false) ? '?' : '&amp;').'lang='.$langs->defaultlang.'"></script>'."\n";
