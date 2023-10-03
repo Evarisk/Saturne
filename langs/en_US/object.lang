@@ -19,7 +19,7 @@
 
 # Right
 ReadObjects   = Read %s
-CreateObjects = Create/Modidy %s
+CreateObjects = Create/Modify %s
 DeleteObjects = Delete %s
 
 # Trigger
@@ -72,7 +72,7 @@ ObjectMustBeClassifiedToOpen     = %s must be in status (classified) in order to
 
 # Confirm box
 ValidateObject          = Validate %s
-ConfirmValidateObject   = Are you sure you want to validate %s? <br> La validation permet aux participants de signer le document mais <b> empêche l'ajout de nouveaux participants ou la modification de %s. </b>
+ConfirmValidateObject   = Are you sure you want to validate %s? <br> Validation allows participants to sign the document but <b> prevents adding new participants or changing %s. </b>
 ReOpenObject            = Open %s again
 ConfirmReOpenObject     = Are you sure you want to reopen %s ? Reopening allows %s to be modified and new participants to be added but all document signatures will be lost
 LockObject              = Lock %s
