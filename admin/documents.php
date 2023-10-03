@@ -338,10 +338,10 @@ foreach ($types as $type => $documentData) {
         $documentParentType = $documentType[0];
         $documentType       = $documentType[1];
     } else {
-        $documentParentType = $documentData['documentType'];
+        $documentParentType = ($documentData['className'] ?? $documentData['documentType']);
     }
 
-    require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . $documentData['documentType'] . '.class.php';
+    require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . ($documentData['className'] ?? $documentData['documentType']) . '.class.php';
 
     $object = new $type($db);
 
