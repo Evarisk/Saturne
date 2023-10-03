@@ -34,6 +34,8 @@ ObjectArchivedTrigger   = Archiving %s %s
 ObjectExpiredTrigger    = Expiring %s %s
 ObjectGenerateTrigger   = Generating %s %s
 ObjectSignedTrigger     = Signing %s %s
+ObjectImportTrigger     = Import of %s %s
+ObjectUnlinkTrigger     = Unlink of %s %s
 
 # SetEventMessage
 ObjectValidated = %s has been validated

@@ -34,6 +34,8 @@ ObjectArchivedTrigger   = %s %s archivé(e)
 ObjectExpiredTrigger    = %s %s expiré(e)
 ObjectGenerateTrigger   = %s %s généré(e)
 ObjectSignedTrigger     = %s %s signé(e)
+ObjectImportTrigger     = %s %s importé(e)
+ObjectUnlinkTrigger     = %s %s délié(e)
 
 # SetEventMessage - Notice info
 ObjectValidated = %s a été validé(e)
