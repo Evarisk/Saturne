@@ -53,12 +53,13 @@ class SaturneDashboard
     }
 
     /**
-     * Load dashboard info.
+     * Load dashboard info
+     *
+     * @param array  $moreParams Parameters for load dashboard info
      *
      * @return array
-     * @throws Exception
      */
-    public function load_dashboard($moreParams = []): array
+    public function load_dashboard(array $moreParams = []): array
     {
         require_once __DIR__ . '/../../' . $this->module . '/class/' . $this->module . 'dashboard.class.php';
 
@@ -67,7 +68,6 @@ class SaturneDashboard
         $dashboardDatas = $dashboard->load_dashboard($moreParams);
 
         $dashboardInfos = [];
-
         if (is_array($dashboardDatas) && !empty($dashboardDatas)) {
             foreach ($dashboardDatas as $key => $dashboardData) {
                 if (key_exists('widgets', $dashboardData)) {
@@ -86,12 +86,14 @@ class SaturneDashboard
     }
 
     /**
-     * Show dashboard.
+     * Show dashboard
+     *
+     * @param array      $moreParams    Parameters for load dashboard info
      *
      * @return void
      * @throws Exception
      */
-    public function show_dashboard($moreParams = [])
+    public function show_dashboard(array $moreParams = [])
     {
         global $conf, $form, $langs, $moduleNameLowerCase, $user;
 
@@ -101,7 +103,6 @@ class SaturneDashboard
         $conf->global->MAIN_DISABLE_TRUNC = 1;
 
         $dashboards = $this->load_dashboard($moreParams);
-
 
         print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '" class="dashboard" id="dashBoardForm">';
         print '<input type="hidden" name="token" value="' . newToken() . '">';
@@ -132,41 +133,32 @@ class SaturneDashboard
         if (is_array($dashboards['widgets']) && !empty($dashboards['widgets'])) {
             $widget = '';
             foreach ($dashboards['widgets'] as $dashboardWidgets) {
-
                 foreach ($dashboardWidgets as $key => $dashboardWidget) {
                     if (!isset($disableWidgetList->$key) && is_array($dashboardWidget) && !empty($dashboardWidget)) {
-                        if (array_key_exists('label', $dashboardWidget)) {
-                            $dashboardWidget = [$dashboardWidget];
-                        }
-
-                        foreach ($dashboardWidget as $widgetSingle) {
-                            $widget .= '<div class="box-flex-item"><div class="box-flex-item-with-margin">';
-                            $widget .= '<div class="info-box">';
-                            $widget .= '<span class="info-box-icon">';
-                            $widget .= '<i class="' . $widgetSingle['picto'] . '"></i>';
-                            $widget .= '</span>';
-                            $widget .= '<div class="info-box-content">';
-                            $widget .= '<div class="info-box-title" title="' . $langs->trans('Close') . '">';
-                            $widget .= '<span class="close-dashboard-widget" data-widgetname="' . $key . '"><i class="fas fa-times"></i></span>';
-                            $widget .= '</div>';
-                            $widget .= '<div class="info-box-lines">';
-                            $widget .= '<div class="info-box-line" style="font-size : 20px;">';
-                            for ($i = 0; $i < count($widgetSingle['label']); $i++) {
-                                if (!empty($widgetSingle['label'][$i])) {
-                                    $widget .= '<span class=""><strong>' . $widgetSingle['label'][$i] . ' : ' . '</strong>';
-                                    $widget .= '<span class="classfortooltip badge badge-info" title="' . $widgetSingle['label'][$i] . ' : ' . $widgetSingle['content'][$i] . '" >' . $widgetSingle['content'][$i] . '</span>';
-                                    $widget .= (!empty($widgetSingle['tooltip'][$i]) ? $form->textwithpicto('', $langs->transnoentities($widgetSingle['tooltip'][$i])) : '') . '</span>';
-                                    $widget .= '<br>';
-                                }
+                        $widget .= '<div class="box-flex-item"><div class="box-flex-item-with-margin">';
+                        $widget .= '<div class="info-box">';
+                        $widget .= '<span class="info-box-icon">';
+                        $widget .= '<i class="' . $dashboardWidget['picto'] . '"></i>';
+                        $widget .= '</span>';
+                        $widget .= '<div class="info-box-content">';
+                        $widget .= '<div class="info-box-title" title="' . $langs->trans('Close') . '">';
+                        $widget .= '<span class="close-dashboard-widget" data-widgetname="' . $key . '"><i class="fas fa-times"></i></span>';
+                        $widget .= '</div>';
+                        $widget .= '<div class="info-box-lines">';
+                        $widget .= '<div class="info-box-line" style="font-size : 20px;">';
+                        for ($i = 0; $i < count($dashboardWidget['label']); $i++) {
+                            if (!empty($dashboardWidget['label'][$i])) {
+                                $widget .= '<span class=""><strong>' . $dashboardWidget['label'][$i] . ' : ' . '</strong>';
+                                $widget .= '<span class="classfortooltip badge badge-info" title="' . $dashboardWidget['label'][$i] . ' : ' . $dashboardWidget['content'][$i] . '" >' . $dashboardWidget['content'][$i] . '</span>';
+                                $widget .= (!empty($dashboardWidget['tooltip'][$i]) ? $form->textwithpicto('', $langs->transnoentities($dashboardWidget['tooltip'][$i])) : '') . '</span>';
+                                $widget .= '<br>';
                             }
-                            $widget .= '</div>';
-                            $widget .= '</div><!-- /.info-box-lines --></div><!-- /.info-box-content -->';
-                            $widget .= '</div><!-- /.info-box -->';
-                            $widget .= '</div><!-- /.box-flex-item-with-margin -->';
-                            $widget .= '</div>';
                         }
-
-
+                        $widget .= '</div>';
+                        $widget .= '</div><!-- /.info-box-lines --></div><!-- /.info-box-content -->';
+                        $widget .= '</div><!-- /.info-box -->';
+                        $widget .= '</div><!-- /.box-flex-item-with-margin -->';
+                        $widget .= '</div>';
                     }
                 }
             }
