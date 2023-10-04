@@ -339,6 +339,7 @@ foreach ($types as $type => $documentData) {
         $documentType       = $documentType[1];
     } else {
         $documentParentType = ($documentData['className'] ?? $documentData['documentType']);
+        $documentType       = $documentData['documentType'];
     }
 
     require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . ($documentData['className'] ?? $documentData['documentType']) . '.class.php';

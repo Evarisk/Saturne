@@ -5,7 +5,7 @@ print load_fiche_titre($langs->trans('DocumentTemplate'), '', '');
 $def = [];
 $sql = 'SELECT nom';
 $sql .= ' FROM ' . MAIN_DB_PREFIX . 'document_model';
-$sql .= " WHERE type = '" . (!empty($documentParentType) ? $documentParentType : $documentType) . "'";
+$sql .= " WHERE type = '" . (!empty($documentType) ? $documentType : $documentParentType) . "'";
 $sql .= ' AND entity = ' . $conf->entity;
 
 $resql = $db->query($sql);
