@@ -559,6 +559,8 @@ class SaturneDocumentModel extends CommonDocGenerator
                 $signatoryRoles = ['attendants'];
             }
 
+            $moreParam['excludeAttendantsRole'] = (empty($moreParam['excludeAttendantsRole']) ? [] : $moreParam['excludeAttendantsRole']);
+
             foreach($signatoryRoles as $role => $signatoryObject) {
                 if (!in_array($role, $moreParam['excludeAttendantsRole'])) {
                     // Get attendants.
