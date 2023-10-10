@@ -72,6 +72,7 @@ ObjectMustBeValidatedToSendEmail = %s doit être au statut (validé) pour envoye
 ObjectMustBeLockedToSendEmail    = %s doit être au statut (verrouillé) pour envoyer un email
 ObjectMustBeLockedToArchive      = %s doit être au statut (verrouillé) et le document généré afin de pouvoir l'archiver
 ObjectMustBeClassifiedToOpen     = %s doit être au statut (classifié) afin de pouvoir l'ouvrir de nouveau
+ObjectMustBeValidatedToVersion  = %s doit être au status (validé) pour la versionner et générer un document
 
 # Confirm box - Boite de confirmation
 ValidateObject          = Valider %s

@@ -41,6 +41,9 @@ ObjectUnlinkTrigger     = Unlink of %s %s
 ObjectValidated = %s has been validated
 ObjectReOpened  = %s has been re-opened
 
+# Numbering modules
+SaturneGenericMaskCodes = This field consists of a prefix followed by a suffix. For example, ABC{000} will result in ABC001, ABC002, etc. You can add as many zeros as you wish.
+
 # Status
 StatusDraft              = Draft (to be validated)
 Validated                = Validated
@@ -69,6 +72,7 @@ ObjectMustBeValidatedToSendEmail = %s must be in (validated) status to send an e
 ObjectMustBeLockedToSendEmail    = %s must be in (locked) status to send an email
 ObjectMustBeLockedToArchive      = %s must be in status (locked) and the document generated in order to archive it
 ObjectMustBeClassifiedToOpen     = %s must be in status (classified) in order to open it again
+ObjectMustBeValidatedToVersion  = %s must be in status (validated) to version it and generate a document
 
 # Confirm box
 ValidateObject          = Validate %s
