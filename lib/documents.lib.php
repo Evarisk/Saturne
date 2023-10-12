@@ -91,6 +91,7 @@ function saturne_show_documents(string $modulepart, string $modulesubdir, string
 		$submodulepart = $modulepart;
 		// modulepart = 'nameofmodule' or 'nameofmodule:NameOfObject'
 		$tmp = explode(':', $modulepart);
+
 		if (!empty($tmp[1])) {
 			$modulepart    = $tmp[0];
 			$submodulepart = $tmp[1];
@@ -99,22 +100,33 @@ function saturne_show_documents(string $modulepart, string $modulesubdir, string
 
 		// For normalized external modules.
 		$file = dol_buildpath('/' . $modulepart . '/core/modules/' . $modulepart . '/'. $modulepart .'documents/' . strtolower($submodulepart) . '/modules_' . strtolower($submodulepart) . '.php');
-		include_once $file;
+		if (file_exists($file)) {
+            include_once $file;
+            $class = 'ModeleODT' . $submodulepart;
 
-		$class = 'ModeleODT' . $submodulepart;
-
-		if (class_exists($class)) {
-			if (preg_match('/specimen/', $param)) {
-				$type      = strtolower($class) . 'specimen';
-				include_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
-				$modellist = getListOfModels($db, $type);
-			} else {
-				$modellist = call_user_func($class . '::liste_modeles', $db, 100);
-			}
-		} else {
-			dol_print_error($db, "Bad value for modulepart '" . $modulepart . "' in saturne_show_documents");
-			return -1;
-		}
+            if (class_exists($class)) {
+                if (preg_match('/specimen/', $param)) {
+                    $type      = strtolower($class) . 'specimen';
+                    include_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
+                    $modellist = getListOfModels($db, $type);
+                } else {
+                    $modellist = call_user_func($class . '::liste_modeles', $db, 100);
+                }
+            } else {
+                dol_print_error($db, "Bad value for modulepart '" . $modulepart . "' in saturne_show_documents");
+                return -1;
+            }
+        } else {
+            if (preg_match('/specimen/', $param)) {
+                $type      = 'SaturneDocumentModelspecimen';
+                include_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
+                $modellist = getListOfModels($db, $type);
+            } else {
+                $saturneDocumentModel = new SaturneDocumentModel($db, $modulepart, $submodulepart);
+                $documentType = strtolower($submodulepart);
+                $modellist = $saturneDocumentModel->liste_modeles($db, $documentType);
+            }
+        }
 
 		// Set headershown to avoid to have table opened a second time later
 		$headershown = 1;

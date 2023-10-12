@@ -53,18 +53,20 @@ class SaturneDashboard
     }
 
     /**
-     * Load dashboard info.
+     * Load dashboard info
+     *
+     * @param array  $moreParams Parameters for load dashboard info
      *
      * @return array
-     * @throws Exception
      */
-    public function load_dashboard(): array
+    public function load_dashboard(array $moreParams = []): array
     {
         require_once __DIR__ . '/../../' . $this->module . '/class/' . $this->module . 'dashboard.class.php';
 
         $className      = ucfirst($this->module) . 'Dashboard';
         $dashboard      = new $className($this->db);
-        $dashboardDatas = $dashboard->load_dashboard();
+        $dashboardDatas = $dashboard->load_dashboard($moreParams);
+
         $dashboardInfos = [];
         if (is_array($dashboardDatas) && !empty($dashboardDatas)) {
             foreach ($dashboardDatas as $key => $dashboardData) {
@@ -84,12 +86,14 @@ class SaturneDashboard
     }
 
     /**
-     * Show dashboard.
+     * Show dashboard
+     *
+     * @param array      $moreParams    Parameters for load dashboard info
      *
      * @return void
      * @throws Exception
      */
-    public function show_dashboard()
+    public function show_dashboard(array $moreParams = [])
     {
         global $conf, $form, $langs, $moduleNameLowerCase, $user;
 
@@ -98,7 +102,7 @@ class SaturneDashboard
 
         $conf->global->MAIN_DISABLE_TRUNC = 1;
 
-        $dashboards = $this->load_dashboard();
+        $dashboards = $this->load_dashboard($moreParams);
 
         print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '" class="dashboard" id="dashBoardForm">';
         print '<input type="hidden" name="token" value="' . newToken() . '">';
@@ -168,6 +172,7 @@ class SaturneDashboard
                 if (is_array($dashboardGraphs) && !empty($dashboardGraphs)) {
                     foreach ($dashboardGraphs as $keyElement => $dashboardGraph) {
                         $nbDataset = 0;
+                        $uniqueKey = $dashboardGraph['title'] . $keyElement;
                         if (is_array($dashboardGraph['data']) && !empty($dashboardGraph['data'])) {
                             if ($dashboardGraph['dataset'] >= 2) {
                                 foreach ($dashboardGraph['data'] as $dashboardGraphDatasets) {
@@ -186,38 +191,38 @@ class SaturneDashboard
                             if ($nbDataset > 0) {
                                 if (is_array($dashboardGraph['labels']) && !empty($dashboardGraph['labels'])) {
                                     foreach ($dashboardGraph['labels'] as $dashboardGraphLabel) {
-                                        $dashboardGraphLegend[$keyElement][] = $langs->trans($dashboardGraphLabel['label']);
-                                        $dashboardGraphColor[$keyElement][]  = $langs->trans($dashboardGraphLabel['color']);
+                                        $dashboardGraphLegend[$uniqueKey][] = $langs->trans($dashboardGraphLabel['label']);
+                                        $dashboardGraphColor[$uniqueKey][]  = $langs->trans($dashboardGraphLabel['color']);
                                     }
                                 }
 
                                 $arrayKeys = array_keys($dashboardGraph['data']);
                                 foreach ($arrayKeys as $key) {
                                     if ($dashboardGraph['dataset'] >= 2) {
-                                        $graphData[$keyElement][] = $dashboardGraph['data'][$key];
+                                        $graphData[$uniqueKey][] = $dashboardGraph['data'][$key];
                                     } else {
-                                        $graphData[$keyElement][] = [
+                                        $graphData[$uniqueKey][] = [
                                             0 => $langs->trans($dashboardGraph['labels'][$key]['label']),
                                             1 => $dashboardGraph['data'][$key]
                                         ];
                                     }
                                 }
 
-                                $fileName[$keyElement] = $keyElement . '.png';
-                                $fileUrl[$keyElement]  = DOL_URL_ROOT . '/viewimage.php?modulepart=' . $moduleNameLowerCase . '&file=' . $keyElement . '.png';
+                                $fileName[$uniqueKey] = $uniqueKey . '.png';
+                                $fileUrl[$uniqueKey]  = DOL_URL_ROOT . '/viewimage.php?modulepart=' . $moduleNameLowerCase . '&file=' . $uniqueKey . '.png';
 
                                 $graph = new DolGraph();
-                                $graph->SetData($graphData[$keyElement]);
+                                $graph->SetData($graphData[$uniqueKey]);
 
                                 if ($dashboardGraph['dataset'] >= 2) {
-                                    $graph->SetLegend($dashboardGraphLegend[$keyElement]);
+                                    $graph->SetLegend($dashboardGraphLegend[$uniqueKey]);
                                 }
-                                $graph->SetDataColor($dashboardGraphColor[$keyElement]);
+                                $graph->SetDataColor($dashboardGraphColor[$uniqueKey]);
                                 $graph->SetType([$dashboardGraph['type'] ?? 'pie']);
                                 $graph->SetWidth($dashboardGraph['width'] ?? $width);
                                 $graph->SetHeight($dashboardGraph['height'] ?? $height);
                                 $graph->setShowLegend($dashboardGraph['showlegend'] ?? 2);
-                                $graph->draw($fileName[$keyElement], $fileUrl[$keyElement]);
+                                $graph->draw($fileName[$uniqueKey], $fileUrl[$uniqueKey]);
                                 print '<div>';
                                 print load_fiche_titre($dashboardGraph['title'], $dashboardGraph['morehtmlright'], $dashboardGraph['picto']);
                                 print $graph->show();

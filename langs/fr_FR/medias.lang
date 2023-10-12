@@ -29,6 +29,7 @@ PhotoNotSent                 = La photo ne s'est pas correctement envoyée
 MediaDimensionSetWithSuccess = Dimensions des médias modifiées avec succès
 MediaDimensionNegativeError  = Les valeurs des dimensions ne peuvent être négatives
 MediaDimensionEmptyError     = Les valeurs des dimensions ne peuvent pas être vides
+MediaData                    = Configuration des médias
 
 # Config page - Page d'administration
 MediaMaxWidthMini                    = Largeur du média mini

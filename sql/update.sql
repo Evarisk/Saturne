@@ -60,3 +60,12 @@ UPDATE llx_saturne_object_signature SET role = 'Contributor' WHERE role = 'MEETI
 UPDATE llx_saturne_object_signature SET role = 'Responsible' WHERE role = 'MEETING_SOCIETY_ATTENDANT';
 UPDATE llx_saturne_object_signature SET role = 'Attendant' WHERE role = 'AUDIT_EXTERNAL_ATTENDANT';
 UPDATE llx_saturne_object_signature SET role = 'Auditor' WHERE role = 'AUDIT_SOCIETY_ATTENDANT';
+
+-- 1.1.2
+ALTER TABLE `llx_digiriskdolibarr_digiriskdocuments` ADD module_name VARCHAR(128) NULL AFTER type;
+UPDATE `llx_digiriskdolibarr_digiriskdocuments` SET module_name = 'digiriskdolibarr';
+INSERT INTO `llx_saturne_object_documents` (ref, ref_ext, entity, date_creation, tms, import_key, status, type, module_name, json, model_pdf, model_odt, last_main_doc, parent_type, parent_id, fk_user_creat)
+SELECT ref, ref_ext, entity, date_creation, tms, import_key, status, type, module_name, json, model_pdf, model_odt, last_main_doc, parent_type, parent_id, fk_user_creat FROM `llx_digiriskdolibarr_digiriskdocuments`;
+DROP TABLE `llx_digiriskdolibarr_digiriskdocuments`;
+DROP TABLE `llx_digiriskdolibarr_digiriskdocuments_extrafields`;
+ALTER TABLE `llx_saturne_object_documents` CHANGE json json longtext;

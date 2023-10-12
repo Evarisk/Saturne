@@ -8,16 +8,15 @@ print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
 print '<td>' . $langs->trans('Name') . '</td>';
 print '<td>' . $langs->trans('Description') . '</td>';
-print '<td class="nowrap">' . $langs->trans('Example') . '</td>';
+print '<td class="nowrap">' . $langs->trans('NextValue') . '</td>';
 print '<td class="center">' . $langs->trans('Status') . '</td>';
-print '<td class="center">' . $langs->trans('ShortInfo') . '</td>';
 print '</tr>';
 
 clearstatcache();
 
 if (empty($documentPath)) {
     $elementType = $object->element;
-    $path = '/custom/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $elementType . '/';
+    $path = '/custom/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . ($objectModSubdir ? $objectModSubdir . '/' : '') . $elementType . '/';
 } else {
     $elementType = $documentParentType;
     $path = '/custom/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $elementType . '/';
@@ -48,9 +47,9 @@ if (is_dir($dir)) {
                             print $module->info();
                             print '</td>';
 
-                            // Show example of numbering module.
+                            // Show next value.
                             print '<td class="nowrap">';
-                            $tmp = $module->getExample();
+                            $tmp = $module->getNextValue($object);
                             if (preg_match('/^Error/', $tmp)) {
                                 print '<div class="error">' . $langs->trans($tmp) . '</div>';
                             } elseif ($tmp == 'NotConfigured') {
@@ -69,26 +68,6 @@ if (is_dir($dir)) {
                             }
                             print '</td>';
 
-                            // Example
-                            $htmltooltip = $langs->trans('Version') . ' : <b>' . $module->getVersion() . '</b><br>';
-                            $nextval = $module->getNextValue($object);
-                            if ("$nextval" != $langs->trans('NotAvailable')) {  // Keep " on nextval.
-                                $htmltooltip .= $langs->trans('NextValue') . ': ';
-                                if ($nextval) {
-                                    if (preg_match('/^Error/', $nextval) || $nextval == 'NotConfigured')
-                                        $nextval = $langs->trans($nextval);
-                                    $htmltooltip .= $nextval . '<br>';
-                                } else {
-                                    $htmltooltip .= $langs->trans($module->error) . '<br>';
-                                }
-                            }
-                            print '<td class="center">';
-                            print $form->textwithpicto('', $htmltooltip, 1, 0);
-                            if ($conf->global->$confType . '.php' == $file) { // If module is the one used, we show existing errors.
-                                if (!empty($module->error)) {
-                                    dol_htmloutput_mesg($module->error, '', 'error', 1);
-                                }
-                            }
                             print '</td>';
                             print '</tr>';
                         }

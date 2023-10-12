@@ -355,16 +355,16 @@ if ($id > 0 || !empty($ref) && empty($action)) {
         $signatoriesByRole = $hookmanager->resArray;
     } elseif ($attendantTableMode == 'advanced') {
         $signatoriesByRole = $signatory->fetchSignatory('', $object->id, $object->element);
+        $signatoriesInDictionary = saturne_fetch_dictionary('c_' . $object->element . '_attendants_role');
         if ($signatoriesByRole == 0) {
-            $signatoriesInDictionary = saturne_fetch_dictionary('c_' . $object->element . '_attendants_role');
             $signatoriesByRole       = [];
-            if (is_array($signatoriesInDictionary) && !empty($signatoriesInDictionary)) {
-                foreach ($signatoriesInDictionary as $signatoryInDictionary) {
-                    $signatoriesByRole[$signatoryInDictionary->ref] = [];
-                }
-            } else {
-                $signatoriesByRole = ['Attendant' => []];
+        }
+        if (is_array($signatoriesInDictionary) && !empty($signatoriesInDictionary)) {
+            foreach ($signatoriesInDictionary as $signatoryInDictionary) {
+                $signatoriesByRole[$signatoryInDictionary->ref] = $signatoriesByRole[$signatoryInDictionary->ref] ?? [];
             }
+        } else {
+            $signatoriesByRole = ['Attendant' => []];
         }
     } else {
         $signatoriesByRole['Attendant'] = $signatory->fetchSignatories($object->id, $object->element);

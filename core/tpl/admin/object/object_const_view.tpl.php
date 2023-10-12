@@ -8,8 +8,9 @@ if ($reshook > 0) {
 if ($action == 'add_all_conf') {
 	if (is_array($constArray) && !empty($constArray)) {
 		foreach ($constArray[$moduleNameLowerCase] as $const) {
-			if (empty($conf->global->$const['code'])) {
-				dolibarr_set_const($db, $const['code'], 1, 'integer', 0, '', $conf->entity);
+            $code = $const['code'];
+			if (empty($conf->global->$code) && $const['disabled'] != 1) {
+				dolibarr_set_const($db, $code, 1, 'integer', 0, '', $conf->entity);
 			}
 		}
 	}
@@ -18,7 +19,7 @@ if ($action == 'add_all_conf') {
 if ($action == 'delete_all_conf') {
 	if (is_array($constArray) && !empty($constArray)) {
 		foreach ($constArray[$moduleNameLowerCase] as $const) {
-			if (empty($conf->global->$const['code'])) {
+			if (empty($conf->global->$const['code']) && $const['disabled'] != 1) {
 				dolibarr_set_const($db, $const['code'], 0, 'integer', 0, '', $conf->entity);
 			}
 		}
@@ -48,7 +49,7 @@ if (is_array($constArray) && !empty($constArray)) {
         print $langs->trans($const['description']);
         print '</td>';
         print '<td class="center">';
-        print ajax_constantonoff($const['code'], $input ?? [], $entity ?? null, $revertonoff ?? 0, $strict ?? 0, $forceReload ?? 0, $marginleftonlyshort ?? 2 , $forcenoajax ?? 0, $setzeroinsteadofdel ?? 1, $suffix ?? '', $mode ?? '');
+        print ajax_constantonoff($const['disabled'] == 1 ? '' : $const['code'], $input ?? [], $entity ?? null, $revertonoff ?? 0, $strict ?? 0, $forceReload ?? 0, $marginleftonlyshort ?? 2 , $forcenoajax ?? 0, $setzeroinsteadofdel ?? 1, $suffix ?? '', $mode ?? '');
         print '</td>';
         print '</tr>';
     }

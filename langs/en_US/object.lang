@@ -19,7 +19,7 @@
 
 # Right
 ReadObjects   = Read %s
-CreateObjects = Create/Modidy %s
+CreateObjects = Create/Modify %s
 DeleteObjects = Delete %s
 
 # Trigger
@@ -34,10 +34,15 @@ ObjectArchivedTrigger   = Archiving %s %s
 ObjectExpiredTrigger    = Expiring %s %s
 ObjectGenerateTrigger   = Generating %s %s
 ObjectSignedTrigger     = Signing %s %s
+ObjectImportTrigger     = Import of %s %s
+ObjectUnlinkTrigger     = Unlink of %s %s
 
 # SetEventMessage
 ObjectValidated = %s has been validated
 ObjectReOpened  = %s has been re-opened
+
+# Numbering modules
+SaturneGenericMaskCodes = This field consists of a prefix followed by a suffix. For example, ABC{000} will result in ABC001, ABC002, etc. You can add as many zeros as you wish.
 
 # Status
 StatusDraft              = Draft (to be validated)
@@ -67,10 +72,11 @@ ObjectMustBeValidatedToSendEmail = %s must be in (validated) status to send an e
 ObjectMustBeLockedToSendEmail    = %s must be in (locked) status to send an email
 ObjectMustBeLockedToArchive      = %s must be in status (locked) and the document generated in order to archive it
 ObjectMustBeClassifiedToOpen     = %s must be in status (classified) in order to open it again
+ObjectMustBeValidatedToVersion  = %s must be in status (validated) to version it and generate a document
 
 # Confirm box
 ValidateObject          = Validate %s
-ConfirmValidateObject   = Are you sure you want to validate %s? <br> La validation permet aux participants de signer le document mais <b> empêche l'ajout de nouveaux participants ou la modification de %s. </b>
+ConfirmValidateObject   = Are you sure you want to validate %s? <br> Validation allows participants to sign the document but <b> prevents adding new participants or changing %s. </b>
 ReOpenObject            = Open %s again
 ConfirmReOpenObject     = Are you sure you want to reopen %s ? Reopening allows %s to be modified and new participants to be added but all document signatures will be lost
 LockObject              = Lock %s

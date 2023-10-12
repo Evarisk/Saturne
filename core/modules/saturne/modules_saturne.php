@@ -39,6 +39,11 @@ abstract class ModeleNumRefSaturne
     public string $prefix = '';
 
     /**
+     * @var string Numbering module ref suffix.
+     */
+    public string $suffix = '';
+
+    /**
      * @var string Name.
      */
     public string $name = '';
@@ -71,13 +76,35 @@ abstract class ModeleNumRefSaturne
     }
 
     /**
-     * Return an example of numbering.
+     *    Return last value
      *
-     * @return string Example.
+     * @param Object $object Object we need next value for
+     * @return string                Value if KO, <0 if KO
+     * @throws Exception
      */
-    public function getExample(): string
+    public function getLastValue(object $object)
     {
-        return $this->prefix . '0501-0001';
+        global $db, $conf;
+
+        // first we get the max value
+        $posindice = strlen($this->prefix) + 1;
+        $sql       = "SELECT MAX(CAST(SUBSTRING(ref FROM " . $posindice . ") AS SIGNED)) as max";
+        $sql      .= ' FROM ' . MAIN_DB_PREFIX . $object->table_element;
+        $sql      .= " WHERE ref LIKE '" . $db->escape($this->prefix) . "%'";
+        if ($object->ismultientitymanaged == 1) {
+            $sql .= " AND entity = " . $conf->entity;
+        }
+        $sql .= " ORDER BY rowid DESC LIMIT 1";
+
+        $resql = $db->query($sql);
+
+        if ($resql) {
+            $obj = $db->fetch_object($resql);
+        } else {
+            dol_syslog(get_class($this) . '::getLastValue', LOG_DEBUG);
+            return -1;
+        }
+        return $this->prefix . $obj->max;
     }
 
     /**
@@ -127,11 +154,15 @@ abstract class ModeleNumRefSaturne
     {
         global $db, $conf;
 
+        $sqlLike = '____-%';
+        $hideDate = 0;
+        $suffixSize = 4;
+
         // First we get the max value.
-        $posIndice = strlen($this->prefix) + 6;
+        $posIndice = dol_strlen($this->prefix) + dol_strlen($sqlLike);
         $sql = 'SELECT MAX(CAST(SUBSTRING(ref FROM ' . $posIndice . ') AS SIGNED)) as max';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . $object->table_element;
-        $sql .= " WHERE ref LIKE '" . $db->escape($this->prefix) . "____-%'";
+        $sql .= " WHERE ref LIKE '" . $db->escape($this->prefix) . $sqlLike . "'";
         if ($object->ismultientitymanaged == 1) {
             $sql .= ' AND entity = ' . $conf->entity;
         }
@@ -155,11 +186,11 @@ abstract class ModeleNumRefSaturne
         if ($max >= (pow(10, 4) - 1)) {
             $num = $max + 1; // If counter > 9999, we do not format on 4 chars, we take number as it is.
         } else {
-            $num = sprintf('%04s', $max + 1);
+            $num = sprintf('%0'. $suffixSize .'s', $max + 1);
         }
 
         dol_syslog(get_class($this) . '::getNextValue return ' . $this->prefix . $yymm . '-' . $num);
-        return $this->prefix . $yymm . '-' . $num;
+        return $this->prefix . ($hideDate ? '' : $yymm . '-') . $num;
     }
 
     /**
@@ -187,12 +218,136 @@ abstract class ModeleNumRefSaturne
     }
 }
 
+/**
+ *  Parent class to manage custom numbering rules.
+ */
+abstract class CustomModeleNumRefSaturne extends ModeleNumRefSaturne
+{
+    /**
+     *  Return description of module
+     *
+     *  @return     string      Texte descripif
+     */
+    public function info(): string
+    {
+
+        global $conf, $langs, $db, $moduleNameLowerCase;
+
+        $langs->load("bills");
+
+        $form = new Form($db);
+        $className = get_class($this);
+
+        $modName = str_replace('mod_', '', $className);
+        $confName = strtoupper($moduleNameLowerCase . '_' . $modName . '_ADDON');
+
+        $texte = $langs->trans('GenericNumRefModelDesc')."<br>\n";
+        $texte .= '<form action="'.$_SERVER["PHP_SELF"].'" method="POST">';
+        $texte .= '<input type="hidden" name="token" value="'.newToken().'">';
+        $texte .= '<input type="hidden" name="action" value="updateMask">';
+        $texte .= '<input type="hidden" name="mask" value="'. $confName .'">';
+        $texte .= '<table class="nobordernopadding" width="100%">';
+
+        $tooltip = $langs->trans("SaturneGenericMaskCodes");
+
+        // Parametrage du prefix
+        $texte .= '<tr><td>'.$langs->trans("Mask").':</td>';
+        $texte .= '<td class="right">'.$form->textwithpicto('<input type="text" class="flat minwidth175" name="addon_value" value="'.$conf->global->$confName.'">', $tooltip, 1, 1).'</td>';
+
+        $texte .= '<td class="left" rowspan="2">&nbsp; <input type="submit" class="button button-edit" name="Button"value="'.$langs->trans("Modify").'"></td>';
+
+        $texte .= '</tr>';
+
+        $texte .= '</table>';
+        $texte .= '</form>';
+
+        return $texte;
+    }
+
+    /**
+     *    Return last value
+     *
+     * @param Object $object Object we need next value for
+     * @return string                Value if KO, <0 if KO
+     * @throws Exception
+     */
+    public function getLastValue(object $object)
+    {
+        $nextValue = $this->getNextValue($object);
+
+        $nextValueSuffix = preg_replace('/'. $this->prefix .'/', '', $nextValue);
+        $nextValueNumber = ltrim($nextValueSuffix, '0');
+        $nextValueNumber -= 1;
+
+        $nextValueSuffixLength = dol_strlen($nextValueSuffix);
+        $nextValueNumberLength = dol_strlen($nextValueNumber);
+
+        $zeroString = '';
+        for ($i = 0; $i < ($nextValueSuffixLength - $nextValueNumberLength); $i++) {
+            $zeroString .= '0';
+        }
+
+        return $this->prefix . $zeroString . $nextValueNumber;
+    }
+
+    /**
+     *  Return next value
+     *
+     *  @return string      			Value if OK, 0 if KO
+     */
+    public function getNextValue(object $object): string
+    {
+        global $db, $conf;
+
+        $underscoreString = '';
+        for ($i = 1; $i < dol_strlen($this->suffix); $i++) {
+            $underscoreString .= '_';
+        }
+        $sqlLike = $underscoreString . '%';
+        $suffixSize = dol_strlen($this->suffix);
+
+        // First we get the max value.
+        $posIndice = dol_strlen($this->prefix) + dol_strlen($sqlLike);
+        $sql = 'SELECT MAX(CAST(SUBSTRING(ref FROM ' . $posIndice . ') AS SIGNED)) as max';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . $object->table_element;
+        $sql .= " WHERE ref LIKE '" . $db->escape($this->prefix) . $sqlLike . "'";
+        if ($object->ismultientitymanaged == 1) {
+            $sql .= ' AND entity = ' . $conf->entity;
+        }
+
+        $resql = $db->query($sql);
+        if ($resql) {
+            $obj = $db->fetch_object($resql);
+            if ($obj) {
+                $max = intval($obj->max);
+            } else {
+                $max = 0;
+            }
+        } else {
+            dol_syslog(get_class($this) . '::getNextValue', LOG_DEBUG);
+            return -1;
+        }
+
+        $date = !empty($object->date_creation) ? $object->date_creation : dol_now();
+        $yymm = strftime('%y%m', $date);
+
+        if ($max >= (pow(10, 4) - 1)) {
+            $num = $max + 1; // If counter > 9999, we do not format on 4 chars, we take number as it is.
+        } else {
+            $num = sprintf('%0'. $suffixSize .'s', $max + 1);
+        }
+
+        dol_syslog(get_class($this) . '::getNextValue return ' . $this->prefix . $yymm . '-' . $num);
+        return $this->prefix . $num;
+    }
+}
+
 require_once DOL_DOCUMENT_ROOT . '/core/class/commondocgenerator.class.php';
 
 /**
  * Parent class for documents models.
  */
-abstract class SaturneDocumentModel extends CommonDocGenerator
+class SaturneDocumentModel extends CommonDocGenerator
 {
     /**
      * @var string Module.
@@ -344,12 +499,14 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
                     // Image.
                     if (file_exists($val)) {
                         $listLines->setImage($key, $val);
-                    } else {
+                    } else if (dol_strlen($val) > 0){
 						if ($key == 'mycompany_logo') {
 							$listLines->setVars($key, $outputLangs->transnoentities('ErrorNoSocietyLogo'), true, 'UTF-8');
 						} else {
 							$listLines->setVars($key, $outputLangs->transnoentities('ErrorFileNotFound'), true, 'UTF-8');
 						}
+                    } else {
+                        $listLines->setVars($key, '', true, 'UTF-8');
                     }
                 } elseif (preg_match('/signature/', $key) && is_file($val)) {
                     $imageSize = getimagesize($val);
@@ -557,7 +714,6 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
             dol_syslog('doc_' . $this->document_type . '_odt::write_file parameter srctemplatepath empty', LOG_WARNING);
             return -1;
         }
-
         if (empty($moduleNameLowerCase)) {
             $moduleNameLowerCase = $objectDocument->module;
         }
@@ -573,7 +729,13 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
 
         if ($conf->$moduleNameLowerCase->dir_output) {
             $confRefModName      = dol_strtoupper($this->module) . '_' . dol_strtoupper($this->document_type) . '_ADDON';
-            $refModName          = new $conf->global->$confRefModName($this->db);
+
+            $numberingModules = [
+                $moreParam['subDir'] . $this->document_type => $conf->global->$confRefModName
+            ];
+
+
+            list($refModName) = saturne_require_objects_mod($numberingModules, $moduleNameLowerCase);
             $objectDocumentRef   = $refModName->getNextValue($objectDocument);
             $objectDocument->ref = $objectDocumentRef;
             $objectDocumentID    = $objectDocument->create($moreParam['user'], true, $object);
@@ -582,7 +744,7 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
 
             $objectDocumentRef = dol_sanitizeFileName($objectDocument->ref);
 
-            $dir = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?? 1] . '/' . $object->element . 'document/' . $object->ref;
+            $dir = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?? 1] . '/' . $this->document_type . (dol_strlen($object->ref) > 0 ? '/' . $object->ref : '');
             if ($moreParam['specimen'] == 1 && $moreParam['zone'] == 'public') {
                 $dir .= '/public_specimen';
             }
@@ -601,7 +763,15 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
                 $societyName = preg_replace('/\./', '_', $conf->global->MAIN_INFO_SOCIETE_NOM);
 
                 $date = dol_print_date(dol_now(), 'dayxcard');
-                $newFileTmp = $date . '_' . $object->ref . '_' . $objectDocumentRef .'_' . $outputLangs->transnoentities($newFileTmp) . '_' . (!empty($moreParam['documentName']) ? $moreParam['documentName'] : '') . $societyName;
+                $newFileTmp = $date
+                    . (dol_strlen($object->ref) > 0         ? '_' . $object->ref         : '')
+                    . '_' . $objectDocumentRef
+                    . ($moreParam['hideTemplateName']       ? ''                         : '_' . $outputLangs->transnoentities($newFileTmp)) . '_'
+                    . (!empty($moreParam['documentName'])   ? $moreParam['documentName'] : '')
+                    . $societyName
+                    . (!empty($moreParam['additionalName']) ? $moreParam['additionalName'] : '')
+                ;
+
                 if ($moreParam['specimen'] == 1) {
                     $newFileTmp .= '_specimen';
                 }
@@ -612,6 +782,7 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
                 $newFileFormat = substr($newFile, strrpos($newFile, '.') + 1);
                 $fileName      = $newFileTmp . '.' . $newFileFormat;
                 $file          = $dir . '/' . $fileName;
+
 
                 $objectDocument->last_main_doc = $fileName;
                 $objectDocument->update($moreParam['user'], true);
@@ -655,6 +826,8 @@ abstract class SaturneDocumentModel extends CommonDocGenerator
                 $arraySoc['mycompany_logo'] = preg_replace('/_small/', '_mini', $arraySoc['mycompany_logo']);
 
                 $tmpArray = array_merge($substitutionArray, $arraySoc, $moreParam['tmparray']);
+                $tmpArray['entity']              = $conf->entity;
+                $tmpArray['object_document_ref'] = $objectDocumentRef;
                 complete_substitutions_array($tmpArray, $outputLangs, $object);
 
                 $this->fillTags($odfHandler, $outputLangs, $tmpArray, $moreParam);
