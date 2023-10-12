@@ -297,7 +297,7 @@ if (is_array($submitFileErrorText)) {
 	<div class="modal-container wpeo-modal-event">
 		<!-- Modal-Header -->
 		<div class="modal-header">
-			<h2 class="modal-title"><?php echo $langs->trans('ModalAddPhoto')?></h2>
+			<h2 class="modal-title"><?php echo $langs->trans('MediaGallery')?></h2>
 			<div class="modal-close"><i class="fas fa-2x fa-times"></i></div>
 		</div>
 		<!-- Modal-Content -->
