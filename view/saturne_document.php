@@ -100,7 +100,8 @@ if ($id > 0 || !empty($ref)) {
 // Security check - Protection if external user
 $permissiontoread = $user->rights->$moduleNameLowerCase->$objectType->read;
 $permissiontoadd  = $user->rights->$moduleNameLowerCase->$objectType->write;
-saturne_check_access($permissiontoread);
+
+saturne_check_access($permissiontoread, $object);
 
 /*
 *  Actions
