@@ -36,10 +36,12 @@ if (is_array($constArray) && !empty($constArray)) {
     print '<td>' . $langs->transnoentities('Description') . '</td>';
 	print '<td class="center nowrap">';
 	print $langs->transnoentities('Status') . '</br>';
-	print '<a class="reposition commonlink" title="' . dol_escape_htmltag($langs->trans("All")) . '" href="' . $_SERVER["PHP_SELF"].'?action=add_all_conf&token=' . newToken() . '"> <u>' . $langs->trans("All") . "</u> </a>";
-	print ' / ';
-	print '<a class="reposition commonlink" title="' . dol_escape_htmltag($langs->trans("None")) . '" href="' . $_SERVER["PHP_SELF"] . '?&action=delete_all_conf&token=' . newToken() . '"> <u>' . $langs->trans("None")."</u> </a>";
-	print '</td>';
+    if ($user->admin) {
+        print '<a class="reposition commonlink" title="' . dol_escape_htmltag($langs->trans("All")) . '" href="' . $_SERVER["PHP_SELF"].'?action=add_all_conf&token=' . newToken() . '"> <u>' . $langs->trans("All") . "</u> </a>";
+        print ' / ';
+        print '<a class="reposition commonlink" title="' . dol_escape_htmltag($langs->trans("None")) . '" href="' . $_SERVER["PHP_SELF"] . '?&action=delete_all_conf&token=' . newToken() . '"> <u>' . $langs->trans("None")."</u> </a>";
+	}
+    print '</td>';
     print '</tr>';
 
     foreach ($constArray[$moduleNameLowerCase] as $const) {
@@ -49,7 +51,9 @@ if (is_array($constArray) && !empty($constArray)) {
         print $langs->trans($const['description']);
         print '</td>';
         print '<td class="center">';
-        print ajax_constantonoff($const['disabled'] == 1 ? '' : $const['code'], $input ?? [], $entity ?? null, $revertonoff ?? 0, $strict ?? 0, $forceReload ?? 0, $marginleftonlyshort ?? 2 , $forcenoajax ?? 0, $setzeroinsteadofdel ?? 1, $suffix ?? '', $mode ?? '');
+        if ($user->admin) {
+            print ajax_constantonoff($const['disabled'] == 1 ? '' : $const['code'], $input ?? [], $entity ?? null, $revertonoff ?? 0, $strict ?? 0, $forceReload ?? 0, $marginleftonlyshort ?? 2 , $forcenoajax ?? 0, $setzeroinsteadofdel ?? 1, $suffix ?? '', $mode ?? '');
+        }
         print '</td>';
         print '</tr>';
     }
