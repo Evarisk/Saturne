@@ -826,7 +826,8 @@ class SaturneDocumentModel extends CommonDocGenerator
                 $arraySoc['mycompany_logo'] = preg_replace('/_small/', '_mini', $arraySoc['mycompany_logo']);
 
                 $tmpArray = array_merge($substitutionArray, $arraySoc, $moreParam['tmparray']);
-                $tmpArray['entity'] = $conf->entity;
+                $tmpArray['entity']              = $conf->entity;
+                $tmpArray['object_document_ref'] = $objectDocumentRef;
                 complete_substitutions_array($tmpArray, $outputLangs, $object);
 
                 $this->fillTags($odfHandler, $outputLangs, $tmpArray, $moreParam);
