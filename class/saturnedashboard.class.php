@@ -122,7 +122,7 @@ class SaturneDashboard
         }
 
         print '<div class="add-widget-box" style="' . (!empty((array)$disableWidgetList) ? '' : 'display:none') . '">';
-        print Form::selectarray('boxcombo', $dashboardWidgetsArray, -1, $langs->trans('ChooseBoxToAdd') . '...', 0, 0, '', 1, 0, 0, 'DESC', 'maxwidth150onsmartphone hideonprint add-dashboard-widget', 0, 'hidden selected', 0, 1);
+        print Form::selectarray('boxcombo', $dashboardWidgetsArray, -1, $langs->trans('ChooseBoxToAdd'), 0, 0, '', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint add-dashboard-widget', 0, 'hidden selected', 0, 1);
         if (!empty($conf->use_javascript_ajax)) {
             include_once DOL_DOCUMENT_ROOT . '/core/lib/ajax.lib.php';
             print ajax_combobox('boxcombo');

@@ -112,6 +112,9 @@ ModuleHasBeenUpdatedTo = %s has been updated to %s
 ModulePatchNote        = Update note %s %s
 ShowPatchNote          = See the update note
 DontShowPatchNote      = No longer display the update note
+ChooseBoxToAdd         = Add widget to dashboard
+
+
 
 #
 # Schedules
