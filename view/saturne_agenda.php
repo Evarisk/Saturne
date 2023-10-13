@@ -50,11 +50,12 @@ global $conf, $db, $langs, $hookmanager, $user;
 saturne_load_langs();
 
 // Get parameters
-$id         = GETPOST('id', 'int');
-$ref        = GETPOST('ref', 'alpha');
-$action     = GETPOST('action', 'aZ09');
-$cancel     = GETPOST('cancel', 'aZ09');
-$backtopage = GETPOST('backtopage', 'alpha');
+$id          = GETPOST('id', 'int');
+$ref         = GETPOST('ref', 'alpha');
+$action      = GETPOST('action', 'aZ09');
+$cancel      = GETPOST('cancel', 'aZ09');
+$backtopage  = GETPOST('backtopage', 'alpha');
+$handlePhoto = GETPOST('handle_photo', 'alpha');
 
 if (GETPOST('actioncode', 'array')) {
     $actioncode = GETPOST('actioncode', 'array', 3);
@@ -156,7 +157,7 @@ if ($reshook > 0) {
 
 if ($id > 0 || !empty($ref)) {
     saturne_get_fiche_head($object, 'agenda', $title);
-    saturne_banner_tab($object, 'ref', '', 1, 'ref', 'ref', method_exists($object, 'getMoreHtmlRef') ? $object->getMoreHtmlRef($object->id) : '', !empty($object->photo));
+    saturne_banner_tab($object, 'ref', '', 1, 'ref', 'ref', method_exists($object, 'getMoreHtmlRef') ? $object->getMoreHtmlRef($object->id) : '', (!empty($object->photo) || $handlePhoto));
 
     print '<div class="fichecenter">';
 

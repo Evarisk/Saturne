@@ -273,37 +273,33 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
             }
         }
     }
-
     $saturneMoreHtmlRef .= '</div>';
 
-
-    $moreParamsBannerTab = '&module_name=' . $moduleName . '&object_type=' . $object->element;
-
     if (!$handlePhoto) {
-        dol_banner_tab($object, $paramId, $moreHtml, $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, $moreParamsBannerTab);
+        $moreParamsBannerTab = '&module_name=' . $moduleName . '&object_type=' . $object->element;
+        dol_banner_tab($object, $paramId, (($moreHtml != 'none' && $moreParams['moreHtml'] != 'none') ? $moreHtml : ''), $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, $moreParamsBannerTab);
     } else {
         global $conf, $form;
 
-		print '<div class="arearef heightref valignmiddle centpercent">';
-        $baseDir = $conf->$moduleNameLowerCase->multidir_output[$conf->entity];
+        print '<div class="arearef heightref valignmiddle centpercent">';
 
+        $modulePart = '';
+        $baseDir    = $conf->$moduleNameLowerCase->multidir_output[$conf->entity];
+        $subDir     = $object->element . '/'. $object->ref . '/photos/';
 
-        $subDir = $object->element . '/'. $object->ref . '/photos/';
-        $reshook  = $hookmanager->executeHooks('saturneBannerTabCustomSubdir', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
-        if ($reshook > 0) {
-            if ($hookmanager->resArray['dir']) {
-                $baseDir = $hookmanager->resArray['dir'];
-            }
-            if ($hookmanager->resArray['subdir']) {
-                $subDir = $hookmanager->resArray['subdir'];
+        $resHook = $hookmanager->executeHooks('saturneBannerTabCustomSubdir', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+        if ($resHook > 0) {
+            if (!empty($hookmanager->resArray)) {
+                $modulePart = $hookmanager->resArray['modulepart'];
+                $baseDir    = $hookmanager->resArray['dir'];
+                $subDir     = $hookmanager->resArray['subdir'];
             }
         }
-        $sdir = $baseDir . '/' . $subDir;
 
-		$morehtmlleft = '<div class="floatleft inline-block valignmiddle divphotoref">' . saturne_show_medias_linked($moduleNameLowerCase, $sdir, 'small', '', 0, 0, 0, 88, 88, 0, 0, 0, $subDir, $object, 'photo', 0, 0,0, 1) . '</div>';
-        print $form->showrefnav($object, $paramId, $moreHtml, $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, '', 0, $morehtmlleft, $object->getLibStatut(6));
-		print '</div>';
-	}
+        $moreHtmlLeft = '<div class="floatleft inline-block valignmiddle divphotoref">' . saturne_show_medias_linked((dol_strlen($modulePart) > 0 ? $modulePart : $moduleNameLowerCase), $baseDir . '/' . $subDir, 'small', '', 0, 0, 0, 88, 88, 0, 0, 0, $subDir, $object, 'photo', 0, 0,0, 1) . '</div>';
+        print $form->showrefnav($object, $paramId, (($moreHtml != 'none' && $moreParams['moreHtml'] != 'none') ? $moreHtml : ''), $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, '', 0, $moreHtmlLeft, $object->getLibStatut(6));
+        print '</div>';
+    }
 
     print '<div class="underbanner clearboth"></div>';
 }
