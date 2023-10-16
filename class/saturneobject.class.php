@@ -487,7 +487,10 @@ abstract class SaturneObject extends CommonObject
 		$result .= $linkend;
 
         if ($withpicto != 2) {
-            $result .= (($addLabel && property_exists($this, 'label')) ? '<span class="opacitymedium">' . ' - ' . dol_trunc($this->label, ($addLabel > 1 ? $addLabel : 0)) . '</span>' : '');
+            $labelToCheck = ['label', 'title', 'name'];
+            foreach ($labelToCheck as $label) {
+                $result .= (($addLabel && property_exists($this, $label) && dol_strlen($this->$label) > 0) ? '<span class="opacitymedium">' . ' - ' . dol_trunc($this->$label, ($addLabel > 1 ? $addLabel : 0)) . '</span>' : '');
+            }
         }
 
 		$hookmanager->initHooks([$this->element . 'dao']);
