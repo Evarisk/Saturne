@@ -165,6 +165,7 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
 
         if ($object->status <= $object::STATUS_VALIDATED && $permissiontoadd) {
             print '<div class="wpeo-dropdown dropdown-right attendance-container">';
+            print '<input type="hidden" name="token" value="' . newToken() . '">';
             print '<input type="hidden" name="signatoryID" value="' . $element->id . '">';
             print '<div class="dropdown-toggle wpeo-button ' . $cssButton . '"><i class="fas ' . $userIcon . '"></i></div>';
             print '<ul class="saturne-dropdown-content wpeo-gridlayout grid-3">';
