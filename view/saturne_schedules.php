@@ -77,11 +77,7 @@ if (isModEnabled($elementType) || is_file($customClassPath)) {
     if (is_file($customLibPath)) {
         require_once $customLibPath;
     }
-    $className = ucfirst($elementType);
-
-    if (strstr($className, '_')) {
-        $className = preg_replace('/_/', '', $className);
-    }
+    $className    = ucfirst($elementType);
     $objectLinked = new $className($db);
 }
 

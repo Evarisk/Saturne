@@ -91,13 +91,8 @@ if ( ! $error && $subaction == "addFiles") {
 	$objectSubtype = $data['objectSubtype'];
 	$objectSubdir  = $data['objectSubdir'];
 
-    if (strstr($objectType, '_')) {
-        $className = preg_replace('/_/', '', $objectType);
-    } else {
-        $className = $objectType;
-    }
-
-    $object = new $className($db);
+    $className = $objectType;
+    $object    = new $className($db);
     $object->fetch($objectId);
 
 	$modObjectName = strtoupper($moduleNameLowerCase) . '_' . strtoupper($className) . '_ADDON';
@@ -187,13 +182,8 @@ if ( ! $error && $subaction == "unlinkFile") {
 	$objectSubtype = $data['objectSubtype'];
 	$objectSubdir  = $data['objectSubdir'];
 
-	$fullPath = $filePath . '/' . $fileName;
-
-    if (strstr($objectType, '_')) {
-        $className = preg_replace('/_/', '', $objectType);
-    } else {
-        $className = $objectType;
-    }
+	$fullPath  = $filePath . '/' . $fileName;
+    $className = $objectType;
 
 	if (is_file($fullPath)) {
 		unlink($fullPath);
@@ -247,11 +237,7 @@ if ( ! $error && $subaction == "addToFavorite") {
 	$objectSubtype = $data['objectSubtype'];
 	$objectSubdir  = $data['objectSubdir'];
 
-    if (strstr($objectType, '_')) {
-        $className = preg_replace('/_/', '', $objectType);
-    } else {
-        $className = $objectType;
-    }
+    $className = $objectType;
 
 	if ($objectId > 0) {
 		$object = new $className($db);
