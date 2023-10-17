@@ -35,7 +35,7 @@
  * @return int|array                     0 < if KO, array of pages if OK
  * @throws Exception
  */
-function saturne_fetch_all_object_type(string $className = '', string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = [], string $filtermode = 'AND', $manageExtraFields = false)
+function saturne_fetch_all_object_type(string $className = '', string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = [], string $filtermode = 'AND', $manageExtraFields = false, $multiEntityManagement = true)
 {
     dol_syslog(__METHOD__, LOG_DEBUG);
 
@@ -72,7 +72,7 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
     if ($manageExtraFields) {
         $sql .= ' LEFT JOIN `' . MAIN_DB_PREFIX . $object->table_element . '_extrafields` as eft ON t.rowid = eft.fk_object';
     }
-    if (isset($object->ismultientitymanaged) && $object->ismultientitymanaged == 1) {
+    if ($multiEntityManagement && isset($object->ismultientitymanaged) && $object->ismultientitymanaged == 1) {
         $sql .= ' WHERE entity IN (' . getEntity($object->table_element) . ')';
     } else {
         $sql .= ' WHERE 1 = 1';
