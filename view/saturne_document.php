@@ -50,12 +50,14 @@ global $conf, $db, $hookmanager, $langs, $user;
 saturne_load_langs();
 
 // Get parameters
-$id         = GETPOST('id', 'int');
-$ref        = GETPOST('ref', 'alpha');
-$action     = GETPOST('action', 'aZ09');
-$cancel     = GETPOST('cancel', 'aZ09');
-$confirm    = GETPOST('confirm', 'aZ09');
-$backtopage = GETPOST('backtopage', 'alpha');
+$id          = GETPOST('id', 'int');
+$ref         = GETPOST('ref', 'alpha');
+$action      = GETPOST('action', 'aZ09');
+$cancel      = GETPOST('cancel', 'aZ09');
+$confirm     = GETPOST('confirm', 'aZ09');
+$backtopage  = GETPOST('backtopage', 'alpha');
+$showNav     = (GETPOSTISSET('show_nav') ? GETPOST('show_nav', 'int') : 1);
+$handlePhoto = (GETPOSTISSET('handle_photo') ? GETPOST('handle_photo', 'alpha') : 'false');
 
 // Get pagination parameters
 $limit     = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : $conf->liste_limit;
@@ -137,7 +139,7 @@ if ($reshook > 0) {
 
 if ($id > 0 || !empty($ref)) {
     saturne_get_fiche_head($object, 'document', $title);
-    saturne_banner_tab($object, 'ref', '', 1, 'ref', 'ref', method_exists($object, 'getMoreHtmlRef') ? $object->getMoreHtmlRef($object->id) : '', !empty($object->photo));
+    saturne_banner_tab($object, 'ref', '', $showNav, 'ref', 'ref', method_exists($object, 'getMoreHtmlRef') ? $object->getMoreHtmlRef($object->id) : '', (!empty($object->photo) || $handlePhoto));
 
     // Build file list
     $filearray = dol_dir_list($upload_dir, 'files', 0, '', '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_DESC : SORT_ASC), 1);
