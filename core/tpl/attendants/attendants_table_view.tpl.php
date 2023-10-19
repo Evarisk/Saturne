@@ -162,7 +162,8 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
                 $userIcon  = 'fa-user';
                 break;
         }
-        if ($object->status == $object::STATUS_VALIDATED && $permissiontoadd) {
+
+        if ($object->status <= $object::STATUS_VALIDATED && $permissiontoadd) {
             print '<div class="wpeo-dropdown dropdown-right attendance-container">';
             print '<input type="hidden" name="signatoryID" value="' . $element->id . '">';
             print '<div class="dropdown-toggle wpeo-button ' . $cssButton . '"><i class="fas ' . $userIcon . '"></i></div>';
