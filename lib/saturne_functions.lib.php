@@ -293,10 +293,11 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
                 $modulePart = $hookmanager->resArray['modulepart'];
                 $baseDir    = $hookmanager->resArray['dir'];
                 $subDir     = $hookmanager->resArray['subdir'];
+                $photoLimit = $hookmanager->resArray['photoLimit'];
             }
         }
 
-        $moreHtmlLeft = '<div class="floatleft inline-block valignmiddle divphotoref">' . saturne_show_medias_linked((dol_strlen($modulePart) > 0 ? $modulePart : $moduleNameLowerCase), $baseDir . '/' . $subDir, 'small', '', 0, 0, 0, 88, 88, 0, 0, 0, $subDir, $object, 'photo', 0, 0,0, 1) . '</div>';
+        $moreHtmlLeft = '<div class="floatleft inline-block valignmiddle divphotoref">' . saturne_show_medias_linked((dol_strlen($modulePart) > 0 ? $modulePart : $moduleNameLowerCase), $baseDir . '/' . $subDir, 'small', $photoLimit ?? 0, 0, 0, 0, 88, 88, 0, 0, 0, $subDir, $object, 'photo', 0, 0,0, 1) . '</div>';
         print $form->showrefnav($object, $paramId, (($moreHtml != 'none' && $moreParams['moreHtml'] != 'none') ? $moreHtml : ''), $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, '', 0, $moreHtmlLeft, $object->getLibStatut(6));
         print '</div>';
     }
