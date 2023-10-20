@@ -215,7 +215,7 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
             $upload_dir = $conf->$moduleNameLowerCase->dir_output . '/' . $objectType . '/' . dol_sanitizeFileName($object->ref);
             $nbFiles = count(dol_dir_list($upload_dir, 'files', 0, '', '(\.meta|_preview.*\.png)$'));
             $nbLinks = Link::count($db, $objectType, $object->id);
-            $head[$h][0] = dol_buildpath('/saturne/view/saturne_document.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType . (($moreparam['showNav'] >= 0) ? '&show_nav=' . $moreparam['showNav'] : '') . ((dol_strlen($moreparam['handlePhoto']) > 0) ? '&handle_photo=' . $moreparam['handlePhoto'] : '');
+            $head[$h][0] = dol_buildpath('/saturne/view/saturne_document.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType . (($moreparam['showNav'] >= 0) ? '&show_nav=' . $moreparam['showNav'] : 1) . ((dol_strlen($moreparam['handlePhoto']) > 0) ? '&handle_photo=' . $moreparam['handlePhoto'] : false);
             $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-file-alt pictofixedwidth"></i>' . $langs->trans('Documents') : '<i class="fas fa-file-alt"></i>';
             if (($nbFiles + $nbLinks) > 0) {
                 $head[$h][1] .= '<span class="badge marginleftonlyshort">' . ($nbFiles + $nbLinks) . '</span>';
@@ -225,7 +225,7 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
         }
 
         if ($showAgendaTab) {
-            $head[$h][0] = dol_buildpath('/saturne/view/saturne_agenda.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType . (($moreparam['showNav'] >= 0) ? '&show_nav=' . $moreparam['showNav'] : '') . ((dol_strlen($moreparam['handlePhoto']) > 0) ? '&handle_photo=' . $moreparam['handlePhoto'] : '');
+            $head[$h][0] = dol_buildpath('/saturne/view/saturne_agenda.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType . (($moreparam['showNav'] >= 0) ? '&show_nav=' . $moreparam['showNav'] : 1) . ((dol_strlen($moreparam['handlePhoto']) > 0) ? '&handle_photo=' . $moreparam['handlePhoto'] : false);
             $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-calendar-alt pictofixedwidth"></i>' . $langs->trans('Events') . '/' . $langs->trans('Agenda') : '<i class="fas fa-calendar-alt"></i>';
             if (isModEnabled('agenda') && (!empty($user->rights->agenda->myactions->read) || !empty($user->rights->agenda->allactions->read))) {
                 $nbEvent = 0;
