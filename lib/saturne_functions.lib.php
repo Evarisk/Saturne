@@ -290,10 +290,18 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
         $resHook = $hookmanager->executeHooks('saturneBannerTabCustomSubdir', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
         if ($resHook > 0) {
             if (!empty($hookmanager->resArray)) {
-                $modulePart = $hookmanager->resArray['modulepart'];
-                $baseDir    = $hookmanager->resArray['dir'];
-                $subDir     = $hookmanager->resArray['subdir'];
-                $photoLimit = $hookmanager->resArray['photoLimit'];
+                if ($hookmanager->resArray['modulepart']) {
+                    $modulePart = $hookmanager->resArray['modulepart'];
+                }
+                if ($hookmanager->resArray['dir']) {
+                    $baseDir = $hookmanager->resArray['dir'];
+                }
+                if ($hookmanager->resArray['subdir']) {
+                    $subDir = $hookmanager->resArray['subdir'];
+                }
+                if ($hookmanager->resArray['photoLimit']) {
+                    $photoLimit = $hookmanager->resArray['photoLimit'];
+                }
             }
         }
 
