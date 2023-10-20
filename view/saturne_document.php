@@ -58,6 +58,7 @@ $confirm     = GETPOST('confirm', 'aZ09');
 $backtopage  = GETPOST('backtopage', 'alpha');
 $showNav     = GETPOST('show_nav', 'int');
 $handlePhoto = GETPOST('handle_photo', 'alpha');
+$subaction   = GETPOST('subaction', 'alpha');
 
 // Get pagination parameters
 $limit     = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : $conf->liste_limit;

@@ -57,6 +57,7 @@ $cancel      = GETPOST('cancel', 'aZ09');
 $backtopage  = GETPOST('backtopage', 'alpha');
 $showNav     = GETPOST('show_nav', 'int');
 $handlePhoto = GETPOST('handle_photo', 'alpha');
+$subaction   = GETPOST('subaction', 'alpha');
 
 if (GETPOST('actioncode', 'array')) {
     $actioncode = GETPOST('actioncode', 'array', 3);
