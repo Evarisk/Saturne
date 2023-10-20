@@ -56,8 +56,8 @@ $action      = GETPOST('action', 'aZ09');
 $cancel      = GETPOST('cancel', 'aZ09');
 $confirm     = GETPOST('confirm', 'aZ09');
 $backtopage  = GETPOST('backtopage', 'alpha');
-$showNav     = (GETPOSTISSET('show_nav') ? GETPOST('show_nav', 'int') : 1);
-$handlePhoto = (GETPOSTISSET('handle_photo') ? GETPOST('handle_photo', 'alpha') : 'false');
+$showNav     = GETPOST('show_nav', 'int');
+$handlePhoto = GETPOST('handle_photo', 'alpha');
 
 // Get pagination parameters
 $limit     = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : $conf->liste_limit;
@@ -139,7 +139,7 @@ if ($reshook > 0) {
 
 if ($id > 0 || !empty($ref)) {
     saturne_get_fiche_head($object, 'document', $title);
-    saturne_banner_tab($object, 'ref', '', $showNav, 'ref', 'ref', method_exists($object, 'getMoreHtmlRef') ? $object->getMoreHtmlRef($object->id) : '', (!empty($object->photo) || $handlePhoto));
+    saturne_banner_tab($object, 'ref', '', dol_strlen($showNav) > 0 ? $showNav : 1, 'ref', 'ref', method_exists($object, 'getMoreHtmlRef') ? $object->getMoreHtmlRef($object->id) : '', ((!empty($object->photo) || dol_strlen($handlePhoto) > 0) ? $handlePhoto : false));
 
     // Build file list
     $filearray = dol_dir_list($upload_dir, 'files', 0, '', '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_DESC : SORT_ASC), 1);

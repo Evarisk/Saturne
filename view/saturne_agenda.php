@@ -55,8 +55,8 @@ $ref         = GETPOST('ref', 'alpha');
 $action      = GETPOST('action', 'aZ09');
 $cancel      = GETPOST('cancel', 'aZ09');
 $backtopage  = GETPOST('backtopage', 'alpha');
-$showNav     = (GETPOSTISSET('show_nav') ? GETPOST('show_nav', 'int') : 1);
-$handlePhoto = (GETPOSTISSET('handle_photo') ? GETPOST('handle_photo', 'alpha') : 'false');
+$showNav     = GETPOST('show_nav', 'int');
+$handlePhoto = GETPOST('handle_photo', 'alpha');
 
 if (GETPOST('actioncode', 'array')) {
     $actioncode = GETPOST('actioncode', 'array', 3);
@@ -158,7 +158,7 @@ if ($reshook > 0) {
 
 if ($id > 0 || !empty($ref)) {
     saturne_get_fiche_head($object, 'agenda', $title);
-    saturne_banner_tab($object, 'ref', '', $showNav, 'ref', 'ref', method_exists($object, 'getMoreHtmlRef') ? $object->getMoreHtmlRef($object->id) : '', (!empty($object->photo) || $handlePhoto));
+    saturne_banner_tab($object, 'ref', '', dol_strlen($showNav) > 0 ? $showNav : 1, 'ref', 'ref', method_exists($object, 'getMoreHtmlRef') ? $object->getMoreHtmlRef($object->id) : '', ((!empty($object->photo) || dol_strlen($handlePhoto) > 0) ? $handlePhoto : false));
 
     print '<div class="fichecenter">';
 
