@@ -167,7 +167,7 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
             print '<div class="wpeo-dropdown dropdown-right attendance-container">';
             print '<input type="hidden" name="signatoryID" value="' . $element->id . '">';
             print '<div class="dropdown-toggle wpeo-button ' . $cssButton . '"><i class="fas ' . $userIcon . '"></i></div>';
-            print '<ul class="dropdown-content wpeo-gridlayout grid-3">';
+            print '<ul class="saturne-dropdown-content wpeo-gridlayout grid-3">';
             print '<li class="dropdown-item set-attendance" style="padding: 0;" value="0"><div class="wpeo-button button-green"><i class="fas fa-user"></i></div></li>';
             print '<li class="dropdown-item set-attendance" style="padding: 0;" value="1"><div class="wpeo-button"><i class="fas fa-user-clock"></i></div></li>';
             print '<li class="dropdown-item set-attendance" style="padding: 0;" value="2"><div class="wpeo-button button-red"><i class="fas fa-user-slash"></i></div></li>';
