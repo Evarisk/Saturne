@@ -10,10 +10,10 @@
 
 ### Version et liens
 
-- Version : 1.1.0
-- PHP : 7.4
-- Compatibilité : Dolibarr 16.0.0 - 17.0.2
-- Saturne Framework : 1.1.1
+- Version : 1.3.0
+- PHP : 7.4.33
+- Compatibilité : Dolibarr 16.0.0 - 18.0.3
+- Saturne Framework : 1.2.0
 - Documentation : [Wiki EasyCRM](https://wiki.dolibarr.org/index.php/Module_EasyCRM)
 - Projet GitHub : [Projet EasyCRM](https://github.com/Eoxia/easycrm/projects?query=is%3Aopen)
 
@@ -21,13 +21,28 @@
 
 - Simplification de la CRM
 
+## <img src="https://github.com/Eoxia/EasyURL/blob/main/img/easyurl_color.png?raw=true" width="64"/> EasyURL
+
+### Version et liens
+
+- Version : 1.0.0
+- PHP : 7.4.33
+- Compatibilité : Dolibarr 16.0.0 - 18.0.3
+- Saturne Framework : 1.2.0
+- Documentation : [Wiki EasyURL](https://wiki.dolibarr.org/index.php/Module_EasyURL)
+- Projet GitHub : [Projet EasyURL](https://github.com/Eoxia/EasyURL/projects?query=is%3Aopen)
+
+### Fonctionnalités
+
+- Création d'URLs raccourcies pour YOURLS et Dolibarr
+
 ## <img src="https://github.com/Eoxia/DoliLetter/blob/main/img/doliletter256px.png?raw=true" width="64"/> DoliLetter
 
 ### Version et liens
 
 - Version : 1.0.1
-- PHP : 7.4
-- Compatibilité : Dolibarr 16.0.0 - 17.0.2
+- PHP : 7.4.33
+- Compatibilité : Dolibarr 16.0.0 - 18.0.3
 - Documentation : [Wiki DoliLetter](https://wiki.dolibarr.org/index.php/Module_DoliLetter)
 - Projet GitHub : [Projet DoliLetter](https://github.com/Eoxia/doliletter/projects?type=classic)
 
@@ -40,8 +55,8 @@
 ### Version et liens
 
 - Version : 1.2.0
-- PHP : 7.4
-- Compatibilité : Dolibarr 15.0.0 - 17.0.2
+- PHP : 7.4.33
+- Compatibilité : Dolibarr 16.0.0 - 18.0.3
 - Documentation : [Wiki DoliWPshop](https://wiki.dolibarr.org/index.php/Module_DoliWPshop)
 - Projet GitHub : [Projet DoliWPshop](https://github.com/Eoxia/doliwpshop/projects?type=classic)
 
@@ -58,8 +73,8 @@
 ### Version et liens
 
 - Version : 1.0.0
-- PHP : 7.4
-- Compatibilité : Dolibarr 15.0.0 - 17.0.2
+- PHP : 7.4.33
+- Compatibilité : Dolibarr 16.0.0 - 18.0.3
 - Documentation : [Wiki DoliTemplate](https://wiki.dolibarr.org/index.php/Module_DoliTemplate)
 - Projet GitHub : [Projet DoliTemplate](https://github.com/Eoxia/dolitemplate/projects?type=classic)
 
@@ -73,8 +88,8 @@
 ### Version et liens
 
 - Version : 1.0.0
-- PHP : 7.4
-- Compatibilité : Dolibarr 15.0.0 - 17.0.2
+- PHP : 7.4.33
+- Compatibilité : Dolibarr 16.0.0 - 18.0.3
 - Documentation : [Wiki Priseo](https://wiki.dolibarr.org/index.php/Module_Priseo)
 - Projet Github : [Projet Priseo](https://github.com/Evarisk/priseo/projects?type=classic)
 
@@ -88,8 +103,8 @@
 ### Version et liens
 
 - Version : 1.1.0
-- PHP : 7.4
-- Compatibilité : Dolibarr 15.0.0 - 17.0.2
+- PHP : 7.4.33
+- Compatibilité : Dolibarr 16.0.0 - 18.0.3
 - Documentation : [Wiki DoliFraisPro](https://wiki.dolibarr.org/index.php/Module_DoliFraisPro)
 - Projet Github : [Projet DoliFraisPro](https://github.com/Eoxia/dolifraispro/projects?type=classic)
 
