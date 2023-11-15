@@ -191,8 +191,8 @@ class SaturneDashboard
                             if ($nbDataset > 0) {
                                 if (is_array($dashboardGraph['labels']) && !empty($dashboardGraph['labels'])) {
                                     foreach ($dashboardGraph['labels'] as $dashboardGraphLabel) {
-                                        $dashboardGraphLegend[$uniqueKey][] = $langs->trans($dashboardGraphLabel['label']);
-                                        $dashboardGraphColor[$uniqueKey][]  = $langs->trans($dashboardGraphLabel['color']);
+                                        $dashboardGraphLegend[$uniqueKey][] = $dashboardGraphLabel['label'];
+                                        $dashboardGraphColor[$uniqueKey][]  = $dashboardGraphLabel['color'];
                                     }
                                 }
 
@@ -202,7 +202,7 @@ class SaturneDashboard
                                         $graphData[$uniqueKey][] = $dashboardGraph['data'][$key];
                                     } else {
                                         $graphData[$uniqueKey][] = [
-                                            0 => $langs->trans($dashboardGraph['labels'][$key]['label']),
+                                            0 => $dashboardGraph['labels'][$key]['label'],
                                             1 => $dashboardGraph['data'][$key]
                                         ];
                                     }
