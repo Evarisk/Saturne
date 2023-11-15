@@ -61,6 +61,7 @@ $contextpage        = GETPOST('contextpage', 'aZ') ? GETPOST('contextpage', 'aZ'
 $cancel             = GETPOST('cancel', 'aZ09');
 $backtopage         = GETPOST('backtopage', 'alpha');
 $attendantTableMode = (GETPOSTISSET('attendant_table_mode') ? GETPOST('attendant_table_mode', 'alpha') : 'advanced');
+$subaction          = GETPOST('subaction', 'alpha');
 
 // Initialize technical objects
 $className = ucfirst($objectType);

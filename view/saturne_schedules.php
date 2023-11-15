@@ -60,6 +60,7 @@ $action      = GETPOST('action', 'aZ09');
 $socid       = GETPOST('socid', 'int') ? GETPOST('socid', 'int') : GETPOST('id', 'int');
 $elementType = GETPOST('element_type', 'alpha');
 $backtopage  = GETPOST('backtopage', 'alpha');
+$subaction   = GETPOST('subaction', 'alpha');
 
 if ($user->socid) {
     $socid = $user->socid;
