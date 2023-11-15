@@ -140,7 +140,8 @@ class modSaturne extends DolibarrModules
             'DoliCar'          => 'dolicar',
             'EasyCRM'          => 'easycrm',
             'DoliSIRH'         => 'dolisirh',
-            'DigiriskDolibarr' => 'digiriskdolibarr'
+            'DigiriskDolibarr' => 'digiriskdolibarr',
+            'EasyURL'          => 'easyurl'
         ];
 
         // A condition to hide module
