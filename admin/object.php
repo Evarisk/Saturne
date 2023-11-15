@@ -54,9 +54,6 @@ $backtopage = GETPOST('backtopage', 'alpha');
 
 // Initialize technical objects
 $className = ucfirst($objectType);
-if (strstr($className, '_')) {
-    $className = preg_replace('/_/', '', $className);
-}
 $object    = new $className($db);
 
 // Initialize view objects

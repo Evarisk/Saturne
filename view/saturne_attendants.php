@@ -64,9 +64,6 @@ $attendantTableMode = (GETPOSTISSET('attendant_table_mode') ? GETPOST('attendant
 
 // Initialize technical objects
 $className = ucfirst($objectType);
-if (strstr($className, '_')) {
-    $className = preg_replace('/_/', '', $className);
-}
 $object    = new $className($db);
 $signatory = new SaturneSignature($db, $moduleNameLowerCase, $object->element);
 $usertmp   = new User($db);

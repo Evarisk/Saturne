@@ -93,9 +93,6 @@ if (!$sortorder) {
 
 // Initialize technical objects
 $className   = ucfirst($objectType);
-if (strstr($className, '_')) {
-    $className = preg_replace('/_/', '', $className);
-}
 $object      = new $className($db);
 $extrafields = new ExtraFields($db);
 
