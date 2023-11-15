@@ -174,9 +174,10 @@ function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', st
  * @param  string $fieldRef    Field name objet ref (object->ref) for select next and previous
  * @param  string $moreHtmlRef More html to show after the ref (see $morehtmlleft for before)
  * @param  bool   $handlePhoto Manage photo
+ * @param  array  $moreParams  More params
  * @return void
  */
-function saturne_banner_tab(object $object, string $paramId = 'ref', string $moreHtml = '', int $showNav = 1, string $fieldId = 'ref', string $fieldRef = 'ref', string $moreHtmlRef = '', bool $handlePhoto = false): void
+function saturne_banner_tab(object $object, string $paramId = 'ref', string $moreHtml = '', int $showNav = 1, string $fieldId = 'ref', string $fieldRef = 'ref', string $moreHtmlRef = '', bool $handlePhoto = false, array $moreParams = []): void
 {
     global $db, $langs, $hookmanager, $moduleName, $moduleNameLowerCase;
 
@@ -197,6 +198,20 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
 
     $saturneMoreHtmlRef .= $moreHtmlRef;
 
+    $parameters = [];
+    $resHook    = $hookmanager->executeHooks('saturneBannerTab', $parameters, $object); // Note that $action and $object may have been modified by some hooks
+    if ($resHook < 0) {
+        setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+    } else {
+        if (!empty($hookmanager->resArray)) {
+            list($customMoreHtmlRef, $moreParams) = $hookmanager->resArray;
+        } else if (!empty($hookmanager->resPrint)) {
+            $customMoreHtmlRef = $hookmanager->resPrint;
+        }
+
+        $saturneMoreHtmlRef .= $customMoreHtmlRef;
+    }
+
     // Banner
     $objectKey      = '';
     $possibleKeys   = [];
@@ -210,11 +225,12 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
             }
 
             foreach ($possibleKeys as $key) {
-                if (property_exists($object, $key)) {
+                if (isset($object->$key)) {
                     $objectKey = $key;
                     break;
                 }
             }
+
             if (dol_strlen($objectKey)) {
                 $className           = ucfirst($bannerElement);
                 $BannerElementObject = new $className($db);
@@ -241,7 +257,9 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
                         } elseif ($bannerElement == 'project') {
                             $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1, '', 1) : img_picto($langs->trans('Project'), 'project');
                         }
-                        $saturneMoreHtmlRef .= ' <a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=edit_' . $bannerElement . '&id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . GETPOST('object_type') . '&token=' . newToken() . '">' . img_edit($langs->transnoentitiesnoconv($bannerElement == 'societe' ? 'SetThirdParty' : 'SetProject')) . '</a>';
+                        if(empty($moreParams[$bannerElement]['disable_edit'])) {
+                            $saturneMoreHtmlRef .= ' <a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=edit_' . $bannerElement . '&id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . GETPOST('object_type') . '&token=' . newToken() . '">' . img_edit($langs->transnoentitiesnoconv($bannerElement == 'societe' ? 'SetThirdParty' : 'SetProject')) . '</a>';
+                        }
                     }
                 } else {
                     $BannerElementObject->fetch($object->$objectKey);
@@ -255,26 +273,40 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
             }
         }
     }
-
-    $parameters = [];
-    $resHook    = $hookmanager->executeHooks('saturneBannerTab', $parameters, $object); // Note that $action and $object may have been modified by some hooks
-    if ($resHook < 0) {
-        setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
-    } else {
-        $saturneMoreHtmlRef .= $hookmanager->resPrint;
-    }
     $saturneMoreHtmlRef .= '</div>';
 
-    $moreParams = '&module_name=' . $moduleName . '&object_type=' . $object->element;
-
     if (!$handlePhoto) {
-        dol_banner_tab($object, $paramId, $moreHtml, $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, $moreParams);
+        $moreParamsBannerTab = '&module_name=' . $moduleName . '&object_type=' . $object->element;
+        dol_banner_tab($object, $paramId, (($moreHtml != 'none' && $moreParams['moreHtml'] != 'none') ? $moreHtml : ''), $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, $moreParamsBannerTab);
     } else {
         global $conf, $form;
 
         print '<div class="arearef heightref valignmiddle centpercent">';
-        $moreHtmlLeft = '<div class="floatleft inline-block valignmiddle divphotoref">' . saturne_show_medias_linked($moduleNameLowerCase, $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $object->element . '/'. $object->ref . '/photos/', 'small', '', 0, 0, 0, 88, 88, 0, 0, 0, $object->element . '/'. $object->ref . '/photos/', $object, 'photo', 0, 0,0, 1) . '</div>';
-        print $form->showrefnav($object, $paramId, $moreHtml, $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, $moreParams, 0, $moreHtmlLeft, $object->getLibStatut(6));
+
+        $modulePart = '';
+        $baseDir    = $conf->$moduleNameLowerCase->multidir_output[$conf->entity];
+        $subDir     = $object->element . '/'. $object->ref . '/photos/';
+
+        $resHook = $hookmanager->executeHooks('saturneBannerTabCustomSubdir', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+        if ($resHook > 0) {
+            if (!empty($hookmanager->resArray)) {
+                if ($hookmanager->resArray['modulepart']) {
+                    $modulePart = $hookmanager->resArray['modulepart'];
+                }
+                if ($hookmanager->resArray['dir']) {
+                    $baseDir = $hookmanager->resArray['dir'];
+                }
+                if ($hookmanager->resArray['subdir']) {
+                    $subDir = $hookmanager->resArray['subdir'];
+                }
+                if ($hookmanager->resArray['photoLimit']) {
+                    $photoLimit = $hookmanager->resArray['photoLimit'];
+                }
+            }
+        }
+
+        $moreHtmlLeft = '<div class="floatleft inline-block valignmiddle divphotoref">' . saturne_show_medias_linked((dol_strlen($modulePart) > 0 ? $modulePart : $moduleNameLowerCase), $baseDir . '/' . $subDir, 'small', $photoLimit ?? 0, 0, 0, 0, 88, 88, 0, 0, 0, $subDir, $object, 'photo', 0, 0,0, 1) . '</div>';
+        print $form->showrefnav($object, $paramId, (($moreHtml != 'none' && $moreParams['moreHtml'] != 'none') ? $moreHtml : ''), $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, '', 0, $moreHtmlLeft, $object->getLibStatut(6));
         print '</div>';
     }
 

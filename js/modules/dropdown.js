@@ -70,8 +70,8 @@ window.saturne.dropdown.event = function() {
     $(document).on('keyup', window.saturne.dropdown.keyup);
     $(document).on('keypress', window.saturne.dropdown.keypress);
     $(document).on('click', '.wpeo-dropdown:not(.dropdown-active) .dropdown-toggle:not(.disabled)', window.saturne.dropdown.open);
-    $(document).on('click', '.wpeo-dropdown.dropdown-active .dropdown-content', function(e) {e.stopPropagation()});
-    $(document).on('click', '.wpeo-dropdown.dropdown-active:not(.dropdown-force-display) .dropdown-content .dropdown-item', window.saturne.dropdown.close );
+    $(document).on('click', '.wpeo-dropdown.dropdown-active .saturne-dropdown-content', function(e) {e.stopPropagation()});
+    $(document).on('click', '.wpeo-dropdown.dropdown-active:not(.dropdown-force-display) .saturne-dropdown-content .dropdown-item', window.saturne.dropdown.close );
     $(document).on('click', '.wpeo-dropdown.dropdown-active', function (e) {window.saturne.dropdown.close(e); e.stopPropagation();});
     $(document).on('click', 'body', window.saturne.dropdown.close);
 };
@@ -159,7 +159,7 @@ window.saturne.dropdown.open = function( event ) {
             }
 
             window.saturne.request.send( triggeredElement, data, function( element, response ) {
-                triggeredElement.closest( '.wpeo-dropdown' ).find( '.dropdown-content' ).html( response.data.view );
+                triggeredElement.closest( '.wpeo-dropdown' ).find( '.saturne-dropdown-content' ).html( response.data.view );
 
                 triggeredElement.closest( '.wpeo-dropdown' ).addClass( 'dropdown-active' );
 

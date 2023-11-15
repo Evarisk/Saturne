@@ -52,12 +52,10 @@ $ref        = GETPOST('ref', 'alpha');
 $action     = GETPOST('action', 'aZ09');
 $cancel     = GETPOST('cancel', 'aZ09');
 $backtopage = GETPOST('backtopage', 'alpha');
+$subaction  = GETPOST('subaction', 'alpha');
 
 // Initialize technical objects
 $className   = ucfirst($objectType);
-if (strstr($className, '_')) {
-    $className = preg_replace('/_/', '', $className);
-}
 $object      = new $className($db);
 $extrafields = new ExtraFields($db);
 

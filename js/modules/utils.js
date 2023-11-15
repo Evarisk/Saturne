@@ -19,104 +19,126 @@
 /**
  * \file    js/modules/utils.js
  * \ingroup saturne
- * \brief   JavaScript file utils for module Saturne.
- */
-
-
-/*
- * Gestion du utils.
- *
- * @since   1.0.0
- * @version 1.0.0
+ * \brief   JavaScript utils file for module Saturne
  */
 
 /**
- * Initialise l'objet "utils" ainsi que la méthode "init" obligatoire pour la bibliothèque Saturne.
+ * Init utils JS
  *
- * @memberof Saturne_Framework_Dropdown
+ * @memberof Saturne_Utils
  *
  * @since   1.0.0
  * @version 1.0.0
  *
- * @returns {void} [description]
+ * @type {Object}
  */
 window.saturne.utils = {};
 
 /**
- * La méthode appelée automatiquement par la bibliothèque Saturne.
+ * Utils init
  *
- * @memberof Saturne_Framework_Dropdown
+ * @memberof Saturne_Utils
  *
  * @since   1.0.0
  * @version 1.0.0
  *
- * @returns {void} [description]
+ * @returns {void}
  */
 window.saturne.utils.init = function() {
-	window.saturne.utils.event();
+  window.saturne.utils.event();
 };
 
 /**
- * La méthode contenant tous les événements pour la utils.
+ * Utils event
  *
- * @memberof Saturne_Framework_Dropdown
+ * @memberof Saturne_Utils
  *
  * @since   1.0.0
  * @version 1.0.0
  *
- * @returns {void} [description]
+ * @returns {void}
  */
 window.saturne.utils.event = function() {
-	$(document).on('mouseenter', '.move-line.ui-sortable-handle', window.saturne.utils.draganddrop);
+  $(document).on('mouseenter', '.move-line.ui-sortable-handle', window.saturne.utils.draganddrop);
+  $(document).on('change', '#element_type', window.saturne.utils.reloadField);
 };
 
 /**
- * [description]
+ * Drag ana drop on move-line action
  *
- * @memberof Saturne_Framework_Dropdown
+ * @memberof Saturne_Utils
  *
  * @since   1.0.0
  * @version 1.0.0
  *
- * @param  {void} event [description]
- * @returns {void}       [description]
+ * @return {void}
  */
-window.saturne.utils.draganddrop = function(event) {
-	$(this).css('cursor', 'pointer');
+window.saturne.utils.draganddrop = function() {
+  $(this).css('cursor', 'pointer');
 
-	$('#tablelines tbody').sortable();
-	$('#tablelines tbody').sortable({
-		handle: '.move-line',
-		connectWith:'#tablelines tbody .line-row',
-		tolerance:'intersect',
-		over:function(event,ui){
-			$(this).css('cursor', 'grabbing');
-		},
-		stop: function(event, ui) {
-			$(this).css('cursor', 'default');
-			let token = $('.fiche').find('input[name="token"]').val();
+  $('#tablelines tbody').sortable();
+  $('#tablelines tbody').sortable({
+    handle: '.move-line',
+    connectWith:'#tablelines tbody .line-row',
+    tolerance:'intersect',
+    over:function(){
+      $(this).css('cursor', 'grabbing');
+    },
+    stop: function() {
+      $(this).css('cursor', 'default');
+      let token = $('.fiche').find('input[name="token"]').val();
 
-			let separator = '&'
-			if (document.URL.match(/action=/)) {
-				document.URL = document.URL.split(/\?/)[0]
-				separator = '?'
-			}
-			let lineOrder = [];
-			$('.line-row').each(function(  ) {
-				lineOrder.push($(this).attr('id'));
-			});
-			$.ajax({
-				url: document.URL + separator + "action=moveLine&token=" + token,
-				type: "POST",
-				data: JSON.stringify({
-					order: lineOrder
-				}),
-				processData: false,
-				contentType: false,
-				success: function ( resp ) {
-				}
-			});
-		}
-	});
+      let separator = '&'
+      if (document.URL.match(/action=/)) {
+        document.URL = document.URL.split(/\?/)[0]
+        separator = '?'
+      }
+      let lineOrder = [];
+      $('.line-row').each(function(  ) {
+        lineOrder.push($(this).attr('id'));
+      });
+      $.ajax({
+        url: document.URL + separator + "action=moveLine&token=" + token,
+        type: "POST",
+        data: JSON.stringify({
+          order: lineOrder
+        }),
+        processData: false,
+        contentType: false,
+        success: function () {},
+        error: function() {}
+      });
+    }
+  });
 };
 
+/**
+ * Reload specific field element_type and fk_element
+ *
+ * @memberof Saturne_Utils
+ *
+ * @since   1.2.0
+ * @version 1.2.0
+ *
+ * @returns {void}
+ */
+window.saturne.utils.reloadField = function() {
+  let field          = $(this).val();
+  let token          = window.saturne.toolbox.getToken();
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+
+  window.saturne.loader.display($('.field_element_type'));
+  window.saturne.loader.display($('.field_fk_element'));
+
+  $.ajax({
+    url: document.URL + querySeparator + "element_type=" + field + "&token=" + token,
+    type: "POST",
+    processData: false,
+    contentType: false,
+    success: function(resp) {
+      $('.field_element_type').replaceWith($(resp).find('.field_element_type'));
+      $('.field_fk_element').replaceWith($(resp).find('.field_fk_element'));
+    },
+    error: function() {}
+  });
+};

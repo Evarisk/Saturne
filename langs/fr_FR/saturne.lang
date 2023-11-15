@@ -38,6 +38,8 @@ ReadAdminPage = Accéder à la configuration du module %s
 # Data - Donnée
 ModuleSettings                    = Réglages
 ModuleSetup                       = Configuration du module %s
+Contributing                      = Contribution
+SaturneModule                     = Module %s
 GeneralConfig                     = Configuration générale
 ConfigData                        = Données configurables de %s
 Configs                           = Configuration des %s
@@ -112,6 +114,9 @@ ModuleHasBeenUpdatedTo = %s a été mis à jour en version %s
 ModulePatchNote        = Note de mise à jour %s %s
 ShowPatchNote          = Consulter la note de mise à jour
 DontShowPatchNote      = Ne plus afficher la note de mise à jour
+ChooseBoxToAdd         = Ajouter le widget au tableau de bord
+
+
 
 #
 # Schedules - horaires

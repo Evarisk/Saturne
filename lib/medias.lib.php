@@ -21,6 +21,9 @@
  * \brief   Library files with common functions for Saturne Medias
  */
 
+include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+include_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
+require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
 
 /**
  * Print medias from media gallery
@@ -36,10 +39,6 @@
 function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', string $sdir = '',string $size = '', int $maxHeight = 80, int $maxWidth = 80, int $offset = 1)
 {
 	global $conf, $langs, $user, $moduleNameLowerCase;
-
-	include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
-	include_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
-	require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
 
 	$sortfield = 'date';
 	$sortorder = 'desc';
@@ -158,9 +157,6 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 {
 	global $conf, $langs, $moduleNameUpperCase;
 
-	include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
-	include_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
-
 	$sortfield = 'position_name';
 	$sortorder = 'desc';
 
@@ -195,9 +191,9 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 			$fileName = $file['name'];
 			$filePath = $file['path'];
 
-			if (($show_only_favorite && $object->$favorite_field == $fileName) || !$show_only_favorite) {
+			if (($show_only_favorite && ($object->$favorite_field == $fileName || !$favoriteExists)) || !$show_only_favorite) {
 				if ($showdiv) {
-					$return .= '<div class="media-container">';
+					$return .= '<div class="media-container" style="margin-right: 20px; display: inline-block">';
 				}
 
 				$return .= '<input hidden class="file-path" value="'. $filePath .'">';
@@ -233,7 +229,7 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 						if (empty($nolink)) {
 							$relativefile              = preg_replace("/'/", "\\'", $relativefile);
 							$urladvanced               = getAdvancedPreviewUrl($modulepart, $relativefile, 0, 'entity=' . $conf->entity);
-							if ($urladvanced) $return .= '<a href="' . $urladvanced . '">';
+							if ($urladvanced) $return .= '<a class="clicked-photo-preview" href="' . $urladvanced . '">';
 							else $return              .= '<a href="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" class="aphoto" target="_blank">';
 						}
 
@@ -288,7 +284,7 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 						$relativefile = preg_replace('/^\//', '', $pdir . $photo);
 						if (empty($nolink)) {
 							$urladvanced               = getAdvancedPreviewUrl($modulepart, $relativefile, 0, 'entity=' . $conf->entity);
-							if ($urladvanced) $return .= '<a href="' . $urladvanced . '">';
+							if ($urladvanced) $return .= '<a class="clicked-photo-preview" href="' . $urladvanced . '">';
 							else $return              .= '<a href="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" class="aphoto" target="_blank">';
 						}
 						$widthName  = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_' . strtoupper($size);
@@ -301,7 +297,8 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 				}
 
 				if ($show_favorite_button) {
-					$favorite = (($object->$favorite_field == '' || $favoriteExists == 0) && $i == 0 && (!property_exists($object, 'photo') && empty($object->photo)) ? 'favorite' : ($object->$favorite_field == $photo ? 'favorite' : ''));
+
+					$favorite = (($object->$favorite_field == '' || $favoriteExists == 0) && $i == 0) ? 'favorite' : ($object->$favorite_field == $photo ? 'favorite' : '');
 					$return .=
 						'<div class="wpeo-button button-square-50 button-blue ' . $object->element . ' media-gallery-favorite ' . $favorite . '" value="' . $object->id . '">
 							<input class="element-linked-id" type="hidden" value="' . ($object->id > 0 ? $object->id : 0) . '">
@@ -392,10 +389,7 @@ function saturne_get_media_linked_elements(string $moduleName, string $fileName)
         require_once $classPath;
 
         $className = ucfirst($element[0]);
-        if (strstr($className, '_')) {
-            $className = preg_replace('/_/', '', $className);
-        }
-        $object = new $className($db);
+        $object    = new $className($db);
 
         $mediaLinkedElements[$fileArray['name']][$element[0]]['picto'] = $object->picto;
         $mediaLinkedElements[$fileArray['name']][$element[0]]['value']++;

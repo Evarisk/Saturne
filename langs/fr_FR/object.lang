@@ -34,10 +34,15 @@ ObjectArchivedTrigger   = %s %s archivé(e)
 ObjectExpiredTrigger    = %s %s expiré(e)
 ObjectGenerateTrigger   = %s %s généré(e)
 ObjectSignedTrigger     = %s %s signé(e)
+ObjectImportTrigger     = %s %s importé(e)
+ObjectUnlinkTrigger     = %s %s délié(e)
 
 # SetEventMessage - Notice info
 ObjectValidated = %s a été validé(e)
 ObjectReOpened  = %s a été rouvert(e)
+
+# Numbering modules
+SaturneGenericMaskCodes = Ce champ se compose d'un préfixe suivi d'un suffixe. Par exemple : ABC{000} donnera ABC001, ABC002, etc.  Vous pouvez ajouter autant de zéro que vous le souhaitez.
 
 # Status - Statut
 StatusDraft              = Brouillon (à valider)
@@ -67,6 +72,7 @@ ObjectMustBeValidatedToSendEmail = %s doit être au statut (validé) pour envoye
 ObjectMustBeLockedToSendEmail    = %s doit être au statut (verrouillé) pour envoyer un email
 ObjectMustBeLockedToArchive      = %s doit être au statut (verrouillé) et le document généré afin de pouvoir l'archiver
 ObjectMustBeClassifiedToOpen     = %s doit être au statut (classifié) afin de pouvoir l'ouvrir de nouveau
+ObjectMustBeValidatedToVersion  = %s doit être au status (validé) pour la versionner et générer un document
 
 # Confirm box - Boite de confirmation
 ValidateObject          = Valider %s

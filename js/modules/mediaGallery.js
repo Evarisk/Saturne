@@ -109,7 +109,8 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 	let objectId         = mediaGallery.attr('data-from-id');
 	let objectType       = mediaGallery.attr('data-from-type')
 	let objectSubtype    = mediaGallery.attr('data-from-subtype')
-	let objectSubdir     = mediaGallery.attr('data-from-subdir')
+  let objectSubdir     = mediaGallery.attr('data-from-subdir')
+  let objectPhotoClass = mediaGallery.attr('data-photo-class')
 
 	let filenames = ''
 	if (filesLinked.length > 0) {
@@ -119,8 +120,13 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 	}
 
 	window.saturne.loader.display($(this));
-	window.saturne.loader.display($('.linked-medias.'+objectSubtype));
-
+  if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
+    if ($('.linked-medias.'+objectPhotoClass).length > 0) {
+      window.saturne.loader.display($('.linked-medias.'+objectPhotoClass));
+    }
+  } else {
+    window.saturne.loader.display($('.linked-medias.'+objectSubtype));
+  }
 	let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
 
 	$.ajax({
@@ -138,13 +144,16 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 		success: function ( resp ) {
 			$('.wpeo-loader').removeClass('wpeo-loader')
 			mediaGallery.removeClass('modal-active')
+      if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
+        $('.photo.'+objectPhotoClass).replaceWith($(resp).find('.photo.'+objectPhotoClass).first())
+        $('.linked-medias.'+objectPhotoClass).replaceWith($(resp).find('.linked-medias.'+objectPhotoClass))
+      } else {
 
-			if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
-				$('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
-			}
-			//refresh medias container after adding
-			$('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
-
+        $('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
+      }
+      if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
+        $('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
+      }
 			//refresh media gallery & unselect selected medias
 			mediaGallery.html($(resp).find('#media_gallery').children())
 		},
@@ -284,16 +293,27 @@ window.saturne.mediaGallery.unlinkFile = function( event ) {
 
 	let token = window.saturne.toolbox.getToken();
 
-	let mediaInfos = $(this).closest('.linked-medias').find('.modal-options')
-	let objectSubtype = mediaInfos.attr('data-from-subtype')
-	let objectType    = mediaInfos.attr('data-from-type')
-	let objectSubdir  = mediaInfos.attr('data-from-subdir')
-	let objectId      = mediaInfos.attr('data-from-id')
+
+  let modal = $(this).closest('.modal-active')
+  let inModal = $(this).closest('.modal-active').length > 0
+
+  let mediaInfos = null;
+  if (inModal) {
+    mediaInfos = modal.find('.modal-options')
+  } else {
+    mediaInfos = $(this).closest('.linked-medias').find('.modal-options')
+  }
+
+  let objectSubtype    = mediaInfos.attr('data-from-subtype')
+	let objectType       = mediaInfos.attr('data-from-type')
+	let objectSubdir     = mediaInfos.attr('data-from-subdir')
+  let objectId         = mediaInfos.attr('data-from-id')
+  let objectPhotoClass = mediaInfos.attr('data-photo-class')
 
 	let mediaContainer   = $(this).closest('.media-container')
 	let filepath         = mediaContainer.find('.file-path').val()
 	let filename         = mediaContainer.find('.file-name').val()
-	let previousFavorite = $('.media-gallery-favorite.favorite').closest('.media-container').find('.file-name').val()
+  let previousFavorite = $(this).closest('.linked-medias').find('.media-gallery-favorite.favorite').closest('.media-container').find('.file-name').val()
 
 	window.saturne.loader.display(mediaContainer);
 
@@ -312,12 +332,21 @@ window.saturne.mediaGallery.unlinkFile = function( event ) {
 		}),
 		processData: false,
 		success: function ( resp ) {
-			if (previousFavorite == filename && $('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
-				$('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
-			}
+      if (previousFavorite == filename) {
+        if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
+          $('.photo.'+objectPhotoClass).replaceWith($(resp).find('.photo.'+objectPhotoClass).first())
+        }
+        if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
+          $('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
+        }
+      }
+      if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
+        $('.linked-medias.' + objectPhotoClass).replaceWith($(resp).find('.linked-medias.' + objectPhotoClass))
+      } else if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
+        $('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
+      }
 
-			$('.wpeo-loader').removeClass('wpeo-loader')
-			$('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
+      $('.wpeo-loader').removeClass('wpeo-loader')
 		}
 	});
 };
@@ -336,15 +365,25 @@ window.saturne.mediaGallery.addToFavorite = function( event ) {
 
 	let token = window.saturne.toolbox.getToken();
 
+  let modal = $(this).closest('.modal-active')
+  let inModal = $(this).closest('.modal-active').length > 0
+
 	//change star button style
 	let previousFavorite = $(this).closest('.linked-medias').find('.fas.fa-star')
-	let newFavorite = $(this).find('.far.fa-star')
+	let newFavorite      = $(this).find('.far.fa-star')
 
-	let mediaInfos = $(this).closest('.linked-medias').find('.modal-options')
-	let objectSubtype = mediaInfos.attr('data-from-subtype')
-	let objectType    = mediaInfos.attr('data-from-type')
-	let objectSubdir  = mediaInfos.attr('data-from-subdir')
-	let objectId      = mediaInfos.attr('data-from-id')
+  let mediaInfos = null;
+  if (inModal) {
+    mediaInfos = modal.find('.modal-options')
+  } else {
+    mediaInfos = $(this).closest('.linked-medias').find('.modal-options')
+  }
+
+	let objectSubtype    = mediaInfos.attr('data-from-subtype')
+	let objectType       = mediaInfos.attr('data-from-type')
+	let objectSubdir     = mediaInfos.attr('data-from-subdir')
+  let objectId         = mediaInfos.attr('data-from-id')
+  let objectPhotoClass = mediaInfos.attr('data-photo-class')
 
 	let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
 
@@ -359,7 +398,11 @@ window.saturne.mediaGallery.addToFavorite = function( event ) {
 		$(this).closest('.linked-medias').find('.favorite-photo').val(filename)
 	}
 
-	$.ajax({
+  if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
+    window.saturne.loader.display($('.photo.'+objectPhotoClass));
+  }
+
+    $.ajax({
 		url: document.URL + querySeparator + "subaction=addToFavorite&token=" + token,
 		type: "POST",
 		data: JSON.stringify({
@@ -371,9 +414,14 @@ window.saturne.mediaGallery.addToFavorite = function( event ) {
 		}),
 		processData: false,
 		success: function ( resp ) {
-			if (previousFavorite != filename && $('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
-				$('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
-			}
+      if (previousFavorite != filename) {
+        if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
+          $('.photo.'+objectPhotoClass).replaceWith($(resp).find('.photo.'+objectPhotoClass).first())
+        }
+      }
+      if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
+        $('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
+      }
 		}
 	});
 };
@@ -397,8 +445,13 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
 	let objectType       = $(this).closest('.linked-medias').find('.modal-options').attr('data-from-type')
 	let objectSubtype    = $(this).closest('.linked-medias').find('.modal-options').attr('data-from-subtype')
 	let objectSubdir     = $(this).closest('.linked-medias').find('.modal-options').attr('data-from-subdir')
+  let objectPhotoClass = $(this).closest('.linked-medias').find('.modal-options').attr('data-photo-class')
 
-	window.saturne.loader.display($('.linked-medias.'+objectSubtype));
+  if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
+    window.saturne.loader.display($('.linked-medias.'+objectPhotoClass));
+  } else {
+    window.saturne.loader.display($('.linked-medias.'+objectSubtype));
+  }
 
 	let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
 
@@ -434,18 +487,20 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
 						processData: false,
 						contentType: false,
 						success: function ( resp ) {
-							$('.wpeo-loader').removeClass('wpeo-loader')
-							mediaGallery.removeClass('modal-active')
+              $('.wpeo-loader').removeClass('wpeo-loader')
+              mediaGallery.removeClass('modal-active')
+              if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
+                $('.photo.'+objectPhotoClass).replaceWith($(resp).find('.photo.'+objectPhotoClass).first())
+                $('.linked-medias.'+objectPhotoClass).replaceWith($(resp).find('.linked-medias.'+objectPhotoClass))
+              } else {
+                if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
+                  $('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
+                }
+                $('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
+              }
 
-							if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
-								$('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
-							}
-
-							//refresh medias container after adding
-							$('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
-
-							//refresh media gallery & unselect selected medias
-							mediaGallery.html($(resp).find('#media_gallery').children())
+              //refresh media gallery & unselect selected medias
+              mediaGallery.html($(resp).find('#media_gallery').children())
 						},
 					});
 				}

@@ -193,6 +193,39 @@ if ($action == 'update_documents_config') {
     }
 }
 
+if ($action == 'specimen') {
+
+    $modele = GETPOST('module', 'alpha');
+    $documentType = preg_split('/_/', $modele)[1];
+
+    require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . $documentType . '.class.php';
+
+    $objectDocument = new $documentType($db);
+    $objectDocument->initAsSpecimen();
+
+    // Search template files
+    $dir = __DIR__ . "/../../". $moduleNameLowerCase . "/core/modules/" . $moduleNameLowerCase . "/" . $moduleNameLowerCase . "documents/" . $documentType . '/';
+    $file = 'pdf_' .  $modele . ".modules.php";
+    if (file_exists($dir . $file)) {
+        $classname = 'pdf_' . $modele;
+        require_once $dir . $file;
+
+        $obj = new $classname($db);
+
+        $modulePart = str_replace('document', '', $documentType);
+
+        if ($obj->write_file($objectDocument, $langs, ['object' => $objectDocument]) > 0) {
+            header("Location: " . DOL_URL_ROOT . "/document.php?modulepart=". $modulePart ."&file=SPECIMEN.pdf");
+            return;
+        } else {
+            setEventMessages($obj->error, $obj->errors, 'errors');
+            dol_syslog($obj->error, LOG_ERR);
+        }
+    } else {
+        setEventMessages($langs->trans("ErrorModuleNotFound"), null, 'errors');
+        dol_syslog($langs->trans("ErrorModuleNotFound"), LOG_ERR);
+    }
+}
 
 /*
  * View
@@ -277,6 +310,24 @@ print $form::selectarray('vignette', $vignetteType, (!empty($conf->global->$vign
 print '</td><td class="center">';
 print '<input type="submit" class="button" name="save" value="' . $langs->trans('Save') . '">';
 print '</td></tr>';
+
+$reshook = $hookmanager->executeHooks('saturneAdminAdditionalConfig', $parameters); // Note that $action and $object may have been modified by some hooks
+if (empty($reshook)) {
+    $additionalConfig = $hookmanager->resArray;
+}
+if (is_array($additionalConfig) && !empty($additionalConfig)) {
+    foreach($additionalConfig as $configName => $configCode) {
+        print '<tr class="oddeven"><td>';
+        print $langs->trans($configName);
+        print '</td><td>';
+        print $langs->trans($configName . 'Description');
+        print '</td>';
+        print '<td class="center">';
+        print ajax_constantonoff($configCode);
+        print '</td></td><td></tr>';
+    }
+}
+
 print '</form>';
 print '</table>';
 
@@ -287,10 +338,11 @@ foreach ($types as $type => $documentData) {
         $documentParentType = $documentType[0];
         $documentType       = $documentType[1];
     } else {
-        $documentParentType = $documentData['documentType'];
+        $documentParentType = ($documentData['className'] ?? $documentData['documentType']);
+        $documentType       = $documentData['documentType'];
     }
 
-    require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . $documentData['documentType'] . '.class.php';
+    require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . ($documentData['className'] ?? $documentData['documentType']) . '.class.php';
 
     $object = new $type($db);
 

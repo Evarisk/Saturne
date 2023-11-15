@@ -22,36 +22,36 @@
 
 Pour faire un commit sur les repositories d'Evarisk il faut respecter la convention suivante :
 
-#NuméroIssue [Object/Element] add/fix: commit message
-- Ex: #100 [Signature] add: signature update action
-- Ex: #101 [Lib] fix: wrong method call
+- <b>#NuméroIssue [Object/Element] add/fix: commit message</b>
+- Exemple 1 : #100 [Signature] add: signature update action
+- Exemple 2 : #101 [Lib] fix: wrong method call
 
 ## CSS OU JS
 
-Pour simplifier l'utilisation et la compréhension du CSS/JS, nous avons utilisé un minifier avec la libraire npm gulpfile.
+Pour simplifier l'utilisation et la compréhension du CSS/JS, nous avons utilisé un minifier avec la librairie npm Gulpfile.
 Par conséquent, il ne faut pas oublier de lancer le terminal et d'exécuter la commande npm i (si c'est la première utilisation) ou npm start.
-- Ex: C:\wamp64\www\dolibarr-16.0.3\htdocs\custom\saturne> npm start
+- Exemple : C:\wamp64\www\dolibarr\htdocs\custom\saturne> npm start
 
 ## Utilisation du Framework
-### Objects Générique
-#### Object (SaturneObject)
+### Objets Générique
+#### Objet (SaturneObject)
 
-Pour implémenter un object sur un module il faut se référer à la classe SaturneObject.
-Cette dernière dispose d'un CRUD générique étendu de CommonObject + des fonctions utilitaires
+Pour implémenter un objet sur un module il faut se référer à la classe SaturneObject.
+Cette dernière dispose d'un CRUD générique étendu de CommonObject + les fonctions utilitaires
 - getNomUrl
-- FetchAll
+- fetchAll
 - etc
 
 #### Documents (SaturneDocuments)
 
-Pour implémenter un object documents sur un module il faut se référer à la classe SaturneDocuments.
-Cette dernière dispose d'un CRUD générique étendu de CommonObject + des fonctions utilitaires suivantes :
-- GenerateDocument
+Pour implémenter un objet document sur un module il faut se référer à la classe SaturneDocuments.
+Cette dernière dispose d'un CRUD générique étendu de CommonObject + les fonctions utilitaires suivantes :
+- generateDocument
 
 #### Signature (SaturneSignature)
 
-Pour implémenter un object signature sur un module il faut se référer à la classe SaturneSignature.
-Cette dernière dispose d'un CRUD générique étendu de CommonObject + des fonctions utilitaires suivantes :
+Pour implémenter un objet signature sur un module il faut se référer à la classe SaturneSignature.
+Cette dernière dispose d'un CRUD générique étendu de CommonObject + les fonctions utilitaires suivantes :
 - setSignatory
 - fetchSignatory
 - fetchSignatories
@@ -59,20 +59,14 @@ Cette dernière dispose d'un CRUD générique étendu de CommonObject + des fonc
 - deleteSignatoriesSignatures
 - deletePreviousSignatories
 
-A venir: (builder d'objets) + exemple
-
 #### Schedules (SaturneSchedules)
 
-Pour implémenter un object horaires sur un module il faut se référer à la classe SaturneSchedules.
+Pour implémenter un objet horaires sur un module il faut se référer à la classe SaturneSchedules.
 Cette dernière dispose d'un CRUD générique étendu de CommonObject
-
-A venir: (builder d'objets) + exemple
 
 #### Dashboard (SaturneDashboard)
 
-Pour implémenter un object tableau de bord sur un module il faut se référer à la classe SaturneDashboard.
+Pour implémenter un objet tableau de bord sur un module il faut se référer à la classe SaturneDashboard.
 Cette dernière dispose des fonctions utilitaires suivantes :
-- load_dashboard - Charger les infos du tableau de board
-- show_dashboard - Afficher le tableau de board
-
-A venir: (builder d'objets) + exemple
+- load_dashboard - Charger les infos du tableau de bord
+- show_dashboard - Afficher le tableau de bord

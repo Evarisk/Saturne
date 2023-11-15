@@ -513,6 +513,18 @@ abstract class SaturneObject extends CommonObject
         return $this->LibStatut($this->status, $mode);
     }
 
+
+    /**
+     * Return the status.
+     *
+     * @param  int    $status ID status.
+     * @param  int    $mode   0 = long label, 1 = short label, 2 = Picto + short label, 3 = Picto, 4 = Picto + long label, 5 = Short label + Picto, 6 = Long label + Picto.
+     * @return string         Label of status.
+     */
+    public function LibStatut(int $status, int $mode = 0): string
+    {
+       return '';
+    }
     /**
      *	Load the info information in the object.
      *
@@ -656,7 +668,8 @@ abstract class SaturneObject extends CommonObject
 		$now  = dol_now();
 
 		$ret  = $langs->trans('Ref') . ' : ' . $object->ref . '</br>';
-		$ret .= (isset($object->label) && !empty($object->label) ? $langs->transnoentities('Label') . ' : ' . $object->label . '</br>' : '');
+        $ret .= $langs->trans('TechnicalID') . ' : ' . $object->id . '<br>';
+        $ret .= (isset($object->label) && !empty($object->label) ? $langs->transnoentities('Label') . ' : ' . $object->label . '</br>' : '');
 		$ret .= (isset($object->description) && !empty($object->description) ? $langs->transnoentities('Description') . ' : ' . $object->description . '</br>' : '');
 		$ret .= (isset($object->type) && !empty($object->type) ? $langs->transnoentities('Type') . ' : ' .  $langs->transnoentities($object->type) . '</br>' : '');
 		$ret .= (isset($object->value) && !empty($object->value) ? $langs->transnoentities('Value') . ' : ' . $object->value . '</br>' : '');
@@ -686,6 +699,7 @@ abstract class SaturneObject extends CommonObject
 		}
         $ret .= (isset($object->note_public) && dol_strlen($object->note_public) > 0 ? $langs->transnoentities('NotePublic') . ' : ' . $object->note_public . '</br>' : '');
         $ret .= (isset($object->note_private) && dol_strlen($object->note_private) > 0 ? $langs->transnoentities('NotePrivate') . ' : ' . $object->note_private . '</br>' : '');
+        $ret .= (isset($object->status) && dol_strlen($object->status) > 0 ? $langs->transnoentities('Status') . ' : ' . $object->status . '<br>' : '');
 
 		return $ret;
 	}

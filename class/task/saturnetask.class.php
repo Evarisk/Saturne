@@ -75,20 +75,20 @@ class SaturneTask extends Task
 		$this->db = $db;
 	}
 
-	/**
-	 * Load dashboard info task
-	 *
-	 * @return array|int
-	 * @throws Exception
-	 */
-	public function loadDashboard()
-	{
-		$arrayTasksByProgress = $this->getTasksByProgress();
+    /**
+     * Load dashboard info task
+     *
+     * @return array
+     * @throws Exception
+     */
+    public function load_dashboard($projectId): array
+    {
+        $arrayTasksByProgress = $this->getTasksByProgress($projectId);
 
-		$array['graphs'] = $arrayTasksByProgress;
+        $array['graphs'] = [$arrayTasksByProgress];
 
-		return $array;
-	}
+        return $array;
+    }
 
 	/**
 	 * Get tasks by progress.
@@ -98,42 +98,51 @@ class SaturneTask extends Task
 	 */
 	public function getTasksByProgress($projectId = 0)
 	{
-		// Tasks by progress
-		global $conf, $langs;
+        global $conf, $langs, $form;
 
-		$tasksByProgress['title'] = $langs->transnoentities('TasksRepartition');
-		$tasksByProgress['picto'] = '<i class="fas fa-tasks"></i>';
-		$tasksByProgress['labels'] = array(
-			'taskat0percent' => array(
-				'label' => $langs->transnoentities('TaskAt0Percent') . ' %',
-				'color' => '#e05353'
-			),
-			'taskinprogress' => array(
-				'label' => $langs->transnoentities('TaskInProgress'),
-				'color' => '#e9ad4f'
-			),
-			'taskat100percent' => array(
-				'label' => $langs->transnoentities('TaskAt100Percent') . ' %',
-				'color' => '#47e58e'
-			),
-		);
-		$tasksArray = $this->getTasksArray(0, 0, $projectId);
-		if (is_array($tasksArray) && !empty($tasksArray)) {
-			foreach ($tasksArray as $tasksingle) {
-				if ($tasksingle->progress == 0) {
-					$tasksByProgress['data']['taskat0percent'] = $tasksByProgress['data']['taskat0percent'] + 1;
-				} elseif ($tasksingle->progress > 0 && $tasksingle->progress < 100) {
-					$tasksByProgress['data']['taskinprogress'] = $tasksByProgress['data']['taskinprogress'] + 1;
-				} else {
-					$tasksByProgress['data']['taskat100percent'] = $tasksByProgress['data']['taskat100percent'] + 1;
-				}
-			}
-		} else {
-			$tasksByProgress['data']['taskat0percent']   = 0;
-			$tasksByProgress['data']['taskinprogress']   = 0;
-			$tasksByProgress['data']['taskat100percent'] = 0;
-		}
-		return $tasksByProgress;
+        // Graph Title parameters
+        $array['title'] = $form->textwithpicto($langs->transnoentities('TasksRepartition'), $langs->transnoentities('TasksFromProject'));
+        $array['picto'] = $this->picto;
+
+        // Graph parameters
+        $array['width']      = '100%';
+        $array['height']     = 400;
+        $array['type']       = 'pie';
+        $array['showlegend'] = $conf->browser->layout == 'phone' ? 1 : 2;
+        $array['dataset']    = 1;
+
+        $array['labels'] = [
+            0 => [
+                'label' => $langs->transnoentities('TaskAt0Percent') . ' %',
+                'color' => '#e05353'
+            ],
+            1 => [
+                'label' => $langs->transnoentities('TaskInProgress'),
+                'color' => '#e9ad4f'
+            ],
+            2 => [
+                'label' => $langs->transnoentities('TaskAt100Percent') . ' %',
+                'color' => '#47e58e'
+            ]
+        ];
+
+        $array['data'][0] = 0;
+        $array['data'][1] = 0;
+        $array['data'][2] = 0;
+        $tasks            = $this->getTasksArray(0, 0, $projectId);
+        if (is_array($tasks) && !empty($tasks)) {
+            foreach ($tasks as $task) {
+                if ($task->progress == 0) {
+                    $array['data'][0] = $array['data'][0] + 1;
+                } elseif ($task->progress > 0 && $task->progress < 100) {
+                    $array['data'][1] = $array['data'][1] + 1;
+                } else {
+                    $array['data'][2] = $array['data'][2] + 1;
+                }
+            }
+        }
+
+        return $array;
 	}
 
 	/**
@@ -231,93 +240,127 @@ class SaturneTask extends Task
 	 *
 	 * @param string       $morewherefilter Add more filter into where SQL request (must start with ' AND ...')
 	 * @param string       $sortorder       Sort Order
-	 * @param string       $sortfield       Sort field
+     * @param string       $sortfield       Sort field
+     * @param string       $sortedByTasks   Sort result array by tasks
 	 *
 	 * @return array|int                    0 < if KO, array of time spent if OK
 	 * @throws Exception
 	 */
-	public function fetchAllTimeSpentAllUsers($morewherefilter = '', $sortfield = '', $sortorder = '')
+	public function fetchAllTimeSpentAllUsers($morewherefilter = '', $sortfield = '', $sortorder = '', $sortedByTasks = 0)
 	{
-		$arrayres = array();
+        $versionEighteenOrMore = 0;
 
-		$sql = "SELECT";
-		$sql .= " s.rowid as socid,";
-		$sql .= " s.nom as thirdparty_name,";
-		$sql .= " s.email as thirdparty_email,";
-		$sql .= " ptt.rowid,";
-		$sql .= " ptt.fk_task,";
-		$sql .= " ptt.task_date,";
-		$sql .= " ptt.task_datehour,";
-		$sql .= " ptt.task_date_withhour,";
-		$sql .= " ptt.task_duration,";
-		$sql .= " ptt.fk_user,";
-		$sql .= " ptt.note,";
-		$sql .= " ptt.thm,";
-		$sql .= " pt.rowid as task_id,";
-		$sql .= " pt.ref as task_ref,";
-		$sql .= " pt.label as task_label,";
-		$sql .= " p.rowid as project_id,";
-		$sql .= " p.ref as project_ref,";
-		$sql .= " p.title as project_label,";
-		$sql .= " p.public as public";
-		$sql .= " FROM ".MAIN_DB_PREFIX."projet_task_time as ptt, ".MAIN_DB_PREFIX."projet_task as pt, ".MAIN_DB_PREFIX."projet as p";
-		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON p.fk_soc = s.rowid";
-		$sql .= " WHERE ptt.fk_task = pt.rowid AND pt.fk_projet = p.rowid";
-		$sql .= " AND pt.entity IN (".getEntity('project').")";
-		if ($morewherefilter) {
-			$sql .= $morewherefilter;
-		}
+        if ((float) DOL_VERSION >= 18.0) {
+            $versionEighteenOrMore = 1;
+        }
+        $arrayres = array();
 
-		if (!empty($sortfield)) {
-			$sql .= $this->db->order($sortfield, $sortorder);
-		}
+        $sql = "SELECT * FROM (";
+        $sql .= "SELECT";
+        $sql .= " s.rowid as socid,";
+        $sql .= " s.nom as thirdparty_name,";
+        $sql .= " s.email as thirdparty_email,";
+        $sql .= " ptt.rowid,";
+        if ($versionEighteenOrMore) {
+            $sql .= " ptt.fk_element AS fk_element,";
+            $sql .= " ptt.element_date AS element_date,";
+            $sql .= " ptt.element_datehour AS element_datehour,";
+            $sql .= " ptt.element_date_withhour AS element_date_withhour,";
+            $sql .= " ptt.element_duration AS element_duration,";
+        } else {
+            $sql .= " ptt.fk_task AS fk_element,";
+            $sql .= " ptt.task_date AS element_date,";
+            $sql .= " ptt.task_datehour AS element_datehour,";
+            $sql .= " ptt.task_date_withhour AS element_date_withhour,";
+            $sql .= " ptt.task_duration AS element_duration,";
+        }
+        $sql .= " ptt.fk_user,";
+        $sql .= " ptt.note,";
+        $sql .= " ptt.thm,";
+        $sql .= " pt.rowid as task_id,";
+        $sql .= " pt.ref as task_ref,";
+        $sql .= " pt.label as task_label,";
+        $sql .= " pt.fk_projet as project_linked_id,";
+        $sql .= " pt.entity as task_entity,";
+        $sql .= " p.rowid as project_id,";
+        $sql .= " p.ref as project_ref,";
+        $sql .= " p.title as project_label,";
+        $sql .= " p.public as public";
+        $sql .= " FROM ".MAIN_DB_PREFIX;
+        if ($versionEighteenOrMore) {
+            $sql .= "element_time as ptt, ";
+        } else {
+            $sql .= "projet_task_time as ptt, ";
+        }
+        $sql .= MAIN_DB_PREFIX."projet_task as pt, ".MAIN_DB_PREFIX."projet as p";
+        $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON p.fk_soc = s.rowid";
+        $sql .= ") AS selector";
+        $sql .= " WHERE fk_element = task_id AND project_linked_id = project_id";
+        $sql .= " AND task_entity IN (".getEntity('project').")";
+        if ($morewherefilter) {
+            $sql .= $morewherefilter;
+        }
 
-		dol_syslog(get_class($this)."::fetchAllTimeSpentAllUsers", LOG_DEBUG);
-		$resql = $this->db->query($sql);
-		if ($resql) {
-			$num = $this->db->num_rows($resql);
+        if (!empty($sortfield)) {
+            $sql .= $this->db->order($sortfield, $sortorder);
+        }
 
-			$i = 0;
-			while ($i < $num) {
-				$obj = $this->db->fetch_object($resql);
+        dol_syslog(get_class($this)."::fetchAllTimeSpentAllUser", LOG_DEBUG);
+        $resql = $this->db->query($sql);
+        if ($resql) {
+            $num = $this->db->num_rows($resql);
 
-				$newobj = new stdClass();
+            $i = 0;
+            while ($i < $num) {
+                $obj = $this->db->fetch_object($resql);
 
-				$newobj->socid            = $obj->socid;
-				$newobj->thirdparty_name  = $obj->thirdparty_name;
-				$newobj->thirdparty_email = $obj->thirdparty_email;
+                $newobj = new stdClass();
 
-				$newobj->fk_project    = $obj->project_id;
-				$newobj->project_ref   = $obj->project_ref;
-				$newobj->project_label = $obj->project_label;
-				$newobj->public        = $obj->project_public;
+                $newobj->socid            = $obj->socid;
+                $newobj->thirdparty_name  = $obj->thirdparty_name;
+                $newobj->thirdparty_email = $obj->thirdparty_email;
 
-				$newobj->fk_task	= $obj->task_id;
-				$newobj->task_ref   = $obj->task_ref;
-				$newobj->task_label = $obj->task_label;
+                $newobj->fk_project    = $obj->project_id;
+                $newobj->project_ref   = $obj->project_ref;
+                $newobj->project_label = $obj->project_label;
+                $newobj->public        = $obj->project_public;
 
-				$newobj->timespent_id       = $obj->rowid;
-				$newobj->timespent_date     = $this->db->jdate($obj->task_date);
-				$newobj->timespent_datehour	= $this->db->jdate($obj->task_datehour);
-				$newobj->timespent_withhour = $obj->task_date_withhour;
-				$newobj->timespent_duration = $obj->task_duration;
-				$newobj->timespent_fk_user  = $obj->fk_user;
-				$newobj->timespent_thm      = $obj->thm;	// hourly rate
-				$newobj->timespent_note     = $obj->note;
+                $newobj->fk_task	= $obj->task_id;
+                $newobj->task_ref   = $obj->task_ref;
+                $newobj->task_label = $obj->task_label;
 
-				$arrayres[] = $newobj;
+                $newobj->timespent_id       = $obj->rowid;
+                $newobj->timespent_date     =  $this->db->jdate($obj->element_date);
+                $newobj->timespent_datehour	=  $this->db->jdate($obj->element_datehour);
+                $newobj->timespent_withhour =  $obj->element_date_withhour;
+                $newobj->timespent_duration =  $obj->element_duration;
+                $newobj->timespent_fk_user  = $obj->fk_user;
+                $newobj->timespent_thm      = $obj->thm;	// hourly rate
+                $newobj->timespent_note     = $obj->note;
 
-				$i++;
-			}
+                $arrayres[] = $newobj;
 
-			$this->db->free($resql);
-		} else {
-			dol_print_error($this->db);
-			$this->error = "Error ".$this->db->lasterror();
-			return -1;
-		}
+                $i++;
+            }
 
-		return $arrayres;
+            $this->db->free($resql);
+        } else {
+            dol_print_error($this->db);
+            $this->error = "Error ".$this->db->lasterror();
+            return -1;
+        }
+
+        if ($sortedByTasks > 0) {
+            $timeSpentSortedByTasks = [];
+            if (is_array($arrayres) && !empty($arrayres)) {
+                foreach ($arrayres as $timeSpent) {
+                    $timeSpentSortedByTasks[$timeSpent->fk_task][$timeSpent->timespent_id] = $timeSpent;
+                }
+            }
+            return $timeSpentSortedByTasks;
+        } else {
+            return $arrayres;
+        }
 	}
 }
 
