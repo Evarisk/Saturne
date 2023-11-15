@@ -22,7 +22,7 @@
 
 Pour faire un commit sur les repositories d'Evarisk il faut respecter la convention suivante :
 
-#NuméroIssue [Object/Element] add/fix: commit message
+- <b>Ex: #NuméroIssue [Object/Element] add/fix: commit message</b>
 - Ex: #100 [Signature] add: signature update action
 - Ex: #101 [Lib] fix: wrong method call
 
