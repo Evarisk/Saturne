@@ -23,7 +23,7 @@
 
 /**
  * The following vars must be defined:
- * Global     : $conf, $db, $langs, $user,
+ * Global     : $conf, $db, $hookmanager, $langs, $user,
  * Parameters : $action,
  * Objects    : $object, $document
  * Variable   : $permissiontoadd, $moduleNameLowerCase, $permissiontodelete
@@ -31,6 +31,8 @@
 
 // Build doc action.
 if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
+    global $hookmanager;
+
     $outputLangs = $langs;
     $newLang = '';
 
