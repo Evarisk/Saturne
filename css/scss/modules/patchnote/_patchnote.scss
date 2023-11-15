@@ -4,6 +4,8 @@ div.wpeo-modal-patchnote{
     border-bottom: solid #cccccc 1px;
   }
   .modal-container {
+    max-width: 80%;
+    max-height: 80%;
     background-color: #e9eaed;
     border-radius: 25px;
     li{
@@ -33,7 +35,6 @@ div.wpeo-modal-patchnote{
   }
   .modal-title {
     color: #0a1464;
-    font-size: 24px!important;
   }
   .wpeo-button{
     background-color: #cccccc;

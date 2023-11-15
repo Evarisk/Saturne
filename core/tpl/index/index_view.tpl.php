@@ -119,7 +119,7 @@ if ($conf->global->$moduleShowPatchNote > 0) : ?>
     </div>
 
     <div class="wpeo-modal wpeo-modal-patchnote" id="patch-note">
-        <div class="modal-container wpeo-modal-event" style="max-width: 1280px; max-height: 1000px">
+        <div class="modal-container wpeo-modal-event">
             <!-- Modal-Header -->
             <div class="modal-header">
                 <h2 class="modal-title"><?php echo $langs->trans('ModulePatchNote', $moduleName, $modModule->version);  ?></h2>
@@ -128,7 +128,7 @@ if ($conf->global->$moduleShowPatchNote > 0) : ?>
             <!-- Modal Content-->
             <div class="modal-content">
                 <?php $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, 'https://api.github.com/repos/' . strtolower($modModule->editor_name) . '/' . $moduleNameLowerCase . '/releases/tags/' . $modModule->version);
+                curl_setopt($ch, CURLOPT_URL, 'https://api.github.com/repos/' . strtolower($modModule->editor_name) . '/' . (!empty($moreParams['specialModuleNameLowerCase']) ? $moreParams['specialModuleNameLowerCase'] : $moduleNameLowerCase) . '/releases/tags/' . $modModule->version);
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
                 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
                 curl_setopt($ch, CURLOPT_USERAGENT, $moduleName);

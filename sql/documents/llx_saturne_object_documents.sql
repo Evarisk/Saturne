@@ -24,7 +24,7 @@ CREATE TABLE llx_saturne_object_documents(
     status        integer DEFAULT 1 NOT NULL,
     type          varchar(128),
     module_name   varchar(128),
-    json          text,
+    json          longtext,
     model_pdf     varchar(255),
     model_odt     varchar(255),
     last_main_doc varchar(128),

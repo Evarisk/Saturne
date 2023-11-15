@@ -50,12 +50,15 @@ global $conf, $db, $hookmanager, $langs, $user;
 saturne_load_langs();
 
 // Get parameters
-$id         = GETPOST('id', 'int');
-$ref        = GETPOST('ref', 'alpha');
-$action     = GETPOST('action', 'aZ09');
-$cancel     = GETPOST('cancel', 'aZ09');
-$confirm    = GETPOST('confirm', 'aZ09');
-$backtopage = GETPOST('backtopage', 'alpha');
+$id          = GETPOST('id', 'int');
+$ref         = GETPOST('ref', 'alpha');
+$action      = GETPOST('action', 'aZ09');
+$cancel      = GETPOST('cancel', 'aZ09');
+$confirm     = GETPOST('confirm', 'aZ09');
+$backtopage  = GETPOST('backtopage', 'alpha');
+$showNav     = GETPOST('show_nav', 'int');
+$handlePhoto = GETPOST('handle_photo', 'alpha');
+$subaction   = GETPOST('subaction', 'alpha');
 
 // Get pagination parameters
 $limit     = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : $conf->liste_limit;
@@ -100,7 +103,8 @@ if ($id > 0 || !empty($ref)) {
 // Security check - Protection if external user
 $permissiontoread = $user->rights->$moduleNameLowerCase->$objectType->read;
 $permissiontoadd  = $user->rights->$moduleNameLowerCase->$objectType->write;
-saturne_check_access($permissiontoread);
+
+saturne_check_access($permissiontoread, $object);
 
 /*
 *  Actions
@@ -126,11 +130,17 @@ if (empty($resHook)) {
 $title   = $langs->trans('Files') . ' - ' . $langs->trans(ucfirst($object->element));
 $helpUrl = 'FR:Module_' . $moduleName;
 
-saturne_header(0, '', $title, $helpUrl);
+$reshook  = $hookmanager->executeHooks('saturneCustomHeaderFunction', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+if ($reshook > 0) {
+    $customHeaderFunction = $hookmanager->resPrint;
+    $customHeaderFunction($title, $helpUrl);
+} else {
+    saturne_header(0, '', $title, $helpUrl);
+}
 
 if ($id > 0 || !empty($ref)) {
     saturne_get_fiche_head($object, 'document', $title);
-    saturne_banner_tab($object, 'ref', '', 1, 'ref', 'ref', '', !empty($object->photo));
+    saturne_banner_tab($object, 'ref', '', dol_strlen($showNav) > 0 ? $showNav : 1, 'ref', 'ref', method_exists($object, 'getMoreHtmlRef') ? $object->getMoreHtmlRef($object->id) : '', ((!empty($object->photo) || dol_strlen($handlePhoto) > 0) ? $handlePhoto : false));
 
     // Build file list
     $filearray = dol_dir_list($upload_dir, 'files', 0, '', '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_DESC : SORT_ASC), 1);

@@ -105,6 +105,7 @@ if ( ! $error && $subaction == "addFiles") {
     $numberingModuleName = [
         $object->element => $conf->global->$modObjectName,
     ];
+
     list($modObject) = saturne_require_objects_mod($numberingModuleName, $moduleNameLowerCase);
 
 	if (dol_strlen($object->ref) > 0) {
@@ -219,7 +220,7 @@ if ( ! $error && $subaction == "unlinkFile") {
 		if (property_exists($object, $objectSubtype)) {
 
 			if ($object->$objectSubtype == $fileName) {
-				$pathPhotos = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType .'/'. $object->ref . '/photos/';
+				$pathPhotos = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType .'/'. $object->ref . '/' . (dol_strlen($objectSubdir) > 0 ? $objectSubdir . '/' : '');
 				$fileArray  = dol_dir_list($pathPhotos, 'files', 0, '', $fileName);
 
 				if (count($fileArray) > 0) {
@@ -296,7 +297,7 @@ if (is_array($submitFileErrorText)) {
 	<div class="modal-container wpeo-modal-event">
 		<!-- Modal-Header -->
 		<div class="modal-header">
-			<h2 class="modal-title"><?php echo $langs->trans('ModalAddPhoto')?></h2>
+			<h2 class="modal-title"><?php echo $langs->trans('MediaGallery')?></h2>
 			<div class="modal-close"><i class="fas fa-2x fa-times"></i></div>
 		</div>
 		<!-- Modal-Content -->
@@ -398,10 +399,6 @@ if (is_array($submitFileErrorText)) {
 			print saturne_show_pagination($pagesCounter, $page_array, $offset);
 			?>
 			<div class="save-photo wpeo-button button-blue button-disable" value="">
-				<input class="from-type" value="" type="hidden"/>
-				<input class="from-subtype" value="" type="hidden"/>
-				<input class="from-id" value="" type="hidden"/>
-				<input class="from-subdir" value="" type="hidden"/>
 				<span><?php echo $langs->trans('Add'); ?></span>
 			</div>
 		</div>

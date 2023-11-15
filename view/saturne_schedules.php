@@ -68,13 +68,23 @@ if ($user->socid) {
 // Initialize technical objects
 $object = new SaturneSchedules($db);
 
-if (isModEnabled($elementType)) {
+$customClassPath = __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $elementType . '.class.php';
+$customLibPath   = __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' . $elementType . '.lib.php';
+if (isModEnabled($elementType) || is_file($customClassPath)) {
+    if (is_file($customClassPath)) {
+        require_once $customClassPath;
+    }
+    if (is_file($customLibPath)) {
+        require_once $customLibPath;
+    }
     $className = ucfirst($elementType);
+
     if (strstr($className, '_')) {
         $className = preg_replace('/_/', '', $className);
     }
     $objectLinked = new $className($db);
 }
+
 
 // Initialize view objects
 $form = new Form($db);
@@ -89,7 +99,7 @@ if ($id > 0 && !empty($elementType)) {
 }
 
 // Security check - Protection if external user
-$permissiontoread = $user->rights->$moduleNameLowerCase->read;
+$permissiontoread = $user->rights->$moduleNameLowerCase->read || $user->rights->$moduleNameLowerCase->lire;
 $permissiontoadd  = $permissiontoread;
 saturne_check_access($permissiontoread);
 
@@ -156,52 +166,47 @@ if (!empty($objectLinked) && empty($action)) {
             $prepareHead = 'contract_prepare_head';
             break;
         default:
-            $prepareHead = '';
+            $prepareHead = $elementType . '_prepare_head';
             break;
     }
 
     $objectLinked->fetch($id);
     if (!empty($prepareHead)) {
-        $head = $prepareHead($objectLinked);
-        print dol_get_fiche_head($head, 'schedules', $title, -1, $objectLinked->picto);
+        print saturne_get_fiche_head($objectLinked, 'schedules', $title);
     }
 
     // Object card
     // ------------------------------------------------------------
     $linkback = '<a href="' . DOL_URL_ROOT . '/' . $elementType . '/list.php?restore_lastsearch_values=1' . (!empty($socid) ? '&socid='.$socid : '') . '">' . $langs->trans('BackToList') . '</a>';
 
-    $morehtmlref = $objectLinked->ref;
+    $morehtmlref = '<div class="refidno">';
 
-    $morehtmlref .= '<div class="refidno">';
+    if ($elementType == 'contrat') {
+        // Ref customer
+        $morehtmlref .= $form->editfieldkey('RefCustomer', 'ref_customer', $objectLinked->ref_customer, $objectLinked, 0, 'string', '', 0, 1);
+        $morehtmlref .= $form->editfieldval('RefCustomer', 'ref_customer', $objectLinked->ref_customer, $objectLinked, 0, 'string', '', null, null, '', 1, 'getFormatedCustomerRef');
 
-    // Ref customer
-    $morehtmlref .= $form->editfieldkey('RefCustomer', 'ref_customer', $objectLinked->ref_customer, $objectLinked, 0, 'string', '', 0, 1);
-    $morehtmlref .= $form->editfieldval('RefCustomer', 'ref_customer', $objectLinked->ref_customer, $objectLinked, 0, 'string', '', null, null, '', 1, 'getFormatedCustomerRef');
-
-    // Ref supplier
-    $morehtmlref .= '<br>';
-    $morehtmlref .= $form->editfieldkey('RefSupplier', 'ref_supplier', $objectLinked->ref_supplier, $objectLinked, 0, 'string', '', 0, 1);
-    $morehtmlref .= $form->editfieldval('RefSupplier', 'ref_supplier', $objectLinked->ref_supplier, $objectLinked, 0, 'string', '', null, null, '', 1, 'getFormatedSupplierRef');
-
-    // Thirdparty
-    if (isModEnabled('societe')) {
-        $objectLinked->fetch_thirdparty();
-        $morehtmlref .= '<br>' . $langs->trans('ThirdParty') . ' : ' . (is_object($objectLinked->thirdparty) ? $objectLinked->thirdparty->getNomUrl(1) : '') . '<br>';
-    }
-
-    // Project
-    if (isModEnabled('project')) {
-        $morehtmlref .= $langs->trans('Project') . ' : ';
-        if (!empty($objectLinked->fk_project)) {
-            $project = new Project($db);
-            $project->fetch($object->fk_project);
-            $morehtmlref .= $project->getNomUrl(1, '', 1);
-        }
+        // Ref supplier
         $morehtmlref .= '<br>';
+        $morehtmlref .= $form->editfieldkey('RefSupplier', 'ref_supplier', $objectLinked->ref_supplier, $objectLinked, 0, 'string', '', 0, 1);
+        $morehtmlref .= $form->editfieldval('RefSupplier', 'ref_supplier', $objectLinked->ref_supplier, $objectLinked, 0, 'string', '', null, null, '', 1, 'getFormatedSupplierRef');
+        $morehtmlref .= '<br>';
+
+        // Project
+        if (isModEnabled('project')) {
+            if (!empty($objectLinked->fk_project)) {
+                $morehtmlref .= $langs->trans('Project') . ' : ';
+                $project = new Project($db);
+                $project->fetch($object->fk_project);
+                $morehtmlref .= $project->getNomUrl(1, '', 1);
+                $morehtmlref .= '<br>';
+            }
+        }
     }
+
     $morehtmlref .= '</div>';
 
-    dol_banner_tab($objectLinked, 'socid', $linkback, ($user->socid ? 0 : 1), 'rowid', 'nom', $morehtmlref);
+    saturne_banner_tab($objectLinked, 'ref', '', 1, 'ref', 'ref', $morehtmlref, !empty($object->photo));
 
     print '<div class="fichecenter">';
     print '<div class="underbanner clearboth"></div>';
@@ -230,7 +235,7 @@ if (!empty($objectLinked) && empty($action)) {
     print '</table>';
 
     $parameters = [];
-    $reshook = $hookmanager->executeHooks('saturneSchedules', $parameters, $object); // Note that $action and $object may have been modified by some hooks
+    $reshook = $hookmanager->executeHooks('saturneSchedules', $parameters, $objectLinked); // Note that $action and $object may have been modified by some hooks
     if ($reshook < 0) {
         setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
     } elseif (empty($reshook)) {
