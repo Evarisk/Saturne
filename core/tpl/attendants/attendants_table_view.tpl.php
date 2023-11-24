@@ -38,11 +38,11 @@ if (!empty($signatories) || (empty($signatories) && $object->status == $object::
     print '<td>' . img_picto('', 'company') . ' ' . $langs->trans('ThirdParty') . '</td>';
     print '<td>' . img_picto('', 'user') . ' ' . $langs->trans('User') . ' | ' . img_picto('', 'contact') . ' ' . $langs->trans('Contacts') . '</td>';
     if ($attendantTableMode == 'simple') {
-        print '<td class="center">' . $langs->trans('Role') . '</td>';
+        print '<td class="center ' . ($conf->browser->layout != 'classic' ? 'hidden': '') . '">' . $langs->trans('Role') . '</td>';
     }
     print '<td class="center">' . $langs->trans('SignatureLink') . '</td>';
     print '<td class="center">' . $langs->trans('SendMailDate') . '</td>';
-    print '<td>' . $langs->trans('SignatureDate') . '</td>';
+    print '<td class="' . ($conf->browser->layout != 'classic' ? 'hidden': '') .'">' . $langs->trans('SignatureDate') . '</td>';
     print '<td class="center">' . $langs->trans('Status') . '</td>';
     print '<td class="center">' . $langs->trans('Attendance') . '</td>';
     print '<td class="center">' . $langs->trans('SignatureActions') . '</td>';
@@ -57,13 +57,21 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
         if ($element->element_type == 'socpeople') {
             $contact->fetch($element->element_id);
             $thirdparty->fetch($contact->fk_soc);
-            print $thirdparty->getNomUrl(1);
+            if ($conf->browser->layout != 'classic') {
+                print img_picto('', 'company') . ' ' . $thirdparty->name;
+            } else {
+                print $thirdparty->getNomUrl(1);
+            }
         } else {
             $usertmp->fetch($element->element_id);
             if ($usertmp->contact_id > 0) {
                 $contact->fetch($usertmp->contact_id);
                 $thirdparty->fetch($contact->fk_soc);
-                print $thirdparty->getNomUrl(1);
+                if ($conf->browser->layout != 'classic') {
+                    print img_picto('', 'company') . ' ' . $thirdparty->name;
+                } else {
+                    print $thirdparty->getNomUrl(1);
+                }
             } else {
                 print img_picto('', 'company') . ' ' . $conf->global->MAIN_INFO_SOCIETE_NOM;
             }
@@ -71,27 +79,31 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
         print '</td><td>';
         if ($element->element_type == 'user') {
             $usertmp->fetch($element->element_id);
-            print $usertmp->getNomUrl(1, '', 0, 0, 24, 1);
+            print $usertmp->getNomUrl(1, ($conf->browser->layout != 'classic' ? 'nolink': ''), 0, 0, 24, 1);
             if (!empty($usertmp->job)) {
                 print ' - ' . $usertmp->job;
             }
         } else {
             $contact->fetch($element->element_id);
-            print $contact->getNomUrl(1);
+            if ($conf->browser->layout != 'classic') {
+                print img_picto('', 'company') . ' ' . $contact->getFullName($langs, 1);
+            } else {
+                print $contact->getNomUrl(1);
+            }
             if (!empty($contact->job)) {
                 print ' - ' . $contact->job;
             }
         }
         if ($attendantTableMode == 'simple') {
-            print '</td><td class="center">';
+            print '</td><td class="center ' . ($conf->browser->layout != 'classic' ? 'hidden': '') . '">';
             print $langs->transnoentities($element->role);
         }
         print '</td><td class="center copy-signatureurl-container">';
         if ($object->status == $object::STATUS_VALIDATED) {
             if ((!$user->rights->$moduleNameLowerCase->$objectType->read && $user->rights->$moduleNameLowerCase->assignedtome->$objectType && ($element->element_id == $user->id || $element->element_id == $user->contact_id)) || $permissiontoadd) {
                 $signatureUrl = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $element->signature_url . '&entity=' . $conf->entity . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
-                print '<a href=' . $signatureUrl . ' target="_blank"><div class="wpeo-button button-primary"><i class="fas' . (($element->status == SaturneSignature::STATUS_SIGNED) ? ' fa-eye' : ' fa-signature') . '"></i></div></a>';
-                print ' <i class="fas fa-clipboard copy-signatureurl" data-signature-url="' . $signatureUrl . '" style="color: #666;"></i>';
+                print '<a href=' . $signatureUrl . ' target="_blank"><div class="wpeo-button button-primary" style="' . ($conf->browser->layout != 'classic' ? 'font-size: 25px;': '') . '"><i class="fas' . (($element->status == SaturneSignature::STATUS_SIGNED) ? ' fa-eye' : ' fa-signature') . '"></i></div></a>';
+                print ' <i class="fas fa-clipboard copy-signatureurl" data-signature-url="' . $signatureUrl . '" style="color: #666;' .  ($conf->browser->layout != 'classic' ? 'display: none;': '') . '"></i>';
                 print '<span class="copied-to-clipboard" style="display: none;">' . '  ' . $langs->trans('CopiedToClipboard') . '</span>';
             }
         }
@@ -132,7 +144,7 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
                 print '<input type="hidden" name="action" value="send_email">';
                 print '<input type="hidden" name="signatoryID" value="' . $element->id . '">';
                 print '<input type="hidden" name="backtopage" value="' . $backtopage . '">';
-                print '<button type="submit" class="signature-email wpeo-button button-primary" value="' . $element->id . '">';
+                print '<button type="submit" class="signature-email wpeo-button button-primary" style="' . ($conf->browser->layout != 'classic' ? 'font-size: 20px;': '') . '" value="' . $element->id . '">';
                 print '<i class="fas fa-paper-plane"></i>';
                 print '</button>';
                 if ($nbEmailSent > 0) {
@@ -140,10 +152,10 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
                 }
                 print '</form>';
             } else {
-                print '<div class="wpeo-button button-grey wpeo-tooltip-event" aria-label="' . $langs->trans('NoEmailSet', $langs->trans($element->role) . ' ' . strtoupper($element->lastname) . ' ' . $element->firstname) . '"><i class="fas fa-paper-plane"></i></div>';
+                print '<div class="wpeo-button button-grey wpeo-tooltip-event" style="' . ($conf->browser->layout != 'classic' ? 'font-size: 20px;': '') . '" aria-label="' . $langs->trans('NoEmailSet', $langs->trans($element->role) . ' ' . strtoupper($element->lastname) . ' ' . $element->firstname) . '"><i class="fas fa-paper-plane"></i></div>';
             }
         }
-        print '</td><td>';
+        print '</td><td class="' . ($conf->browser->layout != 'classic' ? 'hidden': '') . '">';
         print dol_print_date($element->signature_date, 'dayhour', 'tzuser');
         print '</td><td class="center">';
         print $element->getLibStatut(5);
@@ -166,7 +178,7 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
         if ($object->status <= $object::STATUS_VALIDATED && $permissiontoadd) {
             print '<div class="wpeo-dropdown dropdown-right attendance-container">';
             print '<input type="hidden" name="signatoryID" value="' . $element->id . '">';
-            print '<div class="dropdown-toggle wpeo-button ' . $cssButton . '"><i class="fas ' . $userIcon . '"></i></div>';
+            print '<div class="dropdown-toggle wpeo-button ' . $cssButton . '" style="' . ($conf->browser->layout != 'classic' ? 'font-size: 20px;': '') . '"><i class="fas ' . $userIcon . '"></i></div>';
             print '<ul class="saturne-dropdown-content wpeo-gridlayout grid-3">';
             print '<li class="dropdown-item set-attendance" style="padding: 0;" value="0"><div class="wpeo-button button-green"><i class="fas fa-user"></i></div></li>';
             print '<li class="dropdown-item set-attendance" style="padding: 0;" value="1"><div class="wpeo-button"><i class="fas fa-user-clock"></i></div></li>';
