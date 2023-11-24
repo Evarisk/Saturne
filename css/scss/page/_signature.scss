@@ -23,10 +23,10 @@
       .modal-container {
         @media all and (orientation: portrait) {
           .modal-content {
-            height: 65% !important;
+            height: 78% !important;
           }
-          .modal-footer.wpeo-button {
-            font-size: 10px !important;
+          .modal-footer .wpeo-button {
+            font-size: 14px !important;
           }
         }
       }
