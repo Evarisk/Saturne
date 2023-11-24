@@ -159,6 +159,9 @@ function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', st
 	if (property_exists($object, 'picto')) {
 		$picto = $object->picto;
 	}
+    if ($conf->browser->layout == 'phone') {
+        $conf->dol_optimize_smallscreen = 0;
+    }
 
     print dol_get_fiche_head($head, $tabactive, $title, -1, $picto, 0, '', '', $conf->browser->layout != 'phone' ? 0 : 5, 'saturne');
 }
