@@ -90,7 +90,8 @@ ConfirmRemoveFileObject = Are you sure you want to <b>delete</b> the document %s
 ArchiveObject           = Archive %s
 ConfirmArchiveObject    = Are you sure you want to archive %s ?
 VersionObject           = Version %s
-ConfirmVersionObject   = Are you sure you want to version %s ?
+ConfirmVersionObject    = Are you sure you want to version %s ?
+CloneCategories         = Clone tags/categories ?
 
 # Data
 ActionsOnObject = Events on %s

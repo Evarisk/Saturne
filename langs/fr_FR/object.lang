@@ -91,6 +91,7 @@ ArchiveObject           = Archiver %s
 ConfirmArchiveObject    = Êtes-vous sûr de vouloir archiver %s ?
 VersionObject           = Versionner %s
 ConfirmVersionObject    = Êtes-vous sûr de vouloir versionner %s ?
+CloneCategories         = Cloner les tags/catégories ?
 
 # Data - Donnée
 ActionsOnObject = Événements sur %s
