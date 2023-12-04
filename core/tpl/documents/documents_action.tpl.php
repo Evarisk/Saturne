@@ -78,7 +78,7 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
     $constName              = get_class($object) . '::STATUS_LOCKED';
     $moreParams['specimen'] = defined($constName) && $object->status < $object::STATUS_LOCKED;
 
-    if (!empty($models) || !empty(($model))) {
+    if (!empty($models) || !empty($model)) {
         $parameters = ['models' => $models, 'model' => $model, 'outputlangs' => $outputLangs, 'hidedetails' => $hideDetails, 'hidedesc' => $hideDesc, 'hideref' => $hideRef, 'moreparams' => $moreParams];
         $hookmanager->executeHooks('saturneBuildDoc', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
 
@@ -87,7 +87,11 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
             setEventMessages($document->error, $document->errors, 'errors');
             $action = '';
         } else {
-            setEventMessages($langs->trans('FileGenerated') . ' - ' . '<a href=' . DOL_URL_ROOT . '/document.php?modulepart='. $moduleNameLowerCase . '&file=' . urlencode($object->element . ($removeDocumentFromName ? '/' : 'document/') . (dol_strlen($object->ref) > 0 ? $object->ref . '/' : '') . $document->last_main_doc) . '&entity=' . $conf->entity . '"' . '>' . $document->last_main_doc . '</a>', []);
+            $documentType = explode('_odt', (!empty($models) ? $models[0] : $model));
+            if ($document->element != $documentType[0]) {
+                $document->element = $documentType[0];
+            }
+            setEventMessages($langs->trans('FileGenerated') . ' - ' . '<a href=' . DOL_URL_ROOT . '/document.php?modulepart='. $moduleNameLowerCase . '&file=' . urlencode($document->element . '/' . (dol_strlen($object->ref) > 0 ? $object->ref . '/' : '') . $document->last_main_doc) . '&entity=' . $conf->entity . '"' . '>' . $document->last_main_doc . '</a>', []);
             $urlToRedirect = $_SERVER['REQUEST_URI'];
             $urlToRedirect = preg_replace('/#builddoc$/', '', $urlToRedirect);
             $urlToRedirect = preg_replace('/action=builddoc&?/', '', $urlToRedirect); // To avoid infinite loop.
