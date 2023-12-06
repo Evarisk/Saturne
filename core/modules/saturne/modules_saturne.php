@@ -548,15 +548,13 @@ class SaturneDocumentModel extends CommonDocGenerator
         if (!empty($moreParam['object'])) {
             $signatory        = new SaturneSignature($this->db, $this->module, $moreParam['object']->element);
             $signatoriesArray = $signatory->fetchSignatories($moreParam['object']->id, $moreParam['object']->element);
-            if (!empty($moreParam['multipleAttendantsRole'] && !empty($signatoriesArray) && is_array($signatoriesArray))) {
+            if (!empty($signatoriesArray) && is_array($signatoriesArray)) {
                 foreach($signatoriesArray as $signatory) {
                     if (!array_key_exists($signatory->role, $signatoryRoles)) {
                         $signatoryRoles[$signatory->role] = [];
                     }
                     $signatoryRoles[$signatory->role][] = $signatory;
                 }
-            } else {
-                $signatoryRoles = ['attendants'];
             }
 
             $moreParam['excludeAttendantsRole'] = (empty($moreParam['excludeAttendantsRole']) ? [] : $moreParam['excludeAttendantsRole']);
@@ -581,7 +579,7 @@ class SaturneDocumentModel extends CommonDocGenerator
                         if (!empty($signatoryObject) && is_array($signatoryObject)) {
                             foreach ($signatoryObject as $objectSignatory) {
                                 $tmpArray[$role . '_number']    = ++$nbAttendant;
-                                $tmpArray[$role . '_lastname']  = strtoupper($objectSignatory->lastname);
+                                $tmpArray[$role . '_lastname']  = dol_strtoupper($objectSignatory->lastname);
                                 $tmpArray[$role . '_firstname'] = dol_strlen($objectSignatory->firstname) > 0 ? ucfirst($objectSignatory->firstname) : '';
                                 switch ($objectSignatory->attendance) {
                                     case 1:
