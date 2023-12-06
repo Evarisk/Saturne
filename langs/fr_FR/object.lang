@@ -51,7 +51,6 @@ ValidatePendingSignature = Validé (en attente de signature)
 Locked                   = Verrouillé
 Archived                 = Archivé
 Expired                  = Expiré
-Classified               = Classifié
 
 # Button - Bouton
 ReOpenDoli                       = Rouvrir
@@ -59,8 +58,6 @@ Sign                             = Signer
 Lock                             = Verrouiller
 Archive                          = Archiver
 Clone                            = Cloner
-NewVersion                       = Nouvelle version
-Versioning                       = Versionner
 ObjectMustBeDraft                = %s doit être au statut (brouillon)
 ObjectMustBeValidated            = %s doit être au statut (validé)
 ObjectMustBeLocked               = %s doit être au statut (verrouillé)
