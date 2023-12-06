@@ -36,9 +36,9 @@ if (!empty($signatories) || (empty($signatories) && $object->status == $object::
 
     print '<tr class="liste_titre">';
     print '<td>' . img_picto('', 'company') . ' ' . $langs->trans('ThirdParty') . '</td>';
-    print '<td>' . img_picto('', 'user') . ' ' . $langs->trans('User') . ' | ' . img_picto('', 'contact') . ' ' . $langs->trans('Contacts') . '</td>';
+    print '<td class="minwidth300 widthcentpercentminusx">' . img_picto('', 'user') . ' ' . $langs->trans('User') . ' | ' . img_picto('', 'contact') . ' ' . $langs->trans('Contacts') . '</td>';
     if ($attendantTableMode == 'simple') {
-        print '<td class="center ' . ($conf->browser->layout != 'classic' ? 'hidden': '') . '">' . $langs->trans('Role') . '</td>';
+        print '<td class="center ' . ($conf->browser->layout != 'classic' && $object->status > $object::STATUS_DRAFT ? 'hidden': '') . '">' . $langs->trans('Role') . '</td>';
     }
     print '<td class="center">' . $langs->trans('SignatureLink') . '</td>';
     print '<td class="center">' . $langs->trans('SendMailDate') . '</td>';
@@ -95,7 +95,7 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
             }
         }
         if ($attendantTableMode == 'simple') {
-            print '</td><td class="center ' . ($conf->browser->layout != 'classic' ? 'hidden': '') . '">';
+            print '</td><td class="center ' . ($conf->browser->layout != 'classic' && $object->status > $object::STATUS_DRAFT ? 'hidden': '') . '">';
             print $langs->transnoentities($element->role);
         }
         print '</td><td class="center copy-signatureurl-container">';
