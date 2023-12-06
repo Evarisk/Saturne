@@ -71,8 +71,7 @@ AllSignatoriesMustHaveSigned     = Tous les participants doivent avoir signé po
 ObjectMustBeValidatedToSendEmail = %s doit être au statut (validé) pour envoyer un email
 ObjectMustBeLockedToSendEmail    = %s doit être au statut (verrouillé) pour envoyer un email
 ObjectMustBeLockedToArchive      = %s doit être au statut (verrouillé) et le document généré afin de pouvoir l'archiver
-ObjectMustBeClassifiedToOpen     = %s doit être au statut (classifié) afin de pouvoir l'ouvrir de nouveau
-ObjectMustBeValidatedToVersion  = %s doit être au status (validé) pour la versionner et générer un document
+ObjectMustBeValidatedToVersion   = %s doit être au status (validé) pour la versionner et générer un document
 
 # Confirm box - Boite de confirmation
 ValidateObject          = Valider %s
@@ -89,9 +88,8 @@ RemoveFileObject        = Supprimer le document
 ConfirmRemoveFileObject = Êtes-vous sûr de vouloir <b>supprimer</b> le document %s ?<br><b> Cette action est irréversible. Le document sera définitivement supprimé. </b>
 ArchiveObject           = Archiver %s
 ConfirmArchiveObject    = Êtes-vous sûr de vouloir archiver %s ?
-VersionObject           = Versionner %s
-ConfirmVersionObject    = Êtes-vous sûr de vouloir versionner %s ?
 CloneCategories         = Cloner les tags/catégories ?
+ClonePhotos             = Cloner les photos ?
 
 # Data - Donnée
 ActionsOnObject = Événements sur %s
