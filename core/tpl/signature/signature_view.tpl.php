@@ -17,7 +17,7 @@ if (empty($element->signature) && ($object->status == $object::STATUS_VALIDATED 
 
 <div class="modal-signature" value="<?php echo $element->id ?>">
     <input type="hidden" name="token" value="<?php echo newToken(); ?>">
-    <div class="wpeo-modal modal-signature modal-active" id="modal-signature<?php echo $element->id ?>">
+    <div class="wpeo-modal modal-signature" id="modal-signature<?php echo $element->id ?>">
         <div class="modal-container wpeo-modal-event">
             <!-- Modal-Header-->
             <div class="modal-header">
