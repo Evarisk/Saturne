@@ -71,7 +71,6 @@ AllSignatoriesMustHaveSigned     = Tous les participants doivent avoir signé po
 ObjectMustBeValidatedToSendEmail = %s doit être au statut (validé) pour envoyer un email
 ObjectMustBeLockedToSendEmail    = %s doit être au statut (verrouillé) pour envoyer un email
 ObjectMustBeLockedToArchive      = %s doit être au statut (verrouillé) et le document généré afin de pouvoir l'archiver
-ObjectMustBeValidatedToVersion   = %s doit être au status (validé) pour la versionner et générer un document
 
 # Confirm box - Boite de confirmation
 ValidateObject          = Valider %s
