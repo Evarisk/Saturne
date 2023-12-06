@@ -544,106 +544,118 @@ class SaturneDocumentModel extends CommonDocGenerator
     {
         global $conf, $moduleNameLowerCase, $langs;
 
-        // Get attendants.
-        $foundTagForLines = 1;
-        try {
-            $listLines = $odfHandler->setSegment('attendants');
-        } catch (OdfException $e) {
-            // We may arrive here if tags for lines not present into template.
-            $foundTagForLines = 0;
-            $listLines        = '';
-            dol_syslog($e->getMessage());
-        }
-
-        if ($foundTagForLines) {
-            if (!empty($moreParam['object'])) {
-                $signatory        = new SaturneSignature($this->db, $this->module, $moreParam['object']->element);
-                $signatoriesArray = $signatory->fetchSignatories($moreParam['object']->id, $moreParam['object']->element);
-                if (!empty($signatoriesArray) && is_array($signatoriesArray)) {
-                    $nbAttendant = 0;
-                    $tempDir     = $conf->$moduleNameLowerCase->multidir_output[$moreParam['object']->entity ?? 1] . '/temp/';
-                    if (empty($moreParam['excludeAttendantsRole'])) {
-                        $moreParam['excludeAttendantsRole'] = [];
+        $signatoryRoles = [];
+        if (!empty($moreParam['object'])) {
+            $signatory        = new SaturneSignature($this->db, $this->module, $moreParam['object']->element);
+            $signatoriesArray = $signatory->fetchSignatories($moreParam['object']->id, $moreParam['object']->element);
+            if (!empty($signatoriesArray) && is_array($signatoriesArray)) {
+                foreach($signatoriesArray as $signatory) {
+                    if (!array_key_exists($signatory->role, $signatoryRoles)) {
+                        $signatoryRoles[$signatory->role] = [];
                     }
-                    foreach ($signatoriesArray as $objectSignatory) {
-                        if (!in_array($objectSignatory->role, $moreParam['excludeAttendantsRole'])) {
-                            $tmpArray['attendant_number']    = ++$nbAttendant;
-                            $tmpArray['attendant_lastname']  = strtoupper($objectSignatory->lastname);
-                            $tmpArray['attendant_firstname'] = dol_strlen($objectSignatory->firstname) > 0 ? ucfirst($objectSignatory->firstname) : '';
-                            switch ($objectSignatory->attendance) {
-                                case 1:
-                                    $attendance = $outputLangs->trans('Delay');
-                                    break;
-                                case 2:
-                                    $attendance = $outputLangs->trans('Absent');
-                                    break;
-                                default:
-                                    $attendance = $outputLangs->transnoentities('Present');
-                                    break;
-                            }
-                            switch ($objectSignatory->element_type) {
-                                case 'user':
-                                    $user    = new User($this->db);
-                                    $societe = new Societe($this->db);
-                                    $user->fetch($objectSignatory->element_id);
-                                    $tmpArray['attendant_job'] = $user->job;
-                                    if ($user->fk_soc > 0) {
-                                        $societe->fetch($user->fk_soc);
-                                        $tmpArray['attendant_company'] = $societe->name;
-                                    } else {
-                                        $tmpArray['attendant_company'] = $conf->global->MAIN_INFO_SOCIETE_NOM;
-                                    }
-                                    break;
-                                case 'socpeople':
-                                    $contact = new Contact($this->db);
-                                    $societe = new Societe($this->db);
-                                    $contact->fetch($objectSignatory->element_id);
-                                    $tmpArray['attendant_job'] = $contact->poste;
-                                    if ($contact->fk_soc > 0) {
-                                        $societe->fetch($contact->fk_soc);
-                                        $tmpArray['attendant_company'] = $societe->name;
-                                    } else {
-                                        $tmpArray['attendant_company'] = $conf->global->MAIN_INFO_SOCIETE_NOM;
-                                    }
-                                    break;
-                                default:
-                                    $tmpArray['attendant_job']     = '';
-                                    $tmpArray['attendant_company'] = '';
-                                    break;
-                            }
-                            $tmpArray['attendant_role']           = $outputLangs->transnoentities($objectSignatory->role);
-                            $tmpArray['attendant_signature_date'] = dol_print_date($objectSignatory->signature_date, 'dayhour', 'tzuser');
-                            $tmpArray['attendant_attendance']     = $attendance;
-                            if (dol_strlen($objectSignatory->signature) > 0 && $objectSignatory->signature != $langs->transnoentities('FileGenerated')) {
-                                $confSignatureName = dol_strtoupper($this->module) . '_SHOW_SIGNATURE_SPECIMEN';
-                                if ($moreParam['specimen'] == 0 || ($moreParam['specimen'] == 1 && $conf->global->$confSignatureName == 1)) {
-                                    $encodedImage = explode(',', $objectSignatory->signature)[1];
-                                    $decodedImage = base64_decode($encodedImage);
-                                    file_put_contents($tempDir . 'signature' . $objectSignatory->id . '.png', $decodedImage);
-                                    $tmpArray['attendant_signature'] = $tempDir . 'signature' . $objectSignatory->id . '.png';
-                                } else {
-                                    $tmpArray['attendant_signature'] = '';
-                                }
-                            } else {
-                                $tmpArray['attendant_signature'] = '';
-                            }
-                            $this->setTmpArrayVars($tmpArray, $listLines, $outputLangs);
-                            dol_delete_file($tempDir . 'signature' . $objectSignatory->id . '.png');
-                        }
-                    }
-                } else {
-                    $tmpArray['attendant_number']         = '';
-                    $tmpArray['attendant_lastname']       = '';
-                    $tmpArray['attendant_firstname']      = '';
-                    $tmpArray['attendant_job']            = '';
-                    $tmpArray['attendant_company']        = '';
-                    $tmpArray['attendant_role']           = '';
-                    $tmpArray['attendant_signature_date'] = '';
-                    $tmpArray['attendant_attendance']     = '';
-                    $tmpArray['attendant_signature']      = '';
-                    $this->setTmpArrayVars($tmpArray, $listLines, $outputLangs);
+                    $signatoryRoles[$signatory->role][] = $signatory;
                 }
-                $odfHandler->mergeSegment($listLines);
+            }
+
+            $moreParam['excludeAttendantsRole'] = (empty($moreParam['excludeAttendantsRole']) ? [] : $moreParam['excludeAttendantsRole']);
+
+            foreach($signatoryRoles as $role => $signatoryObject) {
+                if (!in_array($role, $moreParam['excludeAttendantsRole'])) {
+                    // Get attendants.
+                    $role             = dol_strtolower($role);
+                    $foundTagForLines = 1;
+                    try {
+                        $listLines = $odfHandler->setSegment($role);
+                    } catch (OdfException $e) {
+                        // We may arrive here if tags for lines not present into template.
+                        $foundTagForLines = 0;
+                        $listLines        = '';
+                        dol_syslog($e->getMessage());
+                    }
+
+                    if ($foundTagForLines) {
+                        $nbAttendant = 0;
+                        $tempDir     = $conf->$moduleNameLowerCase->multidir_output[$moreParam['object']->entity ?? 1] . '/temp/';
+                        if (!empty($signatoryObject) && is_array($signatoryObject)) {
+                            foreach ($signatoryObject as $objectSignatory) {
+                                $tmpArray[$role . '_number']    = ++$nbAttendant;
+                                $tmpArray[$role . '_lastname']  = dol_strtoupper($objectSignatory->lastname);
+                                $tmpArray[$role . '_firstname'] = dol_strlen($objectSignatory->firstname) > 0 ? ucfirst($objectSignatory->firstname) : '';
+                                switch ($objectSignatory->attendance) {
+                                    case 1:
+                                        $attendance = $outputLangs->trans('Delay');
+                                        break;
+                                    case 2:
+                                        $attendance = $outputLangs->trans('Absent');
+                                        break;
+                                    default:
+                                        $attendance = $outputLangs->transnoentities('Present');
+                                        break;
+                                }
+                                switch ($objectSignatory->element_type) {
+                                    case 'user':
+                                        $user    = new User($this->db);
+                                        $societe = new Societe($this->db);
+                                        $user->fetch($objectSignatory->element_id);
+                                        $tmpArray[$role . '_job'] = $user->job;
+                                        if ($user->fk_soc > 0) {
+                                            $societe->fetch($user->fk_soc);
+                                            $tmpArray[$role . '_company'] = $societe->name;
+                                        } else {
+                                            $tmpArray[$role . '_company'] = $conf->global->MAIN_INFO_SOCIETE_NOM;
+                                        }
+                                        break;
+                                    case 'socpeople':
+                                        $contact = new Contact($this->db);
+                                        $societe = new Societe($this->db);
+                                        $contact->fetch($objectSignatory->element_id);
+                                        $tmpArray[$role . '_job'] = $contact->poste;
+                                        if ($contact->fk_soc > 0) {
+                                            $societe->fetch($contact->fk_soc);
+                                            $tmpArray[$role . '_company'] = $societe->name;
+                                        } else {
+                                            $tmpArray[$role . '_company'] = $conf->global->MAIN_INFO_SOCIETE_NOM;
+                                        }
+                                        break;
+                                    default:
+                                        $tmpArray[$role . '_job']     = '';
+                                        $tmpArray[$role . '_company'] = '';
+                                        break;
+                                }
+                                $tmpArray[$role . '_role']           = $outputLangs->transnoentities($objectSignatory->role);
+                                $tmpArray[$role . '_signature_date'] = dol_print_date($objectSignatory->signature_date, 'dayhour', 'tzuser');
+                                $tmpArray[$role . '_attendance']     = $attendance;
+                                if (dol_strlen($objectSignatory->signature) > 0 && $objectSignatory->signature != $langs->transnoentities('FileGenerated')) {
+                                    $confSignatureName = dol_strtoupper($this->module) . '_SHOW_SIGNATURE_SPECIMEN';
+                                    if ($moreParam['specimen'] == 0 || ($moreParam['specimen'] == 1 && $conf->global->$confSignatureName == 1)) {
+                                        $encodedImage = explode(',', $objectSignatory->signature)[1];
+                                        $decodedImage = base64_decode($encodedImage);
+                                        file_put_contents($tempDir . 'signature' . $objectSignatory->id . '.png', $decodedImage);
+                                        $tmpArray[$role . '_signature'] = $tempDir . 'signature' . $objectSignatory->id . '.png';
+                                    } else {
+                                        $tmpArray[$role . '_signature'] = '';
+                                    }
+                                } else {
+                                    $tmpArray[$role . '_signature'] = '';
+                                }
+                                $this->setTmpArrayVars($tmpArray, $listLines, $outputLangs);
+                                dol_delete_file($tempDir . 'signature' . $objectSignatory->id . '.png');
+                            }
+                        } else {
+                            $tmpArray[$role . '_number']         = '';
+                            $tmpArray[$role . '_lastname']       = '';
+                            $tmpArray[$role . '_firstname']      = '';
+                            $tmpArray[$role . '_job']            = '';
+                            $tmpArray[$role . '_company']        = '';
+                            $tmpArray[$role . '_role']           = '';
+                            $tmpArray[$role . '_signature_date'] = '';
+                            $tmpArray[$role . '_attendance']     = '';
+                            $tmpArray[$role . '_signature']      = '';
+                            $this->setTmpArrayVars($tmpArray, $listLines, $outputLangs);
+                        }
+                    $odfHandler->mergeSegment($listLines);
+                    }
+                }
             }
         }
     }
