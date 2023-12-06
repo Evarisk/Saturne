@@ -75,7 +75,7 @@ if ($action == 'generate_QRCode') {
     imagepng($imageData, $file);
 
     setEventMessage('SavedConfig');
-    header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=EasyCRM');
+    header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
     exit;
 }
 
@@ -83,10 +83,10 @@ if ($action == 'generate_QRCode') {
  * View
  */
 
-$title    = $langs->trans('ModuleSetup', $moduleName);
-$help_url = 'FR:Module_' . $moduleName;
+$title   = $langs->trans('ModuleSetup', $moduleName);
+$helpUrl = 'FR:Module_' . $moduleName;
 
-saturne_header(0, '', $title, $help_url);
+saturne_header(0, '', $title, $helpUrl);
 
 // Subheader
 $linkBack = '<a href="' . ($backtopage ?: DOL_URL_ROOT . '/admin/modules.php?restore_lastsearch_values=1') . '">' . $langs->trans('BackToModuleList') . '</a>';
@@ -100,10 +100,10 @@ print dol_get_fiche_head($head, 'pwa', $title, -1, $moduleNameLowerCase . '_colo
 // PWA QR Code generation
 print load_fiche_titre($langs->transnoentities('PWAQRCodeGenerationManagement'), '', '');
 
-print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?module_name=EasyCRM">';
+print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '">';
 print '<input type="hidden" name="token" value="' . newToken() . '">';
 print '<input type="hidden" name="action" value="generate_QRCode">';
-print '<input hidden name="urlToEncode" value="'. dol_buildpath('custom/' . $moduleNameLowerCase . '/view/frontend/' . $startUrl . '?source=pwa', 3) . '">';
+print '<input hidden name="urlToEncode" value="' . dol_buildpath('custom/' . $moduleNameLowerCase . '/view/frontend/' . $startUrl . '?source=pwa', 3) . '">';
 
 print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
