@@ -104,6 +104,18 @@ EnableSaturne           = Please activate the Saturn module to access this page
 
 
 #
+# PWA - Progressive Web App
+#
+
+# Data - Donnée
+PWA                           = Progressive Web App
+PWAQRCodeGenerationManagement = Managing the generation of PWA QRCodes
+GeneratePWAQRCode             = PWA QRCode generation
+GeneratePWAQRCodeDescription  = This option generates the QRCode for the progressive web application
+
+
+
+#
 # Index
 #
 

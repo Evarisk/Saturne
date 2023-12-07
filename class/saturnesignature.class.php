@@ -146,9 +146,9 @@ class SaturneSignature extends SaturneObject
     public $status;
 
     /**
-     * @var string Role
+     * @var string|null Role
      */
-    public string $role;
+    public ?string $role;
 
     /**
      * @var string Firstname
@@ -196,9 +196,9 @@ class SaturneSignature extends SaturneObject
     public int $element_id;
 
     /**
-     * @var string Element type
+     * @var string|null Element type
      */
-    public string $element_type;
+    public ?string $element_type;
 
     /**
      * @var string|null Module name
