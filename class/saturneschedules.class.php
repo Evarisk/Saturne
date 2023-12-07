@@ -93,9 +93,9 @@ class SaturneSchedules extends SaturneObject
     public $date_creation;
 
     /**
-     * @var int Timestamp
+     * @var int|string Timestamp
      */
-    public int $tms;
+    public $tms;
 
     /**
      * @var int Status
