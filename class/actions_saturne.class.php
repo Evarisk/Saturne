@@ -210,8 +210,103 @@ class ActionsSaturne
 
 				<?php
 			}
+        } elseif (preg_match('/categorycard/', $parameters['context']) && preg_match('/viewcat.php/', $_SERVER['PHP_SELF'])) {
+            require_once __DIR__ . '/../../saturne/lib/object.lib.php';
 
-		}
+            $id   = GETPOST('id');
+            $type = GETPOST('type');
+
+            // Load variable for pagination
+            $limit     = GETPOST('limit', 'int') ?GETPOST('limit', 'int') : $conf->liste_limit;
+            $sortfield = GETPOST('sortfield', 'aZ09comma');
+            $sortorder = GETPOST('sortorder', 'aZ09comma');
+            $page      = GETPOSTISSET('pageplusone') ? (GETPOST('pageplusone') - 1) : GETPOST("page", 'int');
+            if (empty($page) || $page == -1) {
+                $page = 0;
+            }     // If $page is not defined, or '' or -1 or if we click on clear filters or if we select empty mass action
+            $offset = $limit * $page;
+
+            if ($type == 'ticket') {
+                require_once DOL_DOCUMENT_ROOT . '/ticket/class/ticket.class.php';
+            } else {
+                require_once __DIR__ . '/' . $type . '.class.php';
+            }
+            $classname = ucfirst($type);
+            $object    = new $classname($this->db);
+
+            $sessions      = $object->fetchAll('', '', 0, 0, ['customsql' => 't.type = ' . "'" . $type . "'"]);
+            $sessionArrays = [];
+            if (is_array($sessions) && !empty($sessions)) {
+                foreach ($sessions as $session) {
+                    $sessionArrays[$session->id] = $session->ref;
+                }
+            }
+
+            $category = new Categorie($this->db);
+            $category->fetch($id);
+
+            $sessionCategories = $category->getObjectsInCateg($object->element, 0, $limit, $offset);
+            $out = '<br>';
+
+            $out .= '<form method="post" action="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&type=' . $type . '">';
+            $out .= '<input type="hidden" name="token" value="' . newToken() . '">';
+            $out .= '<input type="hidden" name="action" value="addintocategory">';
+
+            $out .= '<table class="noborder centpercent">';
+            $out .= '<tr class="liste_titre"><td>';
+            $out .= $langs->trans('AddObjectIntoCategory') . ' ';
+            $out .= $form::selectarray('element_id', $sessionArrays, '', 1);
+            $out .= '<input type="submit" class="button buttongen" value="' . $langs->trans('ClassifyInCategory') . '"></td>';
+            $out .= '</tr>';
+            $out .= '</table>';
+            $out .= '</form>';
+
+            $out .= '<br>';
+
+            $out .= load_fiche_titre($langs->transnoentities($classname), '', 'object_' . $object->picto);
+            $out .= '<table class="noborder centpercent">';
+            $out .= '<tr class="liste_titre"><td colspan="3">' . $langs->trans('Ref') . '</td></tr>';
+
+            if (is_array($sessionCategories) && !empty($sessionCategories)) {
+                // Form to add record into a category
+                if (count($sessionCategories) > 0) {
+                    $i = 0;
+                    foreach ($sessionCategories as $session) {
+                        $i++;
+                        if ($i > $limit) break;
+
+                        $out .= '<tr class="oddeven">';
+                        $out .= '<td class="nowrap">';
+                        $session->picto   = $object->picto;
+                        $session->element = $type;
+                        $out .= $session->getNomUrl(1);
+                        $out .= '</td>';
+                        // Link to delete from category
+                        $out .= '<td class="right">';
+                        if ($user->rights->categorie->creer) {
+                            $out .= '<a href="' . $_SERVER['PHP_SELF'] . '?action=delintocategory&id=' . $id . '&type=' . $type . '&element_id=' . $session->id . '&token=' . newToken() . '">';
+                            $out .= $langs->trans('DeleteFromCat');
+                            $out .= img_picto($langs->trans('DeleteFromCat'), 'unlink', '', false, 0, 0, '', 'paddingleft');
+                            $out .= '</a>';
+                        }
+                        $out .= '</td>';
+                        $out .= '</tr>';
+                    }
+                } else {
+                    $out .= '<tr class="oddeven"><td colspan="2" class="opacitymedium">' . $langs->trans('ThisCategoryHasNoItems') . '</td></tr>';
+                }
+            } else {
+                $out .= '<tr class="oddeven"><td colspan="2" class="opacitymedium">' . $langs->trans('ThisCategoryHasNoItems') . '</td></tr>';
+            }
+
+            $out .= '</table>'; ?>
+
+            <script>
+                jQuery('.fichecenter').last().after(<?php echo json_encode($out); ?>)
+            </script>
+            <?php
+        }
+
 		if (!$error) {
 			$this->results   = array('myreturn' => 999);
 			return 0; // or return 1 to replace standard code

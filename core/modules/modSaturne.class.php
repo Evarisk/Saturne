@@ -120,7 +120,9 @@ class modSaturne extends DolibarrModules
             'hooks' => [
                 'saturnepublicinterface',
                 'emailtemplates',
-				'usercard'
+				'usercard',
+                'category',
+                'categoryindex'
             ],
             // Set this to 1 if features of module are opened to external users
             'moduleforexternal' => 0,
