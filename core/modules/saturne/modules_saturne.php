@@ -545,7 +545,7 @@ class SaturneDocumentModel extends CommonDocGenerator
         global $conf, $moduleNameLowerCase, $langs;
 
         $signatoryRoles = [];
-        if (!empty($moreParam['object'])) {
+        if (!empty($moreParam['object']) && class_exists('SaturneSignature')) {
             $signatory        = new SaturneSignature($this->db, $this->module, $moreParam['object']->element);
             $signatoriesArray = $signatory->fetchSignatories($moreParam['object']->id, $moreParam['object']->element);
             if (!empty($signatoriesArray) && is_array($signatoriesArray)) {
