@@ -170,6 +170,7 @@ WithKindRegards = Bien cordialement
 ConfigEmail     = Cliquez sur ce lien pour vous rendre à la configuration des emails
 
 
+
 #
 # Modal - Modal
 #
@@ -182,6 +183,7 @@ CloseModal = Fermer
 #
 # Certificate - Certificat
 #
+
 # Data - Donnée
 FkElement              = Élément lié
 ElementType            = Type d'élément
@@ -199,6 +201,7 @@ checkDateEndJobComment = Vérification et mise à jour du statut des certificats
 # Data - Donnée
 EntityNumber = Numéro de l'entité
 EntityName   = Nom de l'entité
+
 
 
 #
