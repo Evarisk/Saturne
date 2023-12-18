@@ -22,20 +22,22 @@
  */
 
 /**
- * Load list of objects in memory from the database.
+ * Load list of objects in memory from the database
  *
- * @param  string     $className         Object className
- * @param  string     $sortorder         Sort Order
- * @param  string     $sortfield         Sort field
- * @param  int        $limit             Limit
- * @param  int        $offset            Offset
- * @param  array      $filter            Filter array. Example array('field'=>'value', 'customurl'=>...)
- * @param  string     $filtermode        Filter mode (AND/OR)
- * @param  bool       $manageExtraFields Option for manage extrafields with LEFT JOIN SQL
- * @return int|array                     0 < if KO, array of pages if OK
+ * @param  string     $className             Object className
+ * @param  string     $sortorder             Sort Order
+ * @param  string     $sortfield             Sort field
+ * @param  int        $limit                 Limit
+ * @param  int        $offset                Offset
+ * @param  array      $filter                Filter array. Example array('field'=>'value', 'customurl'=>...)
+ * @param  string     $filtermode            Filter mode (AND/OR)
+ * @param  bool       $extraFieldManagement  Option for manage extrafields with LEFT JOIN SQL
+ * @param  bool       $multiEntityManagement Option for manage multi entities with WHERE
+ * @param  bool       $categoryManagement    Option for manage categories with LEFT JOIN SQL
+ * @return int|array                         0 < if KO, array of pages if OK
  * @throws Exception
  */
-function saturne_fetch_all_object_type(string $className = '', string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = [], string $filtermode = 'AND', $manageExtraFields = false, $multiEntityManagement = true)
+function saturne_fetch_all_object_type(string $className = '', string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = [], string $filtermode = 'AND', bool $extraFieldManagement = false, bool $multiEntityManagement = true, bool $categoryManagement = false)
 {
     dol_syslog(__METHOD__, LOG_DEBUG);
 
@@ -46,7 +48,7 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
     $records      = [];
     $optionsArray = [];
 
-    if ($manageExtraFields) {
+    if ($extraFieldManagement) {
         require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
 
         $extraFields = new ExtraFields($db);
@@ -59,7 +61,7 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
 	if (strstr($objectFields, 't.fk_prospectlevel')) {
 		$objectFields = preg_replace('/t.fk_prospectlevel,/','', $objectFields);
 	}
-    if (is_array($optionsArray) && !empty($optionsArray) && $manageExtraFields) {
+    if (is_array($optionsArray) && !empty($optionsArray) && $extraFieldManagement) {
         foreach ($optionsArray as $name => $label) {
             if (empty($extrafields->attributes[$object->table_element]['type'][$name]) || $extrafields->attributes[$object->table_element]['type'][$name] != 'separate') {
                 $objectFields .= ", eft." . $name;
@@ -69,8 +71,13 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
     $sql = 'SELECT ';
     $sql .= $objectFields;
     $sql .= ' FROM `' . MAIN_DB_PREFIX . $object->table_element . '` as t';
-    if ($manageExtraFields) {
+    if ($extraFieldManagement) {
         $sql .= ' LEFT JOIN `' . MAIN_DB_PREFIX . $object->table_element . '_extrafields` as eft ON t.rowid = eft.fk_object';
+    }
+    if (isModEnabled('categorie') && $categoryManagement) {
+        require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+
+        $sql .= Categorie::getFilterJoinQuery($object->element, 't.rowid');
     }
     if ($multiEntityManagement && isset($object->ismultientitymanaged) && $object->ismultientitymanaged == 1) {
         $sql .= ' WHERE entity IN (' . getEntity($object->table_element) . ')';
@@ -117,7 +124,7 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
             $record = new $className($db);
             $record->setVarsFromFetchObj($obj);
 
-            if (is_array($optionsArray) && !empty($optionsArray) && $manageExtraFields) {
+            if (is_array($optionsArray) && !empty($optionsArray) && $extraFieldManagement) {
                 foreach ($optionsArray as $key => $value) {
                     $record->array_options['options_' . $key] = $obj->$key;
                 }
