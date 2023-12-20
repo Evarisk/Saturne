@@ -199,7 +199,7 @@ checkDateEndJobComment = Vérification et mise à jour du statut des certificats
 # Data - Donnée
 EntityNumber = Numéro de l'entité
 EntityName   = Nom de l'entité
-ThirdParty   = Tiers
+
 
 #
 # Tools - Outils

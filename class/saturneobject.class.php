@@ -662,11 +662,10 @@ abstract class SaturneObject extends CommonObject
 	{
 		global $conf, $db, $langs, $mysoc;
 
-		$langs->load('other');
+        saturne_load_langs(['other', 'companies']);
 
-		$user      = new User($db);
-		$now       = dol_now();
-        $statusVal = [-1 => 'Deleted', 0 => 'StatusDraft', 1 => 'Validated', 2 => 'Locked', 3 => 'Archived'];
+		$user = new User($db);
+		$now  = dol_now();
 
 		$ret  = $langs->trans('Ref') . ' : ' . $object->ref . '</br>';
         $ret .= $langs->trans('TechnicalID') . ' : ' . $object->id . '<br>';
@@ -700,7 +699,7 @@ abstract class SaturneObject extends CommonObject
 		}
         $ret .= (isset($object->note_public) && dol_strlen($object->note_public) > 0 ? $langs->transnoentities('NotePublic') . ' : ' . $object->note_public . '</br>' : '');
         $ret .= (isset($object->note_private) && dol_strlen($object->note_private) > 0 ? $langs->transnoentities('NotePrivate') . ' : ' . $object->note_private . '</br>' : '');
-        $ret .= (isset($object->status) && dol_strlen($object->status) > 0 ? $langs->transnoentities('Status') . ' : ' . $langs->transnoentities($statusVal[$object->status]) . '<br>' : '');
+        $ret .= (isset($object->status) && dol_strlen($object->status) > 0 ? $langs->transnoentities('Status') . ' : ' . $langs->transnoentities($object->fields['status']['arrayofkeyval'][$object->status]) . '<br>' : '');
 
 		return $ret;
 	}
