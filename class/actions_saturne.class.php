@@ -210,11 +210,15 @@ class ActionsSaturne
 
 				<?php
 			}
-        } elseif (preg_match('/categorycard/', $parameters['context']) && preg_match('/viewcat.php/', $_SERVER['PHP_SELF']) && !preg_match('/dao/', $parameters['context'])) {
+        } elseif (preg_match('/categorycard/', $parameters['context']) && preg_match('/viewcat.php/', $_SERVER['PHP_SELF'])) {
             require_once __DIR__ . '/../../saturne/lib/object.lib.php';
 
             $id   = GETPOST('id');
             $type = GETPOST('type');
+
+            if ($type == 'meeting' || $type == 'audit' || $type == 'trainingsession' || !empty(saturne_get_objects_metadata($type))) {
+                return 0;
+            }
 
             // Load variable for pagination
             $limit     = GETPOST('limit', 'int') ?GETPOST('limit', 'int') : $conf->liste_limit;
