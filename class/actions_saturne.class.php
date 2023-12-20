@@ -21,6 +21,8 @@
  * \brief   Saturne hook overload.
  */
 
+require_once __DIR__ . '/../../saturne/lib/object.lib.php';
+
 /**
  * Class ActionsSaturne
  */
@@ -211,8 +213,6 @@ class ActionsSaturne
 				<?php
 			}
         } elseif (preg_match('/categorycard/', $parameters['context']) && preg_match('/viewcat.php/', $_SERVER['PHP_SELF'])) {
-            require_once __DIR__ . '/../../saturne/lib/object.lib.php';
-
             $id   = GETPOST('id');
             $type = GETPOST('type');
 
@@ -353,8 +353,34 @@ class ActionsSaturne
 					}
 				}
 			}
+        } elseif (preg_match('/categorycard/', $parameters['context'])) {
+            global $langs;
 
-		}
+            $elementId = GETPOST('element_id');
+            $type      = GETPOST('type');
+
+            $objects   = saturne_fetch_all_object_type($type);
+            $newObject = $objects[$elementId];
+
+            if (GETPOST('action') == 'addintocategory') {
+                $result = $object->add_type($newObject, $type);
+                if ($result >= 0) {
+                    setEventMessages($langs->trans("WasAddedSuccessfully", $newObject->ref), array());
+                } else {
+                    if ($object->error == 'DB_ERROR_RECORD_ALREADY_EXISTS') {
+                        setEventMessages($langs->trans("ObjectAlreadyLinkedToCategory"), array(), 'warnings');
+                    } else {
+                        setEventMessages($object->error, $object->errors, 'errors');
+                    }
+                }
+            } elseif (GETPOST('action') == 'delintocategory') {
+                $result = $object->del_type($newObject, $type);
+                if ($result < 0) {
+                    dol_print_error('', $object->error);
+                }
+                $action = '';
+            }
+        }
 		return 0;
 	}
 }
