@@ -103,7 +103,7 @@ print load_fiche_titre($langs->transnoentities('PWAQRCodeGenerationManagement'),
 print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '">';
 print '<input type="hidden" name="token" value="' . newToken() . '">';
 print '<input type="hidden" name="action" value="generate_QRCode">';
-print '<input hidden name="urlToEncode" value="' . dol_buildpath('custom/' . $moduleNameLowerCase . '/view/frontend/' . $startUrl . '?source=pwa', 3) . '">';
+print '<input hidden name="urlToEncode" value="' . $startUrl . '">';
 
 print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
