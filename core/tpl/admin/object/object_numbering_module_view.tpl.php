@@ -2,7 +2,9 @@
 /*
  *  Numbering module
  */
-print load_fiche_titre($langs->trans('NumberingModule'), '', '');
+
+$numberingModuleLabel = str_contains($object->element, 'det') ? 'NumberingModuleDet' : 'NumberingModule';
+print load_fiche_titre($langs->trans($numberingModuleLabel), '', '');
 
 print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
