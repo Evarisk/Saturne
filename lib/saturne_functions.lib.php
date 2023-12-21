@@ -443,3 +443,51 @@ function saturne_fetch_dictionary(string $tableName, string $sortOrder = 'ASC', 
 		return -1;
 	}
 }
+
+/**
+ * Show category image
+ *
+ * @param  Categorie   $category Category object
+ * @param  int         $noPrint  0 = Print option, 1 = output in string
+ * @param  string      $moreCSS  More css
+ * @return string|void
+ */
+function saturne_show_category_image(Categorie $category, int $noPrint = 0, string $moreCSS = '')
+{
+    global $conf, $langs;
+
+    $out       = '';
+    $maxWidth  = 50;
+    $maxHeight = 50;
+
+    $categoryPhotoDir = get_exdir($category->id, 2, 0, 0, $category, 'category') . $category->id . '/photos/';
+    $dir              = $conf->categorie->multidir_output[$category->entity ?? 1] . '/' . $categoryPhotoDir;
+
+    $photos = $category->liste_photos($dir);
+    if (is_array($photos) && count($photos)) {
+        foreach ($photos as $photo) {
+            if ($photo['photo_vignette']) {
+                $filename = $photo['photo_vignette'];
+            } else {
+                $filename = $photo['photo'];
+            }
+
+            // Image size
+            $category->get_image_size($dir . $filename);
+            $imgWidth  = ($category->imgWidth < $maxWidth) ? $category->imgWidth : $maxWidth;
+            $imgHeight = ($category->imgHeight < $maxHeight) ? $category->imgHeight : $maxHeight;
+
+            if ($noPrint) {
+                $out = '<div><img width="' . $imgWidth . '" height="' . $imgHeight . '" class="photo ' . $moreCSS . '" src="' . DOL_URL_ROOT . '/custom/saturne/utils/viewimage.php?modulepart=category&entity=' . $category->entity . '&file=' . urlencode($categoryPhotoDir . $filename) . '" value="' . $category->id . '" alt=""></div>';
+            } else {
+                print '<div><img width="' . $imgWidth . '" height="' . $imgHeight . '" class="photo ' . $moreCSS . '" src="' . DOL_URL_ROOT . '/custom/saturne/utils/viewimage.php?modulepart=category&entity=' . $category->entity . '&file=' . urlencode($categoryPhotoDir . $filename) . '" value="' . $category->id . '" alt=""></div>';
+            }
+        }
+    } else {
+        print '<div><img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $moreCSS . '" src="' . DOL_URL_ROOT . '/public/theme/common/nophoto.png" title="' . $langs->trans('NoPhotoYet') . '" value="' . $category->id . '" alt=""></div>';
+    }
+
+    if ($noPrint) {
+        return $out;
+    }
+}
