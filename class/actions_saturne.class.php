@@ -21,6 +21,7 @@
  * \brief   Saturne hook overload.
  */
 
+// Load Saturne Libraries
 require_once __DIR__ . '/../../saturne/lib/object.lib.php';
 
 /**
@@ -216,6 +217,7 @@ class ActionsSaturne
             $id   = GETPOST('id');
             $type = GETPOST('type');
 
+            // Temporary exclude DoliMeet and native Dolibarr objects
             if ($type == 'meeting' || $type == 'audit' || $type == 'trainingsession' || !empty(saturne_get_objects_metadata($type))) {
                 return 0;
             }
