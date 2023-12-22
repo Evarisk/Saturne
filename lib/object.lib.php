@@ -276,7 +276,7 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
  * Get list of objects and their linked class and other infos
  *
  * @param  string    $type Object type to get the metadata from
- * @return array           Array of objects with metadata
+ * @return array           Array of objects with metadata | empty array if type doesn't exist
  * @throws Exception
  */
 function saturne_get_objects_metadata(string $type = ''): array
@@ -661,7 +661,11 @@ function saturne_get_objects_metadata(string $type = ''): array
         }
     }
 
-    return dol_strlen($type) > 0 && array_key_exists($type, $objectsMetadataArray) ? $objectsMetadataArray[$type] : $objectsMetadataArray;
+    if (dol_strlen($type) > 0) {
+        return (array_key_exists($type, $objectsMetadataArray) ? $objectsMetadataArray[$type] : []);
+    } else {
+        return $objectsMetadataArray;
+    }
 }
 
 /**
