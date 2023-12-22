@@ -361,6 +361,11 @@ class ActionsSaturne
             $elementId = GETPOST('element_id');
             $type      = GETPOST('type');
 
+            // Temporary exclude DoliMeet and native Dolibarr objects
+            if ($type == 'meeting' || $type == 'audit' || $type == 'trainingsession' || !empty(saturne_get_objects_metadata($type))) {
+                return 0;
+            }
+
             $objects   = saturne_fetch_all_object_type($type);
             $newObject = $objects[$elementId];
 

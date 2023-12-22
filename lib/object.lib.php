@@ -566,6 +566,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'class_path'     => 'product/stock/class/entrepot.class.php',
             'lib_path'       => 'core/lib/stock.lib.php',
         ];
+        $objectsMetadata['warehouse'] = $objectsMetadata['entrepot'];
     }
 
     if (isModEnabled('expedition')) {
