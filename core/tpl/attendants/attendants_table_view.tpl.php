@@ -111,34 +111,13 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
         if ($object->status == $object::STATUS_VALIDATED && $element->signature == '') {
             if (dol_strlen($element->email) || dol_strlen($usertmp->email) || dol_strlen($contact->email)) {
                 print dol_print_date($element->last_email_sent_date, 'dayhour', 'tzuser');
+                require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
                 $nbEmailSent = 0;
-                // Enable caching of emails sent count actioncomm
-                require_once DOL_DOCUMENT_ROOT . '/core/lib/memory.lib.php';
-                $cacheKey = 'count_emails_sent_' . $element->id;
-                $dataRetrieved = dol_getcache($cacheKey);
-                if (!is_null($dataRetrieved)) {
-                    $nbEmailSent = $dataRetrieved;
-                } else {
-                    $sql = 'SELECT COUNT(id) as nb';
-                    $sql .= ' FROM ' . MAIN_DB_PREFIX . 'actioncomm';
-                    $sql .= ' WHERE fk_element = ' . $object->id;
-                    if ($element->element_type == 'user') {
-                        $sql .= ' AND fk_user_action = ' . $element->element_id;
-                    } else {
-                        $sql .= ' AND fk_contact = ' . $element->element_id;
-                    }
-                    $sql .= " AND code = '" . 'AC_SATURNE_SIGNATURE_PENDING_SIGNATURE' . "'";
-                    $sql .= " AND elementtype = '" . $object->element . '@' . $moduleNameLowerCase . "'";
-                    $resql = $db->query($sql);
-                    if ($resql) {
-                        $obj = $db->fetch_object($resql);
-                        $nbEmailSent = $obj->nb;
-                    } else {
-                        dol_syslog('Failed to count actioncomm ' . $db->lasterror(), LOG_ERR);
-                    }
-                    dol_setcache($cacheKey, $nbEmailSent, 120); // If setting cache fails, this is not a problem, so we do not test result.
+                $actionComm  = new ActionComm($db);
+                $actionComms = $actionComm->getActions(0, $object->id, $object->element . '@' . $moduleNameLowerCase, " AND code = 'AC_SATURNE_SIGNATURE_PENDING_SIGNATURE'");
+                if (is_array($actionComms) && !empty($actionComms)) {
+                    $nbEmailSent = count($actionComms);
                 }
-
                 print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode . '">';
                 print '<input type="hidden" name="token" value="' . newToken() . '">';
                 print '<input type="hidden" name="action" value="send_email">';
