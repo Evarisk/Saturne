@@ -216,15 +216,20 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
     }
 
     // Banner
-    $objectKey      = '';
-    $possibleKeys   = [];
     $bannerElements = ['societe', 'project'];
+    if (!empty($moreParams['bannerElement'])) {
+        $bannerElements[] = $moreParams['bannerElement'];
+    }
     foreach ($bannerElements as $bannerElement) {
+        $objectKey    = '';
+        $possibleKeys = [];
         if (isModEnabled($bannerElement)) {
             if ($bannerElement == 'societe') {
                 $possibleKeys = ['socid', 'fk_soc'];
             } elseif ($bannerElement == 'project') {
                 $possibleKeys = ['projectid', 'fk_project'];
+            } elseif ($bannerElement == $moreParams['bannerElement']) {
+                $possibleKeys = $moreParams['possibleKeys'];
             }
 
             foreach ($possibleKeys as $key) {
@@ -250,6 +255,16 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
                         } elseif ($bannerElement == 'project') {
                             $formProject = new FormProjets($db);
                             $saturneMoreHtmlRef .= img_picto($langs->trans('Project'), 'project', 'class="pictofixedwidth"') . $formProject->select_projects(-1, $object->$objectKey, $objectKey, 0, 0, 1, 0, 1, 0, 0, '', 1, 0, 'maxwidth500 widthcentpercentminusx');
+                        } elseif ($bannerElement == $moreParams['bannerElement']) {
+                            $form = new Form($db);
+                            $objectLists = saturne_fetch_all_object_type($moreParams['className']);
+                            if (is_array($objectLists) && !empty($objectLists)) {
+                                $objectListArray = [];
+                                foreach ($objectLists as $objectKeyList => $objectList) {
+                                    $objectListArray[$objectKeyList] = $objectList->ref;
+                                }
+                                $saturneMoreHtmlRef .= img_picto($langs->trans($moreParams['title']), $moreParams['picto'], 'class="pictofixedwidth"') . $form::selectarray($objectKey, $objectListArray, $object->$objectKey, 1, 0, '', 1, 0, 0, '', 'maxwidth500 widthcentpercentminusx');
+                            }
                         }
                         $saturneMoreHtmlRef .= '<input type="submit" class="button valignmiddle" value="' . $langs->trans('Modify') . '">';
                         $saturneMoreHtmlRef .= '</form>';
@@ -259,14 +274,16 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
                             $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1) : img_picto($langs->trans('ThirdParty'), 'company');
                         } elseif ($bannerElement == 'project') {
                             $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1, '', 1) : img_picto($langs->trans('Project'), 'project');
+                        } elseif ($bannerElement == $moreParams['bannerElement']) {
+                            $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1) : img_picto($langs->trans($moreParams['title']), $moreParams['picto']);
                         }
                         if(empty($moreParams[$bannerElement]['disable_edit'])) {
-                            $saturneMoreHtmlRef .= ' <a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=edit_' . $bannerElement . '&id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . GETPOST('object_type') . '&token=' . newToken() . '">' . img_edit($langs->transnoentitiesnoconv($bannerElement == 'societe' ? 'SetThirdParty' : 'SetProject')) . '</a>';
+                            $saturneMoreHtmlRef .= ' <a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=edit_' . $bannerElement . '&id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . GETPOST('object_type') . '&token=' . newToken() . '">' . img_edit($langs->transnoentitiesnoconv($bannerElement == 'societe' ? 'SetThirdParty' : 'Set' . ucfirst($bannerElement))) . '</a>';
                         }
                     }
                 } else {
                     $BannerElementObject->fetch($object->$objectKey);
-                    if ($bannerElement == 'societe') {
+                    if ($bannerElement == 'societe' || $bannerElement == $moreParams['bannerElement']) {
                         $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1) : '';
                     } elseif ($bannerElement == 'project') {
                         $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1, '', 1) : '';
