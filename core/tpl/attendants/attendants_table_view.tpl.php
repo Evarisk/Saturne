@@ -116,7 +116,11 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
                 $actionComm  = new ActionComm($db);
                 $actionComms = $actionComm->getActions(0, $object->id, $object->element . '@' . $moduleNameLowerCase, " AND code = 'AC_SATURNE_SIGNATURE_PENDING_SIGNATURE'");
                 if (is_array($actionComms) && !empty($actionComms)) {
-                    $nbEmailSent = count($actionComms);
+                    foreach ($actionComms as $actionComm) {
+                        if ($actionComm->socpeopleassigned[$element->element_id]['id'] == $element->element_id) {
+                            $nbEmailSent++;
+                        }
+                    }
                 }
                 print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode . '">';
                 print '<input type="hidden" name="token" value="' . newToken() . '">';
