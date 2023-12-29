@@ -634,6 +634,37 @@ class SaturneSignature extends SaturneObject
     }
 
     /**
+     * Check if signatory has object
+     *
+     * @param  int    $objectID      Object ID
+     * @param  string $tableElement  Name of table without prefix where object is stored
+     * @param  int    $signatoryID   Element ID signatory
+     * @param  string $signatoryType Element type signatory (user or socpeople)
+     * @return bool                  True if signatory has control else false
+     */
+    function checkSignatoryHasObject(int $objectID, string $tableElement, int $signatoryID, string $signatoryType): bool
+    {
+        $sql  = 'SELECT ' . $this->getFieldList('t');
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'saturne_object_signature AS t';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . $tableElement . ' AS e ON (e.rowid = t.fk_object)';
+        $sql .= ' WHERE 1 = 1';
+        $sql .= ' AND e.rowid = ' . $objectID . ' AND t.status > 0 AND t.element_id = ' . $signatoryID . ' AND t.element_type = "' . $signatoryType . '"' ;
+
+        $resql = $this->db->query($sql);
+        if ($resql) {
+            $num = $this->db->num_rows($resql);
+            if ($num > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            dol_print_error($this->db);
+            return false;
+        }
+    }
+
+    /**
      * Clone an object into another one
      *
      * @param  User       $user     User that creates
