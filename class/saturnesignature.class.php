@@ -645,10 +645,14 @@ class SaturneSignature extends SaturneObject
     function checkSignatoryHasObject(int $objectID, string $tableElement, int $signatoryID, string $signatoryType): bool
     {
         $sql  = 'SELECT ' . $this->getFieldList('t');
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'saturne_object_signature AS t';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . $this->table_element . ' AS t';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . $tableElement . ' AS e ON (e.rowid = t.fk_object)';
-        $sql .= ' WHERE 1 = 1';
-        $sql .= ' AND e.rowid = ' . $objectID . ' AND t.status > 0 AND t.element_id = ' . $signatoryID . ' AND t.element_type = "' . $signatoryType . '"' ;
+        if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 1) {
+            $sql .= ' WHERE t.entity IN (' . getEntity($this->table_element) . ')';
+        } else {
+            $sql .= ' WHERE 1 = 1';
+        }
+        $sql .= ' AND e.rowid = ' . $objectID . ' AND t.status > 0 AND t.element_id = ' . $signatoryID . ' AND t.element_type = "' . $signatoryType . '"';
 
         $resql = $this->db->query($sql);
         if ($resql) {
