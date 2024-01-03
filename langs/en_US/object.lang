@@ -87,6 +87,15 @@ ConfirmArchiveObject    = Are you sure you want to archive %s ?
 CloneCategories         = Clone tags/categories ?
 ClonePhotos             = Cloner les photos ?
 
+# Confirm mass box
+ConfirmMassLock              = Bulk lock confirmation
+ConfirmMassLockingQuestion   = Are you sure you want to lock the %d record(s) selected ?
+ConfirmMassArchive           = Bulk archiving confirmation
+ConfirmMassArchivingQuestion = Are you sure you want to archive the %d record(s) selected ?
+
+# SetEventMessage mass action
+RecordsArchived = %d record(s) archived
+
 # Data
 ActionsOnObject = Events on %s
 DisplayMoreInfo = View more information
