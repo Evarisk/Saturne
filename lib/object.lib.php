@@ -415,6 +415,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'class_path'     => 'contact/class/contact.class.php',
             'lib_path'       => 'core/lib/contact.lib.php',
         ];
+        $objectsMetadata['customer'] = $objectsMetadata['thirdparty'];
     }
 
     if (isModEnabled('project')) {
