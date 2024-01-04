@@ -640,9 +640,11 @@ class SaturneSignature extends SaturneObject
      * @param  string $tableElement  Name of table without prefix where object is stored
      * @param  int    $signatoryID   Element ID signatory
      * @param  string $signatoryType Element type signatory (user or socpeople)
+     * @param  string $filter        More SQL filters (' AND ...')
+     * @param  string $signatoryRole Role signatory
      * @return bool                  True if signatory has control else false
      */
-    function checkSignatoryHasObject(int $objectID, string $tableElement, int $signatoryID, string $signatoryType): bool
+    function checkSignatoryHasObject(int $objectID, string $tableElement, int $signatoryID, string $signatoryType, string $filter, string $signatoryRole = 'Attendant'): bool
     {
         $sql  = 'SELECT ' . $this->getFieldList('t');
         $sql .= ' FROM ' . MAIN_DB_PREFIX . $this->table_element . ' AS t';
@@ -652,7 +654,11 @@ class SaturneSignature extends SaturneObject
         } else {
             $sql .= ' WHERE 1 = 1';
         }
-        $sql .= ' AND e.rowid = ' . $objectID . ' AND t.status > 0 AND t.element_id = ' . $signatoryID . ' AND t.element_type = "' . $signatoryType . '"';
+        $sql .= ' AND e.rowid = ' . $objectID . ' AND t.status > 0 AND t.element_id = ' . $signatoryID . ' AND t.element_type = "' . $signatoryType . '"' . ' AND t.element_type = "' . $signatoryType . '"' . ' AND t.role = "' . $signatoryRole . '"';
+
+        if (dol_strlen($filter) > 0) {
+            $sql .= $filter;
+        }
 
         $resql = $this->db->query($sql);
         if ($resql) {
