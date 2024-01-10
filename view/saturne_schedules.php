@@ -52,7 +52,7 @@ require_once __DIR__ . '/../class/saturneschedules.class.php';
 global $conf, $db, $hookmanager, $langs, $user;
 
 // Load translation files required by the page
-saturne_load_langs();
+saturne_load_langs(['contracts']);
 
 // Get parameters
 $id          = GETPOST('id', 'int');
