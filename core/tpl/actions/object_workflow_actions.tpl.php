@@ -23,13 +23,13 @@
 
 /**
  * The following vars must be defined:
- * Global     : $user,
+ * Global     : $langs, $user,
  * Parameters : $action, $backtopage, $id,
- * Objects    : $object
+ * Objects    : $object, $signatory
  * Variable   : $permissiontoadd
  */
 
-// Action to set status STATUS_LOCKED.
+// Action to set status STATUS_LOCKED
 if ($action == 'confirm_lock' && $permissiontoadd) {
     $result = $object->setLocked($user, false);
     if ($result > 0) {
@@ -39,6 +39,31 @@ if ($action == 'confirm_lock' && $permissiontoadd) {
         header('Location: ' . $urlToGo);
         exit;
     } elseif (!empty($object->errors)) { // Set locked KO.
+        setEventMessages('', $object->errors, 'errors');
+    } else {
+        setEventMessages($object->error, [], 'errors');
+    }
+}
+
+// Action to set status STATUS_ARCHIVED and replace signatory by text
+if ($action == 'confirm_archive' && $permissiontoadd) {
+    $result = $object->setArchived($user);
+    if ($result > 0) {
+        $signatories = $signatory->fetchSignatory('', $object->id, $object->element);
+        if (!empty($signatories) && $signatories > 0) {
+            foreach ($signatories as $arrayRole) {
+                foreach ($arrayRole as $signatory) {
+                    $signatory->signature = $langs->transnoentities('FileGenerated');
+                    $signatory->update($user, false);
+                }
+            }
+        }
+        // Set Archived OK
+        $urlToGo = str_replace('__ID__', $result, $backtopage);
+        $urlToGo = preg_replace('/--IDFORBACKTOPAGE--/', $id, $urlToGo); // New method to autoselect project after a New on another form object creation
+        header('Location: ' . $urlToGo);
+        exit;
+    } elseif (!empty($object->errors)) { // Set Archived KO
         setEventMessages('', $object->errors, 'errors');
     } else {
         setEventMessages($object->error, [], 'errors');
