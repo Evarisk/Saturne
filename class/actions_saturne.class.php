@@ -261,7 +261,11 @@ class ActionsSaturne
 
             $out .= '<br>';
 
-            $picto = is_array($objects) && !empty($objects) ? $objects[1]->picto : '';
+            if (is_array($objects) && !empty($objects)) {
+                $object = array_shift($objects);
+                $picto = $object->picto;
+            }
+
             $out .= load_fiche_titre($langs->transnoentities(ucfirst($type)), '', 'object_' . $picto);
             $out .= '<table class="noborder centpercent">';
             $out .= '<tr class="liste_titre"><td colspan="3">' . $langs->trans('Ref') . '</td></tr>';
