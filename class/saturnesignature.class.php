@@ -642,9 +642,9 @@ class SaturneSignature extends SaturneObject
      * @param  string $signatoryType Element type signatory (user or socpeople)
      * @param  string $filter        More SQL filters (' AND ...')
      * @param  string $signatoryRole Role signatory
-     * @return bool                  True if signatory has control else false
+     * @return int                   SignatoryID if signatory has control else 0 or -1 if error
      */
-    function checkSignatoryHasObject(int $objectID, string $tableElement, int $signatoryID, string $signatoryType, string $filter, string $signatoryRole = 'Attendant'): bool
+    public function checkSignatoryHasObject(int $objectID, string $tableElement, int $signatoryID, string $signatoryType, string $filter, string $signatoryRole = 'Attendant'): int
     {
         $sql  = 'SELECT ' . $this->getFieldList('t');
         $sql .= ' FROM ' . MAIN_DB_PREFIX . $this->table_element . ' AS t';
@@ -662,15 +662,17 @@ class SaturneSignature extends SaturneObject
 
         $resql = $this->db->query($sql);
         if ($resql) {
-            $num = $this->db->num_rows($resql);
-            if ($num > 0) {
-                return true;
+            $obj = $this->db->fetch_object($resql);
+            if ($obj) {
+                $this->setVarsFromFetchObj($obj);
+
+                return $this->id;
             } else {
-                return false;
+                return 0;
             }
         } else {
             dol_print_error($this->db);
-            return false;
+            return -1;
         }
     }
 
