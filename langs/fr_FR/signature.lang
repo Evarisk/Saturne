@@ -39,7 +39,7 @@ AddAttendants           = Ajouter participants
 
 # Mail - Mail
 SignatureEmailSubject          = Signature %s %s
-SignatureEmailMessage          = Bonjour, <br> Veuillez trouver ci-joint le lien de signature du document.<br> %s
+SignatureEmailMessage          = Bonjour, <br> Veuillez trouver ci-joint le lien de signature du document.<br> __SATURNE_SIGNATORY_URL__
 SignatureEmailURL              = Lien de signature du document
 GlobalSignatureEmailSubject    = [%s] Liens de signature pour %s %s
 GlobalSignatureEmailMessage    = Bonjour, <br><br> Suite à votre %s "%s" en date du %s, veuillez trouver ci-dessous les liens de signature du document "%s" des différents participants : <br><br>

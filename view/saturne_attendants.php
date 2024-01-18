@@ -217,11 +217,16 @@ if (empty($resHook)) {
             require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
 
             $from = $conf->global->MAIN_MAIL_EMAIL_FROM;
-            $url  = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $signatory->signature_url  . '&entity=' . $conf->entity . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType . '&modal_to_open=modal-signature' . $signatory->id, 3);
-            $url  = '<a href=' . $url . ' target="_blank">' . $langs->transnoentities('SignatureEmailURL') . '</a>';
 
-            $message = $langs->trans('SignatureEmailMessage', $url);
+            // Make substitution in email content
+            $substitutionarray = getCommonSubstitutionArray($langs, 0, null, $object);
+            complete_substitutions_array($substitutionarray, $langs, $object, $parameters);
+
+            $message = $langs->trans('SignatureEmailMessage');
             $subject = $langs->trans('SignatureEmailSubject', $langs->transnoentities('Of' . ucfirst($object->element)), $object->ref);
+
+            $subject = make_substitutions($subject, $substitutionarray);
+            $message = make_substitutions($message, $substitutionarray);
 
             // Create form object
             // Send mail (substitutionarray must be done just before this)
