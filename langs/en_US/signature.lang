@@ -38,7 +38,8 @@ NoEmailSet              = No email entered: %s
 
 # Mail
 SignatureEmailSubject          = Signature %s %s
-SignatureEmailMessage          = Hello, <br><br> Please find attached the link to sign the document.<br> %s
+SignatureEmailMessage          = Hello, <br> Please find attached the link to sign the document.<br> __SATURNE_SIGNATORY_URL__
+SignatureEmailURL              = Document signature link
 GlobalSignatureEmailSubject    = [%s] Signature links for %s %s
 GlobalSignatureEmailMessage    = Hello, <br><br> Further to your %s"%s" dated %s, please find below the %s"%s" document signature links of the various attendants: <br><br>
 GlobalSignatureEmailMessageEnd = We thank you to transmit them. <br><br> Wishing you an excellent reception, <br><br> Sincerely

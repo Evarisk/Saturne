@@ -71,11 +71,8 @@ window.saturne.keyEvent.modalActions = function( event ) {
 	}
 
 	if ( 'Enter' === event.key )  {
-		event.preventDefault()
-		if (!$('input, textarea').is(':focus')) {
+    if (!$('input, textarea').is(':focus')) {
 			$(this).find('.modal-active .modal-footer .wpeo-button').not('.button-disable').first().click();
-		} else {
-			$('textarea:focus').val($('textarea:focus').val() + '\n')
 		}
 	}
 };

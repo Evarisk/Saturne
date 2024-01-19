@@ -22,20 +22,22 @@
  */
 
 /**
- * Load list of objects in memory from the database.
+ * Load list of objects in memory from the database
  *
- * @param  string     $className         Object className
- * @param  string     $sortorder         Sort Order
- * @param  string     $sortfield         Sort field
- * @param  int        $limit             Limit
- * @param  int        $offset            Offset
- * @param  array      $filter            Filter array. Example array('field'=>'value', 'customurl'=>...)
- * @param  string     $filtermode        Filter mode (AND/OR)
- * @param  bool       $manageExtraFields Option for manage extrafields with LEFT JOIN SQL
- * @return int|array                     0 < if KO, array of pages if OK
+ * @param  string     $className             Object className
+ * @param  string     $sortorder             Sort Order
+ * @param  string     $sortfield             Sort field
+ * @param  int        $limit                 Limit
+ * @param  int        $offset                Offset
+ * @param  array      $filter                Filter array. Example array('field'=>'value', 'customurl'=>...)
+ * @param  string     $filtermode            Filter mode (AND/OR)
+ * @param  bool       $extraFieldManagement  Option for manage extrafields with LEFT JOIN SQL
+ * @param  bool       $multiEntityManagement Option for manage multi entities with WHERE
+ * @param  bool       $categoryManagement    Option for manage categories with LEFT JOIN SQL
+ * @return int|array                         0 < if KO, array of pages if OK
  * @throws Exception
  */
-function saturne_fetch_all_object_type(string $className = '', string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = [], string $filtermode = 'AND', $manageExtraFields = false, $multiEntityManagement = true)
+function saturne_fetch_all_object_type(string $className = '', string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = [], string $filtermode = 'AND', bool $extraFieldManagement = false, bool $multiEntityManagement = true, bool $categoryManagement = false)
 {
     dol_syslog(__METHOD__, LOG_DEBUG);
 
@@ -46,7 +48,7 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
     $records      = [];
     $optionsArray = [];
 
-    if ($manageExtraFields) {
+    if ($extraFieldManagement) {
         require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
 
         $extraFields = new ExtraFields($db);
@@ -59,7 +61,7 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
 	if (strstr($objectFields, 't.fk_prospectlevel')) {
 		$objectFields = preg_replace('/t.fk_prospectlevel,/','', $objectFields);
 	}
-    if (is_array($optionsArray) && !empty($optionsArray) && $manageExtraFields) {
+    if (is_array($optionsArray) && !empty($optionsArray) && $extraFieldManagement) {
         foreach ($optionsArray as $name => $label) {
             if (empty($extrafields->attributes[$object->table_element]['type'][$name]) || $extrafields->attributes[$object->table_element]['type'][$name] != 'separate') {
                 $objectFields .= ", eft." . $name;
@@ -69,8 +71,13 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
     $sql = 'SELECT ';
     $sql .= $objectFields;
     $sql .= ' FROM `' . MAIN_DB_PREFIX . $object->table_element . '` as t';
-    if ($manageExtraFields) {
+    if ($extraFieldManagement) {
         $sql .= ' LEFT JOIN `' . MAIN_DB_PREFIX . $object->table_element . '_extrafields` as eft ON t.rowid = eft.fk_object';
+    }
+    if (isModEnabled('categorie') && $categoryManagement) {
+        require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+
+        $sql .= Categorie::getFilterJoinQuery($object->element, 't.rowid');
     }
     if ($multiEntityManagement && isset($object->ismultientitymanaged) && $object->ismultientitymanaged == 1) {
         $sql .= ' WHERE entity IN (' . getEntity($object->table_element) . ')';
@@ -117,7 +124,7 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
             $record = new $className($db);
             $record->setVarsFromFetchObj($obj);
 
-            if (is_array($optionsArray) && !empty($optionsArray) && $manageExtraFields) {
+            if (is_array($optionsArray) && !empty($optionsArray) && $extraFieldManagement) {
                 foreach ($optionsArray as $key => $value) {
                     $record->array_options['options_' . $key] = $obj->$key;
                 }
@@ -165,7 +172,7 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
 
     if ($user->rights->$moduleNameLowerCase->$objectType->read) {
         $head[$h][0] = dol_buildpath('/' . $moduleNameLowerCase . '/view/' . (!empty($moreparam['parentType']) ? $moreparam['parentType'] : $objectType) . '/' . (!empty($moreparam['parentType']) ? $moreparam['parentType'] : $objectType) . '_card.php', 1) . '?id=' . $object->id . (!empty($moreparam['parentType']) ? '&object_type=' . $objectType : '');
-        $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-info-circle pictofixedwidth"></i>' . $langs->trans(ucfirst($objectType)) : '<i class="fas fa-info-circle"></i>';
+        $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-info-circle pictofixedwidth"></i>' . $langs->trans((!empty($moreparam['specialName']) ? ucfirst($moreparam['specialName']) : ucfirst($objectType))) : '<i class="fas fa-info-circle"></i>';
         $head[$h][2] = 'card';
         $h = $h + 10;
 
@@ -269,295 +276,341 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
  * Get list of objects and their linked class and other infos
  *
  * @param  string    $type Object type to get the metadata from
- * @return array           Array of objects with metadata
+ * @return array           Array of objects with metadata | empty array if type doesn't exist
  * @throws Exception
  */
 function saturne_get_objects_metadata(string $type = ''): array
 {
     global $db, $hookmanager, $langs;
 
-    //To add an object :
+    // To add an object :
 
-    //	'mainmenu'      => Object main menu
-    //	'leftmenu'      => Object left menu
-    //	'langs'         => Object translation
-    //	'langfile'      => File lang translation
-    //	'picto'         => Object picto for img_picto() function (equals $this->picto)
-    //	'class_name'    => Class name
-    //	'name_field'    => Object name to be shown (ref, label, firstname, etc.)
-    //	'post_name'     => Name of post sent retrieved by GETPOST() function
-    //	'link_name'     => Name of object sourcetype in llx_element_element
-    //	'tab_type'      => Tab type element for prepare_head function
-    //  'table_element' => Object name in database
-    //	'fk_parent'     => OPTIONAL : Name of parent for objects as productlot, contact, task
-    //	'parent_post'   => OPTIONAL : Name of parent post (retrieved by GETPOST() function, it can be different from fk_parent
-    //	'create_url'    => Path to creation card, no need to add "?action=create"
-    //	'class_path'    => Path to object class
-    //	'lib_path'      => Path to object lib
+    // 'mainmenu'       => Object main menu
+    // 'leftmenu'       => Object left menu
+    // 'langs'          => Object translation
+    // 'langfile'       => File lang translation
+    // 'picto'          => Object picto for img_picto() function (equals $this->picto)
+    // 'color'          => Picto color
+    // 'class_name'     => Class name
+    // 'name_field'     => Object name to be shown (ref, label, firstname, etc.)
+    // 'post_name'      => Name of post sent retrieved by GETPOST() function
+    // 'link_name'      => Name of object sourcetype in llx_element_element
+    // 'tab_type'       => Tab type element for prepare_head function
+    // 'table_element'  => Object name in database
+    // 'fk_parent'      => OPTIONAL : Name of parent for objects as productlot, contact, task
+    // 'parent_post'    => OPTIONAL : Name of parent post (retrieved by GETPOST() function, it can be different from fk_parent
+    // 'hook_name_card' => Hook name object card
+    // 'hook_name_list' => Hook name object list
+    // 'create_url'     => Path to creation card, no need to add "?action=create"
+    // 'class_path'     => Path to object class
+    // 'lib_path'       => Path to object lib
 
     $objectsMetadata = [];
 
-//    if (isModEnabled('product')) {
-//        $objectsMetadata['product'] = [
-//            'mainmenu'      => 'products',
-//            'leftmenu'      => 'product',
-//            'langs'         => 'ProductOrService',
-//            'langfile'      => 'products',
-//            'picto'         => 'product',
-//            'class_name'    => 'Product',
-//            'post_name'     => 'fk_product',
-//            'link_name'     => 'product',
-//            'tab_type'      => 'product',
-//            'table_element' => 'product',
-//            'name_field'    => 'ref',
-//            'create_url'    => 'product/card.php',
-//            'class_path'    => 'product/class/product.class.php',
-//            'lib_path'      => 'core/lib/product.lib.php',
-//        ];
-//    }
-//
-//    if (isModEnabled('productbatch')) {
-//        $objectsMetadata['productlot'] = [
-//            'mainmenu'      => '',
-//            'leftmenu'      => '',
-//            'langs'         => 'Batch',
-//            'langfile'      => 'products',
-//            'picto'         => 'lot',
-//            'class_name'    => 'ProductLot',
-//            'post_name'     => 'fk_productlot',
-//            'link_name'     => 'productbatch',
-//            'tab_type'      => 'productlot',
-//            'table_element' => 'product_batch',
-//            'name_field'    => 'batch',
-//            'fk_parent'     => 'fk_product',
-//            'parent_post'   => 'fk_product',
-//            'create_url'    => 'product/stock/productlot_card.php',
-//            'class_path'    => 'product/stock/class/productlot.class.php',
-//            'lib_path'      => 'core/lib/product.lib.php',
-//        ];
-//    }
-//
-//    if (isModEnabled('user')) {
-//        $objectsMetadata['user'] = [
-//            'mainmenu'      => 'user',
-//            'leftmenu'      => 'users',
-//            'langs'         => 'User',
-//            'picto'         => 'user',
-//            'class_name'    => 'User',
-//            'post_name'     => 'fk_user',
-//            'link_name'     => 'user',
-//            'tab_type'      => 'user',
-//            'table_element' => 'user',
-//            'name_field'    => 'lastname, firstname',
-//            'create_url'    => 'user/card.php',
-//            'class_path'    => 'user/class/user.class.php',
-//            'lib_path'      => 'core/lib/usergroups.lib.php',
-//        ];
-//    }
-//
-//    if (isModEnabled('societe')) {
-//        $objectsMetadata['thirdparty'] = [
-//            'mainmenu'      => 'companies',
-//            'leftmenu'      => 'thirdparties',
-//            'langs'         => 'ThirdParty',
-//            'langfile'      => 'companies',
-//            'picto'         => 'building',
-//            'class_name'    => 'Societe',
-//            'post_name'     => 'fk_soc',
-//            'link_name'     => 'societe',
-//            'tab_type'      => 'thirdparty',
-//            'table_element' => 'societe',
-//            'name_field'    => 'nom',
-//            'create_url'    => 'societe/card.php',
-//            'class_path'    => 'societe/class/societe.class.php',
-//            'lib_path'      => 'core/lib/company.lib.php',
-//        ];
-//        $objectsMetadata['contact'] = [
-//            'mainmenu'      => 'companies',
-//            'leftmenu'      => 'contacts',
-//            'langs'         => 'Contact',
-//            'langfile'      => 'companies',
-//            'picto'         => 'address',
-//            'class_name'    => 'Contact',
-//            'post_name'     => 'fk_contact',
-//            'link_name'     => 'contact',
-//            'tab_type'      => 'contact',
-//            'table_element' => 'socpeople',
-//            'name_field'    => 'lastname, firstname',
-//            'fk_parent'     => 'fk_soc',
-//            'parent_post'   => 'fk_soc',
-//            'create_url'    => 'contact/card.php',
-//            'class_path'    => 'contact/class/contact.class.php',
-//            'lib_path'      => 'core/lib/contact.lib.php',
-//        ];
-//    }
+    if (isModEnabled('product')) {
+        $objectsMetadata['product'] = [
+            'mainmenu'       => 'products',
+            'leftmenu'       => 'product',
+            'langs'          => 'ProductOrService',
+            'langfile'       => 'products',
+            'picto'          => 'product',
+            'color'          => '#a69944',
+            'class_name'     => 'Product',
+            'post_name'      => 'fk_product',
+            'link_name'      => 'product',
+            'tab_type'       => 'product',
+            'table_element'  => 'product',
+            'name_field'     => 'ref',
+            'hook_name_card' => 'productcard',
+            'hook_name_list' => 'productservicelist',
+            'create_url'     => 'product/card.php',
+            'class_path'     => 'product/class/product.class.php',
+            'lib_path'       => 'core/lib/product.lib.php',
+        ];
+    }
+
+    if (isModEnabled('productbatch')) {
+        $objectsMetadata['productlot'] = [
+            'mainmenu'       => '',
+            'leftmenu'       => '',
+            'langs'          => 'Batch',
+            'langfile'       => 'productbatch',
+            'picto'          => 'lot',
+            'color'          => '#a69944',
+            'class_name'     => 'ProductLot',
+            'post_name'      => 'fk_productlot',
+            'link_name'      => 'productbatch',
+            'tab_type'       => 'productlot',
+            'table_element'  => 'product_lot',
+            'name_field'     => 'batch',
+            'fk_parent'      => 'fk_product',
+            'parent_post'    => 'fk_product',
+            'hook_name_card' => 'productlotcard',
+            'hook_name_list' => 'product_lotlist',
+            'create_url'     => 'product/stock/productlot_card.php',
+            'class_path'     => 'product/stock/class/productlot.class.php',
+            'lib_path'       => 'core/lib/product.lib.php',
+        ];
+    }
+
+    if (isModEnabled('user')) {
+        $objectsMetadata['user'] = [
+            'mainmenu'       => '',
+            'leftmenu'       => 'users',
+            'langs'          => 'User',
+            'picto'          => 'user',
+            'color'          => '#79633f',
+            'class_name'     => 'User',
+            'post_name'      => 'fk_user',
+            'link_name'      => 'user',
+            'tab_type'       => 'user',
+            'table_element'  => 'user',
+            'name_field'     => 'lastname, firstname',
+            'hook_name_card' => 'usercard',
+            'hook_name_list' => 'userlist',
+            'create_url'     => 'user/card.php',
+            'class_path'     => 'user/class/user.class.php',
+            'lib_path'       => 'core/lib/usergroups.lib.php',
+        ];
+    }
+
+    if (isModEnabled('societe')) {
+        $objectsMetadata['thirdparty'] = [
+            'mainmenu'       => 'companies',
+            'leftmenu'       => 'thirdparties',
+            'langs'          => 'ThirdParty',
+            'langfile'       => 'companies',
+            'picto'          => 'building',
+            'color'          => '#6c6aa8',
+            'class_name'     => 'Societe',
+            'post_name'      => 'fk_soc',
+            'link_name'      => 'societe',
+            'tab_type'       => 'thirdparty',
+            'table_element'  => 'societe',
+            'name_field'     => 'nom',
+            'hook_name_card' => 'thirdpartycard',
+            'hook_name_list' => 'thirdpartylist',
+            'create_url'     => 'societe/card.php',
+            'class_path'     => 'societe/class/societe.class.php',
+            'lib_path'       => 'core/lib/company.lib.php',
+        ];
+        $objectsMetadata['contact'] = [
+            'mainmenu'       => '',
+            'leftmenu'       => 'contacts',
+            'langs'          => 'Contact',
+            'langfile'       => 'companies',
+            'picto'          => 'address',
+            'color'          => '#6c6aa8',
+            'class_name'     => 'Contact',
+            'post_name'      => 'fk_contact',
+            'link_name'      => 'contact',
+            'tab_type'       => 'contact',
+            'table_element'  => 'socpeople',
+            'name_field'     => 'lastname, firstname',
+            'fk_parent'      => 'fk_soc',
+            'parent_post'    => 'fk_soc',
+            'hook_name_card' => 'contactcard',
+            'hook_name_list' => 'contactlist',
+            'create_url'     => 'contact/card.php',
+            'class_path'     => 'contact/class/contact.class.php',
+            'lib_path'       => 'core/lib/contact.lib.php',
+        ];
+        $objectsMetadata['customer'] = $objectsMetadata['thirdparty'];
+    }
 
     if (isModEnabled('project')) {
         $objectsMetadata['project'] = [
-            'mainmenu'      => 'project',
-            'leftmenu'      => 'projects',
-            'langs'         => 'Project',
-            'langfile'      => 'projects',
-            'picto'         => 'project',
-            'class_name'    => 'Project',
-            'post_name'     => 'fk_project',
-            'link_name'     => 'project',
-            'tab_type'      => 'project',
-            'name_field'    => 'ref, title',
-            'create_url'    => 'projet/card.php',
-            'class_path'    => 'projet/class/project.class.php',
-            'lib_path'      => 'core/lib/project.lib.php',
+            'mainmenu'       => 'project',
+            'leftmenu'       => 'projects',
+            'langs'          => 'Project',
+            'langfile'       => 'projects',
+            'picto'          => 'project',
+            'color'          => '#6c6aa8',
+            'class_name'     => 'Project',
+            'post_name'      => 'fk_project',
+            'link_name'      => 'project',
+            'tab_type'       => 'project',
+            'name_field'     => 'ref, title',
+            'hook_name_card' => 'projectcard',
+            'hook_name_list' => 'projectlist',
+            'create_url'     => 'projet/card.php',
+            'class_path'     => 'projet/class/project.class.php',
+            'lib_path'       => 'core/lib/project.lib.php',
         ];
-//        $objectsMetadata['task'] = [
-//            'mainmenu'      => 'project',
-//            'leftmenu'      => 'tasks',
-//            'langs'         => 'Task',
-//            'langfile'      => 'projects',
-//            'picto'         => 'projecttask',
-//            'class_name'    => 'Task',
-//            'post_name'     => 'fk_task',
-//            'link_name'     => 'project_task',
-//            'tab_type'      => 'task',
-//            'table_element' => 'projet_task',
-//            'name_field'    => 'label',
-//            'fk_parent'     => 'fk_projet',
-//            'parent_post'   => 'fk_project',
-//            'create_url'    => 'projet/tasks.php',
-//            'class_path'    => 'projet/class/task.class.php',
-//            'lib_path'      => 'core/lib/project.lib.php',
-//        ];
+        $objectsMetadata['task'] = [
+            'mainmenu'       => '',
+            'leftmenu'       => 'tasks',
+            'langs'          => 'Task',
+            'langfile'       => 'projects',
+            'picto'          => 'projecttask',
+            'color'          => '#6c6aa8',
+            'class_name'     => 'Task',
+            'post_name'      => 'fk_task',
+            'link_name'      => 'project_task',
+            'tab_type'       => 'task',
+            'table_element'  => 'projet_task',
+            'name_field'     => 'label',
+            'fk_parent'      => 'fk_projet',
+            'parent_post'    => 'fk_project',
+            'hook_name_card' => 'projecttaskcard',
+            'hook_name_list' => 'tasklist',
+            'create_url'     => 'projet/tasks.php',
+            'class_path'     => 'projet/class/task.class.php',
+            'lib_path'       => 'core/lib/project.lib.php',
+        ];
     }
 
-//    if (isModEnabled('facture')) {
-//        $objectsMetadata['invoice'] = [
-//            'mainmenu'      => 'billing',
-//            'leftmenu'      => 'customers_bills',
-//            'langs'         => 'Invoice',
-//            'langfile'      => 'bills',
-//            'picto'         => 'bill',
-//            'class_name'    => 'Facture',
-//            'post_name'     => 'fk_invoice',
-//            'link_name'     => 'facture',
-//            'tab_type'      => 'invoice',
-//            'table_element' => 'facture',
-//            'name_field'    => 'ref',
-//            'create_url'    => 'compta/facture/card.php',
-//            'class_path'    => 'compta/facture/class/facture.class.php',
-//            'lib_path'      => 'core/lib/invoice.lib.php',
-//        ];
-//    }
-//
-//    if (isModEnabled('order')) {
-//        $objectsMetadata['order'] = [
-//            'mainmenu'      => 'billing',
-//            'leftmenu'      => 'orders',
-//            'langs'         => 'Order',
-//            'langfile'      => 'orders',
-//            'picto'         => 'order',
-//            'class_name'    => 'Commande',
-//            'post_name'     => 'fk_order',
-//            'link_name'     => 'commande',
-//            'tab_type'      => 'order',
-//            'table_element' => 'commande',
-//            'name_field'    => 'ref',
-//            'create_url'    => 'commande/card.php',
-//            'class_path'    => 'commande/class/commande.class.php',
-//            'lib_path'      => 'core/lib/order.lib.php',
-//        ];
-//    }
-//
-//    if (isModEnabled('contract')) {
-//        $objectsMetadata['contract'] = [
-//            'mainmenu'      => 'commercial',
-//            'leftmenu'      => 'contracts',
-//            'langs'         => 'Contract',
-//            'langfile'      => 'contracts',
-//            'picto'         => 'contract',
-//            'class_name'    => 'Contrat',
-//            'post_name'     => 'fk_contract',
-//            'link_name'     => 'contrat',
-//            'tab_type'      => 'contract',
-//            'table_element' => 'contrat',
-//            'name_field'    => 'ref',
-//            'create_url'    => 'contrat/card.php',
-//            'class_path'    => 'contrat/class/contrat.class.php',
-//            'lib_path'      => 'core/lib/contract.lib.php',
-//        ];
-//    }
-//
-//    if (isModEnabled('ticket')) {
-//        $objectsMetadata['ticket'] = [
-//            'mainmenu'      => 'ticket',
-//            'leftmenu'      => 'ticket',
-//            'langs'         => 'Ticket',
-//            'picto'         => 'ticket',
-//            'class_name'    => 'Ticket',
-//            'post_name'     => 'fk_ticket',
-//            'link_name'     => 'ticket',
-//            'tab_type'      => 'ticket',
-//            'table_element' => 'ticket',
-//            'name_field'    => 'ref, subject',
-//            'create_url'    => 'ticket/card.php',
-//            'class_path'    => 'ticket/class/ticket.class.php',
-//            'lib_path'      => 'core/lib/ticket.lib.php',
-//        ];
-//    }
-//
-//    if (isModEnabled('stock')) {
-//        $objectsMetadata['entrepot'] = [
-//            'mainmenu'      => 'products',
-//            'leftmenu'      => 'stock',
-//            'langs'         => 'Warehouse',
-//            'langfile'      => 'stocks',
-//            'picto'         => 'stock',
-//            'class_name'    => 'Entrepot',
-//            'post_name'     => 'fk_entrepot',
-//            'link_name'     => 'stock',
-//            'tab_type'      => 'stock',
-//            'table_element' => 'entrepot',
-//            'name_field'    => 'ref',
-//            'create_url'    => 'product/stock/entrepot/card.php',
-//            'class_path'    => 'product/stock/class/entrepot.class.php',
-//            'lib_path'      => 'core/lib/stock.lib.php',
-//        ];
-//    }
-//
-//    if (isModEnabled('expedition')) {
-//        $objectsMetadata['expedition'] = [
-//            'mainmenu'      => 'products',
-//            'leftmenu'      => 'sendings',
-//            'langs'         => 'Shipments',
-//            'langfile'      => 'sendings',
-//            'picto'         => 'dolly',
-//            'class_name'    => 'Expedition',
-//            'post_name'     => 'fk_expedition',
-//            'link_name'     => 'expedition',
-//            'tab_type'      => 'delivery',
-//            'table_element' => 'expedition',
-//            'name_field'    => 'ref',
-//            'class_path'    => 'expedition/class/expedition.class.php',
-//            'lib_path'      => 'core/lib/expedition.lib.php',
-//        ];
-//    }
-//
-//    if (isModEnabled('propal')) {
-//        $objectsMetadata['propal'] = [
-//            'mainmenu'      => 'commercial',
-//            'leftmenu'      => 'propals',
-//            'langs'         => 'Proposal',
-//            'langfile'      => 'propal',
-//            'picto'         => 'propal',
-//            'class_name'    => 'Propal',
-//            'post_name'     => 'fk_propal',
-//            'link_name'     => 'propal',
-//            'tab_type'      => 'propal',
-//            'table_element' => 'propal',
-//            'name_field'    => 'ref',
-//            'create_url'    => 'comm/propal/card.php',
-//            'class_path'    => 'comm/propal/class/propal.class.php',
-//            'lib_path'      => 'core/lib/propal.lib.php',
-//        ];
-//    }
+    if (isModEnabled('facture')) {
+        $objectsMetadata['invoice'] = [
+            'mainmenu'       => 'billing',
+            'leftmenu'       => 'customers_bills',
+            'langs'          => 'Invoice',
+            'langfile'       => 'bills',
+            'picto'          => 'bill',
+            'color'          => '#65953d',
+            'class_name'     => 'Facture',
+            'post_name'      => 'fk_invoice',
+            'link_name'      => 'facture',
+            'tab_type'       => 'invoice',
+            'table_element'  => 'facture',
+            'name_field'     => 'ref',
+            'hook_name_card' => 'invoicecard',
+            'hook_name_list' => 'invoicelist',
+            'create_url'     => 'compta/facture/card.php',
+            'class_path'     => 'compta/facture/class/facture.class.php',
+            'lib_path'       => 'core/lib/invoice.lib.php',
+        ];
+    }
+
+    if (isModEnabled('order')) {
+        $objectsMetadata['order'] = [
+            'mainmenu'       => 'billing',
+            'leftmenu'       => 'orders',
+            'langs'          => 'Order',
+            'langfile'       => 'orders',
+            'picto'          => 'order',
+            'color'          => '#65953d',
+            'class_name'     => 'Commande',
+            'post_name'      => 'fk_order',
+            'link_name'      => 'commande',
+            'tab_type'       => 'order',
+            'table_element'  => 'commande',
+            'name_field'     => 'ref',
+            'hook_name_card' => 'ordercard',
+            'hook_name_list' => 'orderlist',
+            'create_url'     => 'commande/card.php',
+            'class_path'     => 'commande/class/commande.class.php',
+            'lib_path'       => 'core/lib/order.lib.php',
+        ];
+    }
+
+    if (isModEnabled('contract')) {
+        $objectsMetadata['contract'] = [
+            'mainmenu'       => 'commercial',
+            'leftmenu'       => 'contracts',
+            'langs'          => 'Contract',
+            'langfile'       => 'contracts',
+            'picto'          => 'contract',
+            'color'          => '#3bbfa8',
+            'class_name'     => 'Contrat',
+            'post_name'      => 'fk_contract',
+            'link_name'      => 'contrat',
+            'tab_type'       => 'contract',
+            'table_element'  => 'contrat',
+            'name_field'     => 'ref',
+            'hook_name_card' => 'contractcard',
+            'hook_name_list' => 'contractlist',
+            'create_url'     => 'contrat/card.php',
+            'class_path'     => 'contrat/class/contrat.class.php',
+            'lib_path'       => 'core/lib/contract.lib.php',
+        ];
+    }
+
+    if (isModEnabled('ticket')) {
+        $objectsMetadata['ticket'] = [
+            'mainmenu'       => 'ticket',
+            'leftmenu'       => 'ticket',
+            'langs'          => 'Ticket',
+            'picto'          => 'ticket',
+            'color'          => '#3bbfa8',
+            'class_name'     => 'Ticket',
+            'post_name'      => 'fk_ticket',
+            'link_name'      => 'ticket',
+            'tab_type'       => 'ticket',
+            'table_element'  => 'ticket',
+            'name_field'     => 'ref, subject',
+            'hook_name_card' => 'ticketcard',
+            'hook_name_list' => 'ticketlist',
+            'create_url'     => 'ticket/card.php',
+            'class_path'     => 'ticket/class/ticket.class.php',
+            'lib_path'       => 'core/lib/ticket.lib.php',
+        ];
+    }
+
+    if (isModEnabled('stock')) {
+        $objectsMetadata['entrepot'] = [
+            'mainmenu'       => '',
+            'leftmenu'       => 'stock',
+            'langs'          => 'Warehouse',
+            'langfile'       => 'stocks',
+            'picto'          => 'stock',
+            'color'          => '#3bbfa8',
+            'class_name'     => 'Entrepot',
+            'post_name'      => 'fk_entrepot',
+            'link_name'      => 'stock',
+            'tab_type'       => 'stock',
+            'table_element'  => 'entrepot',
+            'name_field'     => 'ref',
+            'hook_name_card' => 'warehousecard',
+            'hook_name_list' => 'stocklist',
+            'create_url'     => 'product/stock/card.php',
+            'class_path'     => 'product/stock/class/entrepot.class.php',
+            'lib_path'       => 'core/lib/stock.lib.php',
+        ];
+        $objectsMetadata['warehouse'] = $objectsMetadata['entrepot'];
+    }
+
+    if (isModEnabled('expedition')) {
+        $objectsMetadata['expedition'] = [
+            'mainmenu'       => '',
+            'leftmenu'       => 'sendings',
+            'langs'          => 'Shipments',
+            'langfile'       => 'sendings',
+            'picto'          => 'dolly',
+            'class_name'     => 'Expedition',
+            'post_name'      => 'fk_expedition',
+            'link_name'      => 'expedition',
+            'tab_type'       => 'delivery',
+            'table_element'  => 'expedition',
+            'name_field'     => 'ref',
+            'hook_name_card' => 'ordershipmentcard',
+            'hook_name_list' => 'propallist',
+            'class_path'     => 'expedition/class/expedition.class.php',
+            'lib_path'       => 'core/lib/expedition.lib.php',
+        ];
+    }
+
+    if (isModEnabled('propal')) {
+        $objectsMetadata['propal'] = [
+            'mainmenu'       => '',
+            'leftmenu'       => 'propals',
+            'langs'          => 'Proposal',
+            'langfile'       => 'propal',
+            'picto'          => 'propal',
+            'color'          => '#65953d',
+            'class_name'     => 'Propal',
+            'post_name'      => 'fk_propal',
+            'link_name'      => 'propal',
+            'tab_type'       => 'propal',
+            'table_element'  => 'propal',
+            'name_field'     => 'ref',
+            'hook_name_card' => 'propalcard',
+            'hook_name_list' => 'propallist',
+            'create_url'     => 'comm/propal/card.php',
+            'class_path'     => 'comm/propal/class/propal.class.php',
+            'lib_path'       => 'core/lib/propal.lib.php',
+        ];
+    }
 
     // Hook to add controllable objects from other modules
     if (!is_object($hookmanager)) {
@@ -566,9 +619,9 @@ function saturne_get_objects_metadata(string $type = ''): array
     }
     $hookmanager->initHooks(['saturnegetobjectsmetadata']);
 
-    $reshook = $hookmanager->executeHooks('extendGetObjectsMetadata', $objectsMetadata);
+    $resHook = $hookmanager->executeHooks('extendGetObjectsMetadata', $objectsMetadata);
 
-    if ($reshook && (is_array($hookmanager->resArray) && !empty($hookmanager->resArray))) {
+    if ($resHook && (is_array($hookmanager->resArray) && !empty($hookmanager->resArray))) {
         $objectsMetadata = $hookmanager->resArray;
     }
 
@@ -582,23 +635,26 @@ function saturne_get_objects_metadata(string $type = ''): array
                 $tableElement = $object->table_element;
 
                 $objectsMetadataArray[$objectType] = [
-                    'name'          => ucfirst($objectType),
-                    'mainmenu'      => $objectMetadata['mainmenu'] ?? '',
-                    'leftmenu'      => $objectMetadata['leftmenu'] ?? '',
-                    'langs'         => $objectMetadata['langs'] ?? '',
-                    'langfile'      => $objectMetadata['langfile'] ?? '',
-                    'picto'         => $objectMetadata['picto'] ?? '',
-                    'class_name'    => $objectMetadata['class_name'] ?? '',
-                    'name_field'    => $objectMetadata['name_field'] ?? '',
-                    'post_name'     => $objectMetadata['post_name'] ?? '',
-                    'link_name'     => $objectMetadata['link_name'] ?? '',
-                    'tab_type'      => $objectMetadata['tab_type'] ?? '',
-                    'table_element' => $tableElement ?? '',
-                    'fk_parent'     => $objectMetadata['fk_parent'] ?? '',
-                    'parent_post'   => $objectMetadata['parent_post'] ?? '',
-                    'create_url'    => $objectMetadata['create_url'] ?? '',
-                    'class_path'    => $objectMetadata['class_path'] ?? '',
-                    'lib_path'      => $objectMetadata['lib_path'] ?? '',
+                    'name'           => ucfirst($objectType),
+                    'mainmenu'       => $objectMetadata['mainmenu'] ?? '',
+                    'leftmenu'       => $objectMetadata['leftmenu'] ?? '',
+                    'langs'          => $objectMetadata['langs'] ?? '',
+                    'langfile'       => $objectMetadata['langfile'] ?? '',
+                    'picto'          => $objectMetadata['picto'] ?? '',
+                    'color'          => $objectMetadata['color'] ?? '',
+                    'class_name'     => $objectMetadata['class_name'] ?? '',
+                    'name_field'     => $objectMetadata['name_field'] ?? '',
+                    'post_name'      => $objectMetadata['post_name'] ?? '',
+                    'link_name'      => $objectMetadata['link_name'] ?? '',
+                    'tab_type'       => $objectMetadata['tab_type'] ?? '',
+                    'table_element'  => $tableElement ?? '',
+                    'fk_parent'      => $objectMetadata['fk_parent'] ?? '',
+                    'parent_post'    => $objectMetadata['parent_post'] ?? '',
+                    'hook_name_card' => $objectMetadata['hook_name_card'] ?? '',
+                    'hook_name_list' => $objectMetadata['hook_name_list'] ?? '',
+                    'create_url'     => $objectMetadata['create_url'] ?? '',
+                    'class_path'     => $objectMetadata['class_path'] ?? '',
+                    'lib_path'       => $objectMetadata['lib_path'] ?? '',
                 ];
                 if (!empty($objectMetadata['langfile'])) {
                     $langs->load($objectMetadata['langfile']);
@@ -607,7 +663,11 @@ function saturne_get_objects_metadata(string $type = ''): array
         }
     }
 
-    return dol_strlen($type) > 0 && array_key_exists($type, $objectsMetadataArray) ? $objectsMetadataArray[$type] : $objectsMetadataArray;
+    if (dol_strlen($type) > 0) {
+        return (array_key_exists($type, $objectsMetadataArray) ? $objectsMetadataArray[$type] : []);
+    } else {
+        return $objectsMetadataArray;
+    }
 }
 
 /**

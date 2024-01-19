@@ -532,11 +532,11 @@ class SaturneDocumentModel extends CommonDocGenerator
     }
 
     /**
-     * Set attendants segment.
+     * Set attendants segment
      *
-     * @param  Odf       $odfHandler  Object builder odf library.
-     * @param  Translate $outputLangs Lang object to use for output.
-     * @param  array     $moreParam   More param (Object/user/etc).
+     * @param  Odf       $odfHandler  Object builder odf library
+     * @param  Translate $outputLangs Lang object to use for output
+     * @param  array     $moreParam   More param (Object/user/etc)
      *
      * @throws Exception
      */
@@ -544,12 +544,13 @@ class SaturneDocumentModel extends CommonDocGenerator
     {
         global $conf, $moduleNameLowerCase, $langs;
 
-        // Get attendants.
+        // Get attendants
         $foundTagForLines = 1;
         try {
-            $listLines = $odfHandler->setSegment('attendants');
+            $segment   = (!empty($moreParam['segmentName']) ? $moreParam['segmentName'] : 'attendant');
+            $listLines = $odfHandler->setSegment($segment);
         } catch (OdfException $e) {
-            // We may arrive here if tags for lines not present into template.
+            // We may arrive here if tags for lines not present into template
             $foundTagForLines = 0;
             $listLines        = '';
             dol_syslog($e->getMessage());
@@ -558,7 +559,11 @@ class SaturneDocumentModel extends CommonDocGenerator
         if ($foundTagForLines) {
             if (!empty($moreParam['object'])) {
                 $signatory        = new SaturneSignature($this->db, $this->module, $moreParam['object']->element);
-                $signatoriesArray = $signatory->fetchSignatories($moreParam['object']->id, $moreParam['object']->element);
+                if (!empty($moreParam['segmentName'])) {
+                    $signatoriesArray = $signatory->fetchSignatory($moreParam['segmentName'], $moreParam['object']->id, $moreParam['object']->element);
+                } else {
+                    $signatoriesArray = $signatory->fetchSignatories($moreParam['object']->id, $moreParam['object']->element);
+                }
                 if (!empty($signatoriesArray) && is_array($signatoriesArray)) {
                     $nbAttendant = 0;
                     $tempDir     = $conf->$moduleNameLowerCase->multidir_output[$moreParam['object']->entity ?? 1] . '/temp/';
@@ -567,9 +572,9 @@ class SaturneDocumentModel extends CommonDocGenerator
                     }
                     foreach ($signatoriesArray as $objectSignatory) {
                         if (!in_array($objectSignatory->role, $moreParam['excludeAttendantsRole'])) {
-                            $tmpArray['attendant_number']    = ++$nbAttendant;
-                            $tmpArray['attendant_lastname']  = strtoupper($objectSignatory->lastname);
-                            $tmpArray['attendant_firstname'] = dol_strlen($objectSignatory->firstname) > 0 ? ucfirst($objectSignatory->firstname) : '';
+                            $tmpArray[$segment . '_number']    = ++$nbAttendant;
+                            $tmpArray[$segment . '_lastname']  = strtoupper($objectSignatory->lastname);
+                            $tmpArray[$segment . '_firstname'] = dol_strlen($objectSignatory->firstname) > 0 ? ucfirst($objectSignatory->firstname) : '';
                             switch ($objectSignatory->attendance) {
                                 case 1:
                                     $attendance = $outputLangs->trans('Delay');
@@ -586,61 +591,61 @@ class SaturneDocumentModel extends CommonDocGenerator
                                     $user    = new User($this->db);
                                     $societe = new Societe($this->db);
                                     $user->fetch($objectSignatory->element_id);
-                                    $tmpArray['attendant_job'] = $user->job;
+                                    $tmpArray[$segment . '_job'] = $user->job;
                                     if ($user->fk_soc > 0) {
                                         $societe->fetch($user->fk_soc);
-                                        $tmpArray['attendant_company'] = $societe->name;
+                                        $tmpArray[$segment . '_company'] = $societe->name;
                                     } else {
-                                        $tmpArray['attendant_company'] = $conf->global->MAIN_INFO_SOCIETE_NOM;
+                                        $tmpArray[$segment . '_company'] = $conf->global->MAIN_INFO_SOCIETE_NOM;
                                     }
                                     break;
                                 case 'socpeople':
                                     $contact = new Contact($this->db);
                                     $societe = new Societe($this->db);
                                     $contact->fetch($objectSignatory->element_id);
-                                    $tmpArray['attendant_job'] = $contact->poste;
+                                    $tmpArray[$segment . '_job'] = $contact->poste;
                                     if ($contact->fk_soc > 0) {
                                         $societe->fetch($contact->fk_soc);
-                                        $tmpArray['attendant_company'] = $societe->name;
+                                        $tmpArray[$segment . '_company'] = $societe->name;
                                     } else {
-                                        $tmpArray['attendant_company'] = $conf->global->MAIN_INFO_SOCIETE_NOM;
+                                        $tmpArray[$segment . '_company'] = $conf->global->MAIN_INFO_SOCIETE_NOM;
                                     }
                                     break;
                                 default:
-                                    $tmpArray['attendant_job']     = '';
-                                    $tmpArray['attendant_company'] = '';
+                                    $tmpArray[$segment . '_job']     = '';
+                                    $tmpArray[$segment . '_company'] = '';
                                     break;
                             }
-                            $tmpArray['attendant_role']           = $outputLangs->transnoentities($objectSignatory->role);
-                            $tmpArray['attendant_signature_date'] = dol_print_date($objectSignatory->signature_date, 'dayhour', 'tzuser');
-                            $tmpArray['attendant_attendance']     = $attendance;
+                            $tmpArray[$segment . '_role']           = $outputLangs->transnoentities($objectSignatory->role);
+                            $tmpArray[$segment . '_signature_date'] = dol_print_date($objectSignatory->signature_date, 'dayhour', 'tzuser');
+                            $tmpArray[$segment . '_attendance']     = $attendance;
                             if (dol_strlen($objectSignatory->signature) > 0 && $objectSignatory->signature != $langs->transnoentities('FileGenerated')) {
                                 $confSignatureName = dol_strtoupper($this->module) . '_SHOW_SIGNATURE_SPECIMEN';
                                 if ($moreParam['specimen'] == 0 || ($moreParam['specimen'] == 1 && $conf->global->$confSignatureName == 1)) {
                                     $encodedImage = explode(',', $objectSignatory->signature)[1];
                                     $decodedImage = base64_decode($encodedImage);
                                     file_put_contents($tempDir . 'signature' . $objectSignatory->id . '.png', $decodedImage);
-                                    $tmpArray['attendant_signature'] = $tempDir . 'signature' . $objectSignatory->id . '.png';
+                                    $tmpArray[$segment . '_signature'] = $tempDir . 'signature' . $objectSignatory->id . '.png';
                                 } else {
-                                    $tmpArray['attendant_signature'] = '';
+                                    $tmpArray[$segment . '_signature'] = '';
                                 }
                             } else {
-                                $tmpArray['attendant_signature'] = '';
+                                $tmpArray[$segment . '_signature'] = '';
                             }
                             $this->setTmpArrayVars($tmpArray, $listLines, $outputLangs);
                             dol_delete_file($tempDir . 'signature' . $objectSignatory->id . '.png');
                         }
                     }
                 } else {
-                    $tmpArray['attendant_number']         = '';
-                    $tmpArray['attendant_lastname']       = '';
-                    $tmpArray['attendant_firstname']      = '';
-                    $tmpArray['attendant_job']            = '';
-                    $tmpArray['attendant_company']        = '';
-                    $tmpArray['attendant_role']           = '';
-                    $tmpArray['attendant_signature_date'] = '';
-                    $tmpArray['attendant_attendance']     = '';
-                    $tmpArray['attendant_signature']      = '';
+                    $tmpArray[$segment . '_number']         = '';
+                    $tmpArray[$segment . '_lastname']       = '';
+                    $tmpArray[$segment . '_firstname']      = '';
+                    $tmpArray[$segment . '_job']            = '';
+                    $tmpArray[$segment . '_company']        = '';
+                    $tmpArray[$segment . '_role']           = '';
+                    $tmpArray[$segment . '_signature_date'] = '';
+                    $tmpArray[$segment . '_attendance']     = '';
+                    $tmpArray[$segment . '_signature']      = '';
                     $this->setTmpArrayVars($tmpArray, $listLines, $outputLangs);
                 }
                 $odfHandler->mergeSegment($listLines);
@@ -682,7 +687,14 @@ class SaturneDocumentModel extends CommonDocGenerator
     {
         // Replace tags of lines.
         try {
-            $this->setAttendantsSegment($odfHandler, $outputLangs, $moreParam);
+            if (!empty($moreParam['multipleAttendantsSegment'])) {
+                foreach ($moreParam['multipleAttendantsSegment'] as $multipleAttendantSegment) {
+                    $moreParam['segmentName'] = $multipleAttendantSegment;
+                    $this->setAttendantsSegment($odfHandler, $outputLangs, $moreParam);
+                }
+            } else {
+                $this->setAttendantsSegment($odfHandler, $outputLangs, $moreParam);
+            }
         } catch (OdfException $e) {
             $this->error = $e->getMessage();
             dol_syslog($this->error, LOG_WARNING);
@@ -692,16 +704,16 @@ class SaturneDocumentModel extends CommonDocGenerator
     }
 
     /**
-     * Function to build a document on disk.
+     * Function to build a document on disk
      *
-     * @param  SaturneDocuments $objectDocument  Object source to build document.
-     * @param  Translate        $outputLangs     Lang object to use for output.
-     * @param  string           $srcTemplatePath Full path of source filename for generator using a template file.
-     * @param  int              $hideDetails     Do not show line details.
-     * @param  int              $hideDesc        Do not show desc.
-     * @param  int              $hideRef         Do not show ref.
-     * @param  array            $moreParam       More param (Object/user/etc).
-     * @return int                               1 if OK, <=0 if KO.
+     * @param  SaturneDocuments $objectDocument  Object source to build document
+     * @param  Translate        $outputLangs     Lang object to use for output
+     * @param  string           $srcTemplatePath Full path of source filename for generator using a template file
+     * @param  int              $hideDetails     Do not show line details
+     * @param  int              $hideDesc        Do not show desc
+     * @param  int              $hideRef         Do not show ref
+     * @param  array            $moreParam       More param (Object/user/etc)
+     * @return int                               1 if OK, <=0 if KO
      * @throws Exception
      */
     public function write_file(SaturneDocuments $objectDocument, Translate $outputLangs, string $srcTemplatePath, int $hideDetails = 0, int $hideDesc = 0, int $hideRef = 0, array $moreParam): int
@@ -718,7 +730,7 @@ class SaturneDocumentModel extends CommonDocGenerator
             $moduleNameLowerCase = $objectDocument->module;
         }
 
-        // Add ODT generation hook.
+        // Add ODT generation hook
         $hookmanager->initHooks(['odtgeneration']);
 
         if (!is_object($outputLangs)) {
@@ -728,14 +740,10 @@ class SaturneDocumentModel extends CommonDocGenerator
         $outputLangs->charset_output = 'UTF-8';
 
         if ($conf->$moduleNameLowerCase->dir_output) {
-            $confRefModName      = dol_strtoupper($this->module) . '_' . dol_strtoupper($this->document_type) . '_ADDON';
-
-            $numberingModules = [
-                $moreParam['subDir'] . $this->document_type => $conf->global->$confRefModName
-            ];
-
-
+            $confRefModName   = dol_strtoupper($this->module) . '_' . dol_strtoupper($this->document_type) . '_ADDON';
+            $numberingModules = [(!empty($moreParam['subDir']) ? $moreParam['subDir'] : $moduleNameLowerCase . 'documents/') . $this->document_type => $conf->global->$confRefModName];
             list($refModName) = saturne_require_objects_mod($numberingModules, $moduleNameLowerCase);
+
             $objectDocumentRef   = $refModName->getNextValue($objectDocument);
             $objectDocument->ref = $objectDocumentRef;
             $objectDocumentID    = $objectDocument->create($moreParam['user'], true, $object);
@@ -762,15 +770,8 @@ class SaturneDocumentModel extends CommonDocGenerator
                 $newFileTmp  = preg_replace('/template_/i', '', $newFileTmp);
                 $societyName = preg_replace('/\./', '_', $conf->global->MAIN_INFO_SOCIETE_NOM);
 
-                $date = dol_print_date(dol_now(), 'dayxcard');
-                $newFileTmp = $date
-                    . (dol_strlen($object->ref) > 0         ? '_' . $object->ref         : '')
-                    . '_' . $objectDocumentRef
-                    . ($moreParam['hideTemplateName']       ? ''                         : '_' . $outputLangs->transnoentities($newFileTmp)) . '_'
-                    . (!empty($moreParam['documentName'])   ? $moreParam['documentName'] : '')
-                    . $societyName
-                    . (!empty($moreParam['additionalName']) ? $moreParam['additionalName'] : '')
-                ;
+                $date       = dol_print_date(dol_now(), 'dayxcard');
+                $newFileTmp = $date . (dol_strlen($object->ref) > 0 ? '_' . $object->ref : '') . '_' . $objectDocumentRef . ($moreParam['hideTemplateName'] ? '' : '_' . $outputLangs->transnoentities($newFileTmp)) . '_' . (!empty($moreParam['documentName'])   ? $moreParam['documentName'] : '') . $societyName . (!empty($moreParam['additionalName']) ? $moreParam['additionalName'] : '');
 
                 if ($moreParam['specimen'] == 1) {
                     $newFileTmp .= '_specimen';
@@ -778,11 +779,10 @@ class SaturneDocumentModel extends CommonDocGenerator
                 $newFileTmp = str_replace(' ', '_', $newFileTmp);
                 $newFileTmp = dol_sanitizeFileName($newFileTmp);
 
-                // Get extension (ods or odt).
+                // Get extension (ods or odt)
                 $newFileFormat = substr($newFile, strrpos($newFile, '.') + 1);
                 $fileName      = $newFileTmp . '.' . $newFileFormat;
                 $file          = $dir . '/' . $fileName;
-
 
                 $objectDocument->last_main_doc = $fileName;
                 $objectDocument->update($moreParam['user'], true);
@@ -795,21 +795,21 @@ class SaturneDocumentModel extends CommonDocGenerator
                     return -1;
                 }
 
-                // Make substitution.
+                // Make substitution
                 $substitutionArray = [];
                 complete_substitutions_array($substitutionArray, $outputLangs, $object);
-                // Call the ODTSubstitution hook.
+                // Call the ODTSubstitution hook
                 $parameters = ['file' => $file, 'object' => $object, 'outputlangs' => $outputLangs, 'substitutionarray' => &$substitutionArray];
-                $hookmanager->executeHooks('ODTSubstitution', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks.
+                $hookmanager->executeHooks('ODTSubstitution', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
 
-                // Open and load template.
+                // Open and load template
                 require_once ODTPHP_PATH . 'odf.php';
                 try {
                     $odfHandler = new odf(
                         $srcTemplatePath,
                         [
                             'PATH_TO_TMP'     => $conf->$moduleNameLowerCase->dir_temp,
-                            'ZIP_PROXY'       => 'PclZipProxy', // PhpZipProxy or PclZipProxy. Got "bad compression method" error when using PhpZipProxy.
+                            'ZIP_PROXY'       => 'PclZipProxy', // PhpZipProxy or PclZipProxy. Got "bad compression method" error when using PhpZipProxy
                             'DELIMITER_LEFT'  => '{',
                             'DELIMITER_RIGHT' => '}'
                         ]
@@ -820,7 +820,7 @@ class SaturneDocumentModel extends CommonDocGenerator
                     return -1;
                 }
 
-                // Define substitution array.
+                // Define substitution array
                 $substitutionArray          = getCommonSubstitutionArray($outputLangs, 0, null, $object);
                 $arraySoc                   = $this->get_substitutionarray_mysoc($mysoc, $outputLangs);
                 $arraySoc['mycompany_logo'] = preg_replace('/_small/', '_mini', $arraySoc['mycompany_logo']);
@@ -837,18 +837,18 @@ class SaturneDocumentModel extends CommonDocGenerator
 
                 $this->fillTags($odfHandler, $outputLangs, $tmpArray, $moreParam);
 
-                // Replace labels translated.
+                // Replace labels translated
                 $tmpArray = $outputLangs->get_translations_for_substitutions();
 
-                // Call the beforeODTSave hook.
+                // Call the beforeODTSave hook
                 $parameters = ['odfHandler' => &$odfHandler, 'file' => $file, 'object' => $object, 'outputlangs' => $outputLangs, 'substitutionarray' => &$tmpArray];
-                $hookmanager->executeHooks('beforeODTSave', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks.
+                $hookmanager->executeHooks('beforeODTSave', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
 
                 $fileInfos   = pathinfo($fileName);
                 $pdfName     = $fileInfos['filename'] . '.pdf';
                 $confPdfName = dol_strtoupper($this->module) . '_AUTOMATIC_PDF_GENERATION';
 
-                // Write new file.
+                // Write new file
                 if (!empty($conf->global->MAIN_ODT_AS_PDF) && $conf->global->$confPdfName > 0) {
                     try {
                         $odfHandler->exportAsAttachedPDF($file);
@@ -871,7 +871,7 @@ class SaturneDocumentModel extends CommonDocGenerator
                 }
 
                 $parameters = ['odfHandler' => &$odfHandler, 'file' => $file, 'object' => $object, 'outputlangs' => $outputLangs, 'substitutionarray' => &$tmpArray];
-                $hookmanager->executeHooks('afterODTCreation', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks.
+                $hookmanager->executeHooks('afterODTCreation', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
 
                 if (!empty($conf->global->MAIN_UMASK)) {
                     @chmod($file, octdec($conf->global->MAIN_UMASK));
@@ -885,9 +885,9 @@ class SaturneDocumentModel extends CommonDocGenerator
                     }
                 }
 
-                $odfHandler = null; // Destroy object.
+                $odfHandler = null; // Destroy object
 
-                return 1; // Success.
+                return 1; // Success
             } else {
                 $this->error = $langs->transnoentities('ErrorCanNotCreateDir', $dir);
                 return -1;

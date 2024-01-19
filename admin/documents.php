@@ -237,7 +237,7 @@ $help_url = 'FR:Module_' . $moduleName;
 saturne_header(0, '', $title, $help_url);
 
 $parameters = [];
-$reshook    = $hookmanager->executeHooks('SaturneAdminDocumentData', $parameters); // Note that $action and $object may have been modified by some hooks
+$reshook    = $hookmanager->executeHooks('saturneAdminDocumentData', $parameters); // Note that $action and $object may have been modified by some hooks
 if (empty($reshook)) {
     $types = $hookmanager->resArray;
 }

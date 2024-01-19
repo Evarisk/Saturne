@@ -159,6 +159,9 @@ function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', st
 	if (property_exists($object, 'picto')) {
 		$picto = $object->picto;
 	}
+    if ($conf->browser->layout == 'phone') {
+        $conf->dol_optimize_smallscreen = 0;
+    }
 
     print dol_get_fiche_head($head, $tabactive, $title, -1, $picto, 0, '', '', $conf->browser->layout != 'phone' ? 0 : 5, 'saturne');
 }
@@ -213,15 +216,20 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
     }
 
     // Banner
-    $objectKey      = '';
-    $possibleKeys   = [];
     $bannerElements = ['societe', 'project'];
+    if (!empty($moreParams['bannerElement'])) {
+        $bannerElements[] = $moreParams['bannerElement'];
+    }
     foreach ($bannerElements as $bannerElement) {
+        $objectKey    = '';
+        $possibleKeys = [];
         if (isModEnabled($bannerElement)) {
             if ($bannerElement == 'societe') {
                 $possibleKeys = ['socid', 'fk_soc'];
             } elseif ($bannerElement == 'project') {
                 $possibleKeys = ['projectid', 'fk_project'];
+            } elseif ($bannerElement == $moreParams['bannerElement']) {
+                $possibleKeys = $moreParams['possibleKeys'];
             }
 
             foreach ($possibleKeys as $key) {
@@ -247,6 +255,16 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
                         } elseif ($bannerElement == 'project') {
                             $formProject = new FormProjets($db);
                             $saturneMoreHtmlRef .= img_picto($langs->trans('Project'), 'project', 'class="pictofixedwidth"') . $formProject->select_projects(-1, $object->$objectKey, $objectKey, 0, 0, 1, 0, 1, 0, 0, '', 1, 0, 'maxwidth500 widthcentpercentminusx');
+                        } elseif ($bannerElement == $moreParams['bannerElement']) {
+                            $form = new Form($db);
+                            $objectLists = saturne_fetch_all_object_type($moreParams['className']);
+                            if (is_array($objectLists) && !empty($objectLists)) {
+                                $objectListArray = [];
+                                foreach ($objectLists as $objectKeyList => $objectList) {
+                                    $objectListArray[$objectKeyList] = $objectList->ref;
+                                }
+                                $saturneMoreHtmlRef .= img_picto($langs->trans($moreParams['title']), $moreParams['picto'], 'class="pictofixedwidth"') . $form::selectarray($objectKey, $objectListArray, $object->$objectKey, 1, 0, '', 1, 0, 0, '', 'maxwidth500 widthcentpercentminusx');
+                            }
                         }
                         $saturneMoreHtmlRef .= '<input type="submit" class="button valignmiddle" value="' . $langs->trans('Modify') . '">';
                         $saturneMoreHtmlRef .= '</form>';
@@ -256,14 +274,16 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
                             $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1) : img_picto($langs->trans('ThirdParty'), 'company');
                         } elseif ($bannerElement == 'project') {
                             $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1, '', 1) : img_picto($langs->trans('Project'), 'project');
+                        } elseif ($bannerElement == $moreParams['bannerElement']) {
+                            $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1) : img_picto($langs->trans($moreParams['title']), $moreParams['picto']);
                         }
                         if(empty($moreParams[$bannerElement]['disable_edit'])) {
-                            $saturneMoreHtmlRef .= ' <a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=edit_' . $bannerElement . '&id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . GETPOST('object_type') . '&token=' . newToken() . '">' . img_edit($langs->transnoentitiesnoconv($bannerElement == 'societe' ? 'SetThirdParty' : 'SetProject')) . '</a>';
+                            $saturneMoreHtmlRef .= ' <a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=edit_' . $bannerElement . '&id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . GETPOST('object_type') . '&token=' . newToken() . '">' . img_edit($langs->transnoentitiesnoconv($bannerElement == 'societe' ? 'SetThirdParty' : 'Set' . ucfirst($bannerElement))) . '</a>';
                         }
                     }
                 } else {
                     $BannerElementObject->fetch($object->$objectKey);
-                    if ($bannerElement == 'societe') {
+                    if ($bannerElement == 'societe' || $bannerElement == $moreParams['bannerElement']) {
                         $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1) : '';
                     } elseif ($bannerElement == 'project') {
                         $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1, '', 1) : '';
@@ -439,4 +459,102 @@ function saturne_fetch_dictionary(string $tableName, string $sortOrder = 'ASC', 
 	} else {
 		return -1;
 	}
+}
+
+/**
+ * Show category image
+ *
+ * @param  Categorie   $category Category object
+ * @param  int         $noPrint  0 = Print option, 1 = output in string
+ * @param  string      $moreCSS  More css
+ * @return string|void
+ */
+function saturne_show_category_image(Categorie $category, int $noPrint = 0, string $moreCSS = '')
+{
+    global $conf, $langs;
+
+    $out       = '';
+    $maxWidth  = 50;
+    $maxHeight = 50;
+
+    $categoryPhotoDir = get_exdir($category->id, 2, 0, 0, $category, 'category') . $category->id . '/photos/';
+    $dir              = $conf->categorie->multidir_output[$category->entity ?? 1] . '/' . $categoryPhotoDir;
+
+    $photos = $category->liste_photos($dir);
+    if (is_array($photos) && count($photos)) {
+        foreach ($photos as $photo) {
+            if ($photo['photo_vignette']) {
+                $filename = $photo['photo_vignette'];
+            } else {
+                $filename = $photo['photo'];
+            }
+
+            // Image size
+            $category->get_image_size($dir . $filename);
+            $imgWidth  = ($category->imgWidth < $maxWidth) ? $category->imgWidth : $maxWidth;
+            $imgHeight = ($category->imgHeight < $maxHeight) ? $category->imgHeight : $maxHeight;
+
+            if ($noPrint) {
+                $out = '<div><img width="' . $imgWidth . '" height="' . $imgHeight . '" class="photo ' . $moreCSS . '" src="' . DOL_URL_ROOT . '/custom/saturne/utils/viewimage.php?modulepart=category&entity=' . $category->entity . '&file=' . urlencode($categoryPhotoDir . $filename) . '" value="' . $category->id . '" title="' . $filename . '" alt=""></div>';
+            } else {
+                print '<div><img width="' . $imgWidth . '" height="' . $imgHeight . '" class="photo ' . $moreCSS . '" src="' . DOL_URL_ROOT . '/custom/saturne/utils/viewimage.php?modulepart=category&entity=' . $category->entity . '&file=' . urlencode($categoryPhotoDir . $filename) . '" value="' . $category->id . '" title="' . $filename . '" alt=""></div>';
+            }
+        }
+    } else {
+        print '<div><img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $moreCSS . '" src="' . DOL_URL_ROOT . '/public/theme/common/nophoto.png" title="' . $langs->trans('NoPhotoYet') . '" value="' . $category->id . '" alt=""></div>';
+    }
+
+    if ($noPrint) {
+        return $out;
+    }
+}
+
+/**
+ * Create category
+ *
+ * @param  string $label       Label
+ * @param  string $type        Type
+ * @param  int    $fkParent    FkParent
+ * @param  string $photoName   Photo name
+ * @param  string $color       Color
+ * @param  string $description Description
+ * @param  int    $visible     Visible
+ * @return int                 0 < if KO, category ID if OK
+ */
+function saturne_create_category(string $label = '', string $type = '', int $fkParent = 0, string $photoName = '', string $color = '', string $description = '', int $visible = 1): int
+{
+    global $conf, $db, $moduleNameLowerCase, $user;
+    global $maxwidthmini, $maxheightmini, $maxwidthsmall, $maxheightsmall;
+
+    require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+
+    $category = new Categorie($db);
+
+    $category->label       = $label;
+    $category->type        = $type;
+    $category->fk_parent   = $fkParent;
+    $category->color       = $color;
+    $category->description = $description;
+    $category->visible     = $visible;
+
+    $result = $category->create($user);
+
+    if ($result < 0) {
+        return -1;
+    }
+
+    if (dol_strlen($photoName) > 0) {
+        $uploadDir = $conf->categorie->multidir_output[$conf->entity ?: 1];
+        $dir       = $uploadDir . '/' . get_exdir($result, 2, 0, 0, $category, 'category') . $result . '/photos/';
+        if (!is_dir($dir)) {
+            dol_mkdir($dir);
+        }
+
+        $originFile = __DIR__ . '/../../' . $moduleNameLowerCase . '/img/pictos_' . $type . '/' . $photoName;
+        dol_copy($originFile, $dir . $photoName);
+        vignette($dir . $photoName, $maxwidthsmall, $maxheightsmall);
+        vignette($dir . $photoName, $maxwidthmini, $maxheightmini, '_mini');
+    }
+
+    return $result;
 }

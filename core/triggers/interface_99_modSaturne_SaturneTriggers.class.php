@@ -48,7 +48,7 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
 		$this->name        = preg_replace('/^Interface/i', '', get_class($this));
 		$this->family      = 'demo';
 		$this->description = 'Saturne triggers.';
-		$this->version     = '1.2.0';
+		$this->version     = '1.2.1';
 		$this->picto       = 'saturne@saturne';
 	}
 
@@ -180,7 +180,11 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
                     $actioncomm->socpeopleassigned = [$object->element_id => $object->element_id];
                 }
                 $actioncomm->fk_element = $object->fk_object;
-                $actioncomm->userownerid = $object->element_id;
+
+                // The client can set HTTP header information (like $_SERVER['HTTP_CLIENT_IP'] ...) to any arbitrary value it wants. As such it's far more reliable to use $_SERVER['REMOTE_ADDR'], as this cannot be set by the user.
+                $actioncomm->note_private .= (isset($_SERVER['REMOTE_ADDR']) && !empty($_SERVER['REMOTE_ADDR']) ? $langs->transnoentities('IPAddress') . ' : ' . $_SERVER['REMOTE_ADDR'] . '<br>' : $langs->transnoentities('NoData'));
+                $actioncomm->userownerid  = 0;
+                $actioncomm->type_code    = 'AC_PUBLIC';
                 $actioncomm->create($user);
                 break;
 

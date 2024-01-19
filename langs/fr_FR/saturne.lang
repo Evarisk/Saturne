@@ -83,6 +83,7 @@ AdvancedTriggers            = Contenu des événéments avancé
 AdvancedTriggersDescription = Active une description détaillée des événements de %s
 
 
+
 #
 # About - Page À propos
 #
@@ -100,6 +101,18 @@ ModuleAbout = À propos de %s
 # Data - Donnée
 ChangeEntityRedirection = Vous avez été redirigé car vous avez changé d'entité
 EnableSaturne           = Veuillez activer le module Saturne pour accéder à cette page
+
+
+
+#
+# PWA - Progressive Web App
+#
+
+# Data - Donnée
+PWA                           = Application Web Progressive
+PWAQRCodeGenerationManagement = Gestion de la génération des QRCodes PWA
+GeneratePWAQRCode             = Génération du QRCode PWA
+GeneratePWAQRCodeDescription  = Cette option permet de générer le QRCode de l'application web progressive
 
 
 
@@ -157,6 +170,7 @@ WithKindRegards = Bien cordialement
 ConfigEmail     = Cliquez sur ce lien pour vous rendre à la configuration des emails
 
 
+
 #
 # Modal - Modal
 #
@@ -169,6 +183,7 @@ CloseModal = Fermer
 #
 # Certificate - Certificat
 #
+
 # Data - Donnée
 FkElement              = Élément lié
 ElementType            = Type d'élément
@@ -186,6 +201,7 @@ checkDateEndJobComment = Vérification et mise à jour du statut des certificats
 # Data - Donnée
 EntityNumber = Numéro de l'entité
 EntityName   = Nom de l'entité
+
 
 
 #

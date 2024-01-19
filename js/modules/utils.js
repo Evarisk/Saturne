@@ -132,7 +132,7 @@ window.saturne.utils.reloadField = function() {
 
   $.ajax({
     url: document.URL + querySeparator + "element_type=" + field + "&token=" + token,
-    type: "POST",
+    type: 'POST',
     processData: false,
     contentType: false,
     success: function(resp) {
@@ -141,4 +141,25 @@ window.saturne.utils.reloadField = function() {
     },
     error: function() {}
   });
+};
+
+/**
+ * Enforce min and max value on keyup event for field input
+ *
+ * @memberof Saturne_Utils
+ *
+ * @since   1.2.1
+ * @version 1.2.1
+ *
+ * @returns {void}
+ */
+window.saturne.utils.enforceMinMax = function(triggeredElement) {
+  if (triggeredElement.value !== "") {
+    if (parseInt(triggeredElement.value) < parseInt(triggeredElement.min)) {
+      triggeredElement.value = triggeredElement.min;
+    }
+    if (parseInt(triggeredElement.value) > parseInt(triggeredElement.max)) {
+      triggeredElement.value = triggeredElement.max;
+    }
+  }
 };

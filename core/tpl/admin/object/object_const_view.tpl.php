@@ -1,6 +1,6 @@
 <?php
 $parameters = [];
-$reshook    = $hookmanager->executeHooks('SaturneAdminObjectConst', $parameters); // Note that $action and $object may have been modified by some hooks
+$reshook    = $hookmanager->executeHooks('saturneAdminObjectConst', $parameters); // Note that $action and $object may have been modified by some hooks
 if ($reshook > 0) {
     $constArray = $hookmanager->resArray;
 }

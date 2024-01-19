@@ -46,7 +46,7 @@ if ($object->status == $object::STATUS_DRAFT && $permissiontoadd) {
     $moreparam       .= '&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?id=' . $object->id . $moreparam);
     $formcompany->selectCompaniesForNewContact($object, 'id', $selectedCompany, 'newcompany' . (($attendantTableMode == 'advanced') ? $signatoryRole : ''), '', 0, $moreparam, 'minwidth300imp');
     print '</td>';
-    print '<td class=minwidth400">';
+    print '<td class="minwidth300 widthcentpercentminusx">';
     if ($selectedCompany <= 0) {
         print img_picto('', 'user', 'class="pictofixedwidth"') . $form->select_dolusers('', 'attendant' . (($attendantTableMode == 'advanced') ? $signatoryRole : '_') . 'user', 1, $alreadyAddedSignatories['user'], 0, '', '', $conf->entity, 0, 0, '', 0, '', 'minwidth200 widthcentpercentminusx maxwidth300') . '<br>';
     }
@@ -55,21 +55,14 @@ if ($object->status == $object::STATUS_DRAFT && $permissiontoadd) {
         $newcardbutton = '<a href="' . DOL_URL_ROOT . '/contact/card.php?socid=' . $selectedCompany . '&action=create' . $moreparam . urlencode('&newcompany' . (($attendantTableMode == 'advanced') ? $signatoryRole : '') . '=' . GETPOST('newcompany' . (($attendantTableMode == 'advanced') ? $signatoryRole : '')) . '&contactID=&#95;&#95;ID&#95;&#95;') . '" title="' . $langs->trans('NewContact') . '"><span class="fa fa-plus-circle valignmiddle paddingleft"></span></a>';
         print $newcardbutton;
     }
+    print '</td>';
     if ($attendantTableMode == 'simple') {
-        print '</td><td class="center">';
+        print '<td class="center">';
         print saturne_select_dictionary('attendant_role','c_' . $object->element . '_attendants_role', 'ref');
+        print '</td>';
     }
-    print '</td><td class="center">';
-    print '-';
-    print '</td><td class="center">';
-    print '-';
-    print '</td><td>';
-    print '-';
-    print '</td><td class="center">';
-    print '-';
-    print '</td><td class="center">';
-    print '-';
-    print '</td><td class="center">';
+    print '<td colspan="' . ($conf->browser->layout != 'classic' ? 4 : 5) . '"></td>';
+    print '<td class="center">';
     print '<button type="submit" class="wpeo-button button-blue"><i class="fas fa-plus"></i></button>';
     print '</td></tr>';
     print '</table>';

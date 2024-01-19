@@ -20,6 +20,16 @@
         height: auto;
         border: 1px solid rgba(0,0,0,0.4) !important;
       }
+      .modal-container {
+        @media all and (orientation: portrait) {
+          .modal-content {
+            height: 78% !important;
+          }
+          .modal-footer .wpeo-button {
+            font-size: 14px !important;
+          }
+        }
+      }
     }
   }
 }

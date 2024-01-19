@@ -75,7 +75,7 @@ class modSaturne extends DolibarrModules
 		$this->editor_url  = 'https://evarisk.com/';
 
         // Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
-		$this->version = '1.2.0';
+		$this->version = '1.2.1';
 
         // Url to the file with your last numberversion of this module
         //$this->url_last_version = 'http://www.example.com/versionmodule.txt';
@@ -96,7 +96,7 @@ class modSaturne extends DolibarrModules
             // Set this to 1 if module has its own login method file (core/login)
             'login' => 0,
             // Set this to 1 if module has its own substitution function file (core/substitutions)
-            'substitutions' => 0,
+            'substitutions' => 1,
             // Set this to 1 if module has its own menus handler directory (core/menus)
             'menus' => 0,
             // Set this to 1 if module overwrite template dir (core/tpl)
@@ -120,7 +120,9 @@ class modSaturne extends DolibarrModules
             'hooks' => [
                 'saturnepublicinterface',
                 'emailtemplates',
-				'usercard'
+				'usercard',
+                'category',
+                'categoryindex'
             ],
             // Set this to 1 if features of module are opened to external users
             'moduleforexternal' => 0,
@@ -147,7 +149,7 @@ class modSaturne extends DolibarrModules
         // A condition to hide module
 		$this->hidden = false;
         // List of module class names as string that must be enabled if this module is enabled. Example: array('always1'=>'modModuleToEnable1','always2'=>'modModuleToEnable2', 'FR1'=>'modModuleToEnableFR'...)
-		$this->depends = ['modAgenda'];
+		$this->depends = [];
         foreach ($modulesList as $moduleName => $moduleNameLowerCase) {
             $this->requiredby[] = 'mod' . $moduleName; // List of module class names as string to disable if this one is disabled. Example: array('modModuleToDisable1', ...)
         }

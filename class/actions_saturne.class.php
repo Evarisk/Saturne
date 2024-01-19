@@ -21,6 +21,9 @@
  * \brief   Saturne hook overload.
  */
 
+// Load Saturne Libraries
+require_once __DIR__ . '/../../saturne/lib/object.lib.php';
+
 /**
  * Class ActionsSaturne
  */
@@ -210,8 +213,103 @@ class ActionsSaturne
 
 				<?php
 			}
+        } elseif (preg_match('/categorycard/', $parameters['context']) && preg_match('/viewcat.php/', $_SERVER['PHP_SELF'])) {
+            $id   = GETPOST('id');
+            $type = GETPOST('type');
 
-		}
+            // Temporary exclude DoliMeet and native Dolibarr objects
+            if ($type == 'meeting' || $type == 'audit' || $type == 'trainingsession' || !empty(saturne_get_objects_metadata($type))) {
+                return 0;
+            }
+
+            // Load variable for pagination
+            $limit     = GETPOST('limit', 'int') ?GETPOST('limit', 'int') : $conf->liste_limit;
+            $sortfield = GETPOST('sortfield', 'aZ09comma');
+            $sortorder = GETPOST('sortorder', 'aZ09comma');
+            $page      = GETPOSTISSET('pageplusone') ? (GETPOST('pageplusone') - 1) : GETPOST("page", 'int');
+            if (empty($page) || $page == -1) {
+                $page = 0;
+            }     // If $page is not defined, or '' or -1 or if we click on clear filters or if we select empty mass action
+            $offset = $limit * $page;
+
+            $objects      = saturne_fetch_all_object_type($type);
+            $objectArrays = [];
+            if (is_array($objects) && !empty($objects)) {
+                foreach ($objects as $object) {
+                    $objectArrays[$object->id] = $object->ref;
+                }
+            }
+
+            $category = new Categorie($this->db);
+            $category->fetch($id);
+            $objectCategories = $category->getObjectsInCateg($type, 0, $limit, $offset);
+
+            $out = '<br>';
+
+            $out .= '<form method="post" action="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&type=' . $type . '">';
+            $out .= '<input type="hidden" name="token" value="' . newToken() . '">';
+            $out .= '<input type="hidden" name="action" value="addintocategory">';
+
+            $out .= '<table class="noborder centpercent">';
+            $out .= '<tr class="liste_titre"><td>';
+            $out .= $langs->trans('AddObjectIntoCategory') . ' ';
+            $out .= $form::selectarray('element_id', $objectArrays, '', 1);
+            $out .= '<input type="submit" class="button buttongen" value="' . $langs->trans('ClassifyInCategory') . '"></td>';
+            $out .= '</tr>';
+            $out .= '</table>';
+            $out .= '</form>';
+
+            $out .= '<br>';
+
+            if (is_array($objects) && !empty($objects)) {
+                $object = array_shift($objects);
+                $picto = $object->picto;
+            }
+
+            $out .= load_fiche_titre($langs->transnoentities(ucfirst($type)), '', 'object_' . $picto);
+            $out .= '<table class="noborder centpercent">';
+            $out .= '<tr class="liste_titre"><td colspan="3">' . $langs->trans('Ref') . '</td></tr>';
+
+            if (is_array($objectCategories) && !empty($objectCategories)) {
+                // Form to add record into a category
+                if (count($objectCategories) > 0) {
+                    $i = 0;
+                    foreach ($objectCategories as $object) {
+                        $i++;
+                        if ($i > $limit) break;
+
+                        $out .= '<tr class="oddeven">';
+                        $out .= '<td class="nowrap">';
+                        $object->picto   = $picto;
+                        $object->element = $type;
+                        $out .= $object->getNomUrl(1);
+                        $out .= '</td>';
+                        // Link to delete from category
+                        $out .= '<td class="right">';
+                        if ($user->rights->categorie->creer) {
+                            $out .= '<a href="' . $_SERVER['PHP_SELF'] . '?action=delintocategory&id=' . $id . '&type=' . $type . '&element_id=' . $object->id . '&token=' . newToken() . '">';
+                            $out .= $langs->trans('DeleteFromCat');
+                            $out .= img_picto($langs->trans('DeleteFromCat'), 'unlink', '', false, 0, 0, '', 'paddingleft');
+                            $out .= '</a>';
+                        }
+                        $out .= '</td>';
+                        $out .= '</tr>';
+                    }
+                } else {
+                    $out .= '<tr class="oddeven"><td colspan="2" class="opacitymedium">' . $langs->trans('ThisCategoryHasNoItems') . '</td></tr>';
+                }
+            } else {
+                $out .= '<tr class="oddeven"><td colspan="2" class="opacitymedium">' . $langs->trans('ThisCategoryHasNoItems') . '</td></tr>';
+            }
+
+            $out .= '</table>'; ?>
+
+            <script>
+                jQuery('.fichecenter').last().after(<?php echo json_encode($out); ?>)
+            </script>
+            <?php
+        }
+
 		if (!$error) {
 			$this->results   = array('myreturn' => 999);
 			return 0; // or return 1 to replace standard code
@@ -261,8 +359,39 @@ class ActionsSaturne
 					}
 				}
 			}
+        } elseif (preg_match('/categorycard/', $parameters['context'])) {
+            global $langs;
 
-		}
+            $elementId = GETPOST('element_id');
+            $type      = GETPOST('type');
+
+            // Temporary exclude DoliMeet and native Dolibarr objects
+            if ($type == 'meeting' || $type == 'audit' || $type == 'trainingsession' || !empty(saturne_get_objects_metadata($type))) {
+                return 0;
+            }
+
+            $objects   = saturne_fetch_all_object_type($type);
+            $newObject = $objects[$elementId];
+
+            if (GETPOST('action') == 'addintocategory') {
+                $result = $object->add_type($newObject, $type);
+                if ($result >= 0) {
+                    setEventMessages($langs->trans("WasAddedSuccessfully", $newObject->ref), array());
+                } else {
+                    if ($object->error == 'DB_ERROR_RECORD_ALREADY_EXISTS') {
+                        setEventMessages($langs->trans("ObjectAlreadyLinkedToCategory"), array(), 'warnings');
+                    } else {
+                        setEventMessages($object->error, $object->errors, 'errors');
+                    }
+                }
+            } elseif (GETPOST('action') == 'delintocategory') {
+                $result = $object->del_type($newObject, $type);
+                if ($result < 0) {
+                    dol_print_error('', $object->error);
+                }
+                $action = '';
+            }
+        }
 		return 0;
 	}
 }

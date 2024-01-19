@@ -26,8 +26,8 @@
  * This also set the property $this->numoffiles
  *
  * @param  string            $modulepart       Module the files are related to ('mymodule', 'mymodule:nameofsubmodule', 'mymodule_temp')
- * @param  string            $modulesubdir     Existing (so sanitized) sub-directory to scan (Example: '0/1/10', 'FA/DD/MM/YY/9999'). Use '' if file is not into subdir of module.
- * @param  string            $filedir          Directory to scan
+ * @param  string|array      $modulesubdir     Existing (so sanitized) sub-directory to scan (Example: '0/1/10', 'FA/DD/MM/YY/9999'). Use '' if file is not into subdir of module.
+ * @param  string|array      $filedir          Directory to scan
  * @param  string            $urlsource        Url of origin page (for return)
  * @param  int|string[]      $genallowed       Generation is allowed (1/0 or array list of templates)
  * @param  int               $delallowed       Remove is allowed (1/0)
@@ -48,7 +48,7 @@
  * @param  string            $tooltiptext      (optional) Tooltip text when gen button disabled
  * @return string                              Output string with HTML array of documents (might be empty string)
  */
-function saturne_show_documents(string $modulepart, string $modulesubdir, string $filedir, string $urlsource, $genallowed, int $delallowed = 0, string $modelselected = '', int $allowgenifempty = 1, int $forcenomultilang = 0, int $notused = 0, int $noform = 0, string $param = '', string $title = '', string $buttonlabel = '', string $codelang = '', string $morepicto = '', $object = null, int $hideifempty = 0, string $removeaction = 'remove_file', int $active = 1, string $tooltiptext = ''): string
+function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, string $urlsource, $genallowed, int $delallowed = 0, string $modelselected = '', int $allowgenifempty = 1, int $forcenomultilang = 0, int $notused = 0, int $noform = 0, string $param = '', string $title = '', string $buttonlabel = '', string $codelang = '', string $morepicto = '', $object = null, int $hideifempty = 0, string $removeaction = 'remove_file', int $active = 1, string $tooltiptext = ''): string
 {
 	global $conf, $db, $form, $hookmanager, $langs;
 
@@ -66,10 +66,17 @@ function saturne_show_documents(string $modulepart, string $modulesubdir, string
 	$hookmanager->initHooks(['formfile']);
 
 	// Get list of files
-	$fileList = null;
+	$fileList = [];
 	if (!empty($filedir)) {
-		$fileList = dol_dir_list($filedir, 'files', 0, '(\.jpg|\.jpeg|\.png|\.odt|\.zip|\.pdf)', '', 'date', SORT_DESC, 1);
+        if (is_array($filedir)) {
+            foreach ($filedir as $fileDirSingle) {
+                $fileList = array_merge($fileList, dol_dir_list($fileDirSingle, 'files', 0, '(\.jpg|\.jpeg|\.png|\.odt|\.zip|\.pdf)', '', 'date', SORT_DESC, 1));
+            }
+        } else {
+            $fileList = dol_dir_list($filedir, 'files', 0, '(\.jpg|\.jpeg|\.png|\.odt|\.zip|\.pdf)', '', 'date', SORT_DESC, 1);
+        }
 	}
+
 	if ($hideifempty && empty($fileList)) {
         return '';
     }
@@ -274,7 +281,13 @@ function saturne_show_documents(string $modulepart, string $modulesubdir, string
 			foreach ($fileList as $file) {
 				// Define relative path for download link (depends on module)
 				$relativepath = $file['name']; // Cas general
-				if ($modulesubdir) {
+                if (is_array($modulesubdir)) {
+                    foreach ($modulesubdir as $moduleSubDirSingle) {
+                        if (strstr($file['path'], $moduleSubDirSingle)) {
+                            $relativepath = $moduleSubDirSingle . '/' . $file['name'];
+                        }
+                    }
+                } elseif ($modulesubdir) {
                     $relativepath = $modulesubdir . '/' . $file['name'];
                 }
 
