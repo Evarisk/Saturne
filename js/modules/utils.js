@@ -113,6 +113,37 @@ window.saturne.utils.draganddrop = function() {
 };
 
 /**
+ * Reload specific field element_type and fk_element
+ *
+ * @memberof Saturne_Utils
+ *
+ * @since   1.2.0
+ * @version 1.2.0
+ *
+ * @returns {void}
+ */
+window.saturne.utils.reloadField = function() {
+  let field          = $(this).val();
+  let token          = window.saturne.toolbox.getToken();
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+
+  window.saturne.loader.display($('.field_element_type'));
+  window.saturne.loader.display($('.field_fk_element'));
+
+  $.ajax({
+    url: document.URL + querySeparator + "element_type=" + field + "&token=" + token,
+    type: 'POST',
+    processData: false,
+    contentType: false,
+    success: function(resp) {
+      $('.field_element_type').replaceWith($(resp).find('.field_element_type'));
+      $('.field_fk_element').replaceWith($(resp).find('.field_fk_element'));
+    },
+    error: function() {}
+  });
+};
+
+/**
  * Enforce min and max value on keyup event for field input
  *
  * @memberof Saturne_Utils
@@ -123,7 +154,6 @@ window.saturne.utils.draganddrop = function() {
  * @returns {void}
  */
 window.saturne.utils.enforceMinMax = function(triggeredElement) {
-  console.log('d')
   if (triggeredElement.value !== "") {
     if (parseInt(triggeredElement.value) < parseInt(triggeredElement.min)) {
       triggeredElement.value = triggeredElement.min;
