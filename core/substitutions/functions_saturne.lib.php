@@ -34,26 +34,29 @@
  */
 function saturne_completesubstitutionarray(array &$substitutionarray, Translate $langs, $object)
 {
-    // Global variables definitions
-    global $conf, $db;
-
-    // Get module parameters
-    $moduleName   = GETPOST('module_name', 'alpha');
-    $objectType   = GETPOST('object_type', 'alpha');
-    $documentType = GETPOST('document_type', 'alpha');
-
-    $moduleNameLowerCase = strtolower($moduleName);
-
-    // Load Saturne libraries
-    require_once __DIR__ . '/../../class/saturnesignature.class.php';
-
-    // Initialize technical objects
-    $signatory = new SaturneSignature($db, $moduleNameLowerCase, $object->element);
-
     $signatoryID = GETPOST('signatoryID', 'int');
-    $signatory->fetch($signatoryID);
 
-    $url = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $signatory->signature_url  . '&entity=' . $conf->entity . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType . '&modal_to_open=modal-signature' . $signatory->id, 3);
+    if (GETPOSTISSET('signatoryID') && $signatoryID > 0) {
+        // Global variables definitions
+        global $conf, $db;
 
-    $substitutionarray['__SATURNE_SIGNATORY_URL__'] = '<a href=' . $url . ' target="_blank">' . $langs->transnoentities('SignatureEmailURL') . '</a>';
+        // Get module parameters
+        $moduleName   = GETPOST('module_name', 'alpha');
+        $objectType   = GETPOST('object_type', 'alpha');
+        $documentType = GETPOST('document_type', 'alpha');
+
+        $moduleNameLowerCase = strtolower($moduleName);
+
+        // Load Saturne libraries
+        require_once __DIR__ . '/../../class/saturnesignature.class.php';
+
+        // Initialize technical objects
+        $signatory = new SaturneSignature($db, $moduleNameLowerCase, $object->element);
+
+        $signatory->fetch($signatoryID);
+
+        $url = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $signatory->signature_url  . '&entity=' . $conf->entity . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType . '&modal_to_open=modal-signature' . $signatory->id, 3);
+
+        $substitutionarray['__SATURNE_SIGNATORY_URL__'] = '<a href=' . $url . ' target="_blank">' . $langs->transnoentities('SignatureEmailURL') . '</a>';
+    }
 }
