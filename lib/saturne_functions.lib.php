@@ -233,7 +233,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
             }
 
             foreach ($possibleKeys as $key) {
-                if (isset($object->$key)) {
+                if (isset($object->$key) || isset($object->fields[$key])) {
                     $objectKey = $key;
                     break;
                 }
