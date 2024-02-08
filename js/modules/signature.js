@@ -1,4 +1,4 @@
-/* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2022-2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,19 +19,11 @@
 /**
  * \file    js/modules/signature.js
  * \ingroup saturne
- * \brief   JavaScript file signature for module Saturne.
+ * \brief   JavaScript file signature for module Saturne
  */
-
-/*
- * Gestion des signatures.
- *
- * @since   1.0.0
- * @version 1.0.0
- */
-
 
 /**
- * Initialise l'objet "signature" ainsi que la méthode "init" obligatoire pour la bibliothèque Saturne.
+ * Init signature JS
  *
  * @memberof Saturne_Framework_Signature
  *
@@ -43,28 +35,17 @@
 window.saturne.signature = {};
 
 /**
- * Initialise le canvas signature
+ * Init signature canvas
  *
  * @memberof Saturne_Framework_Signature
  *
  * @since   1.0.0
  * @version 1.0.0
  */
-window.saturne.signature.canvas;
+window.saturne.signature.canvas = {};
 
 /**
- * Initialise le boutton signature
- *
- * @memberof Saturne_Framework_Signature
- *
- *
- * @since   1.0.0
- * @version 1.0.0
- */
-window.saturne.signature.buttonSignature;
-
-/**
- * La méthode appelée automatiquement par la bibliothèque Saturne.
+ * Signature Init
  *
  * @memberof Saturne_Framework_Signature
  *
@@ -78,118 +59,97 @@ window.saturne.signature.init = function() {
 };
 
 /**
- * La méthode contenant tous les événements pour la signature.
+ * Signature event
  *
  * @memberof Saturne_Framework_Signature
  *
  * @since   1.0.0
- * @version 1.0.0
+ * @version 1.3.0
  *
  * @return {void}
  */
 window.saturne.signature.event = function() {
-    $(document).on('click', '.signature-erase', window.saturne.signature.clearCanvas);
-    $(document).on('click', '.signature-validate', window.saturne.signature.createSignature);
-    $(document).on('click', '.auto-download', window.saturne.signature.autoDownloadSpecimen);
-    $(document).on('click', '.copy-signatureurl', window.saturne.signature.copySignatureUrlClipboard);
-    $(document).on('click', '.set-attendance', window.saturne.signature.setAttendance);
+  $(document).on('click', '.signature-erase', window.saturne.signature.clearCanvas);
+  $(document).on('click', '.signature-validate:not(.button-grey)', window.saturne.signature.createSignature);
+  $(document).on('click', '.auto-download', window.saturne.signature.autoDownloadSpecimen);
+  $(document).on('click', '.copy-signatureurl', window.saturne.signature.copySignatureUrlClipboard);
+  $(document).on('click', '.set-attendance', window.saturne.signature.setAttendance);
+  window.saturne.signature.drawSignatureOnCanvas();
+  $(document).on('mouseover', '.canvas-container', function() { window.saturne.toolbox.removeAddButtonClass('signature-validate', 'button-grey', 'button-primary'); });
 };
 
 /**
- * Open modal signature
+ * Draw signature on canvas
  *
  * @memberof Saturne_Framework_Signature
  *
  * @since   1.0.0
- * @version 1.0.0
+ * @version 1.3.0
  *
  * @return {void}
  */
-window.saturne.signature.modalSignatureOpened = function(triggeredElement) {
-    window.saturne.signature.buttonSignature = triggeredElement;
+window.saturne.signature.drawSignatureOnCanvas = function() {
+  let ratio = Math.max(window.devicePixelRatio || 1, 1);
+  window.saturne.signature.canvas = document.querySelector('canvas');
+  window.saturne.signature.canvas.signaturePad = new SignaturePad(window.saturne.signature.canvas, {
+    penColor: 'rgb(0, 0, 0)'
+  });
 
-    let ratio =  Math.max(window.devicePixelRatio || 1, 1);
-    window.saturne.signature.canvas = document.querySelector('#modal-signature' + triggeredElement.attr('value') + ' canvas');
-
-    window.saturne.signature.canvas.signaturePad = new SignaturePad(window.saturne.signature.canvas, {
-        penColor: 'rgb(0, 0, 0)'
-    });
-
-    window.saturne.signature.canvas.width = window.saturne.signature.canvas.offsetWidth * ratio;
-    window.saturne.signature.canvas.height = window.saturne.signature.canvas.offsetHeight * ratio;
-    window.saturne.signature.canvas.getContext('2d').scale(ratio, ratio);
-    window.saturne.signature.canvas.signaturePad.clear();
-
-    let signatureData = $('#signature_data' + triggeredElement.attr('value')).val();
-    window.saturne.signature.canvas.signaturePad.fromDataURL(signatureData);
+  window.saturne.signature.canvas.width  = window.saturne.signature.canvas.offsetWidth * ratio;
+  window.saturne.signature.canvas.height = window.saturne.signature.canvas.offsetHeight * ratio;
+  window.saturne.signature.canvas.getContext('2d').scale(ratio, ratio);
+  window.saturne.signature.canvas.signaturePad.clear();
+  let signatureData = $('.signature-data').attr('data-signatory-signature');
+  window.saturne.signature.canvas.signaturePad.fromDataURL(signatureData);
 };
 
 /**
- * Action Clear sign
+ * Clear sign action
  *
  * @memberof Saturne_Framework_Signature
  *
  * @since   1.0.0
- * @version 1.0.0
+ * @version 1.3.0
  *
  * @return {void}
  */
 window.saturne.signature.clearCanvas = function() {
-    let canvas = $(this).closest('.modal-signature').find('canvas');
-    canvas[0].signaturePad.clear();
+  window.saturne.signature.canvas.signaturePad.clear();
 };
 
 /**
- * Action create signature
+ * Create signature action
  *
  * @memberof Saturne_Framework_Signature
  *
  * @since   1.0.0
- * @version 1.0.0
+ * @version 1.3.0
  *
  * @return {void}
  */
 window.saturne.signature.createSignature = function() {
-    let elementSignatory       = $(this).attr('value');
-    let elementRedirect        = '';
-    let elementCode            = '';
-    let elementZone            = $(this).find('#zone' + elementSignatory).attr('value');
-    let elementConfCAPTCHA     = $('#confCAPTCHA').val();
-    let actionContainerSuccess = $('.noticeSignatureSuccess');
-    let signatoryIDPost        = '';
-    if (elementSignatory !== 0) {
-        signatoryIDPost = '&signatoryID=' + elementSignatory;
-    }
+  let token          = window.saturne.toolbox.getToken();
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
 
-    if (!$(this).closest('.wpeo-modal').find('canvas')[0].signaturePad.isEmpty()) {
-        var signature = $(this).closest('.wpeo-modal').find('canvas')[0].toDataURL();
-    }
+  if (!window.saturne.signature.canvas.signaturePad.isEmpty()) {
+    var signature = window.saturne.signature.canvas.toDataURL();
+  }
 
-    let token          = window.saturne.toolbox.getToken();
-    let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+  window.saturne.loader.display($(this));
 
-    let url   = document.URL + querySeparator + 'action=add_signature' + signatoryIDPost + '&token=' + token;
-    $.ajax({
-        url: url,
-        type: 'POST',
-        processData: false,
-        contentType: 'application/octet-stream',
-        data: JSON.stringify({
-            signature: signature,
-            code: elementCode
-        }),
-        success: function( resp ) {
-            if (elementZone == "private") {
-                actionContainerSuccess.html($(resp).find('.noticeSignatureSuccess .notice-content'));
-                actionContainerSuccess.removeClass('hidden');
-                $('.signatures-container').html($(resp).find('.signatures-container'));
-            } else {
-                window.location.reload();
-            }
-        },
-        error: function ( ) {
-        }
-    });
+  $.ajax({
+    url: document.URL + querySeparator + 'action=add_signature&token=' + token,
+    type: 'POST',
+    processData: false,
+    contentType: 'application/octet-stream',
+    data: JSON.stringify({
+      signature: signature
+    }),
+    success: function(resp) {
+      $('.signature-container').replaceWith($(resp).find('.signature-container'));
+    },
+    error: function() {}
+  });
 };
 
 /**
@@ -198,15 +158,17 @@ window.saturne.signature.createSignature = function() {
  * @memberof Saturne_Framework_Signature
  *
  * @since   1.0.0
- * @version 1.0.0
+ * @version 1.3.0
  *
+ * @param  {string} fileUrl  Url of file to download
+ * @param  {string} filename Name of file to download
  * @return {void}
  */
 window.saturne.signature.download = function(fileUrl, filename) {
-    let a  = document.createElement('a');
-    a.href = fileUrl;
-    a.setAttribute('download', filename);
-    a.click();
+  let a  = document.createElement('a');
+  a.href = fileUrl;
+  a.setAttribute('download', filename);
+  a.click();
 };
 
 /**
@@ -215,36 +177,32 @@ window.saturne.signature.download = function(fileUrl, filename) {
  * @memberof Saturne_Framework_Signature
  *
  * @since   1.0.0
- * @version 1.0.0
+ * @version 1.3.0
  *
  * @return {void}
  */
 window.saturne.signature.autoDownloadSpecimen = function() {
-    let element        = $(this).closest('.file-generation');
-    let token          = window.saturne.toolbox.getToken();
-    let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
-    let url            = document.URL + querySeparator + 'action=builddoc&token=' + token;
-    $.ajax({
-        url: url,
-        type: 'POST',
-        success: function ( ) {
-            let filename = element.find('.specimen-name').attr('value');
-            let path     = element.find('.specimen-path').attr('value');
-            window.saturne.signature.download(path + filename, filename);
-			$('.button-blue.button-disable.wpeo-loader').removeClass('wpeo-loader').removeClass('button-disable').removeClass('button-blue')
-			$('.loader-spin').remove()
-            $.ajax({
-                url: document.URL + querySeparator + 'action=remove_file&token=' + token,
-                type: 'POST',
-                success: function ( ) {
-                },
-                error: function ( ) {
-                }
-            });
-        },
-        error: function ( ) {
-        }
-    });
+  let element        = $(this).closest('.file-generation');
+  let token          = window.saturne.toolbox.getToken();
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+
+  $.ajax({
+    url: document.URL + querySeparator + 'action=builddoc&token=' + token,
+    type: 'POST',
+    success: function(resp) {
+      let filename = element.find('.specimen-name').attr('data-specimen-name');
+      let path     = element.find('.specimen-path').attr('data-specimen-path');
+      window.saturne.signature.download(path + filename, filename);
+      $('.file-generation').replaceWith($(resp).find('.file-generation'));
+      $.ajax({
+          url: document.URL + querySeparator + 'action=remove_file&token=' + token,
+          type: 'POST',
+          success: function() {},
+          error: function() {}
+      });
+    },
+    error: function() {}
+  });
 };
 
 /**
@@ -258,48 +216,47 @@ window.saturne.signature.autoDownloadSpecimen = function() {
  * @return {void}
  */
 window.saturne.signature.copySignatureUrlClipboard = function() {
-    let signatureUrl = $(this).attr('data-signature-url');
-    navigator.clipboard.writeText(signatureUrl).then(() => {
-        $(this).attr('class', 'fas fa-check copy-signatureurl');
-        $(this).css('color', '#59ed9c');
-        $(this).closest('.copy-signatureurl-container').find('.copied-to-clipboard').attr('style', '');
-        $(this).closest('.copy-signatureurl-container').find('.copied-to-clipboard').fadeOut(2500, () => {
-            $(this).attr('class', 'fas fa-clipboard copy-signatureurl');
-            $(this).css('color', '#666');
-        });
+  let signatureUrl = $(this).attr('data-signature-url');
+  navigator.clipboard.writeText(signatureUrl).then(() => {
+    $(this).attr('class', 'fas fa-check copy-signatureurl');
+    $(this).css('color', '#59ed9c');
+    $(this).closest('.copy-signatureurl-container').find('.copied-to-clipboard').attr('style', '');
+    $(this).closest('.copy-signatureurl-container').find('.copied-to-clipboard').fadeOut(2500, () => {
+      $(this).attr('class', 'fas fa-clipboard copy-signatureurl');
+      $(this).css('color', '#666');
     });
+  });
 };
 
 /**
- * set Attendance signatory
+ * Set attendance signatory
  *
  * @memberof Saturne_Framework_Signature
  *
  * @since   1.0.0
- * @version 1.0.0
+ * @version 1.3.0
  *
  * @return {void}
  */
 window.saturne.signature.setAttendance = function() {
-    let signatoryID       = $(this).closest('.attendance-container').find('input[name="signatoryID"]').val();
-    let attendance        = $(this).attr('value');
-    let token             = window.saturne.toolbox.getToken();
-    let querySeparator    = window.saturne.toolbox.getQuerySeparator(document.URL);
-    let urlWithoutHashtag = String(document.location.href).replace(/#formmail/, "");
-    let url = urlWithoutHashtag + querySeparator + 'action=set_attendance&token=' + token;
-    $.ajax({
-        url: url,
-        type: 'POST',
-        processData: false,
-        contentType: '',
-        data: JSON.stringify({
-            signatoryID: signatoryID,
-            attendance: attendance
-        }),
-        success: function (resp) {
-            $('.signatures-container').html($(resp).find('.signatures-container'));
-        },
-        error: function () {
-        }
-    });
+  let signatoryID       = $(this).closest('.attendance-container').find('input[name="signatoryID"]').val();
+  let attendance        = $(this).attr('value');
+  let token             = window.saturne.toolbox.getToken();
+  let querySeparator    = window.saturne.toolbox.getQuerySeparator(document.URL);
+  let urlWithoutHashtag = String(document.location.href).replace(/#formmail/, "");
+
+  $.ajax({
+    url: urlWithoutHashtag + querySeparator + 'action=set_attendance&token=' + token,
+    type: 'POST',
+    processData: false,
+    contentType: '',
+    data: JSON.stringify({
+      signatoryID: signatoryID,
+      attendance: attendance
+    }),
+    success: function(resp) {
+      $('.signatures-container').html($(resp).find('.signatures-container'));
+    },
+    error: function() {}
+  });
 };

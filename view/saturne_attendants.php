@@ -325,16 +325,9 @@ if ($id > 0 || !empty($ref) && empty($action)) {
             </div>
             <a class="butAction" href="<?php echo $backtocard ?>"><i class="fas fa-check"></i> <?php echo $langs->trans('GoToValidate', $langs->transnoentities('The' . ucfirst($object->element))) ?></a>;
         </div>
-    <?php endif; ?>
-        <div class="noticeSignatureSuccess wpeo-notice notice-success hidden">
-            <div class="notice-content">
-                <div class="notice-title"><?php echo $langs->trans('AddSignatureSuccess') ?></div>
-                <div class="notice-subtitle"><?php echo $langs->trans('AddSignatureSuccessText') . GETPOST('signature_id')?></div>
-            </div>
-        </div>
-    <?php
-    print '</div>';
+    <?php endif;
 
+    print '</div>';
     print '<div class="signatures-container">';
 
     if ($object->status == $object::STATUS_VALIDATED && $permissiontoadd) {
@@ -525,7 +518,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
             foreach ($signatoriesByRole as $signatoryRole) {
                 foreach ($signatoryRole as $attendant) {
                     $mesg .= $outputlangs->trans($attendant->role) . ' : ' . strtoupper($attendant->lastname) . ' ' . $attendant->firstname . '<br>';
-                    $signatureUrl = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $attendant->signature_url . '&entity=' . $conf->entity . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType . '&modal_to_open=modal-signature' . $attendant->id, 3);
+                    $signatureUrl = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $attendant->signature_url . '&entity=' . $conf->entity . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
                     $mesg .= '<a href=' . $signatureUrl . ' target="_blank">' . $signatureUrl . '</a><br><br>';
                 }
             }

@@ -27,8 +27,6 @@ DeletedTrigger          = Participant %s supprimé
 
 # SetEventMessage - Notice info
 BeCareful               = Attention
-AddSignatureSuccess     = Signature du participant réussie
-AddSignatureSuccessText = La signature a bien été enregistrée pour le document
 AddAttendantMessage     = Ajout du participant : %s
 DeleteAttendantMessage  = Suppression du participant : %s
 SignAttendantMessage    = Le participant %s a signé
@@ -86,4 +84,5 @@ Signatory           = Signataire
 Responsible         = Responsable
 
 # Public interface - Interface publique
-FullName = NOM Prénom
+PublicDownloadDocument = Pour télécharger votre "%s", Référence : "%s"
+ThanksForSignDocument  = Merci d'avoir signé le document, vous pouvez fermer la page

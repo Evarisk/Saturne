@@ -27,8 +27,6 @@ DeletedTrigger          = Attendant %s deleted
 
 # SetEventMessage
 BeCareful               = Attention
-AddSignatureSuccess     = Successful attendant signature
-AddSignatureSuccessText = The signature has been registered for the document
 AddAttendantMessage     = Add attendant : %s
 DeleteAttendantMessage  = Attendant deletion: %s
 SignAttendantMessage    = The attendant %s signed
@@ -85,4 +83,5 @@ Signatory           = Signatory
 Responsible         = Responsible
 
 # Public interface
-FullName = Last name First name
+PublicDownloadDocument = To download your "%s", Reference: "%s"
+ThanksForSignDocument  = Thank you for signing the document, you may now close the page
