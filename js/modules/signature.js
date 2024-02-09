@@ -75,7 +75,9 @@ window.saturne.signature.event = function() {
   $(document).on('click', '.copy-signatureurl', window.saturne.signature.copySignatureUrlClipboard);
   $(document).on('click', '.set-attendance', window.saturne.signature.setAttendance);
   window.saturne.signature.drawSignatureOnCanvas();
-  $(document).on('mouseover', '.canvas-container', function() { window.saturne.toolbox.removeAddButtonClass('signature-validate', 'button-grey', 'button-primary'); });
+  $(document).on('touchstart mousedown', '.canvas-container', function () {
+    window.saturne.toolbox.removeAddButtonClass('signature-validate', 'button-grey', 'button-primary');
+  });
 };
 
 /**
@@ -115,6 +117,7 @@ window.saturne.signature.drawSignatureOnCanvas = function() {
  */
 window.saturne.signature.clearCanvas = function() {
   window.saturne.signature.canvas.signaturePad.clear();
+  window.saturne.toolbox.removeAddButtonClass('signature-validate', 'button-primary', 'button-grey');
 };
 
 /**
