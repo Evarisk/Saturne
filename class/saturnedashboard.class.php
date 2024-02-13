@@ -128,7 +128,6 @@ class SaturneDashboard
             print ajax_combobox('boxcombo');
         }
         print '</div>';
-        print '<div class="fichecenter">';
 
         if (is_array($dashboards['widgets']) && !empty($dashboards['widgets'])) {
             $widget = '';
@@ -261,7 +260,6 @@ class SaturneDashboard
             }
         }
 
-        print '</div></div>';
         print '</form>';
     }
 }
