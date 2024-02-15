@@ -23,7 +23,7 @@
 
 /**
  * The following vars must be defined :
- * Global     : $conf, $db
+ * Global     : $conf, $db, $langs
  * Parameters : $action
  * Variable   : $moduleName, $permissiontoread
  */
@@ -31,7 +31,11 @@
 if ($action == 'update_mask' && $permissiontoread) {
     $documentMaskConst = GETPOST('mask', 'alpha');
     $documentMask      = GETPOST('addon_value', 'alpha');
-    dolibarr_set_const($db, $documentMaskConst, $documentMask, 'chaine', 0, '', $conf->entity);
+
+    if (strlen($documentMask) < 1 || dolibarr_set_const($db, $documentMaskConst, $documentMask, 'chaine', 0, '', $conf->entity) == -1) {
+        setEventMessages($langs->trans("Error"), null, 'errors');
+        return;
+    }
 
     setEventMessage('SavedConfig');
     header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
