@@ -32,12 +32,12 @@ if ($action == 'update_mask' && $permissiontoread) {
     $documentMaskConst = GETPOST('mask', 'alpha');
     $documentMask      = GETPOST('addon_value', 'alpha');
 
-    if (strlen($documentMask) < 1 || dolibarr_set_const($db, $documentMaskConst, $documentMask, 'chaine', 0, '', $conf->entity) == -1) {
-        setEventMessages($langs->trans("Error"), null, 'errors');
-        return;
+    if (dol_strlen($documentMask) < 1) {
+        setEventMessages($langs->trans('ErrorSavedConfig'), [], 'errors');
+    } else {
+        dolibarr_set_const($db, $documentMaskConst, $documentMask, 'chaine', 0, '', $conf->entity);
+        setEventMessage('SavedConfig');
+        header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
+        exit;
     }
-
-    setEventMessage('SavedConfig');
-    header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
-    exit;
 }
