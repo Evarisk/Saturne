@@ -32,4 +32,17 @@
       }
     }
   }
+
+  .signature-user {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5em;
+
+    .signature-image, .signature-button {
+      width: 50%;
+      height: 100%;
+    }
+  }
 }

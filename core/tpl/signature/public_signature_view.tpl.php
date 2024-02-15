@@ -40,22 +40,21 @@
                 <input type="hidden" class="specimen-name" data-specimen-name="<?php echo $objectType . '_specimen_' . $trackID . '.odt'; ?>">
                 <input type="hidden" class="specimen-path" data-specimen-path="<?php echo $path; ?>">
                 <?php if (GETPOSTISSET('document_type') && $fileExists) : ?>
-                    <div class="wpeo-button button-primary auto-download"><i class="fas fa-download"></i></div>
+                    <div class="wpeo-button button-square-50 button-primary auto-download"><i class="fas fa-download"></i></div>
                 <?php else : ?>
-                    <div class="wpeo-button button-grey"><i class="fas fa-download"></i></div>
+                    <div class="wpeo-button button-square-50 button-grey"><i class="fas fa-download"></i></div>
                 <?php endif; ?>
             </div>
-            <button type="submit" class="wpeo-button button-grey" onclick="window.close();"><i class="fas fa-times"></i></button>
+            <button type="submit" class="wpeo-button button-square-50 button-grey" onclick="window.close();"><i class="fas fa-times"></i></button>
         </div>
         <div class="signature">
             <div class="signature-element">
                 <?php if (empty($signatory->signature) && $object->status == $object::STATUS_VALIDATED && $signatory->attendance != SaturneSignature::ATTENDANCE_ABSENT) : ?>
-                    <input type="hidden" class="signature-data" data-signatory-signature="<?php echo $signatory->signature; ?>">
                     <canvas class="canvas-container" style="height: 98%; width: 100%; border: #0b419b solid 2px"></canvas>
-                    <div class="signature-erase wpeo-button button-grey" style="font-size: 30px;"><span><i class="fas fa-eraser"></i></span></div>
-                    <div class="signature-validate wpeo-button button-grey" style="font-size: 30px;"><span><i class="fas fa-file-signature"></i></span></div>
-                <?php elseif (!empty($signatory->signature)) : ?>
-                    <img src='<?php echo $signatory->signature ?>' width="100px" height="100px" alt="">
+                    <div class="signature-erase wpeo-button button-square-50 button-grey"><span><i class="fas fa-eraser"></i></span></div>
+                    <div class="signature-validate wpeo-button button-square-50 button-grey"><span><i class="fas fa-file-signature"></i></span></div>
+                <?php else : ?>
+                    <img src='<?php echo $signatory->signature ?>' alt="">
                     <span><?php echo $langs->trans('ThanksForSignDocument'); ?></span>
                     <button type="submit" class="wpeo-button button-primary" onclick="window.close();"><?php echo $langs->trans('CloseModal'); ?></button>
                 <?php endif; ?>

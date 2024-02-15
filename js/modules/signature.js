@@ -74,7 +74,10 @@ window.saturne.signature.event = function() {
   $(document).on('click', '.auto-download', window.saturne.signature.autoDownloadSpecimen);
   $(document).on('click', '.copy-signatureurl', window.saturne.signature.copySignatureUrlClipboard);
   $(document).on('click', '.set-attendance', window.saturne.signature.setAttendance);
-  window.saturne.signature.drawSignatureOnCanvas();
+  var scriptElement = document.querySelector('script[src*="signature-pad.min.js"]');
+  if (scriptElement) {
+    window.saturne.signature.drawSignatureOnCanvas();
+  }
   $(document).on('touchstart mousedown', '.canvas-container', function () {
     window.saturne.toolbox.removeAddButtonClass('signature-validate', 'button-grey', 'button-primary');
   });
@@ -101,8 +104,7 @@ window.saturne.signature.drawSignatureOnCanvas = function() {
   window.saturne.signature.canvas.height = window.saturne.signature.canvas.offsetHeight * ratio;
   window.saturne.signature.canvas.getContext('2d').scale(ratio, ratio);
   window.saturne.signature.canvas.signaturePad.clear();
-  let signatureData = $('.signature-data').attr('data-signatory-signature');
-  window.saturne.signature.canvas.signaturePad.fromDataURL(signatureData);
+  window.saturne.signature.canvas.signaturePad.fromDataURL();
 };
 
 /**
@@ -148,8 +150,8 @@ window.saturne.signature.createSignature = function() {
     data: JSON.stringify({
       signature: signature
     }),
-    success: function(resp) {
-      $('.signature-container').replaceWith($(resp).find('.signature-container'));
+    success: function() {
+      window.location.reload();
     },
     error: function() {}
   });

@@ -297,9 +297,8 @@ if (empty($resHook)) {
 
 $title   = $langs->trans('Attendants') . ' - ' . $langs->trans(ucfirst($object->element));
 $helpUrl = 'FR:Module_' . $moduleName;
-$morejs  = ['/saturne/js/includes/signature-pad.min.js'];
 
-saturne_header(0,'', $title, $helpUrl, '', 0, 0, $morejs);
+saturne_header(0,'', $title, $helpUrl);
 
 if ($id > 0 || !empty($ref) && empty($action)) {
     $object->fetch_optionals();
