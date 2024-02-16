@@ -55,11 +55,11 @@ class SaturneDashboard
     /**
      * Load dashboard info
      *
-     * @param array  $moreParams Parameters for load dashboard info
+     * @param array|null  $moreParams Parameters for load dashboard info
      *
      * @return array
      */
-    public function load_dashboard(array $moreParams = []): array
+    public function load_dashboard(?array $moreParams = []): array
     {
         require_once __DIR__ . '/../../' . $this->module . '/class/' . $this->module . 'dashboard.class.php';
 
@@ -88,12 +88,12 @@ class SaturneDashboard
     /**
      * Show dashboard
      *
-     * @param array      $moreParams    Parameters for load dashboard info
+     * @param array|null      $moreParams    Parameters for load dashboard info
      *
      * @return void
      * @throws Exception
      */
-    public function show_dashboard(array $moreParams = [])
+    public function show_dashboard(?array $moreParams = [])
     {
         global $conf, $form, $langs, $moduleNameLowerCase, $user;
 
@@ -128,7 +128,6 @@ class SaturneDashboard
             print ajax_combobox('boxcombo');
         }
         print '</div>';
-        print '<div class="fichecenter">';
 
         if (is_array($dashboards['widgets']) && !empty($dashboards['widgets'])) {
             $widget = '';
@@ -261,7 +260,6 @@ class SaturneDashboard
             }
         }
 
-        print '</div></div>';
         print '</form>';
     }
 }
