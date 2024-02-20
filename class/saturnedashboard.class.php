@@ -148,10 +148,17 @@ class SaturneDashboard
                         for ($i = 0; $i < count($dashboardWidget['label']); $i++) {
                             if (!empty($dashboardWidget['label'][$i])) {
                                 $widget .= '<span class=""><strong>' . $dashboardWidget['label'][$i] . ' : ' . '</strong>';
-                                $widget .= '<span class="classfortooltip badge badge-info" title="' . $dashboardWidget['label'][$i] . ' : ' . $dashboardWidget['content'][$i] . '" >' . $dashboardWidget['content'][$i] . '</span>';
-                                $widget .= (!empty($dashboardWidget['tooltip'][$i]) ? $form->textwithpicto('', $langs->transnoentities($dashboardWidget['tooltip'][$i])) : '') . '</span>';
+                                if (!empty($dashboardWidget['content'][$i])) {
+                                    $widget .= '<span class="classfortooltip badge badge-info">' . $dashboardWidget['content'][$i] . '</span>';
+                                    $widget .= (!empty($dashboardWidget['tooltip'][$i]) ? $form->textwithpicto('', $langs->transnoentities($dashboardWidget['tooltip'][$i])) : '') . '</span>';
+                                } else {
+                                    $widget .= $dashboardWidget['customContent'][$i];
+                                }
                                 $widget .= '<br>';
                             }
+                        }
+                        if (isset($dashboardWidget['link'])) {
+                            $widget .= $dashboardWidget['link'];
                         }
                         $widget .= '</div>';
                         $widget .= '</div><!-- /.info-box-lines --></div><!-- /.info-box-content -->';
