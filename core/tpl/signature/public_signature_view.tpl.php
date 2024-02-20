@@ -26,7 +26,7 @@
  * Global     : $conf, $langs
  * Parameters : $objectType, $trackID
  * Objects    : $object, $signatory
- * Variable   : $moduleNameLowerCase, $fileExists
+ * Variable   : $fileExists, $moduleNameLowerCase, $moreParams
  */ ?>
 
 <div class="signature-container">
@@ -50,9 +50,9 @@
         <div class="signature">
             <div class="signature-element">
                 <?php if (empty($signatory->signature) && $object->status == $object::STATUS_VALIDATED && $signatory->attendance != SaturneSignature::ATTENDANCE_ABSENT) : ?>
-                    <canvas class="canvas-container" style="height: 98%; width: 100%; border: #0b419b solid 2px"></canvas>
+                    <canvas class="canvas-container canvas-signature" style="height: 98%; width: 100%; border: #0b419b solid 2px"></canvas>
                     <div class="signature-erase wpeo-button button-square-50 button-grey"><span><i class="fas fa-eraser"></i></span></div>
-                    <div class="signature-validate wpeo-button button-square-50 button-grey"><span><i class="fas fa-file-signature"></i></span></div>
+                    <div class="signature-validate wpeo-button button-square-50 button-grey <?php echo $moreParams['moreCSS'] ?? ''; ?>"><span><i class="fas fa-file-signature"></i></span></div>
                 <?php else : ?>
                     <img src='<?php echo $signatory->signature ?>' alt="">
                     <span><?php echo $langs->trans('ThanksForSignDocument'); ?></span>

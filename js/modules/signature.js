@@ -78,7 +78,7 @@ window.saturne.signature.event = function() {
   if (scriptElement) {
     window.saturne.signature.drawSignatureOnCanvas();
   }
-  $(document).on('touchstart mousedown', '.canvas-container', function () {
+  $(document).on('touchstart mousedown', '.canvas-signature', function () {
     window.saturne.toolbox.removeAddButtonClass('signature-validate', 'button-grey', 'button-primary');
   });
 };
@@ -95,7 +95,7 @@ window.saturne.signature.event = function() {
  */
 window.saturne.signature.drawSignatureOnCanvas = function() {
   let ratio = Math.max(window.devicePixelRatio || 1, 1);
-  window.saturne.signature.canvas = document.querySelector('canvas');
+  window.saturne.signature.canvas = document.querySelector('.canvas-signature');
   window.saturne.signature.canvas.signaturePad = new SignaturePad(window.saturne.signature.canvas, {
     penColor: 'rgb(0, 0, 0)'
   });
