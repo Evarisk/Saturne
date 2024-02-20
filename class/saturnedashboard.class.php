@@ -150,11 +150,12 @@ class SaturneDashboard
                             if (!empty($dashboardWidget['label'][$i])) {
                                 $widget .= '<span class=""><strong>' . $dashboardWidget['label'][$i] . ' : ' . '</strong>';
                                 if (!empty($dashboardWidget['content'][$i])) {
-                                    $widget .= '<span class="classfortooltip badge badge-info" title="' . $dashboardWidget['label'][$i] . ' : ' . $dashboardWidget['content'][$i] . '" >' . $dashboardWidget['content'][$i] . '</span>';
+                                    $widget .= '<span class="classfortooltip badge badge-info">' . $dashboardWidget['content'][$i] . '</span>';
                                     $widget .= (!empty($dashboardWidget['tooltip'][$i]) ? $form->textwithpicto('', $langs->transnoentities($dashboardWidget['tooltip'][$i])) : '') . '</span>';
                                     $widget .= '<br>';
                                 } else {
                                     $widget .= $dashboardWidget['customContent'][$i];
+                                    $widget .= '<br>';
                                 }
                             }
                         }
