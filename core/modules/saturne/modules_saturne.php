@@ -242,9 +242,9 @@ abstract class CustomModeleNumRefSaturne extends ModeleNumRefSaturne
         $confName = strtoupper($moduleNameLowerCase . '_' . $modName . '_ADDON');
 
         $texte = $langs->trans('GenericNumRefModelDesc')."<br>\n";
-        $texte .= '<form action="'.$_SERVER["PHP_SELF"].'" method="POST">';
+        $texte .= '<form action="' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleNameLowerCase . '" method="POST">';
         $texte .= '<input type="hidden" name="token" value="'.newToken().'">';
-        $texte .= '<input type="hidden" name="action" value="updateMask">';
+        $texte .= '<input type="hidden" name="action" value="update_mask">';
         $texte .= '<input type="hidden" name="mask" value="'. $confName .'">';
         $texte .= '<table class="nobordernopadding" width="100%">';
 
