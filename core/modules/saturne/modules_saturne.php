@@ -784,8 +784,12 @@ class SaturneDocumentModel extends CommonDocGenerator
                 $fileName      = $newFileTmp . '.' . $newFileFormat;
                 $file          = $dir . '/' . $fileName;
 
-                $objectDocument->last_main_doc = $fileName;
-                $objectDocument->update($moreParam['user'], true);
+                $objectDocument->setValueFrom('last_main_doc', $fileName, '', null, '', '', null, '', '');
+                if (!empty($objectDocument->errors)) {
+                    $objectDocument->errors[] = $objectDocument->ref;
+                    setEventMessages($objectDocument->error, $objectDocument->errors, 'errors');
+                    return -1;
+                }
 
                 dol_mkdir($conf->$moduleNameLowerCase->dir_temp);
 
