@@ -230,7 +230,7 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 							$relativefile = preg_replace("/'/", "\\'", $relativefile);
 							$urladvanced  = getAdvancedPreviewUrl($modulepart, $relativefile, 0, 'entity=' . $conf->entity);
 							if ($urladvanced) {
-                                $return .= '<a class="wpeo-button button-transparent button-square-' . $maxWidth . ' clicked-photo-preview" href="' . $urladvanced . '">';
+                                $return .= '<a class="wpeo-button button-transparent clicked-photo-preview" href="' . $urladvanced . '">';
                             }
 							else {
                                 $return .= '<a href="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" class="aphoto" target="_blank">';
