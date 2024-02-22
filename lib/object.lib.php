@@ -430,6 +430,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'post_name'      => 'fk_project',
             'link_name'      => 'project',
             'tab_type'       => 'project',
+            'table_element'  => 'projet',
             'name_field'     => 'ref, title',
             'hook_name_card' => 'projectcard',
             'hook_name_list' => 'projectlist',
@@ -705,4 +706,44 @@ function saturne_require_objects_mod(array $numberingModulesNames, string $modul
     }
 
     return $variablesToReturn;
+}
+
+/**
+ * Get list of all custom class/objects
+ *
+ * @return array      Array of custom class name | empty array if nothing found
+ * @throws Exception
+ */
+function saturne_get_custom_class(): array
+{
+    $customClassArray = [];
+
+    $path    = DOL_DOCUMENT_ROOT . '/custom';
+    $modules = dol_dir_list($path, 'directories');
+
+    if (is_array($modules) && !empty($modules)) {
+        foreach ($modules as $module) {
+            $classPath      = $module['fullname'] . '/class';
+            $classFileArray = dol_dir_list($classPath, 'files', 1,'.class.php');
+
+            if (is_array($classFileArray) && !empty($classFileArray)) {
+                foreach ($classFileArray as $classFile) {
+                    $filePath    = $classFile['fullname'];
+                    $fileContent = file_get_contents($filePath);
+
+                    if (!file_exists($filePath) && $fileContent === false) {
+                        continue;
+                    }
+                    $fileContent = preg_replace(['!/\*.*?\*/!s', '/\n\s*\/\/.*$/m', '/\n\s*#.*$/m'], '', $fileContent);
+
+                    $pattern = '/class\s+([a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*)/';
+                    if (preg_match($pattern, $fileContent, $matches)) {
+                        $customClassArray[] = $matches[1];
+                    }
+                }
+            }
+        }
+    }
+
+    return $customClassArray;
 }
