@@ -784,8 +784,8 @@ class SaturneDocumentModel extends CommonDocGenerator
                 $fileName      = $newFileTmp . '.' . $newFileFormat;
                 $file          = $dir . '/' . $fileName;
 
-                $objectDocument->setValueFrom('last_main_doc', $fileName, '', null, '', '', null, '', '');
-                if (!empty($objectDocument->errors)) {
+                $objectDocument->setValueFrom('last_main_doc', $fileName, '', null, '', '', $moreParam['user'], '', '');
+                if (!empty($objectDocument->error)) {
                     $objectDocument->errors[] = $objectDocument->ref;
                     setEventMessages($objectDocument->error, $objectDocument->errors, 'errors');
                     return -1;
