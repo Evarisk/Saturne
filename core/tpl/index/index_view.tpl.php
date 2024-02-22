@@ -157,9 +157,8 @@ if (empty($reshook)) {
     print $hookmanager->resPrint;
 }
 
-if ((!isset($showDashboard) || $showDashboard === true)) {
-    $moreParams = !empty($moreParams) ? $moreParams : [];
-    $dashboard->show_dashboard($moreParams);
+if (!isset($showDashboard) || $showDashboard === true) {
+    $dashboard->show_dashboard($moreParams ?? []);
 }
 
 // End of page
