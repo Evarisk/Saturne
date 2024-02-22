@@ -62,11 +62,15 @@ if (is_dir($dir)) {
                             print '</td>';
 
                             print '<td class="center">';
-                            $confType = strtoupper($moduleName) . '_' . strtoupper($elementType) . '_ADDON';
+
+                            $confType     = strtoupper($moduleName) . '_' . strtoupper($elementType) . '_ADDON';
+                            $confStandard = 'mod_' . $elementType . '_standard';
+                            $constName    = GETPOST('const', 'alpha');
+
                             if ($conf->global->$confType == $file || $conf->global->$confType . '.php' == $file) {
-                                print img_picto($langs->trans('Activated'), 'switch_on');
+                                print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setmod&value=' . preg_replace('/\.php$/', '', $file) . '&const=' . $conf->global->$confType . '&label=' . urlencode($module->name) . '&module_name=' . $moduleName . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), strpos($constName, $conf->global->$confType) !== false ? 'switch_on' : 'switch_off') . '</a>';
                             } else {
-                                print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setmod&value=' . preg_replace('/\.php$/', '', $file) . '&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&module_name=' . $moduleName . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), 'switch_off') . '</a>';
+                                print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setmod&value=' . preg_replace('/\.php$/', '', $file) . '&const=' . $confStandard . '&label=' . urlencode($module->name) . '&module_name=' . $moduleName . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), strpos($constName, 'standard') !== false ? 'switch_on' : 'switch_off') . '</a>';
                             }
                             print '</td>';
 
