@@ -65,6 +65,7 @@ Sign                       = Signer
 Erase                      = Effacer
 AttendantTableModeSimple   = Vue simplifiée
 AttendantTableModeAdvanced = Vue avancée
+SignatureSaveButton        = Enregistrer la signature
 
 # Data - Donnée
 Attendant           = Participant
@@ -85,4 +86,4 @@ Responsible         = Responsable
 
 # Public interface - Interface publique
 PublicDownloadDocument = Pour télécharger votre "%s", Référence : "%s"
-ThanksForSignDocument  = Merci d'avoir signé le document, vous pouvez fermer la page
+ThanksForSignDocument  = Signature enregistrée

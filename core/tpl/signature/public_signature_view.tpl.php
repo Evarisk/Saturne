@@ -29,38 +29,71 @@
  * Variable   : $fileExists, $moduleNameLowerCase, $moreParams
  */ ?>
 
-<div class="signature-container">
+<div class="public-card__container">
     <?php if (!empty($conf->global->SATURNE_ENABLE_PUBLIC_INTERFACE)) : ?>
         <input type="hidden" name="token" value="<?php echo newToken(); ?>">
-        <div class="informations">
-            <span><?php echo $langs->trans('Hello') . ' ' . dol_strtoupper($signatory->lastname) . ' ' . ucfirst($signatory->firstname); ?></span>
-            <span><?php echo $langs->trans('PublicDownloadDocument', $langs->trans($objectType), $object->ref . ' ' . $object->label); ?></span>
-            <div class="file-generation">
-                <?php $path = DOL_MAIN_URL_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/'; ?>
-                <input type="hidden" class="specimen-name" data-specimen-name="<?php echo $objectType . '_specimen_' . $trackID . '.odt'; ?>">
-                <input type="hidden" class="specimen-path" data-specimen-path="<?php echo $path; ?>">
-                <?php if (GETPOSTISSET('document_type') && $fileExists) : ?>
-                    <div class="wpeo-button button-square-50 button-primary auto-download"><i class="fas fa-download"></i></div>
-                <?php else : ?>
-                    <div class="wpeo-button button-square-50 button-grey"><i class="fas fa-download"></i></div>
-                <?php endif; ?>
+
+        <div class="public-card__header wpeo-gridlayout grid-2 grid-gap-2">
+            <div class="header-information">
+                <a href="#" onclick="window.close();" class="information-back">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg>
+                    <?php echo $langs->trans('Back'); ?>
+                </a>
+                <div class="information-title"><?php echo $langs->trans('ElectronicSign'); ?></div>
+                <div class="information-user"><?php echo dol_strtoupper($signatory->lastname) . ' ' . ucfirst($signatory->firstname); ?></div>
             </div>
-            <button type="submit" class="wpeo-button button-square-50 button-grey" onclick="window.close();"><i class="fas fa-times"></i></button>
+
+            <div class="header-objet">
+                <div class="objet-container">
+                    <div class="objet-info">
+                        <div class="objet-type"><?php echo $langs->trans($objectType); ?></div>
+                        <div class="objet-label"><?php echo $object->ref . ' ' . $object->label; ?></div>
+                    </div>
+                    <div class="objet-actions file-generation">
+                        <?php $path = DOL_MAIN_URL_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/'; ?>
+                        <input type="hidden" class="specimen-name" data-specimen-name="<?php echo $objectType . '_specimen_' . $trackID . '.odt'; ?>">
+                        <input type="hidden" class="specimen-path" data-specimen-path="<?php echo $path; ?>">
+                        <?php if (GETPOSTISSET('document_type') && $fileExists) : ?>
+                            <div class="wpeo-button button-square-40 button-rounded button-primary auto-download"><i class="fas fa-download"></i></div>
+                        <?php else : ?>
+                            <div class="wpeo-button button-square-40 button-rounded button-grey"><i class="fas fa-download"></i></div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="signature">
+
+        <div class="public-card__content signature">
+            <i class="fas fa-pen"></i> <?php echo $langs->trans('SignatureLabelInfo'); ?>
             <div class="signature-element">
                 <?php if (empty($signatory->signature) && $object->status == $object::STATUS_VALIDATED && $signatory->attendance != SaturneSignature::ATTENDANCE_ABSENT) : ?>
-                    <canvas class="canvas-container canvas-signature" style="height: 98%; width: 100%; border: #0b419b solid 2px"></canvas>
-                    <div class="signature-erase wpeo-button button-square-50 button-grey"><span><i class="fas fa-eraser"></i></span></div>
-                    <div class="signature-validate wpeo-button button-square-50 button-grey <?php echo $moreParams['moreCSS'] ?? ''; ?>"><span><i class="fas fa-file-signature"></i></span></div>
+                    <canvas class="canvas-container canvas-signature"></canvas>
+                    <div class="signature-erase wpeo-button button-square-40 button-rounded button-grey"><span><i class="fas fa-eraser"></i></span></div>
                 <?php else : ?>
-                    <img src='<?php echo $signatory->signature ?>' alt="">
-                    <span><?php echo $langs->trans('ThanksForSignDocument'); ?></span>
-                    <button type="submit" class="wpeo-button button-primary" onclick="window.close();"><?php echo $langs->trans('CloseModal'); ?></button>
+                    <div class="canvas-container">
+                        <img src='<?php echo $signatory->signature ?>' alt="">
+                    </div>
                 <?php endif; ?>
             </div>
+        </div>
+
+        <div class="public-card__footer">
+            <?php if (empty($signatory->signature) && $object->status == $object::STATUS_VALIDATED && $signatory->attendance != SaturneSignature::ATTENDANCE_ABSENT) : ?>
+                <div class="signature-validate wpeo-button button-grey <?php echo $moreParams['moreCSS'] ?? ''; ?>"><i class="fas fa-save"></i> <?php echo $langs->trans('SignatureSaveButton'); ?></div>
+            <?php endif; ?>
         </div>
     <?php else :
         print '<div class="center">' . $langs->trans('SignaturePublicInterfaceForbidden') . '</div>';
     endif; ?>
 </div>
+
+<?php //if (empty($signatory->signature) && $object->status == $object::STATUS_VALIDATED && $signatory->attendance != SaturneSignature::ATTENDANCE_ABSENT) : ?>
+<?php if ($signatory->signature) : ?>
+    <div class="public-card__confirmation">
+        <div class="confirmation-container">
+            <i class="confirmation-icon fas fa-check-circle"></i>
+            <div class="confirmation-title"><?php echo $langs->trans('ThanksForSignDocument'); ?></div>
+            <button type="submit" class="confirmation-close wpeo-button button-primary" onclick="window.close();"><?php echo $langs->trans('CloseModal'); ?></button>
+        </div>
+    </div>
+<?php endif; ?>

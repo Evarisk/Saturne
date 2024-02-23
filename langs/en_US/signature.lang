@@ -64,6 +64,7 @@ Sign                       = Sign
 Erase                      = Erase
 AttendantTableModeSimple   = Simplified view
 AttendantTableModeAdvanced = Advanced view
+SignatureSaveButton        = Save signature
 
 # Data
 Attendant           = Attendant
@@ -84,4 +85,4 @@ Responsible         = Responsible
 
 # Public interface
 PublicDownloadDocument = To download your "%s", Reference: "%s"
-ThanksForSignDocument  = Thank you for signing the document, you may now close the page
+ThanksForSignDocument  = Signature saved

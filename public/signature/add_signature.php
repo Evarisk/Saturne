@@ -136,7 +136,7 @@ $moreCSS = ['/saturne/css/saturne.min.css'];
 $conf->dol_hide_topmenu  = 1;
 $conf->dol_hide_leftmenu = 1;
 
-saturne_header(0,'', $title, '', '', 0, 0, $moreJS, $moreCSS);
+saturne_header(0,'', $title, '', '', 0, 0, $moreJS, $moreCSS, '', 'page-public-card page-signature');
 
 require_once __DIR__ . '/../../core/tpl/signature/public_signature_view.tpl.php';
 
