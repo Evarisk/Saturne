@@ -133,7 +133,7 @@ class SaturneMail extends SaturneObject
     /**
      * @var string Module name
      */
-    public string $module;
+    public $module;
 
     /**
      * @var string Template type
