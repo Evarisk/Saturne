@@ -198,21 +198,12 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
     }
 
     $saturneMoreHtmlRef .= '<div class="refidno">';
-
     $saturneMoreHtmlRef .= $moreHtmlRef;
 
-    $parameters = [];
-    $resHook    = $hookmanager->executeHooks('saturneBannerTab', $parameters, $object); // Note that $action and $object may have been modified by some hooks
-    if ($resHook < 0) {
-        setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
-    } else {
-        if (!empty($hookmanager->resArray)) {
-            list($customMoreHtmlRef, $moreParams) = $hookmanager->resArray;
-        } else if (!empty($hookmanager->resPrint)) {
-            $customMoreHtmlRef = $hookmanager->resPrint;
-        }
-
-        $saturneMoreHtmlRef .= $customMoreHtmlRef;
+    if (method_exists($object, 'getBannerTabContent')) {
+        $bannerTabContent    = $object->getBannerTabContent();
+        $saturneMoreHtmlRef .= $bannerTabContent[0];
+        $moreParams[]        = $bannerTabContent[1];
     }
 
     // Banner
@@ -293,6 +284,21 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
             }
         }
     }
+
+    $parameters = [];
+    $resHook    = $hookmanager->executeHooks('saturneBannerTab', $parameters, $object); // Note that $action and $object may have been modified by some hooks
+    if ($resHook < 0) {
+        setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+    } else {
+        if (!empty($hookmanager->resArray)) {
+            list($customMoreHtmlRef, $moreParams) = $hookmanager->resArray;
+        } else if (!empty($hookmanager->resPrint)) {
+            $customMoreHtmlRef = $hookmanager->resPrint;
+        }
+
+        $saturneMoreHtmlRef .= $customMoreHtmlRef;
+    }
+
     $saturneMoreHtmlRef .= '</div>';
 
     $moreParamsBannerTab = (!empty($moreParams['bannerTab']) ? $moreParams['bannerTab'] : '');
