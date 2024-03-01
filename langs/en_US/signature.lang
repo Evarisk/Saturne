@@ -84,5 +84,6 @@ Signatory           = Signatory
 Responsible         = Responsible
 
 # Public interface
-PublicDownloadDocument = To download your "%s", Reference: "%s"
-ThanksForSignDocument  = Signature saved
+SavedSignature     = Signature saved
+SignatureLabelInfo = I sign electronically
+

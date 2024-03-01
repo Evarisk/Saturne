@@ -173,7 +173,7 @@ class ActionsSaturne
 
             $pictoPath = dol_buildpath('/saturne/img/saturne_color.png', 1);
 
-            $out  = '<div class="signature-container">';
+            $out  = '<div class="signature-container" data-public-interface="false">';
             $out .= '<div class="signature-user">';
             $out .= img_picto('', $pictoPath, '', 1, 0, 0, '', 'pictoModule');
             if (dol_strlen($signatory->signature) > 0) {
@@ -196,7 +196,7 @@ class ActionsSaturne
                             </div>
                             <!-- Modal-ADD Signature Content-->
                             <div class="modal-content" id="#modalContent">
-                                <canvas class="canvas-container" style="height: 95%; width: 98%; border: #0b419b solid 2px"></canvas>
+                                <canvas class="canvas-container canvas-signature" style="height: 95%; width: 98%; border: #0b419b solid 2px"></canvas>
                             </div>
                             <!-- Modal-Footer-->
                             <div class="modal-footer">

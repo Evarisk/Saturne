@@ -29,24 +29,24 @@
  * Variable   : $fileExists, $moduleNameLowerCase, $moreParams
  */ ?>
 
-<div class="public-card__container">
+<div class="public-card__container" data-public-interface="true">
     <?php if (!empty($conf->global->SATURNE_ENABLE_PUBLIC_INTERFACE)) : ?>
         <input type="hidden" name="token" value="<?php echo newToken(); ?>">
 
         <div class="public-card__header wpeo-gridlayout grid-2 grid-gap-2">
             <div class="header-information">
                 <a href="#" onclick="window.close();" class="information-back">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg>
+                    <i class="fas fa-sm fa-chevron-left"></i>
                     <?php echo $langs->trans('Back'); ?>
                 </a>
-                <div class="information-title"><?php echo $langs->trans('ElectronicSign'); ?></div>
+                <div class="information-title"><?php echo $langs->trans('ElectronicSignature'); ?></div>
                 <div class="information-user"><?php echo dol_strtoupper($signatory->lastname) . ' ' . ucfirst($signatory->firstname); ?></div>
             </div>
 
             <div class="header-objet">
                 <div class="objet-container">
                     <div class="objet-info">
-                        <div class="objet-type"><?php echo $langs->trans($objectType); ?></div>
+                        <div class="objet-type"><?php echo $langs->trans(ucfirst($objectType)); ?></div>
                         <div class="objet-label"><?php echo $object->ref . ' ' . $object->label; ?></div>
                     </div>
                     <div class="objet-actions file-generation">
@@ -87,13 +87,10 @@
     endif; ?>
 </div>
 
-<?php //if (empty($signatory->signature) && $object->status == $object::STATUS_VALIDATED && $signatory->attendance != SaturneSignature::ATTENDANCE_ABSENT) : ?>
-<?php if ($signatory->signature) : ?>
-    <div class="public-card__confirmation">
-        <div class="confirmation-container">
-            <i class="confirmation-icon fas fa-check-circle"></i>
-            <div class="confirmation-title"><?php echo $langs->trans('ThanksForSignDocument'); ?></div>
-            <button type="submit" class="confirmation-close wpeo-button button-primary" onclick="window.close();"><?php echo $langs->trans('CloseModal'); ?></button>
-        </div>
+<div class="public-card__confirmation" style="display: none;">
+    <div class="confirmation-container">
+        <i class="confirmation-icon fas fa-check-circle"></i>
+        <div class="confirmation-title"><?php echo $langs->trans('SavedSignature'); ?></div>
+        <button type="submit" class="confirmation-close wpeo-button button-primary" onclick="window.close();"><?php echo $langs->trans('CloseModal'); ?></button>
     </div>
-<?php endif; ?>
+</div>

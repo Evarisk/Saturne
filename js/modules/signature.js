@@ -150,8 +150,13 @@ window.saturne.signature.createSignature = function() {
     data: JSON.stringify({
       signature: signature
     }),
-    success: function() {
-      window.location.reload();
+    success: function(resp) {
+      if ($('.public-card__container').data('public-interface') === true) {
+        $('.public-card__confirmation').removeAttr('style');
+        $('.public-card__container').replaceWith($(resp).find('.public-card__container'));
+      } else {
+        window.location.reload();
+      }
     },
     error: function() {}
   });

@@ -85,5 +85,6 @@ Signatory           = Signataire
 Responsible         = Responsable
 
 # Public interface - Interface publique
-PublicDownloadDocument = Pour télécharger votre "%s", Référence : "%s"
-ThanksForSignDocument  = Signature enregistrée
+SavedSignature     = Signature enregistrée
+SignatureLabelInfo = Je signe électroniquement
+
