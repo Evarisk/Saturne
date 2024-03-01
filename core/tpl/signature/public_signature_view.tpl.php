@@ -64,7 +64,6 @@
         </div>
 
         <div class="public-card__content signature">
-            <i class="fas fa-pen"></i> <?php echo $langs->trans('SignatureLabelInfo'); ?>
             <div class="signature-element">
                 <?php if (empty($signatory->signature) && $object->status == $object::STATUS_VALIDATED && $signatory->attendance != SaturneSignature::ATTENDANCE_ABSENT) : ?>
                     <canvas class="canvas-container canvas-signature"></canvas>

@@ -84,6 +84,5 @@ Signatory           = Signatory
 Responsible         = Responsible
 
 # Public interface
-SavedSignature     = Signature saved
-SignatureLabelInfo = I sign electronically
+SavedSignature = Signature saved
 

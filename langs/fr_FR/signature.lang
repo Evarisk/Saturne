@@ -85,6 +85,5 @@ Signatory           = Signataire
 Responsible         = Responsable
 
 # Public interface - Interface publique
-SavedSignature     = Signature enregistrée
-SignatureLabelInfo = Je signe électroniquement
+SavedSignature = Signature enregistrée
 
