@@ -89,8 +89,8 @@ class ActionsSaturne
                 }
                 // Output html code for logo
                 if ($urllogo) {
-                    print '<div class="center signature-logo">';
-                    print '<img src="' . $urllogo . '">';
+                    print '<div class="center signature-logo maxwidth300">';
+                    print '<img src="' . $urllogo . '" height="96px" alt="">';
                     print '</div>';
                 }
             }
