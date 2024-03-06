@@ -393,16 +393,16 @@ class SaturneDocumentModel extends CommonDocGenerator
     }
 
     /**
-     * Return list of active generation modules.
+     * Return list of active generation modules
      *
-     * @param  DoliDB $db                Database handler.
-     * @param  string $type              Document type.
-     * @param  int    $maxfilenamelength Max length of value to show.
+     * @param  DoliDB $db                Database handler
+     * @param  string $type              Document type
+     * @param  int    $maxfilenamelength Max length of value to show
      *
-     * @return array                     List of templates.
+     * @return array|int                 List of templates
      * @throws Exception
      */
-    public static function liste_modeles(DoliDB $db, string $type, int $maxfilenamelength = 0): array
+    public static function liste_modeles(DoliDB $db, string $type, int $maxfilenamelength = 0)
     {
         require_once __DIR__ . '/../../../lib/saturne_functions.lib.php';
         return saturne_get_list_of_models($db, $type, $maxfilenamelength);
