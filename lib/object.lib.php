@@ -170,6 +170,12 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
     $h          = 0;
     $objectType = $object->element;
 
+    // This case will appear if module use saturne for manage head with hook each other
+    if ($object->module !== $moduleNameLowerCase) {
+        $moduleName          = $object->module;
+        $moduleNameLowerCase = dol_strtolower($object->module);
+    }
+
     if ($user->rights->$moduleNameLowerCase->$objectType->read) {
         $head[$h][0] = dol_buildpath('/' . $moduleNameLowerCase . '/view/' . (!empty($moreparam['parentType']) ? $moreparam['parentType'] : $objectType) . '/' . (!empty($moreparam['parentType']) ? $moreparam['parentType'] : $objectType) . '_card.php', 1) . '?id=' . $object->id . (!empty($moreparam['parentType']) ? '&object_type=' . $objectType : '');
         $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-info-circle pictofixedwidth"></i>' . $langs->trans((!empty($moreparam['specialName']) ? ucfirst($moreparam['specialName']) : ucfirst($objectType))) : '<i class="fas fa-info-circle"></i>';
