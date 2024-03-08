@@ -22,6 +22,10 @@ if ($resql) {
     dol_print_error($db);
 }
 
+$saturneDocumentModel = new SaturneDocumentModel($db, $module->name);
+$modellist            = $saturneDocumentModel->liste_modeles($db, $type);
+$modellist            = is_array($modellist) ? $modellist : [];
+
 print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
 print '<td>' . $langs->trans('Name') . '</td>';
@@ -65,7 +69,7 @@ if (is_array($filelist) && !empty($filelist)) {
                     // Active
                     print '<td class="center">';
 
-                    if (in_array($name, $def)) {
+                    if (in_array($name, $def) && (array_search('index.php', $modellist))) {
                         print '<a href="' . $_SERVER['PHP_SELF'] . '?action=del&value=' . $name . '&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
                         print img_picto($langs->trans('Enabled'), 'switch_on');
                     } else {
@@ -180,12 +184,12 @@ print '</td>';
 // Active
 print '<td class="center">';
 
-if (!in_array($name, $def)) {
-    print '<a href="' . $_SERVER['PHP_SELF'] . '?action=del&value=' . $name . '&const=' . $value . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
-    print img_picto($langs->trans('Enabled'), 'switch_on');
-} else {
+if (array_search('index.php', $modellist) || empty($modellist)) {
     print '<a href="' . $_SERVER['PHP_SELF'] . '?action=set&value=' . $name . '&const=' . $value . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
     print img_picto($langs->trans('Disabled'), 'switch_off');
+} else {
+    print '<a href="' . $_SERVER['PHP_SELF'] . '?action=del&value=' . $name . '&const=' . $value . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
+    print img_picto($langs->trans('Enabled'), 'switch_on');
 }
 print '</a>';
 print '</td>';
