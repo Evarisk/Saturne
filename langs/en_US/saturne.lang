@@ -75,6 +75,7 @@ DocumentTemplate       = Model documents
 ODTDefaultTemplateName = Default ODT of documents
 ErrorFileNotFound      = File not found
 ErrorNoSocietyLogo     = No company logo found
+CustomODT              = Custom ODT of documents
 
 # Trigger
 ConfTrigger                 = Event configuration
