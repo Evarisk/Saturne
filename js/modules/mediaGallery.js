@@ -54,6 +54,7 @@ window.saturne.mediaGallery.event = function() {
 	// Photos
   $( document ).on( 'click', '.clickable-photo', window.saturne.mediaGallery.selectPhoto );
   $( document ).on( 'click', '.save-photo', window.saturne.mediaGallery.savePhoto );
+  $( document ).on( 'click', '.delete-photo', window.saturne.mediaGallery.deletePhoto );
   $( document ).on( 'change', '.flat.minwidth400.maxwidth200onsmartphone', window.saturne.mediaGallery.sendPhoto );
   $( document ).on( 'click', '.clicked-photo-preview', window.saturne.mediaGallery.previewPhoto );
   $( document ).on( 'input', '.form-element #search_in_gallery', window.saturne.mediaGallery.handleSearch );
@@ -84,13 +85,66 @@ window.saturne.mediaGallery.selectPhoto = function( event ) {
 
 		if ($('.clicked-photo').length === 0) {
 			$(this).closest('.modal-container').find('.save-photo').addClass('button-disable');
-		}
+      $(this).closest('.modal-container').find('.delete-photo').addClass('button-disable');
+
+    }
 
 	} else {
 		parent.closest('.modal-container').find('.save-photo').removeClass('button-disable');
-		parent.find('.clickable-photo'+photoID).addClass('clicked-photo');
+    parent.closest('.modal-container').find('.delete-photo').removeClass('button-disable');
+    parent.find('.clickable-photo'+photoID).addClass('clicked-photo');
 	}
 };
+
+/**
+ * Action delete photo to an object.
+ *
+ * @since   1.3.0
+ * @version 1.3.0
+ *
+ * @return {void}
+ */
+window.saturne.mediaGallery.deletePhoto = function( event ) {
+  let mediaGallery      = $('#media_gallery')
+  let mediaGalleryModal = $(this).closest('.modal-container')
+  let filesLinked       = mediaGalleryModal.find('.clicked-photo')
+  let token     = window.saturne.toolbox.getToken();
+
+  let objectId         = mediaGallery.attr('data-from-id');
+  let objectType       = mediaGallery.attr('data-from-type')
+  let objectSubtype    = mediaGallery.attr('data-from-subtype')
+  let objectSubdir     = mediaGallery.attr('data-from-subdir')
+
+  let filenames = ''
+  if (filesLinked.length > 0) {
+    filesLinked.each(function(  ) {
+      filenames += $( this ).find('.filename').val() + 'vVv'
+    });
+  }
+
+  window.saturne.loader.display($(this));
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
+
+  $.ajax({
+    url: document.URL + querySeparator + "subaction=deleteFiles&token=" + token,
+    type: "POST",
+    data: JSON.stringify({
+      filenames: filenames,
+      objectId: objectId,
+      objectType: objectType,
+      objectSubdir: objectSubdir,
+      objectSubtype: objectSubtype
+    }),
+    processData: false,
+    contentType: false,
+    success: function ( resp ) {
+      $('.wpeo-loader').removeClass('wpeo-loader')
+      //refresh media gallery & unselect selected medias
+      mediaGallery.html($(resp).find('#media_gallery').children())
+    },
+  });
+};
+
 
 /**
  * Action save photo to an object.

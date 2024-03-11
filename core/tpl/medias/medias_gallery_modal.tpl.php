@@ -214,6 +214,63 @@ if ( ! $error && $subaction == "addFiles") {
 	}
 }
 
+if (!$error && $subaction == "deleteFiles") {
+    global $user;
+
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    $filenames     = $data['filenames'];
+    $objectId      = $data['objectId'];
+    $objectType    = $data['objectType'];
+    $objectSubtype = $data['objectSubtype'];
+    $objectSubdir  = $data['objectSubdir'];
+
+    $className = $objectType;
+    $object    = new $className($db);
+    $object->fetch($objectId);
+
+    $modObjectName = strtoupper($moduleNameLowerCase) . '_' . strtoupper($className) . '_ADDON';
+
+    $numberingModuleName = [
+        $object->element => $conf->global->$modObjectName,
+    ];
+
+    list($modObject) = saturne_require_objects_mod($numberingModuleName, $moduleNameLowerCase);
+
+    if (dol_strlen($object->ref) > 0) {
+        $pathToObjectPhoto = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType .'/' . $object->ref . '/' . $objectSubdir;
+    } else {
+        $pathToObjectPhoto = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType .'/tmp/' . $modObject->prefix . '0/' . $objectSubdir ;
+    }
+
+    if (preg_match('/vVv/', $filenames)) {
+        $filenames = preg_split('/vVv/', $filenames);
+        array_pop($filenames);
+    } else {
+        $filenames = array($filenames);
+    }
+
+    if (!(empty($filenames))) {
+        foreach ($filenames as $filename) {
+            $entity = ($conf->entity > 1) ? '/' . $conf->entity : '';
+            $filename = dol_sanitizeFileName($filename);
+            if (empty($object->$objectSubtype)) {
+                $object->$objectSubtype = $filename;
+            }
+            if (is_file($conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias/' . $filename)) {
+                $pathToECMPhoto = $conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias/' . $filename;
+                if (file_exists($pathToECMPhoto)) {
+                    unlink($pathToECMPhoto);
+                    unlink($pathToObjectPhoto);
+                }
+            }
+        }
+        if ($objectId != 0) {
+            $object->update($user);
+        }
+    }
+}
+
 if ( ! $error && $subaction == "unlinkFile") {
 	global $user;
 
@@ -442,8 +499,13 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
 
 			print saturne_show_pagination($pagesCounter, $page_array, $offset);
 			?>
+            <div class="delete-photo wpeo-button button-red button-disable" value="">
+                <span><?php echo $langs->trans('Delete'); ?></span>
+            </div>
+            <?php
+            ?>
 			<div class="save-photo wpeo-button button-blue button-disable" value="">
-				<span><?php echo $langs->trans('Add'); ?></span>
+                <span><?php echo $langs->trans('Add'); ?></span>
 			</div>
 		</div>
 	</div>
