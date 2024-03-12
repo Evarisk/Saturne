@@ -138,6 +138,7 @@ $conf->dol_hide_leftmenu = 1;
 
 saturne_header(0,'', $title, '', '', 0, 0, $moreJS, $moreCSS, '', 'page-public-card page-signature');
 
+$moreParams['useConfirmation'] = 1;
 require_once __DIR__ . '/../../core/tpl/signature/public_signature_view.tpl.php';
 
 llxFooter('', 'public');

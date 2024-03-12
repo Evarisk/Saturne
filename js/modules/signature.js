@@ -94,17 +94,17 @@ window.saturne.signature.event = function() {
  * @return {void}
  */
 window.saturne.signature.drawSignatureOnCanvas = function() {
-  let ratio = Math.max(window.devicePixelRatio || 1, 1);
   window.saturne.signature.canvas = document.querySelector('.canvas-signature');
-  window.saturne.signature.canvas.signaturePad = new SignaturePad(window.saturne.signature.canvas, {
-    penColor: 'rgb(0, 0, 0)'
-  });
+  if (window.saturne.signature.canvas) {
+    let ratio = Math.max(window.devicePixelRatio || 1, 1);
+    window.saturne.signature.canvas.signaturePad = new SignaturePad(window.saturne.signature.canvas, {
+      penColor: 'rgb(0, 0, 0)'
+    });
 
-  window.saturne.signature.canvas.width  = window.saturne.signature.canvas.offsetWidth * ratio;
-  window.saturne.signature.canvas.height = window.saturne.signature.canvas.offsetHeight * ratio;
-  window.saturne.signature.canvas.getContext('2d').scale(ratio, ratio);
-  window.saturne.signature.canvas.signaturePad.clear();
-  window.saturne.signature.canvas.signaturePad.fromDataURL();
+    window.saturne.signature.canvas.width = window.saturne.signature.canvas.offsetWidth * ratio;
+    window.saturne.signature.canvas.height = window.saturne.signature.canvas.offsetHeight * ratio;
+    window.saturne.signature.canvas.getContext('2d').scale(ratio, ratio);
+  }
 };
 
 /**

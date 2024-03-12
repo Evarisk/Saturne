@@ -35,10 +35,10 @@
 
         <div class="public-card__header wpeo-gridlayout grid-2 grid-gap-2">
             <div class="header-information">
-                <a href="#" onclick="window.close();" class="information-back">
+                <div class="<?php echo $moreParams['moreCSS'] ?? ''; ?>"><a href="#" onclick="window.close();" class="information-back">
                     <i class="fas fa-sm fa-chevron-left"></i>
                     <?php echo $langs->trans('Back'); ?>
-                </a>
+                </a></div>
                 <div class="information-title"><?php echo $langs->trans('ElectronicSignature'); ?></div>
                 <div class="information-user"><?php echo dol_strtoupper($signatory->lastname) . ' ' . ucfirst($signatory->firstname); ?></div>
             </div>
@@ -86,10 +86,8 @@
     endif; ?>
 </div>
 
-<div class="public-card__confirmation" style="display: none;">
-    <div class="confirmation-container">
-        <i class="confirmation-icon fas fa-check-circle"></i>
-        <div class="confirmation-title"><?php echo $langs->trans('SavedSignature'); ?></div>
-        <button type="submit" class="confirmation-close wpeo-button button-primary" onclick="window.close();"><?php echo $langs->trans('CloseModal'); ?></button>
-    </div>
-</div>
+<?php
+if (isset($moreParams['useConfirmation'])) {
+    $confirmationTitle = $langs->trans('SavedSignature');
+    require_once __DIR__ . '/../public/public_confirmation_view.tpl.php';
+}
