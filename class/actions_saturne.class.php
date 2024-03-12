@@ -213,7 +213,7 @@ class ActionsSaturne
 
 				<?php
 			}
-        } elseif (preg_match('/categorycard/', $parameters['context']) && preg_match('/viewcat.php/', $_SERVER['PHP_SELF'])) {
+        } elseif (preg_match('/categorycard/', $parameters['context']) && preg_match('/viewcat.php/', $_SERVER['PHP_SELF']) && !is_numeric(GETPOST('type'))) {
             $id   = GETPOST('id');
             $type = GETPOST('type');
 
@@ -359,7 +359,7 @@ class ActionsSaturne
 					}
 				}
 			}
-        } elseif (preg_match('/categorycard/', $parameters['context'])) {
+        } elseif (preg_match('/categorycard/', $parameters['context']) && !is_numeric(GETPOST('type'))) {
             global $langs;
 
             $elementId = GETPOST('element_id');
