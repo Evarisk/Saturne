@@ -231,6 +231,13 @@ if (!$error && $subaction == "deleteFiles") {
 
     $modObjectName = strtoupper($moduleNameLowerCase) . '_' . strtoupper($className) . '_ADDON';
 
+    $sizesArray = [
+        'mini',
+        'small',
+        'medium',
+        'large'
+    ];
+
     $numberingModuleName = [
         $object->element => $conf->global->$modObjectName,
     ];
@@ -259,6 +266,12 @@ if (!$error && $subaction == "deleteFiles") {
             }
             if (is_file($conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias/' . $filename)) {
                 $pathToECMPhoto = $conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias/' . $filename;
+                foreach($sizesArray as $size) {
+                    $thumbName = $conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias/thumbs/' . saturne_get_thumb_name($filename, $size);
+                    if (is_file($thumbName)) {
+                        unlink($thumbName);
+                    };
+                }
                 if (file_exists($pathToECMPhoto)) {
                     unlink($pathToECMPhoto);
                     unlink($pathToObjectPhoto);
