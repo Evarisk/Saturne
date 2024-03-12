@@ -70,7 +70,7 @@ window.saturne.signature.init = function() {
  */
 window.saturne.signature.event = function() {
   $(document).on('click', '.signature-erase', window.saturne.signature.clearCanvas);
-  $(document).on('click', '.signature-validate:not(.button-grey)', window.saturne.signature.createSignature);
+  $(document).on('click', '.signature-validate:not(.button-disable)', window.saturne.signature.createSignature);
   $(document).on('click', '.auto-download', window.saturne.signature.autoDownloadSpecimen);
   $(document).on('click', '.copy-signatureurl', window.saturne.signature.copySignatureUrlClipboard);
   $(document).on('click', '.set-attendance', window.saturne.signature.setAttendance);
@@ -79,7 +79,7 @@ window.saturne.signature.event = function() {
     window.saturne.signature.drawSignatureOnCanvas();
   }
   $(document).on('touchstart mousedown', '.canvas-signature', function () {
-    window.saturne.toolbox.removeAddButtonClass('signature-validate', 'button-grey', 'button-primary');
+    window.saturne.toolbox.removeAddButtonClass('signature-validate', 'button-disable', 'button-primary');
   });
 };
 
@@ -119,7 +119,7 @@ window.saturne.signature.drawSignatureOnCanvas = function() {
  */
 window.saturne.signature.clearCanvas = function() {
   window.saturne.signature.canvas.signaturePad.clear();
-  window.saturne.toolbox.removeAddButtonClass('signature-validate', 'button-primary', 'button-grey');
+  window.saturne.toolbox.removeAddButtonClass('signature-validate', 'button-primary', 'button-disable');
 };
 
 /**

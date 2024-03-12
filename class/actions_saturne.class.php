@@ -201,7 +201,7 @@ class ActionsSaturne
                             <!-- Modal-Footer-->
                             <div class="modal-footer">
                                 <div class="signature-erase wpeo-button button-square-50 button-grey"><span><i class="fas fa-eraser"></i></span></div>
-                                <div class="signature-validate wpeo-button button-square-50 button-grey"><span><i class="fas fa-file-signature"></i></span></div>
+                                <div class="signature-validate wpeo-button button-square-50 button-disable"><span><i class="fas fa-file-signature"></i></span></div>
                             </div>
                         </div>
                     </div>

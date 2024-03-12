@@ -113,6 +113,38 @@ window.saturne.utils.draganddrop = function() {
 };
 
 /**
+ * Reload page for ajax action on specific action
+ *
+ * @memberof Saturne_Utils
+ *
+ * @since   1.3.0
+ * @version 1.3.0
+ *
+ * @param {string}                                         action          Html action use for php
+ * @param {string}                                         page            Class page use on resp for reload
+ * @param {string}                                         urlMoreParams   Array for managing custom url parameters
+ * @param {{removeAttr: {value: string, element: string}}} checkMoreParams Array for managing custom parameters
+ *
+ * @returns {void}
+ */
+window.saturne.utils.reloadPage = function(action, page, urlMoreParams, checkMoreParams) {
+  let token          = window.saturne.toolbox.getToken();
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+
+  $.ajax({
+    url: document.URL + querySeparator + 'action=' + action + urlMoreParams + '&token=' + token,
+    type: 'POST',
+    processData: false,
+    contentType: false,
+    success: function(resp) {
+      window.saturne.utils.checkMoreParams(checkMoreParams);
+      $(page).replaceWith($(resp).find(page));
+    },
+    error: function() {}
+  });
+};
+
+/**
  * Reload specific field element_type and fk_element
  *
  * @memberof Saturne_Utils
@@ -161,5 +193,28 @@ window.saturne.utils.enforceMinMax = function(triggeredElement) {
     if (parseInt(triggeredElement.value) > parseInt(triggeredElement.max)) {
       triggeredElement.value = triggeredElement.max;
     }
+  }
+};
+
+/**
+ * Check more parameters for manage visibility of element / remove elements
+ *
+ * @memberof Saturne_Utils
+ *
+ * @since   1.3.0
+ * @version 1.3.0
+ *
+ * @typedef  {Object} RemoveAttrParams
+ * @property {string} element - Selector for the element
+ * @property {string} value - Attribute value to remove
+ *
+ * @param    {Object}           checkMoreParams - Object for managing custom parameters
+ * @property {RemoveAttrParams} checkMoreParams.removeAttr - Information to remove attribute
+ *
+ * @returns {void}
+ */
+window.saturne.utils.checkMoreParams = function(checkMoreParams) {
+  if (checkMoreParams && checkMoreParams.removeAttr) {
+    $(checkMoreParams.removeAttr.element).removeAttr(checkMoreParams.removeAttr.value);
   }
 };
