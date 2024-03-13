@@ -170,7 +170,7 @@ if ($nbofiles) {
     // Show list of found files
     foreach ($listoffiles as $file) {
         print '- '.$file['name'];
-        print ' &nbsp; <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?modulepart=ecm&keyforuploaddir='. $value .'&action=deletefile&token='.newToken().'&file='.urlencode(basename($file['name'])).'">'.img_picto('', 'delete').'</a>';
+        print '&nbsp; <a class="wpeo-button button-primary button-red" style="padding: 1px 2px" href="'.$_SERVER["PHP_SELF"].'?module_name='. $moduleName .'&modulepart=ecm&keyforuploaddir='. $value .'&action=deletefile&token='.newToken().'&file='.urlencode(basename($file['name'])). '&type=' . $type .'">'.img_picto('', 'fontawesome_fa-trash_fas_#ffffff').'</a>';
         print '<br>';
     }
     print '</div>';
