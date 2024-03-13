@@ -211,3 +211,12 @@ EntityName   = Entity name
 # Data
 Tools      = Tools
 ExportData = Export my data
+
+
+
+#
+# Other
+#
+
+# Data
+SocietyAttendants = Third party external attendants
