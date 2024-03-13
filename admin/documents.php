@@ -229,6 +229,20 @@ if ($action == 'specimen') {
     }
 }
 
+if ($action == 'download_template') {
+    $name = GETPOST('filename');
+    $res  = 0;
+
+    if (!file_exists(DOL_DATA_ROOT . '/' . $modulepart .'/temp/'. $moduleNameLowerCase .'/' . $name)) {
+        $res = copy(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/doctemplates/' . $type . '/' . $name,
+            DOL_DATA_ROOT . '/' . $moduleNameLowerCase .'/temp/'. $type);
+    }
+
+    if ($res > 0) {
+        header('Location: ' . DOL_DATA_ROOT . '/document.php?modulepart=' . $modulepart . '&file=' . $modulepart . '/temp/' . dol_strtolower($type) . '/template_' . str_replace('_odt', '.odt', urlencode(basename($name))));
+    }
+}
+
 /*
  * View
  */

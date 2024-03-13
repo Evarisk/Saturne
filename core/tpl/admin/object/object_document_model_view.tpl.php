@@ -58,7 +58,7 @@ if (is_array($filelist) && !empty($filelist)) {
                 if ($modulequalified) {
                     print '<tr class="oddeven"><td>';
                     print (empty($module->name) ? $name : $module->name);
-                    print '&nbsp; <a class="reposition" href="'.DOL_URL_ROOT.'/viewimage.php?modulepart=digiriskdolibarr&file=digiriskdolibarr/'. dol_strtolower($type) .'/'.urlencode(basename($name)).'">'.img_picto('', 'listlight').'</a>';
+                    print '&nbsp; <a class="reposition" href="'. $_SERVER['PHP_SELF'] . '?module_name='. $moduleName .'&action=download_template&type='. dol_strtolower($type) . '&filename=template_'. str_replace('_odt', '.odt', urlencode(basename($name))) .'">'.img_picto('', 'listlight').'</a>';
                     //print '&nbsp;<a class="reposition" href="download.php?path='.DOL_DOCUMENT_ROOT.'/custom/' . $moduleNameLowerCase . '/documents/doctemplates/' . dol_strtolower($type) .'/template_'.str_replace('_odt', '.odt', urlencode(basename($name))).'">'.img_picto('', 'listlight').'</a>';
                     print '</td><td>';
                     if (method_exists($module, 'info')) {
