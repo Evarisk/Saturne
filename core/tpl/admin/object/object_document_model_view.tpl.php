@@ -58,7 +58,7 @@ if (is_array($filelist) && !empty($filelist)) {
                 if ($modulequalified) {
                     print '<tr class="oddeven"><td>';
                     print (empty($module->name) ? $name : $module->name);
-                    print '&nbsp; <a class="wpeo-button button-primary" href="'. $_SERVER['PHP_SELF'] . '?module_name='. $moduleName .'&action=download_template&type='. dol_strtolower($type) .'">'.img_picto('', 'fontawesome_fa-download_fas_#ffffff').'</a>';
+                    print '&nbsp; <a class="wpeo-button button-primary" href="'. $_SERVER['PHP_SELF'] . '?module_name='. $moduleName .'&action=download_template&type='. dol_strtolower($type) .'&filename=' . $name . '#'. $type . '">'.img_picto('', 'fontawesome_fa-download_fas_#ffffff').'</a>';
                     print '</td><td>';
                     if (method_exists($module, 'info')) {
                         print $module->info($langs);
@@ -71,10 +71,10 @@ if (is_array($filelist) && !empty($filelist)) {
                     print '<td class="center">';
 
                     if (in_array($name, $def) && (array_search('index.php', $modellist))) {
-                        print '<a href="' . $_SERVER['PHP_SELF'] . '?action=del&value=' . $name . '&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
+                        print '<a href="' . $_SERVER['PHP_SELF'] . '?action=del&value=' . $name . '&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '#' . $langs->trans($type) . '">';
                         print img_picto($langs->trans('Enabled'), 'switch_on');
                     } else {
-                        print '<a href="' . $_SERVER['PHP_SELF'] . '?action=set&value=' . $name . '&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
+                        print '<a href="' . $_SERVER['PHP_SELF'] . '?action=set&value=' . $name . '&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '#' . $langs->trans($type) . '">';
                         print img_picto($langs->trans('Disabled'), 'switch_off');
                     }
                     print '</a>';
@@ -86,7 +86,7 @@ if (is_array($filelist) && !empty($filelist)) {
                     if ($conf->global->$defaultModelConf == $name) {
                         print img_picto($langs->trans('Default'), 'on');
                     } else {
-                        print '<a href="' . $_SERVER['PHP_SELF'] . '?action=setdoc&value=' . $name .'&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&module_name=' . $moduleName . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), 'off') . '</a>';
+                        print '<a href="' . $_SERVER['PHP_SELF'] . '?action=setdoc&value=' . $name .'&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&module_name=' . $moduleName . '&token=' . newToken() . '#' . $langs->trans($type) . '">' . img_picto($langs->trans('Disabled'), 'off') . '</a>';
                     }
                     print '</td>';
 
@@ -117,11 +117,11 @@ if (is_array($filelist) && !empty($filelist)) {
 
 $value = dol_strtoupper($moduleName) . '_'. dol_strtoupper($type) .'_CUSTOM_ADDON_ODT_PATH';
 
-print '<form action="' . $_SERVER["PHP_SELF"] . '" method="POST" enctype="multipart/form-data">';
+print '<form action="' . $_SERVER["PHP_SELF"] . '#' . $langs->trans($type) . '" method="POST" enctype="multipart/form-data">';
 print '<input type="hidden" name="token" value="' . newToken() . '">';
 print '<input type="hidden" name="action" value="setModuleOptions">';
 print '<input type="hidden" name="keyforuploaddir" value="' . $value . '">';
-print '<input type="hidden" name="value1" value="' . $conf->global->$value . '">';
+print '<input type="hidden" name="value" value="' . $conf->global->$value . '">';
 print '<input type="hidden" name="module_name" value="' . $moduleName . '">';
 
 // List of directories area
@@ -186,10 +186,10 @@ print '</td>';
 print '<td class="center">';
 
 if (array_search('index.php', $modellist) || empty($modellist)) {
-    print '<a href="' . $_SERVER['PHP_SELF'] . '?action=set&value=' . $name . '&const=' . $value . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
+    print '<a href="' . $_SERVER['PHP_SELF'] . '?action=set&value=' . $name . '&const=' . $value . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '#' . $langs->trans($type) . '">';
     print img_picto($langs->trans('Disabled'), 'switch_off');
 } else {
-    print '<a href="' . $_SERVER['PHP_SELF'] . '?action=del&value=' . $name . '&const=' . $value . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
+    print '<a href="' . $_SERVER['PHP_SELF'] . '?action=del&value=' . $name . '&const=' . $value . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '#' . $langs->trans($type) . '">';
     print img_picto($langs->trans('Enabled'), 'switch_on');
 }
 print '</a>';

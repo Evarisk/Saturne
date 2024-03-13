@@ -72,6 +72,7 @@ require '../core/tpl/actions/admin_conf_actions.tpl.php';
 
 // Activate a model
 if ($action == 'set') {
+    delDocumentModel($value, $type);
     addDocumentModel($value, $type, $label, $const);
     header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
 } elseif ($action == 'del') {
@@ -230,13 +231,17 @@ if ($action == 'specimen') {
 }
 
 if ($action == 'download_template') {
-    $name = 'template_' . dol_strtolower($type) . '.odt';
+    $name = 'template_' . str_replace('_odt', '.odt', GETPOST('filename'));
     $path = DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/doctemplates/' . dol_strtolower($type) . '/' . $name;
 
-    header('Content-Type: application/odt');
-    header('Content-disposition: attachment; filename='.basename($path));
-    header('Content-Length: '.filesize($path));
-    readfile($path);
+    if (file_exists($path)) {
+        header('Content-Type: application/odt');
+        header('Content-disposition: attachment; filename=' . basename($path));
+        header('Content-Length: ' . filesize($path));
+        readfile($path);
+    } else {
+        setEventMessages($langs->trans('ErrorFileDoesNotExists'), [], 'errors');
+    }
     //header('Location: ' . DOL_DATA_ROOT . '/document.php?modulepart=' . $modulepart . '&file=' . 'temp/' . $name);
 }
 
