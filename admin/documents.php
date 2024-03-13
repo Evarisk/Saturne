@@ -230,17 +230,14 @@ if ($action == 'specimen') {
 }
 
 if ($action == 'download_template') {
-    $name = GETPOST('filename');
-    $res  = 0;
+    $name = 'template_' . dol_strtolower($type) . '.odt';
+    $path = DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/doctemplates/' . dol_strtolower($type) . '/' . $name;
 
-    if (!file_exists(DOL_DATA_ROOT . '/' . $modulepart .'/temp/'. $moduleNameLowerCase .'/' . $name)) {
-        $res = copy(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/doctemplates/' . $type . '/' . $name,
-            DOL_DATA_ROOT . '/' . $moduleNameLowerCase .'/temp/'. $type);
-    }
-
-    if ($res > 0) {
-        header('Location: ' . DOL_DATA_ROOT . '/document.php?modulepart=' . $modulepart . '&file=' . $modulepart . '/temp/' . dol_strtolower($type) . '/template_' . str_replace('_odt', '.odt', urlencode(basename($name))));
-    }
+    header('Content-Type: application/odt');
+    header('Content-disposition: attachment; filename='.basename($path));
+    header('Content-Length: '.filesize($path));
+    readfile($path);
+    //header('Location: ' . DOL_DATA_ROOT . '/document.php?modulepart=' . $modulepart . '&file=' . 'temp/' . $name);
 }
 
 /*
