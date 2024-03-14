@@ -72,7 +72,6 @@ require '../core/tpl/actions/admin_conf_actions.tpl.php';
 
 // Activate a model
 if ($action == 'set') {
-    delDocumentModel($value, $type);
     addDocumentModel($value, $type, $label, $const);
     header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
 } elseif ($action == 'del') {
@@ -93,7 +92,7 @@ if ($action == 'setdoc') {
     $ret = delDocumentModel($value, $type);
 
     if ($ret > 0) {
-        $ret = addDocumentModel($value, $type, $label);
+        $ret = addDocumentModel($value, $type, $label, $const);
     }
 } elseif ($action == 'setmod') {
     $constforval = strtoupper($moduleName) . '_' . strtoupper($type) . '_ADDON';

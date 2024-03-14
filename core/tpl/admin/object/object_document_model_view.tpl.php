@@ -71,10 +71,10 @@ if (is_array($filelist) && !empty($filelist)) {
                     print '<td class="center">';
 
                     if (in_array($name, $def) && (array_search('index.php', $modellist))) {
-                        print '<a href="' . $_SERVER['PHP_SELF'] . '?action=del&value=' . $name . '&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '#' . $langs->trans($type) . '">';
+                        //print '<a href="' . $_SERVER['PHP_SELF'] . '?action=del&value=' . $name . '&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '#' . $langs->trans($type) . '">';
                         print img_picto($langs->trans('Enabled'), 'switch_on');
                     } else {
-                        print '<a href="' . $_SERVER['PHP_SELF'] . '?action=set&value=' . $name . '&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '#' . $langs->trans($type) . '">';
+                        print '<a href="' . $_SERVER['PHP_SELF'] . '?action=setdoc&value=' . $name . '&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '#' . $langs->trans($type) . '">';
                         print img_picto($langs->trans('Disabled'), 'switch_off');
                     }
                     print '</a>';
@@ -186,10 +186,10 @@ print '</td>';
 print '<td class="center">';
 
 if (array_search('index.php', $modellist) || empty($modellist)) {
-    print '<a href="' . $_SERVER['PHP_SELF'] . '?action=set&value=' . $name . '&const=' . $value . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '#' . $langs->trans($type) . '">';
+    print '<a href="' . $_SERVER['PHP_SELF'] . '?action=setdoc&value=' . $name . '&const=' . $value . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '#' . $langs->trans($type) . '">';
     print img_picto($langs->trans('Disabled'), 'switch_off');
 } else {
-    print '<a href="' . $_SERVER['PHP_SELF'] . '?action=del&value=' . $name . '&const=' . $value . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '#' . $langs->trans($type) . '">';
+    //print '<a href="' . $_SERVER['PHP_SELF'] . '?action=del&value=' . $name . '&const=' . $value . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '#' . $langs->trans($type) . '">';
     print img_picto($langs->trans('Enabled'), 'switch_on');
 }
 print '</a>';
