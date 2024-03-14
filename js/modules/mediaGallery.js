@@ -82,13 +82,11 @@ window.saturne.mediaGallery.selectPhoto = function( event ) {
 	if ($(this).hasClass('clicked-photo')) {
 		$(this).attr('style', 'none !important')
 		$(this).removeClass('clicked-photo')
-
 		if ($('.clicked-photo').length === 0) {
-			$(this).closest('.modal-container').find('.save-photo').addClass('button-disable');
+      $(this).closest('.modal-container').find('.save-photo').addClass('button-disable');
       $(this).closest('.modal-container').find('.delete-photo').addClass('button-disable');
 
     }
-
 	} else {
 		parent.closest('.modal-container').find('.save-photo').removeClass('button-disable');
     parent.closest('.modal-container').find('.delete-photo').removeClass('button-disable');
@@ -140,7 +138,7 @@ window.saturne.mediaGallery.deletePhoto = function( event ) {
     success: function ( resp ) {
       $('.wpeo-loader').removeClass('wpeo-loader')
       //refresh media gallery & unselect selected medias
-      mediaGallery.html($(resp).find('#media_gallery').children())
+      mediaGallery.replaceWith($(resp).find('#media_gallery'))
     },
   });
 };
@@ -173,7 +171,7 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 			filenames += $( this ).find('.filename').val() + 'vVv'
 		});
 	}
-
+  
 	window.saturne.loader.display($(this));
   if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
     if ($('.linked-medias.'+objectPhotoClass).length > 0) {
