@@ -234,15 +234,12 @@ if (!$error && $subaction == 'deleteFiles') {
 
     $modObjectName = strtoupper($moduleNameLowerCase) . '_' . strtoupper($className) . '_ADDON';
 
-    $numberingModuleName = [
-        $object->element => $conf->global->$modObjectName,
-    ];
-
     if (dol_strlen($object->ref) > 0) {
         $pathToObjectPhoto = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType .'/' . $object->ref . '/' . $objectSubdir;
     } else {
-        list($modObject) = saturne_require_objects_mod($numberingModuleName, $moduleNameLowerCase);
-        $pathToObjectPhoto = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType .'/tmp/' . $modObject->prefix . '0/' . $objectSubdir ;
+        $numberingModuleName = [$object->element => $conf->global->$modObjectName];
+        list($modObject)     = saturne_require_objects_mod($numberingModuleName, $moduleNameLowerCase);
+        $pathToObjectPhoto   = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType .'/tmp/' . $modObject->prefix . '0/' . $objectSubdir ;
     }
 
     if (preg_match('/vVv/', $filenames)) {

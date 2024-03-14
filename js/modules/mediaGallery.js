@@ -171,7 +171,6 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 			filenames += $( this ).find('.filename').val() + 'vVv'
 		});
 	}
-  
 	window.saturne.loader.display($(this));
   if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
     if ($('.linked-medias.'+objectPhotoClass).length > 0) {
