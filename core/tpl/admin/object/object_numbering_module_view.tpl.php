@@ -64,14 +64,10 @@ if (is_dir($dir)) {
                             print '<td class="center">';
 
                             $confType        = strtoupper($moduleName) . '_' . strtoupper($elementType) . '_ADDON';
-                            $module->scandir = 'mod_' . $elementType . '_standard';
-                            $constName       = GETPOST('const', 'alpha');
-                            $modConst        = getDolGlobalString($confType);
-
-                            if ($modConst == $file || $modConst . '.php' == $file) {
-                                print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setmod&value=' . preg_replace('/\.php$/', '', $file) . '&const=' . $modConst . '&label=' . urlencode($module->name) . '&module_name=' . $moduleName . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), strpos($constName, $modConst) !== false ? 'switch_on' : 'switch_off') . '</a>';
-                            } else if ((strpos($constName, $modConst) == false && strpos($constName, 'standard') == false) || (strpos($constName, $modConst) == false && strpos($constName, 'standard') !== false)) {
-                                print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setmod&value=' . preg_replace('/\.php$/', '', $file) . '&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&module_name=' . $moduleName . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), strpos($constName, $modConst) !== false ? 'switch_off' : 'switch_on') . '</a>';
+                            if ($conf->global->$confType == $file || $conf->global->$confType . '.php' == $file) {
+                                print img_picto($langs->trans('Activated'), 'switch_on');
+                            } else {
+                                print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setmod&value=' . preg_replace('/\.php$/', '', $file) . '&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&module_name=' . $moduleName . '&type=' . $elementType . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), 'switch_off') . '</a>';
                             }
                             print '</td>';
 
