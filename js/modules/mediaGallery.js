@@ -46,7 +46,7 @@ window.saturne.mediaGallery.init = function() {
  * La méthode contenant tous les événements pour la bibliothèque de médias.
  *
  * @since   1.0.0
- * @version 1.0.0
+ * @version 1.3.0
  *
  * @return {void}
  */
@@ -54,7 +54,7 @@ window.saturne.mediaGallery.event = function() {
 	// Photos
   $( document ).on( 'click', '.clickable-photo', window.saturne.mediaGallery.selectPhoto );
   $( document ).on( 'click', '.save-photo', window.saturne.mediaGallery.savePhoto );
-  $( document ).on( 'click', '.delete-photo', window.saturne.mediaGallery.deletePhoto );
+  $(document).on( 'click', '.delete-photo', window.saturne.mediaGallery.deletePhoto);
   $( document ).on( 'change', '.flat.minwidth400.maxwidth200onsmartphone', window.saturne.mediaGallery.sendPhoto );
   $( document ).on( 'click', '.clicked-photo-preview', window.saturne.mediaGallery.previewPhoto );
   $( document ).on( 'input', '.form-element #search_in_gallery', window.saturne.mediaGallery.handleSearch );
@@ -93,56 +93,6 @@ window.saturne.mediaGallery.selectPhoto = function( event ) {
     parent.find('.clickable-photo'+photoID).addClass('clicked-photo');
 	}
 };
-
-/**
- * Action delete photo to an object.
- *
- * @since   1.3.0
- * @version 1.3.0
- *
- * @return {void}
- */
-window.saturne.mediaGallery.deletePhoto = function( event ) {
-  let mediaGallery      = $('#media_gallery')
-  let mediaGalleryModal = $(this).closest('.modal-container')
-  let filesLinked       = mediaGalleryModal.find('.clicked-photo')
-  let token     = window.saturne.toolbox.getToken();
-
-  let objectId         = mediaGallery.attr('data-from-id');
-  let objectType       = mediaGallery.attr('data-from-type')
-  let objectSubtype    = mediaGallery.attr('data-from-subtype')
-  let objectSubdir     = mediaGallery.attr('data-from-subdir')
-
-  let filenames = ''
-  if (filesLinked.length > 0) {
-    filesLinked.each(function(  ) {
-      filenames += $( this ).find('.filename').val() + 'vVv'
-    });
-  }
-
-  window.saturne.loader.display($(this));
-  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
-
-  $.ajax({
-    url: document.URL + querySeparator + "subaction=deleteFiles&token=" + token,
-    type: "POST",
-    data: JSON.stringify({
-      filenames: filenames,
-      objectId: objectId,
-      objectType: objectType,
-      objectSubdir: objectSubdir,
-      objectSubtype: objectSubtype
-    }),
-    processData: false,
-    contentType: false,
-    success: function ( resp ) {
-      $('.wpeo-loader').removeClass('wpeo-loader')
-      //refresh media gallery & unselect selected medias
-      mediaGallery.replaceWith($(resp).find('#media_gallery'))
-    },
-  });
-};
-
 
 /**
  * Action save photo to an object.
@@ -210,6 +160,43 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 			mediaGallery.html($(resp).find('#media_gallery').children())
 		},
 	});
+};
+
+/**
+ * Action delete photo from media gallery
+ *
+ * @since   1.3.0
+ * @version 1.3.0
+ *
+ * @return {void}
+ */
+window.saturne.mediaGallery.deletePhoto = function() {
+  let mediaGalleryModal = $(this).closest('.modal-container');
+  let filesLinked       = mediaGalleryModal.find('.clicked-photo');
+  let token             = window.saturne.toolbox.getToken();
+  let querySeparator    = window.saturne.toolbox.getQuerySeparator(document.URL);
+
+  let fileNames = '';
+  if (filesLinked.length > 0) {
+    filesLinked.each(function() {
+      fileNames += $(this).find('.filename').val() + 'vVv'
+    });
+  }
+
+  window.saturne.loader.display($(this));
+  $.ajax({
+    url: document.URL + querySeparator + 'subaction=delete_files&token=' + token,
+    type: 'POST',
+    processData: false,
+    contentType: false,
+    data: JSON.stringify({
+      filenames: fileNames
+    }),
+    success: function(resp) {
+      mediaGalleryModal.replaceWith($(resp).find('#media_gallery .modal-container'));
+    },
+    error: function() {},
+  });
 };
 
 /**

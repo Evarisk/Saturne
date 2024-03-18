@@ -217,61 +217,30 @@ if ( ! $error && $subaction == 'addFiles') {
 	}
 }
 
-if (!$error && $subaction == 'deleteFiles') {
-    global $user;
-
+if ($subaction == 'delete_files') {
     $data = json_decode(file_get_contents('php://input'), true);
 
-    $filenames     = $data['filenames'];
-    $objectId      = $data['objectId'];
-    $objectType    = $data['objectType'];
-    $objectSubtype = $data['objectSubtype'];
-    $objectSubdir  = $data['objectSubdir'];
-
-    $className = $objectType;
-    $object    = new $className($db);
-    $object->fetch($objectId);
-
-    $modObjectName = strtoupper($moduleNameLowerCase) . '_' . strtoupper($className) . '_ADDON';
-
-    if (dol_strlen($object->ref) > 0) {
-        $pathToObjectPhoto = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType .'/' . $object->ref . '/' . $objectSubdir;
+    $fileNames = $data['filenames'];
+    if (strpos($fileNames, 'vVv') !== false) {
+        $fileNames = explode('vVv', $fileNames);
+        array_pop($fileNames);
     } else {
-        $numberingModuleName = [$object->element => $conf->global->$modObjectName];
-        list($modObject)     = saturne_require_objects_mod($numberingModuleName, $moduleNameLowerCase);
-        $pathToObjectPhoto   = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType .'/tmp/' . $modObject->prefix . '0/' . $objectSubdir ;
+        $fileNames = array($fileNames);
     }
 
-    if (preg_match('/vVv/', $filenames)) {
-        $filenames = preg_split('/vVv/', $filenames);
-        array_pop($filenames);
-    } else {
-        $filenames = array($filenames);
-    }
-
-    if (!(empty($filenames))) {
-        foreach ($filenames as $filename) {
-            $entity = ($conf->entity > 1) ? '/' . $conf->entity : '';
-            $filename = dol_sanitizeFileName($filename);
-            if (empty($object->$objectSubtype)) {
-                $object->$objectSubtype = $filename;
-            }
-            if (is_file($conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias/' . $filename)) {
-                $pathToECMPhoto = $conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias/' . $filename;
+    if (!empty($fileNames)) {
+        foreach ($fileNames as $fileName) {
+            $fileName       = dol_sanitizeFileName($fileName);
+            $pathToECMPhoto = $conf->ecm->multidir_output[$conf->entity] . '/' . $moduleNameLowerCase . '/medias/' . $fileName;
+            if (is_file($pathToECMPhoto)) {
                 foreach($sizesArray as $size) {
-                    $thumbName = $conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias/thumbs/' . saturne_get_thumb_name($filename, $size);
+                    $thumbName = $conf->ecm->multidir_output[$conf->entity] . '/' . $moduleNameLowerCase . '/medias/thumbs/' . saturne_get_thumb_name($fileName, $size);
                     if (is_file($thumbName)) {
                         unlink($thumbName);
                     }
                 }
-                if (file_exists($pathToECMPhoto)) {
-                    unlink($pathToECMPhoto);
-                    unlink($pathToObjectPhoto);
-                }
+                unlink($pathToECMPhoto);
             }
-        }
-        if ($objectId != 0) {
-            $object->update($user);
         }
     }
 }
@@ -494,15 +463,12 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
 			$pagesCounter                 = $conf->global->$moduleImageNumberPerPageConf ? ceil($allMediasNumber/($conf->global->$moduleImageNumberPerPageConf ?: 1)) : 1;
 			$page_array                   = saturne_load_pagination($pagesCounter, $loadedPageArray, $offset);
 
-			print saturne_show_pagination($pagesCounter, $page_array, $offset);
-			?>
+			print saturne_show_pagination($pagesCounter, $page_array, $offset); ?>
 			<div class="save-photo wpeo-button button-blue button-disable" value="">
                 <span><?php echo $langs->trans('Add'); ?></span>
 			</div>
-            <?php
-            ?>
-            <div class="delete-photo wpeo-button button-red button-disable" value="">
-                <span><?php echo $langs->trans('Delete'); ?></span>
+            <div class="wpeo-button button-red button-disable delete-photo">
+                <i class="fas fa-trash-alt"></i>
             </div>
 		</div>
 	</div>
