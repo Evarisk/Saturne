@@ -37,7 +37,7 @@ if (empty($element->signature) && ($object->status == $object::STATUS_VALIDATED 
                 <div class="wpeo-button button-grey modal-close" style="font-size: 30px;">
                     <span><i class="fas fa-times"></i> <?php echo $langs->trans('Cancel'); ?></span>
                 </div>
-                <div class="signature-validate wpeo-button button-primary" style="font-size: 30px;" value="<?php echo $element->id ?>">
+                <div class="signature-validate wpeo-button button-blue" style="font-size: 30px;" value="<?php echo $element->id ?>">
                     <input type="hidden" id="zone<?php echo $element->id ?>" value="<?php echo $zone ?>">
                     <span><i class="fas fa-check"></i> <?php echo $langs->trans('Validate'); ?></span>
                 </div>
