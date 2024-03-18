@@ -198,7 +198,7 @@ class ActionsSaturne
 								<div class="wpeo-button button-grey modal-close">
 									<span><?php echo $langs->trans('Cancel'); ?></span>
 								</div>
-								<div class="signature-validate wpeo-button button-primary" value="<?php echo $userSignatory->id ?>">
+								<div class="signature-validate wpeo-button button-blue" value="<?php echo $userSignatory->id ?>">
 									<input type="hidden" id="zone<?php echo $userSignatory->id ?>" value="<?php echo 'public' ?>">
 									<span><?php echo $langs->trans('Validate'); ?></span>
 								</div>

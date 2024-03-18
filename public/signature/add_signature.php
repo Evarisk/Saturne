@@ -256,7 +256,7 @@ $element = $signatory; ?>
                     <input type="hidden" class="specimen-name" value="<?php echo $objectType . '_specimen_' . $track_id . '.odt' ?>">
                     <input type="hidden" class="specimen-path" value="<?php echo $path ?>">
                     <?php if (GETPOSTISSET('document_type') && $fileExists) : ?>
-                        <span class="wpeo-button button-primary button-radius-2 grid-align-right auto-download"><i class="button-icon fas fa-print"></i></span>
+                        <span class="wpeo-button button-blue button-radius-2 grid-align-right auto-download"><i class="button-icon fas fa-print"></i></span>
                     <?php else : ?>
                         <span class="wpeo-button button-grey button-radius-2 grid-align-right"><i class="button-icon fas fa-print"></i></span>
                     <?php endif; ?>
@@ -277,7 +277,7 @@ $element = $signatory; ?>
                 <div class="wpeo-gridlayout grid-2">
                     <strong class="grid-align-middle"><?php echo $langs->trans('Signature'); ?></strong>
                     <?php if (!dol_strlen($element->signature)) : ?>
-                        <div class="wpeo-button button-primary button-square-40 button-radius-2 grid-align-right wpeo-modal-event modal-signature-open modal-open" value="<?php echo $element->id ?>">
+                        <div class="wpeo-button button-blue button-square-40 button-radius-2 grid-align-right wpeo-modal-event modal-signature-open modal-open" value="<?php echo $element->id ?>">
                             <input type="hidden" class="modal-options" data-modal-to-open="modal-signature<?php echo $element->id ?>" data-from-id="<?php echo $element->id ?>">
                             <span><i class="fas fa-pen-nib"></i> <?php echo $langs->trans('Sign'); ?></span>
                         </div>
