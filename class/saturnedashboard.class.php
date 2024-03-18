@@ -157,11 +157,10 @@ class SaturneDashboard
                                 $widget .= '<br>';
                             }
                         }
-                        if (isset($dashboardWidget['link'])) {
-                            $widget .= $dashboardWidget['link'];
-                        }
-                        if (isset($dashboardWidget['progressBar'])) {
-                            $widget .= $dashboardWidget['progressBar'];
+                        foreach ($dashboardWidget['customParams'] as $params) {
+                            if (!empty($params)) {
+                                $widget .= $params;
+                            }
                         }
                         $widget .= '</div>';
                         $widget .= '</div><!-- /.info-box-lines --></div><!-- /.info-box-content -->';
