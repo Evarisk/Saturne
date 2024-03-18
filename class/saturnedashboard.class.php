@@ -157,9 +157,20 @@ class SaturneDashboard
                                 $widget .= '<br>';
                             }
                         }
-                        foreach ($dashboardWidget['customParams'] as $params) {
-                            if (!empty($params)) {
-                                $widget .= $params;
+                        if (is_array($dashboardWidget['moreParams']) && (!empty($dashboardWidget['moreParams']))) {
+                            foreach ($dashboardWidget['moreParams'] as $dashboardWidgetMoreParamsKey => $dashboardWidgetMoreParams) {
+                                switch ($dashboardWidgetMoreParamsKey) {
+                                    case 'links' :
+                                        if (is_array($dashboardWidget['moreParams']['links']) && (!empty($dashboardWidget['moreParams']['links']))) {
+                                            foreach ($dashboardWidget['moreParams']['links'] as $dashboardWidgetMoreParamsLink) {
+                                                $widget .= '<a class="' . $dashboardWidgetMoreParamsLink['moreCSS'] . '" href="' . dol_buildpath($dashboardWidgetMoreParamsLink['url'], 1) . '" target="_blank">' . img_picto($langs->trans('Url'), 'globe', 'class="paddingrightonly"') . $langs->transnoentities($dashboardWidgetMoreParamsLink['linkName']) . '</a><br>';
+                                            }
+                                        }
+                                        break;
+                                    default :
+                                        $widget .= $dashboardWidgetMoreParams;
+                                        break;
+                                }
                             }
                         }
                         $widget .= '</div>';
