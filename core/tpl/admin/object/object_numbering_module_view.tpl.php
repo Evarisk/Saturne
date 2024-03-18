@@ -1,6 +1,31 @@
 <?php
-/*
- *  Numbering module
+/* Copyright (C) 2023-2024 EVARISK <technique@evarisk.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+/**
+ * \file    core/tpl/admin/object_numbering_module_view.tpl.php
+ * \ingroup saturne
+ * \brief   Template page for object numbering module view
+ */
+
+/**
+ * The following vars must be defined :
+ * Global   : $conf, $db, $langs
+ * Objects  : $object
+ * Variable : $documentParentType, $documentPath, $moduleName, $moduleNameLowerCase, $objectModSubdir
  */
 
 //$numberingModuleLabel = str_contains($object->element, 'det') ? 'NumberingModuleDet' : 'NumberingModule';
@@ -17,11 +42,11 @@ print '</tr>';
 clearstatcache();
 
 if (empty($documentPath)) {
-    $elementType = $object->element;
-    $path = '/custom/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . ($objectModSubdir ? $objectModSubdir . '/' : '') . $elementType . '/';
+    $objectType = $object->element;
+    $path = '/custom/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . ($objectModSubdir ? $objectModSubdir . '/' : '') . $objectType . '/';
 } else {
-    $elementType = $documentParentType;
-    $path = '/custom/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $elementType . '/';
+    $objectType = $documentParentType;
+    $path = '/custom/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $objectType . '/';
 }
 
 $dir = dol_buildpath($path);
@@ -35,7 +60,7 @@ if (is_dir($dir)) {
         arsort($filelist);
         if (is_array($filelist) && !empty($filelist)) {
             foreach ($filelist as $file) {
-                if (preg_match('/mod_/', $file) && preg_match('/' . $elementType . '/i', $file)) {
+                if (preg_match('/mod_/', $file) && preg_match('/' . $objectType . '/i', $file)) {
                     if (file_exists($dir . '/' . $file)) {
                         $classname = substr($file, 0, dol_strlen($file) - 4);
 
@@ -62,17 +87,13 @@ if (is_dir($dir)) {
                             print '</td>';
 
                             print '<td class="center">';
-
-                            $confType        = strtoupper($moduleName) . '_' . strtoupper($elementType) . '_ADDON';
-                            if ($conf->global->$confType == $file || $conf->global->$confType . '.php' == $file) {
+                            $confName = dol_strtoupper($moduleName . '_' . $objectType) . '_ADDON';
+                            if (getDolGlobalString($confName) . '.php' == $file) {
                                 print img_picto($langs->trans('Activated'), 'switch_on');
                             } else {
-                                print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setmod&value=' . preg_replace('/\.php$/', '', $file) . '&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&module_name=' . $moduleName . '&type=' . $elementType . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), 'switch_off') . '</a>';
+                                print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=set_mod&value=' . preg_replace('/\.php$/', '', $file) . '&module_name=' . $moduleName . '&object_type=' . $objectType . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), 'switch_off') . '</a>';
                             }
-                            print '</td>';
-
-                            print '</td>';
-                            print '</tr>';
+                            print '</td></tr>';
                         }
                     }
                 }
