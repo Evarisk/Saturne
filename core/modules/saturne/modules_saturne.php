@@ -483,9 +483,12 @@ class SaturneDocumentModel extends CommonDocGenerator
         }
 
         if ($nbFiles) {
-            $info .= '<div id="div_' . get_class($this) . '" class="hidden">';
+            $info .= '<div id="div_' . get_class($this) . '" class="hiddenx">';
             foreach ($listOfFiles as $file) {
-                $info .= $file['name'] . '<br>';
+                // Show list of found files
+                $info .= '- ' . $file['name'];
+                $info .= '&nbsp; <a class="wpeo-button button-primary reposition" style="padding: 1px 2px;" href="'. $_SERVER['PHP_SELF'] . '?module_name='. GETPOST('module_name') .'&action=download_template&type='. dol_strtolower($file['level1name']) .'&filename=' . $file['name'] . '">'.img_picto('', 'fontawesome_fa-download_fas_#ffffff').'</a>';
+                $info .= '<br>';
             }
             $info .= '</div>';
         }

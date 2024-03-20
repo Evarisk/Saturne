@@ -230,18 +230,12 @@ if ($action == 'specimen') {
 }
 
 if ($action == 'download_template') {
-    $name = 'template_' . str_replace('_odt', '.odt', GETPOST('filename'));
-    $path = DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/doctemplates/' . dol_strtolower($type) . '/' . $name;
+    $name = GETPOST('filename');
+    $path = 'temp/' . $name;
 
-    if (file_exists($path)) {
-        header('Content-Type: application/odt');
-        header('Content-disposition: attachment; filename=' . basename($path));
-        header('Content-Length: ' . filesize($path));
-        readfile($path);
-    } else {
-        setEventMessages($langs->trans('ErrorFileDoesNotExists'), [], 'errors');
-    }
-    //header('Location: ' . DOL_DATA_ROOT . '/document.php?modulepart=' . $modulepart . '&file=' . 'temp/' . $name);
+    $res = copy(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/doctemplates/' . $type . '/' . $name, DOL_DATA_ROOT . '/' . $moduleNameLowerCase . '/temp/' . $name);
+    header('Location: ' . DOL_URL_ROOT . '/document.php?modulepart=' . $moduleNameLowerCase . '&attachment=1&entity='. $conf->entity .'&file=' . $path);
+    if ($res > 0) dol_delete_file(DOL_DATA_ROOT . '/' . $moduleNameLowerCase . '/temp/' . $name);
 }
 
 /*

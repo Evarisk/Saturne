@@ -58,11 +58,10 @@ if (is_array($filelist) && !empty($filelist)) {
                 if ($modulequalified) {
                     print '<tr class="oddeven"><td>';
                     print (empty($module->name) ? $name : $module->name);
-                    print '&nbsp; <a class="wpeo-button button-primary" href="'. $_SERVER['PHP_SELF'] . '?module_name='. $moduleName .'&action=download_template&type='. dol_strtolower($type) .'&filename=' . $name . '#'. $type . '">'.img_picto('', 'fontawesome_fa-download_fas_#ffffff').'</a>';
                     print '</td><td>';
                     if (method_exists($module, 'info')) {
                         print $module->info($langs);
-                    }else {
+                    } else {
                         print $module->description;
                     }
                     print '</td>';
@@ -170,7 +169,8 @@ if ($nbofiles) {
     // Show list of found files
     foreach ($listoffiles as $file) {
         print '- '.$file['name'];
-        print '&nbsp; <a class="wpeo-button button-primary button-red" style="padding: 1px 2px" href="'.$_SERVER["PHP_SELF"].'?module_name='. $moduleName .'&modulepart=ecm&keyforuploaddir='. $value .'&action=deletefile&token='.newToken().'&file='.urlencode(basename($file['name'])). '&type=' . $type .'">'.img_picto('', 'fontawesome_fa-trash_fas_#ffffff').'</a>';
+        print '&nbsp; <a class="wpeo-button button-primary reposition" style="padding: 1px 2px;" href="'. DOL_URL_ROOT . '/document.php?modulepart=ecm&attachment=1&entity='. $conf->entity .'&file=' . $moduleName . '/' . dol_strtolower($type) . '/' . $file['name'] . '">'.img_picto('', 'fontawesome_fa-download_fas_#ffffff').'</a>';
+        print '&nbsp; <a class="wpeo-button button-primary button-red" style="padding: 1px 2px;" href="'.$_SERVER["PHP_SELF"].'?module_name='. $moduleName .'&modulepart=ecm&keyforuploaddir='. $value .'&action=deletefile&token='.newToken().'&file='.urlencode(basename($file['name'])). '&type=' . $type .'">'.img_picto('', 'fontawesome_fa-trash_fas_#ffffff').'</a>';
         print '<br>';
     }
     print '</div>';
