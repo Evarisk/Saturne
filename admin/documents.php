@@ -229,13 +229,17 @@ if ($action == 'specimen') {
     }
 }
 
+if ($action == 'remove_file') {
+    $name = GETPOST('filename');
+
+   dol_delete_file(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $name);
+}
+
 if ($action == 'download_template') {
     $name = GETPOST('filename');
-    $path = 'temp/' . $name;
+    $type = GETPOST('type');
 
-    $res = copy(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/doctemplates/' . $type . '/' . $name, DOL_DATA_ROOT . '/' . $moduleNameLowerCase . '/temp/' . $name);
-    header('Location: ' . DOL_URL_ROOT . '/document.php?modulepart=' . $moduleNameLowerCase . '&attachment=1&entity='. $conf->entity .'&file=' . $path);
-    if ($res > 0) dol_delete_file(DOL_DATA_ROOT . '/' . $moduleNameLowerCase . '/temp/' . $name);
+    dol_copy(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/doctemplates/' . $type . '/' . $name, DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $name);
 }
 
 /*

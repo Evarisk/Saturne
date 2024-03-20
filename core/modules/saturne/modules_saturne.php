@@ -483,11 +483,15 @@ class SaturneDocumentModel extends CommonDocGenerator
         }
 
         if ($nbFiles) {
-            $info .= '<div id="div_' . get_class($this) . '" class="hiddenx">';
+            $info .= '<div id="div_' . get_class($this) . '" class="file-generation hiddenx">';
             foreach ($listOfFiles as $file) {
                 // Show list of found files
+                $path = DOL_MAIN_URL_ROOT . '/custom/' . GETPOST('module_name') . '/documents/temp/';
                 $info .= '- ' . $file['name'];
-                $info .= '&nbsp; <a class="wpeo-button button-primary reposition" style="padding: 1px 2px;" href="'. $_SERVER['PHP_SELF'] . '?module_name='. GETPOST('module_name') .'&action=download_template&type='. dol_strtolower($file['level1name']) .'&filename=' . $file['name'] . '">'.img_picto('', 'fontawesome_fa-download_fas_#ffffff').'</a>';
+                $info .= '<input type="hidden" class="template-name" value="'.  $file['name'] .'">';
+                $info .= '<input type="hidden" class="template-type" value="' . $file['level1name'] . '">';
+                $info .= '<input type="hidden" class="template-path" value="' . $path . '">';
+                $info .= '&nbsp; <a class="wpeo-button button-primary reposition download-template" style="padding: 1px 2px;"">'.img_picto('', 'fontawesome_fa-download_fas_#ffffff').'</a>';
                 $info .= '<br>';
             }
             $info .= '</div>';
