@@ -218,5 +218,6 @@ ExportData = Export my data
 # Other
 #
 
-# Data - Donnée
+# Data
+SocietyAttendants = Third party external attendants
 Back = Back
