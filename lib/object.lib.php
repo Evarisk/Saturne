@@ -170,6 +170,12 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
     $h          = 0;
     $objectType = $object->element;
 
+    // This case will appear if module use saturne for manage head with hook each other
+    if ($object->module !== $moduleNameLowerCase) {
+        $moduleName          = $object->module;
+        $moduleNameLowerCase = dol_strtolower($object->module);
+    }
+
     if ($user->rights->$moduleNameLowerCase->$objectType->read) {
         $head[$h][0] = dol_buildpath('/' . $moduleNameLowerCase . '/view/' . (!empty($moreparam['parentType']) ? $moreparam['parentType'] : $objectType) . '/' . (!empty($moreparam['parentType']) ? $moreparam['parentType'] : $objectType) . '_card.php', 1) . '?id=' . $object->id . (!empty($moreparam['parentType']) ? '&object_type=' . $objectType : '');
         $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-info-circle pictofixedwidth"></i>' . $langs->trans((!empty($moreparam['specialName']) ? ucfirst($moreparam['specialName']) : ucfirst($objectType))) : '<i class="fas fa-info-circle"></i>';
@@ -415,7 +421,6 @@ function saturne_get_objects_metadata(string $type = ''): array
             'class_path'     => 'contact/class/contact.class.php',
             'lib_path'       => 'core/lib/contact.lib.php',
         ];
-        $objectsMetadata['customer'] = $objectsMetadata['thirdparty'];
     }
 
     if (isModEnabled('project')) {
@@ -567,7 +572,6 @@ function saturne_get_objects_metadata(string $type = ''): array
             'class_path'     => 'product/stock/class/entrepot.class.php',
             'lib_path'       => 'core/lib/stock.lib.php',
         ];
-        $objectsMetadata['warehouse'] = $objectsMetadata['entrepot'];
     }
 
     if (isModEnabled('expedition')) {
@@ -705,4 +709,122 @@ function saturne_require_objects_mod(array $numberingModulesNames, string $modul
     }
 
     return $variablesToReturn;
+}
+
+/**
+ * Show object action for category
+ *
+ * @param  string    $moduleNameLowerCase Module name in lower case
+ * @param  string    $objectType          Object type
+ * @throws Exception
+ */
+function saturne_object_action_for_category(string $moduleNameLowerCase, string $objectType)
+{
+    // Global variables definitions
+    global $user;
+
+    $result = -1;
+    if ($user->hasRight($moduleNameLowerCase, $objectType, 'write')) {
+        // Global variables definitions
+        global $action, $id, $langs, $object;
+
+        $objects = saturne_fetch_all_object_type($objectType);
+        if (is_array($objects) && !empty($objects)) {
+            $objectID  = GETPOST('object_id');
+            $newObject = $objects[$objectID];
+            if ($action == 'add_object_into_category') {
+                $result = $object->add_type($newObject, $objectType);
+                if ($result >= 0) {
+                    setEventMessages($langs->trans('WasAddedSuccessfully', $newObject->ref), []);
+                } else {
+                    if ($object->error == 'DB_ERROR_RECORD_ALREADY_EXISTS') {
+                        setEventMessages($langs->trans('ObjectAlreadyLinkedToCategory'), [], 'warnings');
+                    } else {
+                        setEventMessages($object->error, $object->errors, 'errors');
+                    }
+                }
+            } elseif ($action == 'unlink_object_from_category') {
+                $result = $object->del_type($newObject, $objectType);
+                if ($result < 0) {
+                    dol_print_error('', $object->error);
+                }
+            }
+            if ($result > 0) {
+                header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&type=' . $objectType);
+                exit;
+            }
+        }
+    }
+}
+
+/**
+ * Show object list in category
+ *
+ * @param  string   $moduleNameLowerCase Module name in lower case
+ * @param  string   $objectType          Object type
+ * @return string   $out                 HTML table for show/add/delete object list in category
+ * @throws Exception
+ */
+function saturne_show_object_list_in_category(string $moduleNameLowerCase, string $objectType): string
+{
+    // Global variables definitions
+    global $user;
+
+    $out = '';
+    if ($user->hasRight($moduleNameLowerCase, $objectType, 'read')) {
+        // Global variables definitions
+        global $form, $id, $langs;
+
+        $langs->load($moduleNameLowerCase . '@' . $moduleNameLowerCase);
+
+        $objects      = saturne_fetch_all_object_type($objectType);
+        $objectArrays = [];
+        if (is_array($objects) && !empty($objects)) {
+            foreach ($objects as $object) {
+                $objectArrays[$object->id] = $object->ref;
+            }
+
+            $out .= '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&type=' . $objectType . '">';
+            $out .= '<input type="hidden" name="token" value="' . newToken() . '">';
+            $out .= '<input type="hidden" name="action" value="add_object_into_category">';
+
+            $out .= '<table class="noborder centpercent">';
+            $out .= '<tr class="liste_titre"><td>';
+            $out .= $langs->trans('AddObjectIntoCategory') . ' ';
+            $out .= $form::selectarray('object_id', $objectArrays, '', 1);
+            $out .= '<input type="submit" class="button buttongen" value="' . $langs->trans('ClassifyInCategory') . '"></td>';
+            $out .= '</tr>';
+            $out .= '</table>';
+            $out .= '</form>';
+
+            $newCardButton = dolGetButtonTitle($langs->trans('New'), '', 'fa fa-plus-circle', dol_buildpath('/' . $moduleNameLowerCase . '/view/' . $objectType . '/' . $objectType . '_card.php', 1) . '?action=create&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?id=' . $id . '&type=' . $objectType), '', $user->hasRight($moduleNameLowerCase, $objectType, 'write'));
+            $object        = array_shift($objects);
+            $picto         = $object->picto;
+
+            $out .= load_fiche_titre($langs->transnoentities(ucfirst($objectType)), $newCardButton, 'object_' . $picto);
+            $out .= '<table class="noborder centpercent">';
+            $out .= '<tr class="liste_titre"><td colspan="3">' . $langs->trans('Ref') . '</td></tr>';
+
+            $objects = saturne_fetch_all_object_type($objectType, '', '', 0, 0, ['customsql' => 'cp.fk_categorie = ' . $id], 'AND', false, true, true);
+            if (is_array($objects) && !empty($objects)) {
+                foreach ($objects as $object) {
+                    $out .= '<tr class="oddeven"><td class="nowrap">';
+                    $out .= $object->getNomUrl(1);
+                    $out .= '</td><td class="right">';
+                    if ($user->hasRight($moduleNameLowerCase, $objectType, 'write')) {
+                        $out .= '<a href="' . $_SERVER['PHP_SELF'] . '?action=unlink_object_from_category&id=' . $id . '&type=' . $objectType . '&object_id=' . $object->id . '&token=' . newToken() . '">';
+                        $out .= $langs->trans('DeleteFromCat');
+                        $out .= img_picto($langs->trans('DeleteFromCat'), 'unlink', 'class="paddingleft"');
+                        $out .= '</a>';
+                    }
+                    $out .= '</td></tr>';
+                }
+            } else {
+                $out .= '<tr class="oddeven"><td colspan="2" class="opacitymedium">' . $langs->trans('ThisCategoryHasNoItems') . '</td></tr>';
+            }
+            $out .= '</table>';
+        }
+    }
+
+    return $out;
 }

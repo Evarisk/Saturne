@@ -242,9 +242,9 @@ abstract class CustomModeleNumRefSaturne extends ModeleNumRefSaturne
         $confName = strtoupper($moduleNameLowerCase . '_' . $modName . '_ADDON');
 
         $texte = $langs->trans('GenericNumRefModelDesc')."<br>\n";
-        $texte .= '<form action="'.$_SERVER["PHP_SELF"].'" method="POST">';
+        $texte .= '<form action="' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleNameLowerCase . '" method="POST">';
         $texte .= '<input type="hidden" name="token" value="'.newToken().'">';
-        $texte .= '<input type="hidden" name="action" value="updateMask">';
+        $texte .= '<input type="hidden" name="action" value="update_mask">';
         $texte .= '<input type="hidden" name="mask" value="'. $confName .'">';
         $texte .= '<table class="nobordernopadding" width="100%">';
 
@@ -340,6 +340,25 @@ abstract class CustomModeleNumRefSaturne extends ModeleNumRefSaturne
         dol_syslog(get_class($this) . '::getNextValue return ' . $this->prefix . $yymm . '-' . $num);
         return $this->prefix . $num;
     }
+
+    /**
+     * Set prefix and suffix for custom value
+     *
+     * @param string $moduleNameLowerCase Module name
+     * @param string $objectType          Object element type
+     */
+    public function setCustomValue(string $moduleNameLowerCase, string $objectType)
+    {
+        $refMod = getDolGlobalString(dol_strtoupper($moduleNameLowerCase .  '_' . $objectType .  '_' . $this->name) . '_ADDON');
+        if (dol_strlen($refMod)) {
+            $refModSplitted = preg_split('/\{/', $refMod);
+            if (is_array($refModSplitted) && !empty($refModSplitted)) {
+                $suffix       = preg_replace('/}/', '', $refModSplitted[1]);
+                $this->prefix = $refModSplitted[0];
+                $this->suffix = $suffix;
+            }
+        }
+    }
 }
 
 require_once DOL_DOCUMENT_ROOT . '/core/class/commondocgenerator.class.php';
@@ -393,16 +412,16 @@ class SaturneDocumentModel extends CommonDocGenerator
     }
 
     /**
-     * Return list of active generation modules.
+     * Return list of active generation modules
      *
-     * @param  DoliDB $db                Database handler.
-     * @param  string $type              Document type.
-     * @param  int    $maxfilenamelength Max length of value to show.
+     * @param  DoliDB $db                Database handler
+     * @param  string $type              Document type
+     * @param  int    $maxfilenamelength Max length of value to show
      *
-     * @return array                     List of templates.
+     * @return array|int                 List of templates
      * @throws Exception
      */
-    public static function liste_modeles(DoliDB $db, string $type, int $maxfilenamelength = 0): array
+    public static function liste_modeles(DoliDB $db, string $type, int $maxfilenamelength = 0)
     {
         require_once __DIR__ . '/../../../lib/saturne_functions.lib.php';
         return saturne_get_list_of_models($db, $type, $maxfilenamelength);
@@ -784,8 +803,12 @@ class SaturneDocumentModel extends CommonDocGenerator
                 $fileName      = $newFileTmp . '.' . $newFileFormat;
                 $file          = $dir . '/' . $fileName;
 
-                $objectDocument->last_main_doc = $fileName;
-                $objectDocument->update($moreParam['user'], true);
+                $objectDocument->setValueFrom('last_main_doc', $fileName, '', null, '', '', $moreParam['user'], '', '');
+                if (!empty($objectDocument->error)) {
+                    $objectDocument->errors[] = $objectDocument->ref;
+                    setEventMessages($objectDocument->error, $objectDocument->errors, 'errors');
+                    return -1;
+                }
 
                 dol_mkdir($conf->$moduleNameLowerCase->dir_temp);
 

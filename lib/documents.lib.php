@@ -129,6 +129,7 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
                 include_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
                 $modellist = getListOfModels($db, $type);
             } else {
+                require_once __DIR__ . '/../core/modules/saturne/modules_saturne.php';
                 $saturneDocumentModel = new SaturneDocumentModel($db, $modulepart, $submodulepart);
                 $documentType = strtolower($submodulepart);
                 $modellist = $saturneDocumentModel->liste_modeles($db, $documentType);
@@ -150,14 +151,7 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
             $out .= '<form action="' . $urlsource . (empty($conf->global->MAIN_JUMP_TAG) ? '' : '#builddoc') . '" id="' . $forname . '_form" method="post">';
         }
 
-        // @todo spec digirisk
-		if (preg_match('/TicketDocument/', $submodulepart)) {
-			$action = 'digiriskbuilddoc';
-		} else {
-			$action = 'builddoc';
-		}
-
-		$out .= '<input type="hidden" name="action" value="'. $action .'">';
+		$out .= '<input type="hidden" name="action" value="builddoc">';
 		$out .= '<input type="hidden" name="token" value="' . newToken() . '">';
 		$out .= load_fiche_titre($titletoshow, '', '', 0, 'builddoc');
 		$out .= '<div class="div-table-responsive-no-min">';

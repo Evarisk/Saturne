@@ -318,6 +318,18 @@ if ( ! $error && $subaction == "toggleUnlinkedMedias") {
     dol_set_user_param($db, $conf,$user, $tabparam);
 }
 
+if (!$error && $subaction == 'regenerate_thumbs') {
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    $fullName   = $data['fullname'];
+    $sizesArray = ['mini', 'small', 'medium', 'large'];
+    foreach($sizesArray as $size) {
+        $confWidth  = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_' . dol_strtoupper($size);
+        $confHeight = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size);
+        vignette($fullName, $conf->global->$confWidth, $conf->global->$confHeight, '_' . $size);
+    }
+}
+
 if (is_array($submitFileErrorText)) {
 	print '<input class="error-medias" value="'. htmlspecialchars(json_encode($submitFileErrorText)) .'">';
 }

@@ -18,10 +18,10 @@
 /**
  * \file    admin/documents.php
  * \ingroup saturne
- * \brief   Saturne documents page.
+ * \brief   Saturne documents page
  */
 
-// Load Saturne environment.
+// Load Saturne environment
 if (file_exists('../saturne.main.inc.php')) {
     require_once __DIR__ . '/../saturne.main.inc.php';
 } elseif (file_exists('../../saturne.main.inc.php')) {
@@ -30,37 +30,37 @@ if (file_exists('../saturne.main.inc.php')) {
     die('Include of saturne main fails');
 }
 
-// Get module parameters.
+// Get module parameters
 $moduleName          = GETPOST('module_name', 'alpha');
 $moduleNameLowerCase = strtolower($moduleName);
 
-// Load Dolibarr libraries.
+// Load Dolibarr libraries
 require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 
-// Load Module libraries.
+// Load Module libraries
 require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '.lib.php';
 
-// Global variables definitions.
+// Global variables definitions
 global $conf, $db, $hookmanager, $langs, $user;
 
-// Load translation files required by the page.
+// Load translation files required by the page
 saturne_load_langs(['admin']);
 
-// Initialize view objects.
+// Initialize view objects
 $form = new Form($db);
 
-// Get parameters.
+// Get parameters
 $action     = GETPOST('action', 'alpha');
 $value      = GETPOST('value', 'alpha');
 $type       = GETPOST('type', 'alpha');
 $const      = GETPOST('const', 'alpha');
 $label      = GETPOST('label', 'alpha');
-$modulepart = GETPOST('modulepart', 'aZ09'); // Used by actions_setmoduleoptions.inc.php.
+$modulepart = GETPOST('modulepart', 'aZ09'); // Used by actions_setmoduleoptions.inc.php
 
-$hookmanager->initHooks([$moduleNameLowerCase . 'admindocuments']); // Note that conf->hooks_modules contains array.
+$hookmanager->initHooks([$moduleNameLowerCase . 'admindocuments']); // Note that conf->hooks_modules contains array
 
-// Security check - Protection if external user.
+// Security check - Protection if external user
 $permissiontoread = $user->rights->$moduleNameLowerCase->adminpage->read;
 saturne_check_access($permissiontoread);
 
@@ -68,7 +68,9 @@ saturne_check_access($permissiontoread);
  * Actions
  */
 
-// Activate a model.
+require '../core/tpl/actions/admin_conf_actions.tpl.php';
+
+// Activate a model
 if ($action == 'set') {
     addDocumentModel($value, $type, $label, $const);
     header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
@@ -77,7 +79,7 @@ if ($action == 'set') {
     header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
 }
 
-// Set default model.
+// Set default model
 if ($action == 'setdoc') {
     $constforval = strtoupper($moduleName) . '_' . strtoupper($type) . '_DEFAULT_MODEL';
     $label       = '';
@@ -86,7 +88,7 @@ if ($action == 'setdoc') {
         $conf->global->$constforval = $value;
     }
 
-    // Active model.
+    // Active model
     $ret = delDocumentModel($value, $type);
 
     if ($ret > 0) {

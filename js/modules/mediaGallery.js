@@ -63,6 +63,7 @@ window.saturne.mediaGallery.event = function() {
   $( document ).on( 'click', '.select-page', window.saturne.mediaGallery.selectPage );
   $( document ).on( 'click', '.toggle-today-medias', window.saturne.mediaGallery.toggleTodayMedias );
   $( document ).on( 'click', '.toggle-unlinked-medias', window.saturne.mediaGallery.toggleUnlinkedMedias );
+  $(document).on('click', '.regenerate-thumbs', window.saturne.mediaGallery.regenerateThumbs);
 }
 
 /**
@@ -631,4 +632,34 @@ window.saturne.mediaGallery.toggleUnlinkedMedias = function( event ) {
     error: function ( ) {
     }
   })
+};
+
+/**
+ * Regenerate thumbs media action
+ *
+ * @since   1.3.0
+ * @version 1.3.0
+ *
+ * @return {void}
+ */
+window.saturne.mediaGallery.regenerateThumbs = function() {
+  let token          = window.saturne.toolbox.getToken();
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+  let fullname       = $(this).closest('.photo-image').find('.fullname').attr('data-fullname');
+
+  window.saturne.loader.display($(this).closest('.photo-image'));
+
+  $.ajax({
+    url: document.URL + querySeparator + 'subaction=regenerate_thumbs&token=' + token,
+    type: 'POST',
+    data: JSON.stringify({
+      fullname: fullname
+    }),
+    processData: false,
+    contentType: false,
+    success: function(resp) {
+      $('.ecm-photo-list-content').replaceWith($(resp).find('.ecm-photo-list-content'));
+    },
+    error: function() {}
+  });
 };

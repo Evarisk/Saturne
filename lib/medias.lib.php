@@ -98,18 +98,17 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
                     <div class="center clickable-photo clickable-photo<?php echo $j; ?>" value="<?php echo $j; ?>">
                         <figure class="photo-image">
                             <?php
-                            $filePreviewUrl = urlencode($fileName);
-                            $urladvanced = getAdvancedPreviewUrl($modulepart, $moduleName . '/medias/' . $filePreviewUrl, 0, 'entity=' . $conf->entity);
-                            ?>
-                            <a class="clicked-photo-preview" href="<?php echo $urladvanced; ?>"><i class="fas fa-2x fa-search-plus"></i></a>
-                            <?php if (image_format_supported($fileName) >= 0) : ?>
-                                <?php $fullpath = $path . '/' . urlencode($shownFileName) . '&entity=' . $conf->entity; ?>
-                                <input class="filename" type="hidden" value="<?php echo $fileName; ?>">
-                                <?php
-
-                                ?>
-                                <img class="photo photo<?php echo $j ?>" height="<?php echo $maxHeight; ?>" width="<?php echo $maxWidth; ?>" src="<?php echo $fullpath; ?>">
-                            <?php endif; ?>
+                            if (file_exists($filearray[$i]['path'] . '/thumbs/' . $shownFileName)) {
+                                $advancedPreviewUrl = getAdvancedPreviewUrl($modulepart, $moduleName . '/medias/' . urlencode($fileName), 0, 'entity=' . $conf->entity);
+                                $fullpath           = $path . '/' . urlencode($shownFileName) . '&entity=' . $conf->entity;
+                                print '<input class="filename" type="hidden" value="' . $fileName . '">';
+                                print '<a class="clicked-photo-preview" href="' . $advancedPreviewUrl . '"><i class="fas fa-2x fa-search-plus"></i></a>';
+                                print '<img class="photo photo' . $j . '" width="' . $maxWidth . '" height="' . $maxHeight . '" src="' . $fullpath . '">';
+                            } else {
+                                print '<input type="hidden" class="fullname" data-fullname="' . $filearray[$i]['fullname'] . '">';
+                                print '<i class="clicked-photo-preview regenerate-thumbs fas fa-redo"></i>';
+                                print '<img class="photo photo' . $j . '" width="' . $maxWidth . '" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/public/theme/common/nophoto.png">';
+                            } ?>
                         </figure>
                         <?php print saturne_get_media_linked_elements($moduleName, $fileName); ?>
                         <div class="title"><?php echo $fileName; ?></div>
