@@ -30,6 +30,6 @@
     <div class="confirmation-container">
         <i class="confirmation-icon fas fa-check-circle"></i>
         <div class="confirmation-title"><?php echo $confirmationTitle; ?></div>
-        <button type="submit" class="confirmation-close wpeo-button button-primary" onclick="window.close();"><?php echo $langs->trans('CloseModal'); ?></button>
+        <button type="submit" class="confirmation-close wpeo-button button-blue" onclick="window.close();"><?php echo $langs->trans('CloseModal'); ?></button>
     </div>
 </div>

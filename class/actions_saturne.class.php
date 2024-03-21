@@ -180,7 +180,7 @@ class ActionsSaturne
                 $out .= '<div class="signature-image"><img src="' . $signatory->signature . '" width="200px" height="100px" style="border: #0b419b solid 2px" alt=""></div>';
             }
             if ($user->id == $id) {
-                $out .= '<div class="wpeo-button button-primary button-square-50 modal-open signature-button" value="' . $signatory->id . '">';
+                $out .= '<div class="wpeo-button button-blue button-square-50 modal-open signature-button" value="' . $signatory->id . '">';
                 $out .= '<input type="hidden" class="modal-options" data-modal-to-open="modal-signature' . $signatory->id . '" data-from-test="' . $signatory->id . '">';
                 $out .= img_picto('', 'signature', 'class="paddingright"') . $langs->trans("Sign");
                 $out .= '</div>'; ?>

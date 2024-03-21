@@ -54,7 +54,7 @@
                         <input type="hidden" class="specimen-name" data-specimen-name="<?php echo $objectType . '_specimen_' . $trackID . '.odt'; ?>">
                         <input type="hidden" class="specimen-path" data-specimen-path="<?php echo $path; ?>">
                         <?php if (GETPOSTISSET('document_type') && $fileExists) : ?>
-                            <div class="wpeo-button button-square-40 button-rounded button-primary auto-download"><i class="fas fa-download"></i></div>
+                            <div class="wpeo-button button-square-40 button-rounded button-blue auto-download"><i class="fas fa-download"></i></div>
                         <?php else : ?>
                             <div class="wpeo-button button-square-40 button-rounded button-grey"><i class="fas fa-download"></i></div>
                         <?php endif; ?>

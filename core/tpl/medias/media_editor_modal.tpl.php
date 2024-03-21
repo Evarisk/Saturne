@@ -58,7 +58,7 @@
                 <div class="image-erase wpeo-button button-grey button-square-50">
                     <span><i class="fas fa-eraser"></i></span>
                 </div>
-                <div class="image-validate wpeo-button button-primary button-square-50" value="0">
+                <div class="image-validate wpeo-button button-blue button-square-50" value="0">
                     <span><i class="fas fa-check"></i></span>
                 </div>
             </div>
