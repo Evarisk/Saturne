@@ -211,3 +211,12 @@ EntityName   = Nom de l'entité
 # Data - Donnée
 Tools      = Outils
 ExportData = Exporter mes données
+
+
+
+#
+# Other - Autres
+#
+
+# Data - Donnée
+Back = Retour

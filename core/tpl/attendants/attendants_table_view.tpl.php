@@ -101,8 +101,8 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
         print '</td><td class="center copy-signatureurl-container">';
         if ($object->status == $object::STATUS_VALIDATED) {
             if ((!$user->rights->$moduleNameLowerCase->$objectType->read && $user->rights->$moduleNameLowerCase->assignedtome->$objectType && ($element->element_id == $user->id || $element->element_id == $user->contact_id)) || $permissiontoadd) {
-                $signatureUrl = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $element->signature_url . '&entity=' . $conf->entity . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType . '&modal_to_open=modal-signature' . $element->id, 3);
-                print '<a href=' . $signatureUrl . ' target="_blank"><div class="wpeo-button button-primary" style="' . ($conf->browser->layout != 'classic' ? 'font-size: 25px;': '') . '"><i class="fas' . (($element->status == SaturneSignature::STATUS_SIGNED) ? ' fa-eye' : ' fa-signature') . '"></i></div></a>';
+                $signatureUrl = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $element->signature_url . '&entity=' . $conf->entity . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
+                print '<a href=' . $signatureUrl . ' target="_blank"><div class="wpeo-button button-blue" style="' . ($conf->browser->layout != 'classic' ? 'font-size: 25px;': '') . '"><i class="fas' . (($element->status == SaturneSignature::STATUS_SIGNED) ? ' fa-eye' : ' fa-signature') . '"></i></div></a>';
                 print ' <i class="fas fa-clipboard copy-signatureurl" data-signature-url="' . $signatureUrl . '" style="color: #666;' .  ($conf->browser->layout != 'classic' ? 'display: none;': '') . '"></i>';
                 print '<span class="copied-to-clipboard" style="display: none;">' . '  ' . $langs->trans('CopiedToClipboard') . '</span>';
             }
@@ -127,7 +127,7 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
                 print '<input type="hidden" name="action" value="send_email">';
                 print '<input type="hidden" name="signatoryID" value="' . $element->id . '">';
                 print '<input type="hidden" name="backtopage" value="' . $backtopage . '">';
-                print '<button type="submit" class="signature-email wpeo-button button-primary" style="' . ($conf->browser->layout != 'classic' ? 'font-size: 20px;': '') . '" value="' . $element->id . '">';
+                print '<button type="submit" class="signature-email wpeo-button button-blue" style="' . ($conf->browser->layout != 'classic' ? 'font-size: 20px;': '') . '" value="' . $element->id . '">';
                 print '<i class="fas fa-paper-plane"></i>';
                 print '</button>';
                 if ($nbEmailSent > 0) {
