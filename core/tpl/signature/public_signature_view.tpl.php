@@ -30,7 +30,7 @@
  */ ?>
 
 <div class="public-card__container" data-public-interface="true">
-    <?php if (!empty($conf->global->SATURNE_ENABLE_PUBLIC_INTERFACE)) : ?>
+    <?php if (getDolGlobalInt('SATURNE_ENABLE_PUBLIC_INTERFACE')) : ?>
         <input type="hidden" name="token" value="<?php echo newToken(); ?>">
 
         <div class="public-card__header wpeo-gridlayout grid-2 grid-gap-2">
