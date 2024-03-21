@@ -92,7 +92,7 @@ if ($action == 'setdoc') {
     $ret = delDocumentModel($value, $type);
 
     if ($ret > 0) {
-        $ret = addDocumentModel($value, $type, $label);
+        $ret = addDocumentModel($value, $type, $label, $const);
     }
 } elseif ($action == 'setmod') {
     $constforval = strtoupper($moduleName) . '_' . strtoupper($type) . '_ADDON';
@@ -125,7 +125,7 @@ if ($action == 'deletefile' && $modulepart == 'ecm' && !empty($user->admin)) {
     $result = dol_delete_file($filetodelete);
     if ($result > 0) {
         setEventMessages($langs->trans('FileWasRemoved', GETPOST('file')), null);
-        header('Location: ' . $_SERVER['PHP_SELF']);
+        header('Location: ' . $_SERVER['PHP_SELF']. '?module_name=' . $moduleNameLowerCase . '#' . $langs->trans($type));
     }
 }
 
@@ -227,6 +227,19 @@ if ($action == 'specimen') {
         setEventMessages($langs->trans("ErrorModuleNotFound"), null, 'errors');
         dol_syslog($langs->trans("ErrorModuleNotFound"), LOG_ERR);
     }
+}
+
+if ($action == 'remove_file') {
+    $name = GETPOST('filename');
+
+   dol_delete_file(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $name);
+}
+
+if ($action == 'download_template') {
+    $name = GETPOST('filename');
+    $type = GETPOST('type');
+
+    dol_copy(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/doctemplates/' . $type . '/' . $name, DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $name);
 }
 
 /*

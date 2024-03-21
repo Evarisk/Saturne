@@ -22,6 +22,10 @@ if ($resql) {
     dol_print_error($db);
 }
 
+$saturneDocumentModel = new SaturneDocumentModel($db, $module->name);
+$modellist            = $saturneDocumentModel->liste_modeles($db, $type);
+$modellist            = is_array($modellist) ? $modellist : [];
+
 print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
 print '<td>' . $langs->trans('Name') . '</td>';
@@ -57,7 +61,7 @@ if (is_array($filelist) && !empty($filelist)) {
                     print '</td><td>';
                     if (method_exists($module, 'info')) {
                         print $module->info($langs);
-                    }else {
+                    } else {
                         print $module->description;
                     }
                     print '</td>';
@@ -65,11 +69,11 @@ if (is_array($filelist) && !empty($filelist)) {
                     // Active
                     print '<td class="center">';
 
-                    if (in_array($name, $def)) {
-                        print '<a href="' . $_SERVER['PHP_SELF'] . '?action=del&value=' . $name . '&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
+                    if (in_array($name, $def) && (array_search('index.php', $modellist))) {
+                        //print '<a href="' . $_SERVER['PHP_SELF'] . '?action=del&value=' . $name . '&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '#' . $langs->trans($type) . '">';
                         print img_picto($langs->trans('Enabled'), 'switch_on');
                     } else {
-                        print '<a href="' . $_SERVER['PHP_SELF'] . '?action=set&value=' . $name . '&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
+                        print '<a href="' . $_SERVER['PHP_SELF'] . '?action=setdoc&value=' . $name . '&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '#' . $langs->trans($type) . '">';
                         print img_picto($langs->trans('Disabled'), 'switch_off');
                     }
                     print '</a>';
@@ -81,7 +85,7 @@ if (is_array($filelist) && !empty($filelist)) {
                     if ($conf->global->$defaultModelConf == $name) {
                         print img_picto($langs->trans('Default'), 'on');
                     } else {
-                        print '<a href="' . $_SERVER['PHP_SELF'] . '?action=setdoc&value=' . $name .'&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&module_name=' . $moduleName . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), 'off') . '</a>';
+                        print '<a href="' . $_SERVER['PHP_SELF'] . '?action=setdoc&value=' . $name .'&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&module_name=' . $moduleName . '&token=' . newToken() . '#' . $langs->trans($type) . '">' . img_picto($langs->trans('Disabled'), 'off') . '</a>';
                     }
                     print '</td>';
 
@@ -109,4 +113,91 @@ if (is_array($filelist) && !empty($filelist)) {
         }
     }
 }
+
+$value = dol_strtoupper($moduleName) . '_'. dol_strtoupper($type) .'_CUSTOM_ADDON_ODT_PATH';
+
+print '<form action="' . $_SERVER["PHP_SELF"] . '#' . $langs->trans($type) . '" method="POST" enctype="multipart/form-data">';
+print '<input type="hidden" name="token" value="' . newToken() . '">';
+print '<input type="hidden" name="action" value="setModuleOptions">';
+print '<input type="hidden" name="keyforuploaddir" value="' . $value . '">';
+print '<input type="hidden" name="value" value="' . $conf->global->$value . '">';
+print '<input type="hidden" name="module_name" value="' . $moduleName . '">';
+
+// List of directories area
+print '<tr><td>';
+print $langs->trans('CustomODT');
+print '</td>';
+print '<td>';
+
+$texttitle   = $langs->trans('ListOfDirectories');
+$listofdir   = explode(',', preg_replace('/[\r\n]+/', ',', trim($conf->global->$value)));
+$listoffiles = [];
+foreach ($listofdir as $key => $tmpdir) {
+    $tmpdir = trim($tmpdir);
+    $tmpdir = preg_replace('/DOL_DATA_ROOT/', DOL_DATA_ROOT, $tmpdir);
+    if ( ! $tmpdir) {
+        unset($listofdir[$key]); continue;
+    }
+    if ( ! is_dir($tmpdir)) $texttitle .= img_warning($langs->trans('ErrorDirNotFound', $tmpdir), 0);
+    else {
+        $tmpfiles                          = dol_dir_list($tmpdir, 'files', 0, '\.(ods|odt)');
+        if (count($tmpfiles)) $listoffiles = array_merge($listoffiles, $tmpfiles);
+    }
+}
+$texthelp = $langs->trans('ListOfDirectoriesForModelGenODT');
+// Add list of substitution keys
+$texthelp .= '<br>' . $langs->trans('FollowingSubstitutionKeysCanBeUsed') . '<br>';
+$texthelp .= $langs->transnoentitiesnoconv('FullListOnOnlineDocumentation'); // This contains an url, we don't modify it
+
+print $form->textwithpicto($texttitle, $texthelp, 1, 'help', '', 1);
+print '<div><div style="display: inline-block; min-width: 100px; vertical-align: middle;">';
+print '<span class="flat" style="font-weight: bold">';
+print $conf->global->$value;
+print '</span>';
+print '</div><div style="display: inline-block; vertical-align: middle;">';
+print '<br></div></div>';
+
+// Scan directories
+$nbofiles = count($listoffiles);
+if (!empty($conf->global->$value)) {
+    print $langs->trans('NumberOfModelFilesFound') . ': <b>';
+    print count($listoffiles);
+    print '</b>';
+}
+if ($nbofiles) {
+    print '<div id="div_' . get_class($object) . '" class="hiddenx">';
+    // Show list of found files
+    foreach ($listoffiles as $file) {
+        print '- '.$file['name'];
+        print '&nbsp; <a class="wpeo-button button-primary reposition" style="padding: 1px 2px;" href="'. DOL_URL_ROOT . '/document.php?modulepart=ecm&attachment=1&entity='. $conf->entity .'&file=' . $moduleName . '/' . dol_strtolower($type) . '/' . $file['name'] . '">'.img_picto('', 'fontawesome_fa-download_fas_#ffffff').'</a>';
+        print '&nbsp; <a class="wpeo-button button-primary button-red" style="padding: 1px 2px;" href="'.$_SERVER["PHP_SELF"].'?module_name='. $moduleName .'&modulepart=ecm&keyforuploaddir='. $value .'&action=deletefile&token='.newToken().'&file='.urlencode(basename($file['name'])). '&type=' . $type .'">'.img_picto('', 'fontawesome_fa-trash_fas_#ffffff').'</a>';
+        print '<br>';
+    }
+    print '</div>';
+}
+// Add input to upload a new template file.
+print '<div>' . $langs->trans('UploadNewTemplate') . ' <input type="file" name="userfile">';
+print '<input type="hidden" value='. $value .' name="keyforuploaddir">';
+print '<input type="submit" class="button" value="' . dol_escape_htmltag($langs->trans('Upload')) . '" name="upload">';
+print '</div>';
+print '</td>';
+
+// Active
+print '<td class="center">';
+
+if (array_search('index.php', $modellist) || empty($modellist)) {
+    print '<a href="' . $_SERVER['PHP_SELF'] . '?action=setdoc&value=' . $name . '&const=' . $value . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '#' . $langs->trans($type) . '">';
+    print img_picto($langs->trans('Disabled'), 'switch_off');
+} else {
+    //print '<a href="' . $_SERVER['PHP_SELF'] . '?action=del&value=' . $name . '&const=' . $value . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '#' . $langs->trans($type) . '">';
+    print img_picto($langs->trans('Enabled'), 'switch_on');
+}
+print '</a>';
+print '</td>';
+
+print '<td colspan=3></td>';
+
+print '</tr>';
+
 print '</table>';
+print '</form>';
