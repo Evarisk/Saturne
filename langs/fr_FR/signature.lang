@@ -27,8 +27,6 @@ DeletedTrigger          = Participant %s supprimé
 
 # SetEventMessage - Notice info
 BeCareful               = Attention
-AddSignatureSuccess     = Signature du participant réussie
-AddSignatureSuccessText = La signature a bien été enregistrée pour le document
 AddAttendantMessage     = Ajout du participant : %s
 DeleteAttendantMessage  = Suppression du participant : %s
 SignAttendantMessage    = Le participant %s a signé
@@ -67,6 +65,7 @@ Sign                       = Signer
 Erase                      = Effacer
 AttendantTableModeSimple   = Vue simplifiée
 AttendantTableModeAdvanced = Vue avancée
+SignatureSaveButton        = Enregistrer la signature
 
 # Data - Donnée
 Attendant           = Participant
@@ -86,4 +85,5 @@ Signatory           = Signataire
 Responsible         = Responsable
 
 # Public interface - Interface publique
-FullName = NOM Prénom
+SavedSignature = Signature enregistrée
+

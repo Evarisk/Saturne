@@ -25,6 +25,7 @@
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmdirectory.class.php';
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
+require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 
 // Global variables definitions
@@ -78,6 +79,49 @@ if ( ! $error && $subaction == "uploadPhoto" && ! empty($conf->global->MAIN_UPLO
 			}
 		}
 	}
+}
+
+if (!$error && $subaction == 'add_img') {
+    global $object;
+
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    $encodedImage = explode(',', $data['img'])[1];
+    $decodedImage = base64_decode($encodedImage);
+    $pathToECMImg = $conf->ecm->dir_output . '/' . $moduleNameLowerCase . '/medias';
+    $fileName     = dol_print_date(dol_now(), 'dayhourlog') . '_img.jpg';
+
+    if (!dol_is_dir($pathToECMImg)) {
+        dol_mkdir($pathToECMImg);
+    }
+
+    file_put_contents($pathToECMImg . '/' . $fileName, $decodedImage);
+    addFileIntoDatabaseIndex($pathToECMImg, $fileName, $pathToECMImg . '/' . $fileName);
+
+    $modObjectName       = dol_strtoupper($moduleNameLowerCase) . '_' . dol_strtoupper($object->element) . '_ADDON';
+    $numberingModuleName = [$object->element => $conf->global->$modObjectName];
+    list($modObject)     = saturne_require_objects_mod($numberingModuleName, $moduleNameLowerCase);
+
+    if (dol_strlen($object->ref) > 0) {
+        $pathToObjectImg = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $object->element . '/' . $object->ref . '/' . $data['objectSubdir'];
+    } else {
+        $pathToObjectImg = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $object->element . '/tmp/' . $modObject->prefix . '0/' . $data['objectSubdir'];
+    }
+
+    if (!dol_is_dir($pathToObjectImg)) {
+        dol_mkdir($pathToObjectImg);
+    }
+
+    dol_copy($pathToECMImg . '/' . $fileName, $pathToObjectImg . '/' . $fileName);
+
+    // Create thumbs
+    $mediaSizes = ['mini', 'small', 'medium', 'large'];
+    foreach($mediaSizes as $size) {
+        $confWidth  = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_' . dol_strtoupper($size);
+        $confHeight = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size);
+        vignette($pathToECMImg . '/' . $fileName, $conf->global->$confWidth, $conf->global->$confHeight, '_' . $size);
+        vignette($pathToObjectImg . '/' . $fileName, $conf->global->$confWidth, $conf->global->$confHeight, '_' . $size);
+    }
 }
 
 if ( ! $error && $subaction == "addFiles") {
@@ -289,7 +333,9 @@ if (!$error && $subaction == 'regenerate_thumbs') {
 if (is_array($submitFileErrorText)) {
 	print '<input class="error-medias" value="'. htmlspecialchars(json_encode($submitFileErrorText)) .'">';
 }
-?>
+
+require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
+
 <!-- START MEDIA GALLERY MODAL -->
 <div class="wpeo-modal modal-photo" id="media_gallery" data-id="<?php echo $object->id ?: 0?>">
 	<div class="modal-container wpeo-modal-event">

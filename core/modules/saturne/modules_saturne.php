@@ -340,6 +340,25 @@ abstract class CustomModeleNumRefSaturne extends ModeleNumRefSaturne
         dol_syslog(get_class($this) . '::getNextValue return ' . $this->prefix . $yymm . '-' . $num);
         return $this->prefix . $num;
     }
+
+    /**
+     * Set prefix and suffix for custom value
+     *
+     * @param string $moduleNameLowerCase Module name
+     * @param string $objectType          Object element type
+     */
+    public function setCustomValue(string $moduleNameLowerCase, string $objectType)
+    {
+        $refMod = getDolGlobalString(dol_strtoupper($moduleNameLowerCase .  '_' . $objectType .  '_' . $this->name) . '_ADDON');
+        if (dol_strlen($refMod)) {
+            $refModSplitted = preg_split('/\{/', $refMod);
+            if (is_array($refModSplitted) && !empty($refModSplitted)) {
+                $suffix       = preg_replace('/}/', '', $refModSplitted[1]);
+                $this->prefix = $refModSplitted[0];
+                $this->suffix = $suffix;
+            }
+        }
+    }
 }
 
 require_once DOL_DOCUMENT_ROOT . '/core/class/commondocgenerator.class.php';

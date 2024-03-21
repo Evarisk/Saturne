@@ -89,11 +89,10 @@ class ActionsSaturne
                 }
                 // Output html code for logo
                 if ($urllogo) {
-                    print '<div class="center signature-logo">';
-                    print '<img src="' . $urllogo . '">';
+                    print '<div class="center signature-logo maxwidth300">';
+                    print '<img src="' . $urllogo . '" height="96px" alt="">';
                     print '</div>';
                 }
-                print '<div class="underbanner clearboth"></div>';
             }
         }
 
@@ -125,240 +124,139 @@ class ActionsSaturne
         return 0; // or return 1 to replace standard code
     }
 
-	/**
-	 * Overloading the printCommonFooter function : replacing the parent's function with the one below
-	 *
-	 * @param   array           $parameters     Hook metadatas (context, etc...)
-	 * @return  int                             < 0 on error, 0 on success, 1 to replace standard code
-	 */
-	public function printCommonFooter($parameters)
-	{
-		global $conf, $form, $langs, $user, $db;
+    /**
+     * Overloading the addHtmlHeader function : replacing the parent's function with the one below
+     *
+     * @param  array $parameters Hook metadata (context, etc...)
+     * @return int               0 < on error, 0 on success, 1 to replace standard code
+     */
+    public function addHtmlHeader(array $parameters): int
+    {
+        if (strpos($parameters['context'], 'usercard') !== false) {
+            $resourcesRequired = [
+                'css'       => '/custom/saturne/css/saturne.min.css',
+                'js'        => '/custom/saturne/js/saturne.min.js',
+                'signature' => '/custom/saturne/js/includes/signature-pad.min.js'
+            ];
 
-		$resourcesRequired = [
-			'css' => '/custom/saturne/css/saturne.min.css',
-			'js' => '/custom/saturne/js/saturne.min.js',
-			'signature' => '/custom/saturne/js/includes/signature-pad.min.js',
-		];
+            $out  = '<!-- Includes CSS added by module saturne -->';
+            $out .= '<link rel="stylesheet" type="text/css" href="' . dol_buildpath($resourcesRequired['css'], 1) . '">';
+            $out .= '<!-- Includes JS added by module saturne -->';
+            $out .= '<script src="' . dol_buildpath($resourcesRequired['js'], 1) . '"></script>';
+            $out .= '<script src="' . dol_buildpath($resourcesRequired['signature'], 1) . '"></script>';
 
-		$error = 0; // Error counter
+            $this->resprints = $out;
+        }
 
-		if ($parameters['currentcontext'] == 'usercard') {
-			$id = GETPOSTISSET('id') ? GETPOST('id') : 0;
+        return 0; // or return 1 to replace standard code
+    }
 
-			print '<script src="'.dol_buildpath($resourcesRequired['js'], 1).((strpos($resourcesRequired['js'], '?') === false) ? '?' : '&amp;').'lang='.$langs->defaultlang.'"></script>'."\n";
-			print '<script src="'.dol_buildpath($resourcesRequired['signature'], 1).((strpos($resourcesRequired['signature'], '?') === false) ? '?' : '&amp;').'lang='.$langs->defaultlang.'"></script>'."\n";
-			$urltofile = dol_buildpath($resourcesRequired['css'], 1);
+    /**
+     * Overloading the printCommonFooter function : replacing the parent's function with the one below
+     *
+     * @param  array     $parameters Hook metadatas (context, etc...)
+     * @return int                   0 < on error, 0 on success, 1 to replace standard code
+     * @throws Exception
+     */
+    public function printCommonFooter(array $parameters): int
+    {
+        global $conf, $form, $langs, $user;
 
-			print '<!-- Includes CSS added by page -->'."\n".'<link rel="stylesheet" type="text/css" title="default" href="'.$urltofile;
-			print '">'."\n";
+        if (strpos($parameters['context'], 'usercard') !== false) {
+            $id = GETPOST('id');
 
-			require_once __DIR__ . '/saturnesignature.class.php';
-			$signatory = new SaturneSignature($db);
-			$result = $signatory->fetchSignatory('UserSignature', $id, 'user');
-			if (!is_array($result) || empty($result)) {
-				$userSignatory = $signatory->setSignatory($id, $user->element, 'user', [$id], 'UserSignature');
-			} else {
-				$userSignatory = array_shift($result);
-			}
+            require_once __DIR__ . '/saturnesignature.class.php';
 
-			if (dol_strlen($userSignatory->signature) > 0) {
-				$out = '<div class="signatures-container">';
-				$out .= '<input type="hidden" class="modal-options" data-modal-to-open="modal-signature'. $userSignatory->id .'">';
-				$out .= '<img class="wpeo-modal-event modal-signature-open modal-open" value="'. $userSignatory->id .'" src="'. $userSignatory->signature .'" width="100px" height="100px" style="border: #0b419b solid 2px">';
-				$out .= '</div>';
-			}
-			if ($user->id == $id) {
+            $signatory = new SaturneSignature($this->db);
 
-				$out .= '<div class="wpeo-button button-blue wpeo-modal-event modal-signature-open modal-open" value="'. $userSignatory->id .'">';
-				$out .= '<input type="hidden" class="modal-options" data-modal-to-open="modal-signature'. $userSignatory->id .'" data-from-id="'. $userSignatory->id .'">';
-				$out .= '<span><i class="fas fa-signature"></i>'. $langs->trans('Sign') .'</span>';
-				$out .= '</div>';
+            $signatory->fetch(0, '', ' AND fk_object = ' . $id . ' AND status > 0 AND object_type = "user" AND role = "UserSignature"');
 
-				?>
-				<div class="modal-signature" value="<?php echo $userSignatory->id ?>">
-					<input type="hidden" name="token" value="<?php echo newToken(); ?>">
-					<div class="wpeo-modal modal-signature" id="modal-signature<?php echo $userSignatory->id ?>">
-						<div class="modal-container wpeo-modal-event">
-							<!-- Modal-Header-->
-							<div class="modal-header">
-								<h2 class="modal-title"><?php echo $langs->trans('Signature'); ?></h2>
-								<div class="modal-close"><i class="fas fa-times"></i></div>
-							</div>
-							<!-- Modal-ADD Signature Content-->
-							<div class="modal-content" id="#modalContent">
-								<input type="hidden" id="signature_data<?php echo $userSignatory->id ?>" value="<?php echo $userSignatory->signature ?>">
-								<canvas style="height: 95%; width: 95%; border: #0b419b solid 2px"></canvas>
-							</div>
-							<!-- Modal-Footer-->
-							<div class="modal-footer">
-								<div class="signature-erase wpeo-button button-grey">
-									<span><i class="fas fa-eraser"></i> <?php echo $langs->trans('Erase'); ?></span>
-								</div>
-								<div class="wpeo-button button-grey modal-close">
-									<span><?php echo $langs->trans('Cancel'); ?></span>
-								</div>
-								<div class="signature-validate wpeo-button button-primary" value="<?php echo $userSignatory->id ?>">
-									<input type="hidden" id="zone<?php echo $userSignatory->id ?>" value="<?php echo 'public' ?>">
-									<span><?php echo $langs->trans('Validate'); ?></span>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
+            $pictoPath = dol_buildpath('/saturne/img/saturne_color.png', 1);
 
-				<script>
-					$('.user_extras_electronic_signature').html(<?php echo json_encode($out) ?>);
-				</script>
-
-				<?php
-			}
-        } elseif (preg_match('/categorycard/', $parameters['context']) && preg_match('/viewcat.php/', $_SERVER['PHP_SELF'])) {
-            $id   = GETPOST('id');
-            $type = GETPOST('type');
-
-            // Temporary exclude DoliMeet and native Dolibarr objects
-            if ($type == 'meeting' || $type == 'audit' || $type == 'trainingsession' || !empty(saturne_get_objects_metadata($type))) {
-                return 0;
+            $out  = '<div class="signature-container" data-public-interface="false">';
+            $out .= '<div class="signature-user">';
+            $out .= img_picto('', $pictoPath, '', 1, 0, 0, '', 'pictoModule');
+            if (dol_strlen($signatory->signature) > 0) {
+                $out .= '<div class="signature-image"><img src="' . $signatory->signature . '" width="200px" height="100px" style="border: #0b419b solid 2px" alt=""></div>';
             }
+            if ($user->id == $id) {
+                $out .= '<div class="wpeo-button button-blue button-square-50 modal-open signature-button" value="' . $signatory->id . '">';
+                $out .= '<input type="hidden" class="modal-options" data-modal-to-open="modal-signature' . $signatory->id . '" data-from-test="' . $signatory->id . '">';
+                $out .= img_picto('', 'signature', 'class="paddingright"') . $langs->trans("Sign");
+                $out .= '</div>'; ?>
 
-            // Load variable for pagination
-            $limit     = GETPOST('limit', 'int') ?GETPOST('limit', 'int') : $conf->liste_limit;
-            $sortfield = GETPOST('sortfield', 'aZ09comma');
-            $sortorder = GETPOST('sortorder', 'aZ09comma');
-            $page      = GETPOSTISSET('pageplusone') ? (GETPOST('pageplusone') - 1) : GETPOST("page", 'int');
-            if (empty($page) || $page == -1) {
-                $page = 0;
-            }     // If $page is not defined, or '' or -1 or if we click on clear filters or if we select empty mass action
-            $offset = $limit * $page;
-
-            $objects      = saturne_fetch_all_object_type($type);
-            $objectArrays = [];
-            if (is_array($objects) && !empty($objects)) {
-                foreach ($objects as $object) {
-                    $objectArrays[$object->id] = $object->ref;
-                }
-            }
-
-            $category = new Categorie($this->db);
-            $category->fetch($id);
-            $objectCategories = $category->getObjectsInCateg($type, 0, $limit, $offset);
-
-            $out = '<br>';
-
-            $out .= '<form method="post" action="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&type=' . $type . '">';
-            $out .= '<input type="hidden" name="token" value="' . newToken() . '">';
-            $out .= '<input type="hidden" name="action" value="addintocategory">';
-
-            $out .= '<table class="noborder centpercent">';
-            $out .= '<tr class="liste_titre"><td>';
-            $out .= $langs->trans('AddObjectIntoCategory') . ' ';
-            $out .= $form::selectarray('element_id', $objectArrays, '', 1);
-            $out .= '<input type="submit" class="button buttongen" value="' . $langs->trans('ClassifyInCategory') . '"></td>';
-            $out .= '</tr>';
-            $out .= '</table>';
-            $out .= '</form>';
-
-            $out .= '<br>';
-
-            if (is_array($objects) && !empty($objects)) {
-                $object = array_shift($objects);
-                $picto = $object->picto;
-            }
-
-            $out .= load_fiche_titre($langs->transnoentities(ucfirst($type)), '', 'object_' . $picto);
-            $out .= '<table class="noborder centpercent">';
-            $out .= '<tr class="liste_titre"><td colspan="3">' . $langs->trans('Ref') . '</td></tr>';
-
-            if (is_array($objectCategories) && !empty($objectCategories)) {
-                // Form to add record into a category
-                if (count($objectCategories) > 0) {
-                    $i = 0;
-                    foreach ($objectCategories as $object) {
-                        $i++;
-                        if ($i > $limit) break;
-
-                        $out .= '<tr class="oddeven">';
-                        $out .= '<td class="nowrap">';
-                        $object->picto   = $picto;
-                        $object->element = $type;
-                        $out .= $object->getNomUrl(1);
-                        $out .= '</td>';
-                        // Link to delete from category
-                        $out .= '<td class="right">';
-                        if ($user->rights->categorie->creer) {
-                            $out .= '<a href="' . $_SERVER['PHP_SELF'] . '?action=delintocategory&id=' . $id . '&type=' . $type . '&element_id=' . $object->id . '&token=' . newToken() . '">';
-                            $out .= $langs->trans('DeleteFromCat');
-                            $out .= img_picto($langs->trans('DeleteFromCat'), 'unlink', '', false, 0, 0, '', 'paddingleft');
-                            $out .= '</a>';
-                        }
-                        $out .= '</td>';
-                        $out .= '</tr>';
-                    }
-                } else {
-                    $out .= '<tr class="oddeven"><td colspan="2" class="opacitymedium">' . $langs->trans('ThisCategoryHasNoItems') . '</td></tr>';
-                }
-            } else {
-                $out .= '<tr class="oddeven"><td colspan="2" class="opacitymedium">' . $langs->trans('ThisCategoryHasNoItems') . '</td></tr>';
-            }
-
-            $out .= '</table>'; ?>
+                <div class="modal-signature">
+                    <input type="hidden" name="token" value="<?php echo newToken(); ?>">
+                    <div class="wpeo-modal modal-signature" id="modal-signature<?php echo $signatory->id; ?>">
+                        <div class="modal-container wpeo-modal-event">
+                            <!-- Modal-Header-->
+                            <div class="modal-header">
+                                <h2 class="modal-title"><?php echo $langs->trans('Signature'); ?></h2>
+                                <div class="modal-close"><i class="fas fa-times"></i></div>
+                            </div>
+                            <!-- Modal-ADD Signature Content-->
+                            <div class="modal-content" id="#modalContent">
+                                <canvas class="canvas-container canvas-signature" style="height: 95%; width: 98%; border: #0b419b solid 2px"></canvas>
+                            </div>
+                            <!-- Modal-Footer-->
+                            <div class="modal-footer">
+                                <div class="signature-erase wpeo-button button-square-50 button-grey"><span><i class="fas fa-eraser"></i></span></div>
+                                <div class="signature-validate wpeo-button button-square-50 button-disable"><span><i class="fas fa-file-signature"></i></span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php }
+            $out .= '</div></div>'; ?>
 
             <script>
-                jQuery('.fichecenter').last().after(<?php echo json_encode($out); ?>)
+                $('.user_extras_electronic_signature').html(<?php echo json_encode($out); ?>);
             </script>
             <?php
         }
 
-		if (!$error) {
-			$this->results   = array('myreturn' => 999);
-			return 0; // or return 1 to replace standard code
-		} else {
-			$this->errors[] = 'Error message';
-			return -1;
-		}
-	}
+        return 0; // or return 1 to replace standard code
+    }
 
-	/**
-	 * Overloading the doActions function : replacing the parent's function with the one below
-	 *
-	 * @param  array  $parameters Hook metadata (context, etc...)
-	 * @param  object $object     The object to process
-	 * @param  string $action     Current action (if set). Generally create or edit or null
-	 * @return int                0 < on error, 0 on success, 1 to replace standard code
-	 */
-	public function doActions(array $parameters, $object, string $action): int
-	{
-		global $db, $user;
+    /**
+     * Overloading the doActions function : replacing the parent's function with the one below
+     *
+     * @param  array     $parameters Hook metadata (context, etc...)
+     * @param  object    $object    The object to process
+     * @param  string    $action    Current action (if set). Generally create or edit or null
+     * @return int                  0 < on error, 0 on success, 1 to replace standard code
+     * @throws Exception
+     */
+    public function doActions(array $parameters, $object, string $action): int
+    {
+        global $user;
 
-		if ($parameters['currentcontext'] == 'usercard' && GETPOST('action') == 'add_signature') {
-			require_once __DIR__ . '/saturnesignature.class.php';
-			$signatory = new SaturneSignature($db);
-			$data        = json_decode(file_get_contents('php://input'), true);
+        if (strpos($parameters['context'], 'usercard') !== false && $action == 'add_signature') {
+            $id = GETPOST('id');
 
-			$signatoryID = GETPOST('signatoryID');
+            require_once __DIR__ . '/saturnesignature.class.php';
 
-			if ($signatoryID > 0) {
-				$signatory->fetch($signatoryID);
+            $signatory = new SaturneSignature($this->db);
+            $data      = json_decode(file_get_contents('php://input'), true);
 
-				$signatory->signature      = $data['signature'];
-				$signatory->signature_date = dol_now();
+            $result = $signatory->fetch(0, '', ' AND fk_object = ' . $id . ' AND status > 0 AND object_type = "user" AND role = "UserSignature"');
+            if ($result <= 0) {
+                $signatory->setSignatory($id, $user->element, 'user', [$id], 'UserSignature');
+            }
 
-				$error = 0;
+            $signatory->signature      = $data['signature'];
+            $signatory->signature_date = dol_now();
 
-				if (!$error) {
-					$result = $signatory->update($user, true);
-					if ($result > 0) {
-						// Creation signature OK.
-						$signatory->setSigned($user, false, 'public');
-						exit;
-					} elseif (!empty($signatory->errors)) { // Creation signature KO.
-						setEventMessages('', $signatory->errors, 'errors');
-					} else {
-						setEventMessages($signatory->error, [], 'errors');
-					}
-				}
-			}
+            $result = $signatory->update($user, true);
+            if ($result > 0) {
+                // Creation signature OK
+                $signatory->setSigned($user, false);
+                exit;
+            } elseif (!empty($signatory->errors)) { // Creation signature KO
+                setEventMessages('', $signatory->errors, 'errors');
+            } else {
+                setEventMessages($signatory->error, [], 'errors');
+            }
         } elseif (preg_match('/categorycard/', $parameters['context'])) {
             global $langs;
 
@@ -392,6 +290,7 @@ class ActionsSaturne
                 $action = '';
             }
         }
-		return 0;
-	}
+
+        return 0; // or return 1 to replace standard code
+    }
 }
