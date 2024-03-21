@@ -81,7 +81,7 @@ if ( ! $error && $subaction == "uploadPhoto" && ! empty($conf->global->MAIN_UPLO
 	}
 }
 
-if ( ! $error && $subaction == 'add_img') {
+if (!$error && $subaction == 'add_img') {
     global $object;
 
     $data = json_decode(file_get_contents('php://input'), true);

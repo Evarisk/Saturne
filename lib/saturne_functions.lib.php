@@ -58,6 +58,9 @@ function saturne_header(int $load_media_gallery = 0, string $head = '', string $
 
 	//JS
 	$arrayofjs[] = '/saturne/js/saturne.min.js';
+    if ($load_media_gallery) {
+        $arrayofjs[] = '/saturne/js/includes/signature-pad.min.js';
+    }
     if (file_exists(__DIR__ . '/../../' . $moduleNameLowerCase . '/js/' . $moduleNameLowerCase . '.min.js')) {
         $arrayofjs[] = '/' . $moduleNameLowerCase . '/js/' . $moduleNameLowerCase . '.min.js';
     }

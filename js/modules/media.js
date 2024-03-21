@@ -80,13 +80,27 @@ window.saturne.media.init = function() {
  */
 window.saturne.media.event = function() {
   $(document).on('change', '.fast-upload', window.saturne.media.uploadImage);
-  $(document).on('click', '.image-rotate-left', function() { window.saturne.media.rotateImage(-90); });
-  $(document).on('click', '.image-rotate-right', function() { window.saturne.media.rotateImage(90); });
+  $(document).on('click', '.image-rotate-left', function() {
+    window.saturne.media.rotateImage(-90);
+  });
+  $(document).on('click', '.image-rotate-right', function() {
+    window.saturne.media.rotateImage(90);
+  });
   $(document).on('click', '.image-undo', window.saturne.media.undoLastDraw);
   $(document).on('click', '.image-erase', window.saturne.media.clearCanvas);
   $(document).on('click', '.image-validate', window.saturne.media.createImg);
 };
 
+/**
+ * Upload image action
+ *
+ * @memberof Saturne_Media
+ *
+ * @since   1.3.0
+ * @version 1.3.0
+ *
+ * @returns {void}
+ */
 window.saturne.media.uploadImage = function() {
   if (this.files && this.files[0]) {
     var reader = new FileReader();
@@ -164,47 +178,26 @@ window.saturne.media.clearCanvas = function() {
  */
 window.saturne.media.drawImageOnCanvas = function(event) {
   window.saturne.media.canvas = document.querySelector('#modal-upload-image0 canvas');
+  if (window.saturne.media.canvas) {
+    window.saturne.media.canvas.signaturePad = new SignaturePad(window.saturne.media.canvas, {
+      penColor: 'rgb(255, 0, 0)'
+    });
 
-  window.saturne.media.canvas.signaturePad = new SignaturePad(window.saturne.media.canvas, {
-    penColor: 'rgb(255, 0, 0)'
-  });
+    const context = window.saturne.media.canvas.getContext('2d');
 
-  window.saturne.media.canvas.signaturePad.clear();
+    // Draw the image on the canvas
+    var img = new Image(300, 300);
+    img.src = event.target.result;
+    window.saturne.media.img = event;
+    img.onload = function() {
 
-  // Draw the image on the canvas
-  var img = new Image();
-  img.src = event.target.result;
-  window.saturne.media.img = event;
+      window.saturne.media.canvas.width  = 400;
+      window.saturne.media.canvas.height = 400;
+      context.drawImage(this, 0, 0);
+    };
 
-  img.onload = function() {
-    // let ratio = Math.max(window.devicePixelRatio || 1, 1);
-    // window.saturne.media.canvas.width  = window.saturne.media.canvas.offsetWidth * ratio;
-    // window.saturne.media.canvas.height = window.saturne.media.canvas.offsetHeight * ratio;
-    //let context = window.saturne.media.canvas.getContext('2d').scale(ratio, ratio);
-    let context = window.saturne.media.canvas.getContext('2d');
-    window.saturne.media.canvas.width  = 300;
-    window.saturne.media.canvas.height = 400;
-    context.drawImage(img, 0, 0, window.saturne.media.canvas.width, window.saturne.media.canvas.height);
-  };
-
-  window.saturne.media.rotation = 0; // Reset rotation when a new image is selected
-};
-
-/**
- * Action fast upload.
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @return {void}
- */
-window.saturne.media.fastUpload = function() {
-  let objectId         = $(this).closest('.linked-medias').find('.modal-options').attr('data-from-id')
-  let objectType       = $(this).closest('.linked-medias').find('.modal-options').attr('data-from-type')
-  let objectSubtype    = $(this).closest('.linked-medias').find('.modal-options').attr('data-from-subtype')
-  let objectSubdir     = $(this).closest('.linked-medias').find('.modal-options').attr('data-from-subdir')
-  let objectPhotoClass = $(this).closest('.linked-medias').find('.modal-options').attr('data-photo-class')
-
+    window.saturne.media.rotation = 0; // Reset rotation when a new image is selected
+  }
 };
 
 /**
