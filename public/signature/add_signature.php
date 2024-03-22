@@ -21,9 +21,6 @@
  * \brief   Public page to add signature
  */
 
-if (!defined('NOREQUIREUSER')) {
-    define('NOREQUIREUSER', 1);
-}
 if (!defined('NOTOKENRENEWAL')) {
     define('NOTOKENRENEWAL', 1);
 }
@@ -64,7 +61,6 @@ $moduleNameLowerCase = strtolower($moduleName);
 
 // Load Dolibarr libraries
 require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
-require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
 
 // Load Saturne libraries
 require_once __DIR__ . '/../../class/saturnesignature.class.php';
@@ -129,14 +125,13 @@ if (empty($resHook)) {
  * View
  */
 
-$title   = $langs->trans('Signature');
-$moreJS  = ['/saturne/js/includes/signature-pad.min.js'];
-$moreCSS = ['/saturne/css/saturne.min.css'];
+$title  = $langs->trans('Signature');
+$moreJS = ['/saturne/js/includes/signature-pad.min.js'];
 
 $conf->dol_hide_topmenu  = 1;
 $conf->dol_hide_leftmenu = 1;
 
-saturne_header(0,'', $title, '', '', 0, 0, $moreJS, $moreCSS, '', 'page-public-card page-signature');
+saturne_header(0,'', $title, '', '', 0, 0, $moreJS, [], '', 'page-public-card page-signature');
 
 $moreParams['useConfirmation'] = 1;
 require_once __DIR__ . '/../../core/tpl/signature/public_signature_view.tpl.php';
