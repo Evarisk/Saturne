@@ -665,7 +665,7 @@ function saturne_get_objects_metadata(string $type = ''): array
                     $langs->load($objectMetadata['langfile']);
                 }
                 if (dol_strlen($type) > 0) {
-                    $otherNameType = (!empty(array_search($type, $objectMetadata)) ? $objectType : $otherNameType);
+                    $otherNameType = (!empty(array_search($type, $objectMetadata)) ? $objectType : '');
                 }
             }
         }
@@ -674,7 +674,7 @@ function saturne_get_objects_metadata(string $type = ''): array
     if (dol_strlen($type) > 0) {
         if (array_key_exists($type, $objectsMetadataArray)) {
             return $objectsMetadataArray[$type];
-        } else if (array_key_exists($otherNameType, $objectsMetadataArray)) {
+        } elseif (array_key_exists($otherNameType, $objectsMetadataArray)) {
             return $objectsMetadataArray[$otherNameType];
         } else {
             return [];
