@@ -88,6 +88,16 @@
 
 <?php
 if (isset($moreParams['useConfirmation'])) {
-    $confirmationTitle = $langs->trans('SavedSignature');
+    $varArray = [
+        'confirmationTitle' => 'SavedSignature',
+        'moreCss' => [
+            0 => 'green',
+            1 => 'blue'
+        ],
+        'buttons' => [
+            0 => 'CloseModal',
+        ],
+        'icon' => 'fas fa-check-circle'
+    ];
     require_once __DIR__ . '/../public/public_confirmation_view.tpl.php';
 }

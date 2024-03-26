@@ -459,18 +459,32 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
                     return count($fileArrays) == 0;
                 });
            }
-            $allMediasNumber              = count($filearray);
-			$pagesCounter                 = $conf->global->$moduleImageNumberPerPageConf ? ceil($allMediasNumber/($conf->global->$moduleImageNumberPerPageConf ?: 1)) : 1;
-			$page_array                   = saturne_load_pagination($pagesCounter, $loadedPageArray, $offset);
+            $allMediasNumber = count($filearray);
+			$pagesCounter    = $conf->global->$moduleImageNumberPerPageConf ? ceil($allMediasNumber/($conf->global->$moduleImageNumberPerPageConf ?: 1)) : 1;
+			$page_array      = saturne_load_pagination($pagesCounter, $loadedPageArray, $offset);
 
 			print saturne_show_pagination($pagesCounter, $page_array, $offset); ?>
 			<div class="save-photo wpeo-button button-blue button-disable" value="">
                 <span><?php echo $langs->trans('Add'); ?></span>
 			</div>
+            <?php
+            $varArray = [
+                'confirmationTitle' => 'DeleteFiles',
+                'moreCss' => [
+                    0 => 'red',
+                    1 => 'blue',
+                ],
+                'buttons' => [
+                    0 => 'Delete',
+                    1 => 'CloseModal',
+                ],
+                'icon' => 'fas fa-trash-alt'
+            ];
+            require __DIR__ . '/../public/public_confirmation_view.tpl.php';?>
             <div class="wpeo-button button-red button-disable delete-photo">
                 <i class="fas fa-trash-alt"></i>
             </div>
-		</div>
+        </div>
 	</div>
 </div>
 <!-- END MEDIA GALLERY MODAL -->

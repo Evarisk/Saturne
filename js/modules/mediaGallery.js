@@ -182,20 +182,33 @@ window.saturne.mediaGallery.deletePhoto = function() {
       fileNames += $(this).find('.filename').val() + 'vVv'
     });
   }
-
   window.saturne.loader.display($(this));
-  $.ajax({
-    url: document.URL + querySeparator + 'subaction=delete_files&token=' + token,
-    type: 'POST',
-    processData: false,
-    contentType: false,
-    data: JSON.stringify({
-      filenames: fileNames
-    }),
-    success: function(resp) {
-      mediaGalleryModal.replaceWith($(resp).find('#media_gallery .modal-container'));
-    },
-    error: function() {},
+
+  var countArray = filesLinked.length
+
+  $('.public-card__confirmation').removeAttr('style');
+  $('.public-card__confirmation .confirmation-title .countArray').text(countArray);
+  $(document).on('click', '.confirmation-close', function() {
+      $('.wpeo-loader').removeClass('wpeo-loader')
+      $('.public-card__confirmation').attr('style', 'display:none;')
+  })
+
+  $(document).on('click', '.confirmation-delete', function() {
+      $.ajax({
+        url: document.URL + querySeparator + 'subaction=delete_files&token=' + token,
+        type: 'POST',
+        processData: false,
+        contentType: false,
+        data: JSON.stringify({
+          filenames: fileNames
+        }),
+        success: function ( resp ) {
+          $('.wpeo-loader').removeClass('wpeo-loader')
+          $('.public-card__confirmation').attr('style', 'display:none;')
+          window.location.reload()
+        },
+      error: function() {}
+      });
   });
 };
 
