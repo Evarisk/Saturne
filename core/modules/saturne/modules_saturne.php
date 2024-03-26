@@ -391,11 +391,14 @@ class SaturneDocumentModel extends CommonDocGenerator
 
         parent::__construct($db);
 
-        $this->module        = $moduleNameLowerCase;
-        $this->document_type = $objectDocumentType;
-        $this->name          = $langs->trans('ODTDefaultTemplateName');
-        $this->description   = $langs->trans('DocumentModelOdt');
-        $this->scandir       = dol_strtoupper($this->module) . '_' . dol_strtoupper($this->document_type) . '_ADDON_ODT_PATH'; // Name of constant that is used to save list of directories to scan.
+        $this->module         = $moduleNameLowerCase;
+        $this->document_type  = $objectDocumentType;
+        $this->name           = $langs->transnoentities('ODTDefaultTemplateName');
+        $this->custom_name    = $langs->transnoentities('CustomODT');
+        $this->description    = $langs->transnoentities('DocumentModelOdt');
+        $this->custom_info    = false; //@todo remove info method in doc class for better management of custom_info
+        $this->scandir        = dol_strtoupper($this->module) . '_' . dol_strtoupper($this->document_type) . '_ADDON_ODT_PATH';        // Name of constant that is used to save list of directories to scan.
+        $this->custom_scandir = dol_strtoupper($this->module) . '_' . dol_strtoupper($this->document_type) . '_CUSTOM_ADDON_ODT_PATH';
 
         // Page size for A4 format.
         $this->type         = 'odt';
@@ -428,30 +431,25 @@ class SaturneDocumentModel extends CommonDocGenerator
     }
 
     /**
-     * Return description of a module.
+     * Return description of document model
      *
-     * @param  Translate $langs Lang object to use for output.
+     * @param  Translate $langs Lang object to use for output
      *
-     * @return string           Description.
+     * @return string           Description
      */
     public function info(Translate $langs): string
     {
         global $conf;
 
-        // Load translation files required by the page.
-        $langs->loadLangs(['errors', 'companies']);
-
-        $confName = $this->scandir;
+        $confName = (!$this->custom_info ? $this->scandir : $this->custom_scandir);
 
         $info = $this->description . ' . <br>';
-        $info .= '<form action="' . $_SERVER['PHP_SELF'] . '" method="POST">';
+        $info .= '<form action="' . $_SERVER['PHP_SELF'] . '?module_name=' . $this->module . '" method="POST"' . ($this->custom_info ? ' enctype="multipart/form-data"' : '') . '>';
         $info .= '<input type="hidden" name="token" value="' . newToken() . '">';
         $info .= '<input type="hidden" name="action" value="setModuleOptions">';
-        $info .= '<input type="hidden" name="param1" value="' . $confName . '">';
-        $info .= '<table class="nobordernopadding centpercent">';
+        $info .= '<input type="hidden" name="keyforuploaddir" value="' . $confName . '">';
 
-        // List of directories area.
-        $info        .= '<tr><td>';
+        // List of directories area
         $infoTitle   = $langs->trans('ListOfDirectories');
         $listOfDir   = explode(',', preg_replace('/[\r\n]+/', ',', trim($conf->global->$confName)));
         $listOfFiles = [];
@@ -474,7 +472,7 @@ class SaturneDocumentModel extends CommonDocGenerator
             }
         }
 
-        // Scan directories.
+        // Scan directories
         $nbFiles = count($listOfFiles);
         if (!empty($conf->global->$confName)) {
             $info .= $langs->trans('NumberOfModelFilesFound') . ': <b>';
@@ -483,22 +481,32 @@ class SaturneDocumentModel extends CommonDocGenerator
         }
 
         if ($nbFiles) {
-            $info .= '<div id="div_' . get_class($this) . '" class="file-generation hiddenx">';
+            $info .= '<div class="file-generation">';
             foreach ($listOfFiles as $file) {
                 // Show list of found files
                 $path = DOL_MAIN_URL_ROOT . '/custom/' . GETPOST('module_name') . '/documents/temp/';
-                $info .= '- ' . $file['name'];
                 $info .= '<input type="hidden" class="template-name" value="'.  $file['name'] .'">';
                 $info .= '<input type="hidden" class="template-type" value="' . $file['level1name'] . '">';
                 $info .= '<input type="hidden" class="template-path" value="' . $path . '">';
-                $info .= '&nbsp; <a class="wpeo-button button-primary reposition download-template" style="padding: 1px 2px;"">'.img_picto('', 'fontawesome_fa-download_fas_#ffffff').'</a>';
+                $info .= '- ' . $file['name'];
+                if (!$this->custom_info) {
+                    $info .= ' <a class="wpeo-button button-blue reposition download-template" style="padding: 1px 2px;">' . img_picto('', 'download') . '</a>';
+                } else {
+                    $info .= ' <a class="wpeo-button button-blue reposition" style="padding: 1px 2px;" href="' . DOL_URL_ROOT . '/document.php?modulepart=ecm&attachment=1&entity=' . $conf->entity . '&file=' . $this->module . '/' . dol_strtolower($this->document_type) . '/' . $file['name'] . '">' . img_picto('', 'fontawesome_fa-download_fas_#ffffff') . '</a>';
+                    $info .= ' <a class="wpeo-button button-red reposition" style="padding: 1px 2px;" href="' . $_SERVER['PHP_SELF'] . '?module_name=' . $this->module . '&modulepart=ecm&keyforuploaddir='. $confName . '&action=deletefile&token=' . newToken() . '&file=' . urlencode(basename($file['name'])) . '">' . img_picto('', 'fontawesome_fa-trash_fas_#ffffff') . '</a>';
+                }
                 $info .= '<br>';
             }
             $info .= '</div>';
         }
 
-        $info .= '</td>';
-        $info .= '</table>';
+        if ($this->custom_info) {
+            // Add input to upload a new template file
+            $info .= '<div>' . $langs->trans('UploadNewTemplate') . ' <input type="file" name="userfile">';
+            $info .= '<input type="submit" class="button" name="upload" value="' . dol_escape_htmltag($langs->trans('Upload')) . '">';
+            $info .= '</div>';
+        }
+
         $info .= '</form>';
 
         return $info;

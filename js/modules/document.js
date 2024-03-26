@@ -52,8 +52,8 @@ window.saturne.document.init = function() {
  * @return {void}
  */
 window.saturne.document.event = function() {
-  $(document).on('click', '#builddoc_generatebutton', window.saturne.document.displayLoader );
-  $(document).on('click', '.pdf-generation', window.saturne.document.displayLoader );
+  $(document).on('click', '#builddoc_generatebutton', window.saturne.document.displayLoader);
+  $(document).on('click', '.pdf-generation', window.saturne.document.displayLoader);
   $(document).on('click', '.download-template', window.saturne.document.autoDownloadTemplate);
 };
 
@@ -70,11 +70,11 @@ window.saturne.document.displayLoader = function(  ) {
 };
 
 /**
- * Auto Download document template
+ * Auto download document template
  *
  * @memberof Saturne_Framework_Document
  *
- * @since   1.0.0
+ * @since   1.3.0
  * @version 1.3.0
  *
  * @return {void}
@@ -85,24 +85,20 @@ window.saturne.document.autoDownloadTemplate = function() {
   let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
   let type           = element.find('.template-type').attr('value');
   let filename       = element.find('.template-name').attr('value');
-  let url            = document.URL + querySeparator + 'action=download_template&filename=' + filename + '&type=' + type + '&token=' + token;
 
   $.ajax({
-    url: url,
+    url: document.URL + querySeparator + 'action=download_template&filename=' + filename + '&type=' + type + '&token=' + token,
     type: 'POST',
-    success: function ( ) {
+    success: function() {
       let path = element.find('.template-path').attr('value');
       window.saturne.signature.download(path + filename, filename);
       $.ajax({
         url: document.URL + querySeparator + 'action=remove_file&filename=' + filename + '&token=' + token,
         type: 'POST',
-        success: function ( ) {
-        },
-        error: function ( ) {
-        }
+        success: function () {},
+        error: function() {}
       });
     },
-    error: function ( ) {
-    }
+    error: function () {}
   });
 };

@@ -74,9 +74,11 @@ require '../core/tpl/actions/admin_conf_actions.tpl.php';
 if ($action == 'set') {
     addDocumentModel($value, $type, $label, $const);
     header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
+    exit;
 } elseif ($action == 'del') {
     delDocumentModel($value, $type);
     header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
+    exit;
 }
 
 // Set default model
@@ -125,7 +127,8 @@ if ($action == 'deletefile' && $modulepart == 'ecm' && !empty($user->admin)) {
     $result = dol_delete_file($filetodelete);
     if ($result > 0) {
         setEventMessages($langs->trans('FileWasRemoved', GETPOST('file')), null);
-        header('Location: ' . $_SERVER['PHP_SELF']. '?module_name=' . $moduleNameLowerCase . '#' . $langs->trans($type));
+        header('Location: ' . $_SERVER['PHP_SELF']. '?module_name=' . $moduleNameLowerCase);
+        exit;
     }
 }
 
@@ -229,17 +232,14 @@ if ($action == 'specimen') {
     }
 }
 
-if ($action == 'remove_file') {
-    $name = GETPOST('filename');
-
-   dol_delete_file(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $name);
+if ($action == 'download_template') {
+    $fileName = GETPOST('filename');
+    dol_copy(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/doctemplates/' . $type . '/' . $fileName, DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $fileName);
 }
 
-if ($action == 'download_template') {
-    $name = GETPOST('filename');
-    $type = GETPOST('type');
-
-    dol_copy(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/doctemplates/' . $type . '/' . $name, DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $name);
+if ($action == 'remove_file') {
+    $fileName = GETPOST('filename');
+   dol_delete_file(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $fileName);
 }
 
 /*
