@@ -114,6 +114,15 @@ print $langs->trans('UseAllEmailModeDescription');
 print '</td><td class="center">';
 print ajax_constantonoff('SATURNE_USE_ALL_EMAIL_MODE');
 print '</td></tr>';
+
+// Use fast upload improvement
+print '<tr class="oddeven"><td>';
+print  $langs->trans('UseFastUploadImprovement');
+print '</td><td>';
+print $langs->transnoentities('UseFastUploadImprovementDescription');
+print '</td><td class="center">';
+print ajax_constantonoff('SATURNE_USE_FAST_UPLOAD_IMPROVEMENT');
+print '</td></tr>';
 print '</table>';
 
 // Page end
