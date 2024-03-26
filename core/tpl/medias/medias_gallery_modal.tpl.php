@@ -89,7 +89,7 @@ if (!$error && $subaction == 'add_img') {
     $encodedImage = explode(',', $data['img'])[1];
     $decodedImage = base64_decode($encodedImage);
     $pathToECMImg = $conf->ecm->dir_output . '/' . $moduleNameLowerCase . '/medias';
-    $fileName     = dol_print_date(dol_now(), 'dayhourlog') . '_img.jpg';
+    $fileName     = dol_print_date(dol_now(), 'dayhourlog') . '_img.png';
 
     if (!dol_is_dir($pathToECMImg)) {
         dol_mkdir($pathToECMImg);
@@ -104,6 +104,10 @@ if (!$error && $subaction == 'add_img') {
 
     if (dol_strlen($object->ref) > 0) {
         $pathToObjectImg = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $object->element . '/' . $object->ref . '/' . $data['objectSubdir'];
+        if (empty($object->$data['objectSubType'])) {
+            $object->$data['objectSubType'] = $fileName;
+            $object->setValueFrom($object->$data['objectSubType'], $object->$data['objectSubType'], '', '', 'text', '', $user);
+        }
     } else {
         $pathToObjectImg = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $object->element . '/tmp/' . $modObject->prefix . '0/' . $data['objectSubdir'];
     }
