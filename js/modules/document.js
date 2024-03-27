@@ -80,14 +80,15 @@ window.saturne.document.displayLoader = function(  ) {
  * @return {void}
  */
 window.saturne.document.autoDownloadTemplate = function() {
-  let element        = $(this).closest('.file-generation');
   let token          = window.saturne.toolbox.getToken();
-  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+  let url            = document.URL.replace(/#.*$/, '');
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(url);
+  let element        = $(this).closest('.file-generation');
   let type           = element.find('.template-type').attr('value');
   let filename       = element.find('.template-name').attr('value');
 
   $.ajax({
-    url: document.URL + querySeparator + 'action=download_template&filename=' + filename + '&type=' + type + '&token=' + token,
+    url: url + querySeparator + 'action=download_template&filename=' + filename + '&type=' + type + '&token=' + token,
     type: 'POST',
     success: function() {
       let path = element.find('.template-path').attr('value');

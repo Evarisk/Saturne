@@ -69,7 +69,7 @@ if (is_array($filelist) && !empty($filelist)) {
                 if ($conf->global->$defaultModelConf == $name) {
                     print img_picto($langs->trans('Default'), 'on');
                 } else {
-                    print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setdoc&value=' . $name .'&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&module_name=' . $moduleName . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), 'off') . '</a>';
+                    print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setdoc&value=' . $name .'&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), 'off') . '</a>';
                 }
                 print '</td>';
 
@@ -93,24 +93,35 @@ if (is_array($filelist) && !empty($filelist)) {
                 print '</td></tr>';
 
                 // Custom ODT document
-                print '<tr class="oddeven"><td>';
-                print $langs->trans('CustomODT');
-                print '</td><td>';
-                $module->custom_info = true;
-                print $module->info($langs);
-                print '</td>';
+                if (method_exists($module, 'info')) {
+                    print '<tr class="oddeven"><td>';
+                    print $langs->trans('CustomODT');
+                    print '</td><td>';
+                    $module->custom_info = true;
+                    print $module->info($langs);
+                    print '</td>';
 
-                // Active
-                print '<td class="center">';
-                if (in_array($customName, $def)) {
-                    print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=del&value=' . $customName . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
-                    print img_picto($langs->trans('Enabled'), 'switch_on');
-                } else {
-                    print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=set&value=' . $customName . '&const=' . $module->custom_scandir . '&label=' . urlencode($module->custom_name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
-                    print img_picto($langs->trans('Disabled'), 'switch_off');
+                    // Active
+                    print '<td class="center">';
+                    if (in_array($customName, $def)) {
+                        print '<a href="' . $_SERVER['PHP_SELF'] . '?action=del&value=' . $customName . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
+                        print img_picto($langs->trans('Enabled'), 'switch_on');
+                    } else {
+                        print '<a href="' . $_SERVER['PHP_SELF'] . '?action=set&value=' . $customName . '&const=' . $module->custom_scandir . '&label=' . urlencode($module->custom_name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
+                        print img_picto($langs->trans('Disabled'), 'switch_off');
+                    }
+                    print '</a>';
+
+                    // Default
+                    print '<td class="center">';
+                    $defaultModelConf = strtoupper($moduleName) . '_' . strtoupper($documentParentType) . '_DEFAULT_MODEL';
+                    if ($conf->global->$defaultModelConf == $customName) {
+                        print img_picto($langs->trans('Default'), 'on');
+                    } else {
+                        print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setdoc&value=' . $customName .'&const=' . $module->custom_scandir . '&label=' . urlencode($module->custom_name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), 'off') . '</a>';
+                    }
+                    print '</td><td colspan=2></td></tr>';
                 }
-                print '</a>';
-                print '</td><td colspan=3></td></tr>';
             }
         }
     }
