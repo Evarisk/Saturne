@@ -173,8 +173,6 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 window.saturne.mediaGallery.deletePhoto = function() {
   let mediaGalleryModal = $(this).closest('.modal-container');
   let filesLinked       = mediaGalleryModal.find('.clicked-photo');
-  let token             = window.saturne.toolbox.getToken();
-  let querySeparator    = window.saturne.toolbox.getQuerySeparator(document.URL);
 
   let fileNames = '';
   if (filesLinked.length > 0) {
@@ -188,29 +186,53 @@ window.saturne.mediaGallery.deletePhoto = function() {
 
   $('.public-card__confirmation').removeAttr('style');
   $('.public-card__confirmation .confirmation-title .countArray').text(countArray);
-  $(document).on('click', '.confirmation-close', function() {
-      $('.wpeo-loader').removeClass('wpeo-loader')
-      $('.public-card__confirmation').attr('style', 'display:none;')
-  })
-
+  $(document).on('click', '.confirmation-close', window.saturne.mediaGallery.closeConfirmation)
   $(document).on('click', '.confirmation-delete', function() {
-      $.ajax({
-        url: document.URL + querySeparator + 'subaction=delete_files&token=' + token,
-        type: 'POST',
-        processData: false,
-        contentType: false,
-        data: JSON.stringify({
-          filenames: fileNames
-        }),
-        success: function ( resp ) {
-          $('.wpeo-loader').removeClass('wpeo-loader')
-          $('.public-card__confirmation').attr('style', 'display:none;')
-          window.location.reload()
-        },
-      error: function() {}
-      });
+    window.saturne.mediaGallery.deleteFilesRequest(fileNames);
   });
 };
+
+/**
+ * Action to remove the view of the confirmation box
+ *
+ * @since   1.3.0
+ * @version 1.3.0
+ *
+ * @return {void}
+ */
+window.saturne.mediaGallery.closeConfirmation = function() {
+  $('.wpeo-loader').removeClass('wpeo-loader')
+  $('.public-card__confirmation').attr('style', 'display:none;')
+}
+
+/**
+ * Action to execute delete files request
+ *
+ * @since   1.3.0
+ * @version 1.3.0
+ *
+ * @return {void}
+ */
+window.saturne.mediaGallery.deleteFilesRequest = function( fileNames ) {
+  let token             = window.saturne.toolbox.getToken();
+  let querySeparator    = window.saturne.toolbox.getQuerySeparator(document.URL);
+
+  $.ajax({
+    url: document.URL + querySeparator + 'subaction=delete_files&token=' + token,
+    type: 'POST',
+    processData: false,
+    contentType: false,
+    data: JSON.stringify({
+      filenames: fileNames
+    }),
+    success: function ( resp ) {
+      $('.wpeo-loader').removeClass('wpeo-loader')
+      $('.public-card__confirmation').attr('style', 'display:none;')
+      $('.wpeo-modal').replaceWith($(resp).find('.wpeo-modal'))
+    },
+    error: function() {}
+  });
+}
 
 /**
  * Action handle search in medias

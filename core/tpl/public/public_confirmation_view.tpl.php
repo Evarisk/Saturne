@@ -24,19 +24,23 @@
 /**
  * The following vars must be defined :
  * Parameters : $varArray[]
- * options : icon, moreCss[], confirmationTitle, buttons[]
+ * options : icon, moreCss[], className[], confirmationTitle, buttons[]
  */ ?>
+
+<?php $index = 0 ?>
 
 <div class="public-card__confirmation" style="display: none;">
     <div class="confirmation-container">
         <?php
-        print '<i style="color : ' . $varArray['moreCss'][0] . ';" class="confirmation-icon ' . $varArray['icon'] . '"></i>';
-        print '<div style="color: ' . $varArray['moreCss'][0] .';" class="confirmation-title"> ' . $langs->transnoentities($varArray['confirmationTitle']) . ' </div>';
-        if (isset($varArray['buttons'][1])) {
-            print '<button type="submit" class="confirmation-delete wpeo-button button-' . $varArray['moreCss'][0] . ' marginrightonly" onclick="window.close();"> '. $langs->transnoentities($varArray['buttons'][0], $count) . ' </button>';
-            print '<button type="submit" class="confirmation-close wpeo-button button-' . $varArray['moreCss'][1] . '"> '. $langs->transnoentities($varArray['buttons'][1], $count) . ' </button>';
+        print '<i style="color : ' . $confirmationParams['moreCss'][$index] . ';" class="confirmation-icon ' . $confirmationParams['icon'] . '"></i>';
+        print '<div style="color: ' . $confirmationParams['moreCss'][$index] .';" class="confirmation-title"> ' . $langs->transnoentities($confirmationParams['confirmationTitle']) . ' </div>';
+        if (isset($confirmationParams['buttons'][$index + 1])) {
+            foreach ($confirmationParams['buttons'] as $button) {
+                print '<button type="submit" class="confirmation-' . $confirmationParams['className'][$index] .' wpeo-button button-' . $confirmationParams['moreCss'][$index] . ' marginrightonly"> '. $langs->transnoentities($button, $count) . ' </button>';
+                $index++;
+            }
         } else {
-            print '<button type="submit" class="confirmation-close wpeo-button button-' . $varArray['moreCss'][1] . '"> '. $langs->transnoentities($varArray['buttons'][0], $count) . ' </button>';
+            print '<button type="submit" class="confirmation-close wpeo-button button-' . $confirmationParams['moreCss'][1] . '"> '. $langs->transnoentities($confirmationParams['buttons'][0], $count) . ' </button>';
         }
         ?>
     </div>
