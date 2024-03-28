@@ -153,6 +153,7 @@ window.saturne.signature.createSignature = function() {
     success: function(resp) {
       if ($('.public-card__container').data('public-interface') === true) {
         $('.public-card__confirmation').removeAttr('style');
+        $('.confirmation-close').attr('onclick', 'window.close()');
         $('.public-card__container').replaceWith($(resp).find('.public-card__container'));
       } else {
         window.location.reload();

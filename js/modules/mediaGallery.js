@@ -46,7 +46,7 @@ window.saturne.mediaGallery.init = function() {
  * La méthode contenant tous les événements pour la bibliothèque de médias.
  *
  * @since   1.0.0
- * @version 1.0.0
+ * @version 1.3.0
  *
  * @return {void}
  */
@@ -54,6 +54,7 @@ window.saturne.mediaGallery.event = function() {
 	// Photos
   $( document ).on( 'click', '.clickable-photo', window.saturne.mediaGallery.selectPhoto );
   $( document ).on( 'click', '.save-photo', window.saturne.mediaGallery.savePhoto );
+  $(document).on( 'click', '.delete-photo', window.saturne.mediaGallery.deletePhoto);
   $( document ).on( 'change', '.flat.minwidth400.maxwidth200onsmartphone', window.saturne.mediaGallery.sendPhoto );
   $( document ).on( 'click', '.clicked-photo-preview', window.saturne.mediaGallery.previewPhoto );
   $( document ).on( 'input', '.form-element #search_in_gallery', window.saturne.mediaGallery.handleSearch );
@@ -81,14 +82,15 @@ window.saturne.mediaGallery.selectPhoto = function( event ) {
 	if ($(this).hasClass('clicked-photo')) {
 		$(this).attr('style', 'none !important')
 		$(this).removeClass('clicked-photo')
-
 		if ($('.clicked-photo').length === 0) {
-			$(this).closest('.modal-container').find('.save-photo').addClass('button-disable');
-		}
+      $(this).closest('.modal-container').find('.save-photo').addClass('button-disable');
+      $(this).closest('.modal-container').find('.delete-photo').addClass('button-disable');
 
+    }
 	} else {
 		parent.closest('.modal-container').find('.save-photo').removeClass('button-disable');
-		parent.find('.clickable-photo'+photoID).addClass('clicked-photo');
+    parent.closest('.modal-container').find('.delete-photo').removeClass('button-disable');
+    parent.find('.clickable-photo'+photoID).addClass('clicked-photo');
 	}
 };
 
@@ -119,7 +121,6 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 			filenames += $( this ).find('.filename').val() + 'vVv'
 		});
 	}
-
 	window.saturne.loader.display($(this));
   if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
     if ($('.linked-medias.'+objectPhotoClass).length > 0) {
@@ -160,6 +161,78 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 		},
 	});
 };
+
+/**
+ * Action delete photo from media gallery
+ *
+ * @since   1.3.0
+ * @version 1.3.0
+ *
+ * @return {void}
+ */
+window.saturne.mediaGallery.deletePhoto = function() {
+  let mediaGalleryModal = $(this).closest('.modal-container');
+  let filesLinked       = mediaGalleryModal.find('.clicked-photo');
+
+  let fileNames = '';
+  if (filesLinked.length > 0) {
+    filesLinked.each(function() {
+      fileNames += $(this).find('.filename').val() + 'vVv'
+    });
+  }
+  window.saturne.loader.display($(this));
+
+  var countArray = filesLinked.length
+
+  $('.public-card__confirmation').removeAttr('style');
+  $('.public-card__confirmation .confirmation-title .countArray').text(countArray);
+  $(document).on('click', '.confirmation-close', window.saturne.mediaGallery.closeConfirmation)
+  $(document).on('click', '.confirmation-delete', function() {
+    window.saturne.mediaGallery.deleteFilesRequest(fileNames);
+  });
+};
+
+/**
+ * Action to remove the view of the confirmation box
+ *
+ * @since   1.3.0
+ * @version 1.3.0
+ *
+ * @return {void}
+ */
+window.saturne.mediaGallery.closeConfirmation = function() {
+  $('.wpeo-loader').removeClass('wpeo-loader')
+  $('.public-card__confirmation').attr('style', 'display:none;')
+}
+
+/**
+ * Action to execute delete files request
+ *
+ * @since   1.3.0
+ * @version 1.3.0
+ *
+ * @return {void}
+ */
+window.saturne.mediaGallery.deleteFilesRequest = function( fileNames ) {
+  let token             = window.saturne.toolbox.getToken();
+  let querySeparator    = window.saturne.toolbox.getQuerySeparator(document.URL);
+
+  $.ajax({
+    url: document.URL + querySeparator + 'subaction=delete_files&token=' + token,
+    type: 'POST',
+    processData: false,
+    contentType: false,
+    data: JSON.stringify({
+      filenames: fileNames
+    }),
+    success: function ( resp ) {
+      $('.wpeo-loader').removeClass('wpeo-loader')
+      $('.public-card__confirmation').attr('style', 'display:none;')
+      $('.wpeo-modal').replaceWith($(resp).find('.wpeo-modal'))
+    },
+    error: function() {}
+  });
+}
 
 /**
  * Action handle search in medias

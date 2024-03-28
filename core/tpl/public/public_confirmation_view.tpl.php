@@ -23,13 +23,25 @@
 
 /**
  * The following vars must be defined :
- * Parameters : $confirmationTitle
+ * Parameters : $varArray[]
+ * options : icon, moreCss[], className[], confirmationTitle, buttons[]
  */ ?>
+
+<?php $index = 0 ?>
 
 <div class="public-card__confirmation" style="display: none;">
     <div class="confirmation-container">
-        <i class="confirmation-icon fas fa-check-circle"></i>
-        <div class="confirmation-title"><?php echo $confirmationTitle; ?></div>
-        <button type="submit" class="confirmation-close wpeo-button button-blue" onclick="window.close();"><?php echo $langs->trans('CloseModal'); ?></button>
+        <?php
+        print '<i style="color : ' . $confirmationParams['moreCss'][$index] . ';" class="confirmation-icon ' . $confirmationParams['icon'] . '"></i>';
+        print '<div style="color: ' . $confirmationParams['moreCss'][$index] .';" class="confirmation-title"> ' . $langs->transnoentities($confirmationParams['confirmationTitle']) . ' </div>';
+        if (isset($confirmationParams['buttons'][$index + 1])) {
+            foreach ($confirmationParams['buttons'] as $button) {
+                print '<button type="submit" class="confirmation-' . $confirmationParams['className'][$index] .' wpeo-button button-' . $confirmationParams['moreCss'][$index] . ' marginrightonly"> '. $langs->transnoentities($button, $count) . ' </button>';
+                $index++;
+            }
+        } else {
+            print '<button type="submit" class="confirmation-close wpeo-button button-' . $confirmationParams['moreCss'][1] . '"> '. $langs->transnoentities($confirmationParams['buttons'][0], $count) . ' </button>';
+        }
+        ?>
     </div>
 </div>
