@@ -464,30 +464,20 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
 			$page_array      = saturne_load_pagination($pagesCounter, $loadedPageArray, $offset);
 
 			print saturne_show_pagination($pagesCounter, $page_array, $offset); ?>
-            <div class="wpeo-button button-red button-disable delete-photo">
-                <i class="fas fa-trash-alt"></i>
-            </div>
 			<div class="save-photo wpeo-button button-blue button-disable" value="">
                 <span><?php echo $langs->trans('Add'); ?></span>
 			</div>
+            <div class="wpeo-button button-red button-disable delete-photo">
+                <i class="fas fa-trash-alt"></i>
+            </div>
             <?php
             $confirmationParams = [
+                'picto'             => 'fontawesome_fa-trash-alt_fas_#e05353',
+                'color'             => '#e05353',
                 'confirmationTitle' => 'DeleteFiles',
-                'moreCss' => [
-                    0 => 'red',
-                    1 => 'blue'
-                ],
-                'className' => [
-                    0 => 'delete',
-                    1 => 'close'
-                ],
-                'buttons' => [
-                    0 => 'Yes',
-                    1 => 'No'
-                ],
-                'icon' => 'fas fa-trash-alt'
+                'buttonParams'      => ['No' => 'button-blue marginrightonly confirmation-close', 'Yes' => 'button-red confirmation-delete']
             ];
-            require __DIR__ . '/../public/public_confirmation_view.tpl.php';?>
+            require __DIR__ . '/../utils/confirmation_view.tpl.php'; ?>
         </div>
 	</div>
 </div>

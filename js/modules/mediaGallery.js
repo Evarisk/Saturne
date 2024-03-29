@@ -182,11 +182,11 @@ window.saturne.mediaGallery.deletePhoto = function() {
   }
   window.saturne.loader.display($(this));
 
-  var countArray = filesLinked.length
-
-  $('.public-card__confirmation').removeAttr('style');
-  $('.public-card__confirmation .confirmation-title .countArray').text(countArray);
-  $(document).on('click', '.confirmation-close', window.saturne.mediaGallery.closeConfirmation)
+  $('.card__confirmation').removeAttr('style');
+  $('.card__confirmation .confirmation-title .filesLinked').text(filesLinked.length);
+  $(document).on('click', '.confirmation-close', function() {
+    window.saturne.mediaGallery.closeConfirmation(filesLinked);
+  });
   $(document).on('click', '.confirmation-delete', function() {
     window.saturne.mediaGallery.deleteFilesRequest(fileNames);
   });
@@ -198,11 +198,19 @@ window.saturne.mediaGallery.deletePhoto = function() {
  * @since   1.3.0
  * @version 1.3.0
  *
+ * @param {string} filesLinked Selected Name of linked files
+ *
  * @return {void}
  */
-window.saturne.mediaGallery.closeConfirmation = function() {
+window.saturne.mediaGallery.closeConfirmation = function(filesLinked) {
   $('.wpeo-loader').removeClass('wpeo-loader')
-  $('.public-card__confirmation').attr('style', 'display:none;')
+  $('.card__confirmation').attr('style', 'display:none;')
+
+  if (filesLinked.length > 0) {
+    filesLinked.each(function() {
+      filesLinked.removeClass('clicked-photo');
+    });
+  }
 }
 
 /**
@@ -211,11 +219,13 @@ window.saturne.mediaGallery.closeConfirmation = function() {
  * @since   1.3.0
  * @version 1.3.0
  *
+ * @param {string} fileNames Name of linked files
+ *
  * @return {void}
  */
-window.saturne.mediaGallery.deleteFilesRequest = function( fileNames ) {
-  let token             = window.saturne.toolbox.getToken();
-  let querySeparator    = window.saturne.toolbox.getQuerySeparator(document.URL);
+window.saturne.mediaGallery.deleteFilesRequest = function(fileNames) {
+  let token          = window.saturne.toolbox.getToken();
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
 
   $.ajax({
     url: document.URL + querySeparator + 'subaction=delete_files&token=' + token,
@@ -225,10 +235,8 @@ window.saturne.mediaGallery.deleteFilesRequest = function( fileNames ) {
     data: JSON.stringify({
       filenames: fileNames
     }),
-    success: function ( resp ) {
-      $('.wpeo-loader').removeClass('wpeo-loader')
-      $('.public-card__confirmation').attr('style', 'display:none;')
-      $('.wpeo-modal').replaceWith($(resp).find('.wpeo-modal'))
+    success: function(resp) {
+      $('#media_gallery .modal-container').replaceWith($(resp).find('#media_gallery .modal-container'));
     },
     error: function() {}
   });
