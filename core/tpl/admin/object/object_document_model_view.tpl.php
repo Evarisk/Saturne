@@ -1,6 +1,4 @@
 <?php
-print load_fiche_titre($langs->trans('DocumentTemplate'), '', '');
-
 // Select document models
 $def = [];
 $sql = 'SELECT nom';
@@ -21,15 +19,25 @@ if ($resql) {
     dol_print_error($db);
 }
 
-print '<table class="noborder centpercent">';
-print '<tr class="liste_titre">';
-print '<td>' . $langs->trans('Name') . '</td>';
-print '<td>' . $langs->trans('Description') . '</td>';
-print '<td class="center">' . $langs->trans('Status') . '</td>';
-print '<td class="center">' . $langs->trans('Default') . '</td>';
-print '<td class="center">' . $langs->trans('ShortInfo') . '</td>';
-print '<td class="center">' . $langs->trans('Preview') . '</td>';
-print '</tr>';
+if (is_array($filelist) && !empty($filelist)) {
+    foreach ($filelist as $file) {
+        if (preg_match('/\.modules\.php$/i', $file) && preg_match('/^(pdf_|doc_)/', $file) && preg_match('/' . $documentParentType . '/i', $file)) {
+            print load_fiche_titre($langs->trans('DocumentTemplate'), '', '');
+
+            print '<table class="noborder centpercent">';
+            print '<tr class="liste_titre">';
+            print '<td>' . $langs->trans('Name') . '</td>';
+            print '<td>' . $langs->trans('Description') . '</td>';
+            print '<td class="center">' . $langs->trans('Status') . '</td>';
+            print '<td class="center">' . $langs->trans('Default') . '</td>';
+            print '<td class="center">' . $langs->trans('ShortInfo') . '</td>';
+            print '<td class="center">' . $langs->trans('Preview') . '</td>';
+            print '</tr>';
+
+            break;
+        }
+    }
+}
 
 if (is_array($filelist) && !empty($filelist)) {
     foreach ($filelist as $file) {
