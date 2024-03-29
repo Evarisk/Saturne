@@ -221,3 +221,4 @@ ExportData = Exporter mes données
 # Data - Donnée
 SocietyAttendants = Tiers des participants externe
 Back = Retour
+DeleteFiles = Êtes vous sur de vouloir supprimer les <span class="filesLinked"></span> media(s) sélectionné(s) ?
