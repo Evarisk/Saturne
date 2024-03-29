@@ -68,7 +68,8 @@ saturne_check_access($permissiontoread);
  * Actions
  */
 
-require '../core/tpl/actions/admin_conf_actions.tpl.php';
+// Actions set_mod, update_mask
+require_once __DIR__ . '/../core/tpl/actions/admin_conf_actions.tpl.php';
 
 // Activate a model
 if ($action == 'set') {
@@ -83,21 +84,10 @@ if ($action == 'set') {
 
 // Set default model
 if ($action == 'setdoc') {
-    $constforval = strtoupper($moduleName) . '_' . strtoupper($type) . '_DEFAULT_MODEL';
-    if (dolibarr_set_const($db, $constforval, $value, 'chaine', 0, '', $conf->entity)) {
-        $conf->global->$constforval = $value;
-    }
-
-    // Active model
-    $ret = delDocumentModel($value, $type);
-    if ($ret > 0) {
-        $ret = addDocumentModel($value, $type, $label, $const);
-    }
+    $confName = dol_strtoupper($moduleName . '_' . $type) . '_DEFAULT_MODEL';
+    dolibarr_set_const($db, $confName, $value, 'chaine', 0, '', $conf->entity);
     header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '#' . $type);
     exit;
-} elseif ($action == 'setmod') {
-    $constforval = strtoupper($moduleName) . '_' . strtoupper($type) . '_ADDON';
-    dolibarr_set_const($db, $constforval, $value, 'chaine', 0, '', $conf->entity);
 }
 
 if ($action == 'deletefile' && $modulepart == 'ecm' && !empty($user->admin)) {
