@@ -369,6 +369,17 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/commondocgenerator.class.php';
 class SaturneDocumentModel extends CommonDocGenerator
 {
     /**
+     * @var array Minimum version of PHP required by module.
+     * e.g.: PHP ≥ 5.5 = array(5, 5)
+     */
+    public $phpmin = [7, 4];
+
+    /**
+     * @var string Dolibarr version of the loaded document.
+     */
+    public $version = 'dolibarr';
+
+    /**
      * @var string Module.
      */
     public string $module = '';
@@ -583,7 +594,7 @@ class SaturneDocumentModel extends CommonDocGenerator
         try {
             $segment   = (!empty($moreParam['segmentName']) ? $moreParam['segmentName'] : 'attendant');
             $listLines = $odfHandler->setSegment($segment);
-        } catch (OdfException $e) {
+        } catch (OdfException|OdfExceptionSegmentNotFound $e) {
             // We may arrive here if tags for lines not present into template
             $foundTagForLines = 0;
             $listLines        = '';
