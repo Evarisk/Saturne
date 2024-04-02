@@ -250,8 +250,9 @@ class SaturneDocuments extends SaturneObject
         }
 
         $result = $this->commonGenerateDocument($modelpath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
-
-        $this->call_trigger(strtoupper($this->type) . '_GENERATE', $moreparams['user']);
+        if ($result > 0) {
+            $this->call_trigger(strtoupper($this->type) . '_GENERATE', $moreparams['user']);
+        }
 
         return $result;
     }

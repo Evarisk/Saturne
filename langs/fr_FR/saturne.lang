@@ -70,11 +70,13 @@ NumberingModuleDet = Modèle de numérotation des lignes
 StandardModel   = Renvoie le numéro sous la forme %syymm-nnnn où yy est l'année, mm le mois et nnnn est un compteur séquentiel sans rupture et sans remise à 0.
 
 # ODT Template - Template ODT
-YourDocuments          = Documents
-DocumentTemplate       = Modèle de documents
-ODTDefaultTemplateName = ODT par défaut
-ErrorFileNotFound      = Fichier non trouvé
-ErrorNoSocietyLogo     = Aucun logo de la société renseigné
+YourDocuments               = Documents
+DocumentTemplate            = Modèle de documents
+ODTDefaultTemplateName      = ODT par défaut
+ErrorFileNotFound           = Fichier non trouvé
+ErrorNoSocietyLogo          = Aucun logo de la société renseigné
+CustomODT                   = ODT personnalisé
+ErrorWrongFileNameExtension = Erreur : mauvaise extension de fichier %s
 
 # Trigger - Événements
 ConfTrigger                 = Configuration des événements

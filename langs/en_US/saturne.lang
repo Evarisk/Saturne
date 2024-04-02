@@ -70,11 +70,13 @@ NumberingModuleDet = Numbering model lines
 StandardModel   = Returns the number in the form %syymm-nnnn where yy is the year, mm is the month and nnnn is a sequential counter without break and without reset.
 
 # ODT Template
-YourDocuments          = Documents
-DocumentTemplate       = Model documents
-ODTDefaultTemplateName = Default ODT of documents
-ErrorFileNotFound      = File not found
-ErrorNoSocietyLogo     = No company logo found
+YourDocuments               = Documents
+DocumentTemplate            = Model documents
+ODTDefaultTemplateName      = Default ODT of documents
+ErrorFileNotFound           = File not found
+ErrorNoSocietyLogo          = No company logo found
+CustomODT                   = Custom ODT of documents
+ErrorWrongFileNameExtension = Error: wrong file extension %s
 
 # Trigger
 ConfTrigger                 = Event configuration
