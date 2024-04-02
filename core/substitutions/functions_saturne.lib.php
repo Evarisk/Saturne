@@ -55,7 +55,7 @@ function saturne_completesubstitutionarray(array &$substitutionarray, Translate 
 
         $signatory->fetch($signatoryID);
 
-        $url = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $signatory->signature_url  . '&entity=' . $conf->entity . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType . '&modal_to_open=modal-signature' . $signatory->id, 3);
+        $url = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $signatory->signature_url  . '&entity=' . $conf->entity . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
 
         $substitutionarray['__SATURNE_SIGNATORY_URL__'] = '<a href=' . $url . ' target="_blank">' . $langs->transnoentities('SignatureEmailURL') . '</a>';
     }

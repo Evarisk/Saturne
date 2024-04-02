@@ -213,3 +213,14 @@ EntityName   = Entity name
 # Data
 Tools      = Tools
 ExportData = Export my data
+
+
+
+#
+# Other
+#
+
+# Data
+SocietyAttendants = Third party external attendants
+Back = Back
+DeleteFiles = Are you sure that you want to delete <span class="filesLinked"></span> selected files ?

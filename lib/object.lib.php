@@ -630,6 +630,7 @@ function saturne_get_objects_metadata(string $type = ''): array
     }
 
     $objectsMetadataArray = [];
+    $otherNameType        = '';
     if (is_array($objectsMetadata) && !empty($objectsMetadata)) {
         foreach($objectsMetadata as $objectType => $objectMetadata) {
             if ($objectType != 'context' && $objectType != 'currentcontext') {
@@ -663,12 +664,21 @@ function saturne_get_objects_metadata(string $type = ''): array
                 if (!empty($objectMetadata['langfile'])) {
                     $langs->load($objectMetadata['langfile']);
                 }
+                if (dol_strlen($type) > 0) {
+                    $otherNameType = (!empty(array_search($type, $objectMetadata)) ? $objectType : '');
+                }
             }
         }
     }
 
     if (dol_strlen($type) > 0) {
-        return (array_key_exists($type, $objectsMetadataArray) ? $objectsMetadataArray[$type] : []);
+        if (array_key_exists($type, $objectsMetadataArray)) {
+            return $objectsMetadataArray[$type];
+        } elseif (array_key_exists($otherNameType, $objectsMetadataArray)) {
+            return $objectsMetadataArray[$otherNameType];
+        } else {
+            return [];
+        }
     } else {
         return $objectsMetadataArray;
     }

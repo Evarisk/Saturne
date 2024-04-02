@@ -54,7 +54,6 @@ window.saturne.modal.event = function() {
 	$( document ).on( 'click', '.modal-close, .modal-active:not(.modal-container)', window.saturne.modal.closeModal );
 	$( document ).on( 'click', '.modal-open', window.saturne.modal.openModal );
 	$( document ).on( 'click', '.modal-refresh', window.saturne.modal.refreshModal );
-  window.saturne.modal.loadSignatureModal();
 };
 
 /**
@@ -91,10 +90,6 @@ window.saturne.modal.openModal = function ( event ) {
 	$('#'+modalToOpen).attr('data-from-subtype', fromSubtype);
   $('#'+modalToOpen).attr('data-from-subdir', fromSubdir);
   $('#'+modalToOpen).attr('data-photo-class', photoClass);
-
-	if (modalToOpen.match(/signature/)) {
-		window.saturne.signature.modalSignatureOpened($(this))
-	}
 
     if (fromModule) {
         if (typeof window.saturne.modal.addMoreOpenModalData == 'function') {
@@ -139,18 +134,4 @@ window.saturne.modal.closeModal = function ( event ) {
  */
 window.saturne.modal.refreshModal = function ( event ) {
 	window.location.reload();
-};
-
-/**
- * Load signature modal after redirect in public url page
- *
- * @since   1.2.1
- * @version 1.2.1
- *
- * @return {void}
- */
-window.saturne.modal.loadSignatureModal = function () {
-  if (window.location.href.indexOf('&modal_to_open=') > 0) {
-    $( document ).find('.wpeo-button.modal-signature-open').trigger('click');
-  }
 };

@@ -213,3 +213,14 @@ EntityName   = Nom de l'entité
 # Data - Donnée
 Tools      = Outils
 ExportData = Exporter mes données
+
+
+
+#
+# Other - Autres
+#
+
+# Data - Donnée
+SocietyAttendants = Tiers des participants externe
+Back = Retour
+DeleteFiles = Êtes vous sur de vouloir supprimer les <span class="filesLinked"></span> media(s) sélectionné(s) ?
