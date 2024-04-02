@@ -27,8 +27,6 @@ DeletedTrigger          = Attendant %s deleted
 
 # SetEventMessage
 BeCareful               = Attention
-AddSignatureSuccess     = Successful attendant signature
-AddSignatureSuccessText = The signature has been registered for the document
 AddAttendantMessage     = Add attendant : %s
 DeleteAttendantMessage  = Attendant deletion: %s
 SignAttendantMessage    = The attendant %s signed
@@ -66,6 +64,7 @@ Sign                       = Sign
 Erase                      = Erase
 AttendantTableModeSimple   = Simplified view
 AttendantTableModeAdvanced = Advanced view
+SignatureSaveButton        = Save signature
 
 # Data
 Attendant           = Attendant
@@ -85,4 +84,5 @@ Signatory           = Signatory
 Responsible         = Responsible
 
 # Public interface
-FullName = Last name First name
+SavedSignature = Signature saved
+

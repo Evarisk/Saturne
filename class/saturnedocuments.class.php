@@ -166,7 +166,7 @@ class SaturneDocuments extends SaturneObject
     /**
      * @var int User ID.
      */
-    public int $fk_user_creat;
+    public $fk_user_creat;
 
     /**
      * Constructor.
@@ -250,8 +250,9 @@ class SaturneDocuments extends SaturneObject
         }
 
         $result = $this->commonGenerateDocument($modelpath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
-
-        $this->call_trigger(strtoupper($this->type) . '_GENERATE', $moreparams['user']);
+        if ($result > 0) {
+            $this->call_trigger(strtoupper($this->type) . '_GENERATE', $moreparams['user']);
+        }
 
         return $result;
     }

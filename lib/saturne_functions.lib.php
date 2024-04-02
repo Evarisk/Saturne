@@ -58,6 +58,9 @@ function saturne_header(int $load_media_gallery = 0, string $head = '', string $
 
 	//JS
 	$arrayofjs[] = '/saturne/js/saturne.min.js';
+    if ($load_media_gallery) {
+        $arrayofjs[] = '/saturne/js/includes/signature-pad.min.js';
+    }
     if (file_exists(__DIR__ . '/../../' . $moduleNameLowerCase . '/js/' . $moduleNameLowerCase . '.min.js')) {
         $arrayofjs[] = '/' . $moduleNameLowerCase . '/js/' . $moduleNameLowerCase . '.min.js';
     }
@@ -233,7 +236,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
             }
 
             foreach ($possibleKeys as $key) {
-                if (isset($object->$key)) {
+                if (isset($object->$key) || isset($object->fields[$key])) {
                     $objectKey = $key;
                     break;
                 }
@@ -295,8 +298,10 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
     }
     $saturneMoreHtmlRef .= '</div>';
 
+    $moreParamsBannerTab = (!empty($moreParams['bannerTab']) ? $moreParams['bannerTab'] : '');
+
     if (!$handlePhoto) {
-        $moreParamsBannerTab = '&module_name=' . $moduleName . '&object_type=' . $object->element;
+        $moreParamsBannerTab = (empty($moreParamsBannerTab) ? '&module_name=' . $moduleName . '&object_type=' . $object->element : $moreParamsBannerTab);
         dol_banner_tab($object, $paramId, (($moreHtml != 'none' && $moreParams['moreHtml'] != 'none') ? $moreHtml : ''), $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, $moreParamsBannerTab);
     } else {
         global $conf, $form;
@@ -326,7 +331,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
         }
 
         $moreHtmlLeft = '<div class="floatleft inline-block valignmiddle divphotoref">' . saturne_show_medias_linked((dol_strlen($modulePart) > 0 ? $modulePart : $moduleNameLowerCase), $baseDir . '/' . $subDir, 'small', $photoLimit ?? 0, 0, 0, 0, 88, 88, 0, 0, 0, $subDir, $object, 'photo', 0, 0,0, 1) . '</div>';
-        print $form->showrefnav($object, $paramId, (($moreHtml != 'none' && $moreParams['moreHtml'] != 'none') ? $moreHtml : ''), $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, '', 0, $moreHtmlLeft, $object->getLibStatut(6));
+        print $form->showrefnav($object, $paramId, (($moreHtml != 'none' && $moreParams['moreHtml'] != 'none') ? $moreHtml : ''), $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, $moreParamsBannerTab, 0, $moreHtmlLeft, $object->getLibStatut(6));
         print '</div>';
     }
 

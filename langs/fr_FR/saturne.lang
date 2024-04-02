@@ -36,32 +36,34 @@ ReadAdminPage = Accéder à la configuration du module %s
 #
 
 # Data - Donnée
-ModuleSettings                    = Réglages
-ModuleSetup                       = Configuration du module %s
-Contributing                      = Contribution
-SaturneModule                     = Module %s
-GeneralConfig                     = Configuration générale
-ConfigData                        = Données configurables de %s
-Configs                           = Configuration des %s
-ConfigDatas                       = Configurations
-ModuleMediaGallery                = Configuration des médias de %s
-SavedMediaData                    = Enregistrement des données des médias
-EnablePublicInterface             = Interface publique
-EnablePublicInterfaceDescription  = Activation des interfaces publiques
-ShowCompanyLogo                   = Afficher le logo de la société
-ShowCompanyLogoDescription        = Activez cette option pour masquer le logo de la société dans les pages d'interface publique
-UseCaptcha                        = Code graphique (CAPTCHA)
-UseCaptchaDescription             = Utilisation du code graphique (CAPTCHA) sur les pages d'interfaces publique
-UseAllEmailMode                   = Utilisation de tous les modes de configuration des emails
-UseAllEmailModeDescription        = Autorise l'utilisation de tous les modes de configuration des emails par défaut, seul le mode SMTP est autorisé
-SignaturePublicInterfaceForbidden = Accès interdit à l'interface publique de signature
-ObjectVisibleDescription          = Afficher le champ %s
-ShowSignatureSpecimen             = Voir les signatures sur les documents specimens
-ShowSignatureSpecimenDescription  = Permet la visualisation des signatures sur les documents specimens
-SavedConfig                       = Configuration sauvegardée
-ErrorSavedConfig                  = Une erreur est survenue lors de la configuration
-Config                            = Configuration
-Extrafields                       = Attributs supplémentaires
+ModuleSettings                      = Réglages
+ModuleSetup                         = Configuration du module %s
+Contributing                        = Contribution
+SaturneModule                       = Module %s
+GeneralConfig                       = Configuration générale
+ConfigData                          = Données configurables de %s
+Configs                             = Configuration des %s
+ConfigDatas                         = Configurations
+ModuleMediaGallery                  = Configuration des médias de %s
+SavedMediaData                      = Enregistrement des données des médias
+EnablePublicInterface               = Interface publique
+EnablePublicInterfaceDescription    = Activation des interfaces publiques
+ShowCompanyLogo                     = Afficher le logo de la société
+ShowCompanyLogoDescription          = Activez cette option pour masquer le logo de la société dans les pages d'interface publique
+UseCaptcha                          = Code graphique (CAPTCHA)
+UseCaptchaDescription               = Utilisation du code graphique (CAPTCHA) sur les pages d'interfaces publique
+UseAllEmailMode                     = Utilisation de tous les modes de configuration des emails
+UseAllEmailModeDescription          = Autorise l'utilisation de tous les modes de configuration des emails par défaut, seul le mode SMTP est autorisé
+UseFastUploadImprovement            = Utilisation chargement rapide d'image amélioré
+UseFastUploadImprovementDescription = Activez cette option pour améliorer le chargement rapide d'image <br> Option disponible : <ul><li>Rotation d'image</li><li>Dessin  sur l'image</li><li>Enregistrement de l'image sur un format réduit</li></ul>
+SignaturePublicInterfaceForbidden   = Accès interdit à l'interface publique de signature
+ObjectVisibleDescription            = Afficher le champ %s
+ShowSignatureSpecimen               = Voir les signatures sur les documents specimens
+ShowSignatureSpecimenDescription    = Permet la visualisation des signatures sur les documents specimens
+SavedConfig                         = Configuration sauvegardée
+ErrorSavedConfig                    = Une erreur est survenue lors de la configuration
+Config                              = Configuration
+Extrafields                         = Attributs supplémentaires
 
 
 # Mod Numbering - Modèle de numérotation
@@ -70,11 +72,13 @@ NumberingModuleDet = Modèle de numérotation des lignes
 StandardModel   = Renvoie le numéro sous la forme %syymm-nnnn où yy est l'année, mm le mois et nnnn est un compteur séquentiel sans rupture et sans remise à 0.
 
 # ODT Template - Template ODT
-YourDocuments          = Documents
-DocumentTemplate       = Modèle de documents
-ODTDefaultTemplateName = ODT par défaut
-ErrorFileNotFound      = Fichier non trouvé
-ErrorNoSocietyLogo     = Aucun logo de la société renseigné
+YourDocuments               = Documents
+DocumentTemplate            = Modèle de documents
+ODTDefaultTemplateName      = ODT par défaut
+ErrorFileNotFound           = Fichier non trouvé
+ErrorNoSocietyLogo          = Aucun logo de la société renseigné
+CustomODT                   = ODT personnalisé
+ErrorWrongFileNameExtension = Erreur : mauvaise extension de fichier %s
 
 # Trigger - Événements
 ConfTrigger                 = Configuration des événements
@@ -211,3 +215,14 @@ EntityName   = Nom de l'entité
 # Data - Donnée
 Tools      = Outils
 ExportData = Exporter mes données
+
+
+
+#
+# Other - Autres
+#
+
+# Data - Donnée
+SocietyAttendants = Tiers des participants externe
+Back = Retour
+DeleteFiles = Êtes vous sur de vouloir supprimer les <span class="filesLinked"></span> media(s) sélectionné(s) ?

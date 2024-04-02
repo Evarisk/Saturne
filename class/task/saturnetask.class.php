@@ -267,6 +267,7 @@ class SaturneTask extends Task
             $sql .= " ptt.element_datehour AS element_datehour,";
             $sql .= " ptt.element_date_withhour AS element_date_withhour,";
             $sql .= " ptt.element_duration AS element_duration,";
+            $sql .= " ptt.elementtype AS elementtype,";
         } else {
             $sql .= " ptt.fk_task AS fk_element,";
             $sql .= " ptt.task_date AS element_date,";

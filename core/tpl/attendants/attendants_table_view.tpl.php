@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2022-2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 /**
  * \file    core/tpl/attendants/attendants_table_view.tpl.php
  * \ingroup saturne
- * \brief   Template page for attendants table.
+ * \brief   Template page for attendants table
  */
 
 /**
@@ -101,8 +101,8 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
         print '</td><td class="center copy-signatureurl-container">';
         if ($object->status == $object::STATUS_VALIDATED) {
             if ((!$user->rights->$moduleNameLowerCase->$objectType->read && $user->rights->$moduleNameLowerCase->assignedtome->$objectType && ($element->element_id == $user->id || $element->element_id == $user->contact_id)) || $permissiontoadd) {
-                $signatureUrl = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $element->signature_url . '&entity=' . $conf->entity . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType . '&modal_to_open=modal-signature' . $element->id, 3);
-                print '<a href=' . $signatureUrl . ' target="_blank"><div class="wpeo-button button-primary" style="' . ($conf->browser->layout != 'classic' ? 'font-size: 25px;': '') . '"><i class="fas' . (($element->status == SaturneSignature::STATUS_SIGNED) ? ' fa-eye' : ' fa-signature') . '"></i></div></a>';
+                $signatureUrl = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $element->signature_url . '&entity=' . $conf->entity . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
+                print '<a href=' . $signatureUrl . ' target="_blank"><div class="wpeo-button button-blue" style="' . ($conf->browser->layout != 'classic' ? 'font-size: 25px;': '') . '"><i class="fas' . (($element->status == SaturneSignature::STATUS_SIGNED) ? ' fa-eye' : ' fa-signature') . '"></i></div></a>';
                 print ' <i class="fas fa-clipboard copy-signatureurl" data-signature-url="' . $signatureUrl . '" style="color: #666;' .  ($conf->browser->layout != 'classic' ? 'display: none;': '') . '"></i>';
                 print '<span class="copied-to-clipboard" style="display: none;">' . '  ' . $langs->trans('CopiedToClipboard') . '</span>';
             }
@@ -127,7 +127,7 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
                 print '<input type="hidden" name="action" value="send_email">';
                 print '<input type="hidden" name="signatoryID" value="' . $element->id . '">';
                 print '<input type="hidden" name="backtopage" value="' . $backtopage . '">';
-                print '<button type="submit" class="signature-email wpeo-button button-primary" style="' . ($conf->browser->layout != 'classic' ? 'font-size: 20px;': '') . '" value="' . $element->id . '">';
+                print '<button type="submit" class="signature-email wpeo-button button-blue" style="' . ($conf->browser->layout != 'classic' ? 'font-size: 20px;': '') . '" value="' . $element->id . '">';
                 print '<i class="fas fa-paper-plane"></i>';
                 print '</button>';
                 if ($nbEmailSent > 0) {
@@ -161,7 +161,7 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
         if ($object->status <= $object::STATUS_VALIDATED && $permissiontoadd) {
             print '<div class="wpeo-dropdown dropdown-right attendance-container">';
             print '<input type="hidden" name="signatoryID" value="' . $element->id . '">';
-            print '<div class="dropdown-toggle wpeo-button ' . $cssButton . '" style="' . ($conf->browser->layout != 'classic' ? 'font-size: 20px;': '') . '"><i class="fas ' . $userIcon . '"></i></div>';
+            print '<div class="dropdown-toggle" style="' . ($conf->browser->layout != 'classic' ? 'font-size: 20px;': '') . '"><span class="wpeo-button ' . $cssButton . '"><i class="fas ' . $userIcon . ' button-icon"></i><i class="fas fa-edit button-add"></i></span></div>';
             print '<ul class="saturne-dropdown-content wpeo-gridlayout grid-3">';
             print '<li class="dropdown-item set-attendance" style="padding: 0;" value="0"><div class="wpeo-button button-green"><i class="fas fa-user"></i></div></li>';
             print '<li class="dropdown-item set-attendance" style="padding: 0;" value="1"><div class="wpeo-button"><i class="fas fa-user-clock"></i></div></li>';

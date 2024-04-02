@@ -158,7 +158,7 @@ if (empty($reshook)) {
 }
 
 if (!isset($showDashboard) || $showDashboard === true) {
-    $dashboard->show_dashboard();
+    $dashboard->show_dashboard($moreParams ?? []);
 }
 
 // End of page

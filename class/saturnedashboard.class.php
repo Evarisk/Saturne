@@ -55,11 +55,11 @@ class SaturneDashboard
     /**
      * Load dashboard info
      *
-     * @param array  $moreParams Parameters for load dashboard info
+     * @param array|null  $moreParams Parameters for load dashboard info
      *
      * @return array
      */
-    public function load_dashboard(array $moreParams = []): array
+    public function load_dashboard(?array $moreParams = []): array
     {
         require_once __DIR__ . '/../../' . $this->module . '/class/' . $this->module . 'dashboard.class.php';
 
@@ -88,12 +88,12 @@ class SaturneDashboard
     /**
      * Show dashboard
      *
-     * @param array      $moreParams    Parameters for load dashboard info
+     * @param array|null      $moreParams    Parameters for load dashboard info
      *
      * @return void
      * @throws Exception
      */
-    public function show_dashboard(array $moreParams = [])
+    public function show_dashboard(?array $moreParams = [])
     {
         global $conf, $form, $langs, $moduleNameLowerCase, $user;
 
@@ -128,7 +128,6 @@ class SaturneDashboard
             print ajax_combobox('boxcombo');
         }
         print '</div>';
-        print '<div class="fichecenter">';
 
         if (is_array($dashboards['widgets']) && !empty($dashboards['widgets'])) {
             $widget = '';
@@ -149,9 +148,29 @@ class SaturneDashboard
                         for ($i = 0; $i < count($dashboardWidget['label']); $i++) {
                             if (!empty($dashboardWidget['label'][$i])) {
                                 $widget .= '<span class=""><strong>' . $dashboardWidget['label'][$i] . ' : ' . '</strong>';
-                                $widget .= '<span class="classfortooltip badge badge-info" title="' . $dashboardWidget['label'][$i] . ' : ' . $dashboardWidget['content'][$i] . '" >' . $dashboardWidget['content'][$i] . '</span>';
-                                $widget .= (!empty($dashboardWidget['tooltip'][$i]) ? $form->textwithpicto('', $langs->transnoentities($dashboardWidget['tooltip'][$i])) : '') . '</span>';
+                                if (!empty($dashboardWidget['content'][$i])) {
+                                    $widget .= '<span class="classfortooltip badge badge-info">' . $dashboardWidget['content'][$i] . '</span>';
+                                    $widget .= (!empty($dashboardWidget['tooltip'][$i]) ? $form->textwithpicto('', $langs->transnoentities($dashboardWidget['tooltip'][$i])) : '') . '</span>';
+                                } else {
+                                    $widget .= $dashboardWidget['customContent'][$i];
+                                }
                                 $widget .= '<br>';
+                            }
+                        }
+                        if (is_array($dashboardWidget['moreParams']) && (!empty($dashboardWidget['moreParams']))) {
+                            foreach ($dashboardWidget['moreParams'] as $dashboardWidgetMoreParamsKey => $dashboardWidgetMoreParams) {
+                                switch ($dashboardWidgetMoreParamsKey) {
+                                    case 'links' :
+                                        if (is_array($dashboardWidget['moreParams']['links']) && (!empty($dashboardWidget['moreParams']['links']))) {
+                                            foreach ($dashboardWidget['moreParams']['links'] as $dashboardWidgetMoreParamsLink) {
+                                                $widget .= '<a class="' . $dashboardWidgetMoreParamsLink['moreCSS'] . '" href="' . dol_buildpath($dashboardWidgetMoreParamsLink['url'], 1) . '" target="_blank">' . img_picto($langs->trans('Url'), 'globe', 'class="paddingrightonly"') . $langs->transnoentities($dashboardWidgetMoreParamsLink['linkName']) . '</a><br>';
+                                            }
+                                        }
+                                        break;
+                                    default :
+                                        $widget .= $dashboardWidgetMoreParams;
+                                        break;
+                                }
                             }
                         }
                         $widget .= '</div>';
@@ -261,7 +280,6 @@ class SaturneDashboard
             }
         }
 
-        print '</div></div>';
         print '</form>';
     }
 }

@@ -1,4 +1,4 @@
-/* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2022-2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,11 +19,13 @@
 /**
  * \file    js/modules/toolbox.js
  * \ingroup toolbox
- * \brief   JavaScript file toolbox for module Saturne.
+ * \brief   JavaScript file toolbox for module Saturne
  */
 
 /**
- * Initialise l'objet "toolbox" ainsi que la méthode "init" obligatoire pour la bibliothèque Saturne.
+ * Init toolbox JS
+ *
+ * @memberof Saturne_Framework_Toolbox
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -31,41 +33,75 @@
 window.saturne.toolbox = {};
 
 /**
- * La méthode appelée automatiquement par la bibliothèque Saturne.
+ * Toolbox Init
+ *
+ * @memberof Saturne_Framework_Toolbox
  *
  * @since   1.0.0
  * @version 1.0.0
  *
  * @return {void}
  */
-window.saturne.toolbox.init = function() {
-};
+window.saturne.toolbox.init = function() {};
 
 /**
- * Returns suitable query separator
+ * Return suitable query separator
+ *
+ * @memberof Saturne_Framework_Toolbox
  *
  * @since   1.0.0
- * @version 1.0.0
+ * @version 1.3.0
  *
- * @return {string}
+ * @param  {string} url Url of current page
+ * @return {string}     Suitable query separator
  */
-window.saturne.toolbox.getQuerySeparator = function( url ) {
-	return url.match(/\?/) ? '&' : "?"
+window.saturne.toolbox.getQuerySeparator = function(url) {
+  return url.match(/\?/) ? '&' : "?";
 };
 
-
 /**
- * Returns action security token
+ * Return security token value
+ *
+ * @memberof Saturne_Framework_Toolbox
  *
  * @since   1.0.0
- * @version 1.0.0
+ * @version 1.3.0
  *
- * @return {string}
+ * @return {string} Security token value
  */
 window.saturne.toolbox.getToken = function() {
-	let token = $('input[name="token"]').val();
-
-	return token
+  return $('input[name="token"]').val();
 };
 
+/**
+ * Toggle button class name
+ *
+ * @memberof Saturne_Framework_Toolbox
+ *
+ * @since   1.3.0
+ * @version 1.3.0
+ *
+ * @param  {string} className       Class name of input/button
+ * @param  {string} buttonClassName Button class name to toggle
+ * @return {void}
+ */
+window.saturne.toolbox.toggleButtonClass = function(className, buttonClassName) {
+  $('.' + className).toggleClass(buttonClassName);
+};
 
+/**
+ * Remove and add button class name
+ *
+ * @memberof Saturne_Framework_Toolbox
+ *
+ * @since   1.3.0
+ * @version 1.3.0
+ *
+ * @param  {string} className             Class name of input/button
+ * @param  {string} removeButtonClassName Button class name to remove
+ * @param  {string} addButtonClassName    Button class name to add
+ * @return {void}
+ */
+window.saturne.toolbox.removeAddButtonClass = function(className, removeButtonClassName, addButtonClassName) {
+  $('.' + className).removeClass(removeButtonClassName).addClass(addButtonClassName);
+};

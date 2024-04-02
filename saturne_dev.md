@@ -25,6 +25,7 @@ Pour faire un commit sur les repositories d'Evarisk il faut respecter la convent
 - <b>#NuméroIssue [Object/Element] add/fix: commit message</b>
 - Exemple 1 : #100 [Signature] add: signature update action
 - Exemple 2 : #101 [Lib] fix: wrong method call
+# <img src="https://github.com/Evarisk/Saturne/blob/develop/img/example_of_commit.png?raw=true" width="1000"/>
 
 ## CSS OU JS
 

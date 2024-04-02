@@ -25,6 +25,7 @@
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmdirectory.class.php';
 require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
+require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 
 // Global variables definitions
@@ -37,7 +38,10 @@ $ecmfile = new EcmFiles($db);
 // Initialize view objects
 $form = new Form($db);
 
-if ( ! $error && $subaction == "uploadPhoto" && ! empty($conf->global->MAIN_UPLOAD_DOC)) {
+// Array for the sizes of thumbs
+$sizesArray = ['mini', 'small', 'medium', 'large'];
+
+if ( ! $error && $subaction == 'uploadPhoto' && ! empty($conf->global->MAIN_UPLOAD_DOC)) {
 
 	// Define relativepath and upload_dir
 	$relativepath                                             = $moduleNameLowerCase . '/medias';
@@ -80,7 +84,54 @@ if ( ! $error && $subaction == "uploadPhoto" && ! empty($conf->global->MAIN_UPLO
 	}
 }
 
-if ( ! $error && $subaction == "addFiles") {
+if (!$error && $subaction == 'add_img') {
+    global $object;
+
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    $encodedImage = explode(',', $data['img'])[1];
+    $decodedImage = base64_decode($encodedImage);
+    $pathToECMImg = $conf->ecm->dir_output . '/' . $moduleNameLowerCase . '/medias';
+    $fileName     = dol_print_date(dol_now(), 'dayhourlog') . '_img.png';
+
+    if (!dol_is_dir($pathToECMImg)) {
+        dol_mkdir($pathToECMImg);
+    }
+
+    file_put_contents($pathToECMImg . '/' . $fileName, $decodedImage);
+    addFileIntoDatabaseIndex($pathToECMImg, $fileName, $pathToECMImg . '/' . $fileName);
+
+    $modObjectName       = dol_strtoupper($moduleNameLowerCase) . '_' . dol_strtoupper($object->element) . '_ADDON';
+    $numberingModuleName = [$object->element => $conf->global->$modObjectName];
+    list($modObject)     = saturne_require_objects_mod($numberingModuleName, $moduleNameLowerCase);
+
+    if (dol_strlen($object->ref) > 0) {
+        $pathToObjectImg = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $object->element . '/' . $object->ref . '/' . $data['objectSubdir'];
+        if (empty($object->$data['objectSubType'])) {
+            $object->$data['objectSubType'] = $fileName;
+            $object->setValueFrom($object->$data['objectSubType'], $object->$data['objectSubType'], '', '', 'text', '', $user);
+        }
+    } else {
+        $pathToObjectImg = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $object->element . '/tmp/' . $modObject->prefix . '0/' . $data['objectSubdir'];
+    }
+
+    if (!dol_is_dir($pathToObjectImg)) {
+        dol_mkdir($pathToObjectImg);
+    }
+
+    dol_copy($pathToECMImg . '/' . $fileName, $pathToObjectImg . '/' . $fileName);
+
+    // Create thumbs
+    $mediaSizes = ['mini', 'small', 'medium', 'large'];
+    foreach($mediaSizes as $size) {
+        $confWidth  = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_' . dol_strtoupper($size);
+        $confHeight = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size);
+        vignette($pathToECMImg . '/' . $fileName, $conf->global->$confWidth, $conf->global->$confHeight, '_' . $size);
+        vignette($pathToObjectImg . '/' . $fileName, $conf->global->$confWidth, $conf->global->$confHeight, '_' . $size);
+    }
+}
+
+if ( ! $error && $subaction == 'addFiles') {
 	global $user;
 
 	$data = json_decode(file_get_contents('php://input'), true);
@@ -170,7 +221,35 @@ if ( ! $error && $subaction == "addFiles") {
 	}
 }
 
-if ( ! $error && $subaction == "unlinkFile") {
+if ($subaction == 'delete_files') {
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    $fileNames = $data['filenames'];
+    if (strpos($fileNames, 'vVv') !== false) {
+        $fileNames = explode('vVv', $fileNames);
+        array_pop($fileNames);
+    } else {
+        $fileNames = array($fileNames);
+    }
+
+    if (!empty($fileNames)) {
+        foreach ($fileNames as $fileName) {
+            $fileName       = dol_sanitizeFileName($fileName);
+            $pathToECMPhoto = $conf->ecm->multidir_output[$conf->entity] . '/' . $moduleNameLowerCase . '/medias/' . $fileName;
+            if (is_file($pathToECMPhoto)) {
+                foreach($sizesArray as $size) {
+                    $thumbName = $conf->ecm->multidir_output[$conf->entity] . '/' . $moduleNameLowerCase . '/medias/thumbs/' . saturne_get_thumb_name($fileName, $size);
+                    if (is_file($thumbName)) {
+                        unlink($thumbName);
+                    }
+                }
+                unlink($pathToECMPhoto);
+            }
+        }
+    }
+}
+
+if ( ! $error && $subaction == 'unlinkFile') {
 	global $user;
 
 	$data = json_decode(file_get_contents('php://input'), true);
@@ -188,13 +267,6 @@ if ( ! $error && $subaction == "unlinkFile") {
 	if (is_file($fullPath)) {
 		unlink($fullPath);
 	}
-
-	$sizesArray = [
-		'mini',
-		'small',
-		'medium',
-		'large'
-	];
 
 	foreach($sizesArray as $size) {
 		$thumbName = $filePath . '/thumbs/' . saturne_get_thumb_name($fileName, $size);
@@ -226,7 +298,7 @@ if ( ! $error && $subaction == "unlinkFile") {
 	}
 }
 
-if ( ! $error && $subaction == "addToFavorite") {
+if ( ! $error && $subaction == 'addToFavorite') {
 	global $user;
 
 	$data = json_decode(file_get_contents('php://input'), true);
@@ -249,7 +321,7 @@ if ( ! $error && $subaction == "addToFavorite") {
 	}
 }
 
-if ( ! $error && $subaction == "pagination") {
+if ( ! $error && $subaction == 'pagination') {
 	$data = json_decode(file_get_contents('php://input'), true);
 
 	$offset       = $data['offset'];
@@ -258,7 +330,7 @@ if ( ! $error && $subaction == "pagination") {
 	$loadedPageArray = saturne_load_pagination($pagesCounter, [], $offset);
 }
 
-if ( ! $error && $subaction == "toggleTodayMedias") {
+if ( ! $error && $subaction == 'toggleTodayMedias') {
     $toggleValue = GETPOST('toggle_today_medias');
 
     $tabparam['SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS'] = $toggleValue;
@@ -266,7 +338,7 @@ if ( ! $error && $subaction == "toggleTodayMedias") {
     dol_set_user_param($db, $conf,$user, $tabparam);
 }
 
-if ( ! $error && $subaction == "toggleUnlinkedMedias") {
+if ( ! $error && $subaction == 'toggleUnlinkedMedias') {
     $toggleValue = GETPOST('toggle_unlinked_medias');
 
     $tabparam['SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS'] = $toggleValue;
@@ -274,10 +346,23 @@ if ( ! $error && $subaction == "toggleUnlinkedMedias") {
     dol_set_user_param($db, $conf,$user, $tabparam);
 }
 
+if (!$error && $subaction == 'regenerate_thumbs') {
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    $fullName   = $data['fullname'];
+    foreach($sizesArray as $size) {
+        $confWidth  = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_' . dol_strtoupper($size);
+        $confHeight = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size);
+        vignette($fullName, $conf->global->$confWidth, $conf->global->$confHeight, '_' . $size);
+    }
+}
+
 if (is_array($submitFileErrorText)) {
 	print '<input class="error-medias" value="'. htmlspecialchars(json_encode($submitFileErrorText)) .'">';
 }
-?>
+
+require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
+
 <!-- START MEDIA GALLERY MODAL -->
 <div class="wpeo-modal modal-photo" id="media_gallery" data-id="<?php echo $object->id ?: 0?>">
 	<div class="modal-container wpeo-modal-event">
@@ -378,16 +463,26 @@ if (is_array($submitFileErrorText)) {
                     return count($fileArrays) == 0;
                 });
            }
-            $allMediasNumber              = count($filearray);
-			$pagesCounter                 = $conf->global->$moduleImageNumberPerPageConf ? ceil($allMediasNumber/($conf->global->$moduleImageNumberPerPageConf ?: 1)) : 1;
-			$page_array                   = saturne_load_pagination($pagesCounter, $loadedPageArray, $offset);
+            $allMediasNumber = count($filearray);
+			$pagesCounter    = $conf->global->$moduleImageNumberPerPageConf ? ceil($allMediasNumber/($conf->global->$moduleImageNumberPerPageConf ?: 1)) : 1;
+			$page_array      = saturne_load_pagination($pagesCounter, $loadedPageArray, $offset);
 
-			print saturne_show_pagination($pagesCounter, $page_array, $offset);
-			?>
+			print saturne_show_pagination($pagesCounter, $page_array, $offset); ?>
 			<div class="save-photo wpeo-button button-blue button-disable" value="">
-				<span><?php echo $langs->trans('Add'); ?></span>
+                <span><?php echo $langs->trans('Add'); ?></span>
 			</div>
-		</div>
+            <div class="wpeo-button button-red button-disable delete-photo">
+                <i class="fas fa-trash-alt"></i>
+            </div>
+            <?php
+            $confirmationParams = [
+                'picto'             => 'fontawesome_fa-trash-alt_fas_#e05353',
+                'color'             => '#e05353',
+                'confirmationTitle' => 'DeleteFiles',
+                'buttonParams'      => ['No' => 'button-blue marginrightonly confirmation-close', 'Yes' => 'button-red confirmation-delete']
+            ];
+            require __DIR__ . '/../utils/confirmation_view.tpl.php'; ?>
+        </div>
 	</div>
 </div>
 <!-- END MEDIA GALLERY MODAL -->
