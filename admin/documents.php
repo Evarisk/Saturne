@@ -68,35 +68,26 @@ saturne_check_access($permissiontoread);
  * Actions
  */
 
-require '../core/tpl/actions/admin_conf_actions.tpl.php';
+// Actions set_mod, update_mask
+require_once __DIR__ . '/../core/tpl/actions/admin_conf_actions.tpl.php';
 
 // Activate a model
 if ($action == 'set') {
     addDocumentModel($value, $type, $label, $const);
-    header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
+    header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '#' . $type);
+    exit;
 } elseif ($action == 'del') {
     delDocumentModel($value, $type);
-    header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
+    header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '#' . $type);
+    exit;
 }
 
 // Set default model
 if ($action == 'setdoc') {
-    $constforval = strtoupper($moduleName) . '_' . strtoupper($type) . '_DEFAULT_MODEL';
-    $label       = '';
-
-    if (dolibarr_set_const($db, $constforval, $value, 'chaine', 0, '', $conf->entity)) {
-        $conf->global->$constforval = $value;
-    }
-
-    // Active model
-    $ret = delDocumentModel($value, $type);
-
-    if ($ret > 0) {
-        $ret = addDocumentModel($value, $type, $label);
-    }
-} elseif ($action == 'setmod') {
-    $constforval = strtoupper($moduleName) . '_' . strtoupper($type) . '_ADDON';
-    dolibarr_set_const($db, $constforval, $value, 'chaine', 0, '', $conf->entity);
+    $confName = dol_strtoupper($moduleName . '_' . $type) . '_DEFAULT_MODEL';
+    dolibarr_set_const($db, $confName, $value, 'chaine', 0, '', $conf->entity);
+    header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '#' . $type);
+    exit;
 }
 
 if ($action == 'deletefile' && $modulepart == 'ecm' && !empty($user->admin)) {
@@ -125,7 +116,8 @@ if ($action == 'deletefile' && $modulepart == 'ecm' && !empty($user->admin)) {
     $result = dol_delete_file($filetodelete);
     if ($result > 0) {
         setEventMessages($langs->trans('FileWasRemoved', GETPOST('file')), null);
-        header('Location: ' . $_SERVER['PHP_SELF']);
+        header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '#' . $type);
+        exit;
     }
 }
 
@@ -168,9 +160,9 @@ if ($action == 'setModuleOptions') {
                     setEventMessages($langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv('File')), null, 'errors');
                 }
             }
-            if (preg_match('/__.*__/', $_FILES['userfile']['name'][$key])) {
+            if (pathinfo($_FILES['userfile']['name'], PATHINFO_EXTENSION) != 'odt') {
                 $error++;
-                setEventMessages($langs->trans('ErrorWrongFileName'), null, 'errors');
+                setEventMessages($langs->trans('ErrorWrongFileNameExtension', $_FILES['userfile']['name']), [], 'errors');
             }
         }
 
@@ -181,7 +173,6 @@ if ($action == 'setModuleOptions') {
             }
         }
     }
-
 }
 
 if ($action == 'update_documents_config') {
@@ -229,6 +220,16 @@ if ($action == 'specimen') {
     }
 }
 
+if ($action == 'download_template') {
+    $fileName = GETPOST('filename');
+    dol_copy(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/doctemplates/' . $type . '/' . $fileName, DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $fileName);
+}
+
+if ($action == 'remove_file') {
+    $fileName = GETPOST('filename');
+    dol_delete_file(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $fileName);
+}
+
 /*
  * View
  */
@@ -247,7 +248,7 @@ if (empty($reshook)) {
 // Subheader
 $selectorAnchor = '<select onchange="location = this.value;">';
 foreach ($types as $type => $documentType) {
-    $selectorAnchor .= '<option value="#' . $langs->trans($type) . '">' . $langs->trans($type) . '</option>';
+    $selectorAnchor .= '<option value="#' . dol_strtolower($type) . '">' . $langs->trans($type) . '</option>';
 }
 $selectorAnchor .= '</select>';
 
@@ -348,7 +349,7 @@ foreach ($types as $type => $documentData) {
 
     $object = new $type($db);
 
-    print load_fiche_titre($langs->trans($type), '', $documentData['picto'], 0, $langs->trans($type));
+    print load_fiche_titre($langs->trans($type), '', $documentData['picto'], 0, dol_strtolower($type));
 
     $documentPath = true;
 

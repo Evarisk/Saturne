@@ -88,6 +88,11 @@
 
 <?php
 if (isset($moreParams['useConfirmation'])) {
-    $confirmationTitle = $langs->trans('SavedSignature');
-    require_once __DIR__ . '/../public/public_confirmation_view.tpl.php';
+    $confirmationParams = [
+        'picto'             => 'fontawesome_fa-check-circle_fas_#47e58e',
+        'color'             => '#47e58e',
+        'confirmationTitle' => 'SavedSignature',
+        'buttonParams'      => ['CloseModal' => 'button-blue signature-confirmation-close']
+    ];
+    require_once __DIR__ . '/../utils/confirmation_view.tpl.php';
 }

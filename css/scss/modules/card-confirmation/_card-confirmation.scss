@@ -1,0 +1,30 @@
+.card__confirmation {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: rgba(0,0,0,0.2);
+  z-index: 999;
+  display: flex;
+
+  .confirmation-container {
+    display: block;
+    width: 100%;
+    max-width: 460px;
+    background: #fff;
+    margin: auto;
+    box-shadow: 0 0 40px 0 rgba(0,0,0,0.1);
+    padding: 3em 1.5em;
+    text-align: center;
+
+    .confirmation-icon {
+      font-size: 70px;
+    }
+    .confirmation-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 1em 0;
+    }
+  }
+}

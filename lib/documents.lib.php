@@ -174,17 +174,28 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 				foreach ($modellist as $key => $modellistsingle) {
 					$arrayvalues     = preg_replace('/template_/', '', $modellistsingle);
 					$modellist[$key] = $langs->trans($arrayvalues);
-					$constforval     = strtoupper($modulepart) . '_' . strtoupper($submodulepart) . '_DEFAULT_MODEL';
-					$defaultmodel    = preg_replace('/_odt/', '.odt', $conf->global->$constforval);
-					if ('template_' . $defaultmodel == $modellistsingle) {
-						$modelselected = $key;
-					}
-				}
-			}
+                    $confName        = dol_strtoupper($modulepart . '_' . $submodulepart) . '_DEFAULT_MODEL';
+                    $customModel     = explode('_custom', $key);
+                    if (is_array($customModel) && count($customModel) == 2) {
+                        $customModelKey             = $customModel[0] . $customModel[1];
+                        $modellist[$customModelKey] = $modellist[$key];
+                        if (strpos($key, getDolGlobalString($confName)) !== false) {
+                            $modelselected = $customModelKey;
+                        }
+                        unset($modellist[$key]);
+                    }
+
+                    if (!isset($modelselected) && strpos($key, getDolGlobalString($confName)) !== false) {
+                        $modelselected = $key;
+                    }
+                }
+            }
+
 			$morecss = 'maxwidth200';
 			if ($conf->browser->layout == 'phone') {
                 $morecss = 'maxwidth100';
             }
+
 			$out .= $form::selectarray('model', $modellist, $modelselected, $showempty, 0, 0, '', 0, 0, 0, '', $morecss);
 
 			if ($conf->use_javascript_ajax) {
