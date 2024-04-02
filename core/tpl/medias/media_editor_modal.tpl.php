@@ -41,7 +41,7 @@
             <!-- Modal-ADD Image Content-->
             <div class="modal-content" id="#modalContent" style="height: 75%;">
                 <div class="canvas-container">
-                    <canvas id="canvas" style="border: #0b419b solid 2px"></canvas>
+                    <canvas id="canvas" style="border: #0b419b solid 2px; width: 100%;"></canvas>
                 </div>
             </div>
             <!-- Modal-Footer-->

@@ -79,7 +79,7 @@ window.saturne.media.init = function() {
  * @returns {void}
  */
 window.saturne.media.event = function() {
-  $(document).on('change', '.fast-upload', window.saturne.media.uploadImage);
+  $(document).on('change', '.fast-upload-improvement', window.saturne.media.uploadImage);
   $(document).on('click', '.image-rotate-left', function() {
     window.saturne.media.rotateImage(-90);
   });
@@ -186,14 +186,15 @@ window.saturne.media.drawImageOnCanvas = function(event) {
     const context = window.saturne.media.canvas.getContext('2d');
 
     // Draw the image on the canvas
-    var img = new Image(300, 300);
+    var img = new Image();
     img.src = event.target.result;
     window.saturne.media.img = event;
     img.onload = function() {
-
-      window.saturne.media.canvas.width  = 400;
-      window.saturne.media.canvas.height = 400;
-      context.drawImage(this, 0, 0);
+      let canvasWidth  = $(window.saturne.media.canvas).width();
+      let canvasHeight = $(window.saturne.media.canvas).height();
+      window.saturne.media.canvas.width  = canvasWidth;
+      window.saturne.media.canvas.height = canvasHeight;
+      context.drawImage(img, 0, 0, window.saturne.media.canvas.width, window.saturne.media.canvas.height);
     };
 
     window.saturne.media.rotation = 0; // Reset rotation when a new image is selected
@@ -212,13 +213,15 @@ window.saturne.media.drawImageOnCanvas = function(event) {
  */
 window.saturne.media.createImg = function() {
   let canvas = $(this).closest('.wpeo-modal').find('canvas')[0];
-  let img    = canvas.toDataURL('image/jpeg');
+  let img    = canvas.toDataURL('image/png');
 
-  let objectSubdir = $('.fast-upload-options').attr('data-from-subdir');
+  let objectSubType = $('.fast-upload-options').attr('data-from-subtype');
+  let objectSubdir  = $('.fast-upload-options').attr('data-from-subdir');
 
   let token          = window.saturne.toolbox.getToken();
   let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
 
+  window.saturne.loader.display($(this));
   $.ajax({
     url: document.URL + querySeparator + 'subaction=add_img&token=' + token,
     type: 'POST',
@@ -226,10 +229,16 @@ window.saturne.media.createImg = function() {
     contentType: 'application/octet-stream',
     data: JSON.stringify({
       img: img,
+      objectSubType: objectSubType,
       objectSubdir: objectSubdir
     }),
-    success: function() {
+    success: function(resp) {
+      $('.wpeo-loader').removeClass('wpeo-loader');
       $('.wpeo-modal').removeClass('modal-active');
+      if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
+        $('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'));
+      }
+      $('.linked-medias.' + objectSubType).replaceWith($(resp).find('.linked-medias.' + objectSubType));
     },
     error: function () {}
   });
