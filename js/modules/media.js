@@ -233,6 +233,7 @@ window.saturne.media.createImg = function() {
       objectSubdir: objectSubdir
     }),
     success: function(resp) {
+      $('.wpeo-loader').removeClass('wpeo-loader');
       $('.wpeo-modal').removeClass('modal-active');
       if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
         $('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'));
