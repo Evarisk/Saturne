@@ -664,7 +664,7 @@ function saturne_get_objects_metadata(string $type = ''): array
                 if (!empty($objectMetadata['langfile'])) {
                     $langs->load($objectMetadata['langfile']);
                 }
-                if (dol_strlen($type) > 0) {
+                if (dol_strlen($type) > 0 && empty($otherNameType)) {
                     $otherNameType = (!empty(array_search($type, $objectMetadata)) ? $objectType : '');
                 }
             }
