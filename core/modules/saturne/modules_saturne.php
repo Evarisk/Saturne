@@ -226,9 +226,10 @@ abstract class CustomModeleNumRefSaturne extends ModeleNumRefSaturne
     /**
      *  Return description of module
      *
-     *  @return     string      Texte descripif
+     * @param  String $mode Either "standard" for normal prefix or "custom"
+     * @return String       Descriptive text
      */
-    public function info(): string
+    public function info($mode = 'standard'): string
     {
 
         global $conf, $langs, $db, $moduleNameLowerCase;
@@ -238,8 +239,21 @@ abstract class CustomModeleNumRefSaturne extends ModeleNumRefSaturne
         $form = new Form($db);
         $className = get_class($this);
 
-        $modName = str_replace('mod_', '', $className);
-        $confName = strtoupper($moduleNameLowerCase . '_' . $modName . '_ADDON');
+        if ($mode == 'custom') {
+            $modName  = explode('_', $className);
+            $type     = dol_strtoupper($modName[1]);
+            $confName = strtoupper(dol_strtoupper($moduleNameLowerCase) . '_' . $type . '_CUSTOM_ADDON');
+
+            $tooltip = $langs->trans("GenericMaskCodes", $langs->transnoentities(ucfirst($modName[1])), $langs->transnoentities(ucfirst($modName[1])));
+            $tooltip .= $langs->trans("GenericMaskCodes2");
+            $tooltip .= $langs->trans("GenericMaskCodes3");
+            $tooltip .= $langs->trans("GenericMaskCodes5");
+        } else {
+            $modName  = str_replace('mod_', '', $className);
+            $confName = strtoupper($moduleNameLowerCase . '_' . $modName . '_ADDON');
+
+            $tooltip = $langs->trans("SaturneGenericMaskCodes");
+        }
 
         $texte = $langs->trans('GenericNumRefModelDesc')."<br>\n";
         $texte .= '<form action="' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleNameLowerCase . '" method="POST">';
@@ -247,8 +261,6 @@ abstract class CustomModeleNumRefSaturne extends ModeleNumRefSaturne
         $texte .= '<input type="hidden" name="action" value="update_mask">';
         $texte .= '<input type="hidden" name="mask" value="'. $confName .'">';
         $texte .= '<table class="nobordernopadding" width="100%">';
-
-        $tooltip = $langs->trans("SaturneGenericMaskCodes");
 
         // Parametrage du prefix
         $texte .= '<tr><td>'.$langs->trans("Mask").':</td>';
@@ -339,6 +351,29 @@ abstract class CustomModeleNumRefSaturne extends ModeleNumRefSaturne
 
         dol_syslog(get_class($this) . '::getNextValue return ' . $this->prefix . $yymm . '-' . $num);
         return $this->prefix . $num;
+    }
+
+    /**
+     *  Return next custom value
+     *
+     *  @return string Value if OK, 0 if KO
+     */
+    public function getNextCustomValue(object $object): string
+    {
+        global $conf, $db, $moduleName;
+
+        $type = dol_strtoupper($object->element);
+        $mask = getDolGlobalString(dol_strtoupper($moduleName) . '_' . $type . '_CUSTOM_ADDON');
+
+        if (dol_strlen($mask) <= 0) {
+            $this->error = 'NotConfigured';
+            return 0;
+        }
+
+        $date = (empty($object->date_c) ? (empty($object->date_creation) ? dol_now() : $object->date_creation) : $object->date_c);
+        $ret  = get_next_value($db, $mask, $object->table_element, 'ref', '', (is_object($object) ? $object : ''), $date, 'next', false, null, $conf->entity);
+
+        return $ret;
     }
 
     /**
