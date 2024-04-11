@@ -241,8 +241,8 @@ abstract class CustomModeleNumRefSaturne extends ModeleNumRefSaturne
 
         if ($mode == 'custom') {
             $modName  = explode('_', $className);
-            $type     = dol_strtoupper($modName[1]);
-            $confName = strtoupper(dol_strtoupper($moduleNameLowerCase) . '_' . $type . '_CUSTOM_ADDON');
+            $type     = $modName[1];
+            $confName = dol_strtoupper($moduleNameLowerCase . '_' . $type . '_CUSTOM_ADDON');
 
             $tooltip = $langs->trans("GenericMaskCodes", $langs->transnoentities(ucfirst($modName[1])), $langs->transnoentities(ucfirst($modName[1])));
             $tooltip .= $langs->trans("GenericMaskCodes2");
@@ -256,7 +256,7 @@ abstract class CustomModeleNumRefSaturne extends ModeleNumRefSaturne
         }
 
         $texte = $langs->trans('GenericNumRefModelDesc')."<br>\n";
-        $texte .= '<form action="' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleNameLowerCase . '" method="POST">';
+        $texte .= '<form action="' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleNameLowerCase . '&object_type=' . $type . '" method="POST">';
         $texte .= '<input type="hidden" name="token" value="'.newToken().'">';
         $texte .= '<input type="hidden" name="action" value="update_mask">';
         $texte .= '<input type="hidden" name="mask" value="'. $confName .'">';

@@ -66,6 +66,13 @@ $permissiontoread = $user->rights->$moduleNameLowerCase->adminpage->read;
 saturne_check_access($permissiontoread);
 
 /*
+ * Action
+ */
+
+// Actions set_mod, update_mask
+require_once __DIR__ . '/../../saturne/core/tpl/actions/admin_conf_actions.tpl.php';
+
+/*
  * View
  */
 
