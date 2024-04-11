@@ -703,4 +703,37 @@ abstract class SaturneObject extends CommonObject
 		return $ret;
 	}
 
+    /**
+     * Return a thumb for kanban views
+     *
+     * @param  string     $option     Where point the link (0=> main card, 1,2 => shipment, 'nolink' => No link)
+     * @param  array|null $moreParams Parameters for load kanban view
+     * @return string     $out        HTML Code for Kanban thumb
+     */
+    public function getKanbanView(string $option = '', array $moreParams = null): string
+    {
+        $selected = (empty($moreParams['selected']) ? 0 : $moreParams['selected']);
+
+        $out  = '<div class="box-flex-item box-flex-grow-zero">';
+        $out .= '<div class="info-box info-box-sm">';
+        $out .= '<span class="info-box-icon bg-infobox-action">';
+        $out .= img_picto('', $this->picto);
+        $out .= '</span>';
+        $out .= '<div class="info-box-content">';
+        $out .= '<span class="info-box-ref inline-block tdoverflowmax150 valignmiddle">' . (method_exists($this, 'getNomUrl') ? $this->getNomUrl() : $this->ref) . '</span>';
+        if ($selected >= 0) {
+            $out .= '<input id="cb' . $this->id . '" class="flat checkforselect fright" type="checkbox" name="toselect[]" value="' . $this->id . '"' . ($selected ? ' checked="checked"' : '') . '>';
+        }
+        if (property_exists($this, 'label')) {
+            $out .= '<div class="inline-block opacitymedium valignmiddle tdoverflowmax100">' . $this->label . '</div>';
+        }
+        if (method_exists($this, 'getLibStatut')) {
+            $out .= '<br><div class="info-box-status margintoponly">' . $this->getLibStatut(3) . '</div>';
+        }
+        $out .= '</div>';
+        $out .= '</div>';
+        $out .= '</div>';
+
+        return $out;
+    }
 }
