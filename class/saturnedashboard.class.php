@@ -242,7 +242,7 @@ class SaturneDashboard
                                 $graph->SetHeight($dashboardGraph['height'] ?? $height);
                                 $graph->setShowLegend($dashboardGraph['showlegend'] ?? 2);
                                 $graph->draw($fileName[$uniqueKey], $fileUrl[$uniqueKey]);
-                                print '<div>';
+                                print '<div class="' . $dashboardGraph['moreCSS'] . '">';
                                 print load_fiche_titre($dashboardGraph['title'], $dashboardGraph['morehtmlright'], $dashboardGraph['picto']);
                                 print $graph->show();
                                 print '</div>';
