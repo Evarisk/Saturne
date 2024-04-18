@@ -789,9 +789,10 @@ class SaturneDocumentModel extends CommonDocGenerator
             $numberingModules = [(!empty($moreParam['subDir']) ? $moreParam['subDir'] : $moduleNameLowerCase . 'documents/') . $this->document_type => $conf->global->$confRefModName];
             list($refModName) = saturne_require_objects_mod($numberingModules, $moduleNameLowerCase);
 
-            $objectDocumentRef   = $refModName->getNextValue($objectDocument);
-            $objectDocument->ref = $objectDocumentRef;
-            $objectDocumentID    = $objectDocument->create($moreParam['user'], true, $object);
+            $objectDocumentRef    = $refModName->getNextValue($objectDocument);
+            $objectDocument->ref  = $objectDocumentRef;
+            $objectDocument->type = $this->document_type;
+            $objectDocumentID     = $objectDocument->create($moreParam['user'], true, $object);
 
             $objectDocument->fetch($objectDocumentID);
 
