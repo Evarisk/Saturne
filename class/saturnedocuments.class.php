@@ -196,6 +196,9 @@ class SaturneDocuments extends SaturneObject
         $this->date_creation = $this->db->idate($now);
         $this->tms           = $now;
         $this->status        = 1;
+        if (empty($this->type)) {
+            $this->type = $this->element;
+        }
         $this->module_name   = $this->module;
         $this->parent_id     = $parentObject->id;
         $this->parent_type   = $parentObject->element_type ?: $parentObject->element;
