@@ -132,17 +132,20 @@ if ($action == 'generate_csv') {
     $dashboards = $dashboard->load_dashboard($moreParams);
 
     if (!empty($dashboards)) {
-        $now      = dol_now();
-        $value    = GETPOST('value');
-        $filename = dol_print_date($now, 'dayxcard') . '_graphstats.csv';
+        $now   = dol_now();
+        $value = GETPOST('value');
+
+        $titleName = str_replace(' ', '_', $value);
+        $titleName = dol_sanitizeFileName(dol_strtolower($titleName));
+        $fileName  = dol_print_date($now, 'dayxcard') . '_' . $titleName . '.csv';
 
         $data    = findArrayByTitle($dashboards, $value);
         $labels  = $data['labels'];
         $dataset = $data['data'];
 
         $mode = 0; // Two-dimension graph
-        $fp   = fopen($upload_dir . $filename, 'w');
         $line = 1;
+        $fp   = fopen($upload_dir . '/graphstat/' . $fileName, 'w');
 
         // Empty line and title
         fputcsv($fp, []);
@@ -193,7 +196,7 @@ if ($action == 'generate_csv') {
         fputcsv($fp, []);
         fclose($fp);
 
-        setEventMessages($langs->trans('SuccessGenerateCSV', $filename), []);
+        setEventMessages($langs->trans('SuccessGenerateCSV', $fileName), []);
     } else {
         setEventMessages($langs->trans('ErrorMissingData'), [], 'errors');
     }

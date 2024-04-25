@@ -576,7 +576,7 @@ function findArrayByTitle(array $array, $title = ''): ?array
     if (!empty($array)) {
         foreach ($array as $key => $value) {
             if (is_array($value)) {
-                if (isset($value['title']) && strstr($value['title'], $title)) {
+                if (isset($value['title']) && sanitizeVal($value['title']) == sanitizeVal($title)) {
                     return $value;
                 } else {
                     $result = findArrayByTitle($value, $title);

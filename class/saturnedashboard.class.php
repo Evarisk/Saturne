@@ -243,7 +243,7 @@ class SaturneDashboard
                                 $graph->setShowLegend($dashboardGraph['showlegend'] ?? 2);
                                 $graph->draw($fileName[$uniqueKey], $fileUrl[$uniqueKey]);
                                 print '<div class="' . $dashboardGraph['moreCSS'] . '">';
-                                $downloadCSV = '<a href="' . $_SERVER['PHP_SELF'] . '?action=generate_csv&value=' . strip_tags($dashboardGraph['title']) . '">'. img_picto('ExportCSV', 'download') .'</a>';
+                                $downloadCSV = '<a href="' . $_SERVER['PHP_SELF'] . '?action=generate_csv&value=' . strip_tags($dashboardGraph['title']) . '">'. img_picto('ExportCSV', 'fontawesome_file-csv_fas') .'</a>';
                                 print load_fiche_titre($dashboardGraph['title'], $dashboardGraph['morehtmlright'], $dashboardGraph['picto'], 0, '', '', $downloadCSV);
                                 print $graph->show();
                                 print '</div>';
