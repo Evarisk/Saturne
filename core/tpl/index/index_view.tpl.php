@@ -10,7 +10,7 @@ require_once DOL_DOCUMENT_ROOT . '/includes/parsedown/Parsedown.php';
 // Load Saturne libraries.
 if (!isset($showDashboard) || $showDashboard === true) {
     require_once __DIR__ . '/../../../class/saturnedashboard.class.php';
- }
+}
 
 // Load Module libraries.
 require_once __DIR__ . '/../../../../' . $moduleNameLowerCase . '/core/modules/mod' . $moduleName . '.class.php';
@@ -28,6 +28,8 @@ $parse     = new Parsedown();
 if (!isset($showDashboard) || $showDashboard === true) {
     $dashboard = new SaturneDashboard($db, $moduleNameLowerCase);
 }
+
+$upload_dir = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?? 1];
 
 $hookmanager->initHooks([$moduleNameLowerCase . 'index', 'globalcard']); // Note that conf->hooks_modules contains array.
 
@@ -67,6 +69,9 @@ if (empty($reshook)) {
         dol_set_user_param($db, $conf, $user, $tabparam);
         $action = '';
     }
+
+    // Actions builddoc, forcebuilddoc, remove_file, generate_csv.
+    require_once __DIR__ . '/../documents/documents_action.tpl.php';
 }
 
 /*

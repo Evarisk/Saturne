@@ -127,3 +127,75 @@ if ($action == 'remove_file' && $permissiontodelete) {
         setEventMessages('BugFoundVarUploaddirnotDefined', [], 'errors');
     }
 }
+
+if ($action == 'generate_csv') {
+    $dashboards = $dashboard->load_dashboard($moreParams);
+
+    if (!empty($dashboards)) {
+        $now      = dol_now();
+        $value    = GETPOST('value');
+        $filename = dol_print_date($now, 'dayxcard') . '_graphstats.csv';
+
+        $data    = findArrayByTitle($dashboards, $value);
+        $labels  = $data['labels'];
+        $dataset = $data['data'];
+
+        $mode = 0; // Two-dimension graph
+        $fp   = fopen($upload_dir . $filename, 'w');
+        $line = 1;
+
+        // Empty line and title
+        fputcsv($fp, []);
+        fputcsv($fp, [$line => '', 2 => $value]);
+
+        $header = [$line => ''];
+        if (is_array($dataset[0]) && !empty($dataset[0])) {
+            $mode = 1; // Three-dimension graph
+            foreach ($dataset as $labelArray) {
+                $line++;
+                $header[$line] = $labelArray[0];
+            }
+        } else if (is_array($labels) && !empty($labels)) {
+            foreach ($labels as $labelArray) {
+                $line++;
+                $header[$line] = $labelArray['label'];
+            }
+        }
+
+        fputcsv($fp, $header);
+        $line = 1;
+
+        if ($mode == 1 && !empty($dataset) && !empty($labels)) {
+            foreach ($labels as $labelArray) {
+                $line = 1;
+                $content[$line] = $labelArray['label'];
+                foreach ($dataset as $value) {
+                    $line++;
+                    if (!empty($value['y_combined_' . $labelArray['label']])) {
+                        $content[$line] = $value['y_combined_' . $labelArray['label']];
+                    } else if (!empty($value[1])) {
+                        $content[$line] = $value[1];
+                    } else {
+                        $content[$line] = 0;
+                    }
+                }
+                fputcsv($fp, $content);
+            }
+        } else if (!empty($dataset)) {
+            $content = [$line => ''];
+            foreach ($dataset as $value) {
+                $line++;
+                $content[$line] = $value;
+            }
+            fputcsv($fp, $content);
+        }
+
+        fputcsv($fp, []);
+        fclose($fp);
+
+        setEventMessages($langs->trans('SuccessGenerateCSV', $filename), []);
+    } else {
+        setEventMessages($langs->trans('ErrorMissingData'), [], 'errors');
+    }
+    $action = '';
+}
