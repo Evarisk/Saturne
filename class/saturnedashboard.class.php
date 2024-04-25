@@ -289,7 +289,7 @@ class SaturneDashboard
      * @param  int    $key Key to find in color array
      * @return string
      */
-    public function getColorRange(int $key): string
+    public static function getColorRange(int $key): string
     {
         $colorArray = ['#f44336', '#e81e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107', '#ff9800', '#ff5722', '#795548', '#9e9e9e', '#607d8b'];
         return $colorArray[$key % count($colorArray)];
