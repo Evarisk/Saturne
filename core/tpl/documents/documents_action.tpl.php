@@ -198,7 +198,9 @@ if ($action == 'generate_csv') {
         fputcsv($fp, []);
         fclose($fp);
 
-        setEventMessages($langs->trans('SuccessGenerateCSV', $fileName), []);
+        $documentUrl = DOL_URL_ROOT . '/document.php';
+        header("Location: " . $documentUrl . '?modulepart=' . $moduleNameLowerCase . '&file=' . urlencode('graphstat/' . $fileName) . '&entity=' . $conf->entity);
+        exit;
     } else {
         setEventMessages($langs->trans('ErrorMissingData'), [], 'errors');
     }
