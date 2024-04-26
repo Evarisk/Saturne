@@ -128,13 +128,6 @@ class modSaturne extends DolibarrModules
             'moduleforexternal' => 0,
         ];
 
-        // Data directories to create when module is enabled.
-        // Example: this->dirs = array("/dolimeet/temp","/dolimeet/subdir");
-		$this->dirs = ['/saturne/temp',];
-
-        // Config pages. Put here list of php page, stored into dolimeet/admin directory, to use to set up module.
-		$this->config_page_url = ['setup.php@saturne'];
-
         // Dependencies
         $modulesList = [
             'DigiQuali'        => 'digiquali',
@@ -145,6 +138,20 @@ class modSaturne extends DolibarrModules
             'DigiriskDolibarr' => 'digiriskdolibarr',
             'EasyURL'          => 'easyurl'
         ];
+
+        // Data directories to create when module is enabled.
+        // Example: this->dirs = array("/dolimeet/temp","/dolimeet/subdir");
+		$this->dirs = [
+            '/saturne/temp',
+        ];
+
+        // Add a graphstat directory for each module using Saturne
+        foreach ($modulesList as $moduleName => $moduleNameLowerCase) {
+            $this->dirs[] = '/' . $moduleNameLowerCase . '/graphstat';
+        }
+
+        // Config pages. Put here list of php page, stored into dolimeet/admin directory, to use to set up module.
+		$this->config_page_url = ['setup.php@saturne'];
 
         // A condition to hide module
 		$this->hidden = false;
