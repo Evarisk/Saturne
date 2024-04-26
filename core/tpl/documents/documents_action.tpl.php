@@ -166,23 +166,25 @@ if ($action == 'generate_csv') {
         }
 
         fputcsv($fp, $header);
-        $line = 1;
+        $line       = 1;
+        $labelIndex = 1;
 
         if ($mode == 1 && !empty($dataset) && !empty($labels)) {
             foreach ($labels as $labelArray) {
-                $line = 1;
+                $line           = 1;
                 $content[$line] = $labelArray['label'];
                 foreach ($dataset as $value) {
                     $line++;
                     if (!empty($value['y_combined_' . $labelArray['label']])) {
                         $content[$line] = $value['y_combined_' . $labelArray['label']];
-                    } else if (!empty($value[1])) {
-                        $content[$line] = $value[1];
+                    } else if (!empty($value[$labelIndex])) {
+                        $content[$line] = $value[$labelIndex];
                     } else {
                         $content[$line] = 0;
                     }
                 }
                 fputcsv($fp, $content);
+                $labelIndex++;
             }
         } else if (!empty($dataset)) {
             $content = [$line => ''];
