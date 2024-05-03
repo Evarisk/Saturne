@@ -70,8 +70,90 @@ if (empty($reshook)) {
         $action = '';
     }
 
-    // Actions builddoc, forcebuilddoc, remove_file, generate_csv.
-    require_once __DIR__ . '/../documents/documents_action.tpl.php';
+    if ($action == 'generate_csv') {
+        parse_str(GETPOST('graph'), $data);
+
+        if (!empty($data)) {
+            $now   = dol_now();
+            $value = $data['title'];
+
+            $titleName = strip_tags($value);
+            $titleName = str_replace(' ', '_', $titleName);
+            $titleName = dol_sanitizeFileName(dol_strtolower($titleName));
+            $fileName  = dol_print_date($now, 'dayxcard') . '_' . $titleName . '.csv';
+
+            $labels  = $data['labels'];
+            $dataset = $data['data'];
+
+            $mode = 0; // Two-dimension graph
+            $line = 1;
+
+            $fp = fopen($upload_dir . '/temp/' . $fileName, 'w');
+
+            // Empty line and title
+            fputcsv($fp, []);
+            fputcsv($fp, [$line => '', 2 => $value]);
+
+            $header = [0 => ''];
+            if (is_array($labels) && !empty($labels)) {
+                if (is_array($dataset) && !empty($dataset)) {
+                    $mode = 1;
+                }
+                foreach ($labels as $label) {
+                    $line++;
+                    $header[$line] = $label['label'];
+                }
+            }
+            fputcsv($fp, $header);
+
+            $line       = 0;
+            $labelIndex = 1;
+
+            if ($mode == 1 && !empty($dataset) && !empty($labels)) {
+                foreach ($labels as $labelArray) {
+                    foreach ($dataset as $values) {
+                        if (!empty($values['y_combined_' . $labelArray['label']])) {
+                            $i = 0;
+                            foreach($values as $key => $value) {
+                                $i++;
+                                $content[$i] = $value;
+                            }
+                        } else if (!empty($values[$labelIndex])) {
+                            $content[$line + 1] = $values[$labelIndex];
+                        } else if (!empty($values[$line])) {
+                            $content[$line + 1] = $values[1];
+                        } else {
+                            $content[$line + 1] = 0;
+                        }
+
+                        fputcsv($fp, $content);
+                    }
+                    $labelIndex++;
+                    if (!empty($values['y_combined_' . $labelArray['label']])) {
+                        break;
+                    }
+                }
+                $line++;
+            } else if (!empty($dataset)) {
+                $content = [$line => ''];
+                foreach ($dataset as $value) {
+                    $line++;
+                    $content[$line] = $value;
+                }
+                fputcsv($fp, $content);
+            }
+
+            fputcsv($fp, []);
+            fclose($fp);
+
+            $documentUrl = DOL_URL_ROOT . '/document.php';
+            header("Location: " . $documentUrl . '?modulepart=' . $moduleNameLowerCase . '&file=' . urlencode('temp/' . $fileName) . '&entity=' . $conf->entity);
+            exit;
+        } else {
+            setEventMessages($langs->trans('ErrorMissingData'), [], 'errors');
+        }
+        $action = '';
+    }
 }
 
 /*

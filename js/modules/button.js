@@ -72,6 +72,8 @@ window.saturne.button.event = function() {
  * @return {void}
  */
 window.saturne.button.addLoader = function() {
-    window.saturne.loader.display($(this));
-    $(this).toggleClass('button-blue button-disable');
+    if (!$(this).hasClass('no-load')) {
+      window.saturne.loader.display($(this));
+      $(this).toggleClass('button-blue button-disable');
+    }
 };

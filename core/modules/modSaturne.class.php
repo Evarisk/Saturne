@@ -145,11 +145,6 @@ class modSaturne extends DolibarrModules
             '/saturne/temp',
         ];
 
-        // Add a graphstat directory for each module using Saturne
-        foreach ($modulesList as $moduleName => $moduleNameLowerCase) {
-            $this->dirs[] = '/' . $moduleNameLowerCase . '/graphstat';
-        }
-
         // Config pages. Put here list of php page, stored into dolimeet/admin directory, to use to set up module.
 		$this->config_page_url = ['setup.php@saturne'];
 

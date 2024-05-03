@@ -563,29 +563,3 @@ function saturne_create_category(string $label = '', string $type = '', int $fkP
 
     return $result;
 }
-
-/**
- * Search recursively a specific array in nested arrays
- *
- * @param  array      $array Array with multiple arrays in it
- * @param  mixed      $title Title to search
- * @return array|null
- */
-function findArrayByTitle(array $array, $title = ''): ?array
-{
-    if (!empty($array)) {
-        foreach ($array as $key => $value) {
-            if (is_array($value)) {
-                if (isset($value['title']) && sanitizeVal($value['title']) == sanitizeVal($title)) {
-                    return $value;
-                } else {
-                    $result = findArrayByTitle($value, $title);
-                    if ($result !== null) {
-                        return $result;
-                    }
-                }
-            }
-        }
-    }
-    return null;
-}
