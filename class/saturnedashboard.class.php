@@ -211,7 +211,9 @@ class SaturneDashboard
                                 if (is_array($dashboardGraph['labels']) && !empty($dashboardGraph['labels'])) {
                                     foreach ($dashboardGraph['labels'] as $dashboardGraphLabel) {
                                         $dashboardGraphLegend[$uniqueKey][] = $dashboardGraphLabel['label'];
-                                        $dashboardGraphColor[$uniqueKey][]  = $dashboardGraphLabel['color'];
+                                        if (dol_strlen($dashboardGraphLabel['color']) > 0) {
+                                            $dashboardGraphColor[$uniqueKey][] = $dashboardGraphLabel['color'];
+                                        }
                                     }
                                 }
 
@@ -236,7 +238,9 @@ class SaturneDashboard
                                 if ($dashboardGraph['dataset'] >= 2) {
                                     $graph->SetLegend($dashboardGraphLegend[$uniqueKey]);
                                 }
-                                $graph->SetDataColor($dashboardGraphColor[$uniqueKey]);
+                                if (isset($dashboardGraphColor[$uniqueKey])) {
+                                    $graph->SetDataColor($dashboardGraphColor[$uniqueKey]);
+                                }
                                 $graph->SetType([$dashboardGraph['type'] ?? 'pie']);
                                 $graph->SetWidth($dashboardGraph['width'] ?? $width);
                                 $graph->SetHeight($dashboardGraph['height'] ?? $height);
