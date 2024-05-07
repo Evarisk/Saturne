@@ -102,11 +102,16 @@ window.saturne.media.event = function() {
  * @returns {void}
  */
 window.saturne.media.uploadImage = function() {
+  const fastUploadOptions = $(this).closest('.linked-medias').find('.fast-upload-options');
+  const objectSubType     = fastUploadOptions.attr('data-from-subtype');
+  const objectSubdir      = fastUploadOptions.attr('data-from-subdir');
   if (this.files && this.files[0]) {
     var reader = new FileReader();
 
     reader.onload = function(event) {
       $(document).find('.modal-upload-image').addClass('modal-active');
+      $('.modal-upload-image').find('.fast-upload-options').attr('data-from-subtype', objectSubType);
+      $('.modal-upload-image').find('.fast-upload-options').attr('data-from-subdir', objectSubdir);
       window.saturne.media.drawImageOnCanvas(event);
     };
 
@@ -177,7 +182,7 @@ window.saturne.media.clearCanvas = function() {
  * @return {void}
  */
 window.saturne.media.drawImageOnCanvas = function(event) {
-  window.saturne.media.canvas = document.querySelector('#modal-upload-image0 canvas');
+  window.saturne.media.canvas = document.querySelector('#modal-upload-image canvas');
   if (window.saturne.media.canvas) {
     window.saturne.media.canvas.signaturePad = new SignaturePad(window.saturne.media.canvas, {
       penColor: 'rgb(255, 0, 0)'
@@ -212,11 +217,11 @@ window.saturne.media.drawImageOnCanvas = function(event) {
  * @return {void}
  */
 window.saturne.media.createImg = function() {
-  let canvas = $(this).closest('.wpeo-modal').find('canvas')[0];
+  let canvas = $(this).closest('.modal-upload-image').find('canvas')[0];
   let img    = canvas.toDataURL('image/png');
 
-  let objectSubType = $('.fast-upload-options').attr('data-from-subtype');
-  let objectSubdir  = $('.fast-upload-options').attr('data-from-subdir');
+  let objectSubType = $(this).closest('.modal-upload-image').find('.fast-upload-options').attr('data-from-subtype');
+  let objectSubdir  = $(this).closest('.modal-upload-image').find('.fast-upload-options').attr('data-from-subdir');
 
   let token          = window.saturne.toolbox.getToken();
   let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
@@ -238,7 +243,7 @@ window.saturne.media.createImg = function() {
       if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
         $('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'));
       }
-      $('.linked-medias.' + objectSubType).replaceWith($(resp).find('.linked-medias.' + objectSubType));
+      $('.linked-medias.' + objectSubType).html($(resp).find('.linked-medias.' + objectSubType).children());
     },
     error: function () {}
   });
