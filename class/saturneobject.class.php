@@ -667,38 +667,41 @@ abstract class SaturneObject extends CommonObject
 		$user = new User($db);
 		$now  = dol_now();
 
-		$ret  = $langs->trans('Ref') . ' : ' . $object->ref . '</br>';
+		$ret  = $langs->trans('Ref') . ' : ' . $object->ref . '<br>';
         $ret .= $langs->trans('TechnicalID') . ' : ' . $object->id . '<br>';
-        $ret .= (isset($object->label) && !empty($object->label) ? $langs->transnoentities('Label') . ' : ' . $object->label . '</br>' : '');
-		$ret .= (isset($object->description) && !empty($object->description) ? $langs->transnoentities('Description') . ' : ' . $object->description . '</br>' : '');
-		$ret .= (isset($object->type) && !empty($object->type) ? $langs->transnoentities('Type') . ' : ' .  $langs->transnoentities($object->type) . '</br>' : '');
-		$ret .= (isset($object->value) && !empty($object->value) ? $langs->transnoentities('Value') . ' : ' . $object->value . '</br>' : '');
-		$ret .= $langs->transnoentities('DateCreation') . ' : ' . dol_print_date($object->date_creation ?: $now, 'dayhoursec', 'tzuser') . '</br>';
-		$ret .= $langs->transnoentities('DateModification') . ' : ' . dol_print_date($object->tms ?: $now, 'dayhoursec', 'tzuser') . '</br>';
-		if (!empty($object->fk_user_creat)) {
+        $ret .= (isset($object->label) && !empty($object->label) ? $langs->transnoentities('Label') . ' : ' . $object->label . '<br>' : '');
+		$ret .= (isset($object->description) && !empty($object->description) ? $langs->transnoentities('Description') . ' : ' . $object->description . '<br>' : '');
+		$ret .= (isset($object->type) && !empty($object->type) ? $langs->transnoentities('Type') . ' : ' .  $langs->transnoentities($object->type) . '<br>' : '');
+		$ret .= (isset($object->value) && !empty($object->value) ? $langs->transnoentities('Value') . ' : ' . $object->value . '<br>' : '');
+		$ret .= $langs->transnoentities('DateCreation') . ' : ' . dol_print_date($object->date_creation ?: $now, 'dayhoursec', 'tzuser') . '<br>';
+		$ret .= $langs->transnoentities('DateModification') . ' : ' . dol_print_date($object->tms ?: $now, 'dayhoursec', 'tzuser') . '<br>';
+
+        if (!empty($object->fk_user_creat)) {
 			$user->fetch($object->fk_user_creat);
-			$ret .= $langs->transnoentities('CreatedByLogin') . ' : ' . ucfirst($user->firstname) . ' ' . dol_strtoupper($user->lastname) . '</br>';
+			$ret .= $langs->transnoentities('CreatedByLogin') . ' : ' . ucfirst($user->firstname) . ' ' . dol_strtoupper($user->lastname) . '<br>';
 		}
+
 		if (!empty($object->fk_user_modif)) {
 			$user->fetch($object->fk_user_modif);
-			$ret .= $langs->transnoentities('ModifiedByLogin') . ' : ' . ucfirst($user->firstname) . ' ' . dol_strtoupper($user->lastname) . '</br>';
+			$ret .= $langs->transnoentities('ModifiedByLogin') . ' : ' . ucfirst($user->firstname) . ' ' . dol_strtoupper($user->lastname) . '<br>';
 		}
-		$ret .= $langs->transnoentities('EntityNumber') . ' : ' . $conf->entity . '</br>';
-		$ret .= $langs->transnoentities('EntityName') . ' : ' . $mysoc->name . '</br>';
+
+		$ret .= $langs->transnoentities('EntityNumber') . ' : ' . $conf->entity . '<br>';
+		$ret .= $langs->transnoentities('EntityName') . ' : ' . $mysoc->name . '<br>';
 		if (array_key_exists('fk_soc', $object->fields) && isModEnabled('societe')) {
             require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 			$societe = new Societe($db);
 			$societe->fetch($object->fk_soc);
-			$ret .= $langs->transnoentities('ThirdParty') . ' : ' . (dol_strlen($societe->name) > 0 ? $societe->name : $langs->transnoentities('NoData')) . '</br>';
+			$ret .= $langs->transnoentities('ThirdParty') . ' : ' . (dol_strlen($societe->name) > 0 ? $societe->name : $langs->transnoentities('NoData')) . '<br>';
 		}
 		if (array_key_exists('fk_project', $object->fields) && isModEnabled('project')) {
             require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
 			$project = new Project($db);
 			$project->fetch($object->fk_project);
-			$ret .= $langs->transnoentities('Project') . ' : ' . $project->ref . ' ' . $project->title . '</br>';
+			$ret .= $langs->transnoentities('Project') . ' : ' . $project->ref . ' ' . $project->title . '<br>';
 		}
-        $ret .= (isset($object->note_public) && dol_strlen($object->note_public) > 0 ? $langs->transnoentities('NotePublic') . ' : ' . $object->note_public . '</br>' : '');
-        $ret .= (isset($object->note_private) && dol_strlen($object->note_private) > 0 ? $langs->transnoentities('NotePrivate') . ' : ' . $object->note_private . '</br>' : '');
+        $ret .= (isset($object->note_public) && dol_strlen($object->note_public) > 0 ? $langs->transnoentities('NotePublic') . ' : ' . $object->note_public . '<br>' : '');
+        $ret .= (isset($object->note_private) && dol_strlen($object->note_private) > 0 ? $langs->transnoentities('NotePrivate') . ' : ' . $object->note_private . '<br>' : '');
         $ret .= (isset($object->status) && dol_strlen($object->status) > 0  && isset($object->fields['status']['arrayofkeyval'][$object->status]) ? $langs->transnoentities('Status') . ' : ' . $langs->transnoentities($object->fields['status']['arrayofkeyval'][$object->status]) . '<br>' : '');
 		return $ret;
 	}
