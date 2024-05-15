@@ -247,6 +247,16 @@ class SaturneDashboard
                                 $graph->setShowLegend($dashboardGraph['showlegend'] ?? 2);
                                 $graph->draw($fileName[$uniqueKey], $fileUrl[$uniqueKey]);
                                 print '<div class="' . $dashboardGraph['moreCSS'] . '">';
+
+                                $downloadCSV  = '<form method="POST" action="' . $_SERVER['PHP_SELF'] . (GETPOSTISSET('id') ? '?id=' . GETPOST('id') : '') . '">';
+                                $downloadCSV .= '<input type="hidden" name="token" value="' . newToken() . '">';
+                                $downloadCSV .= '<input type="hidden" name="action" value="generate_csv">';
+                                $downloadCSV .= '<input type="hidden" name="graph" value="' . http_build_query($dashboardGraph) . '">';
+                                $downloadCSV .= '<button class="wpeo-button no-load button-grey">';
+                                $downloadCSV .= img_picto('ExportCSV', 'fontawesome_file-csv_fas_#31AD29_15px');
+                                $downloadCSV .= '</button></form>';
+                                $dashboardGraph['morehtmlright'] .= $downloadCSV;
+
                                 print load_fiche_titre($dashboardGraph['title'], $dashboardGraph['morehtmlright'], $dashboardGraph['picto']);
                                 print $graph->show();
                                 print '</div>';
