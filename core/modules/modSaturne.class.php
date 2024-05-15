@@ -80,7 +80,7 @@ class modSaturne extends DolibarrModules
         // Url to the file with your last numberversion of this module
         //$this->url_last_version = 'http://www.example.com/versionmodule.txt';
 
-        // Key used in llx_const table to save module status enabled/disabled (where DOLIMEET is value of property name of module in uppercase)
+        // Key used in llx_const table to save module status enabled/disabled (where SATURNE is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 
         // Name of image file used for this module.
@@ -140,12 +140,10 @@ class modSaturne extends DolibarrModules
         ];
 
         // Data directories to create when module is enabled.
-        // Example: this->dirs = array("/dolimeet/temp","/dolimeet/subdir");
-		$this->dirs = [
-            '/saturne/temp',
-        ];
+        // Example: this->dirs = array("/saturne/temp","/saturne/subdir");
+		$this->dirs = ['/saturne/temp'];
 
-        // Config pages. Put here list of php page, stored into dolimeet/admin directory, to use to set up module.
+        // Config pages. Put here list of php page, stored into saturne/admin directory, to use to set up module.
 		$this->config_page_url = ['setup.php@saturne'];
 
         // A condition to hide module
@@ -170,8 +168,8 @@ class modSaturne extends DolibarrModules
 
         // Constants
         // List of particular constants to add when module is enabled (key, 'chaine', value, desc, visible, 'current' or 'allentities', deleteonunactive)
-        // Example: $this->const=array(1 => array('DOLIMEET_MYNEWCONST1', 'chaine', 'myvalue', 'This is a constant to add', 1),
-        //                             2 => array('DOLIMEET_MYNEWCONST2', 'chaine', 'myvalue', 'This is another constant to add', 0, 'current', 1)
+        // Example: $this->const=array(1 => array('SATURNE_MYNEWCONST1', 'chaine', 'myvalue', 'This is a constant to add', 1),
+        //                             2 => array('SATURNE_MYNEWCONST2', 'chaine', 'myvalue', 'This is another constant to add', 0, 'current', 1)
         // );
         $i = 0;
 		$this->const = [
@@ -193,7 +191,7 @@ class modSaturne extends DolibarrModules
 
         // Array to add new pages in new tabs
         // Example:
-        // $this->tabs[] = array('data'=>'objecttype:+tabname2:SUBSTITUTION_Title2:mylangfile@dolimeet:$user->rights->othermodule->read:/dolimeet/mynewtab2.php?id=__ID__',  	// To add another new tab identified by code tabname2. Label will be result of calling all substitution functions on 'Title2' key.
+        // $this->tabs[] = array('data'=>'objecttype:+tabname2:SUBSTITUTION_Title2:mylangfile@saturne:$user->rights->othermodule->read:/saturne/mynewtab2.php?id=__ID__',  	// To add another new tab identified by code tabname2. Label will be result of calling all substitution functions on 'Title2' key.
         // $this->tabs[] = array('data'=>'objecttype:-tabname:NU:conditiontoremove');
 		$this->tabs = [];
 

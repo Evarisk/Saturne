@@ -29,7 +29,7 @@ if (!isset($showDashboard) || $showDashboard === true) {
     $dashboard = new SaturneDashboard($db, $moduleNameLowerCase);
 }
 
-$upload_dir = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?? 1];
+$upload_dir = $conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1];
 
 $hookmanager->initHooks([$moduleNameLowerCase . 'index', 'globalcard']); // Note that conf->hooks_modules contains array.
 
@@ -75,10 +75,10 @@ if (empty($reshook)) {
 
         if (!empty($data)) {
             $now   = dol_now();
-            $value = $data['title'];
+            $title = $data['title'];
 
-            $titleName = strip_tags($value);
-            $titleName = str_replace(' ', '_', $titleName);
+            $title     = strip_tags($title);
+            $titleName = str_replace(' ', '_', $title);
             $titleName = dol_sanitizeFileName(dol_strtolower($titleName));
             $fileName  = dol_print_date($now, 'dayxcard') . '_' . $titleName . '.csv';
 
@@ -92,55 +92,46 @@ if (empty($reshook)) {
 
             // Empty line and title
             fputcsv($fp, []);
-            fputcsv($fp, [$line => '', 2 => $value]);
+            fputcsv($fp, [1 => $title]);
+            fputcsv($fp, []);
 
-            $header = [0 => ''];
+            $header = [1 => ''];
             if (is_array($labels) && !empty($labels)) {
-                if (is_array($dataset) && !empty($dataset)) {
-                    $mode = 1;
-                }
                 foreach ($labels as $label) {
                     $line++;
                     $header[$line] = $label['label'];
                 }
+                if (!empty($data['type']) && $data['type'] == 'bar') {
+                    $mode = 1;
+                    fputcsv($fp, $header);
+                }
             }
-            fputcsv($fp, $header);
-
-            $line       = 0;
-            $labelIndex = 1;
 
             if ($mode == 1 && !empty($dataset) && !empty($labels)) {
-                foreach ($labels as $labelArray) {
-                    foreach ($dataset as $values) {
+                foreach ($dataset as $values) {
+                    $row = 0;
+                    if (!empty($values[0])) {
+                        $content[$row] = $values[0];
+                    }
+                    foreach ($labels as $labelArray) {
+                        $row++;
                         if (!empty($values['y_combined_' . $labelArray['label']])) {
-                            $i = 0;
-                            foreach($values as $key => $value) {
-                                $i++;
-                                $content[$i] = $value;
-                            }
-                        } else if (!empty($values[$labelIndex])) {
-                            $content[$line + 1] = $values[$labelIndex];
-                        } else if (!empty($values[$line])) {
-                            $content[$line + 1] = $values[1];
+                            $content[$row] = $values['y_combined_' . $labelArray['label']];
+                        } elseif (!empty($values[$row])) {
+                            $content[$row] = $values[$row];
                         } else {
-                            $content[$line + 1] = 0;
+                            $content[$row] = 0;
                         }
-
-                        fputcsv($fp, $content);
                     }
-                    $labelIndex++;
-                    if (!empty($values['y_combined_' . $labelArray['label']])) {
-                        break;
-                    }
+                    fputcsv($fp, $content);
                 }
-                $line++;
-            } else if (!empty($dataset)) {
-                $content = [$line => ''];
+            } elseif (!empty($dataset)) {
+                $labelIndex = 2;
                 foreach ($dataset as $value) {
-                    $line++;
-                    $content[$line] = $value;
+                    $content = [0 => $header[$labelIndex], 1 => $value];
+                    $labelIndex++;
+                    fputcsv($fp, $content);
                 }
-                fputcsv($fp, $content);
             }
 
             fputcsv($fp, []);
