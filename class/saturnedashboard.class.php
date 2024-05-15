@@ -244,7 +244,7 @@ class SaturneDashboard
                                 $graph->draw($fileName[$uniqueKey], $fileUrl[$uniqueKey]);
                                 print '<div class="' . $dashboardGraph['moreCSS'] . '">';
 
-                                $downloadCSV  = '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '">';
+                                $downloadCSV  = '<form method="POST" action="' . $_SERVER['PHP_SELF'] . (GETPOSTISSET('id') ? '?id=' . GETPOST('id') : '') . '">';
                                 $downloadCSV .= '<input type="hidden" name="token" value="' . newToken() . '">';
                                 $downloadCSV .= '<input type="hidden" name="action" value="generate_csv">';
                                 $downloadCSV .= '<input type="hidden" name="graph" value="' . http_build_query($dashboardGraph) . '">';
