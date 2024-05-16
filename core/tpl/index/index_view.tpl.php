@@ -48,7 +48,7 @@ if ($reshook < 0) {
 }
 
 if (empty($reshook)) {
-    if ($action == 'closenotice') {
+    if ($action == 'close_notice') {
         dolibarr_set_const($db, strtoupper($moduleName) . '_SHOW_PATCH_NOTE', 0, 'integer', 0, '', $conf->entity);
     }
 
