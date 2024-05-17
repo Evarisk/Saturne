@@ -1,4 +1,4 @@
-/* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2022-2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,63 +17,57 @@
  */
 
 /**
- * \file    js/modules/notice.js
+ * \file    js/modules/media.js
  * \ingroup saturne
- * \brief   JavaScript file notice for module Saturne.
+ * \brief   JavaScript notice file for module Saturne
  */
 
 /**
- * Initialise l'objet "notice" ainsi que la méthode "init" obligatoire pour la bibliothèque EoxiaJS.
+ * Init notice JS
  *
- * @since   1.4.0
- * @version 1.4.0
+ * @since   1.2.0
+ * @version 1.2.0
  */
 window.saturne.notice = {};
 
 /**
- * La méthode appelée automatiquement par la bibliothèque EoxiaJS.
+ * Notice init
  *
- * @since   1.4.0
- * @version 1.4.0
+ * @since   1.2.0
+ * @version 1.2.0
  *
  * @return {void}
  */
 window.saturne.notice.init = function() {
-	window.saturne.notice.event();
+  window.saturne.notice.event();
 };
 
 /**
- * La méthode contenant tous les événements pour l'évaluateur.
+ * Notice event
  *
- * @since   1.4.0
- * @version 1.4.0
+ * @since   1.2.0
+ * @version 1.2.0
  *
  * @return {void}
  */
 window.saturne.notice.event = function() {
-	$(document).on('click', '.notice-close', window.saturne.notice.closeNotice);
+  $(document).on('click', '.notice-close', window.saturne.notice.closeNotice);
 };
 
 /**
- * Clique sur une des user de la liste.
+ * Close notice on click
  *
- * @since   1.4.0
- * @version 1.4.0
+ * @since   1.2.0
+ * @version 1.2.0
  *
  * @return {void}
  */
 window.saturne.notice.closeNotice = function() {
-	$(this).closest('.notice').fadeOut(function () {
-		$(this).closest('.notice').addClass("hidden");
-	});
+  $(this).closest('.wpeo-notice').fadeOut(function () {
+    $(this).closest('.wpeo-notice').addClass('hidden');
+  });
 
-	if ($(this).hasClass('notice-close-forever')) {
-		let token          = window.saturne.toolbox.getToken();
-		let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
-
-		$.ajax({
-			url: document.URL + querySeparator + 'action=closenotice&token='+token,
-			type: "POST",
-		});
-	}
+  if ($(this).hasClass('notice-close-forever')) {
+    window.saturne.utils.reloadPage('close_notice', '.fiche');
+  }
 };
