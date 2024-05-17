@@ -104,7 +104,7 @@ if (!empty($file) && !dolIsAllowedForPreview($file)) {
 }
 
 $fileName = basename($file);
-$fullName = $conf->$modulepart->multidir_output[$entity] . '/' . $file;
+$fullName = DOL_DATA_ROOT . '/' . ($entity > 1 ? $entity . '/' : '') . $modulepart . '/' . $file;
 
 // Security:
 // On interdit les remontees de repertoire ainsi que les pipe dans les noms de fichiers
