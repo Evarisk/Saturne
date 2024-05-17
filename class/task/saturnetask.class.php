@@ -98,7 +98,11 @@ class SaturneTask extends Task
 	 */
 	public function getTasksByProgress($projectId = 0)
 	{
-        global $conf, $langs, $form;
+        global $conf, $langs;
+
+        require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
+
+        $form = new Form($this->db);
 
         // Graph Title parameters
         $array['title'] = $form->textwithpicto($langs->transnoentities('TasksRepartition'), $langs->transnoentities('TasksFromProject'));

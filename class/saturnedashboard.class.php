@@ -211,7 +211,9 @@ class SaturneDashboard
                                 if (is_array($dashboardGraph['labels']) && !empty($dashboardGraph['labels'])) {
                                     foreach ($dashboardGraph['labels'] as $dashboardGraphLabel) {
                                         $dashboardGraphLegend[$uniqueKey][] = $dashboardGraphLabel['label'];
-                                        $dashboardGraphColor[$uniqueKey][]  = $dashboardGraphLabel['color'];
+                                        if (dol_strlen($dashboardGraphLabel['color']) > 0) {
+                                            $dashboardGraphColor[$uniqueKey][] = $dashboardGraphLabel['color'];
+                                        }
                                     }
                                 }
 
@@ -236,13 +238,25 @@ class SaturneDashboard
                                 if ($dashboardGraph['dataset'] >= 2) {
                                     $graph->SetLegend($dashboardGraphLegend[$uniqueKey]);
                                 }
-                                $graph->SetDataColor($dashboardGraphColor[$uniqueKey]);
+                                if (isset($dashboardGraphColor[$uniqueKey])) {
+                                    $graph->SetDataColor($dashboardGraphColor[$uniqueKey]);
+                                }
                                 $graph->SetType([$dashboardGraph['type'] ?? 'pie']);
                                 $graph->SetWidth($dashboardGraph['width'] ?? $width);
                                 $graph->SetHeight($dashboardGraph['height'] ?? $height);
                                 $graph->setShowLegend($dashboardGraph['showlegend'] ?? 2);
                                 $graph->draw($fileName[$uniqueKey], $fileUrl[$uniqueKey]);
-                                print '<div>';
+                                print '<div class="' . $dashboardGraph['moreCSS'] . '">';
+
+                                $downloadCSV  = '<form method="POST" action="' . $_SERVER['PHP_SELF'] . (GETPOSTISSET('id') ? '?id=' . GETPOST('id') : '') . '">';
+                                $downloadCSV .= '<input type="hidden" name="token" value="' . newToken() . '">';
+                                $downloadCSV .= '<input type="hidden" name="action" value="generate_csv">';
+                                $downloadCSV .= '<input type="hidden" name="graph" value="' . http_build_query($dashboardGraph) . '">';
+                                $downloadCSV .= '<button class="wpeo-button no-load button-grey">';
+                                $downloadCSV .= img_picto('ExportCSV', 'fontawesome_file-csv_fas_#31AD29_15px');
+                                $downloadCSV .= '</button></form>';
+                                $dashboardGraph['morehtmlright'] .= $downloadCSV;
+
                                 print load_fiche_titre($dashboardGraph['title'], $dashboardGraph['morehtmlright'], $dashboardGraph['picto']);
                                 print $graph->show();
                                 print '</div>';
@@ -264,13 +278,13 @@ class SaturneDashboard
                         print '<table class="noborder centpercent">';
                         print '<tr class="liste_titre">';
                         foreach ($dashboardList['labels'] as $key => $dashboardListLabel) {
-                            print '<td class="nowraponall tdoverflowmax200' . (($key != 'Ref') ? ' center' : '') . '">' . $langs->transnoentities($dashboardListLabel) . '</td>';
+                            print '<td class="nowraponall tdoverflowmax200 ' . (($key != 'Ref') ? 'center' : '') . '">' . $langs->transnoentities($dashboardListLabel) . '</td>';
                         }
                         print '</tr>';
                         foreach ($dashboardList['data'] as $dashboardListDatasets) {
                             print '<tr class="oddeven">';
                             foreach ($dashboardListDatasets as $key => $dashboardGraphDataset) {
-                                print '<td class="nowraponall tdoverflowmax200' . (($key != 'Ref') ? ' center ' : '') . $dashboardGraphDataset['morecss'] . '">' . $dashboardGraphDataset['value'] . '</td>';
+                                print '<td class="nowraponall tdoverflowmax200 ' . (($key != 'Ref') ? 'center ' : '') . $dashboardGraphDataset['morecss'] . '"' . $dashboardGraphDataset['moreAttr'] . '>' . $dashboardGraphDataset['value'] . '</td>';
                             }
                             print '</tr>';
                         }
@@ -281,5 +295,17 @@ class SaturneDashboard
         }
 
         print '</form>';
+    }
+
+    /**
+     * get color range for key
+     *
+     * @param  int    $key Key to find in color array
+     * @return string
+     */
+    public static function getColorRange(int $key): string
+    {
+        $colorArray = ['#f44336', '#e81e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107', '#ff9800', '#ff5722', '#795548', '#9e9e9e', '#607d8b'];
+        return $colorArray[$key % count($colorArray)];
     }
 }

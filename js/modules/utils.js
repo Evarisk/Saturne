@@ -127,7 +127,7 @@ window.saturne.utils.draganddrop = function() {
  *
  * @returns {void}
  */
-window.saturne.utils.reloadPage = function(action, page, urlMoreParams, checkMoreParams) {
+window.saturne.utils.reloadPage = function(action, page, urlMoreParams = '', checkMoreParams = '') {
   let token          = window.saturne.toolbox.getToken();
   let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
 

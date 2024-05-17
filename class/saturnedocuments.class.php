@@ -131,7 +131,7 @@ class SaturneDocuments extends SaturneObject
     /**
      * @var string Module name.
      */
-    public string $module_name;
+    public string $module_name = '';
 
     /**
      * @var string|null Json.
@@ -156,7 +156,7 @@ class SaturneDocuments extends SaturneObject
     /**
      * @var string Object parent type.
      */
-    public string $parent_type;
+    public string $parent_type = '';
 
     /**
      * @var int Object parent ID.
@@ -196,7 +196,9 @@ class SaturneDocuments extends SaturneObject
         $this->date_creation = $this->db->idate($now);
         $this->tms           = $now;
         $this->status        = 1;
-        $this->type          = $this->element;
+        if (empty($this->type)) {
+            $this->type = $this->element;
+        }
         $this->module_name   = $this->module;
         $this->parent_id     = $parentObject->id;
         $this->parent_type   = $parentObject->element_type ?: $parentObject->element;

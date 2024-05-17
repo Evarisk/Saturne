@@ -1,4 +1,4 @@
-/* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2022-2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,12 +19,12 @@
 /**
  * \file    js/modules/keyEvents.js
  * \ingroup saturne
- * \brief   JavaScript file keyEvents for module Saturne.
+ * \brief   JavaScript keyEvents file for module Saturne
  */
 
 
 /**
- * Initialise l'objet "keyEvent" ainsi que la méthode "init" obligatoire pour la bibliothèque Saturne.
+ * Init keyEvents JS
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -32,7 +32,7 @@
 window.saturne.keyEvent = {};
 
 /**
- * La méthode appelée automatiquement par la bibliothèque Saturne.
+ * keyEvents init
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -40,11 +40,11 @@ window.saturne.keyEvent = {};
  * @return {void}
  */
 window.saturne.keyEvent.init = function() {
-	window.saturne.keyEvent.event();
+  window.saturne.keyEvent.event();
 };
 
 /**
- * La méthode contenant tous les événements pour le migration.
+ * keyEvents event
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -52,73 +52,56 @@ window.saturne.keyEvent.init = function() {
  * @return {void}
  */
 window.saturne.keyEvent.event = function() {
-	$( document ).on( 'keydown', window.saturne.keyEvent.modalActions );
-	$( document ).on( 'keyup', '.url-container' , window.saturne.keyEvent.checkUrlFormat );
-	$( document ).on( 'keydown', window.saturne.keyEvent.buttonActions );
-}
+  $(document).on( 'keydown', window.saturne.keyEvent.keyActions);
+  $(document).on( 'keyup', '.url-container' , window.saturne.keyEvent.checkUrlFormat);
+};
 
 /**
- * Action modal close & validation with key events
+ * Key events action
  *
  * @since   1.0.0
- * @version 1.0.0
+ * @version 1.4.0
  *
  * @return {void}
  */
-window.saturne.keyEvent.modalActions = function( event ) {
-	if ( 'Escape' === event.key  ) {
-		$(this).find('.modal-active .modal-close .fas.fa-times').first().click();
-	}
+window.saturne.keyEvent.keyActions = function(event) {
+  if ($(this).find('.modal-active').length > 0) {
+    // Modal key events
+    if ('Escape' === event.key) {
+      $(this).find('.modal-active .modal-close .fas.fa-times').first().click();
+    }
 
-	if ( 'Enter' === event.key )  {
-    if (!$('input, textarea').is(':focus')) {
-			$(this).find('.modal-active .modal-footer .wpeo-button').not('.button-disable').first().click();
-		}
-	}
+    if ('Enter' === event.key) {
+      if (!$('input, textarea').is(':focus')) {
+        $(this).find('.modal-active .modal-footer .wpeo-button').not('.button-disable').first().click();
+      }
+    }
+  } else {
+    // List key events
+    if (!$(event.target).is('input, textarea')) {
+      if ('Enter' === event.key) {
+        $(this).find('.button_search').click();
+      }
+      if (event.shiftKey && 'Enter' === event.key) {
+        $(this).find('.button_removefilter').click();
+      }
+    }
+  }
 };
 
 /**
  * Check url format of url containers
  *
  * @since   1.0.0
- * @version 1.0.0
+ * @version 1.4.0
  *
  * @return {void}
  */
-window.saturne.keyEvent.checkUrlFormat = function( event ) {
-	var urlRegex = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi;
-	if ($(this).val().match(urlRegex)) {
-		$(this).attr('style', 'border: solid; border-color: green')
-	} else if ($('input:focus').val().length > 0) {
-		$(this).attr('style', 'border: solid; border-color: red')
-	}
-};
-
-/**
- * Action save & cancel with key events
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @return {void}
- */
-window.saturne.keyEvent.buttonActions = function( event ) {
-	if ( 'Escape' === event.key  ) {
-		$(this).find('.button-cancel').click();
-	}
-
-	if ( 'Enter' === event.key )  {
-		if (!$('input, textarea').is(':focus')) {
-			$(this).find('.button-add').click();
-		}
-	}
-
-	if (!$(event.target).is('input, textarea')) {
-		if ('Enter' === event.key)  {
-			$(this).find('.button_search').click();
-		}
-		if (event.shiftKey && 'Enter' === event.key)  {
-			$(this).find('.button_removefilter').click();
-		}
-	}
+window.saturne.keyEvent.checkUrlFormat = function() {
+  const urlRegex = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi;
+  if ($(this).val().match(urlRegex)) {
+    $(this).attr('style', 'border: solid; border-color: green');
+  } else if ($('input:focus').val().length > 0) {
+    $(this).attr('style', 'border: solid; border-color: red');
+  }
 };

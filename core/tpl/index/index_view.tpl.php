@@ -10,7 +10,7 @@ require_once DOL_DOCUMENT_ROOT . '/includes/parsedown/Parsedown.php';
 // Load Saturne libraries.
 if (!isset($showDashboard) || $showDashboard === true) {
     require_once __DIR__ . '/../../../class/saturnedashboard.class.php';
- }
+}
 
 // Load Module libraries.
 require_once __DIR__ . '/../../../../' . $moduleNameLowerCase . '/core/modules/mod' . $moduleName . '.class.php';
@@ -29,6 +29,8 @@ if (!isset($showDashboard) || $showDashboard === true) {
     $dashboard = new SaturneDashboard($db, $moduleNameLowerCase);
 }
 
+$upload_dir = $conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1];
+
 $hookmanager->initHooks([$moduleNameLowerCase . 'index', 'globalcard']); // Note that conf->hooks_modules contains array.
 
 // Security check.
@@ -46,27 +48,12 @@ if ($reshook < 0) {
 }
 
 if (empty($reshook)) {
-    if ($action == 'closenotice') {
+    if ($action == 'close_notice') {
         dolibarr_set_const($db, strtoupper($moduleName) . '_SHOW_PATCH_NOTE', 0, 'integer', 0, '', $conf->entity);
     }
 
-    if ($action == 'adddashboardinfo' || $action == 'closedashboardinfo') {
-        $data                = json_decode(file_get_contents('php://input'), true);
-        $dashboardWidgetName = $data['dashboardWidgetName'];
-        $confName            = strtoupper($moduleName) . '_DISABLED_DASHBOARD_INFO';
-        $visible             = json_decode($user->conf->$confName);
-
-        if ($action == 'adddashboardinfo') {
-            unset($visible->$dashboardWidgetName);
-        } else {
-            $visible->$dashboardWidgetName = 0;
-        }
-
-        $tabparam[$confName] = json_encode($visible);
-
-        dol_set_user_param($db, $conf, $user, $tabparam);
-        $action = '';
-    }
+    // Actions adddashboardinfo, closedashboardinfo, generate_csv
+    require_once __DIR__ . '/../actions/dashboard_actions.tpl.php';
 }
 
 /*

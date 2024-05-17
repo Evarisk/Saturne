@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2021-2023 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2021-2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,22 +18,22 @@
 /**
  * \file    class/saturneobject.class.php
  * \ingroup saturne
- * \brief   This file is a CRUD class file for SaturneObject (Create/Read/Update/Delete).
+ * \brief   This file is a CRUD class file for SaturneObject (Create/Read/Update/Delete)
  */
 
-// Load Dolibarr Libraries.
+// Load Dolibarr Libraries
 require_once DOL_DOCUMENT_ROOT . '/core/class/commonobject.class.php';
 
 // Load Saturne libraries
 require_once __DIR__ . '/../lib/object.lib.php';
 
 /**
- * Class for SaturneObject.
+ * Class for SaturneObject
  */
 abstract class SaturneObject extends CommonObject
 {
     /**
-     * @var DoliDB Database handler.
+     * @var DoliDB Database handler
      */
     public $db;
 
@@ -44,16 +44,16 @@ abstract class SaturneObject extends CommonObject
     public $ismultientitymanaged = 1;
 
     /**
-     * @var int Does object support extrafields ? 0 = No, 1 = Yes.
+     * @var int Does object support extrafields ? 0 = No, 1 = Yes
      */
     public int $isextrafieldmanaged = 1;
 
     /**
      * Constructor.
      *
-     * @param DoliDb $db                  Database handler.
-     * @param string $moduleNameLowerCase Module name.
-     * @param string $objectType          Object element type.
+     * @param DoliDb $db                  Database handler
+     * @param string $moduleNameLowerCase Module name
+     * @param string $objectType          Object element type
      */
     public function __construct(DoliDB $db, string $moduleNameLowerCase = 'saturne', string $objectType = 'saturne_object')
 	{
@@ -90,11 +90,11 @@ abstract class SaturneObject extends CommonObject
 	}
 
     /**
-     * Create object into database.
+     * Create object into database
      *
-     * @param  User $user      User that creates.
-     * @param  bool $notrigger false = launch triggers after, true = disable triggers.
-     * @return int             0 < if KO, ID of created object if OK.
+     * @param  User $user      User that creates
+     * @param  bool $notrigger false = launch triggers after, true = disable triggers
+     * @return int             0 < if KO, ID of created object if OK
      */
 	public function create(User $user, bool $notrigger = false): int
     {
@@ -102,12 +102,12 @@ abstract class SaturneObject extends CommonObject
 	}
 
     /**
-     * Load object in memory from the database.
+     * Load object in memory from the database
      *
-     * @param  int|string  $id        ID object.
-     * @param  string|null $ref       Ref.
-     * @param  string      $morewhere More SQL filters (' AND ...').
-     * @return int                    0 < if KO, 0 if not found, > 0 if OK.
+     * @param  int|string  $id        ID object
+     * @param  string|null $ref       Ref
+     * @param  string      $morewhere More SQL filters (' AND ...')
+     * @return int                    0 < if KO, 0 if not found, > 0 if OK
      */
     public function fetch($id, string $ref = null, string $morewhere = ''): int
     {
@@ -119,9 +119,9 @@ abstract class SaturneObject extends CommonObject
     }
 
     /**
-     * Load object lines in memory from the database.
+     * Load object lines in memory from the database
      *
-     * @return int 0 < if KO, 0 if not found, >0 if OK.
+     * @return int 0 < if KO, 0 if not found, >0 if OK
      */
     public function fetchLines(): int
     {
@@ -130,15 +130,15 @@ abstract class SaturneObject extends CommonObject
     }
 
 	/**
-	 * Load list of objects in memory from the database.
+	 * Load list of objects in memory from the database
 	 *
-	 * @param  string     $sortorder  Sort Order.
-	 * @param  string     $sortfield  Sort field.
-	 * @param  int        $limit      Limit.
-	 * @param  int        $offset     Offset.
-	 * @param  array      $filter     Filter array. Example array('field'=>'valueforlike', 'customurl'=>...).
-	 * @param  string     $filtermode Filter mode (AND/OR).
-	 * @return array|int              Int <0 if KO, array of pages if OK.
+	 * @param  string     $sortorder  Sort Order
+	 * @param  string     $sortfield  Sort field
+	 * @param  int        $limit      Limit
+	 * @param  int        $offset     Offset
+	 * @param  array      $filter     Filter array. Example array('field'=>'valueforlike', 'customurl'=>...)
+	 * @param  string     $filtermode Filter mode (AND/OR)
+	 * @return array|int              Int <0 if KO, array of pages if OK
      * @throws Exception
 	 */
 	public function fetchAll(string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = [], string $filtermode = 'AND')
@@ -155,7 +155,7 @@ abstract class SaturneObject extends CommonObject
 		} else {
 			$sql .= ' WHERE 1 = 1';
 		}
-		// Manage filter.
+		// Manage filter
 		$sqlwhere = [];
 		if (count($filter) > 0) {
 			foreach ($filter as $key => $value) {
@@ -209,11 +209,11 @@ abstract class SaturneObject extends CommonObject
 	}
 
     /**
-     * Update object into database.
+     * Update object into database
      *
-     * @param  User $user      User that modifies.
-     * @param  bool $notrigger false = launch triggers after, true = disable triggers.
-     * @return int             0 < if KO, > 0 if OK.
+     * @param  User $user      User that modifies
+     * @param  bool $notrigger false = launch triggers after, true = disable triggers
+     * @return int             0 < if KO, > 0 if OK
      */
     public function update(User $user, bool $notrigger = false): int
     {
@@ -221,12 +221,12 @@ abstract class SaturneObject extends CommonObject
     }
 
     /**
-     * Delete object in database.
+     * Delete object in database
      *
-     * @param  User $user       User that deletes.
-     * @param  bool $notrigger  false = launch triggers after, true = disable triggers.
-     * @param  bool $softDelete Don't delete object.
-     * @return int              0 < if KO, > 0 if OK.
+     * @param  User $user       User that deletes
+     * @param  bool $notrigger  false = launch triggers after, true = disable triggers
+     * @param  bool $softDelete Don't delete object
+     * @return int              0 < if KO, > 0 if OK
      */
     public function delete(User $user, bool $notrigger = false, bool $softDelete = true): int
     {
@@ -239,11 +239,11 @@ abstract class SaturneObject extends CommonObject
     }
 
     /**
-     * Validate object.
+     * Validate object
      *
-     * @param  User      $user      User making status change.
-     * @param  int       $notrigger 1 = Does not execute triggers, 0 = execute triggers.
-     * @return int                  0 < if OK, 0=Nothing done, > 0 if KO.
+     * @param  User      $user      User making status change
+     * @param  int       $notrigger 1 = Does not execute triggers, 0 = execute triggers
+     * @return int                  0 < if OK, 0=Nothing done, > 0 if KO
      * @throws Exception
      */
 	public function validate(User $user, int $notrigger = 0): int
@@ -256,7 +256,7 @@ abstract class SaturneObject extends CommonObject
         $moduleNameLowerCase = $this->module;
         $objectType          = $this->element;
 
-		// Protection.
+		// Protection
 		if ($this->status == $this::STATUS_VALIDATED) {
 			dol_syslog(get_class($this) . '::validate action abandonned: already validated', LOG_WARNING);
 			return 0;
@@ -264,7 +264,7 @@ abstract class SaturneObject extends CommonObject
 
 		$this->db->begin();
 
-		// Define new ref.
+		// Define new ref
 		if ((preg_match('/^\(?PROV/i', $this->ref) || empty($this->ref))) { // empty should not happen, but when it occurs, the test save life.
             $oldRef = $this->ref;
 			$num    = $this->getNextNumRef();
@@ -275,7 +275,7 @@ abstract class SaturneObject extends CommonObject
 		$this->newref = $num;
 
 		if (!empty($num)) {
-			// Validate.
+			// Validate
 			$sql = 'UPDATE ' . MAIN_DB_PREFIX . $this->table_element;
 			$sql .= " SET ref = '" . $this->db->escape($num) . "',";
 			$sql .= ' status = ' . $this::STATUS_VALIDATED;
@@ -290,20 +290,20 @@ abstract class SaturneObject extends CommonObject
 			}
 
 			if (!$error && !$notrigger) {
-				// Call trigger.
+				// Call trigger
 				$result = $this->call_trigger(strtoupper($this->element) . '_VALIDATE', $user);
 				if ($result < 0) {
 					$error++;
 				}
-				// End call triggers.
+				// End call triggers
 			}
 		}
 
 		if (!$error) {
-			// Rename directory if dir was a temporary ref.
+			// Rename directory if dir was a temporary ref
 			if (preg_match('/^\(?PROV/i', $oldRef)) {
 
-				// Now we rename also files into index.
+				// Now we rename also files into index
 				$sql = 'UPDATE ' . MAIN_DB_PREFIX . 'ecm_files';
 				$sql .= " SET filename = CONCAT('" . $this->db->escape($this->newref) . "', SUBSTR(filename, " . (strlen($oldRef) + 1) . ')),';
 				$sql .= " filepath = '" . $this->db->escape($objectType . '/' . $oldRef) . "'";
@@ -313,7 +313,7 @@ abstract class SaturneObject extends CommonObject
 					$error++; $this->error = $this->db->lasterror();
 				}
 
-				// We rename directory ($oldRef = old ref, $num = new ref) in order not to lose the attachments.
+				// We rename directory ($oldRef = old ref, $num = new ref) in order not to lose the attachments
 				$oldRef    = dol_sanitizeFileName($oldRef);
 				$newRef    = dol_sanitizeFileName($num);
 				$dirSource = $conf->$moduleNameLowerCase->dir_output . '/' . $objectType . '/' . $oldRef;
@@ -324,7 +324,7 @@ abstract class SaturneObject extends CommonObject
 
 					if (@rename($dirSource, $dirDest)) {
 						dol_syslog('Rename ok');
-						// Rename docs starting with $oldRef with $newRef.
+						// Rename docs starting with $oldRef with $newRef
                         $listOfFiles = dol_dir_list($conf->$moduleNameLowerCase->dir_output . '/' . $objectType . '/' . $newRef, 'files', 1, '^' . preg_quote($oldRef, '/'));
 						foreach ($listOfFiles as $fileEntry) {
 							$dirSource = $fileEntry['name'];
@@ -338,7 +338,7 @@ abstract class SaturneObject extends CommonObject
 			}
 		}
 
-		// Set new ref and current status.
+		// Set new ref and current status
 		if (!$error) {
 			$this->ref    = $num;
 			$this->status = $this::STATUS_VALIDATED;
@@ -366,15 +366,15 @@ abstract class SaturneObject extends CommonObject
     }
 
     /**
-     * Set draft status.
+     * Set draft status
      *
-     * @param  User $user      Object user that modify.
-     * @param  int  $notrigger 1 = Does not execute triggers, 0 = Execute triggers.
-     * @return int             0 < if KO, > 0 if OK.
+     * @param  User $user      Object user that modify
+     * @param  int  $notrigger 1 = Does not execute triggers, 0 = Execute triggers
+     * @return int             0 < if KO, > 0 if OK
      */
 	public function setDraft(User $user, int $notrigger = 0): int
 	{
-		// Protection.
+		// Protection
 		if ($this->status <= $this::STATUS_DRAFT) {
 			return 0;
 		}
@@ -383,11 +383,11 @@ abstract class SaturneObject extends CommonObject
 	}
 
     /**
-     * Set locked status.
+     * Set locked status
      *
-     * @param  User $user      Object user that modify.
-     * @param  int  $notrigger 1 = Does not execute triggers, 0 = Execute triggers.
-     * @return int             0 < if KO, > 0 if OK.
+     * @param  User $user      Object user that modify
+     * @param  int  $notrigger 1 = Does not execute triggers, 0 = Execute triggers
+     * @return int             0 < if KO, > 0 if OK
      */
     public function setLocked(User $user, int $notrigger = 0): int
     {
@@ -395,11 +395,11 @@ abstract class SaturneObject extends CommonObject
     }
 
     /**
-     * Set archived status.
+     * Set archived status
      *
-     * @param  User $user      Object user that modify.
-     * @param  int  $notrigger 1 = Does not execute triggers, 0 = Execute triggers.
-     * @return int             0 < if KO, > 0 if OK.
+     * @param  User $user      Object user that modify
+     * @param  int  $notrigger 1 = Does not execute triggers, 0 = Execute triggers
+     * @return int             0 < if KO, > 0 if OK
      */
     public function setArchived(User $user, int $notrigger = 0): int
     {
@@ -407,22 +407,22 @@ abstract class SaturneObject extends CommonObject
     }
 
     /**
-     *  Return a link to the object card (with optionaly the picto).
+     *  Return a link to the object card (with optionaly the picto)
      *
-     *  @param  int     $withpicto              Include picto in link (0 = No picto, 1 = Include picto into link, 2 = Only picto).
-     *  @param  string  $option                 On what the link point to ('nolink', ...).
-     *  @param  int     $notooltip              1 = Disable tooltip.
-     *  @param  string  $morecss                Add more css on link.
-     *  @param  int     $save_lastsearch_value -1 = Auto, 0 = No save of lastsearch_values when clicking, 1 = Save lastsearch_values whenclicking.
+     *  @param  int     $withpicto              Include picto in link (0 = No picto, 1 = Include picto into link, 2 = Only picto)
+     *  @param  string  $option                 On what the link point to ('nolink', ...)
+     *  @param  int     $notooltip              1 = Disable tooltip
+     *  @param  string  $morecss                Add more css on link
+     *  @param  int     $save_lastsearch_value -1 = Auto, 0 = No save of lastsearch_values when clicking, 1 = Save lastsearch_values whenclicking
      * 	@param	int     $addLabel               0 = Default, 1 = Add label into string, >1 = Add first chars into string
-     *  @return	string                          String with URL.
+     *  @return	string                          String with URL
      */
 	public function getNomUrl(int $withpicto = 0, string $option = '', int $notooltip = 0, string $morecss = '', int $save_lastsearch_value = -1, int $addLabel = 0): string
 	{
 		global $action, $conf, $hookmanager, $langs;
 
 		if (!empty($conf->dol_no_mouse_hover)) {
-			$notooltip = 1; // Force disable tooltips.
+			$notooltip = 1; // Force disable tooltips
 		}
 
 		$result = '';
@@ -437,7 +437,7 @@ abstract class SaturneObject extends CommonObject
 		$url = dol_buildpath('/' . $this->module . '/view/' . $this->element . '/' . $this->element . '_card.php', 1) . '?id=' . $this->id;
 
 		if ($option != 'nolink') {
-			// Add param to save lastsearch_values or not.
+			// Add param to save lastsearch_values or not
 			$add_save_lastsearch_values = ($save_lastsearch_value == 1 ? 1 : 0);
 			if ($save_lastsearch_value == -1 && preg_match('/list\.php/', $_SERVER['PHP_SELF'])) {
 				$add_save_lastsearch_values = 1;
@@ -503,10 +503,10 @@ abstract class SaturneObject extends CommonObject
 	}
 
     /**
-     * Return the label of the status.
+     * Return the label of the status
      *
-     * @param  int    $mode 0 = long label, 1 = short label, 2 = Picto + short label, 3 = Picto, 4 = Picto + long label, 5 = Short label + Picto, 6 = Long label + Picto.
-     * @return string       Label of status.
+     * @param  int    $mode 0 = long label, 1 = short label, 2 = Picto + short label, 3 = Picto, 4 = Picto + long label, 5 = Short label + Picto, 6 = Long label + Picto
+     * @return string       Label of status
      */
     public function getLibStatut(int $mode = 0): string
     {
@@ -515,20 +515,20 @@ abstract class SaturneObject extends CommonObject
 
 
     /**
-     * Return the status.
+     * Return the status
      *
-     * @param  int    $status ID status.
-     * @param  int    $mode   0 = long label, 1 = short label, 2 = Picto + short label, 3 = Picto, 4 = Picto + long label, 5 = Short label + Picto, 6 = Long label + Picto.
-     * @return string         Label of status.
+     * @param  int    $status ID status
+     * @param  int    $mode   0 = long label, 1 = short label, 2 = Picto + short label, 3 = Picto, 4 = Picto + long label, 5 = Short label + Picto, 6 = Long label + Picto
+     * @return string         Label of status
      */
     public function LibStatut(int $status, int $mode = 0): string
     {
        return '';
     }
     /**
-     *	Load the info information in the object.
+     *	Load the info information in the object
      *
-     *	@param  int   $id ID of object.
+     *	@param  int   $id ID of object
      *	@return	void
      */
 	public function info(int $id)
@@ -557,8 +557,8 @@ abstract class SaturneObject extends CommonObject
 	}
 
     /**
-     * Initialise object with example values.
-     * ID must be 0 if object instance is a specimen.
+     * Initialise object with example values
+     * ID must be 0 if object instance is a specimen
      *
      * @return void
      */
@@ -568,9 +568,9 @@ abstract class SaturneObject extends CommonObject
 	}
 
     /**
-     * Returns the reference to the following non-used object depending on the active numbering module.
+     * Returns the reference to the following non-used object depending on the active numbering module
      *
-     *  @return string Object free reference.
+     *  @return string Object free reference
      */
 	public function getNextNumRef(): string
 	{
@@ -607,13 +607,13 @@ abstract class SaturneObject extends CommonObject
     }
 
     /**
-     * Sets object to supplied categories.
+     * Sets object to supplied categories
      *
-     * Deletes object from existing categories not supplied.
-     * Adds it to non-existing supplied categories.
-     * Existing categories are left untouched.
+     * Deletes object from existing categories not supplied
+     * Adds it to non-existing supplied categories
+     * Existing categories are left untouched
      *
-     * @param  int[]|int $categories Category or categories IDs.
+     * @param  int[]|int $categories Category or categories IDs
      * @return float|int
      */
     public function setCategories($categories)
@@ -667,40 +667,80 @@ abstract class SaturneObject extends CommonObject
 		$user = new User($db);
 		$now  = dol_now();
 
-		$ret  = $langs->trans('Ref') . ' : ' . $object->ref . '</br>';
+		$ret  = $langs->trans('Ref') . ' : ' . $object->ref . '<br>';
         $ret .= $langs->trans('TechnicalID') . ' : ' . $object->id . '<br>';
-        $ret .= (isset($object->label) && !empty($object->label) ? $langs->transnoentities('Label') . ' : ' . $object->label . '</br>' : '');
-		$ret .= (isset($object->description) && !empty($object->description) ? $langs->transnoentities('Description') . ' : ' . $object->description . '</br>' : '');
-		$ret .= (isset($object->type) && !empty($object->type) ? $langs->transnoentities('Type') . ' : ' .  $langs->transnoentities($object->type) . '</br>' : '');
-		$ret .= (isset($object->value) && !empty($object->value) ? $langs->transnoentities('Value') . ' : ' . $object->value . '</br>' : '');
-		$ret .= $langs->transnoentities('DateCreation') . ' : ' . dol_print_date($object->date_creation ?: $now, 'dayhoursec', 'tzuser') . '</br>';
-		$ret .= $langs->transnoentities('DateModification') . ' : ' . dol_print_date($object->tms ?: $now, 'dayhoursec', 'tzuser') . '</br>';
-		if (!empty($object->fk_user_creat)) {
+        $ret .= (isset($object->label) && !empty($object->label) ? $langs->transnoentities('Label') . ' : ' . $object->label . '<br>' : '');
+		$ret .= (isset($object->description) && !empty($object->description) ? $langs->transnoentities('Description') . ' : ' . $object->description . '<br>' : '');
+		$ret .= (isset($object->type) && !empty($object->type) ? $langs->transnoentities('Type') . ' : ' .  $langs->transnoentities($object->type) . '<br>' : '');
+		$ret .= (isset($object->value) && !empty($object->value) ? $langs->transnoentities('Value') . ' : ' . $object->value . '<br>' : '');
+		$ret .= $langs->transnoentities('DateCreation') . ' : ' . dol_print_date($object->date_creation ?: $now, 'dayhoursec', 'tzuser') . '<br>';
+		$ret .= $langs->transnoentities('DateModification') . ' : ' . dol_print_date($object->tms ?: $now, 'dayhoursec', 'tzuser') . '<br>';
+
+        if (!empty($object->fk_user_creat)) {
 			$user->fetch($object->fk_user_creat);
-			$ret .= $langs->transnoentities('CreatedByLogin') . ' : ' . ucfirst($user->firstname) . ' ' . dol_strtoupper($user->lastname) . '</br>';
+			$ret .= $langs->transnoentities('CreatedByLogin') . ' : ' . ucfirst($user->firstname) . ' ' . dol_strtoupper($user->lastname) . '<br>';
 		}
+
 		if (!empty($object->fk_user_modif)) {
 			$user->fetch($object->fk_user_modif);
-			$ret .= $langs->transnoentities('ModifiedByLogin') . ' : ' . ucfirst($user->firstname) . ' ' . dol_strtoupper($user->lastname) . '</br>';
+			$ret .= $langs->transnoentities('ModifiedByLogin') . ' : ' . ucfirst($user->firstname) . ' ' . dol_strtoupper($user->lastname) . '<br>';
 		}
-		$ret .= $langs->transnoentities('EntityNumber') . ' : ' . $conf->entity . '</br>';
-		$ret .= $langs->transnoentities('EntityName') . ' : ' . $mysoc->name . '</br>';
+
+		$ret .= $langs->transnoentities('EntityNumber') . ' : ' . $conf->entity . '<br>';
+		$ret .= $langs->transnoentities('EntityName') . ' : ' . $mysoc->name . '<br>';
 		if (array_key_exists('fk_soc', $object->fields) && isModEnabled('societe')) {
             require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
 			$societe = new Societe($db);
 			$societe->fetch($object->fk_soc);
-			$ret .= $langs->transnoentities('ThirdParty') . ' : ' . (dol_strlen($societe->name) > 0 ? $societe->name : $langs->transnoentities('NoData')) . '</br>';
+			$ret .= $langs->transnoentities('ThirdParty') . ' : ' . (dol_strlen($societe->name) > 0 ? $societe->name : $langs->transnoentities('NoData')) . '<br>';
 		}
 		if (array_key_exists('fk_project', $object->fields) && isModEnabled('project')) {
             require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
 			$project = new Project($db);
 			$project->fetch($object->fk_project);
-			$ret .= $langs->transnoentities('Project') . ' : ' . $project->ref . ' ' . $project->title . '</br>';
+			$ret .= $langs->transnoentities('Project') . ' : ' . $project->ref . ' ' . $project->title . '<br>';
 		}
-        $ret .= (isset($object->note_public) && dol_strlen($object->note_public) > 0 ? $langs->transnoentities('NotePublic') . ' : ' . $object->note_public . '</br>' : '');
-        $ret .= (isset($object->note_private) && dol_strlen($object->note_private) > 0 ? $langs->transnoentities('NotePrivate') . ' : ' . $object->note_private . '</br>' : '');
+        $ret .= (isset($object->note_public) && dol_strlen($object->note_public) > 0 ? $langs->transnoentities('NotePublic') . ' : ' . $object->note_public . '<br>' : '');
+        $ret .= (isset($object->note_private) && dol_strlen($object->note_private) > 0 ? $langs->transnoentities('NotePrivate') . ' : ' . $object->note_private . '<br>' : '');
         $ret .= (isset($object->status) && dol_strlen($object->status) > 0  && isset($object->fields['status']['arrayofkeyval'][$object->status]) ? $langs->transnoentities('Status') . ' : ' . $langs->transnoentities($object->fields['status']['arrayofkeyval'][$object->status]) . '<br>' : '');
 		return $ret;
 	}
 
+    /**
+     * Return a thumb for kanban views
+     *
+     * @param  string     $option     Where point the link (0=> main card, 1,2 => shipment, 'nolink' => No link)
+     * @param  array|null $moreParams Parameters for load kanban view
+     * @return int|string -1 if $option is not a string or $out HTML Code for Kanban thumb
+     */
+    public function getKanbanView($option = '', array $moreParams = null): string
+    {
+        if (is_string($option)) {
+            $selected = (empty($moreParams['selected']) ? 0 : $moreParams['selected']);
+
+            $out = '<div class="box-flex-item box-flex-grow-zero">';
+            $out .= '<div class="info-box info-box-sm">';
+            $out .= '<span class="info-box-icon bg-infobox-action">';
+            $out .= img_picto('', $this->picto);
+            $out .= '</span>';
+            $out .= '<div class="info-box-content">';
+            $out .= '<span class="info-box-ref inline-block tdoverflowmax150 valignmiddle">' . (method_exists($this, 'getNomUrl') ? $this->getNomUrl() : $this->ref) . '</span>';
+            if ($selected >= 0) {
+                $out .= '<input id="cb' . $this->id . '" class="flat checkforselect fright" type="checkbox" name="toselect[]" value="' . $this->id . '"' . ($selected ? ' checked="checked"' : '') . '>';
+            }
+            if (property_exists($this, 'label')) {
+                $out .= '<div class="inline-block opacitymedium valignmiddle tdoverflowmax100">' . $this->label . '</div>';
+            }
+            if (method_exists($this, 'getLibStatut')) {
+                $out .= '<br><div class="info-box-status margintoponly">' . $this->getLibStatut(3) . '</div>';
+            }
+            $out .= '</div>';
+            $out .= '</div>';
+            $out .= '</div>';
+
+            return $out;
+        } else {
+            return -1;
+        }
+    }
 }

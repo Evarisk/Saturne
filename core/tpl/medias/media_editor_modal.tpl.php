@@ -29,9 +29,10 @@
 ?>
 
 <!-- File start-->
-<div class="modal-upload-image" value="0">
+<div class="modal-upload-image">
     <input type="hidden" name="token" value="<?php echo newToken(); ?>">
-    <div class="wpeo-modal modal-upload-image" id="modal-upload-image0">
+    <div class="wpeo-modal modal-upload-image" id="modal-upload-image">
+        <input type="hidden" class="fast-upload-options">
         <div class="modal-container wpeo-modal-event">
             <!-- Modal-Header-->
             <div class="modal-header">
