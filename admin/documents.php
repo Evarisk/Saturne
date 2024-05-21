@@ -52,11 +52,12 @@ $form = new Form($db);
 
 // Get parameters
 $action     = GETPOST('action', 'alpha');
-$value      = GETPOST('value', 'alpha');
+$modelName  = GETPOST('model_name', 'alpha');
 $type       = GETPOST('type', 'alpha');
 $const      = GETPOST('const', 'alpha');
 $label      = GETPOST('label', 'alpha');
 $modulepart = GETPOST('modulepart', 'aZ09'); // Used by actions_setmoduleoptions.inc.php
+$pageY      = GETPOST('page_y', 'int');
 
 $hookmanager->initHooks([$moduleNameLowerCase . 'admindocuments']); // Note that conf->hooks_modules contains array
 
@@ -73,20 +74,20 @@ require_once __DIR__ . '/../core/tpl/actions/admin_conf_actions.tpl.php';
 
 // Activate a model
 if ($action == 'set') {
-    addDocumentModel($value, $type, $label, $const);
-    header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '#' . $type);
+    addDocumentModel($modelName, $type, $label, $const);
+    header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
     exit;
 } elseif ($action == 'del') {
-    delDocumentModel($value, $type);
-    header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '#' . $type);
+    delDocumentModel($modelName, $type);
+    header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
     exit;
 }
 
 // Set default model
 if ($action == 'setdoc') {
     $confName = dol_strtoupper($moduleName . '_' . $type) . '_DEFAULT_MODEL';
-    dolibarr_set_const($db, $confName, $value, 'chaine', 0, '', $conf->entity);
-    header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '#' . $type);
+    dolibarr_set_const($db, $confName, $modelName, 'chaine', 0, '', $conf->entity);
+    header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
     exit;
 }
 
@@ -116,7 +117,7 @@ if ($action == 'deletefile' && $modulepart == 'ecm' && !empty($user->admin)) {
     $result = dol_delete_file($filetodelete);
     if ($result > 0) {
         setEventMessages($langs->trans('FileWasRemoved', GETPOST('file')), null);
-        header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '#' . $type);
+        header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
         exit;
     }
 }
@@ -187,36 +188,30 @@ if ($action == 'update_documents_config') {
 }
 
 if ($action == 'specimen') {
-
-    $modele = GETPOST('module', 'alpha');
-    $documentType = preg_split('/_/', $modele)[1];
+    $documentType = explode('_', $modelName)[1];
 
     require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . $documentType . '.class.php';
 
-    $objectDocument = new $documentType($db);
-    $objectDocument->initAsSpecimen();
+    $document = new $documentType($db);
 
     // Search template files
-    $dir = __DIR__ . "/../../". $moduleNameLowerCase . "/core/modules/" . $moduleNameLowerCase . "/" . $moduleNameLowerCase . "documents/" . $documentType . '/';
-    $file = 'pdf_' .  $modele . ".modules.php";
+    $dir = __DIR__ . '/../../' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $documentType . '/';
+    $file = 'pdf_' .  $modelName . '.modules.php';
     if (file_exists($dir . $file)) {
-        $classname = 'pdf_' . $modele;
-        require_once $dir . $file;
+        $moreParams['object']     = new stdClass();
+        $moreParams['user']       = $user;
+        $moreParams['specimen']   = 1;
+        $moreParams['zone']       = 'public';
+        $moreParams['objectType'] = str_replace('document', '', $documentType);
 
-        $obj = new $classname($db);
-
-        $modulePart = str_replace('document', '', $documentType);
-
-        if ($obj->write_file($objectDocument, $langs, ['object' => $objectDocument]) > 0) {
-            header("Location: " . DOL_URL_ROOT . "/document.php?modulepart=". $modulePart ."&file=SPECIMEN.pdf");
-            return;
+        $result = $document->generateDocument($modelName, $langs, 0, 0, 0, $moreParams);
+        if ($result <= 0) {
+            setEventMessages($document->error, $document->errors, 'errors');
         } else {
-            setEventMessages($obj->error, $obj->errors, 'errors');
-            dol_syslog($obj->error, LOG_ERR);
+            setEventMessages($langs->trans('FileGenerated') . ' - ' . '<a href=' . DOL_URL_ROOT . '/document.php?modulepart=' . $moreParams['objectType'] . '&file=' . urlencode('public_specimen/' . $document->last_main_doc) . '&entity=' . $conf->entity . '"' . '>' . $document->last_main_doc . '</a>', []);
+            header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
+            exit;
         }
-    } else {
-        setEventMessages($langs->trans("ErrorModuleNotFound"), null, 'errors');
-        dol_syslog($langs->trans("ErrorModuleNotFound"), LOG_ERR);
     }
 }
 
