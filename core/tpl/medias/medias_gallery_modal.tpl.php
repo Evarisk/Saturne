@@ -298,27 +298,18 @@ if ( ! $error && $subaction == 'unlinkFile') {
 	}
 }
 
-if ( ! $error && $subaction == 'addToFavorite') {
-	global $user;
+if (!$error && $subaction == 'addToFavorite') {
+    global $object, $user;
 
-	$data = json_decode(file_get_contents('php://input'), true);
+    $data = json_decode(file_get_contents('php://input'), true);
 
-	$fileName      = $data['filename'];
-	$objectId      = $data['objectId'];
-	$objectType    = $data['objectType'];
-	$objectSubtype = $data['objectSubtype'];
-	$objectSubdir  = $data['objectSubdir'];
+    $fileName      = $data['filename'];
+    $objectSubtype = $data['objectSubtype'];
 
-    $className = $objectType;
-
-	if ($objectId > 0) {
-		$object = new $className($db);
-		$object->fetch($objectId);
-		if (property_exists($object, $objectSubtype)) {
-			$object->$objectSubtype = $fileName;
-			$object->update($user, true);
-		}
-	}
+    if (property_exists($object, $objectSubtype)) {
+        $object->$objectSubtype = $fileName;
+        $object->setValueFrom($objectSubtype, $object->$objectSubtype, '', '', 'text', '', $user);
+    }
 }
 
 if ( ! $error && $subaction == 'pagination') {
