@@ -325,6 +325,7 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 						mediaGallery.html($(resp).find('#media_gallery').children()).promise().done( () => {
 							if (totalCount == 1) {
 								$('#media_gallery').find('.save-photo').removeClass('button-disable');
+								$('#media_gallery').find('.delete-photo').removeClass('button-disable');
 								$('#media_gallery').find('.clickable-photo0').addClass('clicked-photo');
 							}
 							if ($(resp).find('.error-medias').length) {
