@@ -39,7 +39,7 @@ $ecmfile = new EcmFiles($db);
 $form = new Form($db);
 
 // Array for the sizes of thumbs
-$sizesArray = ['mini', 'small', 'medium', 'large'];
+$mediaSizes = ['mini', 'small', 'medium', 'large'];
 
 if ( ! $error && $subaction == 'uploadPhoto' && ! empty($conf->global->MAIN_UPLOAD_DOC)) {
 
@@ -84,7 +84,7 @@ if ( ! $error && $subaction == 'uploadPhoto' && ! empty($conf->global->MAIN_UPLO
 	}
 }
 
-if (!$error && $subaction == 'add_img') {
+if ($subaction == 'add_img') {
     global $object;
 
     $data = json_decode(file_get_contents('php://input'), true);
@@ -101,17 +101,16 @@ if (!$error && $subaction == 'add_img') {
     file_put_contents($pathToECMImg . '/' . $fileName, $decodedImage);
     addFileIntoDatabaseIndex($pathToECMImg, $fileName, $pathToECMImg . '/' . $fileName);
 
-    $modObjectName       = dol_strtoupper($moduleNameLowerCase) . '_' . dol_strtoupper($object->element) . '_ADDON';
-    $numberingModuleName = [$object->element => $conf->global->$modObjectName];
-    list($modObject)     = saturne_require_objects_mod($numberingModuleName, $moduleNameLowerCase);
-
     if (dol_strlen($object->ref) > 0) {
         $pathToObjectImg = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $object->element . '/' . $object->ref . '/' . $data['objectSubdir'];
-        if (empty($object->$data['objectSubType'])) {
-            $object->$data['objectSubType'] = $fileName;
-            $object->setValueFrom($object->$data['objectSubType'], $object->$data['objectSubType'], '', '', 'text', '', $user);
+        if (empty($object->{$data['objectSubType']})) {
+            $object->setValueFrom($data['objectSubType'], $fileName, '', '', 'text', '', $user);
         }
     } else {
+        $modObjectName       = dol_strtoupper($moduleNameLowerCase) . '_' . dol_strtoupper($object->element) . '_ADDON';
+        $numberingModuleName = [$object->element => $conf->global->$modObjectName];
+        list($modObject)     = saturne_require_objects_mod($numberingModuleName, $moduleNameLowerCase);
+
         $pathToObjectImg = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $object->element . '/tmp/' . $modObject->prefix . '0/' . $data['objectSubdir'];
     }
 
@@ -122,7 +121,6 @@ if (!$error && $subaction == 'add_img') {
     dol_copy($pathToECMImg . '/' . $fileName, $pathToObjectImg . '/' . $fileName);
 
     // Create thumbs
-    $mediaSizes = ['mini', 'small', 'medium', 'large'];
     foreach($mediaSizes as $size) {
         $confWidth  = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_' . dol_strtoupper($size);
         $confHeight = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size);
@@ -131,105 +129,76 @@ if (!$error && $subaction == 'add_img') {
     }
 }
 
-if ( ! $error && $subaction == 'addFiles') {
-	global $user;
+if ($subaction == 'addFiles') {
+    global $object;
 
-	$data = json_decode(file_get_contents('php://input'), true);
+    $data = json_decode(file_get_contents('php://input'), true);
 
-	$filenames     = $data['filenames'];
-	$objectId      = $data['objectId'];
-	$objectType    = $data['objectType'];
-	$objectSubtype = $data['objectSubtype'];
-	$objectSubdir  = $data['objectSubdir'];
+    $objectType = $data['objectType'];
+    $objectId   = $data['objectId'];
 
-    $className = $objectType;
-    $object    = new $className($db);
-    $object->fetch($objectId);
+    if ($objectId != $object->id && $objectType != $object->element) {
+        $className = $objectType;
+        $object    = new $className($db);
+        $object->fetch($objectId);
+    }
 
-	$modObjectName = strtoupper($moduleNameLowerCase) . '_' . strtoupper($className) . '_ADDON';
+    $pathToECMImg = $conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias';
+    if (!dol_is_dir($pathToECMImg)) {
+        dol_mkdir($pathToECMImg);
+    }
 
-    $numberingModuleName = [
-        $object->element => $conf->global->$modObjectName,
-    ];
+    if (dol_strlen($object->ref) > 0) {
+        $pathToObjectImg = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $objectType . '/' . $object->ref . '/' . $data['objectSubdir'];
+    } else {
+        $modObjectName       = dol_strtoupper($moduleNameLowerCase) . '_' . dol_strtoupper($objectType) . '_ADDON';
+        $numberingModuleName = [$objectType => $conf->global->$modObjectName];
+        list($modObject)     = saturne_require_objects_mod($numberingModuleName, $moduleNameLowerCase);
 
-    list($modObject) = saturne_require_objects_mod($numberingModuleName, $moduleNameLowerCase);
+        $pathToObjectImg = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $objectType . '/tmp/' . $modObject->prefix . '0/' . $data['objectSubdir'];
+    }
 
-	if (dol_strlen($object->ref) > 0) {
-		$pathToObjectPhoto = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType .'/' . $object->ref . '/' . $objectSubdir;
-	} else {
-		$pathToObjectPhoto = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType .'/tmp/' . $modObject->prefix . '0/' . $objectSubdir ;
-	}
+    if (!dol_is_dir($pathToObjectImg)) {
+        dol_mkdir($pathToObjectImg);
+    }
 
-	if (preg_match('/vVv/', $filenames)) {
-		$filenames = preg_split('/vVv/', $filenames);
-		array_pop($filenames);
-	} else {
-		$filenames = array($filenames);
-	}
+    if (strpos($data['filenames'], 'vVv') !== false) {
+        $fileNames = explode('vVv', $data['filenames']);
+        array_pop($fileNames);
+    } else {
+        $fileNames = [$data['filenames']];
+    }
 
-	if ( ! (empty($filenames))) {
-		if ( ! is_dir($conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType . '/tmp/')) {
-			dol_mkdir($conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType . '/tmp/');
-		}
+    if (!empty($fileNames)) {
+        foreach ($fileNames as $fileName) {
+            $fileName = dol_sanitizeFileName($fileName);
+            if (empty($object->{$data['objectSubtype']})) {
+                $object->{$data['objectSubtype']} = $fileName;
+            }
 
-		if ( ! is_dir($conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType . '/' . (dol_strlen($object->ref) > 0 ? $object->ref : 'tmp/' . $modObject->prefix . '0/') )) {
-			dol_mkdir($conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType . '/' . (dol_strlen($object->ref) > 0 ? $object->ref : 'tmp/' . $modObject->prefix . '0/'));
-		}
+            dol_copy($pathToECMImg . '/' . $fileName, $pathToObjectImg . '/' . $fileName);
 
-		foreach ($filenames as $filename) {
-			$entity = ($conf->entity > 1) ? '/' . $conf->entity : '';
-			$filename = dol_sanitizeFileName($filename);
-			if (empty($object->$objectSubtype)) {
-				$object->$objectSubtype = $filename;
-			}
-			if (is_file($conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias/' . $filename)) {
-				$pathToECMPhoto = $conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias/' . $filename;
-
-				if ( ! is_dir($pathToObjectPhoto)) {
-					mkdir($pathToObjectPhoto, 0777, true);
-				}
-
-				if (file_exists($pathToECMPhoto)) {
-					copy($pathToECMPhoto, $pathToObjectPhoto . '/' . $filename);
-					$ecmfile->fetch(0,'',($conf->entity > 1 ? $conf->entity . '/' : ''). 'ecm/'. $moduleNameLowerCase .'/medias/' . $filename);
-					$date      = dol_print_date(dol_now(),'dayxcard');
-					$extension = pathinfo($filename, PATHINFO_EXTENSION);
-
-					$destfull = $pathToObjectPhoto . '/' . $filename;
-
-					$confWidthMini    = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_MINI';
-					$confHeightMini   = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_MINI';
-					$confWidthSmall   = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_SMALL';
-					$confHeightSmall  = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_SMALL';
-					$confWidthMedium  = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_MEDIUM';
-					$confHeightMedium = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_MEDIUM';
-					$confWidthLarge   = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_LARGE';
-					$confHeightLarge  = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_LARGE';
-
-					// Create thumbs
-					$imgThumbMini   = vignette($destfull, $conf->global->$confWidthMini, $conf->global->$confHeightMini, '_mini');
-					$imgThumbSmall  = vignette($destfull, $conf->global->$confWidthSmall, $conf->global->$confHeightSmall, '_small');
-					$imgThumbMedium = vignette($destfull, $conf->global->$confWidthMedium, $conf->global->$confHeightMedium, '_medium');
-					$imgThumbLarge  = vignette($destfull, $conf->global->$confWidthLarge, $conf->global->$confHeightLarge, '_large');
-					// Create mini thumbs for image (Ratio is near 16/9)
-				}
-			}
-		}
-        if ($objectId != 0){
-            $object->update($user);
+            // Create thumbs
+            foreach($mediaSizes as $size) {
+                $confWidth  = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_' . dol_strtoupper($size);
+                $confHeight = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size);
+                vignette($pathToObjectImg . '/' . $fileName, $conf->global->$confWidth, $conf->global->$confHeight, '_' . $size);
+            }
         }
-	}
+        if ($objectId > 0) {
+            $object->setValueFrom($data['objectSubtype'], $object->{$data['objectSubtype']}, '', '', 'text', '', $user);
+        }
+    }
 }
 
 if ($subaction == 'delete_files') {
     $data = json_decode(file_get_contents('php://input'), true);
 
-    $fileNames = $data['filenames'];
-    if (strpos($fileNames, 'vVv') !== false) {
-        $fileNames = explode('vVv', $fileNames);
+    if (strpos($data['filenames'], 'vVv') !== false) {
+        $fileNames = explode('vVv', $data['filenames']);
         array_pop($fileNames);
     } else {
-        $fileNames = array($fileNames);
+        $fileNames = [$data['filenames']];
     }
 
     if (!empty($fileNames)) {
@@ -237,7 +206,7 @@ if ($subaction == 'delete_files') {
             $fileName       = dol_sanitizeFileName($fileName);
             $pathToECMPhoto = $conf->ecm->multidir_output[$conf->entity] . '/' . $moduleNameLowerCase . '/medias/' . $fileName;
             if (is_file($pathToECMPhoto)) {
-                foreach($sizesArray as $size) {
+                foreach($mediaSizes as $size) {
                     $thumbName = $conf->ecm->multidir_output[$conf->entity] . '/' . $moduleNameLowerCase . '/medias/thumbs/' . saturne_get_thumb_name($fileName, $size);
                     if (is_file($thumbName)) {
                         unlink($thumbName);
@@ -249,66 +218,45 @@ if ($subaction == 'delete_files') {
     }
 }
 
-if ( ! $error && $subaction == 'unlinkFile') {
-	global $user;
-
-	$data = json_decode(file_get_contents('php://input'), true);
-
-	$filePath      = $data['filepath'];
-	$fileName      = $data['filename'];
-	$objectId      = $data['objectId'];
-	$objectType    = $data['objectType'];
-	$objectSubtype = $data['objectSubtype'];
-	$objectSubdir  = $data['objectSubdir'];
-
-	$fullPath  = $filePath . '/' . $fileName;
-    $className = $objectType;
-
-	if (is_file($fullPath)) {
-		unlink($fullPath);
-	}
-
-	foreach($sizesArray as $size) {
-		$thumbName = $filePath . '/thumbs/' . saturne_get_thumb_name($fileName, $size);
-		if (is_file($thumbName)) {
-			unlink($thumbName);
-		};
-	}
-
-	if ($objectId > 0) {
-		$object = new $className($db);
-		$object->fetch($objectId);
-
-		if (property_exists($object, $objectSubtype)) {
-
-			if ($object->$objectSubtype == $fileName) {
-				$pathPhotos = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/'. $objectType .'/'. $object->ref . '/' . (dol_strlen($objectSubdir) > 0 ? $objectSubdir . '/' : '');
-				$fileArray  = dol_dir_list($pathPhotos, 'files', 0, '', $fileName);
-
-				if (count($fileArray) > 0) {
-					$firstFileName = array_shift($fileArray);
-					$object->$objectSubtype = $firstFileName['name'];
-				} else {
-					$object->$objectSubtype = '';
-				}
-
-				$object->update($user, true);
-			}
-		}
-	}
-}
-
-if (!$error && $subaction == 'addToFavorite') {
-    global $object, $user;
+if ($subaction == 'unlinkFile') {
+    global $object;
 
     $data = json_decode(file_get_contents('php://input'), true);
 
-    $fileName      = $data['filename'];
-    $objectSubtype = $data['objectSubtype'];
+    $fullPath = $data['filepath'] . '/' . $data['filename'];
+    if (is_file($fullPath)) {
+        unlink($fullPath);
 
-    if (property_exists($object, $objectSubtype)) {
-        $object->$objectSubtype = $fileName;
-        $object->setValueFrom($objectSubtype, $object->$objectSubtype, '', '', 'text', '', $user);
+        foreach($mediaSizes as $size) {
+            $thumbName = $data['filepath'] . '/thumbs/' . saturne_get_thumb_name($data['filename'], $size);
+            if (is_file($thumbName)) {
+                unlink($thumbName);
+            }
+        }
+    }
+
+    if (property_exists($object, $data['objectSubtype'])) {
+        if ($object->{$data['objectSubtype']} == $data['filename']) {
+            $fileArray = dol_dir_list($data['filepath'], 'files');
+            if (count($fileArray) > 0) {
+                $firstFileName = array_shift($fileArray);
+                $object->{$data['objectSubtype']} = $firstFileName['name'];
+            } else {
+                $object->{$data['objectSubtype']} = '';
+            }
+            $object->setValueFrom($data['objectSubtype'], $object->{$data['objectSubtype']}, '', '', 'text', '', $user);
+        }
+    }
+}
+
+if ($subaction == 'addToFavorite') {
+    global $object;
+
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    if (property_exists($object, $data['objectSubtype'])) {
+        $object->{$data['objectSubtype']} = $data['filename'];
+        $object->setValueFrom($data['objectSubtype'], $object->{$data['objectSubtype']}, '', '', 'text', '', $user);
     }
 }
 
@@ -340,11 +288,10 @@ if ( ! $error && $subaction == 'toggleUnlinkedMedias') {
 if (!$error && $subaction == 'regenerate_thumbs') {
     $data = json_decode(file_get_contents('php://input'), true);
 
-    $fullName   = $data['fullname'];
-    foreach($sizesArray as $size) {
+    foreach($mediaSizes as $size) {
         $confWidth  = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_' . dol_strtoupper($size);
         $confHeight = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size);
-        vignette($fullName, $conf->global->$confWidth, $conf->global->$confHeight, '_' . $size);
+        vignette($data['fullname'], $conf->global->$confWidth, $conf->global->$confHeight, '_' . $size);
     }
 }
 
