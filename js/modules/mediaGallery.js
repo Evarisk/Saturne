@@ -181,11 +181,10 @@ window.saturne.mediaGallery.deletePhoto = function() {
   }
   window.saturne.loader.display($(this));
 
-  $('.confirmation-close').removeClass('button-disable')
   $('.card__confirmation').removeAttr('style');
   $('.card__confirmation .confirmation-title .filesLinked').text(filesLinked.length);
   $(document).on('click', '.confirmation-close', function() {
-    window.saturne.mediaGallery.closeConfirmation(filesLinked);
+    window.saturne.mediaGallery.closeConfirmation(filesLinked, mediaGalleryModal);
   });
   $(document).on('click', '.confirmation-delete', function() {
     window.saturne.mediaGallery.deleteFilesRequest(fileNames);
@@ -198,12 +197,13 @@ window.saturne.mediaGallery.deletePhoto = function() {
  * @since   1.3.0
  * @version 1.5.0
  *
- * @param {string} filesLinked Selected Name of linked files
+ * @param {string} filesLinked       Selected Name of linked files
+ * @param {string} mediaGalleryModal Media gallery modal element
  *
  * @return {void}
  */
 
-window.saturne.mediaGallery.closeConfirmation = function(filesLinked) {
+window.saturne.mediaGallery.closeConfirmation = function(filesLinked, mediaGalleryModal) {
   $('.wpeo-loader').removeClass('wpeo-loader')
   $('.card__confirmation').attr('style', 'display:none;')
   if (filesLinked.length > 0) {
@@ -211,8 +211,8 @@ window.saturne.mediaGallery.closeConfirmation = function(filesLinked) {
       filesLinked.removeClass('clicked-photo');
     });
   }
-  $('.save-photo').addClass('button-disable');
-  $('.delete-photo').addClass('button-disable');
+  mediaGalleryModal.find('.save-photo').addClass('button-disable');
+  mediaGalleryModal.find('.delete-photo').addClass('button-disable');
 }
 
 /**

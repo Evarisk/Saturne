@@ -35,7 +35,7 @@
         print $confirmationParams['confirmationTitle'] ? '<div style="color: ' . $confirmationParams['color'] . ';" class="confirmation-title"> ' . $langs->transnoentities($confirmationParams['confirmationTitle']) . ' </div>' : '';
         if (is_array($confirmationParams['buttonParams']) && !empty($confirmationParams['buttonParams'])) {
             foreach ($confirmationParams['buttonParams'] as $buttonLabel => $CSSButton) {
-                print '<button type="submit" class="wpeo-button ' . $CSSButton . '">' . $langs->transnoentities($buttonLabel) . '</button>';
+                print '<div class="wpeo-button ' . $CSSButton . '">' . $langs->transnoentities($buttonLabel) . '</div>';
             }
         } ?>
     </div>
