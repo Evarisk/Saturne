@@ -65,7 +65,7 @@ if (is_array($filelist) && !empty($filelist)) {
                 if (in_array($name, $def)) {
                     print img_picto($langs->trans('Enabled'), 'switch_on');
                 } else {
-                    print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=set&value=' . $name . '&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
+                    print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=set&model_name=' . $name . '&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
                     print img_picto($langs->trans('Disabled'), 'switch_off');
                     print '</a>';
                 }
@@ -77,7 +77,7 @@ if (is_array($filelist) && !empty($filelist)) {
                 if ($conf->global->$defaultModelConf == $name) {
                     print img_picto($langs->trans('Default'), 'on');
                 } else {
-                    print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setdoc&value=' . $name .'&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), 'off') . '</a>';
+                    print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setdoc&model_name=' . $name .'&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), 'off') . '</a>';
                 }
                 print '</td>';
 
@@ -94,7 +94,7 @@ if (is_array($filelist) && !empty($filelist)) {
                 // Preview
                 print '<td class="center">';
                 if ($module->type == 'pdf') {
-                    print '<a href="' . $_SERVER['PHP_SELF'] . '?action=specimen&module=' . $name . '&module_name=' . $moduleName . '">' . img_object($langs->trans('Preview'), 'pdf') . '</a>';
+                    print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=specimen&model_name=' . $name . '&module_name=' . $moduleName . '&token=' . newToken() . '">' . img_object($langs->trans('Preview'), 'pdf') . '</a>';
                 } else {
                     print img_object($langs->trans('PreviewNotAvailable'), 'generic');
                 }
@@ -112,10 +112,10 @@ if (is_array($filelist) && !empty($filelist)) {
                     // Active
                     print '<td class="center">';
                     if (in_array($customName, $def)) {
-                        print '<a href="' . $_SERVER['PHP_SELF'] . '?action=del&value=' . $customName . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
+                        print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=del&model_name=' . $customName . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
                         print img_picto($langs->trans('Enabled'), 'switch_on');
                     } else {
-                        print '<a href="' . $_SERVER['PHP_SELF'] . '?action=set&value=' . $customName . '&const=' . $module->custom_scandir . '&label=' . urlencode($module->custom_name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
+                        print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=set&model_name=' . $customName . '&const=' . $module->custom_scandir . '&label=' . urlencode($module->custom_name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
                         print img_picto($langs->trans('Disabled'), 'switch_off');
                     }
                     print '</a>';
@@ -126,7 +126,7 @@ if (is_array($filelist) && !empty($filelist)) {
                     if ($conf->global->$defaultModelConf == $customName) {
                         print img_picto($langs->trans('Default'), 'on');
                     } else {
-                        print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setdoc&value=' . $customName .'&const=' . $module->custom_scandir . '&label=' . urlencode($module->custom_name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), 'off') . '</a>';
+                        print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setdoc&model_name=' . $customName .'&const=' . $module->custom_scandir . '&label=' . urlencode($module->custom_name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), 'off') . '</a>';
                     }
                     print '</td><td colspan=2></td></tr>';
                 }
