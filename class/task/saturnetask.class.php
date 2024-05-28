@@ -236,10 +236,10 @@ class SaturneTask extends Task
 			$result .= $favoriteStar;
 		}
 
-        $hookmanager->initHooks(['taskdao']);
+        $hookmanager->initHooks(['saturnetaskdao']);
         $parameters = ['id' => $this->id, 'getnomurl' => &$result];
-        $reshook    = $hookmanager->executeHooks('getNomUrl', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
-        if ($reshook > 0) {
+        $resHook    = $hookmanager->executeHooks('getNomUrl', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
+        if ($resHook > 0) {
             $result = $hookmanager->resPrint;
         } else {
             $result .= $hookmanager->resPrint;
