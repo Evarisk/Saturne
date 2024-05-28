@@ -211,13 +211,15 @@ class SaturneDashboard
                                 if (is_array($dashboardGraph['labels']) && !empty($dashboardGraph['labels'])) {
                                     foreach ($dashboardGraph['labels'] as $key => $dashboardGraphLabel) {
                                         $dashboardGraphLegend[$uniqueKey][] = $dashboardGraphLabel['label'];
-                                        if (dol_strlen($dashboardGraphLabel['color']) > 0) {
-                                            $dashboardGraphColor[$uniqueKey][] = $dashboardGraphLabel['color'];
-                                        } else {
-                                            // If only one color is defined in category, the others will be black
-                                            // If no color is defined, all the colors will be defined by global $theme_datacolor
-                                            // To avoid black color we better define a color instead of empty
-                                            $dashboardGraphColor[$uniqueKey][] = $this->getColorRange($key);
+                                        if (isset($dashboardGraphLabel['color'])) {
+                                            if (dol_strlen($dashboardGraphLabel['color']) > 0) {
+                                                $dashboardGraphColor[$uniqueKey][] = $dashboardGraphLabel['color'];
+                                            } else {
+                                                // If only one color is defined in category, the others will be black
+                                                // If no color is defined, all the colors will be defined by global $theme_datacolor
+                                                // To avoid black color we better define a color instead of empty
+                                                $dashboardGraphColor[$uniqueKey][] = $this->getColorRange($key);
+                                            }
                                         }
                                     }
                                 }
