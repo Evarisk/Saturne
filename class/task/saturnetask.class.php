@@ -182,7 +182,7 @@ class SaturneTask extends Task
 	 */
 	public function getNomUrl($withpicto = 0, $option = '', $mode = 'task', $addlabel = 0, $sep = ' - ', $notooltip = 0, $saveLastSearchValue = -1, $showFavorite = 0)
 	{
-		global $conf, $langs, $user;
+		global $action, $conf, $hookmanager, $langs, $user;
 
 		if ( ! empty($conf->dol_no_mouse_hover)) $notooltip = 1; // Force disable tooltips
 
@@ -235,6 +235,15 @@ class SaturneTask extends Task
 
 			$result .= $favoriteStar;
 		}
+
+        $hookmanager->initHooks(['saturnetaskdao']);
+        $parameters = ['id' => $this->id, 'getnomurl' => &$result];
+        $resHook    = $hookmanager->executeHooks('getNomUrl', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
+        if ($resHook > 0) {
+            $result = $hookmanager->resPrint;
+        } else {
+            $result .= $hookmanager->resPrint;
+        }
 
 		return $result;
 	}
