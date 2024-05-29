@@ -177,7 +177,7 @@ class SaturneSignature extends SaturneObject
     public ?string $society_name = '';
 
     /**
-     * @var string|null Job
+     * @var string|null Post or Function
      */
     public ?string $job = '';
 
