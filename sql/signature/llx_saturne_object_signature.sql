@@ -27,6 +27,8 @@ CREATE TABLE llx_saturne_object_signature(
     phone                varchar(255),
     society_name         varchar(255),
     job                  varchar(255),
+    civility_code        varchar(255),
+    json                 varchar(255),
     signature_date       datetime DEFAULT NULL,
     signature_location   varchar(255),
     signature_comment    text DEFAULT NULL,

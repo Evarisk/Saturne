@@ -71,4 +71,4 @@ DROP TABLE `llx_digiriskdolibarr_digiriskdocuments_extrafields`;
 ALTER TABLE `llx_saturne_object_documents` CHANGE json json longtext;
 
 -- 1.5.0
-INSERT INTO `llx_saturne_object_signature` (entity, date_creation, tms, import_key, status, role, firstname, lastname, email, phone, society_name, job, signature_date, signature_location, signature_comment, element_id, element_type, module_name, signature, stamp, last_email_sent_date, signature_url, transaction_url, object_type, fk_object)
+INSERT INTO `llx_saturne_object_signature` (entity, date_creation, tms, import_key, status, role, firstname, lastname, email, phone, society_name, job, civility_code, json, signature_date, signature_location, signature_comment, element_id, element_type, module_name, signature, stamp, last_email_sent_date, signature_url, transaction_url, object_type, fk_object)
