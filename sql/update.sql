@@ -22,8 +22,8 @@ ALTER TABLE `llx_saturne_schedules` CHANGE `status` `status` INT(11) NOT NULL;
 -- 1.1.0
 ALTER TABLE `llx_dolisirh_object_signature` ADD module_name VARCHAR(128) NULL AFTER element_type;
 UPDATE `llx_dolisirh_object_signature` SET module_name = 'dolisirh';
-INSERT INTO `llx_saturne_object_signature` (entity, date_creation, tms, import_key, status, role, firstname, lastname, email, phone, society_name, job, signature_date, signature_location, signature_comment, element_id, element_type, module_name, signature, stamp, last_email_sent_date, signature_url, transaction_url, object_type, fk_object)
-SELECT entity, date_creation, tms, import_key, status, role, firstname, lastname, email, phone, society_name, job, signature_date, signature_location, signature_comment, element_id, element_type, module_name, signature, stamp, last_email_sent_date, signature_url, transaction_url, object_type, fk_object FROM `llx_dolisirh_object_signature`;
+INSERT INTO `llx_saturne_object_signature` (entity, date_creation, tms, import_key, status, role, firstname, lastname, email, phone, society_name, signature_date, signature_location, signature_comment, element_id, element_type, module_name, signature, stamp, last_email_sent_date, signature_url, transaction_url, object_type, fk_object)
+SELECT entity, date_creation, tms, import_key, status, role, firstname, lastname, email, phone, society_name, signature_date, signature_location, signature_comment, element_id, element_type, module_name, signature, stamp, last_email_sent_date, signature_url, transaction_url, object_type, fk_object FROM `llx_dolisirh_object_signature`;
 DROP TABLE `llx_dolisirh_object_signature`;
 
 ALTER TABLE `llx_dolismq_dolismqdocuments` ADD module_name VARCHAR(128) NULL AFTER type;
@@ -69,3 +69,6 @@ SELECT ref, ref_ext, entity, date_creation, tms, import_key, status, type, modul
 DROP TABLE `llx_digiriskdolibarr_digiriskdocuments`;
 DROP TABLE `llx_digiriskdolibarr_digiriskdocuments_extrafields`;
 ALTER TABLE `llx_saturne_object_documents` CHANGE json json longtext;
+
+-- 1.5.0
+INSERT INTO `llx_saturne_object_signature` (entity, date_creation, tms, import_key, status, role, firstname, lastname, email, phone, society_name, job, signature_date, signature_location, signature_comment, element_id, element_type, module_name, signature, stamp, last_email_sent_date, signature_url, transaction_url, object_type, fk_object)
