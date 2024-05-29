@@ -99,6 +99,7 @@ class SaturneSignature extends SaturneObject
         'email'                => ['type' => 'varchar(255)', 'label' => 'Email',             'enabled' => 1, 'position' => 90,  'notnull' => 0, 'visible' => 3],
         'phone'                => ['type' => 'varchar(255)', 'label' => 'Phone',             'enabled' => 1, 'position' => 100, 'notnull' => 0, 'visible' => 3],
         'society_name'         => ['type' => 'varchar(255)', 'label' => 'SocietyName',       'enabled' => 1, 'position' => 110, 'notnull' => 0, 'visible' => 3],
+        'job'                  => ['type' => 'varchar(255)', 'label' => 'PostOrFunction',    'enabled' => 1, 'position' => 115, 'notnull' => 0, 'visible' => 1],
         'signature_date'       => ['type' => 'datetime',     'label' => 'SignatureDate',     'enabled' => 1, 'position' => 120, 'notnull' => 0, 'visible' => 3],
         'signature_location'   => ['type' => 'varchar(255)', 'label' => 'SignatureLocation', 'enabled' => 1, 'position' => 125, 'notnull' => 0, 'visible' => 3],
         'signature_comment'    => ['type' => 'varchar(255)', 'label' => 'SignatureComment',  'enabled' => 1, 'position' => 130, 'notnull' => 0, 'visible' => 3],
@@ -174,6 +175,11 @@ class SaturneSignature extends SaturneObject
      * @var string|null Society name
      */
     public ?string $society_name = '';
+
+    /**
+     * @var string|null Job
+     */
+    public ?string $job = '';
 
     /**
      * @var string Signature date
