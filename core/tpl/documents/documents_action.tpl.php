@@ -59,13 +59,19 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
     }
 
     if (GETPOST('forcebuilddoc')) {
-        $model     = '';
-        $modelList = saturne_get_list_of_models($db, $object->element . 'document');
-        if (!empty($modelList)) {
-            asort($modelList);
-            $modelList = array_filter($modelList, 'saturne_remove_index');
-            if (is_array($modelList)) {
+        $model      = '';
+        $modelLists = saturne_get_list_of_models($db, $object->element . 'document');
+        if (!empty($modelLists)) {
+            asort($modelLists);
+            $modelLists = array_filter($modelLists, 'saturne_remove_index');
+            if (is_array($modelLists)) {
                 $models = array_keys($modelList);
+                foreach ($modelLists as $key => $modelList) {
+                    $confName = dol_strtoupper($moduleNameLowerCase . '_' . $document->element) . '_DEFAULT_MODELT';
+                    if (strpos($key, getDolGlobalString($confName)) !== false) {
+                        $models[0] = $key;
+                    }
+                }
             }
         }
     } else {
