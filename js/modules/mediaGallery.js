@@ -404,12 +404,10 @@ window.saturne.mediaGallery.unlinkFile = function( event ) {
 
 	let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
 
-  $('.card__confirmation').removeAttr('style');
-  $('.card__confirmation .confirmation-title .filesLinked').text(1);
+  $('.card__confirmation').css('display', 'flex');
   $(document).on('click', '.confirmation-close', function() {
-    $('.confirmation-close').removeClass('button-disable');
     $('.wpeo-loader').removeClass('wpeo-loader');
-    $('.card__confirmation').attr('style', 'display:none;')
+    $('.card__confirmation').css('display', 'none');
   });
   $(document).on('click', '.confirmation-delete', function() {
     $.ajax({
@@ -425,7 +423,7 @@ window.saturne.mediaGallery.unlinkFile = function( event ) {
       }),
       processData: false,
       success: function ( resp ) {
-        $('.card__confirmation').attr('style', 'display:none;')
+        $('.card__confirmation').css('display', 'none');
         $('#media_gallery .modal-container').replaceWith($(resp).find('#media_gallery .modal-container'));
         if (previousFavorite == filename) {
           if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
