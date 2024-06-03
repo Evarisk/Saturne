@@ -368,7 +368,7 @@ window.saturne.mediaGallery.previewPhoto = function( event ) {
  * Action unlink photo
  *
  * @since   1.0.0
- * @version 1.0.0
+ * @version 1.5.0
  *
  * @return {void}
  */
@@ -404,36 +404,45 @@ window.saturne.mediaGallery.unlinkFile = function( event ) {
 
 	let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
 
-	$.ajax({
-		url: document.URL + querySeparator + "subaction=unlinkFile&token=" + token,
-		type: "POST",
-		data: JSON.stringify({
-			filepath: filepath,
-			filename: filename,
-			objectSubtype: objectSubtype,
-			objectType: objectType,
-			objectSubdir: objectSubdir,
-			objectId: objectId
-		}),
-		processData: false,
-		success: function ( resp ) {
-      if (previousFavorite == filename) {
+  $('.card__confirmation').css('display', 'flex');
+  $(document).on('click', '.confirmation-close', function() {
+    $('.wpeo-loader').removeClass('wpeo-loader');
+    $('.card__confirmation').css('display', 'none');
+  });
+  $(document).on('click', '.confirmation-delete', function() {
+    $.ajax({
+      url: document.URL + querySeparator + "subaction=unlinkFile&token=" + token,
+      type: "POST",
+      data: JSON.stringify({
+        filepath: filepath,
+        filename: filename,
+        objectSubtype: objectSubtype,
+        objectType: objectType,
+        objectSubdir: objectSubdir,
+        objectId: objectId
+      }),
+      processData: false,
+      success: function ( resp ) {
+        $('.card__confirmation').css('display', 'none');
+        $('#media_gallery .modal-container').replaceWith($(resp).find('#media_gallery .modal-container'));
+        if (previousFavorite == filename) {
+          if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
+            $('.photo.'+objectPhotoClass).replaceWith($(resp).find('.photo.'+objectPhotoClass).first())
+          }
+          if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
+            $('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
+          }
+        }
         if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
-          $('.photo.'+objectPhotoClass).replaceWith($(resp).find('.photo.'+objectPhotoClass).first())
+          $('.linked-medias.' + objectPhotoClass).replaceWith($(resp).find('.linked-medias.' + objectPhotoClass))
+        } else if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
+          $('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
         }
-        if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
-          $('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
-        }
-      }
-      if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
-        $('.linked-medias.' + objectPhotoClass).replaceWith($(resp).find('.linked-medias.' + objectPhotoClass))
-      } else if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
-        $('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
-      }
 
-      $('.wpeo-loader').removeClass('wpeo-loader')
-		}
-	});
+        $('.wpeo-loader').removeClass('wpeo-loader')
+      }
+    });
+  });
 };
 
 /**
