@@ -178,7 +178,8 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
             print '<input type="hidden" name="action" value="delete_attendant">';
             print '<input type="hidden" name="signatoryID" value="' . $element->id . '">';
             print '<input type="hidden" name="backtopage" value="' . $backtopage . '">';
-            print '<button type="submit" name="deleteAttendant" id="deleteAttendant" class="attendant-delete wpeo-button button-grey" value="' . $element->id . '">';
+            print '<input type="hidden" name="page_y">';
+            print '<button type="submit" name="deleteAttendant" id="deleteAttendant" class="attendant-delete wpeo-button button-grey reposition" value="' . $element->id . '">';
             print '<i class="fas fa-trash"></i>';
             print '</button>';
             print '</form>';

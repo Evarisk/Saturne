@@ -34,6 +34,7 @@ if (file_exists('../saturne.main.inc.php')) {
 $moduleName   = GETPOST('module_name', 'alpha');
 $objectType   = GETPOST('object_type', 'alpha');
 $documentType = GETPOST('document_type', 'alpha');
+$pageY        = GETPOST('page_y', 'int');
 
 $moduleNameLowerCase = strtolower($moduleName);
 
@@ -136,7 +137,7 @@ if (empty($resHook)) {
                 setEventMessages($langs->trans('AddAttendantMessage', $langs->transnoentities($attendantRole) . ' ' . $contact->getFullName($langs, 1)), []);
             }
             // Prevent form reloading page
-            header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode);
+            header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode . '&page_y=' . $pageY);
             exit;
         } elseif (!empty($signatory->errors)) {
             // Creation attendant KO
@@ -279,7 +280,7 @@ if (empty($resHook)) {
         if ($result > 0) {
             setEventMessages($langs->trans('DeleteAttendantMessage', $langs->transnoentities($signatory->role) . ' ' . strtoupper($signatory->lastname) . ' ' . $signatory->firstname), []);
             // Prevent form reloading page
-            header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode);
+            header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode . '&page_y=' . $pageY);
             exit;
         } elseif (!empty($signatory->errors)) {
             // Deletion attendant KO
