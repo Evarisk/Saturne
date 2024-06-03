@@ -172,21 +172,12 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 			$modellist = array_filter($modellist, 'saturne_remove_index');
 			if (is_array($modellist)) {
 				foreach ($modellist as $key => $modellistsingle) {
-					$arrayvalues     = preg_replace('/template_/', '', $modellistsingle);
-					$modellist[$key] = $langs->trans($arrayvalues);
-                    $confName        = dol_strtoupper($modulepart . '_' . $submodulepart) . '_DEFAULT_MODEL';
-                    $customModel     = explode('_custom', $key);
-                    if (is_array($customModel) && count($customModel) == 2) {
-                        $customModelKey             = $customModel[0] . $customModel[1];
-                        $modellist[$customModelKey] = $modellist[$key];
-                        if (strpos($key, getDolGlobalString($confName)) !== false) {
-                            $modelselected = $customModelKey;
-                        }
-                        unset($modellist[$key]);
-                    }
-
-                    if (!isset($modelselected) && strpos($key, getDolGlobalString($confName)) !== false) {
-                        $modelselected = $key;
+					$arrayvalues         = preg_replace('/template_/', '', $modellistsingle);
+                    $newKey              = str_replace($object->element . 'document_custom_odt', $object->element . 'document_odt', $key);
+                    $modellists[$newKey] = $langs->trans($arrayvalues);
+                    $confName            = dol_strtoupper($modulepart . '_' . $submodulepart) . '_DEFAULT_MODEL';
+                    if (strpos($key, getDolGlobalString($confName)) !== false) {
+                        $modelselected = $newKey;
                     }
                 }
             }
@@ -196,7 +187,7 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
                 $morecss = 'maxwidth100';
             }
 
-			$out .= $form::selectarray('model', $modellist, $modelselected, $showempty, 0, 0, '', 0, 0, 0, '', $morecss);
+			$out .= $form::selectarray('model', $modellists, $modelselected, $showempty, 0, 0, '', 0, 0, 0, '', $morecss);
 
 			if ($conf->use_javascript_ajax) {
 				$out .= ajax_combobox('model');
@@ -210,17 +201,17 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 				$genbutton .= '<button class="wpeo-button button-square-40 button-disable" name="' . $forname . '_generatebutton"><i class="fas fa-print button-icon"></i></button>';
 			}
 
-            if (!$allowgenifempty && !is_array($modellist) && empty($modellist)) {
+            if (!$allowgenifempty && !is_array($modellists) && empty($modellists)) {
                 $genbutton .= ' disabled';
             }
-            if ($allowgenifempty && !is_array($modellist) && empty($modellist) && empty($conf->dol_no_mouse_hover)) {
+            if ($allowgenifempty && !is_array($modellists) && empty($modellists) && empty($conf->dol_no_mouse_hover)) {
                 $langs->load('errors');
                 $genbutton .= ' ' . img_warning($langs->transnoentitiesnoconv('WarningNoDocumentModelActivated'));
             }
-            if (!$allowgenifempty && !is_array($modellist) && empty($modellist) && empty($conf->dol_no_mouse_hover)) {
+            if (!$allowgenifempty && !is_array($modellists) && empty($modellists) && empty($conf->dol_no_mouse_hover)) {
                 $genbutton = '';
             }
-            if (empty($modellist) && !$showempty) {
+            if (empty($modellists) && !$showempty) {
                 $genbutton = '';
             }
             $out .= $genbutton;

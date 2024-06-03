@@ -59,13 +59,16 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
     }
 
     if (GETPOST('forcebuilddoc')) {
-        $model     = '';
-        $modelList = saturne_get_list_of_models($db, $object->element . 'document');
-        if (!empty($modelList)) {
-            asort($modelList);
-            $modelList = array_filter($modelList, 'saturne_remove_index');
-            if (is_array($modelList)) {
-                $models = array_keys($modelList);
+        $model      = '';
+        $modelLists = saturne_get_list_of_models($db, $object->element . 'document');
+        if (is_array($modelLists) && !empty($modelLists)) {
+            asort($modelLists);
+            $modelLists = array_filter($modelLists, 'saturne_remove_index');
+            foreach ($modelLists as $key => $modelList) {
+                $confName = dol_strtoupper($moduleNameLowerCase . '_' . $document->element) . '_DEFAULT_MODEL';
+                if (strpos($key, getDolGlobalString($confName)) !== false) {
+                    $model = str_replace($object->element . 'document_custom_odt', $object->element . 'document_odt', $key);
+                }
             }
         }
     } else {
@@ -78,20 +81,20 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
     $constName              = get_class($object) . '::STATUS_LOCKED';
     $moreParams['specimen'] = defined($constName) && $object->status < $object::STATUS_LOCKED;
 
-    if (!empty($models) || !empty($model)) {
-        $parameters = ['models' => $models, 'model' => $model, 'outputlangs' => $outputLangs, 'hidedetails' => $hideDetails, 'hidedesc' => $hideDesc, 'hideref' => $hideRef, 'moreparams' => $moreParams];
+    if (!empty($model)) {
+        $parameters = ['model' => $model, 'outputlangs' => $outputLangs, 'hidedetails' => $hideDetails, 'hidedesc' => $hideDesc, 'hideref' => $hideRef, 'moreparams' => $moreParams];
         $hookmanager->executeHooks('saturneBuildDoc', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
 
-        $result = $document->generateDocument((!empty($models) ? $models[0] : $model), $outputLangs, $hideDetails, $hideDesc, $hideRef, $moreParams);
+        $result = $document->generateDocument($model, $outputLangs, $hideDetails, $hideDesc, $hideRef, $moreParams);
         if ($result <= 0) {
             setEventMessages($document->error, $document->errors, 'errors');
             $action = '';
         } else {
-            $documentType = explode('_odt', (!empty($models) ? $models[0] : $model));
+            $documentType = explode('_odt', $model);
             if ($document->element != $documentType[0]) {
                 $document->element = $documentType[0];
             }
-            setEventMessages($langs->trans('FileGenerated') . ' - ' . '<a href=' . DOL_URL_ROOT . '/document.php?modulepart='. $moduleNameLowerCase . '&file=' . urlencode($document->element . '/' . (dol_strlen($object->ref) > 0 ? $object->ref . '/' : '') . $document->last_main_doc) . '&entity=' . $conf->entity . '"' . '>' . $document->last_main_doc . '</a>', []);
+            setEventMessages($langs->trans('FileGenerated') . ' - ' . '<a href=' . DOL_URL_ROOT . '/document.php?modulepart=' . (!empty($moreParams['modulePart']) ? $moreParams['modulePart'] : $moduleNameLowerCase) . '&file=' . urlencode((empty($moreParams['modulePart']) ? $document->element . '/' : '') . (dol_strlen($object->ref) > 0 ? $object->ref . '/' : '') . $document->last_main_doc) . '&entity=' . $conf->entity . '"' . '>' . $document->last_main_doc . '</a>', []);
             $urlToRedirect = $_SERVER['REQUEST_URI'];
             $urlToRedirect = preg_replace('/#builddoc$/', '', $urlToRedirect);
             $urlToRedirect = preg_replace('/action=builddoc&?/', '', $urlToRedirect); // To avoid infinite loop.

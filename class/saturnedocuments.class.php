@@ -200,8 +200,8 @@ class SaturneDocuments extends SaturneObject
             $this->type = $this->element;
         }
         $this->module_name   = $this->module;
-        $this->parent_id     = $parentObject->id;
-        $this->parent_type   = $parentObject->element_type ?: $parentObject->element;
+        $this->parent_id     = $parentObject->id ?: 0;
+        $this->parent_type   = $parentObject->element_type ?: $parentObject->element ?: '';
         $this->fk_user_creat = $user->id ?: 1;
 
         //$this->DocumentFillJSON($this);

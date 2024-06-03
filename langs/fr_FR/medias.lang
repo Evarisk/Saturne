@@ -30,6 +30,7 @@ MediaDimensionSetWithSuccess = Dimensions des médias modifiées avec succès
 MediaDimensionNegativeError  = Les valeurs des dimensions ne peuvent être négatives
 MediaDimensionEmptyError     = Les valeurs des dimensions ne peuvent pas être vides
 MediaData                    = Configuration des médias
+ConfirmUnlinkMedia           = Êtes vous sur de vouloir détacher le media sélectionné ?
 
 # Config page - Page d'administration
 MediaMaxWidthMini                    = Largeur du média mini

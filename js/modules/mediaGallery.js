@@ -1,4 +1,4 @@
-/* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2022-2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
  */
 
 /**
- * Initialise l'objet "mediaGallery" ainsi que la méthode "init" obligatoire pour la bibliothèque Saturne.
+ * Initialise l'objet "mediaGallery" ainsi que la méthode "init" obligatoire pour la bibliothèque Saturne
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -31,7 +31,7 @@
 window.saturne.mediaGallery = {};
 
 /**
- * La méthode appelée automatiquement par la bibliothèque Saturne.
+ * La méthode appelée automatiquement par la bibliothèque Saturne
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -43,7 +43,7 @@ window.saturne.mediaGallery.init = function() {
 };
 
 /**
- * La méthode contenant tous les événements pour la bibliothèque de médias.
+ * La méthode contenant tous les événements pour la bibliothèque de médias
  *
  * @since   1.0.0
  * @version 1.3.0
@@ -68,7 +68,7 @@ window.saturne.mediaGallery.event = function() {
 }
 
 /**
- * Select photo.
+ * Select photo
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -95,7 +95,7 @@ window.saturne.mediaGallery.selectPhoto = function( event ) {
 };
 
 /**
- * Action save photo to an object.
+ * Action save photo to an object
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -166,14 +166,13 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
  * Action delete photo from media gallery
  *
  * @since   1.3.0
- * @version 1.3.0
+ * @version 1.5.0
  *
  * @return {void}
  */
 window.saturne.mediaGallery.deletePhoto = function() {
   let mediaGalleryModal = $(this).closest('.modal-container');
   let filesLinked       = mediaGalleryModal.find('.clicked-photo');
-
   let fileNames = '';
   if (filesLinked.length > 0) {
     filesLinked.each(function() {
@@ -185,7 +184,7 @@ window.saturne.mediaGallery.deletePhoto = function() {
   $('.card__confirmation').removeAttr('style');
   $('.card__confirmation .confirmation-title .filesLinked').text(filesLinked.length);
   $(document).on('click', '.confirmation-close', function() {
-    window.saturne.mediaGallery.closeConfirmation(filesLinked);
+    window.saturne.mediaGallery.closeConfirmation(filesLinked, mediaGalleryModal);
   });
   $(document).on('click', '.confirmation-delete', function() {
     window.saturne.mediaGallery.deleteFilesRequest(fileNames);
@@ -196,21 +195,24 @@ window.saturne.mediaGallery.deletePhoto = function() {
  * Action to remove the view of the confirmation box
  *
  * @since   1.3.0
- * @version 1.3.0
+ * @version 1.5.0
  *
- * @param {string} filesLinked Selected Name of linked files
+ * @param {string} filesLinked       Selected Name of linked files
+ * @param {string} mediaGalleryModal Media gallery modal element
  *
  * @return {void}
  */
-window.saturne.mediaGallery.closeConfirmation = function(filesLinked) {
+
+window.saturne.mediaGallery.closeConfirmation = function(filesLinked, mediaGalleryModal) {
   $('.wpeo-loader').removeClass('wpeo-loader')
   $('.card__confirmation').attr('style', 'display:none;')
-
   if (filesLinked.length > 0) {
     filesLinked.each(function() {
       filesLinked.removeClass('clicked-photo');
     });
   }
+  mediaGalleryModal.find('.save-photo').addClass('button-disable');
+  mediaGalleryModal.find('.delete-photo').addClass('button-disable');
 }
 
 /**
@@ -260,7 +262,7 @@ window.saturne.mediaGallery.handleSearch = function( event ) {
 };
 
 /**
- * Action send photo.
+ * Action send photo
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -323,6 +325,7 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 						mediaGallery.html($(resp).find('#media_gallery').children()).promise().done( () => {
 							if (totalCount == 1) {
 								$('#media_gallery').find('.save-photo').removeClass('button-disable');
+								$('#media_gallery').find('.delete-photo').removeClass('button-disable');
 								$('#media_gallery').find('.clickable-photo0').addClass('clicked-photo');
 							}
 							if ($(resp).find('.error-medias').length) {
@@ -345,7 +348,7 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 };
 
 /**
- * Action preview photo.
+ * Action preview photo
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -362,10 +365,10 @@ window.saturne.mediaGallery.previewPhoto = function( event ) {
 };
 
 /**
- * Action unlink photo.
+ * Action unlink photo
  *
  * @since   1.0.0
- * @version 1.0.0
+ * @version 1.5.0
  *
  * @return {void}
  */
@@ -401,40 +404,49 @@ window.saturne.mediaGallery.unlinkFile = function( event ) {
 
 	let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
 
-	$.ajax({
-		url: document.URL + querySeparator + "subaction=unlinkFile&token=" + token,
-		type: "POST",
-		data: JSON.stringify({
-			filepath: filepath,
-			filename: filename,
-			objectSubtype: objectSubtype,
-			objectType: objectType,
-			objectSubdir: objectSubdir,
-			objectId: objectId
-		}),
-		processData: false,
-		success: function ( resp ) {
-      if (previousFavorite == filename) {
+  $('.card__confirmation').css('display', 'flex');
+  $(document).on('click', '.confirmation-close', function() {
+    $('.wpeo-loader').removeClass('wpeo-loader');
+    $('.card__confirmation').css('display', 'none');
+  });
+  $(document).on('click', '.confirmation-delete', function() {
+    $.ajax({
+      url: document.URL + querySeparator + "subaction=unlinkFile&token=" + token,
+      type: "POST",
+      data: JSON.stringify({
+        filepath: filepath,
+        filename: filename,
+        objectSubtype: objectSubtype,
+        objectType: objectType,
+        objectSubdir: objectSubdir,
+        objectId: objectId
+      }),
+      processData: false,
+      success: function ( resp ) {
+        $('.card__confirmation').css('display', 'none');
+        $('#media_gallery .modal-container').replaceWith($(resp).find('#media_gallery .modal-container'));
+        if (previousFavorite == filename) {
+          if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
+            $('.photo.'+objectPhotoClass).replaceWith($(resp).find('.photo.'+objectPhotoClass).first())
+          }
+          if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
+            $('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
+          }
+        }
         if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
-          $('.photo.'+objectPhotoClass).replaceWith($(resp).find('.photo.'+objectPhotoClass).first())
+          $('.linked-medias.' + objectPhotoClass).replaceWith($(resp).find('.linked-medias.' + objectPhotoClass))
+        } else if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
+          $('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
         }
-        if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
-          $('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
-        }
-      }
-      if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
-        $('.linked-medias.' + objectPhotoClass).replaceWith($(resp).find('.linked-medias.' + objectPhotoClass))
-      } else if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
-        $('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
-      }
 
-      $('.wpeo-loader').removeClass('wpeo-loader')
-		}
-	});
+        $('.wpeo-loader').removeClass('wpeo-loader')
+      }
+    });
+  });
 };
 
 /**
- * Action add photo to favorite.
+ * Action add photo to favorite
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -509,7 +521,7 @@ window.saturne.mediaGallery.addToFavorite = function( event ) {
 };
 
 /**
- * Action fast upload.
+ * Action fast upload
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -594,7 +606,7 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
 };
 
 /**
- * Action select page.
+ * Action select page
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -650,7 +662,7 @@ window.saturne.mediaGallery.selectPage = function( event ) {
 };
 
 /**
- * Action toggle today medias.
+ * Action toggle today medias
  *
  * @since   1.0.0
  * @version 1.0.0
@@ -683,7 +695,7 @@ window.saturne.mediaGallery.toggleTodayMedias = function( event ) {
 };
 
 /**
- * Action toggle unlinked medias.
+ * Action toggle unlinked medias
  *
  * @since   1.0.0
  * @version 1.0.0
