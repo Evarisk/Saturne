@@ -61,16 +61,13 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
     if (GETPOST('forcebuilddoc')) {
         $model      = '';
         $modelLists = saturne_get_list_of_models($db, $object->element . 'document');
-        if (!empty($modelLists)) {
+        if (is_array($modelLists) && !empty($modelLists)) {
             asort($modelLists);
             $modelLists = array_filter($modelLists, 'saturne_remove_index');
-            if (is_array($modelLists)) {
-                $models = array_keys($modelList);
-                foreach ($modelLists as $key => $modelList) {
-                    $confName = dol_strtoupper($moduleNameLowerCase . '_' . $document->element) . '_DEFAULT_MODELT';
-                    if (strpos($key, getDolGlobalString($confName)) !== false) {
-                        $models[0] = $key;
-                    }
+            foreach ($modelLists as $key => $modelList) {
+                $confName = dol_strtoupper($moduleNameLowerCase . '_' . $document->element) . '_DEFAULT_MODEL';
+                if (strpos($key, getDolGlobalString($confName)) !== false) {
+                    $model = str_replace($object->element . 'document_custom_odt', $object->element . 'document_odt', $key);
                 }
             }
         }
@@ -84,16 +81,16 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
     $constName              = get_class($object) . '::STATUS_LOCKED';
     $moreParams['specimen'] = defined($constName) && $object->status < $object::STATUS_LOCKED;
 
-    if (!empty($models) || !empty($model)) {
-        $parameters = ['models' => $models, 'model' => $model, 'outputlangs' => $outputLangs, 'hidedetails' => $hideDetails, 'hidedesc' => $hideDesc, 'hideref' => $hideRef, 'moreparams' => $moreParams];
+    if (!empty($model)) {
+        $parameters = ['model' => $model, 'outputlangs' => $outputLangs, 'hidedetails' => $hideDetails, 'hidedesc' => $hideDesc, 'hideref' => $hideRef, 'moreparams' => $moreParams];
         $hookmanager->executeHooks('saturneBuildDoc', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
 
-        $result = $document->generateDocument((!empty($models) ? $models[0] : $model), $outputLangs, $hideDetails, $hideDesc, $hideRef, $moreParams);
+        $result = $document->generateDocument($model, $outputLangs, $hideDetails, $hideDesc, $hideRef, $moreParams);
         if ($result <= 0) {
             setEventMessages($document->error, $document->errors, 'errors');
             $action = '';
         } else {
-            $documentType = explode('_odt', (!empty($models) ? $models[0] : $model));
+            $documentType = explode('_odt', $model);
             if ($document->element != $documentType[0]) {
                 $document->element = $documentType[0];
             }
