@@ -130,18 +130,14 @@ if ($subaction == 'add_img') {
 }
 
 if ($subaction == 'addFiles') {
-    global $object;
-
     $data = json_decode(file_get_contents('php://input'), true);
 
     $objectType = $data['objectType'];
     $objectId   = $data['objectId'];
 
-    if ($objectId != $object->id && $objectType != $object->element) {
-        $className = $objectType;
-        $object    = new $className($db);
-        $object->fetch($objectId);
-    }
+    $className = $objectType;
+    $object    = new $className($db);
+    $object->fetch($objectId);
 
     $pathToECMImg = $conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias';
     if (!dol_is_dir($pathToECMImg)) {
@@ -219,8 +215,6 @@ if ($subaction == 'delete_files') {
 }
 
 if ($subaction == 'unlinkFile') {
-    global $object;
-
     $data = json_decode(file_get_contents('php://input'), true);
 
     $fullPath = $data['filepath'] . '/' . $data['filename'];
@@ -235,28 +229,38 @@ if ($subaction == 'unlinkFile') {
         }
     }
 
-    if (property_exists($object, $data['objectSubtype'])) {
-        if ($object->{$data['objectSubtype']} == $data['filename']) {
-            $fileArray = dol_dir_list($data['filepath'], 'files');
-            if (count($fileArray) > 0) {
-                $firstFileName = array_shift($fileArray);
-                $object->{$data['objectSubtype']} = $firstFileName['name'];
-            } else {
-                $object->{$data['objectSubtype']} = '';
+    if ($data['objectId'] > 0) {
+        $className = $data['objectType'];
+        $object    = new $className($db);
+        $object->fetch($data['objectId']);
+
+        if (property_exists($object, $data['objectSubtype'])) {
+            if ($object->{$data['objectSubtype']} == $data['filename']) {
+                $fileArray = dol_dir_list($data['filepath'], 'files');
+                if (count($fileArray) > 0) {
+                    $firstFileName = array_shift($fileArray);
+                    $object->{$data['objectSubtype']} = $firstFileName['name'];
+                } else {
+                    $object->{$data['objectSubtype']} = '';
+                }
+                $object->setValueFrom($data['objectSubtype'], $object->{$data['objectSubtype']}, '', '', 'text', '', $user);
             }
-            $object->setValueFrom($data['objectSubtype'], $object->{$data['objectSubtype']}, '', '', 'text', '', $user);
         }
     }
 }
 
 if ($subaction == 'addToFavorite') {
-    global $object;
-
     $data = json_decode(file_get_contents('php://input'), true);
 
-    if (property_exists($object, $data['objectSubtype'])) {
-        $object->{$data['objectSubtype']} = $data['filename'];
-        $object->setValueFrom($data['objectSubtype'], $object->{$data['objectSubtype']}, '', '', 'text', '', $user);
+    if ($data['objectId'] > 0) {
+        $className = $data['objectType'];
+        $object    = new $className($db);
+        $object->fetch($data['objectId']);
+
+        if (property_exists($object, $data['objectSubtype'])) {
+            $object->{$data['objectSubtype']} = $data['filename'];
+            $object->setValueFrom($data['objectSubtype'], $object->{$data['objectSubtype']}, '', '', 'text', '', $user);
+        }
     }
 }
 
