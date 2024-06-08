@@ -310,7 +310,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
 
         $modulePart = '';
         $baseDir    = $conf->$moduleNameLowerCase->multidir_output[$conf->entity];
-        $subDir     = $object->element . '/'. $object->ref . '/photos/';
+        $subDir     = $object->element_type . '/'. $object->ref . '/';
 
         $resHook = $hookmanager->executeHooks('saturneBannerTabCustomSubdir', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
         if ($resHook > 0) {
@@ -329,7 +329,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
                 }
             }
         }
-
+        
         $moreHtmlLeft = '<div class="floatleft inline-block valignmiddle divphotoref">' . saturne_show_medias_linked((dol_strlen($modulePart) > 0 ? $modulePart : $moduleNameLowerCase), $baseDir . '/' . $subDir, 'small', $photoLimit ?? 0, 0, 0, 0, 88, 88, 0, 0, 0, $subDir, $object, 'photo', 0, 0,0, 1) . '</div>';
         print $form->showrefnav($object, $paramId, (($moreHtml != 'none' && $moreParams['moreHtml'] != 'none') ? $moreHtml : ''), $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, $moreParamsBannerTab, 0, $moreHtmlLeft, $object->getLibStatut(6));
         print '</div>';
