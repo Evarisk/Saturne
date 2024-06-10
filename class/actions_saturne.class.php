@@ -75,7 +75,7 @@ class ActionsSaturne
         global $conf, $mysoc;
 
         // Do something only for the current context
-        if ($parameters['currentcontext'] == 'saturnepublicinterface') {
+        if (strpos($parameters['context'], 'saturnepublicinterface') !== false) {
             if (!empty($conf->global->SATURNE_SHOW_COMPANY_LOGO)) {
                 // Define logo and logosmall
                 $logosmall = $mysoc->logo_small;
@@ -110,7 +110,7 @@ class ActionsSaturne
         global $user, $langs;
 
         // do something only for the context 'somecontext1' or 'somecontext2'
-        if ($parameters['currentcontext'] == 'emailtemplates') {
+        if (strpos($parameters['context'], 'emailtemplates') !== false) {
             if (isModEnabled('saturne') && $user->hasRight('saturne', 'adminpage', 'read')) {
                 $pictopath = dol_buildpath('/custom/saturne/img/saturne_color.png', 1);
                 $picto     = img_picto('', $pictopath, '', 1, 0, 0, '', 'pictoModule');
@@ -257,7 +257,7 @@ class ActionsSaturne
             } else {
                 setEventMessages($signatory->error, [], 'errors');
             }
-        } elseif (preg_match('/categorycard/', $parameters['context'])) {
+        } elseif (strpos($parameters['context'], 'categorycard') !== false) {
             global $langs;
 
             $elementId = GETPOST('element_id');
