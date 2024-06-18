@@ -85,6 +85,8 @@ class SaturneTask extends Task
     {
         $arrayTasksByProgress = $this->getTasksByProgress($projectId);
 
+        $arrayTasksByProgress['position'] = 10;
+
         $array['graphs'] = [$arrayTasksByProgress];
 
         return $array;

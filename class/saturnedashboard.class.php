@@ -81,7 +81,6 @@ class SaturneDashboard
                 }
             }
         }
-
         return $dashboardInfos;
     }
 
@@ -103,6 +102,17 @@ class SaturneDashboard
         $conf->global->MAIN_DISABLE_TRUNC = 1;
 
         $dashboards = $this->load_dashboard($moreParams);
+
+        $dashboardGraphsArray = [];
+        foreach ($dashboards['graphs'] as $key => $graph) {
+            foreach ($graph as $keyElement => $dashboardGraph) {
+                array_push($dashboardGraphsArray, $dashboardGraph);
+            }
+        }
+
+        usort($dashboardGraphsArray, function ($a, $b) {
+            return $a['position'] <=> $b['position'];
+        });
 
         print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '" class="dashboard" id="dashBoardForm">';
         print '<input type="hidden" name="token" value="' . newToken() . '">';
@@ -186,89 +196,85 @@ class SaturneDashboard
 
         print '<div class="graph-dashboard wpeo-grid grid-2">';
 
-        if (is_array($dashboards['graphs']) && !empty($dashboards['graphs'])) {
-            foreach ($dashboards['graphs'] as $dashboardGraphs) {
-                if (is_array($dashboardGraphs) && !empty($dashboardGraphs)) {
-                    foreach ($dashboardGraphs as $keyElement => $dashboardGraph) {
-                        $nbDataset = 0;
-                        $uniqueKey = strip_tags($dashboardGraph['title']) . $keyElement;
-                        if (is_array($dashboardGraph['data']) && !empty($dashboardGraph['data'])) {
-                            if ($dashboardGraph['dataset'] >= 2) {
-                                foreach ($dashboardGraph['data'] as $dashboardGraphDatasets) {
-                                    unset($dashboardGraphDatasets[0]);
-                                    foreach ($dashboardGraphDatasets as $dashboardGraphDataset) {
-                                        if (!empty($dashboardGraphDataset)) {
-                                            $nbDataset = 1;
-                                        }
-                                    }
+        if (is_array($dashboardGraphsArray) && !empty($dashboardGraphsArray)) {
+            foreach ($dashboardGraphsArray as $dashboardGraph) {
+                $nbDataset = 0;
+                $uniqueKey = strip_tags($dashboardGraph['title']) . $keyElement;
+                if (is_array($dashboardGraph['data']) && !empty($dashboardGraph['data'])) {
+                    if ($dashboardGraph['dataset'] >= 2) {
+                        foreach ($dashboardGraph['data'] as $dashboardGraphDatasets) {
+                            unset($dashboardGraphDatasets[0]);
+                            foreach ($dashboardGraphDatasets as $dashboardGraphDataset) {
+                                if (!empty($dashboardGraphDataset)) {
+                                    $nbDataset = 1;
                                 }
-                            } else {
-                                foreach ($dashboardGraph['data'] as $dashboardGraphDatasets) {
-                                    $nbDataset += $dashboardGraphDatasets;
-                                }
-                            }
-                            if ($nbDataset > 0) {
-                                if (is_array($dashboardGraph['labels']) && !empty($dashboardGraph['labels'])) {
-                                    foreach ($dashboardGraph['labels'] as $key => $dashboardGraphLabel) {
-                                        $dashboardGraphLegend[$uniqueKey][] = $dashboardGraphLabel['label'];
-                                        if (isset($dashboardGraphLabel['color'])) {
-                                            if (dol_strlen($dashboardGraphLabel['color']) > 0) {
-                                                $dashboardGraphColor[$uniqueKey][] = $dashboardGraphLabel['color'];
-                                            } else {
-                                                // If only one color is defined in category, the others will be black
-                                                // If no color is defined, all the colors will be defined by global $theme_datacolor
-                                                // To avoid black color we better define a color instead of empty
-                                                $dashboardGraphColor[$uniqueKey][] = $this->getColorRange($key);
-                                            }
-                                        }
-                                    }
-                                }
-
-                                $arrayKeys = array_keys($dashboardGraph['data']);
-                                foreach ($arrayKeys as $key) {
-                                    if ($dashboardGraph['dataset'] >= 2) {
-                                        $graphData[$uniqueKey][] = $dashboardGraph['data'][$key];
-                                    } else {
-                                        $graphData[$uniqueKey][] = [
-                                            0 => $dashboardGraph['labels'][$key]['label'],
-                                            1 => $dashboardGraph['data'][$key]
-                                        ];
-                                    }
-                                }
-
-                                $fileName[$uniqueKey] = $uniqueKey . '.png';
-                                $fileUrl[$uniqueKey]  = DOL_URL_ROOT . '/viewimage.php?modulepart=' . $moduleNameLowerCase . '&file=' . $uniqueKey . '.png';
-
-                                $graph = new DolGraph();
-                                $graph->SetData($graphData[$uniqueKey]);
-
-                                if ($dashboardGraph['dataset'] >= 2) {
-                                    $graph->SetLegend($dashboardGraphLegend[$uniqueKey]);
-                                }
-                                if (isset($dashboardGraphColor[$uniqueKey])) {
-                                    $graph->SetDataColor($dashboardGraphColor[$uniqueKey]);
-                                }
-                                $graph->SetType([$dashboardGraph['type'] ?? 'pie']);
-                                $graph->SetWidth($dashboardGraph['width'] ?? $width);
-                                $graph->SetHeight($dashboardGraph['height'] ?? $height);
-                                $graph->setShowLegend($dashboardGraph['showlegend'] ?? 2);
-                                $graph->draw($fileName[$uniqueKey], $fileUrl[$uniqueKey]);
-                                print '<div class="' . $dashboardGraph['moreCSS'] . '">';
-
-                                $downloadCSV  = '<form method="POST" action="' . $_SERVER['PHP_SELF'] . (GETPOSTISSET('id') ? '?id=' . GETPOST('id') : '') . '">';
-                                $downloadCSV .= '<input type="hidden" name="token" value="' . newToken() . '">';
-                                $downloadCSV .= '<input type="hidden" name="action" value="generate_csv">';
-                                $downloadCSV .= '<input type="hidden" name="graph" value="' . http_build_query($dashboardGraph) . '">';
-                                $downloadCSV .= '<button class="wpeo-button no-load button-grey">';
-                                $downloadCSV .= img_picto('ExportCSV', 'fontawesome_file-csv_fas_#31AD29_15px');
-                                $downloadCSV .= '</button></form>';
-                                $dashboardGraph['morehtmlright'] .= $downloadCSV;
-
-                                print load_fiche_titre($dashboardGraph['title'], $dashboardGraph['morehtmlright'], $dashboardGraph['picto']);
-                                print $graph->show();
-                                print '</div>';
                             }
                         }
+                    } else {
+                        foreach ($dashboardGraph['data'] as $dashboardGraphDatasets) {
+                            $nbDataset += $dashboardGraphDatasets;
+                        }
+                    }
+                    if ($nbDataset > 0) {
+                        if (is_array($dashboardGraph['labels']) && !empty($dashboardGraph['labels'])) {
+                            foreach ($dashboardGraph['labels'] as $key => $dashboardGraphLabel) {
+                                $dashboardGraphLegend[$uniqueKey][] = $dashboardGraphLabel['label'];
+                                if (isset($dashboardGraphLabel['color'])) {
+                                    if (dol_strlen($dashboardGraphLabel['color']) > 0) {
+                                        $dashboardGraphColor[$uniqueKey][] = $dashboardGraphLabel['color'];
+                                    } else {
+                                        // If only one color is defined in category, the others will be black
+                                        // If no color is defined, all the colors will be defined by global $theme_datacolor
+                                        // To avoid black color we better define a color instead of empty
+                                        $dashboardGraphColor[$uniqueKey][] = $this->getColorRange($key);
+                                    }
+                                }
+                            }
+                        }
+
+                        $arrayKeys = array_keys($dashboardGraph['data']);
+                        foreach ($arrayKeys as $key) {
+                            if ($dashboardGraph['dataset'] >= 2) {
+                                $graphData[$uniqueKey][] = $dashboardGraph['data'][$key];
+                            } else {
+                                $graphData[$uniqueKey][] = [
+                                    0 => $dashboardGraph['labels'][$key]['label'],
+                                    1 => $dashboardGraph['data'][$key]
+                                ];
+                            }
+                        }
+
+                        $fileName[$uniqueKey] = $uniqueKey . '.png';
+                        $fileUrl[$uniqueKey]  = DOL_URL_ROOT . '/viewimage.php?modulepart=' . $moduleNameLowerCase . '&file=' . $uniqueKey . '.png';
+
+                        $graph = new DolGraph();
+                        $graph->SetData($graphData[$uniqueKey]);
+
+                        if ($dashboardGraph['dataset'] >= 2) {
+                            $graph->SetLegend($dashboardGraphLegend[$uniqueKey]);
+                        }
+                        if (isset($dashboardGraphColor[$uniqueKey])) {
+                            $graph->SetDataColor($dashboardGraphColor[$uniqueKey]);
+                        }
+                        $graph->SetType([$dashboardGraph['type'] ?? 'pie']);
+                        $graph->SetWidth($dashboardGraph['width'] ?? $width);
+                        $graph->SetHeight($dashboardGraph['height'] ?? $height);
+                        $graph->setShowLegend($dashboardGraph['showlegend'] ?? 2);
+                        $graph->draw($fileName[$uniqueKey], $fileUrl[$uniqueKey]);
+                        print '<div class="' . $dashboardGraph['moreCSS'] . '">';
+
+                        $downloadCSV  = '<form method="POST" action="' . $_SERVER['PHP_SELF'] . (GETPOSTISSET('id') ? '?id=' . GETPOST('id') : '') . '">';
+                        $downloadCSV .= '<input type="hidden" name="token" value="' . newToken() . '">';
+                        $downloadCSV .= '<input type="hidden" name="action" value="generate_csv">';
+                        $downloadCSV .= '<input type="hidden" name="graph" value="' . http_build_query($dashboardGraph) . '">';
+                        $downloadCSV .= '<button class="wpeo-button no-load button-grey">';
+                        $downloadCSV .= img_picto('ExportCSV', 'fontawesome_file-csv_fas_#31AD29_15px');
+                        $downloadCSV .= '</button></form>';
+                        $dashboardGraph['morehtmlright'] .= $downloadCSV;
+
+                        print load_fiche_titre($dashboardGraph['title'], $dashboardGraph['morehtmlright'], $dashboardGraph['picto']);
+                        print $graph->show();
+                        print '</div>';
                     }
                 }
             }
