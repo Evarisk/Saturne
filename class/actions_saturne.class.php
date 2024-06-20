@@ -50,9 +50,9 @@ class ActionsSaturne
     public array $results = [];
 
     /**
-     * @var string String displayed by executeHook() immediately after return
+     * @var string|null String displayed by executeHook() immediately after return
      */
-    public string $resprints;
+    public ?string $resprints;
 
     /**
      * Constructor
