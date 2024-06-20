@@ -13,11 +13,13 @@
         height: 220px;
         border: 1px solid rgba(0,0,0,0.2);
         border-radius: 6px;
-        cursor: url('../img/assets/pencil-alt-solid.svg') 0 32, auto;
-
+        
         img {
           width: 100%;
         }
+      }
+      .editable {
+        cursor: url('../img/assets/pencil-alt-solid.svg') 0 32, auto;
       }
     }
   }
