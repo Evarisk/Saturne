@@ -93,10 +93,10 @@ class SaturneDashboard
             });
             
             $positionsKeys = array_keys($positions);
-            $index = 0;
+            $index         = 0;
             foreach ($dashboardInfos['graphs'] as $key => $databoardGraphs) {
                 foreach ($databoardGraphs as $keyElement => $dashboardGraph) {
-                    $positionKey                        = $positionsKeys[$index];
+                    $positionKey                                 = $positionsKeys[$index];
                     $dashboardInfos['graphs'][$key][$keyElement] = $positions[$positionKey];
                     $index++;
                 }
