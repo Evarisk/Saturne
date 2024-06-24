@@ -33,6 +33,7 @@ if ($object->status == $object::STATUS_DRAFT && $permissiontoadd) {
     print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode . '">';
     print '<input type="hidden" name="token" value="' . newToken() . '">';
     print '<input type="hidden" name="action" value="add_attendant">';
+    print '<input type="hidden" name="page_y">';
     if ($attendantTableMode == 'advanced') {
         print '<input type="hidden" name="attendant_role" value="' . $signatoryRole . '">';
     }
@@ -63,7 +64,7 @@ if ($object->status == $object::STATUS_DRAFT && $permissiontoadd) {
     }
     print '<td colspan="' . ($conf->browser->layout != 'classic' ? 4 : 5) . '"></td>';
     print '<td class="center">';
-    print '<button type="submit" class="wpeo-button button-blue"><i class="fas fa-plus"></i></button>';
+    print '<button type="submit" class="wpeo-button button-blue reposition"><i class="fas fa-plus"></i></button>';
     print '</td></tr>';
     print '</table>';
     print '</form>';
