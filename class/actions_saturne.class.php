@@ -268,26 +268,26 @@ class ActionsSaturne
                 return 0;
             }
 
-            $objects   = saturne_fetch_all_object_type($type);
-            $newObject = $objects[$elementId];
-
-            if (GETPOST('action') == 'addintocategory') {
-                $result = $object->add_type($newObject, $type);
-                if ($result >= 0) {
-                    setEventMessages($langs->trans("WasAddedSuccessfully", $newObject->ref), array());
-                } else {
-                    if ($object->error == 'DB_ERROR_RECORD_ALREADY_EXISTS') {
-                        setEventMessages($langs->trans("ObjectAlreadyLinkedToCategory"), array(), 'warnings');
+            $objects = saturne_fetch_all_object_type($type);
+            if (is_array($objects) && !empty($objects)) {
+                $newObject = $objects[$elementId];
+                if (GETPOST('action') == 'addintocategory') {
+                    $result = $object->add_type($newObject, $type);
+                    if ($result >= 0) {
+                        setEventMessages($langs->trans("WasAddedSuccessfully", $newObject->ref), array());
                     } else {
-                        setEventMessages($object->error, $object->errors, 'errors');
+                        if ($object->error == 'DB_ERROR_RECORD_ALREADY_EXISTS') {
+                            setEventMessages($langs->trans("ObjectAlreadyLinkedToCategory"), array(), 'warnings');
+                        } else {
+                            setEventMessages($object->error, $object->errors, 'errors');
+                        }
+                    }
+                } elseif (GETPOST('action') == 'delintocategory') {
+                    $result = $object->del_type($newObject, $type);
+                    if ($result < 0) {
+                        dol_print_error('', $object->error);
                     }
                 }
-            } elseif (GETPOST('action') == 'delintocategory') {
-                $result = $object->del_type($newObject, $type);
-                if ($result < 0) {
-                    dol_print_error('', $object->error);
-                }
-                $action = '';
             }
         }
 
