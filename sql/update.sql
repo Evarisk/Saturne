@@ -69,3 +69,8 @@ SELECT ref, ref_ext, entity, date_creation, tms, import_key, status, type, modul
 DROP TABLE `llx_digiriskdolibarr_digiriskdocuments`;
 DROP TABLE `llx_digiriskdolibarr_digiriskdocuments_extrafields`;
 ALTER TABLE `llx_saturne_object_documents` CHANGE json json longtext;
+
+-- 1.5.0
+ALTER TABLE `llx_saturne_object_signature` ADD `json` SMALLINT NULL AFTER `society_name`;
+ALTER TABLE `llx_saturne_object_signature` ADD `civility_code` SMALLINT NULL AFTER `society_name`;
+ALTER TABLE `llx_saturne_object_signature` ADD `job` SMALLINT NULL AFTER `society_name`;
