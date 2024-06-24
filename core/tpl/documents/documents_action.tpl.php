@@ -67,13 +67,14 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
             foreach ($modelLists as $key => $modelList) {
                 $confName = dol_strtoupper($moduleNameLowerCase . '_' . $document->element) . '_DEFAULT_MODEL';
                 if (strpos($key, getDolGlobalString($confName)) !== false) {
-                    $model = str_replace($object->element . 'document_custom_odt', $object->element . 'document_odt', $key);
+                    $model = $key;
                 }
             }
         }
     } else {
         $model = GETPOST('model', 'alpha');
     }
+    $model = str_replace($object->element . 'document_custom_odt', $object->element . 'document_odt', $model);
 
     $moreParams['object']   = $object;
     $moreParams['user']     = $user;
