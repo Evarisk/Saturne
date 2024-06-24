@@ -36,7 +36,7 @@
  * @param  bool       $categoryManagement    Option for manage categories with LEFT JOIN SQL
  * @param  string     $joinManagement        Option for manage JOIN SQL
  * @return int|array                         0 < if KO, array of pages if OK
- * @throws Exception
+ * @throws Exception|Error
  */
 function saturne_fetch_all_object_type(string $className = '', string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = [], string $filtermode = 'AND', bool $extraFieldManagement = false, bool $multiEntityManagement = true, bool $categoryManagement = false, string $joinManagement = '')
 {
@@ -44,7 +44,12 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
 
     global $db;
 
-    $object = new $className($db);
+    try {
+        $object = new $className($db);
+    } catch (Error $error) {
+        dol_syslog(__METHOD__ . ' ' . $error->getMessage(), LOG_ERR);
+        return -1;
+    }
 
     $records      = [];
     $optionsArray = [];

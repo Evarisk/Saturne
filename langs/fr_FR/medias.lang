@@ -31,6 +31,8 @@ MediaDimensionNegativeError  = Les valeurs des dimensions ne peuvent être néga
 MediaDimensionEmptyError     = Les valeurs des dimensions ne peuvent pas être vides
 MediaData                    = Configuration des médias
 ConfirmUnlinkMedia           = Êtes vous sur de vouloir détacher le media sélectionné ?
+AddPhotoFromComputer         = Ajouter une photo depuis la galerie de l'appareil
+AddPhotoFromMediaGallery     = Ajouter une photo depuis la galerie des médias
 
 # Config page - Page d'administration
 MediaMaxWidthMini                    = Largeur du média mini

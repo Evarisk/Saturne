@@ -50,9 +50,9 @@ class ActionsSaturne
     public array $results = [];
 
     /**
-     * @var string String displayed by executeHook() immediately after return
+     * @var string|null String displayed by executeHook() immediately after return
      */
-    public string $resprints;
+    public ?string $resprints;
 
     /**
      * Constructor
@@ -75,7 +75,7 @@ class ActionsSaturne
         global $conf, $mysoc;
 
         // Do something only for the current context
-        if ($parameters['currentcontext'] == 'saturnepublicinterface') {
+        if (strpos($parameters['context'], 'saturnepublicinterface') !== false) {
             if (!empty($conf->global->SATURNE_SHOW_COMPANY_LOGO)) {
                 // Define logo and logosmall
                 $logosmall = $mysoc->logo_small;
@@ -110,7 +110,7 @@ class ActionsSaturne
         global $user, $langs;
 
         // do something only for the context 'somecontext1' or 'somecontext2'
-        if ($parameters['currentcontext'] == 'emailtemplates') {
+        if (strpos($parameters['context'], 'emailtemplates') !== false) {
             if (isModEnabled('saturne') && $user->hasRight('saturne', 'adminpage', 'read')) {
                 $pictopath = dol_buildpath('/custom/saturne/img/saturne_color.png', 1);
                 $picto     = img_picto('', $pictopath, '', 1, 0, 0, '', 'pictoModule');
@@ -257,7 +257,7 @@ class ActionsSaturne
             } else {
                 setEventMessages($signatory->error, [], 'errors');
             }
-        } elseif (preg_match('/categorycard/', $parameters['context'])) {
+        } elseif (strpos($parameters['context'], 'categorycard') !== false) {
             global $langs;
 
             $elementId = GETPOST('element_id');
@@ -268,26 +268,26 @@ class ActionsSaturne
                 return 0;
             }
 
-            $objects   = saturne_fetch_all_object_type($type);
-            $newObject = $objects[$elementId];
-
-            if (GETPOST('action') == 'addintocategory') {
-                $result = $object->add_type($newObject, $type);
-                if ($result >= 0) {
-                    setEventMessages($langs->trans("WasAddedSuccessfully", $newObject->ref), array());
-                } else {
-                    if ($object->error == 'DB_ERROR_RECORD_ALREADY_EXISTS') {
-                        setEventMessages($langs->trans("ObjectAlreadyLinkedToCategory"), array(), 'warnings');
+            $objects = saturne_fetch_all_object_type($type);
+            if (is_array($objects) && !empty($objects)) {
+                $newObject = $objects[$elementId];
+                if (GETPOST('action') == 'addintocategory') {
+                    $result = $object->add_type($newObject, $type);
+                    if ($result >= 0) {
+                        setEventMessages($langs->trans("WasAddedSuccessfully", $newObject->ref), array());
                     } else {
-                        setEventMessages($object->error, $object->errors, 'errors');
+                        if ($object->error == 'DB_ERROR_RECORD_ALREADY_EXISTS') {
+                            setEventMessages($langs->trans("ObjectAlreadyLinkedToCategory"), array(), 'warnings');
+                        } else {
+                            setEventMessages($object->error, $object->errors, 'errors');
+                        }
+                    }
+                } elseif (GETPOST('action') == 'delintocategory') {
+                    $result = $object->del_type($newObject, $type);
+                    if ($result < 0) {
+                        dol_print_error('', $object->error);
                     }
                 }
-            } elseif (GETPOST('action') == 'delintocategory') {
-                $result = $object->del_type($newObject, $type);
-                if ($result < 0) {
-                    dol_print_error('', $object->error);
-                }
-                $action = '';
             }
         }
 

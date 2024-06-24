@@ -46,7 +46,7 @@ abstract class SaturneObject extends CommonObject
     /**
      * @var int Does object support extrafields ? 0 = No, 1 = Yes
      */
-    public int $isextrafieldmanaged = 1;
+    public $isextrafieldmanaged = 1;
 
     /**
      * Constructor.

@@ -30,6 +30,8 @@ MediaDimensionSetWithSuccess = Successfully modified media dimensions
 MediaDimensionNegativeError  = The values of the dimensions cannot be negative
 MediaDimensionEmptyError     = The values of the dimensions cannot be empty
 ConfirmUnlinkMedia           = Are you sure you want to detach the selected media ?
+AddPhotoFromComputer         = Add a photo from device gallery
+AddPhotoFromMediaGallery     = Add a photo from media gallery
 
 # Config page
 MediaMaxWidthMini                    = Minimum media width

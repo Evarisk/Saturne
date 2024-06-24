@@ -58,7 +58,7 @@ class SaturneDocuments extends SaturneObject
     /**
      * @var int Does object support extrafields ? 0=No, 1=Yes
      */
-    public int $isextrafieldmanaged = 1;
+    public $isextrafieldmanaged = 1;
 
     /**
      * @var array Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
