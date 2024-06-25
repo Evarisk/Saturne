@@ -81,23 +81,23 @@ class SaturneDashboard
                 }
             }
 
-            $positions = [];
+            $graphs = [];
             foreach ($dashboardInfos['graphs'] as $key => $dashboardGraph) {
                 foreach ($dashboardGraph as $keyElement => $graph) {
-                    $positions[$key . '-' . $graph['title'] . '-' . $graph['position']] = $graph;
+                    $graphs[$key . '-' . $graph['title'] . '-' . $graph['position']] = $graph;
                 }
             }
 
-            uasort($positions, function ($a, $b) {
-                return $a['position'] <=> $b['position'];
+            uasort($graphs, function ($graph1, $graph2) {
+                return $graph1['position'] <=> $graph2['position'];
             });
             
-            $positionsKeys = array_keys($positions);
+            $graphsKeys = array_keys($graphs);
             $index         = 0;
             foreach ($dashboardInfos['graphs'] as $key => $databoardGraphs) {
                 foreach ($databoardGraphs as $keyElement => $dashboardGraph) {
-                    $positionKey                                 = $positionsKeys[$index];
-                    $dashboardInfos['graphs'][$key][$keyElement] = $positions[$positionKey];
+                    $positionKey                                 = $graphsKeys[$index];
+                    $dashboardInfos['graphs'][$key][$keyElement] = $graphs[$positionKey];
                     $index++;
                 }
             }
