@@ -80,6 +80,27 @@ class SaturneDashboard
                     $dashboardInfos['graphs'][$key] = $dashboardData['graphs'];
                 }
             }
+
+            $graphs = [];
+            foreach ($dashboardInfos['graphs'] as $key => $dashboardGraph) {
+                foreach ($dashboardGraph as $keyElement => $graph) {
+                    $graphs[$key . '-' . $graph['title'] . '-' . $graph['position']] = $graph;
+                }
+            }
+
+            uasort($graphs, function ($graph1, $graph2) {
+                return $graph1['position'] <=> $graph2['position'];
+            });
+            
+            $graphsKeys = array_keys($graphs);
+            $index         = 0;
+            foreach ($dashboardInfos['graphs'] as $key => $databoardGraphs) {
+                foreach ($databoardGraphs as $keyElement => $dashboardGraph) {
+                    $positionKey                                 = $graphsKeys[$index];
+                    $dashboardInfos['graphs'][$key][$keyElement] = $graphs[$positionKey];
+                    $index++;
+                }
+            }
         }
 
         return $dashboardInfos;
@@ -103,6 +124,17 @@ class SaturneDashboard
         $conf->global->MAIN_DISABLE_TRUNC = 1;
 
         $dashboards = $this->load_dashboard($moreParams);
+
+        // $dashboardGraphsArray = [];
+        // foreach ($dashboards['graphs'] as $key => $graph) {
+        //     foreach ($graph as $keyElement => $dashboardGraph) {
+        //         array_push($dashboardGraphsArray, $dashboardGraph);
+        //     }
+        // }
+
+        // usort($dashboardGraphsArray, function ($a, $b) {
+        //     return $a['position'] <=> $b['position'];
+        // });
 
         print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '" class="dashboard" id="dashBoardForm">';
         print '<input type="hidden" name="token" value="' . newToken() . '">';
@@ -223,7 +255,7 @@ class SaturneDashboard
                                         }
                                     }
                                 }
-
+        
                                 $arrayKeys = array_keys($dashboardGraph['data']);
                                 foreach ($arrayKeys as $key) {
                                     if ($dashboardGraph['dataset'] >= 2) {
@@ -235,13 +267,13 @@ class SaturneDashboard
                                         ];
                                     }
                                 }
-
+        
                                 $fileName[$uniqueKey] = $uniqueKey . '.png';
                                 $fileUrl[$uniqueKey]  = DOL_URL_ROOT . '/viewimage.php?modulepart=' . $moduleNameLowerCase . '&file=' . $uniqueKey . '.png';
-
+        
                                 $graph = new DolGraph();
                                 $graph->SetData($graphData[$uniqueKey]);
-
+        
                                 if ($dashboardGraph['dataset'] >= 2) {
                                     $graph->SetLegend($dashboardGraphLegend[$uniqueKey]);
                                 }
@@ -254,7 +286,7 @@ class SaturneDashboard
                                 $graph->setShowLegend($dashboardGraph['showlegend'] ?? 2);
                                 $graph->draw($fileName[$uniqueKey], $fileUrl[$uniqueKey]);
                                 print '<div class="' . $dashboardGraph['moreCSS'] . '">';
-
+        
                                 $downloadCSV  = '<form method="POST" action="' . $_SERVER['PHP_SELF'] . (GETPOSTISSET('id') ? '?id=' . GETPOST('id') : '') . '">';
                                 $downloadCSV .= '<input type="hidden" name="token" value="' . newToken() . '">';
                                 $downloadCSV .= '<input type="hidden" name="action" value="generate_csv">';
@@ -263,7 +295,7 @@ class SaturneDashboard
                                 $downloadCSV .= img_picto('ExportCSV', 'fontawesome_file-csv_fas_#31AD29_15px');
                                 $downloadCSV .= '</button></form>';
                                 $dashboardGraph['morehtmlright'] .= $downloadCSV;
-
+        
                                 print load_fiche_titre($dashboardGraph['title'], $dashboardGraph['morehtmlright'], $dashboardGraph['picto']);
                                 print $graph->show();
                                 print '</div>';

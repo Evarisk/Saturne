@@ -114,6 +114,7 @@ class SaturneTask extends Task
         $array['type']       = 'pie';
         $array['showlegend'] = $conf->browser->layout == 'phone' ? 1 : 2;
         $array['dataset']    = 1;
+        $array['position']   = 150;
 
         $array['labels'] = [
             0 => [
