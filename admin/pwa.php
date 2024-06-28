@@ -97,6 +97,30 @@ $preHead = $moduleNameLowerCase . '_admin_prepare_head';
 $head    = $preHead();
 print dol_get_fiche_head($head, 'pwa', $title, -1, $moduleNameLowerCase . '_color@' . $moduleNameLowerCase);
 
+// PWA general configuration
+print load_fiche_titre($langs->trans('Configs', $langs->trans('QuickCreations')), '', '');
+
+print '<table class="noborder centpercent">';
+print '<tr class="liste_titre">';
+print '<td>' . $langs->trans('Name') . '</td>';
+print '<td>' . $langs->trans('Description') . '</td>';
+print '<td class="center">' . $langs->trans('Visible') . '</td>';
+print '<td>' . $langs->trans('Value') . '</td>';
+print '</tr>';
+
+// PWA close project when probability zero
+print '<tr class="oddeven"><td>';
+print $langs->trans('PWACloseProject');
+print '</td><td>';
+print $langs->trans('PWACloseProjectOpportunityZero');
+print '</td>';
+
+print '<td class="center">';
+print ajax_constantonoff('EASYCRM_PWA_CLOSE_PROJECT_WHEN_OPPORTUNITY_ZERO');
+print '</td></td><td></td></tr>';
+
+print '</table>';
+
 // PWA QR Code generation
 print load_fiche_titre($langs->transnoentities('PWAQRCodeGenerationManagement'), '', '');
 
