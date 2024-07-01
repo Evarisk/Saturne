@@ -147,7 +147,11 @@ window.saturne.dashboard.selectDatasetDashboardInfo = function() {
     let token          = window.saturne.toolbox.getToken();
     let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
 
-    window.saturne.loader.display($('.fichecenter'));
+    if ($('.fichecenter').length > 0) {
+      window.saturne.loader.display($('.fichecenter'));
+    } else {
+      window.saturne.loader.display($('.fiche'));
+    }
 
     $.ajax({
         url: document.URL + querySeparator + 'token=' + token + '&search_userid=' + userID + '&search_year=' + year + '&search_month=' + month,
@@ -155,7 +159,11 @@ window.saturne.dashboard.selectDatasetDashboardInfo = function() {
         processData: false,
         contentType: false,
         success: function(resp) {
-            $('.fichecenter').replaceWith($(resp).find('.fichecenter'));
+            if ($('.fichecenter').length > 0) {
+              $('.fichecenter').replaceWith($(resp).find('.fichecenter'));
+            } else {
+              $('.fiche').replaceWith($(resp).find('.fiche'));
+            }
         },
         error: function() {}
     });
