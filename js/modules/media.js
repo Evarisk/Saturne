@@ -179,10 +179,13 @@ window.saturne.media.drawImageOnCanvas = function(event) {
     img.src = event.target.result;
     window.saturne.media.img = event;
     img.onload = function() {
-      let canvasWidth  = $(window.saturne.media.canvas).width();
-      let canvasHeight = $(window.saturne.media.canvas).height();
-      window.saturne.media.canvas.width  = canvasWidth;
-      window.saturne.media.canvas.height = canvasHeight;
+      if (img.width >= $('.fast-upload-options').data('image-resolution-width')) {
+        window.saturne.media.canvas.width  = $('.fast-upload-options').data('image-resolution-width');
+        window.saturne.media.canvas.height = $('.fast-upload-options').data('image-resolution-height');
+      } else {
+        window.saturne.media.canvas.width  = img.width;
+        window.saturne.media.canvas.height = img.height;
+      }
       context.drawImage(img, 0, 0, window.saturne.media.canvas.width, window.saturne.media.canvas.height);
     };
 
