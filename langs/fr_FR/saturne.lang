@@ -226,3 +226,12 @@ ExportData = Exporter mes données
 SocietyAttendants = Tiers des participants externe
 Back = Retour
 DeleteFiles = Êtes vous sur de vouloir supprimer les <span class="filesLinked"></span> media(s) sélectionné(s) ?
+
+
+#
+# Config Redirections - Configuration des redirections
+#
+
+RedirectionsSetup = Configuration des redirections
+FromURL = Depuis l'URL
+ToURL = Vers l'URL
