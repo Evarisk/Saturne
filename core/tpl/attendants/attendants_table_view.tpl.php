@@ -185,16 +185,12 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
         }
         print '</td>';
         print '</tr>';
-        $alreadyAddedSignatories[$element->element_type][$element->element_id] = $elementmod->element_id;
+        $alreadyAddedSignatories[$element->element_type][$element->element_id] = $element->element_id;
     }
 
-    if ($object->limit_managers == 0) {
-        require __DIR__ . '/attendants_table_add_view.tpl.php';
-    }
+    require __DIR__ . '/attendants_table_add_view.tpl.php';
 } else {
     print '<div class="opacitymedium">' . $langs->trans('NoAttendants') . '</div><br>';
 
-    if ($object->limit_managers == 0) {
-        require __DIR__ . '/attendants_table_add_view.tpl.php';
-    }
+    require __DIR__ . '/attendants_table_add_view.tpl.php';
 }
