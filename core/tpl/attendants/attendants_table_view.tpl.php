@@ -188,9 +188,13 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
         $alreadyAddedSignatories[$element->element_type][$element->element_id] = $element->element_id;
     }
 
-    require __DIR__ . '/attendants_table_add_view.tpl.php';
+    if ($object->limit_managers == 0) {
+        require __DIR__ . '/attendants_table_add_view.tpl.php';
+    }
 } else {
     print '<div class="opacitymedium">' . $langs->trans('NoAttendants') . '</div><br>';
 
-    require __DIR__ . '/attendants_table_add_view.tpl.php';
+    if ($object->limit_managers == 0) {
+        require __DIR__ . '/attendants_table_add_view.tpl.php';
+    }
 }
