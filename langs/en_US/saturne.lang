@@ -56,6 +56,7 @@ UseAllEmailMode                     = Use of all email configuration modes
 UseAllEmailModeDescription          = Allow the use of all email configuration modes by default, only SMTP mode is allowed
 UseFastUploadImprovement            = Improved fast image loading
 UseFastUploadImprovementDescription = Activate this option to improve image loading speed <br> Option available : <ul><li>Image rotation</li><li>Drawing on the image</li><li>Saving the image on a reduced format</li></ul>
+MediaResolutionDescription          = Selecting image resolution
 SignaturePublicInterfaceForbidden   = No access to the public signature interface
 ShowSpecimen                        = See signatures on specimen documents
 ShowSpecimenDescription             = Allows viewing of signatures on specimen documents
