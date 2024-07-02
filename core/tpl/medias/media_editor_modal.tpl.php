@@ -31,7 +31,7 @@
 <!-- File start-->
 <div class="modal-upload-image">
     <input type="hidden" name="token" value="<?php echo newToken(); ?>">
-    <div class="wpeo-modal modal-upload-image" id="modal-upload-image">
+    <div class="wpeo-modal modal-upload-image" id="modal-upload-image" style="z-index: 1010;">
         <?php $mediaResolution = explode('-', getDolGlobalString('SATURNE_MEDIA_RESOLUTION_USED'));
         $mediaResolution = explode('x', $mediaResolution[1]); ?>
         <input type="hidden" class="fast-upload-options" data-image-resolution-width="<?php echo $mediaResolution[0]; ?>" data-image-resolution-height="<?php echo $mediaResolution[1]; ?>">
@@ -49,6 +49,9 @@
             </div>
             <!-- Modal-Footer-->
             <div class="modal-footer">
+                <div class="image-move butAction button-square">
+                    <span><i class="fas fa-arrows-alt"></i></span>
+                </div>
                 <div class="image-rotate-left butAction button-square">
                     <span><i class="fas fa-undo-alt"></i></span>
                 </div>
@@ -58,6 +61,10 @@
 <!--                <div class="image-undo butAction button-square">-->
 <!--                    <span><i class="fas fa-undo-alt"></i></span>-->
 <!--                </div>-->
+                <!-- Button to start drawing -->
+                <div class="image-drawing butAction button-square">
+                    <span><i class="fas fa-pen"></i></span>
+                </div>
                 <div class="image-erase butAction button-square">
                     <span><i class="fas fa-eraser"></i></span>
                 </div>

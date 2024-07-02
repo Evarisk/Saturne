@@ -48,30 +48,66 @@ window.saturne.media.rotation = 0;
  * @since   1.3.0
  * @version 1.3.0
  */
-window.saturne.media.img = null;
+window.saturne.media.img       = null;
+window.saturne.media.imageData = null;
+
+/**
+ * Init signaturePad in canvas
+ *
+ * @since   1.3.0
+ * @version 1.3.0
+ */
+window.saturne.media.signaturePad = null;
+
+/**
+ * Variables to handle pan
+ *
+ * @memberof Saturne_Media
+ *
+ * @since   1.6.0
+ * @version 1.6.0
+ */
+window.saturne.media.translateX     = 0;
+window.saturne.media.translateY     = 0;
+window.saturne.media.lastTranslateX = 0;
+window.saturne.media.lastTranslateY = 0;
+
+/**
+ * Check moving status
+ *
+ * @memberof Saturne_Media
+ *
+ * @since   1.6.0
+ * @version 1.6.0
+ */
+window.saturne.media.isMoving = true;
 
 /**
  * Media init
  *
+ * @memberof Saturne_Media
+ *
  * @since   1.3.0
- * @version 1.3.0
+ * @version 1.6.0
  *
  * @returns {void}
  */
 window.saturne.media.init = function() {
   window.saturne.media.event();
+  window.saturne.media.initPan();
 };
 
 /**
  * Media event
  *
  * @since   1.3.0
- * @version 1.3.0
+ * @version 1.6.0
  *
  * @returns {void}
  */
 window.saturne.media.event = function() {
   $(document).on('change', '.fast-upload-improvement', window.saturne.media.uploadImage);
+  $(document).on('click', '.image-move', window.saturne.media.startMoving);
   $(document).on('click', '.image-rotate-left', function() {
     window.saturne.media.rotateImage(-90);
   });
@@ -79,8 +115,40 @@ window.saturne.media.event = function() {
     window.saturne.media.rotateImage(90);
   });
   $(document).on('click', '.image-undo', window.saturne.media.undoLastDraw);
+  $(document).on('click', '.image-drawing', window.saturne.media.startDrawing);
   $(document).on('click', '.image-erase', window.saturne.media.clearCanvas);
   $(document).on('click', '.image-validate', window.saturne.media.createImg);
+};
+
+/**
+ * Init pan with Hammer.js
+ *
+ * @memberof Saturne_Media
+ *
+ * @since   1.6.0
+ * @version 1.6.0
+ *
+ * @returns {void}
+ */
+window.saturne.media.initPan = function() {
+  const modalContent = document.querySelector('.modal-content');
+  const hammer = new Hammer(modalContent);
+
+  hammer.get('pan').set({ direction: Hammer.DIRECTION_ALL });
+
+  hammer.on('pan', (e) => {
+    if (window.saturne.media.isMoving) {
+      // Slow down the movement by dividing the delta values
+      const slowFactor    = 3;   // Adjust this factor to control the speed
+      const dampingFactor = 0.1; // Adjust this factor for more realistic movement
+
+      const deltaX = e.deltaX * dampingFactor;
+      const deltaY = e.deltaY * dampingFactor;
+
+      modalContent.scrollLeft -= deltaX / slowFactor;
+      modalContent.scrollTop  -= deltaY / slowFactor;
+    }
+  });
 };
 
 /**
@@ -144,39 +212,92 @@ window.saturne.media.undoLastDraw = function() {
 };
 
 /**
+ * Start moving action
+ *
+ * @memberof Saturne_Media
+ *
+ * @since   1.6.0
+ * @version 1.6.0
+ *
+ * @return {void}
+ */
+window.saturne.media.startMoving = function() {
+  window.saturne.media.isMoving = true;
+
+  if (window.saturne.media.signaturePad) {
+    window.saturne.media.imageData = window.saturne.media.canvas.toDataURL();
+    window.saturne.media.signaturePad.off();
+  }
+
+  window.saturne.toolbox.toggleButtonClass('image-drawing', 'button-grey button-blue');
+  window.saturne.toolbox.toggleButtonClass('image-move', 'button-blue button-grey');
+};
+
+/**
+ * Start drawing action
+ *
+ * @memberof Saturne_Media
+ *
+ * @since   1.6.0
+ * @version 1.6.0
+ *
+ * @return {void}
+ */
+window.saturne.media.startDrawing = function() {
+  window.saturne.media.isMoving = false; // Disable pan mode
+
+  const canvas = document.querySelector('#canvas');
+  if (canvas) {
+    if (!window.saturne.media.signaturePad) {
+      // Initialise SignaturePad if you have not already done so
+      window.saturne.media.signaturePad = new SignaturePad(canvas, {
+        penColor: 'rgb(255, 0, 0)'
+      });
+    } else {
+      // Activate the drawing without deleting the background image
+      window.saturne.media.signaturePad.on();
+    }
+
+    window.saturne.media.drawImageOnCanvas(window.saturne.media.img);
+
+    window.saturne.toolbox.toggleButtonClass('image-drawing', 'button-blue button-grey');
+    window.saturne.toolbox.toggleButtonClass('image-move', 'button-grey button-blue');
+  }
+};
+
+/**
  * Clear canvas action
  *
  * @since   1.3.0
- * @version 1.3.0
+ * @version 1.6.0
  *
  * @return {void}
  */
 window.saturne.media.clearCanvas = function() {
-  let canvas = $(this).closest('.modal-upload-image').find('canvas');
-  canvas[0].signaturePad.clear();
-  window.saturne.media.drawImageOnCanvas(window.saturne.media.img);
+  const canvas = document.querySelector('#canvas');
+  if (canvas && window.saturne.media.signaturePad) {
+    window.saturne.media.signaturePad.clear();
+    window.saturne.media.drawImageOnCanvas(window.saturne.media.img);
+    window.saturne.media.imageData = null;
+  }
 };
 
 /**
  * Draw img on canvas action
  *
  * @since   1.3.0
- * @version 1.3.0
+ * @version 1.6.0
  *
  * @return {void}
  */
 window.saturne.media.drawImageOnCanvas = function(event) {
   window.saturne.media.canvas = document.querySelector('#modal-upload-image canvas');
   if (window.saturne.media.canvas) {
-    window.saturne.media.canvas.signaturePad = new SignaturePad(window.saturne.media.canvas, {
-      penColor: 'rgb(255, 0, 0)'
-    });
-
     const context = window.saturne.media.canvas.getContext('2d');
 
     // Draw the image on the canvas
-    var img = new Image();
-    img.src = event.target.result;
+    const img                = new Image();
+    img.src                  = event.target.result;
     window.saturne.media.img = event;
     img.onload = function() {
       if (img.width >= $('.fast-upload-options').data('image-resolution-width')) {
@@ -187,6 +308,15 @@ window.saturne.media.drawImageOnCanvas = function(event) {
         window.saturne.media.canvas.height = img.height;
       }
       context.drawImage(img, 0, 0, window.saturne.media.canvas.width, window.saturne.media.canvas.height);
+
+      // Restore drawing state
+      if (window.saturne.media.imageData) {
+        const drawingImg  = new Image();
+        drawingImg.src    = window.saturne.media.imageData;
+        drawingImg.onload = function() {
+          context.drawImage(drawingImg, 0, 0);
+        };
+      }
     };
 
     window.saturne.media.rotation = 0; // Reset rotation when a new image is selected
