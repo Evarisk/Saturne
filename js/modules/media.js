@@ -94,7 +94,10 @@ window.saturne.media.isMoving = true;
  */
 window.saturne.media.init = function() {
   window.saturne.media.event();
-  window.saturne.media.initPan();
+  const scriptElement = document.querySelector('script[src*="hammer.min.js"]');
+  if (scriptElement) {
+    window.saturne.media.initPan();
+  }
 };
 
 /**
