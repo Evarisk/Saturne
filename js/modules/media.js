@@ -132,21 +132,23 @@ window.saturne.media.event = function() {
  */
 window.saturne.media.initPan = function() {
   const modalContent = document.querySelector('.modal-content');
-  const hammer = new Hammer(modalContent);
-
-  hammer.get('pan').set({ direction: Hammer.DIRECTION_ALL });
+  const hammer = new Hammer(modalContent, {
+    touchAction: 'auto', // Configure touch action behavior
+    recognizers: [
+      [Hammer.Pan, { direction: Hammer.DIRECTION_ALL }] // Enable panning in all directions
+    ],
+    threshold: 5, // Adjust this threshold for more sensitive pan detection
+    velocity: 0.1 // Adjust this velocity for smoother pan movement
+  });
 
   hammer.on('pan', (e) => {
     if (window.saturne.media.isMoving) {
-      // Slow down the movement by dividing the delta values
-      const slowFactor    = 3;   // Adjust this factor to control the speed
-      const dampingFactor = 0.1; // Adjust this factor for more realistic movement
+      const deltaX = e.deltaX;
+      const deltaY = e.deltaY;
 
-      const deltaX = e.deltaX * dampingFactor;
-      const deltaY = e.deltaY * dampingFactor;
-
-      modalContent.scrollLeft -= deltaX / slowFactor;
-      modalContent.scrollTop  -= deltaY / slowFactor;
+      // Adjust the scroll position of modal content
+      modalContent.scrollLeft -= deltaX;
+      modalContent.scrollTop  -= deltaY;
     }
   });
 };
@@ -300,13 +302,41 @@ window.saturne.media.drawImageOnCanvas = function(event) {
     img.src                  = event.target.result;
     window.saturne.media.img = event;
     img.onload = function() {
-      if (img.width >= $('.fast-upload-options').data('image-resolution-width')) {
-        window.saturne.media.canvas.width  = $('.fast-upload-options').data('image-resolution-width');
-        window.saturne.media.canvas.height = $('.fast-upload-options').data('image-resolution-height');
+      const maxWidth  = $('.fast-upload-options').data('image-resolution-width');
+      const maxHeight = $('.fast-upload-options').data('image-resolution-height');
+      let canvasWidth, canvasHeight;
+
+      // Calculate the aspect ratio of the image
+      const aspectRatio = img.width / img.height;
+
+      if (img.width > maxWidth || img.height > maxHeight) {
+        if (aspectRatio > 1) {
+          // Landscape orientation
+          canvasWidth  = maxWidth;
+          canvasHeight = maxWidth / aspectRatio;
+        } else {
+          // Portrait orientation
+          canvasHeight = maxHeight;
+          canvasWidth  = maxHeight * aspectRatio;
+        }
+
+        // Ensure the canvas dimensions do not exceed the maximum dimensions
+        if (canvasWidth > maxWidth) {
+          canvasWidth  = maxWidth;
+          canvasHeight = maxWidth / aspectRatio;
+        }
+        if (canvasHeight > maxHeight) {
+          canvasHeight = maxHeight;
+          canvasWidth  = maxHeight * aspectRatio;
+        }
       } else {
-        window.saturne.media.canvas.width  = img.width;
-        window.saturne.media.canvas.height = img.height;
+        canvasWidth  = img.width;
+        canvasHeight = img.height;
       }
+
+      window.saturne.media.canvas.width  = canvasWidth;
+      window.saturne.media.canvas.height = canvasHeight;
+
       context.drawImage(img, 0, 0, window.saturne.media.canvas.width, window.saturne.media.canvas.height);
 
       // Restore drawing state
