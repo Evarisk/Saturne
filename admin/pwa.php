@@ -48,7 +48,9 @@ global $conf, $db, $langs, $user;
 saturne_load_langs(['admin']);
 
 // Initialize view objects
-$form = new Form($db);
+$form        = new Form($db);
+$hookmanager = new HookManager($db);
+$hookmanager->initHooks(['pwaadditionalconfig']);
 
 // Get parameters
 $action     = GETPOST('action', 'alpha');
@@ -97,29 +99,17 @@ $preHead = $moduleNameLowerCase . '_admin_prepare_head';
 $head    = $preHead();
 print dol_get_fiche_head($head, 'pwa', $title, -1, $moduleNameLowerCase . '_color@' . $moduleNameLowerCase);
 
-// PWA general configuration
-print load_fiche_titre($langs->trans('Configs', $langs->trans('QuickCreations')), '', '');
+$parameters = [];
+$resHook    = $hookmanager->executeHooks('saturnePWAAdditionalConfig', $parameters);
 
-print '<table class="noborder centpercent">';
-print '<tr class="liste_titre">';
-print '<td>' . $langs->trans('Name') . '</td>';
-print '<td>' . $langs->trans('Description') . '</td>';
-print '<td class="center">' . $langs->trans('Visible') . '</td>';
-print '<td>' . $langs->trans('Value') . '</td>';
-print '</tr>';
-
-// PWA close project when probability zero
-print '<tr class="oddeven"><td>';
-print $langs->trans('PWACloseProject');
-print '</td><td>';
-print $langs->trans('PWACloseProjectOpportunityZero');
-print '</td>';
-
-print '<td class="center">';
-print ajax_constantonoff('EASYCRM_PWA_CLOSE_PROJECT_WHEN_OPPORTUNITY_ZERO');
-print '</td></td><td></td></tr>';
-
-print '</table>';
+if (empty($resHook)) {
+    $additionalConfig = $hookmanager->resArray;
+}
+if (is_array($additionalConfig) && !empty($additionalConfig)) {
+    foreach ($additionalConfig as $config) {
+        print $config;
+    }
+}
 
 // PWA QR Code generation
 print load_fiche_titre($langs->transnoentities('PWAQRCodeGenerationManagement'), '', '');

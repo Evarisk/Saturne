@@ -117,8 +117,6 @@ PWA                            = Progressive Web App
 PWAQRCodeGenerationManagement  = Managing the generation of PWA QRCodes
 GeneratePWAQRCode              = PWA QRCode generation
 GeneratePWAQRCodeDescription   = This option generates the QRCode for the progressive web application
-PWACloseProject                = Close the project
-PWACloseProjectOpportunityZero = Close the project when the opportunity is at 0
 
 
 #
