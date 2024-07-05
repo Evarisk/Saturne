@@ -98,6 +98,9 @@ class SaturneSignature extends SaturneObject
         'lastname'             => ['type' => 'varchar(255)', 'label' => 'Lastname',          'enabled' => 1, 'position' => 80,  'notnull' => 0, 'visible' => 3],
         'email'                => ['type' => 'varchar(255)', 'label' => 'Email',             'enabled' => 1, 'position' => 90,  'notnull' => 0, 'visible' => 3],
         'phone'                => ['type' => 'varchar(255)', 'label' => 'Phone',             'enabled' => 1, 'position' => 100, 'notnull' => 0, 'visible' => 3],
+        'job'                  => ['type' => 'varchar(80)',  'label' => 'PostOrFunction',    'enabled' => 1, 'position' => 101, 'notnull' => 0, 'visible' => 3],
+        'civility'             => ['type' => 'varchar(6)',   'label' => 'Civility',          'enabled' => 1, 'position' => 102, 'notnull' => 0, 'visible' => 3],
+        'json'                 => ['type' => 'text',         'label' => 'JSON',              'enabled' => 1, 'position' => 103, 'notnull' => 0, 'visible' => 0],
         'society_name'         => ['type' => 'varchar(255)', 'label' => 'SocietyName',       'enabled' => 1, 'position' => 110, 'notnull' => 0, 'visible' => 3],
         'signature_date'       => ['type' => 'datetime',     'label' => 'SignatureDate',     'enabled' => 1, 'position' => 120, 'notnull' => 0, 'visible' => 3],
         'signature_location'   => ['type' => 'varchar(255)', 'label' => 'SignatureLocation', 'enabled' => 1, 'position' => 125, 'notnull' => 0, 'visible' => 3],
@@ -174,6 +177,21 @@ class SaturneSignature extends SaturneObject
      * @var string|null Society name
      */
     public ?string $society_name = '';
+
+    /**
+     * @var string|null Post or Function
+     */
+    public ?string $job = '';
+
+    /**
+     * @var string|null Civility code
+     */
+    public ?string $civility_code = '';
+
+    /**
+     * @var string Json.
+     */
+    public string $json;
 
     /**
      * @var string Signature date
