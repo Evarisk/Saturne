@@ -34,6 +34,22 @@ if (file_exists('../saturne.main.inc.php')) {
 $moduleName = GETPOST('module_name', 'alpha');
 $objectType = GETPOST('object_type', 'alpha');
 
+// If the previous action is from extrafields, the return value is PHP_SELF without querys
+// So we need to fill moduleName and objectType using the previous url (HTTP_REFERER)
+if (empty($moduleName) && empty($objectType)) {
+    $lastUrl      = $_SERVER['HTTP_REFERER'];
+    $lastUrlArray = parse_url($lastUrl);
+
+    if (is_array($lastUrlArray) && isset($lastUrlArray['query'])) {
+        parse_str($lastUrlArray['query'], $lastUrlQuerys);
+
+        if (isset($lastUrlQuerys['module_name']) && isset($lastUrlQuerys['object_type'])) {
+            $moduleName = $lastUrlQuerys['module_name'];
+            $objectType = $lastUrlQuerys['object_type'];
+        }
+    }
+}
+
 $moduleNameLowerCase = strtolower($moduleName);
 
 // Libraries
@@ -86,6 +102,10 @@ print dol_get_fiche_head($head, $object->element, $title, -1, $moduleNameLowerCa
 require_once __DIR__ . '/../core/tpl/admin/object/object_numbering_module_view.tpl.php';
 
 require_once __DIR__ . '/../core/tpl/admin/object/object_const_view.tpl.php';
+
+if ($object->isextrafieldmanaged > 0) {
+    require_once __DIR__ . '/../core/tpl/admin/object/object_extrafields_view.tpl.php';
+}
 
 // Page end
 print dol_get_fiche_end();
