@@ -1,4 +1,4 @@
--- Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
+-- Copyright (C) 2022-2024 EVARISK <technique@evarisk.com>
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -70,7 +70,7 @@ DROP TABLE `llx_digiriskdolibarr_digiriskdocuments`;
 DROP TABLE `llx_digiriskdolibarr_digiriskdocuments_extrafields`;
 ALTER TABLE `llx_saturne_object_documents` CHANGE json json longtext;
 
--- 1.5.0
-ALTER TABLE `llx_saturne_object_signature` ADD `json` text AFTER `society_name`;
-ALTER TABLE `llx_saturne_object_signature` ADD `civility_code` VARCHAR(6) AFTER `society_name`;
-ALTER TABLE `llx_saturne_object_signature` ADD `job` VARCHAR(80) AFTER `society_name`;
+-- 1.6.0
+ALTER TABLE `llx_saturne_object_signature` ADD `civility` VARCHAR(6) AFTER `role`;
+ALTER TABLE `llx_saturne_object_signature` ADD `job` VARCHAR(128) AFTER `lastname`;
+ALTER TABLE `llx_saturne_object_signature` ADD `json` longtext NULL AFTER `attendance`;
