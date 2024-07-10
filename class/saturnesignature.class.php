@@ -94,7 +94,8 @@ class SaturneSignature extends SaturneObject
         'import_key'           => ['type' => 'varchar(14)',  'label' => 'ImportId',          'enabled' => 1, 'position' => 40,  'notnull' => 0, 'visible' => 0],
         'status'               => ['type' => 'smallint',     'label' => 'Status',            'enabled' => 1, 'position' => 50,  'notnull' => 0, 'visible' => 1, 'index' => 1],
         'role'                 => ['type' => 'varchar(255)', 'label' => 'Role',              'enabled' => 1, 'position' => 60,  'notnull' => 0, 'visible' => 3],
-        'civility'             => ['type' => 'varchar(6)',   'label' => 'Civility',          'enabled' => 0, 'position' => 61,  'notnull' => 0, 'visible' => 0],
+        'gender'               => ['type' => 'varchar(10)',  'label' => 'Gender',            'enabled' => 0, 'position' => 61,  'notnull' => 0, 'visible' => 0],
+        'civility'             => ['type' => 'varchar(6)',   'label' => 'Civility',          'enabled' => 0, 'position' => 62,  'notnull' => 0, 'visible' => 0],
         'firstname'            => ['type' => 'varchar(255)', 'label' => 'Firstname',         'enabled' => 1, 'position' => 70,  'notnull' => 0, 'visible' => 3],
         'lastname'             => ['type' => 'varchar(255)', 'label' => 'Lastname',          'enabled' => 1, 'position' => 80,  'notnull' => 0, 'visible' => 3],
         'job'                  => ['type' => 'varchar(128)', 'label' => 'PostOrFunction',    'enabled' => 0, 'position' => 81,  'notnull' => 0, 'visible' => 0],
@@ -152,6 +153,11 @@ class SaturneSignature extends SaturneObject
      * @var string|null Role
      */
     public ?string $role;
+
+    /**
+     * @var string|null Gender
+     */
+    public ?string $gender = '';
 
     /**
      * @var string|null Civility
