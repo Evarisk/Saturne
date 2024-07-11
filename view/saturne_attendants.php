@@ -368,6 +368,9 @@ if ($id > 0 || !empty($ref) && empty($action)) {
 
     $alreadyAddedSignatories = [];
     if (is_array($signatoriesByRole) && !empty($signatoriesByRole)) {
+        $signatoriesCount = array_reduce($signatoriesByRole, function ($carry, $item) {
+            return $carry + count($item);
+        }, 0);
         foreach ($signatoriesByRole as $signatoryRole => $signatories) {
             require __DIR__ . '/../core/tpl/attendants/attendants_table_view.tpl.php';
         }
