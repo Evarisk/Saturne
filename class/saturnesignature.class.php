@@ -163,7 +163,7 @@ class SaturneSignature extends SaturneObject
     /**
      * @var string|null Email
      */
-    public ?string $email;
+    public ?string $email = '';
 
     /**
      * @var string|null Phone
@@ -218,7 +218,7 @@ class SaturneSignature extends SaturneObject
     /**
      * @var string Signature url
      */
-    public string $signature_url;
+    public string $signature_url = '';
 
     /**
      * @var string|null Transaction url
