@@ -142,6 +142,8 @@ ChooseBoxToAdd         = Ajouter le widget au tableau de bord
 # Data - Donnée
 Schedules      = Horaires
 SchedulesSaved = Les horaires ont bien été enregistrés
+weekDayDefault     = Cf-Site Internet
+weekEndDefault     = Fermé Fermé
 
 
 
