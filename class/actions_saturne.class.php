@@ -159,24 +159,27 @@ class ActionsSaturne
      * @param  string       $action     Current action
      * @return int                      0 < on error, 0 on success, 1 to replace standard code
      */
-    public function llxHeader(array $parameters, $object, string $action) {
+    public function llxHeader(array $parameters, $object, string $action)
+    {
         if (strpos($parameters['context'], 'index') !== false) {
             require_once __DIR__ . '/saturneredirection.class.php';
 
             $saturneRedirection = new SaturneRedirection($this->db);
 
-            $original_url = GETPOST('original_url', 'alpha');
+            $originalUrl = GETPOST('original_url', 'alpha');
 
             $redirectionList = $saturneRedirection->fetchAll();
             if (is_array($redirectionList) && !empty($redirectionList)) {
                 foreach($redirectionList as $redirection) {
-                    if ($redirection->from_url == "/" . $original_url) {
+                    if ($redirection->from_url == '/' . $originalUrl) {
                         header('Location: ' . $redirection->to_url);
                         exit;
                     }
                 }
             }
         }
+
+        return 0; // or return 1 to replace standard code
     }
 
     /**

@@ -66,6 +66,17 @@ Config                              = Configuration
 Extrafields                         = Attributs supplémentaires
 ClickHereToGoToTheConfigPage        = Veuillez cliquer ici pour vous rendre sur la page de configuration
 
+# Config Redirections - Configuration des redirections
+RedirectionsSetup  = Configuration des redirections
+FromURL            = Depuis l'URL
+ToURL              = Vers l'URL
+Redirections       = Redirections
+RedirectionsMin    = redirections
+HowToUseFromUrl    = Saisissez l'URL de départ. Par exemple, pour rediriger depuis https://www.evarisk.com/depuis/la/page, saisissez "/depuis/la/page"
+HowToUseToUrl      = Saisissez l'URL de destination. Par exemple, pour rediriger vers https://www.evarisk.com/vers/la/page, saisissez "/vers/la/page"
+RedirectionCreated = Redirection créée
+RedirectionRemoved = Redirection supprimée
+
 # Mod Numbering - Modèle de numérotation
 NumberingModule = Modèle de numérotation
 NumberingModuleDet = Modèle de numérotation des lignes
@@ -244,14 +255,3 @@ SocietyAttendants   = Tiers des participants externe
 Back                = Retour
 DeleteFiles         = Êtes vous sur de vouloir supprimer les <span class="filesLinked"></span> media(s) sélectionné(s) ?
 RecordingInProgress = Enregistrement en cours...
-
-
-#
-# Config Redirections - Configuration des redirections
-#
-
-RedirectionsSetup = Configuration des redirections
-FromURL = Depuis l'URL
-ToURL = Vers l'URL
-HowToUseFromUrl = Saisissez la fin de l'URL à rediriger. Par exemple, pour être redirigé de https://www.evarisk.com/vers/la/page, saisissez "/vers/la/page"
-HowToUseToUrl = Saisissez l'URL de destination. Par exemple, pour rediriger vers https://www.evarisk.com/vers/la/page, saisissez "/vers/la/page"
