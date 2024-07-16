@@ -122,7 +122,8 @@ class modSaturne extends DolibarrModules
                 'emailtemplates',
 				'usercard',
                 'category',
-                'categoryindex'
+                'categoryindex',
+                'index'
             ],
             // Set this to 1 if features of module are opened to external users
             'moduleforexternal' => 0,
@@ -298,7 +299,12 @@ class modSaturne extends DolibarrModules
 			}
 		}
 
-		// Create extrafields during init
+        require_once __DIR__ . '/../../class/saturneredirection.class.php';
+
+        $saturneRedirection = new SaturneRedirection($this->db);
+        $saturneRedirection->adaptHtAccess();
+
+        // Create extrafields during init
 		include_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
 		$extra_fields = new ExtraFields($this->db);
 

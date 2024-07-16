@@ -53,6 +53,11 @@ function saturne_admin_prepare_head(): array
     $head[$h][2] = 'information';
     $h++;
 
+    $head[$h][0] = dol_buildpath('/saturne/admin/redirections.php', 1) . '?tab_name=redirections';
+    $head[$h][1] = '<i class="fas fa-forward pictofixedwidth"></i>' . $langs->trans('Redirections');
+    $head[$h][2] = 'redirections';
+    $h++;
+
     $head[$h][0] = dol_buildpath('/saturne/admin/information.php', 1) . '?filename=evarisk_modules&tab_name=evariskModule';
     $head[$h][1] = '<i class="fas fa-cogs pictofixedwidth"></i>' . $langs->trans('SaturneModule', 'Evarisk');
     $head[$h][2] = 'evariskModule';
