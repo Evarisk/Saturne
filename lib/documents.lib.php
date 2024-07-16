@@ -46,9 +46,11 @@
  * @param  string            $removeaction     (optional) The action to remove a file
  * @param  int               $active           (optional) To show gen button disabled
  * @param  string            $tooltiptext      (optional) Tooltip text when gen button disabled
+ * @param  string            $sortfield        (optional) Allows to sort the list of files by a field
+ * @param  string            $sortorder        (optional) Allows to sort the list of files with a specific order
  * @return string                              Output string with HTML array of documents (might be empty string)
  */
-function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, string $urlsource, $genallowed, int $delallowed = 0, string $modelselected = '', int $allowgenifempty = 1, int $forcenomultilang = 0, int $notused = 0, int $noform = 0, string $param = '', string $title = '', string $buttonlabel = '', string $codelang = '', string $morepicto = '', $object = null, int $hideifempty = 0, string $removeaction = 'remove_file', int $active = 1, string $tooltiptext = ''): string
+function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, string $urlsource, $genallowed, int $delallowed = 0, string $modelselected = '', int $allowgenifempty = 1, int $forcenomultilang = 0, int $notused = 0, int $noform = 0, string $param = '', string $title = '', string $buttonlabel = '', string $codelang = '', string $morepicto = '', $object = null, int $hideifempty = 0, string $removeaction = 'remove_file', int $active = 1, string $tooltiptext = '', string $sortfield = '', string $sortorder = ''): string
 {
 	global $conf, $db, $form, $hookmanager, $langs;
 
@@ -62,6 +64,23 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 	if ( ! preg_match('/entity=[0-9]+/', $param)) {
 		$param .= ($param ? '&' : '') . 'entity=' . (!empty($object->entity) ? $object->entity : $conf->entity);
 	}
+
+    if (empty($sortfield)) {
+        if (GETPOST('sortfield')) {
+            $sortfield = GETPOST('sortfield');
+        } else {
+            $sortfield = 'name';
+        }
+    }
+
+
+    if (empty($sortorder)) {
+        if (GETPOST('sortorder')) {
+            $sortorder = GETPOST('sortorder');
+        } else {
+            $sortorder = 'desc';
+        }
+    }
 
 	$hookmanager->initHooks(['formfile']);
 
@@ -239,7 +258,20 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 		if ($conf->global->$manualPdfGenerationConf > 0) {
 			$out .= '<td></td>';
 		}
+
 		$out .= '</tr>';
+        $out .= '<tr class="liste_titre">';
+        $out .= '<th class=""><a href="'. $_SERVER['PHP_SELF'] . '?sortfield=name&sortorder=' . ($sortorder == 'desc' ? 'asc' : 'desc') .'">' . $langs->trans('Name');
+        $out .= '</a></th>';
+        $out .= '<th class=""><a href="'. $_SERVER['PHP_SELF'] . '?sortfield=size&sortorder=' . ($sortorder == 'desc' ? 'asc' : 'desc') .'">' . $langs->trans('Size');
+        $out .= '</a></th>';
+        $out .= '<th class="center">' . $langs->trans('Date');
+        $out .= '</th>';
+        $out .= '<th class="right">' . $langs->trans('PDF');
+        $out .= '</th>';
+        $out .= '<th class="right">' . $langs->trans('Action');
+        $out .= '</th>';
+        $out .= '</tr>';
 
 		// Execute hooks
 		$parameters = ['colspan' => ($colspan + $colspanmore), 'socid' => ($GLOBALS['socid'] ?? ''), 'id' => ($GLOBALS['id'] ?? ''), 'modulepart' => $modulepart];
@@ -258,7 +290,6 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 		if (is_object($object) && $object->id > 0) {
 			require_once DOL_DOCUMENT_ROOT . '/core/class/link.class.php';
 			$link      = new Link($db);
-			$sortfield = $sortorder = null;
 			$link->fetchAll($link_list, $object->element, $object->id, $sortfield, $sortorder);
 		}
 
@@ -271,6 +302,7 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 			$out        .= '<div class="div-table-responsive-no-min">';
 			$out        .= '<table class="noborder centpercent" id="' . $modulepart . '_table">' . "\n";
 		}
+        $fileList = dol_sort_array($fileList, $sortfield, $sortorder);
 
 		// Loop on each file found
 		if (is_array($fileList)) {
