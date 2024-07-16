@@ -495,7 +495,7 @@ class SaturneDocumentModel extends CommonDocGenerator
             $info .= '<div class="file-generation">';
             foreach ($listOfFiles as $file) {
                 // Show list of found files
-                $path = DOL_MAIN_URL_ROOT . '/custom/' . GETPOST('module_name') . '/documents/temp/';
+                $path = DOL_MAIN_URL_ROOT . '/custom/' . $this->module . '/documents/temp/';
                 $info .= '<input type="hidden" class="template-name" value="'.  $file['name'] .'">';
                 $info .= '<input type="hidden" class="template-type" value="' . $file['level1name'] . '">';
                 $info .= '<input type="hidden" class="template-path" value="' . $path . '">';

@@ -144,9 +144,13 @@ if (empty($reshook)) {
     print $hookmanager->resPrint;
 }
 
+print '<div class="fichecenter">';
+
 if (!isset($showDashboard) || $showDashboard === true) {
     $dashboard->show_dashboard($moreParams ?? []);
 }
+
+print '</div>';
 
 // End of page
 llxFooter();

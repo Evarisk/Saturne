@@ -1,4 +1,4 @@
--- Copyright (C) 2023 EVARISK <technique@evarisk.com>
+-- Copyright (C) 2023-2024 EVARISK <technique@evarisk.com>
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -21,8 +21,10 @@ CREATE TABLE llx_saturne_object_signature(
     import_key           varchar(14),
     status               integer NOT NULL,
     role                 varchar(255),
+    civility             varchar(6),
     firstname            varchar(255),
     lastname             varchar(255),
+    job                  varchar(128),
     email                varchar(255),
     phone                varchar(255),
     society_name         varchar(255),
@@ -38,6 +40,7 @@ CREATE TABLE llx_saturne_object_signature(
     signature_url        varchar(255),
     transaction_url      varchar(255),
     attendance           smallint,
+    json                 longtext DEFAULT NULL,
     object_type          varchar(255),
     fk_object            integer NOT NULL
 ) ENGINE=innodb;

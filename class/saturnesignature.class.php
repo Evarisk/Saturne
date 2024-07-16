@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2021-2023 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2021-2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ class SaturneSignature extends SaturneObject
     /**
      * @var int  Does object support extrafields ? 0=No, 1=Yes
      */
-    public int $isextrafieldmanaged = 0;
+    public $isextrafieldmanaged = 0;
 
     /**
      * @var string String with name of icon for signature. Must be the part after the 'object_' into object_signature.png
@@ -94,8 +94,10 @@ class SaturneSignature extends SaturneObject
         'import_key'           => ['type' => 'varchar(14)',  'label' => 'ImportId',          'enabled' => 1, 'position' => 40,  'notnull' => 0, 'visible' => 0],
         'status'               => ['type' => 'smallint',     'label' => 'Status',            'enabled' => 1, 'position' => 50,  'notnull' => 0, 'visible' => 1, 'index' => 1],
         'role'                 => ['type' => 'varchar(255)', 'label' => 'Role',              'enabled' => 1, 'position' => 60,  'notnull' => 0, 'visible' => 3],
+        'civility'             => ['type' => 'varchar(6)',   'label' => 'Civility',          'enabled' => 0, 'position' => 61,  'notnull' => 0, 'visible' => 0],
         'firstname'            => ['type' => 'varchar(255)', 'label' => 'Firstname',         'enabled' => 1, 'position' => 70,  'notnull' => 0, 'visible' => 3],
         'lastname'             => ['type' => 'varchar(255)', 'label' => 'Lastname',          'enabled' => 1, 'position' => 80,  'notnull' => 0, 'visible' => 3],
+        'job'                  => ['type' => 'varchar(128)', 'label' => 'PostOrFunction',    'enabled' => 0, 'position' => 81,  'notnull' => 0, 'visible' => 0],
         'email'                => ['type' => 'varchar(255)', 'label' => 'Email',             'enabled' => 1, 'position' => 90,  'notnull' => 0, 'visible' => 3],
         'phone'                => ['type' => 'varchar(255)', 'label' => 'Phone',             'enabled' => 1, 'position' => 100, 'notnull' => 0, 'visible' => 3],
         'society_name'         => ['type' => 'varchar(255)', 'label' => 'SocietyName',       'enabled' => 1, 'position' => 110, 'notnull' => 0, 'visible' => 3],
@@ -111,6 +113,7 @@ class SaturneSignature extends SaturneObject
         'transaction_url'      => ['type' => 'varchar(255)', 'label' => 'TransactionUrl',    'enabled' => 1, 'position' => 180, 'notnull' => 0, 'visible' => 1],
         'last_email_sent_date' => ['type' => 'datetime',     'label' => 'SendMailDate',      'enabled' => 1, 'position' => 190, 'notnull' => 0, 'visible' => 3],
         'attendance'           => ['type' => 'smallint',     'label' => 'Attendance',        'enabled' => 1, 'position' => 194, 'notnull' => 0, 'visible' => 3],
+        'json'                 => ['type' => 'text',         'label' => 'JSON',              'enabled' => 0, 'position' => 210, 'notnull' => 0, 'visible' => 0],
         'object_type'          => ['type' => 'varchar(255)', 'label' => 'object_type',       'enabled' => 1, 'position' => 195, 'notnull' => 0, 'visible' => 0],
         'fk_object'            => ['type' => 'integer',      'label' => 'FKObject',          'enabled' => 1, 'position' => 200, 'notnull' => 1, 'visible' => 0, 'index' => 1],
     ];
@@ -151,6 +154,11 @@ class SaturneSignature extends SaturneObject
     public ?string $role;
 
     /**
+     * @var string|null Civility
+     */
+    public ?string $civility = '';
+
+    /**
      * @var string Firstname
      */
     public $firstname;
@@ -161,9 +169,14 @@ class SaturneSignature extends SaturneObject
     public $lastname;
 
     /**
+     * @var string|null Post or Function
+     */
+    public ?string $job = '';
+
+    /**
      * @var string|null Email
      */
-    public ?string $email;
+    public ?string $email = '';
 
     /**
      * @var string|null Phone
@@ -218,7 +231,7 @@ class SaturneSignature extends SaturneObject
     /**
      * @var string Signature url
      */
-    public string $signature_url;
+    public string $signature_url = '';
 
     /**
      * @var string|null Transaction url
@@ -234,6 +247,11 @@ class SaturneSignature extends SaturneObject
      * @var int|null Attendance
      */
     public ?int $attendance;
+
+    /**
+     * @var string|null Json
+     */
+    public ?string $json = null;
 
     /**
      * @var string Object type

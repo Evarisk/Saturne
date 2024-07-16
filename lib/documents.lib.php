@@ -267,7 +267,7 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 		// Show title of array if not already shown
 		if ((!empty($fileList) || !empty($link_list) || preg_match('/^massfilesarea/', $modulepart)) && !$headershown) {
 			$headershown = 1;
-			$out        .= '<div class="titre">' . $titletoshow . '</div>' . "\n";
+			$out        .= load_fiche_titre($titletoshow, '', '', 0, 'builddoc');
 			$out        .= '<div class="div-table-responsive-no-min">';
 			$out        .= '<table class="noborder centpercent" id="' . $modulepart . '_table">' . "\n";
 		}

@@ -66,7 +66,7 @@
         <div class="public-card__content signature">
             <div class="signature-element">
                 <?php if (empty($signatory->signature) && $object->status == $object::STATUS_VALIDATED && $signatory->attendance != SaturneSignature::ATTENDANCE_ABSENT) : ?>
-                    <canvas class="canvas-container canvas-signature"></canvas>
+                    <canvas class="canvas-container editable canvas-signature"></canvas>
                     <div class="signature-erase wpeo-button button-square-40 button-rounded button-grey"><span><i class="fas fa-eraser"></i></span></div>
                 <?php else : ?>
                     <div class="canvas-container">
