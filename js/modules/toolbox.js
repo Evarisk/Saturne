@@ -60,6 +60,23 @@ window.saturne.toolbox.getQuerySeparator = function(url) {
 };
 
 /**
+ * Return suitable url after changing entity with an anchor
+ *
+ * @memberof Saturne_Framework_Toolbox
+ *
+ * @since   1.6.0
+ * @version 1.6.0
+ *
+ * @param  {string} url Url of current page
+ * @return {string}     Suitable query separator
+ */
+window.saturne.toolbox.replaceUrlAnchor = function() {
+  var url = window.location.href;
+
+  return url.replace(/%23/g, '#');
+};
+
+/**
  * Return security token value
  *
  * @memberof Saturne_Framework_Toolbox
