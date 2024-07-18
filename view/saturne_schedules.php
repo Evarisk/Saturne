@@ -227,11 +227,7 @@ if (!empty($objectLinked) && empty($action)) {
         print '<tr class="oddeven"><td>';
         print $form->textwithpicto($langs->trans(ucfirst($day)), $langs->trans('OpeningHoursFormatDesc'));
         print '</td><td>';
-        if ($day != 'sunday' && $day != 'saturday') {
-            print '<input name="' . $day . '" id=' . $day . '" class="minwidth100" value="' . ($object->$day ?: (GETPOSTISSET($day, 'alpha') ? GETPOST($day, 'alpha') : $langs->trans('weekDayDefault'))) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '></td></tr>';
-        } else {
-            print '<input name="' . $day . '" id=' . $day . '" class="minwidth100" value="' . ($object->$day ?: (GETPOSTISSET($day, 'alpha') ? GETPOST($day, 'alpha') : $langs->trans('weekEndDefault'))) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '></td></tr>';
-        }
+        print '<input name="' . $day . '" id=' . $day . '" class="minwidth100" value="' . ($object->$day ?: GETPOST($day, 'alpha')) . '"' . (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '' : ' autofocus="autofocus"') . '></td></tr>';
     }
     print '</table>';
 
