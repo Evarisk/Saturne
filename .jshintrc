@@ -1,0 +1,25 @@
+{
+  "bitwise": true,
+  "curly": true,
+  "eqeqeq": true,
+  "esversion": 6,
+  "forin": true,
+  "freeze": true,
+  "latedef": "nofunc",
+  "maxcomplexity": 10,
+  "noarg": true,
+  "nonbsp": true,
+  "nonew": true,
+  "undef": true,
+  "unused": true,
+  "node": true,
+  "browser": true,
+  "jquery": true,
+  "devel": true,
+  "strict": "global",
+  "globals": {
+    "angular": false,
+    "module": false,
+    "require": false
+  }
+}
