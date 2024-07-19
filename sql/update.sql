@@ -71,6 +71,7 @@ DROP TABLE `llx_digiriskdolibarr_digiriskdocuments_extrafields`;
 ALTER TABLE `llx_saturne_object_documents` CHANGE json json longtext;
 
 -- 1.6.0
-ALTER TABLE `llx_saturne_object_signature` ADD `civility` VARCHAR(6) AFTER `role`;
+ALTER TABLE `llx_saturne_object_signature` ADD `gender` VARCHAR(10) AFTER `role`;
+ALTER TABLE `llx_saturne_object_signature` ADD `civility` VARCHAR(6) AFTER `gender`;
 ALTER TABLE `llx_saturne_object_signature` ADD `job` VARCHAR(128) AFTER `lastname`;
 ALTER TABLE `llx_saturne_object_signature` ADD `json` longtext NULL AFTER `attendance`;

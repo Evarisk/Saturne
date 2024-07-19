@@ -21,6 +21,7 @@ CREATE TABLE llx_saturne_object_signature(
     import_key           varchar(14),
     status               integer NOT NULL,
     role                 varchar(255),
+    gender               varchar(10),
     civility             varchar(6),
     firstname            varchar(255),
     lastname             varchar(255),
