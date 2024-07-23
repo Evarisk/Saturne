@@ -258,19 +258,14 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 		if ($conf->global->$manualPdfGenerationConf > 0) {
 			$out .= '<td></td>';
 		}
-
 		$out .= '</tr>';
         $out .= '<tr class="liste_titre">';
-        $out .= '<th class=""><a href="'. $_SERVER['PHP_SELF'] . '?sortfield=name&sortorder=' . ($sortorder == 'desc' ? 'asc' : 'desc') .'">' . $langs->trans('Name');
-        $out .= '</a></th>';
-        $out .= '<th class=""><a href="'. $_SERVER['PHP_SELF'] . '?sortfield=size&sortorder=' . ($sortorder == 'desc' ? 'asc' : 'desc') .'">' . $langs->trans('Size');
-        $out .= '</a></th>';
-        $out .= '<th class="center">' . $langs->trans('Date');
-        $out .= '</th>';
-        $out .= '<th class="right">' . $langs->trans('PDF');
-        $out .= '</th>';
-        $out .= '<th class="right">' . $langs->trans('Action');
-        $out .= '</th>';
+        $out .= get_document_title_field($sortfield, $sortorder, 'Name');
+        $out .= get_document_title_field($sortfield, $sortorder, 'Size', true, 'right');
+        $out .= get_document_title_field($sortfield, $sortorder, 'Date', true, 'right');
+        $out .= get_document_title_field($sortfield, $sortorder, 'PDF', false, 'right');
+        $out .= get_document_title_field($sortfield, $sortorder, 'Action', false, 'right');
+//        $out .= '</th>';
         $out .= '</tr>';
 
 		// Execute hooks
@@ -442,6 +437,24 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 	$out .= '<!-- End show_document -->' . "\n";
 
 	return $out;
+}
+
+function get_document_title_field(string $sortfield, string $sortorder, string $name, bool $sortable = true, string $morehtml = ''): string {
+    global $langs;
+
+    $out = '<th class="'. $morehtml .'">';
+    if ($sortable) {
+        $out .= '<a href="'. $_SERVER['PHP_SELF'] . '?sortfield='. (strtolower($name)) .'&sortorder=' . ($sortorder == 'desc' ? 'asc' : 'desc') .'#builddoc_form">';
+        $out .= ($sortfield == strtolower($name) ? '<u>' : '');
+    }
+    $out .= $langs->trans($name);
+    if ($sortable) {
+        $out .= ' ' . ($sortfield == strtolower($name) ? ($sortorder == 'asc' ? '<i class="fas fa-chevron-up"></i>' : '<i class="fas fa-chevron-down"></i>') : '');
+        $out .= ($sortfield == strtolower($name) ? '</u>' : '');
+        $out .= '</a>';
+    }
+    $out .='</th>';
+    return $out;
 }
 
 /**
