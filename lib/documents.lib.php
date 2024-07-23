@@ -94,7 +94,22 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
         } else {
             $fileList = dol_dir_list($filedir, 'files', 0, '(\.jpg|\.jpeg|\.png|\.odt|\.zip|\.pdf)', '', 'date', SORT_DESC, 1);
         }
-	}
+    }
+
+    $fileList = dol_sort_array($fileList, $sortfield, $sortorder);
+
+    $page = GETPOST('page', 'int') ?: 1;
+    $filePerPage = 20;
+    $fileListLength = 0;
+    if (is_array($fileList) && !empty($fileList)) {
+        $fileListLength = count($fileList);
+    }
+
+    if ($fileListLength > $filePerPage) {
+        $fileList = array_slice($fileList, ($page - 1 ) * $filePerPage, $filePerPage);
+    }
+
+    $pageNumber = ceil($fileListLength / $filePerPage);
 
 	if ($hideifempty && empty($fileList)) {
         return '';
@@ -234,6 +249,20 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
                 $genbutton = '';
             }
             $out .= $genbutton;
+            $querySeparator = (strpos($_SERVER['REQUEST_URI'], '?') === false) ? '?' : '&';
+
+            $out .= '<div class="pagination">';
+            if($page > 1) {
+                $out .= '<a href="'. $_SERVER['PHP_SELF'] . '?page=' . ($page - 1) .'&sortfield=' . $sortfield . '&sortorder=' . $sortorder . '#builddoc_form"><i class="fas fa-chevron-left"></i></a>';
+                $out .= '&nbsp;&nbsp;&nbsp;&nbsp;';
+            }
+            $out .= '<input hidden id="page_number" value="' . $pageNumber . '">';
+            $out .= '<input name="change_pagination" id="change_pagination" class="maxwidth25" value="' . $page . '" name="page">';
+            $out .= ' / ';
+            $out .= '<a href="'. $_SERVER['PHP_SELF'] . '?page=' . $pageNumber .'&sortfield=' . $sortfield . '&sortorder=' . $sortorder . '#builddoc_form">' . $pageNumber . '</a>';
+            $out .= '&nbsp;&nbsp;&nbsp;&nbsp;';
+            $out .= '<a href="'. $_SERVER['PHP_SELF'] . '?page=' . ($page + 1) .'&sortfield=' . $sortfield . '&sortorder=' . $sortorder . '#builddoc_form"><i class="fas fa-chevron-right"></i></a>';
+            $out .= '</div>';
 		} else {
 			$out .= '<div class="float">' . $langs->trans('Files') . '</div>';
 		}
@@ -297,7 +326,6 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 			$out        .= '<div class="div-table-responsive-no-min">';
 			$out        .= '<table class="noborder centpercent" id="' . $modulepart . '_table">' . "\n";
 		}
-        $fileList = dol_sort_array($fileList, $sortfield, $sortorder);
 
 		// Loop on each file found
 		if (is_array($fileList)) {
@@ -442,9 +470,10 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 function get_document_title_field(string $sortfield, string $sortorder, string $name, bool $sortable = true, string $morehtml = ''): string {
     global $langs;
 
+    $querySeparator = (strpos($_SERVER['PHP_SELF'], '?') === false) ? '?' : '&';
     $out = '<th class="'. $morehtml .'">';
     if ($sortable) {
-        $out .= '<a href="'. $_SERVER['PHP_SELF'] . '?sortfield='. (strtolower($name)) .'&sortorder=' . ($sortorder == 'desc' ? 'asc' : 'desc') .'#builddoc_form">';
+        $out .= '<a href="'. $_SERVER['PHP_SELF'] . $querySeparator . 'sortfield='. (strtolower($name)) .'&sortorder=' . ($sortorder == 'desc' ? 'asc' : 'desc') .'#builddoc_form">';
         $out .= ($sortfield == strtolower($name) ? '<u>' : '');
     }
     $out .= $langs->trans($name);
