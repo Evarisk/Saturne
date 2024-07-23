@@ -96,6 +96,21 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
         }
     }
 
+    if (GETPOST('search_name')) {
+        $fileList = array_filter($fileList, function($file) {
+            return strpos($file['name'], GETPOST('search_name')) !== false;
+        });
+    }
+
+    if (GETPOST('search_date')) {
+        $search_date = GETPOST('search_date');
+        $fileList = array_filter($fileList, function($file) use ($search_date) {
+            $file_date = date('Y-m-d', $file['date']);
+            return $file_date === $search_date;
+        });
+    }
+
+
     $fileList = dol_sort_array($fileList, $sortfield, $sortorder);
 
     $page = GETPOST('page', 'int') ?: 1;
@@ -289,12 +304,23 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 		}
 		$out .= '</tr>';
         $out .= '<tr class="liste_titre">';
+        $out .= get_document_title_search('text', 'Name');
+        $out .= '<td></td>';
+        $out .= get_document_title_search('date', 'Date', 'right');
+        $out .= '<td></td>';
+        $out .= '<td class="right ">';
+        $out .= '<i class="saturne-search-button fas fa-search" style="cursor: pointer;"></i>';
+        $out .= '&nbsp;&nbsp;&nbsp;';
+        $out .= '<i class="saturne-cancel-button fas fa-times" style="cursor: pointer;"></i>';
+        $out .= '</td>';
+
+        $out .= '</tr>';
+        $out .= '<tr class="liste_titre">';
         $out .= get_document_title_field($sortfield, $sortorder, 'Name');
         $out .= get_document_title_field($sortfield, $sortorder, 'Size', true, 'right');
         $out .= get_document_title_field($sortfield, $sortorder, 'Date', true, 'right');
         $out .= get_document_title_field($sortfield, $sortorder, 'PDF', false, 'right');
         $out .= get_document_title_field($sortfield, $sortorder, 'Action', false, 'right');
-//        $out .= '</th>';
         $out .= '</tr>';
 
 		// Execute hooks
@@ -467,6 +493,16 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 	return $out;
 }
 
+/**
+ * Get document title field
+ *
+ * @param string $sortfield
+ * @param string $sortorder
+ * @param string $name
+ * @param bool $sortable
+ * @param string $morehtml
+ * @return string
+ */
 function get_document_title_field(string $sortfield, string $sortorder, string $name, bool $sortable = true, string $morehtml = ''): string {
     global $langs;
 
@@ -483,6 +519,23 @@ function get_document_title_field(string $sortfield, string $sortorder, string $
         $out .= '</a>';
     }
     $out .='</th>';
+
+    return $out;
+}
+
+/**
+ * Get document title search
+ *
+ * @param string $type
+ * @param string $name
+ * @param string $morehtml
+ * @return string
+ */
+function get_document_title_search(string $type, string $name, string $morehtml = ''): string
+{
+    $out = '<td class="'. $morehtml .'">';
+    $out .= '<input class="saturne-search" id="search_' . strtolower($name) . '" type="'. $type .'"  name="search_' . strtolower($name) . '" value="' . GETPOST('search_' . strtolower($name)) . '">';
+    $out .= '</td>';
     return $out;
 }
 
