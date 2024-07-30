@@ -109,6 +109,18 @@ EnableSaturne           = Veuillez activer le module Saturne pour accéder à ce
 
 
 #
+# Public Interface - Interface publique
+#
+
+# Data - Donnée
+PublicInterfaceObject                  = Interface publique %s
+PublicInterfaceUseSignatoryDescription = Utilisation de la signature sur l'interface publique
+PublicInterfaceUser                    = Utilisateur par défaut
+PublicInterfaceUserDescription         = Utilisateur utilisé sur l'interface publique
+PublicInterfaceForbidden               = Accès interdit à l'interface publique %s
+
+
+#
 # PWA - Progressive Web App
 #
 
