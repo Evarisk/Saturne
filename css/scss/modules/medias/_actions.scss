@@ -30,4 +30,9 @@
       color: #fff !important;
     }
   }
+
+  .photo {
+    aspect-ratio: 1/1;
+    object-fit: cover;
+  }
 }

@@ -124,3 +124,16 @@
   height: 30px;
   background-color: green;
 }
+
+/** Image listing in public interface */
+.linked-medias-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+}
+
+.page-public-card {
+  .linked-medias-list {
+    margin-bottom: 1em;
+  }
+}
