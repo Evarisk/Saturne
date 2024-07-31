@@ -95,6 +95,7 @@ ConfirmMassArchivingQuestion = Are you sure you want to archive the %d record(s)
 
 # SetEventMessage mass action
 RecordsArchived = %d record(s) archived
+ObjectNotFound  = %s not found
 
 # Data
 ActionsOnObject = Events on %s
