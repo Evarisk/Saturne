@@ -66,7 +66,7 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
             $modelLists = array_filter($modelLists, 'saturne_remove_index');
             foreach ($modelLists as $key => $modelList) {
                 $confName = dol_strtoupper($moduleNameLowerCase . '_' . $document->element) . '_DEFAULT_MODEL';
-                if (strpos($key, getDolGlobalString($confName)) !== false) {
+                if (dol_strlen(getDolGlobalString($confName)) > 0 && strpos($key, getDolGlobalString($confName)) !== false) {
                     $model = $key;
                 }
             }
