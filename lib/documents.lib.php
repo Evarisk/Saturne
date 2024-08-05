@@ -176,7 +176,7 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
                     $newKey              = str_replace($object->element . 'document_custom_odt', $object->element . 'document_odt', $key);
                     $modellists[$newKey] = $langs->trans($arrayvalues);
                     $confName            = dol_strtoupper($modulepart . '_' . $submodulepart) . '_DEFAULT_MODEL';
-                    if (strpos($key, getDolGlobalString($confName)) !== false) {
+                    if (dol_strlen(getDolGlobalString($confName)) > 0 && strpos($key, getDolGlobalString($confName)) !== false) {
                         $modelselected = $newKey;
                     }
                 }
