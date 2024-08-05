@@ -148,7 +148,7 @@ class SaturneDashboard
                         for ($i = 0; $i < count($dashboardWidget['label']); $i++) {
                             if (!empty($dashboardWidget['label'][$i])) {
                                 $widget .= '<span class=""><strong>' . $dashboardWidget['label'][$i] . ' : ' . '</strong>';
-                                if (!empty($dashboardWidget['content'][$i])) {
+                                if (isset($dashboardWidget['content'][$i]) && $dashboardWidget['content'][$i] !== '') {
                                     $widget .= '<span class="classfortooltip badge badge-info">' . $dashboardWidget['content'][$i] . '</span>';
                                     $widget .= (!empty($dashboardWidget['tooltip'][$i]) ? $form->textwithpicto('', $langs->transnoentities($dashboardWidget['tooltip'][$i])) : '') . '</span>';
                                 } else {
