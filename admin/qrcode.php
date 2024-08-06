@@ -102,7 +102,8 @@ $QRCodes = $saturneQRCode->fetchAll();
 print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
 print '<td>' . $langs->trans('URL') . '</td>';
-print '<td class="center">' . $langs->trans('QR Code') . '</td>';
+print '<td class="text-blank
+">' . $langs->trans('QR Code') . '</td>';
 print '<td class="center">' . $langs->trans('ModuleName') . '</td>';
 print '<td class="center">' . $langs->trans('Action') . '</td>';
 print '</tr>';

@@ -52,11 +52,14 @@
  */
 function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, string $urlsource, $genallowed, int $delallowed = 0, string $modelselected = '', int $allowgenifempty = 1, int $forcenomultilang = 0, int $notused = 0, int $noform = 0, string $param = '', string $title = '', string $buttonlabel = '', string $codelang = '', string $morepicto = '', $object = null, int $hideifempty = 0, string $removeaction = 'remove_file', int $active = 1, string $tooltiptext = '', string $sortfield = '', string $sortorder = ''): string
 {
-	global $conf, $db, $form, $hookmanager, $langs;
+	global $conf, $db, $form, $hookmanager, $langs, $user;
 
 	if (!is_object($form)) {
         $form = new Form($db);
     }
+
+    require_once __DIR__ . '/../class/saturneqrcode.class.php';
+    $QRCode = new SaturneQRCode($db);
 
 	include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 
@@ -288,6 +291,7 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
             $out .= $form->textwithpicto($langs->trans('Help'), $htmltooltip, 1, 0);
             $out .= '</span>';
         }
+        $out .= '</th><th>';
 		$out .= '</th>';
 
 		if (!empty($hookmanager->hooks['formfile'])) {
@@ -308,6 +312,7 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
         $out .= '<td></td>';
         $out .= get_document_title_search('date', 'Date', 'right');
         $out .= '<td></td>';
+        $out .= '<td></td>';
         $out .= '<td class="right ">';
         $out .= '<i class="saturne-search-button fas fa-search" style="cursor: pointer;"></i>';
         $out .= '&nbsp;&nbsp;&nbsp;';
@@ -320,6 +325,7 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
         $out .= get_document_title_field($sortfield, $sortorder, 'Size', true, 'right');
         $out .= get_document_title_field($sortfield, $sortorder, 'Date', true, 'right');
         $out .= get_document_title_field($sortfield, $sortorder, 'PDF', false, 'right');
+        $out .= get_document_title_field($sortfield, $sortorder, 'QRCode', false, 'right');
         $out .= get_document_title_field($sortfield, $sortorder, 'Action', false, 'right');
         $out .= '</tr>';
 
@@ -352,6 +358,28 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 			$out        .= '<div class="div-table-responsive-no-min">';
 			$out        .= '<table class="noborder centpercent" id="' . $modulepart . '_table">' . "\n";
 		}
+
+        ?>
+        <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+
+<?php
+
+        $out .= '<div id="pdfModal" class="wpeo-modal">
+                    <div class="modal-container">
+                        <div class="modal-header">
+                            <h2>QR Code</h2>
+                        </div>
+                        <div class="modal-content" style="display: flex; justify-content: center">
+                            <div id="pdfPreview">
+                                <!-- Le PDF sera affiché ici dans un iframe -->
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="downloadBtn" style="margin-top: 10px;"><i class="fas fa-download fa-2x"></i></button>
+                        </div>
+                    </div>
+                </div>';
+
 
 		// Loop on each file found
 		if (is_array($fileList)) {
@@ -424,6 +452,26 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 
 					$out .= '</td>';
 				}
+
+                //Show QR Code
+                $documentQRCode = $QRCode->fetchAll('', '', 0, 0, ['url' => $documenturl . '?modulepart=' . $modulepart . '&amp;file=' . urlencode($relativepath) . ($param ? '&' . $param : '')]);
+                if (is_array($documentQRCode) && !empty($documentQRCode)) {
+                    $documentQRCode = array_shift($documentQRCode);
+                } else {
+                    $QRCode->url = $documenturl . '?modulepart=' . $modulepart . '&amp;file=' . urlencode($relativepath) . ($param ? '&' . $param : '');
+                    $QRCode->encoded_qr_code = $QRCode->getQRCodeBase64($QRCode->url);
+                    $QRCode->status = 1;
+                    $QRCode->module_name = $modulepart;
+                    $QRCode->create($user);
+                    $documentQRCode = $QRCode;
+
+                }
+
+                $out .= '<td class="right preview-qr-code">';
+                $out .= '<input hidden class="qrcode-base64" value="'. $documentQRCode->encoded_qr_code .'">';
+                $out .= img_picto($langs->trans("QRCodeGeneration"), 'fontawesome_fa-qrcode_fas_blue');
+                $out .= ' ' . $form->textwithpicto('', $langs->trans('QRCodeGenerationTooltip'));
+                $out .= '</td>';
 
 				if ($delallowed || $morepicto) {
 					$out .= '<td class="right nowraponall">';

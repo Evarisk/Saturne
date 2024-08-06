@@ -21,8 +21,11 @@
  * \brief   This file is a CRUD class file for SaturneQRCode (Create/Read/Update/Delete).
  */
 
-// Load Saturne libraries.
+// Load Saturne libraries
 require_once __DIR__ . '/saturneobject.class.php';
+
+// Load QRCode library
+require_once DOL_DOCUMENT_ROOT . '/includes/tecnickcom/tcpdf/tcpdf_barcodes_2d.php';
 
 class SaturneQRCode extends SaturneObject
 {
