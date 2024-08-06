@@ -99,6 +99,22 @@ $head    = $preHead();
 print dol_get_fiche_head($head, 'qrcode', $title, -1, $moduleNameLowerCase . '_color@' . $moduleNameLowerCase);
 $QRCodes = $saturneQRCode->fetchAll();
 
+print '<div id="pdfModal" class="wpeo-modal">
+                    <div class="modal-container">
+                        <div class="modal-header">
+                            <h2>QR Code</h2>
+                        </div>
+                        <div class="modal-content" style="display: flex; justify-content: center">
+                            <div id="pdfPreview">
+                                <!-- Le PDF sera affiché ici dans un iframe -->
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="downloadBtn" style="margin-top: 10px;"><i class="fas fa-download fa-2x"></i></button>
+                        </div>
+                    </div>
+                </div>';
+
 print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
 print '<td>' . $langs->trans('URL') . '</td>';
@@ -114,8 +130,12 @@ if (is_array($QRCodes) && !empty($QRCodes)) {
         print '<input type="hidden" name="action" value="remove">';
         print '<tr class="oddeven"><td>';
         print $QRCode->url;
-        print '</td><td class="center">';
-        print '<img src="' . $QRCode->encoded_qr_code . '" alt="QR Code" width="100" height="100">';
+        print '</td>';
+        print '<td class="right preview-qr-code">';
+        print '<input hidden class="qrcode-base64" value="'. $QRCode->encoded_qr_code .'">';
+        print img_picto($langs->trans("QRCodeGeneration"), 'fontawesome_fa-qrcode_fas_blue');
+        print ' ' . $form->textwithpicto('', $langs->trans('QRCodeGenerationTooltip'));
+        print '</td>';
         print '</td><td class="center">';
         print ucfirst($QRCode->module_name);
         print '</td><td class="center">';
