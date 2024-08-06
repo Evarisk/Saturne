@@ -453,7 +453,7 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
                 if (is_array($documentQRCode) && !empty($documentQRCode)) {
                     $documentQRCode = array_shift($documentQRCode);
                 } else {
-                    $QRCode->url = $documenturl . '?modulepart=' . $modulepart . '&amp;file=' . urlencode($relativepath) . ($param ? '&' . $param : '');
+                    $QRCode->url = DOL_URL_ROOT . '/document.php?modulepart=' . $modulepart . '&amp;file=' . urlencode($relativepath) . ($param ? '&' . $param : '');
                     $QRCode->encoded_qr_code = $QRCode->getQRCodeBase64($QRCode->url);
                     $QRCode->status = 1;
                     $QRCode->module_name = $modulepart;

@@ -58,7 +58,7 @@ class SaturneQRCode extends SaturneObject
     /**
      * @var int Does object support extrafields ? 0 = No, 1 = Yes
      */
-    public $isextrafieldmanaged = 1;
+    public $isextrafieldmanaged = 0;
 
     /**
      * @var string Last output from end job execution

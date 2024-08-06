@@ -58,7 +58,7 @@ function saturne_admin_prepare_head(): array
     $head[$h][2] = 'information';
     $h++;
 
-    $head[$h][0] = dol_buildpath('/saturne/admin/qrcode.php', 1) . '?filename=saturne_dev&tab_name=qrcode';
+    $head[$h][0] = dol_buildpath('/saturne/admin/qrcode.php', 1);
     $head[$h][1] = '<i class="fas fa-qrcode pictofixedwidth"></i>' . $langs->trans('QRCode');
     $head[$h][2] = 'qrcode';
     $h++;

@@ -69,17 +69,41 @@ saturne_check_access($permissiontoread);
 
 // Add a redirection
 if ($action == 'add') {
+    if (dol_strlen($url) == 0) {
+        setEventMessage('URLToEncodeRequired', 'errors');
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit;
+    }
     $saturneQRCode->url = $url;
     $saturneQRCode->encoded_qr_code = $saturneQRCode->getQRCodeBase64($url);
     $saturneQRCode->module_name = 'saturne';
     $saturneQRCode->status = 1;
     $saturneQRCode->create($user);
+
+    setEventMessage('QRCodeCreated');
+    header('Location: ' . $_SERVER['PHP_SELF']);
+    exit;
+}
+
+if ($action == 'update') {
+    $saturneQRCode->fetch(GETPOST('id'));
+    $saturneQRCode->url = GETPOST('url');
+    $saturneQRCode->encoded_qr_code = $saturneQRCode->getQRCodeBase64($saturneQRCode->url);
+    $saturneQRCode->update($user);
+
+    setEventMessage('QRCodeUpdated');
+    header('Location: ' . $_SERVER['PHP_SELF']);
+    exit;
 }
 
 // Remove a redirection
 if ($action == 'remove') {
     $saturneQRCode->fetch(GETPOST('id'));
     $saturneQRCode->delete($user, false, false);
+
+    setEventMessage('QRCodeRemoved');
+    header('Location: ' . $_SERVER['PHP_SELF']);
+    exit;
 }
 
 /*
@@ -120,29 +144,55 @@ print '<tr class="liste_titre">';
 print '<td>' . $langs->trans('URL') . '</td>';
 print '<td class="center">' . $langs->trans('QR Code') . '</td>';
 print '<td class="center">' . $langs->trans('ModuleName') . '</td>';
-print '<td class="center">' . $langs->trans('Action') . '</td>';
+print '<td class="center">' . $langs->trans('Actions') . '</td>';
 print '</tr>';
 
 if (is_array($QRCodes) && !empty($QRCodes)) {
     foreach ($QRCodes as $QRCode) {
-        print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '">';
-        print '<input type="hidden" name="token" value="' . newToken() . '">';
-        print '<input type="hidden" name="action" value="remove">';
-        print '<tr class="oddeven"><td>';
-        print $QRCode->url;
-        print '</td>';
-        print '<td class="right preview-qr-code">';
-        print '<input hidden class="qrcode-base64" value="'. $QRCode->encoded_qr_code .'">';
-        print img_picto($langs->trans("QRCodeGeneration"), 'fontawesome_fa-qrcode_fas_blue');
-        print ' ' . $form->textwithpicto('', $langs->trans('QRCodeGenerationTooltip'));
-        print '</td>';
-        print '</td><td class="center">';
-        print ucfirst($QRCode->module_name);
-        print '</td><td class="center">';
-        print '<input type="hidden" name="id" value="' . $QRCode->id . '">';
-        print '<input type="submit" class="button" value="' . $langs->trans('Remove') . '">';
-        print '</td></tr>';
-        print '</form>';
+        if ($action == 'edit' && $QRCode->id == GETPOST('id')) {
+            print '<tr class="oddeven" id="qrcode-'. $QRCode->id .'"><td>';
+            print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '">';
+            print '<input type="hidden" name="token" value="' . newToken() . '">';
+            print '<input type="hidden" name="action" value="update">';
+            print '<input type="hidden" name="id" value="' . $QRCode->id . '">';
+            print '<input type="text" class="minwidth500" name="url" value="' . $QRCode->url . '">';
+            print '</td><td class="center">';
+            print '</td><td class="center">';
+            print '</td><td class="center">';
+            print '<input hidden class="qrcode-base64" value="'. $QRCode->encoded_qr_code .'">';
+            print '<button type="submit" class="butAction">' . $langs->trans('Save') . '</button>';
+            print '</td></tr>';
+            print '</form>';
+        } else {
+            print '<tr class="oddeven"><td>';
+            print $QRCode->url;
+            print '</td>';
+            print '<td class="right preview-qr-code">';
+            print '<input hidden class="qrcode-base64" value="'. $QRCode->encoded_qr_code .'">';
+            print img_picto($langs->trans("QRCodeGeneration"), 'fontawesome_fa-qrcode_fas_blue');
+            print ' ' . $form->textwithpicto('', $langs->trans('QRCodeGenerationTooltip'));
+            print '</td>';
+            print '</td><td class="center">';
+            print ucfirst($QRCode->module_name);
+            print '</td><td class="center">';
+
+            // Modify this section to use anchor tags for edit and delete actions
+            print '<a href="' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&action=edit&id=' . $QRCode->id . '#qrcode-'. $QRCode->id .'" class="edit-button">';
+            print img_picto($langs->trans('Edit'), 'edit');
+            print '</a> ';
+            // Form for Remove action using a form with token and a styled submit button
+            print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '" style="display:inline;">';
+            print '<input type="hidden" name="token" value="' . newToken() . '">';  // Token for CSRF protection
+            print '<input type="hidden" name="action" value="remove">';  // Action to remove the QR code
+            print '<input type="hidden" name="id" value="' . $QRCode->id . '">';  // ID of the QR code to be removed
+            print '<button type="submit" class="" title="' . $langs->trans('Remove') . '">';
+            print '<i class="fas fa-trash-alt"></i>';  // Font Awesome icon for the delete action
+            print '</button>';
+            print '</form>';
+
+
+            print '</td></tr>';
+        }
     }
 }
 
