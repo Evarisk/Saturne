@@ -29,7 +29,7 @@
  * Variable   : $signatoryRole, $signatories, $moduleNameLowerCase, $permissiontoadd
  */
 
-print load_fiche_titre($langs->trans('Attendants') . (($attendantTableMode == 'advanced') ? ' - ' . $langs->trans($signatoryRole) : ''), '', '');
+print load_fiche_titre($langs->trans($attendantTableMode == 'advanced' ? $signatoryRole : 'Attendants'), '', '');
 
 if (!empty($signatories) || (empty($signatories) && $object->status == $object::STATUS_DRAFT)) {
     print '<table class="border centpercent tableforfield">';
