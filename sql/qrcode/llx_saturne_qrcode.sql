@@ -22,6 +22,6 @@ CREATE TABLE llx_saturne_qrcode(
     status          integer DEFAULT 1 NOT NULL,
     module_name     varchar(255),
     url             text,
-    encoded_qr_code text,
+    encoded_qr_code longtext,
     fk_user_creat   integer NOT NULL
 ) ENGINE=innodb;

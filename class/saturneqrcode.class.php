@@ -144,6 +144,23 @@ class SaturneQRCode extends SaturneObject
     {
         parent::__construct($db, $moduleNameLowerCase, $objectType);
     }
+
+    /**
+     * Get QR Code base64
+     *
+     * @param string $url URL to encode
+     *
+     * @return string Encoded QR Code
+     */
+    public function getQRCodeBase64(string $url): string
+{
+        // Create QR Code
+        $barcodeObject = new TCPDF2DBarcode($url, 'QRCODE,H');
+        $qrCodePng     = $barcodeObject->getBarcodePngData(6, 6);
+        $qrCodeBase64  = 'data:image/png;base64,' . base64_encode($qrCodePng);
+
+        return $qrCodeBase64;
+    }
 }
 
 ?>
