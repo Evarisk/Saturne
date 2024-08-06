@@ -359,11 +359,6 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 			$out        .= '<table class="noborder centpercent" id="' . $modulepart . '_table">' . "\n";
 		}
 
-        ?>
-        <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-
-<?php
-
         $out .= '<div id="pdfModal" class="wpeo-modal">
                     <div class="modal-container">
                         <div class="modal-header">
