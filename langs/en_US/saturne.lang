@@ -64,7 +64,7 @@ SavedConfig                         = Saved configuration
 ErrorSavedConfig                    = An error occurred during the configuration
 Config                              = Configuration
 Extrafields                         = Extra attributes
-
+ClickHereToGoToTheConfigPage        = Click here to go to the configuration page
 
 # Mod Numbering
 NumberingModule = Numbering model
