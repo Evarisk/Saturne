@@ -60,7 +60,7 @@ window.saturne.utils.init = function() {
  */
 window.saturne.utils.event = function() {
   $(document).on('mouseenter', '.move-line.ui-sortable-handle', window.saturne.utils.draganddrop);
-  $(document).on('change', '#element_type', window.saturne.utils.reloadField);
+  //$(document).on('change', '#element_type', window.saturne.utils.reloadField);
 };
 
 /**
