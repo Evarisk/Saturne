@@ -588,6 +588,7 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
               $('.wpeo-loader').removeClass('wpeo-loader')
               mediaGallery.removeClass('modal-active')
               if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
+                $('.headphoto').replaceWith($(resp).find('.headphoto').first())
                 $('.photo.'+objectPhotoClass).replaceWith($(resp).find('.photo.'+objectPhotoClass).first())
                 $('.linked-medias.'+objectPhotoClass).replaceWith($(resp).find('.linked-medias.'+objectPhotoClass))
               } else {
