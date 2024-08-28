@@ -55,6 +55,11 @@ window.saturne.document.event = function() {
   $(document).on('click', '#builddoc_generatebutton', window.saturne.document.displayLoader);
   $(document).on('click', '.pdf-generation', window.saturne.document.displayLoader);
   $(document).on('click', '.download-template', window.saturne.document.autoDownloadTemplate);
+  $(document).on( 'keydown', '#change_pagination', window.saturne.document.changePagination );
+  $(document).on( 'keydown', '.saturne-search', window.saturne.document.saturneSearch );
+  $(document).on( 'click', '.saturne-search-button', window.saturne.document.saturneSearch );
+  $(document).on( 'click', '.saturne-cancel-button', window.saturne.document.saturneCancelSearch );
+
 };
 
 /**
@@ -103,3 +108,97 @@ window.saturne.document.autoDownloadTemplate = function() {
     error: function () {}
   });
 };
+
+/**
+ * Manage documents list pagination
+ *
+ * @memberof Saturne_Framework_Document
+ *
+ * @since   1.6.0
+ * @version 1.6.0
+ *
+ * @return {void}
+ */
+window.saturne.document.changePagination = function (event) {
+  if (event.keyCode === 13) {
+    event.preventDefault();
+
+    var input = event.target;
+    var pageNumber = $('#page_number').val();
+    var pageValue = parseInt(input.value) <= parseInt(pageNumber) ? input.value : pageNumber;
+    var currentUrl = new URL(window.location.href);
+
+    if (currentUrl.searchParams.has('page')) {
+      currentUrl.searchParams.set('page', pageValue);
+    } else {
+      currentUrl.searchParams.append('page', pageValue);
+    }
+
+    window.location.replace(currentUrl.toString());
+  }
+}
+
+/**
+ * Manage search on documents list
+ *
+ * @memberof Saturne_Framework_Document
+ *
+ * @since   1.6.0
+ * @version 1.6.0
+ *
+ * @return {void}
+ */
+window.saturne.document.saturneSearch = function (event) {
+  if (event.keyCode === 13 || $(this).hasClass('saturne-search-button')) {
+    event.preventDefault();
+
+    var currentUrl = new URL(window.location.href);
+
+    let name = $('#search_name').val();
+    let date = $('#search_date').val();
+
+    if (name === '' && date === '') {
+      return;
+    }
+    if (name.length > 0) {
+      if (currentUrl.searchParams.has('search_name')) {
+        currentUrl.searchParams.set('search_name', name);
+      } else {
+        currentUrl.searchParams.append('search_name', name);
+      }
+    }
+    if (date.length > 0) {
+      if (currentUrl.searchParams.has('search_date')) {
+        currentUrl.searchParams.set('search_date', date);
+      } else {
+        currentUrl.searchParams.append('search_date', date);
+      }
+    }
+    window.location.replace(currentUrl.toString());
+
+  }
+}
+
+/**
+ * Cancel search on documents list
+ *
+ * @memberof Saturne_Framework_Document
+ *
+ * @since   1.6.0
+ * @version 1.6.0
+ *
+ * @return {void}
+ */
+window.saturne.document.saturneCancelSearch = function (event) {
+  event.preventDefault();
+
+  var currentUrl = new URL(window.location.href);
+
+  if (currentUrl.searchParams.has('search_name')) {
+    currentUrl.searchParams.delete('search_name');
+  }
+  if (currentUrl.searchParams.has('search_date')) {
+    currentUrl.searchParams.delete('search_date');
+  }
+  window.location.replace(currentUrl.toString());
+}
