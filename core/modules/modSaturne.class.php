@@ -136,7 +136,8 @@ class modSaturne extends DolibarrModules
             'EasyCRM'          => 'easycrm',
             'DoliSIRH'         => 'dolisirh',
             'DigiriskDolibarr' => 'digiriskdolibarr',
-            'EasyURL'          => 'easyurl'
+            'EasyURL'          => 'easyurl',
+            'GMAO'             => 'gmao'
         ];
 
         // Data directories to create when module is enabled.
