@@ -35,7 +35,6 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 
 // Get module parameters
-
 $moduleName = GETPOST('module_name');
 if (dol_strlen($moduleName) > 0 && strpos($moduleName, '#') !== false) {
     $moduleName = explode('#', $moduleName)[0];
@@ -94,7 +93,6 @@ if ($action == 'setdoc') {
     header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
     exit;
 }
-
 
 if ($action == 'deletefile' && $modulepart == 'ecm' && !empty($user->admin)) {
     include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
