@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2021-2023 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2021-2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -151,6 +151,9 @@ class SaturneDashboard
                                 if (isset($dashboardWidget['content'][$i]) && $dashboardWidget['content'][$i] !== '') {
                                     $widget .= '<span class="classfortooltip badge badge-info">' . $dashboardWidget['content'][$i] . '</span>';
                                     $widget .= (!empty($dashboardWidget['tooltip'][$i]) ? $form->textwithpicto('', $langs->transnoentities($dashboardWidget['tooltip'][$i])) : '') . '</span>';
+                                    if (isset($dashboardWidget['moreContent'][$i]) && $dashboardWidget['moreContent'][$i] !== '') {
+                                        $widget .= $dashboardWidget['moreContent'][$i];
+                                    }
                                 } else {
                                     $widget .= $dashboardWidget['customContent'][$i];
                                 }

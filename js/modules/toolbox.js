@@ -60,6 +60,21 @@ window.saturne.toolbox.getQuerySeparator = function(url) {
 };
 
 /**
+ * Replaces encoded anchor characters in the current URL
+ *
+ * @memberof Saturne_Framework_Toolbox
+ *
+ * @since   1.6.0
+ * @version 1.6.0
+ *
+ * @return {string} The updated URL with decoded anchor characters
+ */
+window.saturne.toolbox.replaceUrlAnchor = function() {
+  let url = window.location.href;
+  return url.replace(/%23/g, '#');
+};
+
+/**
  * Return security token value
  *
  * @memberof Saturne_Framework_Toolbox

@@ -49,6 +49,7 @@ PendingSignature = En attente de signature
 Signed           = Signé
 
 # Header table - Entête de tableau
+Role             = Rôle
 SignatureLink    = Lien signature
 SendMailDate     = Date d'envoi d'email
 SignatureDate    = Date de signature
