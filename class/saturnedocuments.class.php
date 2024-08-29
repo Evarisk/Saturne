@@ -258,4 +258,55 @@ class SaturneDocuments extends SaturneObject
 
         return $result;
     }
+
+    /**
+     * Get last document of a type in a dir
+     *
+     * @param  string    $moduleNameLowerCase Module name in lowercase
+     * @param  string    $fileDir             File directory
+     * @param  string    $fileType            Type of file
+     * @return array|int $result              Array of document or -1 if not found
+     */
+    public function getLastDocument(string $moduleNameLowerCase = '', string $fileDir = '', string $fileType = '')
+    {
+        global $conf;
+
+        require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+
+        $uploadDir = $conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1];
+        $fileDir   = $uploadDir . '/' . $fileDir;
+        $fileList  = dol_dir_list($fileDir, 'files', 0, '(\.' . $fileType .  ')', '', 'date', 'SORT_DESC', 1);
+        if (count($fileList)) {
+            $result = $fileList[0];
+        } else {
+            $result = -1;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get URL of last generated document as a html link
+     *
+     * @param  string $moduleNameLowerCase Module name in lowercase
+     * @param  string $fileDir             File directory
+     * @param  string $fileType            Type of file
+     * @param  string $icon                Icon for download button
+     * @return string                      String of html button
+     */
+    public function showUrlOfLastGeneratedDocument(string $moduleNameLowerCase = '', string $fileDir = '', string $fileType = '', string $icon = 'fa-file-word'): string
+    {
+        global $langs;
+
+        $out      = '';
+        $document = $this->getLastDocument($moduleNameLowerCase, $fileDir, $fileType);
+        if (is_array($document)) {
+            $documentUrl = DOL_URL_ROOT . '/document.php';
+            $fileUrl     = $documentUrl . '?modulepart=' . $moduleNameLowerCase . '&file=' . urlencode($fileDir . '/' . $document['name']);
+            $icon        = $fileType == 'pdf' ? 'fa-file-pdf' : $icon;
+            $out         = '<a class="marginleftonly" href="' . $fileUrl . '" download>' . img_picto($langs->trans('File') . ' : ' . $document['name'], $icon) . '</a>';
+        }
+
+        return $out;
+    }
 }
