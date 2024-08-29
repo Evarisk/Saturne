@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2021-2023 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2021-2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,10 @@ if (file_exists('../saturne.main.inc.php')) {
 }
 
 // Get module parameters
-$moduleName          = GETPOST('module_name', 'alpha');
+$moduleName = GETPOST('module_name');
+if (dol_strlen($moduleName) > 0 && strpos($moduleName, '#') !== false) {
+    $moduleName = explode('#', $moduleName)[0];
+}
 $moduleNameLowerCase = strtolower($moduleName);
 
 // Load Dolibarr libraries
@@ -233,6 +236,12 @@ $title    = $langs->trans('ModuleSetup', $moduleName);
 $help_url = 'FR:Module_' . $moduleName;
 
 saturne_header(0, '', $title, $help_url);
+
+?>
+    <script>
+        history.replaceState(null, '', window.saturne.toolbox.replaceUrlAnchor());
+    </script>
+<?php
 
 $parameters = [];
 $reshook    = $hookmanager->executeHooks('saturneAdminDocumentData', $parameters); // Note that $action and $object may have been modified by some hooks

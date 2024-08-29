@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2022-2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,17 +42,19 @@ require_once TCPDF_PATH . 'tcpdf_barcodes_2d.php';
 require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '.lib.php';
 
 // Global variables definitions
-global $conf, $db, $langs, $user;
+global $conf, $db, $hookmanager, $langs, $user;
 
 // Load translation files required by the page
 saturne_load_langs(['admin']);
 
-// Initialize view objects
-$form = new Form($db);
-
 // Get parameters
 $action     = GETPOST('action', 'alpha');
 $backtopage = GETPOST('backtopage', 'alpha');
+
+// Initialize view objects
+$form = new Form($db);
+
+$hookmanager->initHooks(['pwaadmin', 'globalcard']); // Note that conf->hooks_modules contains array
 
 // Security check - Protection if external user
 $permissiontoread = $user->rights->$moduleNameLowerCase->adminpage->read;
@@ -119,6 +121,10 @@ print '<td class="center">' . saturne_show_medias_linked($moduleNameLowerCase, $
 print '</table>';
 print $form->buttonsSaveCancel('Generate', '');
 print '</form>';
+
+$parameters = [];
+$hookmanager->executeHooks('saturneAdminPWAAdditionalConfig', $parameters);
+print $hookmanager->resPrint;
 
 // Page end
 print dol_get_fiche_end();

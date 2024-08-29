@@ -61,7 +61,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/tpl/admin_extrafields_view.tpl.php';
 // Buttons.
 if ($action != 'create' && $action != 'edit') {
     print '<div class="tabsAction">';
-    print '<div class="inline-block divButAction"><a class="butAction" href="' . $_SERVER['PHP_SELF'] . '&action=create">' . $langs->trans('NewAttribute') . '</a></div>';
+    print '<div class="inline-block divButAction"><a class="butAction" href="' . $_SERVER['PHP_SELF'] . '?action=create&module_name=' . $moduleName . '&object_type=' . $objectType . '">' . $langs->trans('NewAttribute') . '</a></div>';
     print '</div>';
 }
 

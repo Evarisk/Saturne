@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2021-2023 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2021-2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -94,8 +94,11 @@ class SaturneSignature extends SaturneObject
         'import_key'           => ['type' => 'varchar(14)',  'label' => 'ImportId',          'enabled' => 1, 'position' => 40,  'notnull' => 0, 'visible' => 0],
         'status'               => ['type' => 'smallint',     'label' => 'Status',            'enabled' => 1, 'position' => 50,  'notnull' => 0, 'visible' => 1, 'index' => 1],
         'role'                 => ['type' => 'varchar(255)', 'label' => 'Role',              'enabled' => 1, 'position' => 60,  'notnull' => 0, 'visible' => 3],
+        'gender'               => ['type' => 'varchar(10)',  'label' => 'Gender',            'enabled' => 1, 'position' => 61,  'notnull' => 0, 'visible' => 3],
+        'civility'             => ['type' => 'varchar(6)',   'label' => 'Civility',          'enabled' => 1, 'position' => 62,  'notnull' => 0, 'visible' => 3],
         'firstname'            => ['type' => 'varchar(255)', 'label' => 'Firstname',         'enabled' => 1, 'position' => 70,  'notnull' => 0, 'visible' => 3],
         'lastname'             => ['type' => 'varchar(255)', 'label' => 'Lastname',          'enabled' => 1, 'position' => 80,  'notnull' => 0, 'visible' => 3],
+        'job'                  => ['type' => 'varchar(128)', 'label' => 'PostOrFunction',    'enabled' => 1, 'position' => 81,  'notnull' => 0, 'visible' => 3],
         'email'                => ['type' => 'varchar(255)', 'label' => 'Email',             'enabled' => 1, 'position' => 90,  'notnull' => 0, 'visible' => 3],
         'phone'                => ['type' => 'varchar(255)', 'label' => 'Phone',             'enabled' => 1, 'position' => 100, 'notnull' => 0, 'visible' => 3],
         'society_name'         => ['type' => 'varchar(255)', 'label' => 'SocietyName',       'enabled' => 1, 'position' => 110, 'notnull' => 0, 'visible' => 3],
@@ -111,6 +114,7 @@ class SaturneSignature extends SaturneObject
         'transaction_url'      => ['type' => 'varchar(255)', 'label' => 'TransactionUrl',    'enabled' => 1, 'position' => 180, 'notnull' => 0, 'visible' => 1],
         'last_email_sent_date' => ['type' => 'datetime',     'label' => 'SendMailDate',      'enabled' => 1, 'position' => 190, 'notnull' => 0, 'visible' => 3],
         'attendance'           => ['type' => 'smallint',     'label' => 'Attendance',        'enabled' => 1, 'position' => 194, 'notnull' => 0, 'visible' => 3],
+        'json'                 => ['type' => 'text',         'label' => 'JSON',              'enabled' => 0, 'position' => 210, 'notnull' => 0, 'visible' => 0],
         'object_type'          => ['type' => 'varchar(255)', 'label' => 'object_type',       'enabled' => 1, 'position' => 195, 'notnull' => 0, 'visible' => 0],
         'fk_object'            => ['type' => 'integer',      'label' => 'FKObject',          'enabled' => 1, 'position' => 200, 'notnull' => 1, 'visible' => 0, 'index' => 1],
     ];
@@ -151,6 +155,16 @@ class SaturneSignature extends SaturneObject
     public ?string $role;
 
     /**
+     * @var string|null Gender
+     */
+    public ?string $gender = '';
+
+    /**
+     * @var string|null Civility
+     */
+    public ?string $civility = '';
+
+    /**
      * @var string Firstname
      */
     public $firstname;
@@ -161,9 +175,14 @@ class SaturneSignature extends SaturneObject
     public $lastname;
 
     /**
+     * @var string|null Post or Function
+     */
+    public ?string $job = '';
+
+    /**
      * @var string|null Email
      */
-    public ?string $email;
+    public ?string $email = '';
 
     /**
      * @var string|null Phone
@@ -218,7 +237,7 @@ class SaturneSignature extends SaturneObject
     /**
      * @var string Signature url
      */
-    public string $signature_url;
+    public string $signature_url = '';
 
     /**
      * @var string|null Transaction url
@@ -234,6 +253,11 @@ class SaturneSignature extends SaturneObject
      * @var int|null Attendance
      */
     public ?int $attendance;
+
+    /**
+     * @var string|null Json
+     */
+    public ?string $json = null;
 
     /**
      * @var string Object type
@@ -452,7 +476,6 @@ class SaturneSignature extends SaturneObject
                     $signatory_data = '';
                     if ($element_type == 'user') {
                         $signatory_data = new User($this->db);
-
                         $signatory_data->fetch($element_id);
 
                         if ($signatory_data->socid > 0) {
@@ -462,10 +485,11 @@ class SaturneSignature extends SaturneObject
                             $this->society_name = $conf->global->MAIN_INFO_SOCIETE_NOM;
                         }
 
-                        $this->phone = $signatory_data->user_mobile;
+                        $this->phone  = (!empty($signatory_data->user_mobile) ? $signatory_data->user_mobile : $signatory_data->office_phone);
+                        $this->gender = $signatory_data->gender;
+                        $this->job    = $signatory_data->job;
                     } elseif ($element_type == 'socpeople') {
                         $signatory_data = new Contact($this->db);
-
                         $signatory_data->fetch($element_id);
                         if (!is_object($signatory_data)) {
                             $signatory_data = new stdClass();
@@ -474,11 +498,12 @@ class SaturneSignature extends SaturneObject
                         $society->fetch($signatory_data->socid);
 
                         $this->society_name = $society->name;
-                        $this->phone        = $signatory_data->phone_mobile;
+                        $this->phone        = (!empty($signatory_data->phone_mobile) ? $signatory_data->phone_mobile : (!empty($signatory_data->phone_pro) ? $signatory_data->phone_pro : $signatory_data->phone_perso));
+                        $this->job          = $signatory_data->poste;
                     }
 
-                    $this->status = self::STATUS_REGISTERED;
-
+                    $this->status    = self::STATUS_REGISTERED;
+                    $this->civility  = $signatory_data->civility_code;
                     $this->firstname = $signatory_data->firstname;
                     $this->lastname  = $signatory_data->lastname;
                     $this->email     = $signatory_data->email;
@@ -736,5 +761,129 @@ class SaturneSignature extends SaturneObject
             $this->db->rollback();
             return -1;
         }
+    }
+
+    /**
+     *  Return a link to the object card (with optionaly the picto)
+     *
+     *  @param  int     $withpicto              Include picto in link (0 = No picto, 1 = Include picto into link, 2 = Only picto)
+     *  @param  string  $option                 On what the link point to ('nolink', ...)
+     *  @param  int     $notooltip              1 = Disable tooltip
+     *  @param  string  $morecss                Add more css on link
+     *  @param  int     $save_lastsearch_value -1 = Auto, 0 = No save of lastsearch_values when clicking, 1 = Save lastsearch_values whenclicking
+     * 	@param	int     $addLabel               0 = Default, 1 = Add label into string, >1 = Add first chars into string
+     *  @return	string                          String with URL
+     */
+    public function getNomUrl(int $withpicto = 0, string $option = '', int $notooltip = 0, string $morecss = '', int $save_lastsearch_value = -1, int $addLabel = 0): string
+    {
+        global $action, $conf, $hookmanager, $langs;
+
+        if (!empty($conf->dol_no_mouse_hover)) {
+            $notooltip = 1; // Force disable tooltips
+        }
+
+        $result = '';
+        $picto  = $this->element_type == 'socpeople' ? 'contact' : 'user';
+        if ($this->element_type == 'user') {
+            $user = new User($this->db);
+            $url  = dol_buildpath('/user/card.php?id=' . $this->element_id, 1);
+            $user->fetch($this->element_id);
+        } else {
+            $contact = new Contact($this->db);
+            $url  = dol_buildpath('/contact/card.php?id=' . $this->element_id, 1);
+            $contact->fetch($this->element_id);
+        }
+
+        $label = img_picto('', $picto) . ' <u>' . $langs->trans(ucfirst($picto)) . '</u>';
+        if (isset($this->status)) {
+            $label .= ' ' . $this->getLibStatut(5);
+        }
+        $label .= '<br>';
+        $label .= '<b>' . $langs->trans('Name') . ' : </b> ' . $this->firstname . ' ' . $this->lastname;
+        if ($this->element_type == 'user') {
+            $label .= (!empty($this->gender) ? '<br><b>' . $langs->trans('Gender') . ' : </b> ' . $langs->trans('Gender' . $this->gender) : '');
+            $label .= '<br><b>' . $langs->trans('Login') . ' : </b> ' . $user->login;
+        }
+        $label .= (!empty($this->job) ? '<br><b>' . $langs->trans('PostOrFunction') . ' : </b> ' . $this->job : '');
+        $label .= (!empty($this->email) ? '<br><b>' . $langs->trans('Email') . ' : </b> ' . $this->email : '');
+        $label .= (!empty($this->phone) ? '<br><b>' . $langs->trans('Phone') . ' : </b> ' . $this->phone : '');
+        if ($this->element_type == 'socpeople') {
+            $label .= (!empty($contact->address) ? '<br><b>' . $langs->trans('Address') . ' : </b> ' . $contact->address : '');
+        } else {
+            $label .= '<br><b>' . $langs->trans('Administrator') . ' : </b> ' . ($user->admin > 0 ? $langs->trans('Yes') : $langs->trans('No'));
+            $label .= '<br><b>' . $langs->trans('Type') . ' : </b> ' . ($user->employee > 0 ? $langs->trans('InternalUser') : $langs->trans('ExternalUser'));
+        }
+
+        if ($option != 'nolink') {
+            // Add param to save lastsearch_values or not
+            $add_save_lastsearch_values = ($save_lastsearch_value == 1 ? 1 : 0);
+            if ($save_lastsearch_value == -1 && preg_match('/list\.php/', $_SERVER['PHP_SELF'])) {
+                $add_save_lastsearch_values = 1;
+            }
+            if ($add_save_lastsearch_values) {
+                $url .= '&save_lastsearch_values=1';
+            }
+        }
+
+        $linkclose = '';
+        if (empty($notooltip)) {
+            if (!empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
+                $label = $langs->trans('Show' . ucfirst($this->element));
+                $linkclose .= ' alt="' . dol_escape_htmltag($label, 1) . '"';
+            }
+            $linkclose .= ' title="' . dol_escape_htmltag($label, 1) . '"';
+            $linkclose .= ' class="classfortooltip' . ($morecss ? ' ' . $morecss : '') . '"';
+        } else {
+            $linkclose = ($morecss ? ' class="' . $morecss . '"' : '');
+        }
+
+        if ($option == 'nolink') {
+            $linkstart = '<span';
+        } else {
+            $linkstart = '<a href="' . $url . '"';
+        }
+        if ($option == 'blank') {
+            $linkstart .= 'target=_blank';
+        }
+        $linkstart .= $linkclose . '>';
+        if ($option == 'nolink' || empty($url)) {
+            $linkend = '</span>';
+        } else {
+            $linkend = '</a>';
+        }
+
+        $result .= $linkstart;
+
+        if ($withpicto > 0) {
+            $result .= img_picto('', $picto) . ' ';
+        } else {
+            if (!empty($this->gender)) {
+                $picto = '<!-- picto photo user --><span class="nopadding userimg' . ($morecss ? ' '.$morecss : '') . '">' . Form::showphoto('userphoto', $this, 0, 0, 0, 'userphotosmall', 'mini', 0, 1) . '</span>';
+                $result .= $picto;
+            } else {
+                $result .= img_picto('', $picto) . ' ';
+            }
+        }
+
+        if ($withpicto != 2) {
+            $result .= (!empty($this->civility) ? $this->civility . ' ' : '') . $this->lastname . ' ' . $this->firstname;
+        }
+
+        $result .= $linkend;
+
+        if ($withpicto != 2) {
+            $result .= (($addLabel && property_exists($this, 'label')) ? '<span class="opacitymedium">' . ' - ' . dol_trunc($this->label, ($addLabel > 1 ? $addLabel : 0)) . '</span>' : '');
+        }
+
+        $hookmanager->initHooks([$this->element . 'dao']);
+        $parameters = ['id' => $this->id, 'getnomurl' => $result];
+        $reshook = $hookmanager->executeHooks('getNomUrl', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks.
+        if ($reshook > 0) {
+            $result = $hookmanager->resPrint;
+        } else {
+            $result .= $hookmanager->resPrint;
+        }
+
+        return $result;
     }
 }

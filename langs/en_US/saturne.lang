@@ -64,7 +64,7 @@ SavedConfig                         = Saved configuration
 ErrorSavedConfig                    = An error occurred during the configuration
 Config                              = Configuration
 Extrafields                         = Extra attributes
-
+ClickHereToGoToTheConfigPage        = Click here to go to the configuration page
 
 # Mod Numbering
 NumberingModule = Numbering model
@@ -109,6 +109,18 @@ EnableSaturne           = Please activate the Saturn module to access this page
 
 
 #
+# Public Interface - Interface publique
+#
+
+# Data - Donnée
+PublicInterfaceObject                  = Public interface %s
+PublicInterfaceUseSignatoryDescription = Using the signature on the public interface
+PublicInterfaceUser                    = Default user
+PublicInterfaceUserDescription         = User used on the public interface
+PublicInterfaceForbidden               = No access to public interface %s
+
+
+#
 # PWA - Progressive Web App
 #
 
@@ -125,13 +137,16 @@ GeneratePWAQRCodeDescription  = This option generates the QRCode for the progres
 #
 
 # Data
-ModuleArea             = Welcome to %s
-ModuleUpdate           = Update of %s :
-ModuleHasBeenUpdatedTo = %s has been updated to %s
-ModulePatchNote        = Update note %s %s
-ShowPatchNote          = See the update note
-DontShowPatchNote      = No longer display the update note
-ChooseBoxToAdd         = Add widget to dashboard
+ModuleArea                 = Welcome to %s
+ModuleUpdate               = Update of %s :
+ModuleHasBeenUpdatedTo     = %s has been updated to %s
+ModulePatchNote            = Update note %s %s
+ShowPatchNote              = See the update note
+DontShowPatchNote          = No longer display the update note
+ChooseBoxToAdd             = Add widget to dashboard
+SetupDefaultDataNotCreated = You have not created default data for %s
+HowToSetupDefaultData      = To set up %s default data, please click on this link :
+ConfigDefaultData          = Configure %s default data
 
 
 

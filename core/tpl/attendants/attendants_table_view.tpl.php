@@ -29,7 +29,7 @@
  * Variable   : $signatoryRole, $signatories, $moduleNameLowerCase, $permissiontoadd
  */
 
-print load_fiche_titre($langs->trans('Attendants') . (($attendantTableMode == 'advanced') ? ' - ' . $langs->trans($signatoryRole) : ''), '', '');
+print load_fiche_titre($langs->trans($attendantTableMode == 'advanced' ? $signatoryRole : 'Attendants'), '', '');
 
 if (!empty($signatories) || (empty($signatories) && $object->status == $object::STATUS_DRAFT)) {
     print '<table class="border centpercent tableforfield">';
@@ -42,7 +42,7 @@ if (!empty($signatories) || (empty($signatories) && $object->status == $object::
     }
     print '<td class="center">' . $langs->trans('SignatureLink') . '</td>';
     print '<td class="center">' . $langs->trans('SendMailDate') . '</td>';
-    print '<td class="' . ($conf->browser->layout != 'classic' ? 'hidden': '') .'">' . $langs->trans('SignatureDate') . '</td>';
+    print '<td class="' . ($conf->browser->layout != 'classic' ? 'hidden': '') . '">' . $langs->trans('SignatureDate') . '</td>';
     print '<td class="center">' . $langs->trans('Status') . '</td>';
     print '<td class="center">' . $langs->trans('Attendance') . '</td>';
     print '<td class="center">' . $langs->trans('SignatureActions') . '</td>';
@@ -77,22 +77,9 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
             }
         }
         print '</td><td>';
-        if ($element->element_type == 'user') {
-            $usertmp->fetch($element->element_id);
-            print $usertmp->getNomUrl(1, ($conf->browser->layout != 'classic' ? 'nolink': ''), 0, 0, 24, 1);
-            if (!empty($usertmp->job)) {
-                print ' - ' . $usertmp->job;
-            }
-        } else {
-            $contact->fetch($element->element_id);
-            if ($conf->browser->layout != 'classic') {
-                print img_picto('', 'company') . ' ' . $contact->getFullName($langs, 1);
-            } else {
-                print $contact->getNomUrl(1);
-            }
-            if (!empty($contact->job)) {
-                print ' - ' . $contact->job;
-            }
+        print $element->getNomUrl(-1, 'blank');
+        if (!empty($element->job)) {
+            print ' - ' . $element->job;
         }
         if ($attendantTableMode == 'simple') {
             print '</td><td class="center ' . ($conf->browser->layout != 'classic' && $object->status > $object::STATUS_DRAFT ? 'hidden': '') . '">';
@@ -109,7 +96,7 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
         }
         print '</td><td class="center">';
         if ($object->status == $object::STATUS_VALIDATED && $element->signature == '') {
-            if (dol_strlen($element->email) || dol_strlen($usertmp->email) || dol_strlen($contact->email)) {
+            if (dol_strlen($element->email)) {
                 print dol_print_date($element->last_email_sent_date, 'dayhour', 'tzuser');
                 require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
                 $nbEmailSent = 0;

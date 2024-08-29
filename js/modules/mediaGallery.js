@@ -406,10 +406,14 @@ window.saturne.mediaGallery.unlinkFile = function( event ) {
 
   $('.card__confirmation').css('display', 'flex');
   $(document).on('click', '.confirmation-close', function() {
+    $(document).off('click', '.confirmation-delete');
+    $(document).off('click', '.confirmation-close');
     $('.wpeo-loader').removeClass('wpeo-loader');
     $('.card__confirmation').css('display', 'none');
   });
   $(document).on('click', '.confirmation-delete', function() {
+    $(document).off('click', '.confirmation-delete');
+    $(document).off('click', '.confirmation-close');
     $.ajax({
       url: document.URL + querySeparator + "subaction=unlinkFile&token=" + token,
       type: "POST",

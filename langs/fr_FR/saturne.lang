@@ -64,7 +64,7 @@ SavedConfig                         = Configuration sauvegardée
 ErrorSavedConfig                    = Une erreur est survenue lors de la configuration
 Config                              = Configuration
 Extrafields                         = Attributs supplémentaires
-
+ClickHereToGoToTheConfigPage        = Veuillez cliquer ici pour vous rendre sur la page de configuration
 
 # Mod Numbering - Modèle de numérotation
 NumberingModule = Modèle de numérotation
@@ -109,6 +109,18 @@ EnableSaturne           = Veuillez activer le module Saturne pour accéder à ce
 
 
 #
+# Public Interface - Interface publique
+#
+
+# Data - Donnée
+PublicInterfaceObject                  = Interface publique %s
+PublicInterfaceUseSignatoryDescription = Utilisation de la signature sur l'interface publique
+PublicInterfaceUser                    = Utilisateur par défaut
+PublicInterfaceUserDescription         = Utilisateur utilisé sur l'interface publique
+PublicInterfaceForbidden               = Accès interdit à l'interface publique %s
+
+
+#
 # PWA - Progressive Web App
 #
 
@@ -125,13 +137,16 @@ GeneratePWAQRCodeDescription  = Cette option permet de générer le QRCode de l'
 #
 
 # Data - Donnée
-ModuleArea             = Bienvenue sur %s
-ModuleUpdate           = Mise à jour de %s :
-ModuleHasBeenUpdatedTo = %s a été mis à jour en version %s
-ModulePatchNote        = Note de mise à jour %s %s
-ShowPatchNote          = Consulter la note de mise à jour
-DontShowPatchNote      = Ne plus afficher la note de mise à jour
-ChooseBoxToAdd         = Ajouter le widget au tableau de bord
+ModuleArea                 = Bienvenue sur %s
+ModuleUpdate               = Mise à jour de %s :
+ModuleHasBeenUpdatedTo     = %s a été mis à jour en version %s
+ModulePatchNote            = Note de mise à jour %s %s
+ShowPatchNote              = Consulter la note de mise à jour
+DontShowPatchNote          = Ne plus afficher la note de mise à jour
+ChooseBoxToAdd             = Ajouter le widget au tableau de bord
+SetupDefaultDataNotCreated = Vous n'avez pas créé les données par défaut de %s
+HowToSetupDefaultData      = Pour configurer les données par défaut de %s, veuillez cliquer sur ce lien :
+ConfigDefaultData          = Configuration des données par défaut de %s
 
 
 

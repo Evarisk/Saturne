@@ -192,7 +192,7 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 
 			if (($show_only_favorite && ($object->$favorite_field == $fileName || !$favoriteExists)) || !$show_only_favorite) {
 				if ($showdiv) {
-					$return .= '<div class="media-container" style="margin-right: 20px; display: inline-block">';
+					$return .= '<div class="media-container">';
 				}
 
 				$return .= '<input hidden class="file-path" value="'. $filePath .'">';
