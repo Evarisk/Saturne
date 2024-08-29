@@ -29,8 +29,8 @@
  *
  * @memberof Saturne_Audio
  *
- * @since   1.6.0
- * @version 1.6.0
+ * @since   1.7.0
+ * @version 1.7.0
  *
  * @type {Object}
  */
@@ -41,8 +41,8 @@ window.saturne.audio = {};
  *
  * @memberof Saturne_Audio
  *
- * @since   1.6.0
- * @version 1.6.0
+ * @since   1.7.0
+ * @version 1.7.0
  *
  * @type {Object}
  */
@@ -53,8 +53,8 @@ window.saturne.mediaRecoder = {};
  *
  * @memberof Saturne_Audio
  *
- * @since   1.6.0
- * @version 1.6.0
+ * @since   1.7.0
+ * @version 1.7.0
  *
  * @returns {void}
  */
@@ -67,8 +67,8 @@ window.saturne.audio.init = function() {
  *
  * @memberof Saturne_Audio
  *
- * @since   1.6.0
- * @version 1.6.0
+ * @since   1.7.0
+ * @version 1.7.0
  *
  * @returns {void}
  */
@@ -82,8 +82,8 @@ window.saturne.audio.event = function() {
  *
  * @memberof Saturne_Audio
  *
- * @since   1.6.0
- * @version 1.6.0
+ * @since   1.7.0
+ * @version 1.7.0
  *
  * @returns {void}
  */
@@ -101,8 +101,8 @@ window.saturne.audio.getMediaStream = async function() {
  *
  * @memberof Saturne_Audio
  *
- * @since   1.6.0
- * @version 1.6.0
+ * @since   1.7.0
+ * @version 1.7.0
  *
  * @returns {void}
  */
@@ -151,8 +151,8 @@ window.saturne.audio.startRecording = async function() {
  *
  * @memberof Saturne_Audio
  *
- * @since   1.6.0
- * @version 1.6.0
+ * @since   1.7.0
+ * @version 1.7.0
  *
  * @returns {void}
  */
