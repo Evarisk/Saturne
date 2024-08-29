@@ -262,46 +262,51 @@ class SaturneDocuments extends SaturneObject
     /**
      * Get last document of a type in a dir
      *
-     * @param string $type       Type of file
-     * @param string $modulepart Module of the file
-     * @param string $filedir    File directory
-     * @return array|null
+     * @param  string    $moduleNameLowerCase Module name in lowercase
+     * @param  string    $fileDir             File directory
+     * @param  string    $fileType            Type of file
+     * @return array|int $result              Array of document or -1 if not found
      */
-    public function getLastDocument(string $type, string $modulepart, string $filedir) : ?array
+    public function getLastDocument(string $moduleNameLowerCase = '', string $fileDir = '', string $fileType = '')
     {
-        require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
-
         global $conf;
 
-        $upload_dir = $conf->digiriskdolibarr->multidir_output[$conf->entity ?? 1];
-        $fileDir    = $upload_dir . '/' . $filedir;
-        $fileList   = dol_dir_list($fileDir, 'files', 0, '(\.' . $type .  ')', '', 'date', $sort, 1);
-        $result   = null;
+        require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+
+        $uploadDir = $conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1];
+        $fileDir   = $uploadDir . '/' . $fileDir;
+        $fileList  = dol_dir_list($fileDir, 'files', 0, '(\.' . $fileType .  ')', '', 'date', 'SORT_DESC', 1);
         if (count($fileList)) {
             $result = $fileList[0];
+        } else {
+            $result = -1;
         }
+
         return $result;
     }
 
     /**
-     * Get Url of last generated document as a html link
+     * Get URL of last generated document as a html link
      *
-     * @param string $type         Type of file
-     * @param string $modulepart   Module of the file
-     * @param string $filedir      File directory
-     * @param string $defaulticon  Default icon for download button
-     * @return string              String of html button
+     * @param  string $moduleNameLowerCase Module name in lowercase
+     * @param  string $fileDir             File directory
+     * @param  string $fileType            Type of file
+     * @param  string $icon                Icon for download button
+     * @return string                      String of html button
      */
-    public function showUrlOfLastGeneratedDocument(string $type, string $modulepart, string $filedir, string $defaulticon = 'fa-file-alt') : string
+    public function showUrlOfLastGeneratedDocument(string $moduleNameLowerCase = '', string $fileDir = '', string $fileType = '', string $icon = 'fa-file-word'): string
     {
-        $document   = $this->getLastDocument($type, $modulepart, $filedir);
-        $result     = '';
-        if (!is_null($document)) {
+        global $langs;
+
+        $out      = '';
+        $document = $this->getLastDocument($moduleNameLowerCase, $fileDir, $fileType);
+        if (is_array($document)) {
             $documentUrl = DOL_URL_ROOT . '/document.php';
-            $fileUrl    = $documentUrl . '?modulepart=' . $modulepart . '&file=' . urlencode($filedir . '/' . $document['name']);
-            $icon       = $type == 'pdf' ? 'fa-file-pdf' : $defaulticon;
-            $result     = '<a class="marginleftonly" href="' . $fileUrl . '" target="_blank">' . img_picto('download', $icon) . '</a>';
+            $fileUrl     = $documentUrl . '?modulepart=' . $moduleNameLowerCase . '&file=' . urlencode($fileDir . '/' . $document['name']);
+            $icon        = $fileType == 'pdf' ? 'fa-file-pdf' : $icon;
+            $out         = '<a class="marginleftonly" href="' . $fileUrl . '" download>' . img_picto($langs->trans('File') . ' : ' . $document['name'], $icon) . '</a>';
         }
-        return $result;
+
+        return $out;
     }
 }
