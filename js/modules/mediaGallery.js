@@ -587,14 +587,13 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
 						success: function ( resp ) {
               $('.wpeo-loader').removeClass('wpeo-loader')
               mediaGallery.removeClass('modal-active')
+              if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
+                $('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
+              }
               if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
-                $('.headphoto').replaceWith($(resp).find('.headphoto').first())
                 $('.photo.'+objectPhotoClass).replaceWith($(resp).find('.photo.'+objectPhotoClass).first())
                 $('.linked-medias.'+objectPhotoClass).replaceWith($(resp).find('.linked-medias.'+objectPhotoClass))
               } else {
-                if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
-                  $('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
-                }
                 $('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
               }
 
