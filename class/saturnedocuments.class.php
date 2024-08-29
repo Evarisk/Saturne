@@ -260,14 +260,14 @@ class SaturneDocuments extends SaturneObject
     }
 
     /**
-     * Get documents of a type in a dir
+     * Get last document of a type in a dir
      *
-     * @param string $type
-     * @param string $modulepart
-     * @param string $filedir
-     * @return array
+     * @param string $type       Type of file
+     * @param string $modulepart Module of the file
+     * @param string $filedir    File directory
+     * @return array|null
      */
-    public function getDocuments(string $type, string $modulepart, string $filedir, string $sort = SORT_DESC) : array
+    public function getLastDocument(string $type, string $modulepart, string $filedir) : ?array
     {
         require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 
@@ -276,20 +276,6 @@ class SaturneDocuments extends SaturneObject
         $upload_dir = $conf->digiriskdolibarr->multidir_output[$conf->entity ?? 1];
         $fileDir    = $upload_dir . '/' . $filedir;
         $fileList   = dol_dir_list($fileDir, 'files', 0, '(\.' . $type .  ')', '', 'date', $sort, 1);
-        return $fileList;
-    }
-
-    /**
-     * Get last document of a type in a dir
-     *
-     * @param string $type
-     * @param string $modulepart
-     * @param string $filedir
-     * @return array|null
-     */
-    public function getLastDocument(string $type, string $modulepart, string $filedir) : ?array
-    {
-        $fileList = $this->getDocuments($type, $modulepart, $filedir);
         $result   = null;
         if (count($fileList)) {
             $result = $fileList[0];
@@ -306,16 +292,13 @@ class SaturneDocuments extends SaturneObject
      * @param string $defaulticon  Default icon for download button
      * @return string              String of html button
      */
-    public function getUrlOfLastGeneratedDocument(string $type, string $modulepart, string $filedir, string $defaulticon = 'fa-file-alt') : string
+    public function showUrlOfLastGeneratedDocument(string $type, string $modulepart, string $filedir, string $defaulticon = 'fa-file-alt') : string
     {
         $document   = $this->getLastDocument($type, $modulepart, $filedir);
         $result     = '';
         if (!is_null($document)) {
             $documentUrl = DOL_URL_ROOT . '/document.php';
-            if (getDolGlobalString('DOL_URL_ROOT_DOCUMENT_PHP') !== '') {
-                $documentUrl = getDolGlobalString('DOL_URL_ROOT_DOCUMENT_PHP'); // To use another wrapper
-            }
-            $fileUrl    = $documentUrl . '?modulepart=' . $modulepart . '&amp;file=' . urlencode($filedir . '/' . $document['name']);
+            $fileUrl    = $documentUrl . '?modulepart=' . $modulepart . '&file=' . urlencode($filedir . '/' . $document['name']);
             $icon       = $type == 'pdf' ? 'fa-file-pdf' : $defaulticon;
             $result     = '<a class="marginleftonly" href="' . $fileUrl . '" target="_blank">' . img_picto('download', $icon) . '</a>';
         }
