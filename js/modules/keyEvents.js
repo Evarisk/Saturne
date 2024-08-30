@@ -87,6 +87,12 @@ window.saturne.keyEvent.keyActions = function(event) {
       }
     }
   }
+
+  if ($(this).find('.card__confirmation').length > 0) {
+    if ('Escape' === event.key) {
+      $(this).find('.confirmation-close-button.confirmation-close .fas.fa-times').click();
+    }
+  }
 };
 
 /**
