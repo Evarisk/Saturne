@@ -15,7 +15,7 @@
     background: #fff;
     margin: auto;
     box-shadow: 0 0 40px 0 rgba(0,0,0,0.1);
-    padding: 3em 1.5em;
+    padding: 1.5em 1.5em;
     text-align: center;
 
     .confirmation-icon {
@@ -25,6 +25,19 @@
       font-size: 20px;
       font-weight: 600;
       margin: 1em 0;
+    }
+    .confirmation-close-button {
+      display: flex;
+      justify-content: end;
+      width: 100%;
+
+      color: rgba(0,0,0,0.3);
+      transition: all 0.2s ease-out;
+      &:hover {
+        cursor: pointer;
+        color: $color__primary;
+      }
+
     }
   }
 }
