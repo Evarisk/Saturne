@@ -137,3 +137,30 @@
     margin-bottom: 1em;
   }
 }
+
+.clickable-photo-preview {
+  position: absolute;
+  top: 3%;
+  right: 3%;
+  z-index: 900;
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border-radius: 50%;
+  transition: all 0.2s ease-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+
+  &:hover {
+    transform: scale(1.1);
+    text-decoration: none;
+  }
+
+  i {
+    line-height: 25px;
+    font-size: 14px;
+    color: $color__primary;
+  }
+}
