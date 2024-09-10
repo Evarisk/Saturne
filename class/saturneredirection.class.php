@@ -71,7 +71,6 @@ class SaturneRedirection extends SaturneObject
         'date_creation'     => ['type' => 'datetime',     'label' => 'DateCreation',     'enabled' => 1, 'position' => 40,  'notnull' => 1, 'visible' => 0],
         'tms'               => ['type' => 'timestamp',    'label' => 'DateModification', 'enabled' => 1, 'position' => 50,  'notnull' => 1, 'visible' => 0],
         'import_key'        => ['type' => 'varchar(14)',  'label' => 'ImportId',         'enabled' => 1, 'position' => 60,  'notnull' => 0, 'visible' => 0, 'index' => 0],
-        'status'            => ['type' => 'smallint',     'label' => 'Status',           'enabled' => 1, 'position' => 70,  'notnull' => 1, 'visible' => 2, 'default' => 0, 'index' => 1, 'validate' => 1, 'arrayofkeyval' => [0 => 'StatusDraft', 1 => 'ValidatePendingSignature', 2 => 'Expired', 3 => 'Archived']],
         'from_url'          => ['type' => 'text',         'label' => 'FromURL',          'enabled' => 1, 'position' => 80,  'notnull' => 0, 'visible' => 0],
         'to_url'            => ['type' => 'text',         'label' => 'ToURL',            'enabled' => 1, 'position' => 90,  'notnull' => 0, 'visible' => 0],
         'fk_user_creat'     => ['type' => 'integer:User:user/class/user.class.php',      'label'   => 'UserAuthor',         'picto' => 'user',              'enabled' => 1,                         'position' => 220, 'notnull' => 1, 'visible' => 0, 'foreignkey' => 'user.rowid'],
@@ -101,11 +100,6 @@ class SaturneRedirection extends SaturneObject
      * @var string Import key
      */
     public $import_key;
-
-    /**
-     * @var int Status
-     */
-    public $status;
 
     /**
      * @var string From URL

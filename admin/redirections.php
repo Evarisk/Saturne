@@ -76,20 +76,29 @@ if ($resHook < 0) {
 
 if (empty($resHook)) {
     if ($action == 'add') {
+        if (empty($fromUrl) || empty($toUrl)) {
+            setEventMessage($langs->trans('RedirectionMissingParameter'));
+            header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
+            exit;
+        }
         $saturneRedirection->from_url = $fromUrl;
-        $saturneRedirection->to_url = $toUrl;
-        $saturneRedirection->create($user, true);
+        $saturneRedirection->to_url   = $toUrl;
+        $result                       = $saturneRedirection->create($user, true);
 
-        setEventMessage('RedirectionCreated');
-        header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
-        exit;
+        if ($result > 0) {
+            setEventMessage($langs->trans('ObjectCreated', 'redirection'));
+            header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
+            exit;
+        } else {
+            setEventMessage($langs->trans('ErrorCreateObject', 'redirection') . ' ' . $saturneRedirection->error , 'errors');
+        }
     }
 
     if ($action == 'remove') {
         $saturneRedirection->fetch(GETPOST('id'));
         $saturneRedirection->delete($user, true, false);
 
-        setEventMessage('RedirectionRemoved');
+        setEventMessage($langs->trans('ObjectDeleted', 'redirection'));
         header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
         exit;
     }
@@ -100,9 +109,9 @@ if (empty($resHook)) {
  */
 
 $title    = $langs->trans('ModuleSetup', 'Saturne');
-$help_url = 'FR:Module_' . $moduleName;
+$helpUrl = 'FR:Module_' . $moduleName;
 
-saturne_header(0, '', $title, $help_url);
+saturne_header(0, '', $title, $helpUrl);
 
 print load_fiche_titre($title, '', 'title_setup');
 

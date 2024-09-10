@@ -107,8 +107,9 @@ ObjectSubject   = Email document
 ObjectContent   = Veuillez trouver ci-joint le/les document(s) ODT lié(s) à __THETYPE__.
 
 # Config Trigger Info - Configuration Infos Événements
-ObjectCreated  = Création d'un(e) %s
-ObjectModified = Modifcation d'un(e) %s
-ObjectDeleted  = Suppression d'un(e) %s
-ObjectValidate = Validation d'un(e) %s
-ObjectLock     = Verrouillage d'un(e) %s
+ObjectCreated     = Création d'un(e) %s
+ObjectModified    = Modifcation d'un(e) %s
+ObjectDeleted     = Suppression d'un(e) %s
+ObjectValidate    = Validation d'un(e) %s
+ObjectLock        = Verrouillage d'un(e) %s
+ErrorCreateObject = Erreur lors de la création de %s

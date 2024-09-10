@@ -171,7 +171,12 @@ class ActionsSaturne
             $redirectionList = $saturneRedirection->fetchAll();
             if (is_array($redirectionList) && !empty($redirectionList)) {
                 foreach($redirectionList as $redirection) {
-                    if ($redirection->from_url == '/' . $originalUrl) {
+                    //check redirection from url, if not beginning with a / add it
+                    $urlToCheck = $redirection->from_url;
+                    if (strpos($redirection->from_url, '/') !== 0) {
+                        $urlToCheck = '/' . $redirection->from_url;
+                    }
+                    if ($urlToCheck == '/' . $originalUrl) {
                         header('Location: ' . $redirection->to_url);
                         exit;
                     }

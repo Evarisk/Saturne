@@ -67,15 +67,15 @@ Extrafields                         = Attributs supplémentaires
 ClickHereToGoToTheConfigPage        = Veuillez cliquer ici pour vous rendre sur la page de configuration
 
 # Config Redirections - Configuration des redirections
-RedirectionsSetup  = Configuration des redirections
-FromURL            = Depuis l'URL
-ToURL              = Vers l'URL
-Redirections       = Redirections
-RedirectionsMin    = redirections
-HowToUseFromUrl    = Saisissez l'URL de départ. Par exemple, pour rediriger depuis https://www.evarisk.com/depuis/la/page, saisissez "/depuis/la/page"
-HowToUseToUrl      = Saisissez l'URL de destination. Par exemple, pour rediriger vers https://www.evarisk.com/vers/la/page, saisissez "/vers/la/page"
-RedirectionCreated = Redirection créée
-RedirectionRemoved = Redirection supprimée
+RedirectionsSetup           = Configuration des redirections
+FromURL                     = Depuis l'URL
+ToURL                       = Vers l'URL
+Redirections                = Redirections
+RedirectionsMin             = redirections
+HowToUseFromUrl             = Saisissez l'URL de départ. Par exemple, pour rediriger depuis https://www.evarisk.com/depuis/la/page, saisissez "/depuis/la/page"
+HowToUseToUrl               = Saisissez l'URL de destination. Par exemple, pour rediriger vers https://www.evarisk.com/vers/la/page, saisissez "/vers/la/page"
+RedirectionMissingParameter = Paramètre de redirection manquant
+
 
 # Mod Numbering - Modèle de numérotation
 NumberingModule = Modèle de numérotation

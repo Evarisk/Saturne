@@ -14,6 +14,4 @@
 -- along with this program.  If not, see https://www.gnu.org/licenses/.
 
 ALTER TABLE llx_saturne_redirection ADD INDEX idx_saturne_redirection_rowid (rowid);
-ALTER TABLE llx_saturne_redirection ADD INDEX idx_saturne_redirection_ref (ref);
-ALTER TABLE llx_saturne_redirection ADD UNIQUE INDEX uk_saturne_redirection_ref (ref, entity);
 ALTER TABLE llx_saturne_redirection ADD CONSTRAINT llx_saturne_redirection_fk_user_creat FOREIGN KEY (fk_user_creat) REFERENCES llx_user(rowid);

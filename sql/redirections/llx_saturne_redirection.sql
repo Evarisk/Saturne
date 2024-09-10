@@ -19,7 +19,6 @@ CREATE TABLE llx_saturne_redirection(
     date_creation     datetime NOT NULL,
     tms               timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     import_key        varchar(14),
-    status            integer NOT NULL,
     from_url          text,
     to_url            text,
     fk_user_creat     integer NOT NULL
