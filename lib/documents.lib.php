@@ -113,8 +113,8 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 
     $fileList = dol_sort_array($fileList, $sortfield, $sortorder);
 
-    $page = GETPOST('page', 'int') ?: 1;
-    $filePerPage = 20;
+    $page           = GETPOST('page', 'int') ?: 1;
+    $filePerPage    = 20;
     $fileListLength = 0;
     if (is_array($fileList) && !empty($fileList)) {
         $fileListLength = count($fileList);
@@ -264,7 +264,6 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
                 $genbutton = '';
             }
             $out .= $genbutton;
-            $querySeparator = (strpos($_SERVER['REQUEST_URI'], '?') === false) ? '?' : '&';
 
             $out .= '<div class="pagination">';
             if($page > 1) {
@@ -536,6 +535,7 @@ function get_document_title_search(string $type, string $name, string $morehtml 
     $out = '<td class="'. $morehtml .'">';
     $out .= '<input class="saturne-search" id="search_' . strtolower($name) . '" type="'. $type .'"  name="search_' . strtolower($name) . '" value="' . GETPOST('search_' . strtolower($name)) . '">';
     $out .= '</td>';
+
     return $out;
 }
 
