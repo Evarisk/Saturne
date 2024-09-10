@@ -79,7 +79,6 @@ class SaturneQRCode extends SaturneObject
         'date_creation'     => ['type' => 'datetime',     'label' => 'DateCreation',     'enabled' => 1, 'position' => 40,  'notnull' => 1, 'visible' => 0],
         'tms'               => ['type' => 'timestamp',    'label' => 'DateModification', 'enabled' => 1, 'position' => 50,  'notnull' => 1, 'visible' => 0],
         'import_key'        => ['type' => 'varchar(14)',  'label' => 'ImportId',         'enabled' => 1, 'position' => 60,  'notnull' => 0, 'visible' => 0, 'index' => 0],
-        'status'            => ['type' => 'smallint',     'label' => 'Status',           'enabled' => 1, 'position' => 70,  'notnull' => 1, 'visible' => 2, 'default' => 0, 'index' => 1, 'validate' => 1, 'arrayofkeyval' => [0 => 'StatusDraft', 1 => 'ValidatePendingSignature', 2 => 'Expired', 3 => 'Archived']],
         'module_name'       => ['type' => 'varchar(128)', 'label' => 'ModuleName',       'enabled' => 1, 'position' => 90,  'notnull' => 0, 'visible' => 0],
         'url'               => ['type' => 'text',         'label' => 'Url',              'enabled' => 1, 'position' => 80,  'notnull' => 0, 'visible' => 0, 'index' => 0],
         'encoded_qr_code'   => ['type' => 'text',         'label' => 'EncodedData',      'enabled' => 1, 'position' => 90,  'notnull' => 0, 'visible' => 0, 'index' => 0],
@@ -110,11 +109,6 @@ class SaturneQRCode extends SaturneObject
      * @var string Import key
      */
     public $import_key;
-
-    /**
-     * @var int Status
-     */
-    public $status;
 
     /**
      * @var string Module name

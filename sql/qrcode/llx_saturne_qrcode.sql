@@ -1,4 +1,4 @@
--- Copyright (C) 2021-2023 EVARISK <technique@evarisk.com>
+-- Copyright (C) 2024 EVARISK <technique@evarisk.com>
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ CREATE TABLE llx_saturne_qrcode(
     date_creation   datetime NOT NULL,
     tms             timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     import_key      varchar(14),
-    status          integer DEFAULT 1 NOT NULL,
     module_name     varchar(255),
     url             text,
     encoded_qr_code longtext,

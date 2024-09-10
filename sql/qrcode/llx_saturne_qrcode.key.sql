@@ -14,6 +14,4 @@
 -- along with this program.  If not, see https://www.gnu.org/licenses/.
 
 ALTER TABLE llx_saturne_qrcode ADD INDEX idx_saturne_object_qrcode_rowid (rowid);
-ALTER TABLE llx_saturne_qrcode ADD INDEX idx_saturne_object_qrcode_ref (ref);
-ALTER TABLE llx_saturne_qrcode ADD INDEX idx_saturne_object_qrcode_status (status);
 ALTER TABLE llx_saturne_qrcode ADD CONSTRAINT llx_saturne_qrcode_fk_user_creat FOREIGN KEY (fk_user_creat) REFERENCES llx_user (rowid);

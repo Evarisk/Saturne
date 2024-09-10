@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2021-2023 EVARISK
+/* Copyright (C) 2024 EVARISK
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,9 @@
  */
 
 /**
- * \file    admin/redirections.php
+ * \file    admin/qrcode.php
  * \ingroup saturne
- * \brief   Saturne redirections page
+ * \brief   Saturne qrcode page
  */
 
 // Load Saturne environment
@@ -39,7 +39,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/includes/tecnickcom/tcpdf/tcpdf_barcodes_2d.php';
 
-// Load Module libraries
+// Load Saturne libraries
 require_once __DIR__ . '/../lib/saturne.lib.php';
 require_once __DIR__ . '/../class/saturneqrcode.class.php';
 
@@ -54,7 +54,7 @@ $form = new Form($db);
 
 // Get parameters
 $action = GETPOST('action', 'alpha');
-$url = GETPOST('url', 'alpha');
+$url    = GETPOST('url', 'alpha');
 
 // Initialize Redirection Manager
 $saturneQRCode = new SaturneQRCode($db);
@@ -74,10 +74,9 @@ if ($action == 'add') {
         header('Location: ' . $_SERVER['PHP_SELF']);
         exit;
     }
-    $saturneQRCode->url = $url;
+    $saturneQRCode->url             = $url;
     $saturneQRCode->encoded_qr_code = $saturneQRCode->getQRCodeBase64($url);
-    $saturneQRCode->module_name = 'saturne';
-    $saturneQRCode->status = 1;
+    $saturneQRCode->module_name     = 'saturne';
     $saturneQRCode->create($user);
 
     setEventMessage('QRCodeCreated');
@@ -87,7 +86,7 @@ if ($action == 'add') {
 
 if ($action == 'update') {
     $saturneQRCode->fetch(GETPOST('id'));
-    $saturneQRCode->url = GETPOST('url');
+    $saturneQRCode->url             = GETPOST('url');
     $saturneQRCode->encoded_qr_code = $saturneQRCode->getQRCodeBase64($saturneQRCode->url);
     $saturneQRCode->update($user);
 
