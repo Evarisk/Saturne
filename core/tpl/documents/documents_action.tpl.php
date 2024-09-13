@@ -65,10 +65,13 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
             asort($modelLists);
             $modelLists = array_filter($modelLists, 'saturne_remove_index');
             foreach ($modelLists as $key => $modelList) {
-                $confName = dol_strtoupper($moduleNameLowerCase . '_' . $document->element) . '_DEFAULT_MODEL';
+                $confName = dol_strtoupper($object->module . '_' . $document->element) . '_DEFAULT_MODEL';
                 if (dol_strlen(getDolGlobalString($confName)) > 0 && strpos($key, getDolGlobalString($confName)) !== false) {
                     $model = $key;
                 }
+            }
+            if (!dol_strlen($model)) {
+                $model = key($modelLists);
             }
         }
     } else {
@@ -100,8 +103,10 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
             $urlToRedirect = preg_replace('/#builddoc$/', '', $urlToRedirect);
             $urlToRedirect = preg_replace('/action=builddoc&?/', '', $urlToRedirect); // To avoid infinite loop.
             $urlToRedirect = preg_replace('/forcebuilddoc=1&?/', '', $urlToRedirect); // To avoid infinite loop.
-            header('Location: ' . $urlToRedirect);
-            exit;
+            if (isset($shouldExit) && $shouldExit) {
+                header('Location: ' . $urlToRedirect);
+                exit;
+            }
         }
     }
 }

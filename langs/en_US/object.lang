@@ -67,7 +67,7 @@ ObjectMustBeValidatedToSign      = %s must be in status (validated) for particip
 AllSignatoriesMustHaveSigned     = All participants must have signed to lock %s
 ObjectMustBeValidatedToSendEmail = %s must be in (validated) status to send an email
 ObjectMustBeLockedToSendEmail    = %s must be in (locked) status to send an email
-ObjectMustBeLockedToArchive      = %s must be in status (locked) and the document generated in order to archive it
+ObjectMustBeLockedToArchive      = %s must be in status (locked) in order to archive it
 
 # Confirm box
 ValidateObject          = Validate %s
