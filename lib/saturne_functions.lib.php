@@ -563,3 +563,40 @@ function saturne_create_category(string $label = '', string $type = '', int $fkP
 
     return $result;
 }
+
+/**
+ * Create notice
+ *
+ * @param  string   $title       Title
+ * @param  string   $message     Message
+ * @param  string   $type        Type of the notice
+ * @param  bool     $visible     Visibility of the notice
+ * @param  bool     $closeButton Button to close
+ * @param  string   $moreCss     More css
+ * @param  string[] $moreAttr    More html attributes
+ *
+ * @return string
+ */
+function saturn_show_notice(string $title = '', string $message = '', string $type = 'error', bool $visible = true, bool $closeButton = true, string $moreCss = '', $moreAttr = []) {
+    $out = '<div class="wpeo-notice notice-' . $type;
+    if (!$visible) {
+        $out .= ' hidden';
+    }
+    $out .= ' ' . $moreCss . '"';
+    foreach ($moreAttr as $attr => $value) {
+        $out .= ' ' . $attr . '="' . $value . '"';
+    }
+    $out .= '>';
+
+    $out .= '<div class="notice-content">';
+    $out .= '<div class="notice-title">' . $title . '</div>';
+    $out .= $message;
+    $out .= '</div>';
+
+    if ($closeButton) {
+        $out .= '<div class="notice-close"><i class="fas fa-times"></i></div>';
+    }
+    $out .= '</div>';
+
+    return $out;
+}
