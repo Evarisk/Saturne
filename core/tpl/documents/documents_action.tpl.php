@@ -26,7 +26,7 @@
  * Global     : $conf, $db, $hookmanager, $langs, $user,
  * Parameters : $action,
  * Objects    : $object, $document
- * Variable   : $permissiontoadd, $moduleNameLowerCase, $permissiontodelete
+ * Variable   : $permissiontoadd, $permissiontodelete, $shouldRedirect (optional)
  */
 
 // Build doc action.
@@ -98,12 +98,12 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
             if ($document->element != $documentType[0]) {
                 $document->element = $documentType[0];
             }
-            setEventMessages($langs->trans('FileGenerated') . ' - ' . '<a href=' . DOL_URL_ROOT . '/document.php?modulepart=' . (!empty($moreParams['modulePart']) ? $moreParams['modulePart'] : $moduleNameLowerCase) . '&file=' . urlencode((empty($moreParams['modulePart']) ? $document->element . '/' : '') . (dol_strlen($object->ref) > 0 ? $object->ref . '/' : '') . $document->last_main_doc) . '&entity=' . $conf->entity . '"' . '>' . $document->last_main_doc . '</a>', []);
+            setEventMessages($langs->trans('FileGenerated') . ' - ' . '<a href=' . DOL_URL_ROOT . '/document.php?modulepart=' . (!empty($moreParams['modulePart']) ? $moreParams['modulePart'] : $object->module) . '&file=' . urlencode((empty($moreParams['modulePart']) ? $document->element . '/' : '') . (dol_strlen($object->ref) > 0 ? $object->ref . '/' : '') . $document->last_main_doc) . '&entity=' . $conf->entity . '"' . '>' . $document->last_main_doc . '</a>', []);
             $urlToRedirect = $_SERVER['REQUEST_URI'];
             $urlToRedirect = preg_replace('/#builddoc$/', '', $urlToRedirect);
             $urlToRedirect = preg_replace('/action=builddoc&?/', '', $urlToRedirect); // To avoid infinite loop.
             $urlToRedirect = preg_replace('/forcebuilddoc=1&?/', '', $urlToRedirect); // To avoid infinite loop.
-            if (isset($shouldExit) && $shouldExit) {
+            if (isset($shouldRedirect) && $shouldRedirect) {
                 header('Location: ' . $urlToRedirect);
                 exit;
             }

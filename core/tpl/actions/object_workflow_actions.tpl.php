@@ -25,7 +25,7 @@
  * The following vars must be defined:
  * Global     : $langs, $user,
  * Parameters : $action, $backtopage, $id,
- * Objects    : $object, $signatory (optional)
+ * Objects    : $object, $signatory (optional), $document (optional)
  * Variable   : $permissiontoadd
  */
 
@@ -61,8 +61,10 @@ if ($action == 'confirm_archive' && $permissiontoadd) {
             }
         }
 
-        $shouldExit = true;
-        require_once __DIR__ . '/../documents/documents_action.tpl.php';
+        if (isset($document)) {
+            $shouldRedirect = false;
+            require_once __DIR__ . '/../documents/documents_action.tpl.php';
+        }
 
         // Set Archived OK
         $urlToGo = str_replace('__ID__', $result, $backtopage);
