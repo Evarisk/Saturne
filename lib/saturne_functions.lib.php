@@ -565,7 +565,7 @@ function saturne_create_category(string $label = '', string $type = '', int $fkP
 }
 
 /**
- * Create notice
+ * Show notice
  *
  * @param  string   $title       Title
  * @param  string   $message     Message
@@ -573,11 +573,12 @@ function saturne_create_category(string $label = '', string $type = '', int $fkP
  * @param  bool     $visible     Visibility of the notice
  * @param  bool     $closeButton Button to close
  * @param  string   $moreCss     More css
- * @param  string[] $moreAttr    More html attributes
+ * @param string[] $moreAttr     More html attributes
  *
  * @return string
  */
-function saturn_show_notice(string $title = '', string $message = '', string $type = 'error', bool $visible = true, bool $closeButton = true, string $moreCss = '', $moreAttr = []) {
+function saturne_show_notice(string $title = '', string $message = '', string $type = 'error', bool $visible = false, bool $closeButton = true, string $moreCss = '', array $moreAttr = []): string
+{
     $out = '<div class="wpeo-notice notice-' . $type;
     if (!$visible) {
         $out .= ' hidden';
