@@ -170,6 +170,8 @@ AutomaticPdfGeneration                  = Génération automatique des PDF
 AutomaticPdfGenerationDescription       = Crée automatiquement le document en PDF lors de la génération
 ManualPdfGeneration                     = Génération manuelle des PDF
 ManualPdfGenerationDescription          = Ajout d'un bouton pour créer un document ODT en PDF
+UseCreateDocumentOnArchive              = Génération document lors de l'archive
+UseCreateDocumentOnArchiveDescription   = Création automatique du document lors de l'archivage
 FileCouldNotBeGeneratedInPDF            = Le fichier n'a pas pu être généré en PDF
 CheckDocumentationToEnablePDFGeneration = Veuillez vous référer à la documentation pour la génération en PDF : <a target="_blank" href="https://wiki.dolibarr.org/index.php?title=Module_Saturne">Documentation</a>
 PDFGenerationTooltip                    = Appuyez sur ce bouton pour générer le document ODT en PDF

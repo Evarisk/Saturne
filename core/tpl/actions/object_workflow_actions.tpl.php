@@ -61,7 +61,7 @@ if ($action == 'confirm_archive' && $permissiontoadd) {
             }
         }
 
-        if (isset($document)) {
+        if (isset($document) && getDolGlobalInt('SATURNE_USE_CREATE_DOCUMENT_ON_ARCHIVE')) {
             $shouldRedirect = false;
             require_once __DIR__ . '/../documents/documents_action.tpl.php';
         }

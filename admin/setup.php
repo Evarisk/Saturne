@@ -115,6 +115,15 @@ print '</td><td class="center">';
 print ajax_constantonoff('SATURNE_USE_ALL_EMAIL_MODE');
 print '</td></tr>';
 
+// Use create document on archive
+print '<tr class="oddeven"><td>';
+print  $langs->trans('UseCreateDocumentOnArchive');
+print '</td><td>';
+print $langs->trans('UseCreateDocumentOnArchiveDescription');
+print '</td><td class="center">';
+print ajax_constantonoff('SATURNE_USE_CREATE_DOCUMENT_ON_ARCHIVE');
+print '</td></tr>';
+
 // Use fast upload improvement
 print '<tr class="oddeven"><td>';
 print  $langs->trans('UseFastUploadImprovement');
@@ -123,6 +132,8 @@ print $langs->transnoentities('UseFastUploadImprovementDescription');
 print '</td><td class="center">';
 print ajax_constantonoff('SATURNE_USE_FAST_UPLOAD_IMPROVEMENT');
 print '</td></tr>';
+
+// End of the table
 print '</table>';
 
 // Page end

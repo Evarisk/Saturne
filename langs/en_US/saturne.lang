@@ -170,6 +170,8 @@ AutomaticPdfGeneration                  = Automatic generation of PDFs
 AutomaticPdfGenerationDescription       = Automatically creates the document as a PDF when it is generated
 ManualPdfGeneration                     = Manual generation of PDFs
 ManualPdfGenerationDescription          = Added a button to create an ODT document in PDF
+UseCreateDocumentOnArchive              = Document generation during archiving
+UseCreateDocumentOnArchiveDescription   = Automatic creation of the document during archiving
 FileCouldNotBeGeneratedInPDF            = The file could not be generated in PDF
 CheckDocumentationToEnablePDFGeneration = Please refer to the documentation for the PDF generation : <a target="_blank" href="https://wiki.dolibarr.org/index.php?title=Module_Digirisk#Impression_du_Document_Unique_au_format_pdf_-_.28.2A.pdf.29">Documentation</a>
 PDFGenerationTooltip                    = Appuyez sur ce bouton pour générer le document ODT en PDF
