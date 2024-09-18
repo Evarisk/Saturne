@@ -91,7 +91,7 @@ window.saturne.audio.getMediaStream = async function() {
   try {
     return await navigator.mediaDevices.getUserMedia({audio: true});
   } catch (err) {
-    console.error('Erreur lors de l\'accès au microphone', err);
+    window.saturne.notice.showNotice('notice-infos', 'Error', err, 'error');
     throw err;
   }
 };

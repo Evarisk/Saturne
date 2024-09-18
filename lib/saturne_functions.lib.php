@@ -591,7 +591,7 @@ function saturne_show_notice(string $title = '', string $message = '', string $t
 
     $out .= '<div class="notice-content">';
     $out .= '<div class="notice-title">' . $title . '</div>';
-    $out .= $message;
+    $out .= '<div class="notice-message">' . $message . '</div>';
     $out .= '</div>';
 
     if ($closeButton) {

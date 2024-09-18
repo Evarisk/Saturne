@@ -54,6 +54,32 @@ window.saturne.notice.event = function() {
   $(document).on('click', '.notice-close', window.saturne.notice.closeNotice);
 };
 
+
+/**
+ * Show notice
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @returns {void}
+ */
+window.saturne.notice.showNotice = function (id, title, message, type) {
+  let notice = $('#' + id);
+
+  // Remove all default classes notice provided by Saturne CSS
+  notice.removeClass('notice-error');
+  notice.removeClass('notice-info');
+  notice.removeClass('notice-success');
+  notice.removeClass('notice-warning');
+
+  notice.addClass('notice-' + type);
+
+  notice.find('.notice-title').text(title);
+  notice.find('.notice-message').text(message);
+
+  notice.removeClass('hidden');
+};
+
 /**
  * Close notice on click
  *
@@ -65,6 +91,7 @@ window.saturne.notice.event = function() {
 window.saturne.notice.closeNotice = function() {
   $(this).closest('.wpeo-notice').fadeOut(function () {
     $(this).closest('.wpeo-notice').addClass('hidden');
+    $(this).css('display', '');
   });
 
   if ($(this).hasClass('notice-close-forever')) {
