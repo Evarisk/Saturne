@@ -119,6 +119,7 @@ window.saturne.audio.startRecording = async function() {
   $('#recording-indicator').show();
   $('#start-recording span').toggleClass('fa-circle fa-square');
   $('#start-recording').attr('id', 'stop-recording');
+  $('.page-footer button').prop('disabled', true);
 
   window.saturne.mediaRecoder.onstop = function() {
     const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
@@ -134,15 +135,20 @@ window.saturne.audio.startRecording = async function() {
       data: formData,
       processData: false,
       contentType: false,
-      success: function(result) {
-        console.log(result);
-      },
-      error: function(xhr, status, error) {
-        console.error('Erreur:', error);
-      }
-    });
+      xhr: function() {
+        let xhr = new XMLHttpRequest();
+        xhr.upload.onprogress = function(event) {
+          let percent = Math.round((event.loaded / event.total) * 100);
+          $('#recording-indicator').text('Téléchargement en cours : ' + percent + ' %');
+        };
 
-    $('#recording-indicator').hide();
+        return xhr;
+      },
+      complete: function(resp) {
+        $('.page-footer button').prop('disabled', false);
+        $('#recording-indicator').replaceWith($(resp.responseText).find('#recording-indicator'));
+      },
+    });
   };
 };
 
