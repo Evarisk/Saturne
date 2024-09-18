@@ -66,6 +66,15 @@ Config                              = Configuration
 Extrafields                         = Extra attributes
 ClickHereToGoToTheConfigPage        = Click here to go to the configuration page
 
+# Redirections
+Redirections = Redirections
+FromURL      = From URL
+ToURL        = To URL
+FromUrlHelp  = Enter the starting URL. For example, to redirect from https://www.evarisk.com/depuis/la/page, enter “/from/the/page”.
+ToUrlHelp    = Enter the destination URL. For example, to redirect to https://www.evarisk.com/vers/la/page, enter “/to/the/page”.
+
+
+
 # Mod Numbering
 NumberingModule = Numbering model
 NumberingModuleDet = Numbering model lines

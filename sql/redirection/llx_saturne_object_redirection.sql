@@ -13,5 +13,15 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see https://www.gnu.org/licenses/.
 
-ALTER TABLE llx_saturne_redirection ADD INDEX idx_saturne_redirection_rowid (rowid);
-ALTER TABLE llx_saturne_redirection ADD CONSTRAINT llx_saturne_redirection_fk_user_creat FOREIGN KEY (fk_user_creat) REFERENCES llx_user(rowid);
+CREATE TABLE llx_saturne_object_redirection(
+  rowid         integer AUTO_INCREMENT PRIMARY KEY NOT NULL,
+  entity        integer DEFAULT 1 NOT NULL,
+  date_creation datetime NOT NULL,
+  tms           timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  import_key    varchar(14),
+  status        integer DEFAULT 1 NOT NULL,
+  from_url      text,
+  to_url        text,
+  fk_user_creat integer NOT NULL,
+  fk_user_modif integer
+) ENGINE=innodb;

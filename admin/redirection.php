@@ -16,9 +16,9 @@
  */
 
 /**
- * \file    admin/redirections.php
+ * \file    admin/redirection.php
  * \ingroup saturne
- * \brief   Saturne redirections page
+ * \brief   Saturne redirection page
  */
 
 // Load Saturne environment
@@ -32,10 +32,10 @@ if (file_exists('../saturne.main.inc.php')) {
 
 // Get module parameters
 $moduleName          = GETPOST('module_name', 'alpha');
-$moduleNameLowerCase = strtolower($moduleName);
+$moduleNameLowerCase = dol_strtolower($moduleName);
 
 // Load Dolibarr libraries
-require_once DOL_DOCUMENT_ROOT . '/includes/tecnickcom/tcpdf/tcpdf_barcodes_2d.php';
+require_once TCPDF_PATH . 'tcpdf_barcodes_2d.php';
 
 // Load Module libraries
 require_once __DIR__ . '/../lib/saturne.lib.php';
@@ -45,7 +45,7 @@ require_once __DIR__ . '/../class/saturneredirection.class.php';
 global $conf, $db, $hookmanager, $langs, $user;
 
 // Load translation files required by the page
-saturne_load_langs(['admin']);
+saturne_load_langs();
 
 // Get parameters
 $action  = GETPOST('action', 'alpha');
@@ -58,11 +58,11 @@ $saturneRedirection = new SaturneRedirection($db);
 // Initialize view objects
 $form = new Form($db);
 
-$hookmanager->initHooks(['saturneredirectionadmin', 'saturneadmin']); // Note that conf->hooks_modules contains array.
+$hookmanager->initHooks([$moduleNameLowerCase . 'redirectionadmin', 'saturneadmin']); // Note that conf->hooks_modules contains array
 
 // Security check - Protection if external user
-$permissiontoread = $user->rights->saturne->adminpage->read;
-saturne_check_access($permissiontoread);
+$permissionToRead = $user->rights->$moduleNameLowerCase->adminpage->read;
+saturne_check_access($permissionToRead);
 
 /*
  * Actions
@@ -76,31 +76,34 @@ if ($resHook < 0) {
 
 if (empty($resHook)) {
     if ($action == 'add') {
-        if (empty($fromUrl) || empty($toUrl)) {
-            setEventMessage($langs->trans('RedirectionMissingParameter'));
-            header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
-            exit;
-        }
         $saturneRedirection->from_url = $fromUrl;
         $saturneRedirection->to_url   = $toUrl;
-        $result                       = $saturneRedirection->create($user, true);
 
+        $result = $saturneRedirection->create($user, true);
         if ($result > 0) {
             setEventMessage($langs->trans('ObjectCreated', 'redirection'));
             header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
             exit;
+        } elseif (!empty($saturneRedirection->errors)) {
+            setEventMessages($langs->trans('ErrorCreateObject', 'redirection'), $saturneRedirection->errors, 'errors');
         } else {
-            setEventMessage($langs->trans('ErrorCreateObject', 'redirection') . ' ' . $saturneRedirection->error , 'errors');
+            setEventMessages($saturneRedirection->error, [], 'errors');
         }
     }
 
     if ($action == 'remove') {
         $saturneRedirection->fetch(GETPOST('id'));
-        $saturneRedirection->delete($user, true, false);
 
-        setEventMessage($langs->trans('ObjectDeleted', 'redirection'));
-        header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
-        exit;
+        $result = $saturneRedirection->delete($user, true, false);
+        if ($result > 0) {
+            setEventMessage($langs->trans('ObjectDeleted', 'redirection'));
+            header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
+            exit;
+        } elseif (!empty($saturneRedirection->errors)) {
+            setEventMessages($langs->trans('ErrorDeleteObject', 'redirection'), $saturneRedirection->errors, 'errors');
+        } else {
+            setEventMessages($saturneRedirection->error, [], 'errors');
+        }
     }
 }
 
@@ -108,25 +111,27 @@ if (empty($resHook)) {
  * View
  */
 
-$title    = $langs->trans('ModuleSetup', 'Saturne');
+$title   = $langs->trans('ModuleSetup', 'Saturne');
 $helpUrl = 'FR:Module_' . $moduleName;
 
 saturne_header(0, '', $title, $helpUrl);
 
+// Subheader
+$linkBack = '<a href="' . DOL_URL_ROOT . '/admin/modules.php?restore_lastsearch_values=1' . '">' . $langs->trans('BackToModuleList') . '</a>';
 print load_fiche_titre($title, '', 'title_setup');
 
 // Configuration header
 $preHead = $moduleNameLowerCase . '_admin_prepare_head';
 $head    = $preHead();
-print dol_get_fiche_head($head, 'redirections', $title, -1, $moduleNameLowerCase . '_color@' . $moduleNameLowerCase);
+print dol_get_fiche_head($head, 'redirection', $title, -1, $moduleNameLowerCase . '_color@' . $moduleNameLowerCase);
 
-print load_fiche_titre($langs->trans('Configs', $langs->trans('RedirectionsMin')), '', '');
+print load_fiche_titre($langs->trans('Configs', dol_strtolower($langs->trans('Redirections'))), '', '');
 
 print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
 print '<td>' . $langs->trans('FromURL') . '</td>';
 print '<td>' . $langs->trans('ToURL') . '</td>';
-print '<td class="center">' . $langs->trans('QR Code') . '</td>';
+print '<td class="center">' . $langs->trans('QRCode') . '</td>';
 print '<td class="center">' . $langs->trans('Action') . '</td>';
 print '</tr>';
 
@@ -156,14 +161,14 @@ if (is_array($redirections) && !empty($redirections)) {
 
 print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '">';
 print '<input type="hidden" name="token" value="' . newToken() . '">';
-
 print '<input type="hidden" name="action" value="add">';
+
 print '<tr class="oddeven"><td>';
-print '<input placeholder="'. $langs->trans('FromURL') .'" type="text" name="from_url" value="' . $fromUrl . '" class="marginrightonly">';
-print $form->textwithpicto($langs->trans('Help'), $langs->trans('HowToUseFromUrl'));
+print '<input type="text" class="marginrightonly minwidth300 maxwidthonsmartphone" name="from_url" placeholder="' . $langs->trans('FromURL') . '" value="' . $fromUrl . '" required>';
+print $form->textwithpicto('', $langs->trans('FromUrlHelp'));
 print '</td><td>';
-print '<input placeholder="'. $langs->trans('ToURL') .'" type="text" name="to_url" value="' . $toUrl . '" class="marginrightonly">';
-print $form->textwithpicto($langs->trans('Help'), $langs->trans('HowToUseToUrl'));
+print '<input type="text" name="to_url" class="marginrightonly minwidth300 maxwidthonsmartphone" placeholder="' . $langs->trans('ToURL') . '"  value="' . $toUrl . '" required>';
+print $form->textwithpicto('', $langs->trans('ToUrlHelp'));
 print '</td><td class="center" colspan="2">';
 print '<button class="butAction">'. $langs->trans('Add') . '</button>';
 print '</td></tr>';
@@ -171,6 +176,7 @@ print '</td></tr>';
 print '</form>';
 print '</table>';
 
+// Page end
 print dol_get_fiche_end();
 llxFooter();
 $db->close();

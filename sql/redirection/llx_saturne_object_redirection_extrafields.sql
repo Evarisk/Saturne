@@ -13,9 +13,9 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program. If not, see https://www.gnu.org/licenses/.
 
-create table llx_saturne_redirection_extrafields(
-    rowid      integer AUTO_INCREMENT PRIMARY KEY,
-    tms        timestamp,
-    fk_object  integer NOT NULL,
-    import_key varchar(14)
+create table llx_saturne_object_redirection_extrafields(
+  rowid      integer AUTO_INCREMENT PRIMARY KEY,
+  tms        timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  import_key varchar(14),
+  fk_object  integer NOT NULL
 ) ENGINE=innodb;

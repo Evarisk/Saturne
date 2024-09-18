@@ -154,12 +154,11 @@ class ActionsSaturne
     /**
      *  Overloading the llxHeader function : replacing the parent's function with the one below
      *
-     * @param  array        $parameters Hook metadatas (context, etc...)
-     * @param  CommonObject $object     Current object
-     * @param  string       $action     Current action
-     * @return int                      0 < on error, 0 on success, 1 to replace standard code
+     * @param  array $parameters Hook metadatas (context, etc...)
+     * @return int               0 < on error, 0 on success, 1 to replace standard code
+     * @throws Exception
      */
-    public function llxHeader(array $parameters, $object, string $action)
+    public function llxHeader(array $parameters): int
     {
         if (strpos($parameters['context'], 'index') !== false) {
             require_once __DIR__ . '/saturneredirection.class.php';
@@ -168,9 +167,9 @@ class ActionsSaturne
 
             $originalUrl = GETPOST('original_url', 'alpha');
 
-            $redirectionList = $saturneRedirection->fetchAll();
-            if (is_array($redirectionList) && !empty($redirectionList)) {
-                foreach($redirectionList as $redirection) {
+            $redirections = $saturneRedirection->fetchAll();
+            if (is_array($redirections) && !empty($redirections)) {
+                foreach($redirections as $redirection) {
                     //check redirection from url, if not beginning with a / add it
                     $urlToCheck = $redirection->from_url;
                     if (strpos($redirection->from_url, '/') !== 0) {

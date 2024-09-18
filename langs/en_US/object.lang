@@ -37,9 +37,13 @@ ObjectSignedTrigger     = Signing %s %s
 ObjectImportTrigger     = Import of %s %s
 ObjectUnlinkTrigger     = Unlink of %s %s
 
-# SetEventMessage
+# SetEventMessage - Notice info
 ObjectValidated = %s has been validated
 ObjectReOpened  = %s has been re-opened
+
+# SetEventMessage - Notice error
+ErrorCreateObject = Error: creation of a %s
+ErrorDeleteObject = Error: deleting a %s
 
 # Numbering modules
 SaturneGenericMaskCodes = This field consists of a prefix followed by a suffix. For example, ABC{000} will result in ABC001, ABC002, etc. You can add as many zeros as you wish.

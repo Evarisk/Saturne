@@ -44,7 +44,7 @@ class SaturneRedirection extends SaturneObject
     /**
      * @var string Name of table without prefix where object is stored. This is also the key used for extrafields management
      */
-    public $table_element = 'saturne_redirection';
+    public $table_element = 'saturne_object_redirection';
 
     /**
      * @var int Does this object support multicompany module ?
@@ -62,18 +62,24 @@ class SaturneRedirection extends SaturneObject
      */
     public string $picto = 'fontawesome_fa-forward_fas_#d35968';
 
+    public const STATUS_DELETED   = -1;
+    public const STATUS_DRAFT     = 0;
+    public const STATUS_VALIDATED = 1;
+
     /**
-     * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
+     * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor
      */
     public $fields = [
-        'rowid'             => ['type' => 'integer',      'label' => 'TechnicalID',      'enabled' => 1, 'position' => 1,   'notnull' => 1, 'visible' => 0, 'noteditable' => 1, 'index' => 1, 'comment' => 'Id'],
-        'entity'            => ['type' => 'integer',      'label' => 'Entity',           'enabled' => 1, 'position' => 30,  'notnull' => 1, 'visible' => 0, 'index' => 1],
-        'date_creation'     => ['type' => 'datetime',     'label' => 'DateCreation',     'enabled' => 1, 'position' => 40,  'notnull' => 1, 'visible' => 0],
-        'tms'               => ['type' => 'timestamp',    'label' => 'DateModification', 'enabled' => 1, 'position' => 50,  'notnull' => 1, 'visible' => 0],
-        'import_key'        => ['type' => 'varchar(14)',  'label' => 'ImportId',         'enabled' => 1, 'position' => 60,  'notnull' => 0, 'visible' => 0, 'index' => 0],
-        'from_url'          => ['type' => 'text',         'label' => 'FromURL',          'enabled' => 1, 'position' => 80,  'notnull' => 0, 'visible' => 0],
-        'to_url'            => ['type' => 'text',         'label' => 'ToURL',            'enabled' => 1, 'position' => 90,  'notnull' => 0, 'visible' => 0],
-        'fk_user_creat'     => ['type' => 'integer:User:user/class/user.class.php',      'label'   => 'UserAuthor',         'picto' => 'user',              'enabled' => 1,                         'position' => 220, 'notnull' => 1, 'visible' => 0, 'foreignkey' => 'user.rowid'],
+        'rowid'         => ['type' => 'integer',      'label' => 'TechnicalID',      'enabled' => 1, 'position' => 1,  'notnull' => 1, 'visible' => 0, 'noteditable' => 1, 'index' => 1, 'comment' => 'Id'],
+        'entity'        => ['type' => 'integer',      'label' => 'Entity',           'enabled' => 1, 'position' => 10, 'notnull' => 1, 'visible' => 0, 'index' => 1],
+        'date_creation' => ['type' => 'datetime',     'label' => 'DateCreation',     'enabled' => 1, 'position' => 20, 'notnull' => 1, 'visible' => 0],
+        'tms'           => ['type' => 'timestamp',    'label' => 'DateModification', 'enabled' => 1, 'position' => 30, 'notnull' => 1, 'visible' => 0],
+        'import_key'    => ['type' => 'varchar(14)',  'label' => 'ImportId',         'enabled' => 1, 'position' => 40, 'notnull' => 0, 'visible' => 0, 'index' => 0],
+        'status'        => ['type' => 'smallint',     'label' => 'Status',           'enabled' => 1, 'position' => 90, 'notnull' => 1, 'visible' => 0, 'default' => 1, 'index' => 1, 'arrayofkeyval' => [0 => 'StatusDraft', 1 => 'Validated']],
+        'from_url'      => ['type' => 'text',         'label' => 'FromURL',          'enabled' => 1, 'position' => 50, 'notnull' => 0, 'visible' => 0],
+        'to_url'        => ['type' => 'text',         'label' => 'ToURL',            'enabled' => 1, 'position' => 60, 'notnull' => 0, 'visible' => 0],
+        'fk_user_creat' => ['type' => 'integer:User:user/class/user.class.php', 'label' => 'UserAuthor', 'picto' => 'user', 'enabled' => 1, 'position' => 70, 'notnull' => 1, 'visible' => 0, 'foreignkey' => 'user.rowid'],
+        'fk_user_modif' => ['type' => 'integer:User:user/class/user.class.php', 'label' => 'UserModif',  'picto' => 'user', 'enabled' => 1, 'position' => 80, 'notnull' => 0, 'visible' => 0, 'foreignkey' => 'user.rowid'],
     ];
 
     /**
@@ -102,6 +108,11 @@ class SaturneRedirection extends SaturneObject
     public $import_key;
 
     /**
+     * @var int Status
+     */
+    public $status;
+
+    /**
      * @var string From URL
      */
     public string $from_url;
@@ -112,9 +123,14 @@ class SaturneRedirection extends SaturneObject
     public string $to_url;
 
     /**
-     * @var int User creator
+     * @var int User ID
      */
     public $fk_user_creat;
+
+    /**
+     * @var int|null User ID
+     */
+    public $fk_user_modif;
 
     /**
      * Constructor
@@ -130,10 +146,8 @@ class SaturneRedirection extends SaturneObject
 
     /**
      * Adapt htaccess in order to redirect 404 errors to dolibarr main index
-     *
-     * @return int
      */
-    public function adaptHtAccess(): int
+    public function adaptHtAccess()
     {
         $toUrl = DOL_MAIN_URL_ROOT . '/index.php?original_url=$1';
 
@@ -142,6 +156,7 @@ class SaturneRedirection extends SaturneObject
         $redirectionLines .= "RewriteRule ^(.*)$ $toUrl" . PHP_EOL;
 
         $htaccessContent = file_get_contents(DOL_DOCUMENT_ROOT . '/../.htaccess');
+
         if (!strpos($htaccessContent, $redirectionLines)) {
 
             $rewriteEnginePos = strpos($htaccessContent, 'RewriteEngine on');
@@ -153,7 +168,5 @@ class SaturneRedirection extends SaturneObject
             $newHtaccessContent = $htaccessContent . "\n" . ($allRedirectionLines ?? $redirectionLines);
             file_put_contents(DOL_DOCUMENT_ROOT . '/../.htaccess', $newHtaccessContent);
         }
-
-        return 1;
     }
 }
