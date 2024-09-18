@@ -41,6 +41,10 @@ ObjectUnlinkTrigger     = %s %s délié(e)
 ObjectValidated = %s a été validé(e)
 ObjectReOpened  = %s a été rouvert(e)
 
+# SetEventMessage - Notice erreur
+ErrorCreateObject = Erreur : création d'un(e) %s
+ErrorDeleteObject = Erreur : suppression d'un(e) %s
+
 # Numbering modules
 SaturneGenericMaskCodes = Ce champ se compose d'un préfixe suivi d'un suffixe. Par exemple : ABC{000} donnera ABC001, ABC002, etc.  Vous pouvez ajouter autant de zéro que vous le souhaitez.
 

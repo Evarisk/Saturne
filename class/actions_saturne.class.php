@@ -152,6 +152,41 @@ class ActionsSaturne
     }
 
     /**
+     *  Overloading the llxHeader function : replacing the parent's function with the one below
+     *
+     * @param  array $parameters Hook metadatas (context, etc...)
+     * @return int               0 < on error, 0 on success, 1 to replace standard code
+     * @throws Exception
+     */
+    public function llxHeader(array $parameters): int
+    {
+        if (strpos($parameters['context'], 'index') !== false) {
+            require_once __DIR__ . '/saturneredirection.class.php';
+
+            $saturneRedirection = new SaturneRedirection($this->db);
+
+            $originalUrl = GETPOST('original_url', 'alpha');
+
+            $redirections = $saturneRedirection->fetchAll();
+            if (is_array($redirections) && !empty($redirections)) {
+                foreach($redirections as $redirection) {
+                    //check redirection from url, if not beginning with a / add it
+                    $urlToCheck = $redirection->from_url;
+                    if (strpos($redirection->from_url, '/') !== 0) {
+                        $urlToCheck = '/' . $redirection->from_url;
+                    }
+                    if ($urlToCheck == '/' . $originalUrl) {
+                        header('Location: ' . $redirection->to_url);
+                        exit;
+                    }
+                }
+            }
+        }
+
+        return 0; // or return 1 to replace standard code
+    }
+
+    /**
      * Overloading the printCommonFooter function : replacing the parent's function with the one below
      *
      * @param  array     $parameters Hook metadatas (context, etc...)

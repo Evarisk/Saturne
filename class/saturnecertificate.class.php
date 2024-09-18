@@ -18,7 +18,7 @@
 /**
  * \file    class/saturnecertificate.class.php
  * \ingroup saturne
- * \brief   This file is a CRUD class file for SaturneSaturneCertificate (Create/Read/Update/Delete).
+ * \brief   This file is a CRUD class file for SaturneCertificate (Create/Read/Update/Delete).
  */
 
 // Load Saturne libraries.
