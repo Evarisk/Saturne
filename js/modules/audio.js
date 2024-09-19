@@ -91,7 +91,8 @@ window.saturne.audio.getMediaStream = async function() {
   try {
     return await navigator.mediaDevices.getUserMedia({audio: true});
   } catch (err) {
-    window.saturne.notice.showNotice('notice-infos', 'Error', err, 'error');
+    let {name, message} = err;
+    window.saturne.notice.showNotice('notice-infos', 'Error', name + ': ' + message, 'error');
     throw err;
   }
 };
