@@ -22,6 +22,8 @@
  * \brief   JavaScript notice file for module Saturne
  */
 
+"use strict"
+
 /**
  * Init notice JS
  *
@@ -64,7 +66,8 @@ window.saturne.notice.event = function() {
  * @returns {void}
  */
 window.saturne.notice.showNotice = function (id, title, message, type) {
-  let notice = $('#' + id);
+  const notice = $('#' + id);
+  const inputs = notice.find('input');
 
   // Remove all default classes notice provided by Saturne CSS
   notice.removeClass('notice-error');
@@ -73,6 +76,14 @@ window.saturne.notice.showNotice = function (id, title, message, type) {
   notice.removeClass('notice-warning');
 
   notice.addClass('notice-' + type);
+
+  // Use hidden input to translate title and message
+  inputs.each(function (index, element) {
+    let name = $(element).attr('name');
+    let val  = $(element).val();
+    title = title.replace(new RegExp(name, 'g'), val);
+    message = message.replace(new RegExp(name, 'g'), val);
+  });
 
   notice.find('.notice-title').text(title);
   notice.find('.notice-message').text(message);
@@ -90,7 +101,7 @@ window.saturne.notice.showNotice = function (id, title, message, type) {
  */
 window.saturne.notice.closeNotice = function() {
   $(this).closest('.wpeo-notice').fadeOut(function () {
-    $(this).closest('.wpeo-notice').addClass('hidden');
+    $(this).addClass('hidden');
     $(this).css('display', '');
   });
 

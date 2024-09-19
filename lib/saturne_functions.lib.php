@@ -567,27 +567,34 @@ function saturne_create_category(string $label = '', string $type = '', int $fkP
 /**
  * Show notice
  *
- * @param  string   $title       Title
- * @param  string   $message     Message
- * @param  string   $type        Type of the notice
- * @param  bool     $visible     Visibility of the notice
- * @param  bool     $closeButton Button to close
- * @param  string   $moreCss     More css
- * @param string[] $moreAttr     More html attributes
+ * @param  string   $title        Title
+ * @param  string   $message      Message
+ * @param  string   $type         Type of the notice
+ * @param  string   $id           HTML Id for the notice
+ * @param  bool     $visible      Visibility of the notice
+ * @param  bool     $closeButton  Button to close
+ * @param  string   $moreCss      More css
+ * @param  string[] $translations Array of translations to manipulate notice with JS
+ * @param  string[] $moreAttr     More html attributes
  *
  * @return string
  */
-function saturne_show_notice(string $title = '', string $message = '', string $type = 'error', bool $visible = false, bool $closeButton = true, string $moreCss = '', array $moreAttr = []): string
+function saturne_show_notice(string $title = '', string $message = '', string $type = 'error', string $id = 'notice-infos', bool $visible = false, bool $closeButton = true, string $moreCss = '', array $translations = [], array $moreAttr = []): string
 {
     $out = '<div class="wpeo-notice notice-' . $type;
     if (!$visible) {
         $out .= ' hidden';
     }
     $out .= ' ' . $moreCss . '"';
+    $out .= ' id="' . $id . '"';
     foreach ($moreAttr as $attr => $value) {
         $out .= ' ' . $attr . '="' . $value . '"';
     }
     $out .= '>';
+
+    foreach ($translations as $name => $translation) {
+        $out .= '<input type="hidden" name="' . $name . '" value="' . $translation . '">';
+    }
 
     $out .= '<div class="notice-content">';
     $out .= '<div class="notice-title">' . $title . '</div>';
