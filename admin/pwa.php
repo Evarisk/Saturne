@@ -45,20 +45,19 @@ require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameL
 global $conf, $db, $hookmanager, $langs, $user;
 
 // Load translation files required by the page
-saturne_load_langs(['admin']);
+saturne_load_langs();
 
 // Get parameters
-$action     = GETPOST('action', 'alpha');
-$backtopage = GETPOST('backtopage', 'alpha');
+$action = GETPOST('action', 'alpha');
 
 // Initialize view objects
 $form = new Form($db);
 
-$hookmanager->initHooks(['pwaadmin', 'globalcard']); // Note that conf->hooks_modules contains array
+$hookmanager->initHooks([$moduleNameLowerCase . 'pwaadmin', 'saturneadmin']); // Note that conf->hooks_modules contains array
 
 // Security check - Protection if external user
-$permissiontoread = $user->rights->$moduleNameLowerCase->adminpage->read;
-saturne_check_access($permissiontoread);
+$permissionToRead = $user->rights->$moduleNameLowerCase->adminpage->read;
+saturne_check_access($permissionToRead);
 
 /*
  * Actions
@@ -77,7 +76,7 @@ if ($action == 'generate_QRCode') {
     imagepng($imageData, $file);
 
     setEventMessage('SavedConfig');
-    header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&start_url=' . $startUrl);
+    header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&start_url=' . $urlToEncode);
     exit;
 }
 
@@ -91,7 +90,7 @@ $helpUrl = 'FR:Module_' . $moduleName;
 saturne_header(0, '', $title, $helpUrl);
 
 // Subheader
-$linkBack = '<a href="' . ($backtopage ?: DOL_URL_ROOT . '/admin/modules.php?restore_lastsearch_values=1') . '">' . $langs->trans('BackToModuleList') . '</a>';
+$linkBack = '<a href="' . DOL_URL_ROOT . '/admin/modules.php?restore_lastsearch_values=1' . '">' . $langs->trans('BackToModuleList') . '</a>';
 print load_fiche_titre($title, $linkBack, 'title_setup');
 
 // Configuration header
@@ -99,10 +98,13 @@ $preHead = $moduleNameLowerCase . '_admin_prepare_head';
 $head    = $preHead();
 print dol_get_fiche_head($head, 'pwa', $title, -1, $moduleNameLowerCase . '_color@' . $moduleNameLowerCase);
 
+print '<a class="marginrightonly" href="' . $startUrl . '" target="_blank">' . img_picto('', 'url', 'class="pictofixedwidth"') . $langs->trans('PWA') . '</a>';
+print showValueWithClipboardCPButton($startUrl, 0, 'none');
+
 // PWA QR Code generation
 print load_fiche_titre($langs->transnoentities('PWAQRCodeGenerationManagement'), '', '');
 
-print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&start_url=' . $startUrl . '">';
+print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '">';
 print '<input type="hidden" name="token" value="' . newToken() . '">';
 print '<input type="hidden" name="action" value="generate_QRCode">';
 print '<input hidden name="urlToEncode" value="' . $startUrl . '">';
