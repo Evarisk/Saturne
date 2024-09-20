@@ -2,11 +2,11 @@ div.wpeo-modal-patchnote{
   .modal-header{
     background-color: white;
     border-bottom: solid #cccccc 1px;
+    box-shadow: 0 0 18px rgba(0,0,0,0.2);
   }
   .modal-container {
     max-width: 80%;
     max-height: 80%;
-    background-color: #e9eaed;
     border-radius: 25px;
     li{
       list-style-type: circle;
@@ -23,8 +23,8 @@ div.wpeo-modal-patchnote{
   }
   .modal-content {
     img{
-      width: 100%;
-      box-shadow:5px 5px 18px rgba(0,0,0,0.2) ;
+      max-width: 100%;
+      box-shadow:5px 5px 18px rgba(0,0,0,0.2);
       margin-bottom: 28px;
     }
     h3{
