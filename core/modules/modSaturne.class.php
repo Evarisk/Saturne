@@ -181,6 +181,15 @@ class modSaturne extends DolibarrModules
             $i++ => ['SATURNE_USE_CAPTCHA', 'integer', 0, '', 0, 'current'],
             $i++ => ['SATURNE_USE_ALL_EMAIL_MODE', 'integer', 1, '', 0, 'current'],
             $i++ => ['SATURNE_USE_CREATE_DOCUMENT_ON_ARCHIVE', 'integer', 1, '', 0, 'current'],
+            $i++ => ['SATURNE_MEDIA_MAX_WIDTH_MINI', 'integer', 128, '', 0, 'current'],
+            $i++ => ['SATURNE_MEDIA_MAX_HEIGHT_MINI', 'integer', 72, '', 0, 'current'],
+            $i++ => ['SATURNE_MEDIA_MAX_WIDTH_SMALL', 'integer', 480, '', 0, 'current'],
+            $i++ => ['SATURNE_MEDIA_MAX_HEIGHT_SMALL', 'integer', 270, '', 0, 'current'],
+            $i++ => ['SATURNE_MEDIA_MAX_WIDTH_MEDIUM', 'integer', 854, '', 0, 'current'],
+            $i++ => ['SATURNE_MEDIA_MAX_HEIGHT_MEDIUM', 'integer', 480, '', 0, 'current'],
+            $i++ => ['SATURNE_MEDIA_MAX_WIDTH_LARGE', 'integer', 1280, '', 0, 'current'],
+            $i++ => ['SATURNE_MEDIA_MAX_HEIGHT_LARGE', 'integer', 720, '', 0, 'current'],
+            $i++ => ['SATURNE_DISPLAY_NUMBER_MEDIA_GALLERY', 'integer', 8, '', 0, 'current'],
 
             // CONST DOLIBARR
             $i   => ['MAIN_ALLOW_SVG_FILES_AS_IMAGES', 'integer', 1, '', 0, 'current']
