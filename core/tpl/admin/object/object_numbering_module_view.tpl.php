@@ -34,9 +34,9 @@ $varsToChecks = [
     'langs'               => ['isset' => true,  'not_empty' => true, 'type' => 'object'],
     'object'              => ['isset' => true,  'not_empty' => true, 'type' => 'object'],
     'documentParentType'  => ['isset' => false, 'not_empty' => true, 'type' => 'string'],
-    'documentPath'        => ['isset' => false, 'not_empty' => true, 'type' => 'string'],
+    'documentPath'        => ['isset' => false, 'not_empty' => true, 'type' => 'bool'],
     'moduleName'          => ['isset' => true,  'not_empty' => true, 'type' => 'string'],
-    'moduleNameLowerCase' => ['isset' => true,  'not_empty' => false,'type' => 'string'],
+    'moduleNameLowerCase' => ['isset' => true,  'not_empty' => true, 'type' => 'string'],
     'objectModSubdir'     => ['isset' => false, 'not_empty' => true, 'type' => 'string']
 ];
 
