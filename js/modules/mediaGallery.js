@@ -594,7 +594,7 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
                 $('.photo.'+objectPhotoClass).replaceWith($(resp).find('.photo.'+objectPhotoClass).first())
                 $('.linked-medias.'+objectPhotoClass).replaceWith($(resp).find('.linked-medias.'+objectPhotoClass))
               } else {
-                $('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
+                $('.linked-medias.'+objectSubtype).replaceWith($(resp).find('.linked-medias.'+objectSubtype))
               }
 
               //refresh media gallery & unselect selected medias

@@ -18,21 +18,18 @@
 #
 
 # Data - Donnée
-MediasMin                    = médias
-MediaGallery                 = Bibliothèque de médias
-ErrorThisFileSizeTooLarge    = Le fichier %s est trop volumineux
-ErrorThisFileExists          = Le fichier %s existe déjà
-EmptyMediaGallery            = La bibliothèque de médias est vide
-SearchFile                   = Rechercher un fichier
-PhotoWellSent                = La photo a été ajoutée à la bibliothèque de médias
-PhotoNotSent                 = La photo ne s'est pas correctement envoyée
-MediaDimensionSetWithSuccess = Dimensions des médias modifiées avec succès
-MediaDimensionNegativeError  = Les valeurs des dimensions ne peuvent être négatives
-MediaDimensionEmptyError     = Les valeurs des dimensions ne peuvent pas être vides
-MediaData                    = Configuration des médias
-ConfirmUnlinkMedia           = Êtes vous sur de vouloir détacher le media sélectionné ?
-AddPhotoFromComputer         = Ajouter une photo depuis la galerie de l'appareil
-AddPhotoFromMediaGallery     = Ajouter une photo depuis la galerie des médias
+MediasMin                 = médias
+MediaGallery              = Bibliothèque de médias
+ErrorThisFileSizeTooLarge = Le fichier %s est trop volumineux
+ErrorThisFileExists       = Le fichier %s existe déjà
+EmptyMediaGallery         = La bibliothèque de médias est vide
+SearchFile                = Rechercher un fichier
+PhotoWellSent             = La photo a été ajoutée à la bibliothèque de médias
+PhotoNotSent              = La photo ne s'est pas correctement envoyée
+MediaData                 = Configuration des médias
+ConfirmUnlinkMedia        = Êtes vous sur de vouloir détacher le media sélectionné ?
+AddPhotoFromComputer      = Ajouter une photo depuis la galerie de l'appareil
+AddPhotoFromMediaGallery  = Ajouter une photo depuis la galerie des médias
 
 # Config page - Page d'administration
 MediaMaxWidthMini                    = Largeur du média mini
