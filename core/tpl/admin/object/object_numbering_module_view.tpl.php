@@ -25,8 +25,22 @@
  * The following vars must be defined :
  * Global   : $conf, $db, $langs
  * Objects  : $object
- * Variable : $documentParentType, $documentPath, $moduleName, $moduleNameLowerCase, $objectModSubdir
+ * Variable : $documentParentType (optional), $documentPath (optional), $moduleName, $moduleNameLowerCase, $objectModSubdir (optional)
  */
+
+$varsToChecks = [
+    'conf'                => ['isset' => true,  'not_empty' => true, 'type' => 'object'],
+    'db'                  => ['isset' => true,  'not_empty' => true, 'type' => 'object'],
+    'langs'               => ['isset' => true,  'not_empty' => true, 'type' => 'object'],
+    'object'              => ['isset' => true,  'not_empty' => true, 'type' => 'object'],
+    'documentParentType'  => ['isset' => false, 'not_empty' => true, 'type' => 'string'],
+    'documentPath'        => ['isset' => false, 'not_empty' => true, 'type' => 'bool'],
+    'moduleName'          => ['isset' => true,  'not_empty' => true, 'type' => 'string'],
+    'moduleNameLowerCase' => ['isset' => true,  'not_empty' => true, 'type' => 'string'],
+    'objectModSubdir'     => ['isset' => false, 'not_empty' => true, 'type' => 'string']
+];
+
+require_once __DIR__ . '/../../utils/saturne_check_variable.php';
 
 //$numberingModuleLabel = str_contains($object->element, 'det') ? 'NumberingModuleDet' : 'NumberingModule';
 print load_fiche_titre($langs->trans('NumberingModule'), '', '');
@@ -43,7 +57,7 @@ clearstatcache();
 
 if (empty($documentPath)) {
     $objectType = $object->element;
-    $path = '/custom/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . ($objectModSubdir ? $objectModSubdir . '/' : '') . $objectType . '/';
+    $path = '/custom/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . (!empty($objectModSubdir) ? $objectModSubdir . '/' : '') . $objectType . '/';
 } else {
     $objectType = $documentParentType;
     $path = '/custom/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $objectType . '/';
