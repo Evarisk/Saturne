@@ -134,6 +134,34 @@ class SaturneDashboard
             foreach ($dashboards['widgets'] as $dashboardWidgets) {
                 foreach ($dashboardWidgets as $key => $dashboardWidget) {
                     if (!isset($disableWidgetList->$key) && is_array($dashboardWidget) && !empty($dashboardWidget)) {
+                        $widget .= '
+<div class="wpeo-infobox">
+    <div class="wpeo-infobox__header">
+        <div class="header__icon-container">
+            <span class="header__icon-background" style="background: #0D8AFF;"></span>
+            <i class="header__icon fas fa-book" style="color: #0D8AFF;"></i>
+        </div>
+        <div class="header__title">Titre de l\'infobox super long</div>
+        <i class="header__close fas fa-times"></i>
+    </div>
+    <div class="wpeo-infobox__body">
+        <ul class="body__row-container">
+            <li class="body__row">
+                <span class="row__libelle">Libellé listing</span>
+                <span class="row__data-container">
+                    <span class="row__data">
+                        <span class="row__data-libelle"><i class="far fa-calendar"></i> Data avec icone</span>
+                    </span>
+                    <span class="row__data">
+                        <span class="row__data-libelle">Data sans icone</span>
+                    </span>
+                </span>
+            </li>
+        </ul>
+        <div class="body__content">Lorem ispum dolor sit amet, consectetur adipiscing elit. Sed elementum in nibh ac rutrum</div>
+    </div>
+</div>
+';
                         $widget .= '<div class="box-flex-item"><div class="box-flex-item-with-margin">';
                         $widget .= '<div class="info-box">';
                         $widget .= '<span class="info-box-icon">';
