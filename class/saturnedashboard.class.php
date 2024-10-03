@@ -134,85 +134,69 @@ class SaturneDashboard
             foreach ($dashboards['widgets'] as $dashboardWidgets) {
                 foreach ($dashboardWidgets as $key => $dashboardWidget) {
                     if (!isset($disableWidgetList->$key) && is_array($dashboardWidget) && !empty($dashboardWidget)) {
-                        $widget .= '
-<div class="wpeo-infobox">
-    <div class="wpeo-infobox__header">
-        <div class="header__icon-container">
-            <span class="header__icon-background" style="background: #0D8AFF;"></span>
-            <i class="header__icon fas fa-book" style="color: #0D8AFF;"></i>
-        </div>
-        <div class="header__title">Titre de l\'infobox super long</div>
-        <i class="header__close fas fa-times"></i>
-    </div>
-    <div class="wpeo-infobox__body">
-        <ul class="body__row-container">
-            <li class="body__row">
-                <span class="row__libelle">Libellé listing</span>
-                <span class="row__data-container">
-                    <span class="row__data">
-                        <span class="row__data-libelle"><i class="far fa-calendar"></i> Data avec icone</span>
-                    </span>
-                    <span class="row__data">
-                        <span class="row__data-libelle">Data sans icone</span>
-                    </span>
-                </span>
-            </li>
-        </ul>
-        <div class="body__content">Lorem ispum dolor sit amet, consectetur adipiscing elit. Sed elementum in nibh ac rutrum</div>
-    </div>
-</div>
-';
-                        $widget .= '<div class="box-flex-item"><div class="box-flex-item-with-margin">';
-                        $widget .= '<div class="info-box">';
-                        $widget .= '<span class="info-box-icon">';
-                        $widget .= '<i class="' . $dashboardWidget['picto'] . '"></i>';
-                        $widget .= '</span>';
-                        $widget .= '<div class="info-box-content">';
-                        $widget .= '<div class="info-box-title" title="' . $langs->trans('Close') . '">';
-                        $widget .= '<span class="close-dashboard-widget" data-widgetname="' . $key . '"><i class="fas fa-times"></i></span>';
-                        $widget .= '</div>';
-                        $widget .= '<div class="info-box-lines">';
-                        $widget .= '<div class="info-box-line" style="font-size : 20px;">';
-                        for ($i = 0; $i < count($dashboardWidget['label']); $i++) {
-                            if (!empty($dashboardWidget['label'][$i])) {
-                                $widget .= '<span class=""><strong>' . $dashboardWidget['label'][$i] . ' : ' . '</strong>';
-                                if (isset($dashboardWidget['content'][$i]) && $dashboardWidget['content'][$i] !== '') {
-                                    $widget .= '<span class="classfortooltip badge badge-info">' . $dashboardWidget['content'][$i] . '</span>';
-                                    $widget .= (!empty($dashboardWidget['tooltip'][$i]) ? $form->textwithpicto('', $langs->transnoentities($dashboardWidget['tooltip'][$i])) : '') . '</span>';
-                                    if (isset($dashboardWidget['moreContent'][$i]) && $dashboardWidget['moreContent'][$i] !== '') {
-                                        $widget .= $dashboardWidget['moreContent'][$i];
-                                    }
-                                } else {
-                                    $widget .= $dashboardWidget['customContent'][$i];
+
+                        $widget .= '<div class="wpeo-infobox">';
+                        
+                            $widget .= '<div class="wpeo-infobox__header">';
+                                $widget .= '<div class="header__icon-container">';
+                                    $widget .= '<span class="header__icon-background" style="background: #0D8AFF;"></span>'; // @TODO Variable couleur ici
+                                    $widget .= '<i class="header__icon ' . $dashboardWidget['picto'] . '" style="color: #0D8AFF;"></i>'; // @TODO Variable couleur ici
+                                $widget .= '</div>';
+                                $widget .= '<div class="header__title">Titre</div>'; // @TODO Variable titre ici
+                                $widget .= '<i class="close-dashboard-widget header__close fas fa-times" data-widgetname="' . $key . '"></i>';
+                            $widget .= '</div>';
+
+                        $widget .= '<div class="wpeo-infobox__body">';
+                            $widget .= '<ul class="body__row-container">';
+                            for ($i = 0; $i < count($dashboardWidget['label']); $i++) {
+                                if (!empty($dashboardWidget['label'][$i])) {
+                                    $widget .= '<li class="body__row">';
+                                        $widget .= '<span class="row__libelle">';
+                                            $widget .= $dashboardWidget['label'][$i];
+                                            $widget .= (!empty($dashboardWidget['tooltip'][$i]) ? $form->textwithpicto('', $langs->transnoentities($dashboardWidget['tooltip'][$i])) : '');
+                                        $widget .= '</span>';
+                                        $widget .= '<span class="row__data-container">';
+                                            $widget .= '<span class="row__data">'; // @TODO Boucle ici pour avoir plusieurs badges
+                                                if (isset($dashboardWidget['content'][$i]) && $dashboardWidget['content'][$i] !== '') {
+                                                    $widget .= '<span class="row__data-libelle">' . $dashboardWidget['content'][$i] . '</span>';
+                                                    
+                                                    if (isset($dashboardWidget['moreContent'][$i]) && $dashboardWidget['moreContent'][$i] !== '') {
+                                                        $widget .= $dashboardWidget['moreContent'][$i];
+                                                    }
+                                                } else {
+                                                    $widget .= $dashboardWidget['customContent'][$i];
+                                                }
+                                            $widget .= '</span>';
+                                        $widget .= '</span>';
+                                    $widget .= '</li>';
                                 }
-                                $widget .= '<br>';
                             }
-                        }
-                        if (is_array($dashboardWidget['moreParams']) && (!empty($dashboardWidget['moreParams']))) {
-                            foreach ($dashboardWidget['moreParams'] as $dashboardWidgetMoreParamsKey => $dashboardWidgetMoreParams) {
-                                switch ($dashboardWidgetMoreParamsKey) {
-                                    case 'links' :
-                                        if (is_array($dashboardWidget['moreParams']['links']) && (!empty($dashboardWidget['moreParams']['links']))) {
-                                            foreach ($dashboardWidget['moreParams']['links'] as $dashboardWidgetMoreParamsLink) {
-                                                $widget .= '<a class="' . $dashboardWidgetMoreParamsLink['moreCSS'] . '" href="' . dol_buildpath($dashboardWidgetMoreParamsLink['url'], 1) . '" target="_blank">' . img_picto($langs->trans('Url'), 'globe', 'class="paddingrightonly"') . $langs->transnoentities($dashboardWidgetMoreParamsLink['linkName']) . '</a><br>';
+                            $widget .= '</ul>';
+                            if (is_array($dashboardWidget['moreParams']) && (!empty($dashboardWidget['moreParams']))) {
+                                $widget .= '<div class="body__content">';
+                                foreach ($dashboardWidget['moreParams'] as $dashboardWidgetMoreParamsKey => $dashboardWidgetMoreParams) {
+                                    switch ($dashboardWidgetMoreParamsKey) {
+                                        case 'links' :
+                                            if (is_array($dashboardWidget['moreParams']['links']) && (!empty($dashboardWidget['moreParams']['links']))) {
+                                                foreach ($dashboardWidget['moreParams']['links'] as $dashboardWidgetMoreParamsLink) {
+                                                    $widget .= '<a class="' . $dashboardWidgetMoreParamsLink['moreCSS'] . '" href="' . dol_buildpath($dashboardWidgetMoreParamsLink['url'], 1) . '" target="_blank">' . img_picto($langs->trans('Url'), 'globe', 'class="paddingrightonly"') . $langs->transnoentities($dashboardWidgetMoreParamsLink['linkName']) . '</a><br>';
+                                                }
                                             }
-                                        }
-                                        break;
-                                    default :
-                                        $widget .= $dashboardWidgetMoreParams;
-                                        break;
+                                            break;
+                                        default :
+                                            $widget .= $dashboardWidgetMoreParams;
+                                            break;
+                                    }
                                 }
+                                $widget .= '</div>';
                             }
-                        }
                         $widget .= '</div>';
-                        $widget .= '</div><!-- /.info-box-lines --></div><!-- /.info-box-content -->';
-                        $widget .= '</div><!-- /.info-box -->';
-                        $widget .= '</div><!-- /.box-flex-item-with-margin -->';
+
                         $widget .= '</div>';
                     }
                 }
             }
-            print '<div class="opened-dash-board-wrap"><div class="box-flex-container">' . $widget . '</div></div>';
+            print '<div class="opened-dash-board-wrap"><div class="wpeo-infobox-container box-flex-container">' . $widget . '</div></div>';
         }
 
         print '<div class="graph-dashboard wpeo-grid grid-2">';
