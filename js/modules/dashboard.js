@@ -89,8 +89,8 @@ window.saturne.dashboard.addDashBoardInfo = function() {
             dashboardWidgetName: dashboardWidgetName
         }),
         contentType: false,
-        success: function() {
-            window.location.reload();
+        success: function(resp) {
+          $('.fichecenter').replaceWith($(resp).find('.fichecenter'));
         },
         error: function() {}
     });
@@ -121,7 +121,7 @@ window.saturne.dashboard.closeDashBoardInfo = function() {
         }),
         contentType: false,
         success: function(resp) {
-            box.closest('.box-flex-item').fadeOut(400);
+            box.closest('.wpeo-infobox').fadeOut(400);
             $('.add-widget-box').attr('style', '');
             $('.add-widget-box').html($(resp).find('.add-widget-box').children())
         },
