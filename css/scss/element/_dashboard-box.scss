@@ -1,6 +1,20 @@
+.wpeo-infobox-container {
+  gap: 1em;
+  width: calc(100% + 1em);
+  margin: 0;
+
+  .wpeo-infobox {
+    flex: 0 0 calc(50% - 1em);
+
+    @media ( max-width: $media__mobile ) {
+      flex: 0 0 calc(100% - 1em);
+    }
+  }
+}
+
 .box-flex-item {
 
-  .info-box {
+/*   .info-box {
     display: flex;
     flex-wrap: nowrap;
 
@@ -42,5 +56,5 @@
       display: inline-block;
       line-height: 20px;
     }
-  }
+  } */
 }

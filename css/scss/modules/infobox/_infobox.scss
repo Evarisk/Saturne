@@ -1,0 +1,109 @@
+/*--------------------------------------------------------------
+	Module : Infobox
+	Version : 1.0.0
+
+ * .wpeo-infobox -> classe de base pour l'infobox
+--------------------------------------------------------------*/
+
+.wpeo-infobox {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 0 30px 0 rgba(0,0,0,0.1);
+  padding: 1.5em;
+  box-sizing: border-box;
+
+  .wpeo-infobox__header {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    width: 100%;
+
+    .header__icon-container {
+      width: 26px;
+      min-width: 26px;
+      height: 26px;
+      line-height: 26px;
+      position: relative;
+      border-radius: 4px;
+      overflow: hidden;
+      text-align: center;
+
+      .header__icon-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.15;
+      }
+      .header__icon {
+        font-size: 14px;
+      }
+    }
+    .header__title {
+      font-size: 16px;
+      font-weight: 700;
+      color: $color__dolibarr;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+      width: 100%;
+    }
+    .header__close {
+      color: rgba(0,0,0,0.2);
+      font-size: 16px;
+      transition: all 0.2s ease-out;
+      padding: 0.2em 0 0.2em 0.2em;
+
+      &:hover {
+        color: $color__dolibarr;
+        cursor: pointer;
+      }
+    }
+  }
+
+  .wpeo-infobox__body {
+    margin-top: 0.5em;
+
+    .body__row-container {
+      padding: 0;
+      margin: 0;
+
+      .body__row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5em;
+        width: 100%;
+        margin: 0.1em 0;
+
+        .row__libelle {
+          font-size: 14px;
+          color: rgba($color__dolibarr, 0.5);
+
+          .fa-info-circle {
+            color: #000;
+          }
+        }
+        .row__data-container {
+          .row__data {
+            display: inline-block;
+            font-size: 14px;
+            background: rgba($color__dolibarr, 0.1);
+            border-radius: 2px;
+            padding: 0.1em 0.4em;
+            color: rgba($color__dolibarr, 0.5);
+            font-weight: 600;
+            margin: 0.1em 0;
+          }
+        }
+      }
+    }
+
+    .body__content {
+      color: rgba($color__dolibarr, 0.5);
+      font-size: 14px;
+    }
+  }
+}
