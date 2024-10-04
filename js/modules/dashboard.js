@@ -108,7 +108,7 @@ window.saturne.dashboard.addDashBoardInfo = function() {
  */
 window.saturne.dashboard.closeDashBoardInfo = function() {
     let box = $(this);
-    let dashboardWidgetName = box.attr('data-widgetname');
+    let dashboardWidgetName = box.data('widgetname');
     let token = window.saturne.toolbox.getToken();
     let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
 

@@ -136,11 +136,11 @@ class SaturneDashboard
                     if (!isset($disableWidgetList->$key) && is_array($dashboardWidget) && !empty($dashboardWidget)) {
 
                         $widget .= '<div class="wpeo-infobox">';
-                        
+
                             $widget .= '<div class="wpeo-infobox__header">';
                                 $widget .= '<div class="header__icon-container">';
-                                    $widget .= '<span class="header__icon-background" style="background: ' . ($dashboardWidget['pictoColor'] ?? '#0D8AFF') . ';"></span>'; // @TODO Variable couleur ici
-                                    $widget .= '<i class="header__icon ' . $dashboardWidget['picto'] . '" style="color: ' . ($dashboardWidget['pictoColor'] ?? '#0D8AFF') . ';"></i>'; // @TODO Variable couleur ici
+                                    $widget .= '<span class="header__icon-background" style="background: ' . ($dashboardWidget['pictoColor'] ?? '#0D8AFF') . ';"></span>';
+                                    $widget .= '<i class="header__icon ' . $dashboardWidget['picto'] . '" style="color: ' . ($dashboardWidget['pictoColor'] ?? '#0D8AFF') . ';"></i>';
                                 $widget .= '</div>';
                                 $widget .= '<div class="header__title">' . ($dashboardWidget['title'] ?? $langs->transnoentities('Title')) . '</div>';
                                 $widget .= '<i class="close-dashboard-widget header__close fas fa-times" data-widgetname="' . $key . '"></i>';
