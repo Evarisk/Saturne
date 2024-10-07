@@ -4,3 +4,20 @@
   width: 20px;
   padding-right: 4px;
 }
+
+$menu-styles: (
+  digiriskdolibarr: (
+    filter: none,
+  ),
+  digiquali: (
+    filter: none,
+  )
+);
+
+@each $menu, $styles in $menu-styles {
+  div.mainmenu.#{$menu} {
+    @each $property, $value in $styles {
+      #{$property}: $value;
+    }
+  }
+}
