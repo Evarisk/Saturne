@@ -339,19 +339,12 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
 				</div>
 			</div>
 			<div class="wpeo-gridlayout grid-3">
-				<div class="modal-add-media">
-					<?php
-					print '<input type="hidden" name="token" value="'.newToken().'">';
-					if (( ! empty($conf->use_javascript_ajax) && empty($conf->global->MAIN_ECM_DISABLE_JS)) && !empty($section)) {
-						$sectiondir = GETPOST('file', 'alpha') ? GETPOST('file', 'alpha') : GETPOST('section_dir', 'alpha');
-						print '<!-- Start form to attach new file in '. $moduleNameLowerCase .'_photo_view.tpl.php sectionid=' . $section . ' sectiondir=' . $sectiondir . ' -->' . "\n";
-						include_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
-						print '<strong>' . $langs->trans('AddFile') . '</strong>'
-						?>
-						<input type="file" id="add_media_to_gallery" class="flat minwidth400 maxwidth200onsmartphone" name="userfile[]" multiple accept>
-					<?php } else print '&nbsp;'; ?>
-					<div class="underbanner clearboth"></div>
-				</div>
+                <div class="modal-add-media">
+                    <input type="hidden" name="token" value="<?php echo newToken(); ?>">
+                    <strong><?php echo $langs->trans('AddFile'); ?></strong>
+                    <input type="file" id="add_media_to_gallery" class="flat minwidth400 maxwidth200onsmartphone" name="userfile[]" multiple accept>
+                    <div class="underbanner clearboth"></div>
+                </div>
 				<div class="form-element">
 					<span class="form-label"><strong><?php print $langs->trans('SearchFile') ?></strong></span>
 					<div class="form-field-container">
