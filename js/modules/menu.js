@@ -65,7 +65,7 @@ window.saturne.menu.event = function() {
  */
 window.saturne.menu.toggleMenu = function() {
 
-	var menu = $(this).closest('#id-left').find('a.vmenu, span.vmenudisabled, span.vmenu, a.vsmenu');
+	var menu = $(this).closest('#id-left').find('a.vmenu, span.vmenudisabled, span.vmenu, a.vsmenu, a.help');
 	var elementParent = $(this).closest('#id-left').find('div.vmenu')
 	var text = '';
 
@@ -124,7 +124,7 @@ window.saturne.menu.setMenu = function() {
 
 		if (localStorage.maximized == 'false') {
 			var text = '';
-			var menu = $('#id-left').find('a.vmenu, span.vmenudisabled, span.vmenu, a.vsmenu');
+			var menu = $('#id-left').find('a.vmenu, span.vmenudisabled, span.vmenu, a.vsmenu, a.help');
 			var elementParent = $(document).find('div.vmenu')
 
 			menu.each(function () {
