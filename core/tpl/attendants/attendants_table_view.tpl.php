@@ -175,7 +175,9 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
         $alreadyAddedSignatories[$element->element_type][$element->element_id] = $element->element_id;
     }
 
-    require __DIR__ . '/attendants_table_add_view.tpl.php';
+    if ((!empty($object->max_managers) && $signatoriesCount < $object->max_managers) || empty($object->max_managers)) {
+        require __DIR__ . '/attendants_table_add_view.tpl.php';
+    }
 } else {
     print '<div class="opacitymedium">' . $langs->trans('NoAttendants') . '</div><br>';
 
