@@ -222,8 +222,8 @@ if (empty($resHook)) {
             $substitutionarray = getCommonSubstitutionArray($langs, 0, null, $object);
             complete_substitutions_array($substitutionarray, $langs, $object, $parameters);
 
-            $message = $langs->trans('SignatureEmailMessage');
-            $subject = $langs->trans('SignatureEmailSubject', $langs->transnoentities('Of' . ucfirst($object->element)), $object->ref);
+            $subject = $langs->transnoentities('EmailSignatureTopic', $langs->transnoentities(ucfirst($object->element)));
+            $message = $langs->transnoentities('EmailSignatureContent');
 
             $subject = make_substitutions($subject, $substitutionarray);
             $message = make_substitutions($message, $substitutionarray);
@@ -502,7 +502,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
         $formmail->withto              = $liste;
         $formmail->withtofree          = (GETPOST('sendto', 'alphawithlgt') ? GETPOST('sendto', 'alphawithlgt') : '1');
         $formmail->withtocc            = $liste;
-        $formmail->withtopic           = $outputlangs->trans('GlobalSignatureEmailSubject', '__MYCOMPANY_NAME__', $langs->transnoentities('The' . ucfirst($object->element)), $object->ref);
+        $formmail->withtopic           = $outputlangs->transnoentities('EmailGlobalSignatureTopic', $langs->transnoentities('The' . ucfirst($object->element)));
         $formmail->withbody            = 1;
         $formmail->withcancel          = 1;
 
@@ -511,19 +511,19 @@ if ($id > 0 || !empty($ref) && empty($action)) {
             $_POST['receiver'] = $receiver;
         }
 
-        $mesg = $outputlangs->transnoentities('GlobalSignatureEmailMessage', strtolower($outputlangs->trans(ucfirst($object->element))), $object->label ?: $object->ref, dol_print_date($object->date_start ?: $object->date_creation, 'dayhour', 'tzuser'), strtolower($outputlangs->trans($documentType)));
+        $mesg = $outputlangs->transnoentities('EmailGlobalSignatureContent', strtolower($outputlangs->trans(ucfirst($object->element))), $object->label ?: $object->ref, dol_print_date($object->date_start ?: $object->date_creation, 'dayhour', 'tzuser'), strtolower($outputlangs->trans($documentType)));
 
         if (is_array($signatoriesByRole) && !empty($signatoriesByRole)) {
             foreach ($signatoriesByRole as $signatoryRole) {
                 foreach ($signatoryRole as $attendant) {
                     $mesg .= $outputlangs->trans($attendant->role) . ' : ' . strtoupper($attendant->lastname) . ' ' . $attendant->firstname . '<br>';
-                    $signatureUrl = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $attendant->signature_url . '&entity=' . $conf->entity . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
-                    $mesg .= '<a href=' . $signatureUrl . ' target="_blank">' . $signatureUrl . '</a><br><br>';
+                    $signatureUrl = dol_buildpath('custom/saturne/public/signature/add_signature.php?track_id=' . $attendant->signature_url . '&entity=' . $conf->entity . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
+                    $mesg .= '<a href=' . $signatureUrl . ' target="_blank">' . $langs->transnoentities('SignatureEmailURL') . '</a><br><br>';
                 }
             }
         }
 
-        $mesg .= $outputlangs->transnoentities('GlobalSignatureEmailMessageEnd');
+        $mesg .= $outputlangs->transnoentities('EmailGlobalSignatureContentEnd');
 
         $_POST['message'] = $mesg;
 

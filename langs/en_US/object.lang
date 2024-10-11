@@ -106,9 +106,9 @@ ActionsOnObject = Events on %s
 DisplayMoreInfo = View more information
 
 # Email - Mail
-ObjectLabel     = Summary
-ObjectSubject   = Email document
-ObjectContent   = Please find attached the ODT document(s) related to __THETYPE__.
+ObjectEmailDocumentLabel   = SAT_Document
+ObjectEmailDocumentTopic   = [__[MAIN_INFO_SOCIETY_NAME]__] __TYPE__ __REF__ Summary
+ObjectEmailDocumentContent = Hello,<br /><br />Please find attached the ODT document(s) related to __THETYPE__.<br /><br />Yours sincerely,<br /><br />QHSE Department<br />__USER_FULLNAME__<br />__USER_EMAIL__<br />__MYCOMPANY_NAME__<br />__MYCOMPANY_FULLADDRESS__<br />__MYCOMPANY_EMAIL__
 
 # Config Trigger Info
 ObjectCreated  = Creation of %s

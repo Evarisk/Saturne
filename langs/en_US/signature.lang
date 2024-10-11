@@ -35,12 +35,14 @@ ErrorSetupEmail         = Mail configuration error, you have not configured your
 NoEmailSet              = No email entered: %s
 
 # Mail
-SignatureEmailSubject          = Signature %s %s
-SignatureEmailMessage          = Hello, <br> Please find attached the link to sign the document.<br> __SATURNE_SIGNATORY_URL__
+EmailSignatureLabel            = SAT_Signature
+EmailSignatureTopic            = [__[MAIN_INFO_SOCIETE_NOM]__] Signature %s __REF__
+EmailSignatureContent          = Hello,<br />Please find attached the link to sign the document.<br />__SATURNE_SIGNATORY_URL__
 SignatureEmailURL              = Document signature link
-GlobalSignatureEmailSubject    = [%s] Signature links for %s %s
-GlobalSignatureEmailMessage    = Hello, <br><br> Further to your %s"%s" dated %s, please find below the %s"%s" document signature links of the various attendants: <br><br>
-GlobalSignatureEmailMessageEnd = We thank you to transmit them. <br><br> Wishing you an excellent reception, <br><br> Sincerely
+EmailGlobalSignatureLabel      = SAT_Global_Signature
+EmailGlobalSignatureTopic      = [__[MAIN_INFO_SOCIETE_NOM]__] Signature links for %s __REF__
+EmailGlobalSignatureContent    = Hello,<br /><br />Further to your %s"%s" dated %s, please find below the %s"%s" document signature links of the various attendants:<br /><br />
+EmailGlobalSignatureContentEnd = We thank you to transmit them.<br /><br />Wishing you an excellent reception,<br /><br />Sincerely
 
 # Status
 Registered       = Registered

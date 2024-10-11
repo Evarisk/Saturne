@@ -176,6 +176,8 @@ class modSaturne extends DolibarrModules
         $i = 0;
         $this->const = [
             // CONST MODULE
+            $i++ => ['SATURNE_VERSION','chaine', $this->version, '', 0, 'current'],
+            $i++ => ['SATURNE_DB_VERSION', 'chaine', $this->version, '', 0, 'current'],
             $i++ => ['SATURNE_ENABLE_PUBLIC_INTERFACE', 'integer', 1, '', 0, 'current'],
             $i++ => ['SATURNE_SHOW_COMPANY_LOGO', 'integer', 0, '', 0, 'current'],
             $i++ => ['SATURNE_USE_CAPTCHA', 'integer', 0, '', 0, 'current'],
@@ -285,61 +287,115 @@ class modSaturne extends DolibarrModules
 	}
 
     /**
-     *  Function called when module is enabled.
-     *  The init function add constants, boxes, permissions and menus (defined in constructor) into Dolibarr database.
-     *  It also creates data directories
+     * Function called when module is enabled
+     * The init function add constants, boxes, permissions and menus (defined in constructor) into Dolibarr database
+     * It also creates data directories
      *
-     * @param  string    $options Options when enabling module ('', 'noboxes')
-     * @return int                1 if OK, 0 if KO
+     * @param  string     $options Options when enabling module ('', 'noboxes')
+     * @return int                 1 if OK, 0 if KO
+     * @throws Exception
      */
-	public function init($options = ''): int
+    public function init($options = ''): int
     {
-		global $langs;
+        global $conf, $langs, $user;
 
-		// Permissions
-		$this->remove($options);
-		$sql = [];
+        // Permissions
+        $this->remove($options);
 
-		// Load sql sub folders
-		$sqlFolder = scandir(__DIR__ . '/../../sql');
-		foreach ($sqlFolder as $subFolder) {
-			if ( ! preg_match('/\./', $subFolder)) {
-				$this->_load_tables('/saturne/sql/' . $subFolder . '/');
-			}
-		}
+        $sql = [];
+        // Load sql sub folders
+        $sqlFolder = scandir(__DIR__ . '/../../sql');
+        foreach ($sqlFolder as $subFolder) {
+            if (!preg_match('/\./', $subFolder)) {
+                $this->_load_tables('/saturne/sql/' . $subFolder . '/');
+            }
+        }
+
+        $result = $this->_load_tables('/saturne/sql/');
+        if ($result < 0) {
+            return -1; // Do not activate module if error 'not allowed' returned when loading module SQL queries (the _load_table run sql with run_sql with the error allowed parameter set to 'default')
+        }
+
+        dolibarr_set_const($this->db, 'SATURNE_VERSION', $this->version, 'chaine', 0, '', $conf->entity);
+        dolibarr_set_const($this->db, 'SATURNE_VERSION_DB_VERSION', $this->version, 'chaine', 0, '', $conf->entity);
 
         require_once __DIR__ . '/../../class/saturneredirection.class.php';
 
         $saturneRedirection = new SaturneRedirection($this->db);
         $saturneRedirection->adaptHtAccess();
 
+        // Load Saturne libraries
+        require_once __DIR__ . '/../../../saturne/class/saturnemail.class.php';
+
+        $saturneMail = new SaturneMail($this->db);
+
+        $saturneMail->position = 100;
+
+        $emailTemplates = [
+            'email_template_document' => [
+                'label'   => 'ObjectEmailDocumentLabel',
+                'topic'   => 'ObjectEmailDocumentTopic',
+                'content' => 'ObjectEmailDocumentContent'
+            ],
+            'email_template_global_signature' => [
+                'label'   => 'EmailGlobalSignatureLabel',
+                'topic'   => 'EmailGlobalSignatureTopic',
+                'content' => 'EmailGlobalSignatureContent'
+            ],
+            'email_template_signature' => [
+                'label'   => 'EmailSignatureLabel',
+                'topic'   => 'EmailSignatureTopic',
+                'content' => 'EmailSignatureContent'
+            ]
+        ];
+
+        foreach ($emailTemplates as $emailTemplate => $emailTemplateData) {
+            $saturneMail->entity        = 0;
+            $saturneMail->module        = 'saturne';
+            $saturneMail->type_template = 'saturne';
+            $saturneMail->lang          = 'fr_FR';
+            $saturneMail->datec         = $this->db->idate(dol_now());
+            $saturneMail->label         = $langs->transnoentities($emailTemplateData['label']);
+            $saturneMail->position++;
+            $saturneMail->enabled       = "isModEnabled('saturne')";
+            $saturneMail->topic         = $langs->transnoentities($emailTemplateData['topic']);
+            $saturneMail->content       = $langs->transnoentities($emailTemplateData['content']);
+            $saturneMail->joinfiles     = 1;
+            if ($saturneMail->fetch(getDolGlobalInt('SATURNE_' . dol_strtoupper($emailTemplate))) == 0) {
+                $emailTemplateID = $saturneMail->create($user);
+                dolibarr_set_const($this->db, 'SATURNE_' . dol_strtoupper($emailTemplate), $emailTemplateID, 'integer', 0, '', $conf->entity);
+            }
+        }
+
         // Create extrafields during init
-		include_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
-		$extra_fields = new ExtraFields($this->db);
+        require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
+        $extraFields = new ExtraFields($this->db);
 
-//		$extra_fields->update('electronic_signature', $langs->transnoentities('TrainingSessionLocation'), 'varchar', '', 'contrat', 0, 0, 1850, '', '', '', 1);
-		$extra_fields->addExtraField('electronic_signature', $langs->transnoentities('ElectronicSignature'), 'text', '','', 'user', 0, 0, '', '', '', '', 1);
+        $extraFieldsArrays = [
+            'electronic_signature' => ['Label' => 'ElectronicSignature', 'type' => 'text', 'elementtype' => ['user'], 'position' => 100, 'list' => 1, 'entity' => 0, 'langfile' => 'saturne@saturne', 'enabled' => "isModEnabled('saturne')"]
+        ];
 
+        foreach ($extraFieldsArrays as $key => $extraField) {
+            foreach ($extraField['elementtype'] as $extraFieldElementType) {
+                $extraFields->update($key, $extraField['Label'], $extraField['type'], $extraField['length'], $extraFieldElementType, 0, 0, $this->numero . $extraField['position'], $extraField['params'], '', '', $extraField['list'], ($extraField['help'][$extraFieldElementType] ?? $extraField['help']), '', '', $extraField['entity'], $extraField['langfile'], $extraField['enabled'] . ' && isModEnabled("' . $extraFieldElementType . '")', 0, 0, $extraField['css']);
+                $extraFields->addExtraField($key, $extraField['Label'], $extraField['type'], $this->numero . $extraField['position'], $extraField['length'], $extraFieldElementType, 0, 0, '', $extraField['params'], $extraField['alwayseditable'], '', $extraField['list'], $extraField['help'], '', $extraField['entity'], $extraField['langfile'], $extraField['enabled'] . ' && isModEnabled("' . $extraFieldElementType . '")', 0, 0, $extraField['css']);
+            }
+        }
 
-		$result = $this->_load_tables('/saturne/sql/');
-		if ($result < 0) {
-			return -1; // Do not activate module if error 'not allowed' returned when loading module SQL queries (the _load_table run sql with run_sql with the error allowed parameter set to 'default')
-		}
-
-		return $this->_init($sql, $options);
-	}
+        return $this->_init($sql, $options);
+    }
 
     /**
-     *  Function called when module is disabled.
-     *  Remove from database constants, boxes and permissions from Dolibarr database.
-     *  Data directories are not deleted
+     * Function called when module is disabled
+     * Remove from database constants, boxes and permissions from Dolibarr database
+     * Data directories are not deleted
      *
-     *  @param      string	$options    Options when enabling module ('', 'noboxes')
-     *  @return     int                 1 if OK, 0 if KO
+     * @param  string $options Options when enabling module ('', 'noboxes')
+     * @return int             1 if OK, 0 if KO
      */
-	public function remove($options = ''): int
+    public function remove($options = ''): int
     {
-		$sql = [];
-		return $this->_remove($sql, $options);
-	}
+        $sql = [];
+        return $this->_remove($sql, $options);
+    }
 }
