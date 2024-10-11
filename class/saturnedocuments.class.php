@@ -265,16 +265,14 @@ class SaturneDocuments extends SaturneObject
      * @param  string    $moduleNameLowerCase Module name in lowercase
      * @param  string    $fileDir             File directory
      * @param  string    $fileType            Type of file
+     * @param  int       $entity              Entity
      * @return array|int $result              Array of document or -1 if not found
      */
-    public function getLastDocument(string $moduleNameLowerCase = '', string $fileDir = '', string $fileType = '')
+    public function getLastDocument(string $moduleNameLowerCase = '', string $fileDir = '', string $fileType = '', int $entity = 1)
     {
-        global $conf;
-
         require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 
-        $uploadDir = $conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1];
-        $fileDir   = $uploadDir . '/' . $fileDir;
+        $fileDir   = DOL_DATA_ROOT . '/' . ($entity > 1 ? $entity . '/' : '') . $moduleNameLowerCase . '/' . $fileDir;
         $fileList  = dol_dir_list($fileDir, 'files', 0, '(\.' . $fileType .  ')', '', 'date', 'SORT_DESC', 1);
         if (count($fileList)) {
             $result = $fileList[0];
@@ -292,14 +290,15 @@ class SaturneDocuments extends SaturneObject
      * @param  string $fileDir             File directory
      * @param  string $fileType            Type of file
      * @param  string $icon                Icon for download button
+     * @param  int    $entity              Entity
      * @return string                      String of html button
      */
-    public function showUrlOfLastGeneratedDocument(string $moduleNameLowerCase = '', string $fileDir = '', string $fileType = '', string $icon = 'fa-file-word'): string
+    public function showUrlOfLastGeneratedDocument(string $moduleNameLowerCase = '', string $fileDir = '', string $fileType = '', string $icon = 'fa-file-word', int $entity = 1): string
     {
         global $langs;
 
         $out      = '';
-        $document = $this->getLastDocument($moduleNameLowerCase, $fileDir, $fileType);
+        $document = $this->getLastDocument($moduleNameLowerCase, $fileDir, $fileType, $entity);
         if (is_array($document)) {
             $documentUrl = DOL_URL_ROOT . '/document.php';
             $fileUrl     = $documentUrl . '?modulepart=' . $moduleNameLowerCase . '&file=' . urlencode($fileDir . '/' . $document['name']);
