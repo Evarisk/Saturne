@@ -333,26 +333,29 @@ class modSaturne extends DolibarrModules
 
         $emailTemplates = [
             'email_template_document' => [
-                'label'   => 'ObjectEmailDocumentLabel',
-                'topic'   => 'ObjectEmailDocumentTopic',
-                'content' => 'ObjectEmailDocumentContent'
+                'type_template' => 'document',
+                'label'         => 'ObjectEmailDocumentLabel',
+                'topic'         => 'ObjectEmailDocumentTopic',
+                'content'       => 'ObjectEmailDocumentContent'
             ],
             'email_template_global_signature' => [
-                'label'   => 'EmailGlobalSignatureLabel',
-                'topic'   => 'EmailGlobalSignatureTopic',
-                'content' => 'EmailGlobalSignatureContent'
+                'type_template' => 'signature',
+                'label'         => 'EmailGlobalSignatureLabel',
+                'topic'         => 'EmailGlobalSignatureTopic',
+                'content'       => 'EmailGlobalSignatureContent'
             ],
             'email_template_signature' => [
-                'label'   => 'EmailSignatureLabel',
-                'topic'   => 'EmailSignatureTopic',
-                'content' => 'EmailSignatureContent'
+                'type_template' => 'signature',
+                'label'         => 'EmailSignatureLabel',
+                'topic'         => 'EmailSignatureTopic',
+                'content'       => 'EmailSignatureContent'
             ]
         ];
 
         foreach ($emailTemplates as $emailTemplate => $emailTemplateData) {
             $saturneMail->entity        = 0;
             $saturneMail->module        = 'saturne';
-            $saturneMail->type_template = 'saturne';
+            $saturneMail->type_template = 'saturne_' . $emailTemplateData['type_template'];
             $saturneMail->lang          = 'fr_FR';
             $saturneMail->datec         = $this->db->idate(dol_now());
             $saturneMail->label         = $langs->transnoentities($emailTemplateData['label']);
