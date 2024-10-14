@@ -44,6 +44,7 @@ if (isModEnabled('societe')) {
 }
 
 require_once __DIR__ . '/../class/saturnesignature.class.php';
+require_once __DIR__ . '/../class/saturnemail.class.php';
 require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
 require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' . $objectType . '.lib.php';
 
@@ -64,10 +65,11 @@ $attendantTableMode = (GETPOSTISSET('attendant_table_mode') ? GETPOST('attendant
 $subaction          = GETPOST('subaction', 'alpha');
 
 // Initialize technical objects
-$className = ucfirst($objectType);
-$object    = new $className($db);
-$signatory = new SaturneSignature($db, $moduleNameLowerCase, $object->element);
-$usertmp   = new User($db);
+$className   = ucfirst($objectType);
+$object      = new $className($db);
+$signatory   = new SaturneSignature($db, $moduleNameLowerCase, $object->element);
+$saturneMail = new SaturneMail($db, $moduleNameLowerCase, $object->element);
+$usertmp     = new User($db);
 if (isModEnabled('societe')) {
     $thirdparty = new Societe($db);
     $contact    = new Contact($db);
@@ -219,11 +221,13 @@ if (empty($resHook)) {
             $from = $conf->global->MAIN_MAIL_EMAIL_FROM;
 
             // Make substitution in email content
-            $substitutionarray = getCommonSubstitutionArray($langs, 0, null, $object);
+            $substitutionarray                       = getCommonSubstitutionArray($langs, 0, null, $object);
+            $substitutionarray['__OBJECT_ELEMENT__'] = dol_strtolower($langs->transnoentities(ucfirst($object->element)));
             complete_substitutions_array($substitutionarray, $langs, $object, $parameters);
 
-            $message = $langs->trans('SignatureEmailMessage');
-            $subject = $langs->trans('SignatureEmailSubject', $langs->transnoentities('Of' . ucfirst($object->element)), $object->ref);
+            $result  = $saturneMail->fetch(getDolGlobalInt('SATURNE_EMAIL_TEMPLATE_SIGNATURE'));
+            $subject = $result > 0 ? $saturneMail->topic : $langs->transnoentities('EmailSignatureTopic');
+            $message = $result > 0 ? $saturneMail->content : $langs->transnoentities('EmailSignatureContent');
 
             $subject = make_substitutions($subject, $substitutionarray);
             $message = make_substitutions($message, $substitutionarray);
@@ -458,7 +462,13 @@ if ($id > 0 || !empty($ref) && empty($action)) {
             // First we set ->substit (useless, it will be erased later) and ->substit_lines
             $formmail->setSubstitFromObject($object, $langs);
         }
-        $substitutionarray = getCommonSubstitutionArray($outputlangs, 0, $arrayoffamiliestoexclude, $object);
+        $substitutionarray                                           = getCommonSubstitutionArray($outputlangs, 0, $arrayoffamiliestoexclude, $object);
+        $substitutionarray['__OBJECT_ELEMENT__']                     = dol_strtolower($langs->transnoentities(ucfirst($object->element)));
+        $substitutionarray['__OBJECT_THE_ELEMENT__']                 = $langs->transnoentities('The' . ucfirst($object->element));
+        $substitutionarray['__OBJECT_LABEL_OR_REF__']                = $object->label ?: $object->ref;
+        $substitutionarray['__OBJECT_DATE_START_OR_DATE_CREATION__'] = dol_print_date($object->date_start ?: $object->date_creation, 'dayhour', 'tzuser');
+        $substitutionarray['__DOCUMENT_TYPE__']                      = dol_strtolower($outputlangs->trans($documentType));
+
         $parameters = ['mode' => 'formemail'];
         complete_substitutions_array($substitutionarray, $outputlangs, $object, $parameters);
 
@@ -499,33 +509,36 @@ if ($id > 0 || !empty($ref) && empty($action)) {
             }
         }
 
-        $formmail->withto              = $liste;
-        $formmail->withtofree          = (GETPOST('sendto', 'alphawithlgt') ? GETPOST('sendto', 'alphawithlgt') : '1');
-        $formmail->withtocc            = $liste;
-        $formmail->withtopic           = $outputlangs->trans('GlobalSignatureEmailSubject', '__MYCOMPANY_NAME__', $langs->transnoentities('The' . ucfirst($object->element)), $object->ref);
-        $formmail->withbody            = 1;
-        $formmail->withcancel          = 1;
+        $result = $saturneMail->fetch(getDolGlobalInt('SATURNE_EMAIL_TEMPLATE_GLOBAL_SIGNATURE'));
+
+        $topic = $result > 0 ? $saturneMail->topic : $outputlangs->transnoentities('EmailGlobalSignatureTopic');
+
+        $formmail->withto     = $liste;
+        $formmail->withtofree = (GETPOST('sendto', 'alphawithlgt') ? GETPOST('sendto', 'alphawithlgt') : '1');
+        $formmail->withtocc   = $liste;
+        $formmail->withtopic  = make_substitutions($topic, $substitutionarray);
+        $formmail->withbody   = 1;
+        $formmail->withcancel = 1;
 
         if (dol_strlen($object->thirdparty->email)) {
             $receiver          = ['thirdparty'];
             $_POST['receiver'] = $receiver;
         }
 
-        $mesg = $outputlangs->transnoentities('GlobalSignatureEmailMessage', strtolower($outputlangs->trans(ucfirst($object->element))), $object->label ?: $object->ref, dol_print_date($object->date_start ?: $object->date_creation, 'dayhour', 'tzuser'), strtolower($outputlangs->trans($documentType)));
-
         if (is_array($signatoriesByRole) && !empty($signatoriesByRole)) {
+            $signatoriesByRoleSignatureEmailURL = '';
             foreach ($signatoriesByRole as $signatoryRole) {
                 foreach ($signatoryRole as $attendant) {
-                    $mesg .= $outputlangs->trans($attendant->role) . ' : ' . strtoupper($attendant->lastname) . ' ' . $attendant->firstname . '<br>';
-                    $signatureUrl = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $attendant->signature_url . '&entity=' . $conf->entity . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
-                    $mesg .= '<a href=' . $signatureUrl . ' target="_blank">' . $signatureUrl . '</a><br><br>';
+                    $signatoriesByRoleSignatureEmailURL .= $outputlangs->trans($attendant->role) . ' : ' . strtoupper($attendant->lastname) . ' ' . $attendant->firstname . '<br>';
+                    $signatureUrl = dol_buildpath('custom/saturne/public/signature/add_signature.php?track_id=' . $attendant->signature_url . '&entity=' . $conf->entity . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
+                    $signatoriesByRoleSignatureEmailURL .= '<a href=' . $signatureUrl . ' target="_blank">' . $langs->transnoentities('SignatureEmailURL') . '</a><br><br>';
                 }
             }
+            $substitutionarray['__SIGNATORIES_BY_ROLE_SIGNATURE_EMAIL_URL__'] = $signatoriesByRoleSignatureEmailURL;
         }
+        $content = $result > 0 ? $saturneMail->content : $langs->transnoentities('EmailGlobalSignatureContent');
 
-        $mesg .= $outputlangs->transnoentities('GlobalSignatureEmailMessageEnd');
-
-        $_POST['message'] = $mesg;
+        $_POST['message'] = make_substitutions($content, $substitutionarray);
 
         // Array of substitutions
         $formmail->substit = $substitutionarray;

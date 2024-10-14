@@ -106,9 +106,9 @@ ActionsOnObject = Événements sur %s
 DisplayMoreInfo = Afficher plus d'informations
 
 # Email - Mail
-ObjectLabel     = Récapitulatif
-ObjectSubject   = Email document
-ObjectContent   = Veuillez trouver ci-joint le/les document(s) ODT lié(s) à __THETYPE__.
+ObjectEmailDocumentLabel   = SAT_Document
+ObjectEmailDocumentTopic   = [__[MAIN_INFO_SOCIETE_NOM]__] Récapitulatif __TYPE__ __REF__
+ObjectEmailDocumentContent = Bonjour,<br /><br />Veuillez trouver ci-joint le/les document(s) ODT lié(s) à __THETYPE__.<br /><br />Bien cordialement,<br /><br />Service QHSE<br />__USER_FULLNAME__<br />__USER_EMAIL__<br />__MYCOMPANY_NAME__<br />__MYCOMPANY_FULLADDRESS__<br />__MYCOMPANY_EMAIL__
 
 # Config Trigger Info - Configuration Infos Événements
 ObjectCreated  = Création d'un(e) %s
