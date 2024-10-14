@@ -103,7 +103,7 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
             $urlToRedirect = preg_replace('/#builddoc$/', '', $urlToRedirect);
             $urlToRedirect = preg_replace('/action=builddoc&?/', '', $urlToRedirect); // To avoid infinite loop.
             $urlToRedirect = preg_replace('/forcebuilddoc=1&?/', '', $urlToRedirect); // To avoid infinite loop.
-            if (empty($shouldRedirect)) {
+            if (!isset($shouldRedirect) || $shouldRedirect) {
                 header('Location: ' . $urlToRedirect);
                 exit;
             }
