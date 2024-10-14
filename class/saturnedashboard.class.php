@@ -300,13 +300,13 @@ class SaturneDashboard
                         print '<table class="noborder centpercent">';
                         print '<tr class="liste_titre">';
                         foreach ($dashboardList['labels'] as $key => $dashboardListLabel) {
-                            print '<td class="nowraponall tdoverflowmax200 ' . (($key != 'Ref') ? 'center' : '') . '">' . $langs->transnoentities($dashboardListLabel) . '</td>';
+                            print '<td class="' . ($conf->browser->layout == 'classic' ? 'nowraponall tdoverflowmax200 ' : '') . (($key != 'Ref') ? 'center' : '') . '">' . $langs->transnoentities($dashboardListLabel) . '</td>';
                         }
                         print '</tr>';
                         foreach ($dashboardList['data'] as $dashboardListDatasets) {
                             print '<tr class="oddeven">';
                             foreach ($dashboardListDatasets as $key => $dashboardGraphDataset) {
-                                print '<td class="nowraponall tdoverflowmax200 ' . (($key != 'Ref') ? 'center ' : '') . $dashboardGraphDataset['morecss'] . '"' . $dashboardGraphDataset['moreAttr'] . '>' . $dashboardGraphDataset['value'] . '</td>';
+                                print '<td class="' . ($conf->browser->layout == 'classic' ? 'nowraponall tdoverflowmax200 ' : '') . (($key != 'Ref') ? 'center ' : '') . $dashboardGraphDataset['morecss'] . '"' . $dashboardGraphDataset['moreAttr'] . '>' . $dashboardGraphDataset['value'] . '</td>';
                             }
                             print '</tr>';
                         }
