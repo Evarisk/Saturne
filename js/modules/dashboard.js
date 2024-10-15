@@ -62,6 +62,8 @@ window.saturne.dashboard.event = function() {
     $(document).on('change', '.add-dashboard-widget', window.saturne.dashboard.addDashBoardInfo);
     $(document).on('click', '.close-dashboard-widget', window.saturne.dashboard.closeDashBoardInfo);
     $(document).on('click', '.select-dataset-dashboard-info', window.saturne.dashboard.selectDatasetDashboardInfo);
+    $(document).on('click', '#dashboard-graph-filter', window.saturne.dashboard.openGraphFilter);
+    $(document).on('submit', '#dashboard-filter-form', window.saturne.dashboard.selectDashboardFilter);
 };
 
 /**
@@ -159,4 +161,59 @@ window.saturne.dashboard.selectDatasetDashboardInfo = function() {
         },
         error: function() {}
     });
+};
+
+/**
+ * Show dashboard filters
+ *
+ * @memberof Saturne_Dashboard
+ *
+ * @since   1.1.0
+ * @version 1.1.0
+ *
+ * @returns {void}
+ */
+window.saturne.dashboard.openGraphFilter = function() {
+  let refId         = $(this).data('ref-id');
+  let filterSection = $('#' + refId);
+
+  if (filterSection.is(':hidden')) {
+    filterSection.fadeIn(800);
+  } else {
+    filterSection.fadeOut(800);
+  }
+};
+
+/**
+ * Select dashboard filter
+ *
+ * @memberof Saturne_Dashboard
+ *
+ * @since   1.1.0
+ * @version 1.1.0
+ *
+ * @returns {void}
+ */
+window.saturne.dashboard.selectDashboardFilter = function(e) {
+
+  e.preventDefault();
+
+  let token = window.saturne.toolbox.getToken();
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+
+  window.saturne.loader.display($('.fichecenter'));
+
+  console.log('Hola')
+
+  /*$.ajax({
+    url: document.URL + querySeparator + 'action=dashboardfilter&token=' + token,
+    type: "POST",
+    processData: false,
+    data: new FormData(this),
+    contentType: false,
+    success: function(resp) {
+      $('.fichecenter').replaceWith($(resp).find('.fichecenter'));
+    },
+    error: function() {}
+  });*/
 };

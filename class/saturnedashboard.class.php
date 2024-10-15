@@ -159,7 +159,7 @@ class SaturneDashboard
                                             $widget .= '<span class="row__data">'; // @TODO Boucle ici pour avoir plusieurs badges
                                                 if (isset($dashboardWidget['content'][$i]) && $dashboardWidget['content'][$i] !== '') {
                                                     $widget .= '<span class="row__data-libelle">' . $dashboardWidget['content'][$i] . '</span>';
-                                                    
+
                                                     if (isset($dashboardWidget['moreContent'][$i]) && $dashboardWidget['moreContent'][$i] !== '') {
                                                         $widget .= $dashboardWidget['moreContent'][$i];
                                                     }
@@ -197,6 +197,41 @@ class SaturneDashboard
                 }
             }
             print '<div class="opened-dash-board-wrap"><div class="wpeo-infobox-container box-flex-container">' . $widget . '</div></div>';
+        }
+
+        $dashboards['graphsFilters'] = ['riskType' => [
+            'title'        => $langs->transnoentities('DisplayRiskOfType'),
+            'type'         => 'selectarray',
+            'filter'       => 'riskType',
+            'values'       => ['risk' => $langs->transnoentities('Risk'), 'riskenvironmental' => $langs->transnoentities('Riskenvironmental')],
+            'currentValue' => 'risk'
+        ]];
+        if (!empty($dashboards['graphsFilters']) && is_array($dashboards['graphsFilters'])) {
+            print '<div class="graph-filter-container">';
+
+            print '<button class="wpeo-button button-grey" type="button" id="dashboard-graph-filter" data-ref-id="graphFilters">';
+            print img_picto('Reload', 'fontawesome_filter_fas_grey_15px');
+            print '<span class="marginleftonly">' . $langs->transnoentities('Filter') . '</span>';
+            print '</button>';
+
+            print '<form action="' . $_SERVER['PHP_SELF'] . '" method="POST" id="graphFilters">';
+
+            foreach ($dashboards['graphsFilters'] as $key => $dashboardGraphFilter) {
+                switch ($dashboardGraphFilter['type']) {
+                    case 'selectarray':
+                        print '<span class="marginrightonly">' . $dashboardGraphFilter['title'] . '</span>';
+                        print Form::selectarray($dashboardGraphFilter['filter'], $dashboardGraphFilter['values'], $dashboardGraphFilter['currentValue'], $dashboardGraphFilter['title'], 0, 0, '', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint', 0, 'hidden selected', 0, 1);
+                        break;
+                    default :
+                        break;
+                }
+            }
+
+            print '<button class="button_search marginrightonly" type="submit">';
+            print img_picto('Reload', 'fontawesome_redo_fas_grey_15px');
+            print '</button>';
+            print '</form>';
+            print '</div>';
         }
 
         print '<div class="graph-dashboard wpeo-grid grid-2">';
