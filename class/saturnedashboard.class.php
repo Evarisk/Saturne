@@ -345,13 +345,11 @@ class SaturneDashboard
             }
         }
 
-        print '</div>';
-
         if (is_array($dashboards['lists']) && !empty($dashboards['lists'])) {
             foreach ($dashboards['lists'] as $dashboardLists) {
                 foreach ($dashboardLists as $dashboardList) {
                     if (is_array($dashboardList['data']) && !empty($dashboardList['data'])) {
-                        print '<div>';
+                        print '<div id="graph-' . $dashboardList['name'] . '" style="width: 100%">';
 
                         if (!empty($dashboardList['name'])) {
                             $dashboardList['morehtmlright'] = '<button class="wpeo-button button-transparent" type="button" data-item-type="graph" data-item-name="' . $dashboardList['name'] . '" data-item-suppress="graph-' . $dashboardList['name'] . '" data-item-refresh="add-graph-box" id="dashboard-close-item">';
@@ -378,6 +376,7 @@ class SaturneDashboard
                 }
             }
         }
+        print '</div>';
 
         print '</form>';
     }
