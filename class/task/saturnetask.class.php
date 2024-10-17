@@ -83,9 +83,17 @@ class SaturneTask extends Task
      */
     public function load_dashboard($projectId): array
     {
-        $arrayTasksByProgress = $this->getTasksByProgress($projectId);
+        global $user, $langs;
 
-        $array['graphs'] = [$arrayTasksByProgress];
+        $confName        = strtoupper($this->module) . '_DASHBOARD_CONFIG';
+        $dashboardConfig = json_decode($user->conf->$confName);
+        $array = ['graphs' => [], 'disabledGraphs' => []];
+
+        if (empty($dashboardConfig->graphs->TasksRepartition->hide)) {
+            $array['graphs'][] = $this->getTasksByProgress($projectId);
+        } else {
+            $array['disabledGraphs']['TasksRepartition'] = $langs->transnoentities('TasksRepartition');
+        }
 
         return $array;
     }
@@ -106,6 +114,7 @@ class SaturneTask extends Task
 
         // Graph Title parameters
         $array['title'] = $form->textwithpicto($langs->transnoentities('TasksRepartition'), $langs->transnoentities('TasksFromProject'));
+        $array['name']  = 'TasksRepartition';
         $array['picto'] = $this->picto;
 
         // Graph parameters
