@@ -326,9 +326,11 @@ class SaturneDashboard
                                 $downloadCSV .= img_picto('ExportCSV', 'fontawesome_file-csv_fas_#31AD29_15px');
                                 //$downloadCSV .= '</button>';
                                 $downloadCSV .= '</button></form>';
-                                $downloadCSV .= '<button class="wpeo-button button-transparent" type="button" data-item-type="graph" data-item-name="' . $dashboardGraph['name'] . '" data-item-suppress="graph-' . $dashboardGraph['name'] . '" data-item-refresh="add-graph-box" id="dashboard-close-item">';
-                                $downloadCSV .= img_picto('Close', 'fontawesome_times_fas_light-grey_15px', '', '', '', '', '', 'close-dashboard-widget');
-                                $downloadCSV .= '</button>';
+                                if (!empty($dashboardGraph['name'])) {
+                                    $downloadCSV .= '<button class="wpeo-button button-transparent" type="button" data-item-type="graph" data-item-name="' . $dashboardGraph['name'] . '" data-item-suppress="graph-' . $dashboardGraph['name'] . '" data-item-refresh="add-graph-box" id="dashboard-close-item">';
+                                    $downloadCSV .= img_picto('Close', 'fontawesome_times_fas_light-grey_15px', '', '', '', '', '', 'close-dashboard-widget');
+                                    $downloadCSV .= '</button>';
+                                }
                                 $downloadCSV .= '</div>';
                                 $dashboardGraph['morehtmlright'] .= $downloadCSV;
 
@@ -350,6 +352,13 @@ class SaturneDashboard
                 foreach ($dashboardLists as $dashboardList) {
                     if (is_array($dashboardList['data']) && !empty($dashboardList['data'])) {
                         print '<div>';
+
+                        if (!empty($dashboardList['name'])) {
+                            $dashboardList['morehtmlright'] = '<button class="wpeo-button button-transparent" type="button" data-item-type="graph" data-item-name="' . $dashboardList['name'] . '" data-item-suppress="graph-' . $dashboardList['name'] . '" data-item-refresh="add-graph-box" id="dashboard-close-item">';
+                            $dashboardList['morehtmlright'] .= img_picto('Close', 'fontawesome_times_fas_light-grey_15px', '', '', '', '', '', 'close-dashboard-widget');
+                            $dashboardList['morehtmlright'] .= '</button>';
+                        }
+
                         print load_fiche_titre($dashboardList['title'], $dashboardList['morehtmlright'], $dashboardList['picto']);
                         print '<table class="noborder centpercent">';
                         print '<tr class="liste_titre">';
