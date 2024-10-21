@@ -47,7 +47,8 @@ if ($action == 'adddashboardinfo' || $action == 'closedashboardinfo') {
 }
 
 if ($action == 'generate_csv') {
-    parse_str(GETPOST('graph'), $data);
+    $data = json_decode(file_get_contents('php://input'), true);
+    parse_str($data['graph'], $data);
 
     if (!empty($data)) {
         $now   = dol_now();

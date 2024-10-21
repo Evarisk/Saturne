@@ -62,6 +62,8 @@ window.saturne.dashboard.event = function() {
     $(document).on('change', '.add-dashboard-widget', window.saturne.dashboard.addDashBoardInfo);
     $(document).on('click', '.close-dashboard-widget', window.saturne.dashboard.closeDashBoardInfo);
     $(document).on('click', '.select-dataset-dashboard-info', window.saturne.dashboard.selectDatasetDashboardInfo);
+
+    $(document).on('click', '#export-csv', window.saturne.dashboard.exportCSV);
 };
 
 /**
@@ -160,3 +162,44 @@ window.saturne.dashboard.selectDatasetDashboardInfo = function() {
         error: function() {}
     });
 };
+
+/**
+ * Export CSV.
+ *
+ * @memberof Saturne_Dashboard
+ *
+ * @since   1.1.0
+ * @version 1.1.0
+ *
+ * @returns {void}
+ */
+window.saturne.dashboard.exportCSV = function(e) {
+  e.preventDefault();
+  let button         = $(this);
+  let token          = window.saturne.toolbox.getToken();
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+
+  let graph = button.parent().find('input[name="graph"]').val();
+
+  window.saturne.loader.display(button);
+
+  $.ajax({
+    url: document.URL + querySeparator + 'action=generate_csv&token=' + token,
+    type: "POST",
+    data: JSON.stringify({
+      graph: graph
+    }),
+    success: function(resp) {
+      let url = window.URL.createObjectURL(new Blob([resp], { type: 'text/csv' }));
+      let graphName = button.data('graph-name').replace(/ /g, '_');
+      let date = new Date();
+      let dateFormat = date.getFullYear() + ('0' + (date.getMonth() + 1)).slice(-2) + ('0' + date.getDate()).slice(-2);
+      let fileName = dateFormat + '_' +  graphName + '.csv';
+      button.after($('<a href="' + url + '" download="' + fileName + '"></a>'));
+      button.next()[0].click();
+      window.saturne.loader.remove(button);
+    },
+    error: function() {}
+  })
+
+}
