@@ -186,9 +186,7 @@ window.saturne.dashboard.exportCSV = function(e) {
   $.ajax({
     url: document.URL + querySeparator + 'action=generate_csv&token=' + token,
     type: "POST",
-    data: JSON.stringify({
-      graph: graph
-    }),
+    data: graph,
     success: function(resp) {
       let url = window.URL.createObjectURL(new Blob([resp], { type: 'text/csv' }));
       let graphName = button.data('graph-name').replace(/ /g, '_');

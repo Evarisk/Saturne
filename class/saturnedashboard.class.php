@@ -270,7 +270,7 @@ class SaturneDashboard
                                 $graph->draw($fileName[$uniqueKey], $fileUrl[$uniqueKey]);
                                 print '<div class="' . $dashboardGraph['moreCSS'] . '">';
 
-                                $downloadCSV  = '<input type="hidden" name="graph" value="' . http_build_query($dashboardGraph) . '">';
+                                $downloadCSV  = '<input type="hidden" name="graph" value="' . dol_escape_htmltag(json_encode($dashboardGraph, JSON_UNESCAPED_UNICODE)) . '">';
                                 $downloadCSV .= '<button class="wpeo-button no-load button-grey" id="export-csv" data-graph-name="' . dol_sanitizeFileName(dol_strtolower($dashboardGraph['title'])) . '" >';
                                 $downloadCSV .= img_picto('ExportCSV', 'fontawesome_file-csv_fas_#31AD29_15px');
                                 $downloadCSV .= '</button>';
