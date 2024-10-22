@@ -164,12 +164,14 @@ window.saturne.dashboard.selectDatasetDashboardInfo = function() {
 };
 
 /**
- * Export CSV.
+ * Export graph to CSV
  *
  * @memberof Saturne_Dashboard
  *
- * @since   1.1.0
- * @version 1.1.0
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param {Event} e Event
  *
  * @returns {void}
  */
@@ -185,19 +187,20 @@ window.saturne.dashboard.exportCSV = function(e) {
 
   $.ajax({
     url: document.URL + querySeparator + 'action=generate_csv&token=' + token,
-    type: "POST",
+    type: 'POST',
     data: graph,
     success: function(resp) {
-      let url = window.URL.createObjectURL(new Blob([resp], { type: 'text/csv' }));
-      let graphName = button.data('graph-name').replace(/ /g, '_');
-      let date = new Date();
+      let url        = window.URL.createObjectURL(new Blob([resp], { type: 'text/csv' }));
+      let graphName  = button.data('graph-name').replace(/ /g, '_');
+      let date       = new Date();
       let dateFormat = date.getFullYear() + ('0' + (date.getMonth() + 1)).slice(-2) + ('0' + date.getDate()).slice(-2);
-      let fileName = dateFormat + '_' +  graphName + '.csv';
+      let fileName   = dateFormat + '_' +  graphName + '.csv';
+
       button.after($('<a href="' + url + '" download="' + fileName + '"></a>'));
       button.next()[0].click();
+
       window.saturne.loader.remove(button);
     },
     error: function() {}
   })
-
 }
