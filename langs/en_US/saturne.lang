@@ -253,3 +253,4 @@ SocietyAttendants   = Third party external attendants
 Back                = Back
 DeleteFiles         = Are you sure that you want to delete <span class="filesLinked"></span> selected files ?
 RecordingInProgress = Recording in progress...
+ExportGraphCSV      = Export the graph in CSV format

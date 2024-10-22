@@ -253,3 +253,4 @@ SocietyAttendants   = Tiers des participants externe
 Back                = Retour
 DeleteFiles         = Êtes vous sur de vouloir supprimer les <span class="filesLinked"></span> media(s) sélectionné(s) ?
 RecordingInProgress = Enregistrement en cours...
+ExportGraphCSV      = Exporter le graphique en CSV
