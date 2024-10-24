@@ -501,9 +501,17 @@ class SaturneDocumentModel extends CommonDocGenerator
                 $info .= '<input type="hidden" class="template-path" value="' . $path . '">';
                 $info .= '- ' . $file['name'];
                 if (!$this->custom_info) {
-                    $info .= ' <a class="wpeo-button button-blue download-template" style="padding: 1px 2px;">' . img_picto('', 'download') . '</a>';
+                    if (getDolGlobalString('MAIN_UMASK') == '0664') {
+                        $info .= ' <a class="wpeo-button button-blue download-template" style="padding: 1px 2px;">' . img_picto('', 'download') . '</a>';
+                    } else {
+                        $info .= ' <a class="wpeo-button button-grey classfortooltip" style="padding: 1px 2px;" title="' . $langs->transnoentities('FileCouldNotBeDownloadConf') . '">' . img_picto('', 'download') . '</a>';
+                    }
                 } else {
-                    $info .= ' <a class="wpeo-button button-blue" style="padding: 1px 2px;" href="' . DOL_URL_ROOT . '/document.php?modulepart=ecm&attachment=1&entity=' . $conf->entity . '&file=' . $this->module . '/' . dol_strtolower($this->document_type) . '/' . $file['name'] . '">' . img_picto('', 'fontawesome_fa-download_fas_#ffffff') . '</a>';
+                    if (getDolGlobalString('MAIN_UMASK') == '0664') {
+                        $info .= ' <a class="wpeo-button button-blue" style="padding: 1px 2px;" href="' . DOL_URL_ROOT . '/document.php?modulepart=ecm&attachment=1&entity=' . $conf->entity . '&file=' . $this->module . '/' . dol_strtolower($this->document_type) . '/' . $file['name'] . '">' . img_picto('', 'fontawesome_fa-download_fas_#ffffff') . '</a>';
+                    } else {
+                        $info .= ' <a class="wpeo-button button-grey classfortooltip" style="padding: 1px 2px;" title="' . $langs->transnoentities('FileCouldNotBeDownloadConf') . '">' . img_picto('', 'fontawesome_fa-download_fas_#ffffff') . '</a>';
+                    }
                     $info .= ' <a class="wpeo-button button-red" style="padding: 1px 2px;" href="' . $_SERVER['PHP_SELF'] . '?module_name=' . $this->module . '&modulepart=ecm&keyforuploaddir='. $confName . '&action=deletefile&token=' . newToken() . '&file=' . urlencode(basename($file['name'])) . '&type=' . $this->document_type . '">' . img_picto('', 'fontawesome_fa-trash_fas_#ffffff') . '</a>';
                 }
                 $info .= '<br>';

@@ -186,6 +186,7 @@ CheckDocumentationToEnablePDFGeneration = Please refer to the documentation for 
 PDFGenerationTooltip                    = Appuyez sur ce bouton pour générer le document ODT en PDF
 PDFGeneration                           = Generating the PDF document
 NoData                                  = N/A
+FileCouldNotBeDownloadConf              = The file could not be downloaded cause of a permission issue
 
 
 
