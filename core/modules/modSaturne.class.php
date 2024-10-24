@@ -282,6 +282,8 @@ class modSaturne extends DolibarrModules
 				'user'     => 0,
 			];
 		}
+
+        $conf->global->MAIN_UMASK = '0664';
 	}
 
     /**
