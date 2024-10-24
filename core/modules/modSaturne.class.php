@@ -282,8 +282,6 @@ class modSaturne extends DolibarrModules
 				'user'     => 0,
 			];
 		}
-
-        $conf->global->MAIN_UMASK = '0664';
 	}
 
     /**
@@ -327,6 +325,8 @@ class modSaturne extends DolibarrModules
 		if ($result < 0) {
 			return -1; // Do not activate module if error 'not allowed' returned when loading module SQL queries (the _load_table run sql with run_sql with the error allowed parameter set to 'default')
 		}
+
+        dolibarr_set_const($this->db, 'MAIN_UMASK', '0664', 'chaine', 0, 0, 'global', 1);
 
 		return $this->_init($sql, $options);
 	}
