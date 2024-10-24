@@ -294,7 +294,7 @@ class modSaturne extends DolibarrModules
      */
 	public function init($options = ''): int
     {
-		global $langs;
+		global $langs, $conf;
 
 		// Permissions
 		$this->remove($options);
@@ -326,7 +326,7 @@ class modSaturne extends DolibarrModules
 			return -1; // Do not activate module if error 'not allowed' returned when loading module SQL queries (the _load_table run sql with run_sql with the error allowed parameter set to 'default')
 		}
 
-        dolibarr_set_const($this->db, 'MAIN_UMASK', '0664', 'chaine', 0, 0, 'global', 1);
+        dolibarr_set_const($this->db, 'MAIN_UMASK', '0664', 'chaine', 0, '', $conf->entity);
 
 		return $this->_init($sql, $options);
 	}
