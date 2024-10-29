@@ -545,21 +545,25 @@ class SaturneSignature extends SaturneObject
      */
     public function fetchSignatory(string $role, int $fk_object, string $object_type)
     {
-        $filter = ['customsql' => 'fk_object=' . $fk_object . ' AND status > 0 AND object_type="' . $object_type . '"'];
-        if (strlen($role)) {
-            $filter['customsql'] .= ' AND role = "' . $role . '"';
-            return $this->fetchAll('', '', 0, 0, $filter);
-        } else {
-            $signatories = $this->fetchAll('', '', 0, 0, $filter);
-            if (!empty($signatories) && $signatories > 0) {
-                $signatoriesArray = [];
-                foreach ($signatories as $signatory) {
-                    $signatoriesArray[$signatory->role][$signatory->id] = $signatory;
-                }
-                return $signatoriesArray;
+        if (!empty($fk_object)) {
+            $filter = ['customsql' => 'fk_object=' . $fk_object . ' AND status > 0 AND object_type="' . $object_type . '"'];
+            if (strlen($role)) {
+                $filter['customsql'] .= ' AND role = "' . $role . '"';
+                return $this->fetchAll('', '', 0, 0, $filter);
             } else {
-                return 0;
+                $signatories = $this->fetchAll('', '', 0, 0, $filter);
+                if (!empty($signatories) && $signatories > 0) {
+                    $signatoriesArray = [];
+                    foreach ($signatories as $signatory) {
+                        $signatoriesArray[$signatory->role][$signatory->id] = $signatory;
+                    }
+                    return $signatoriesArray;
+                } else {
+                    return 0;
+                }
             }
+        } else {
+            return 0;
         }
     }
 
