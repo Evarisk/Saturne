@@ -578,8 +578,12 @@ class SaturneSignature extends SaturneObject
      */
     public function fetchSignatories(int $fk_object, string $object_type, string $morefilter = '1 = 1')
     {
-        $filter = ['customsql' => 'fk_object=' . $fk_object . ' AND ' . $morefilter . ' AND object_type="' . $object_type . '"' . ' AND status > 0'];
-        return $this->fetchAll('', '', 0, 0, $filter);
+        if (!empty($fk_object)) {
+            $filter = ['customsql' => 'fk_object=' . $fk_object . ' AND ' . $morefilter . ' AND object_type="' . $object_type . '"' . ' AND status > 0'];
+            return $this->fetchAll('', '', 0, 0, $filter);
+        } else {
+            return [];
+        }
     }
 
     /**
