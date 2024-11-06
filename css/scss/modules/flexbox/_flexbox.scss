@@ -1,0 +1,19 @@
+.flex {
+  display: flex;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.self-end {
+  align-self: flex-end;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}

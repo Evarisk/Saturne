@@ -164,8 +164,6 @@ window.saturne.dashboard.selectDashboardFilter = function(e) {
     graphFilters: values,
   }
 
-  console.log(button.data('item-refresh'))
-
   window.saturne.dashboard.configureDashboard(data, $("#" + button.data('ref-id')), button.data('item-refresh'));
 };
 

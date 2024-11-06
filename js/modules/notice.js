@@ -85,8 +85,8 @@ window.saturne.notice.showNotice = function (id, title, message, type) {
     message = message.replace(new RegExp(name, 'g'), val);
   });
 
-  notice.find('.notice-title').text(title);
-  notice.find('.notice-message').text(message);
+  notice.find('.notice-title').html(title);
+  notice.find('.notice-message').html(message);
 
   notice.removeClass('hidden');
 };

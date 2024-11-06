@@ -210,17 +210,17 @@ class SaturneDashboard
             print '<div class="graph-filter-container">';
 
             print '<button class="wpeo-button button-grey" type="button" id="dashboard-graph-filter" data-ref-id="graph-filters" >';
-            print img_picto('Reload', 'fontawesome_filter_fas_grey_15px');
+            print img_picto($langs->transnoentities('Filter'), 'fontawesome_filter_fas_grey_1em');
             print '<span class="marginleftonly">' . $langs->transnoentities('Filters') . '</span>';
             print '</button>';
 
-            print '<div id="graph-filters" style="display: none; flex-direction: row; margin-top: 5px;">';
+            print '<div id="graph-filters flex-row" style="display: none; margin-top: 1em;">';
 
-            print '<div style="display: flex; flex-direction: column;">';
+            print '<div class="flex flex-col">';
             foreach ($dashboards['graphsFilters'] as $key => $dashboardGraphFilter) {
                 switch ($dashboardGraphFilter['type']) {
                     case 'selectarray':
-                        print '<div class="" style="display:flex; flex-direction: row;">';
+                        print '<div class="flex flex-row">';
                         print '<span class="marginrightonly">' . $dashboardGraphFilter['title'] . '</span>';
                         print Form::selectarray($dashboardGraphFilter['filter'], $dashboardGraphFilter['values'], $dashboardGraphFilter['currentValue'], $dashboardGraphFilter['title'], 0, 0, '', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint', 0, 'hidden selected', 0, 1);
                         print '</div>';
@@ -231,8 +231,8 @@ class SaturneDashboard
             }
             print '</div>';
 
-            print '<button class="marginleftonly button_search" style="align-self: flex-end;" type="button" id="dashboard-graph-filter-submit" data-ref-id="graph-filters" data-item-refresh="graph-dashboard">';
-            print img_picto('Reload', 'fontawesome_redo_fas_grey_15px');
+            print '<button class="marginleftonly button_search self-end" type="button" id="dashboard-graph-filter-submit" data-ref-id="graph-filters" data-item-refresh="graph-dashboard">';
+            print img_picto($langs->transnoentities('Reload'), 'fontawesome_redo_fas_grey_1em');
             print '</button>';
             print '</div>';
             print '</div>';
@@ -318,17 +318,17 @@ class SaturneDashboard
                                 print '<div class="' . $dashboardGraph['moreCSS'] . '" id="graph-' . $dashboardGraph['name'] . '">';
 
                                 $downloadCSV  = '<form method="POST" action="' . $_SERVER['PHP_SELF'] . (GETPOSTISSET('id') ? '?id=' . GETPOST('id') : '') . '">';
-                                //$downloadCSV  = '<div style="display: flex; flex-direction: row; justify-content: flex-end;">';
+                                //$downloadCSV  = '<div class="flex flex-row justify-end">';
                                 $downloadCSV .= '<input type="hidden" name="token" value="' . newToken() . '">';
                                 $downloadCSV .= '<input type="hidden" name="action" value="generate_csv">';
                                 $downloadCSV .= '<input type="hidden" name="graph" value="' . http_build_query($dashboardGraph) . '">';
                                 $downloadCSV .= '<button class="wpeo-button no-load button-grey">';
-                                $downloadCSV .= img_picto('ExportCSV', 'fontawesome_file-csv_fas_#31AD29_15px');
+                                $downloadCSV .= img_picto('ExportCSV', 'fontawesome_file-csv_fas_#31AD29_1em');
                                 //$downloadCSV .= '</button>';
                                 $downloadCSV .= '</button></form>';
                                 if (!empty($dashboardGraph['name'])) {
                                     $downloadCSV .= '<button class="wpeo-button button-transparent" type="button" data-item-type="graph" data-item-name="' . $dashboardGraph['name'] . '" data-item-suppress="graph-' . $dashboardGraph['name'] . '" data-item-refresh="add-graph-box" id="dashboard-close-item">';
-                                    $downloadCSV .= img_picto('Close', 'fontawesome_times_fas_light-grey_15px', '', '', '', '', '', 'close-dashboard-widget');
+                                    $downloadCSV .= img_picto('Close', 'fontawesome_times_fas_light-grey_1em', '', '', '', '', '', 'close-dashboard-widget');
                                     $downloadCSV .= '</button>';
                                 }
                                 $downloadCSV .= '</div>';
@@ -353,7 +353,7 @@ class SaturneDashboard
 
                         if (!empty($dashboardList['name'])) {
                             $dashboardList['morehtmlright'] = '<button class="wpeo-button button-transparent" type="button" data-item-type="graph" data-item-name="' . $dashboardList['name'] . '" data-item-suppress="graph-' . $dashboardList['name'] . '" data-item-refresh="add-graph-box" id="dashboard-close-item">';
-                            $dashboardList['morehtmlright'] .= img_picto('Close', 'fontawesome_times_fas_light-grey_15px', '', '', '', '', '', 'close-dashboard-widget');
+                            $dashboardList['morehtmlright'] .= img_picto('Close', 'fontawesome_times_fas_light-grey_1em', '', '', '', '', '', 'close-dashboard-widget');
                             $dashboardList['morehtmlright'] .= '</button>';
                         }
 
