@@ -115,6 +115,7 @@ class modSaturne extends DolibarrModules
             'js' => [
 				'/saturne/js/saturne.js',
 				'/saturne/js/modules/menu.js',
+                '/saturne/js/modules/toolbox.js',
 			],
             // Set here all hooks context managed by module. To find available hook context, make a "grep -r '>initHooks(' *" on source code. You can also set hook context to 'all'
             'hooks' => [

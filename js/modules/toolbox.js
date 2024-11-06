@@ -120,3 +120,51 @@ window.saturne.toolbox.toggleButtonClass = function(className, buttonClassName) 
 window.saturne.toolbox.removeAddButtonClass = function(className, removeButtonClassName, addButtonClassName) {
   $('.' + className).removeClass(removeButtonClassName).addClass(addButtonClassName);
 };
+
+/**
+ * Check if the iframe is created
+ * If the iframe is created, check if the iframe change
+ * If the iframe change, reload the page
+ *
+ * @memberof Saturne_Framework_Toolbox
+ *
+ * @since   1.5.0
+ * @version 1.5.0
+ *
+ * @returns {void}
+ */
+window.saturne.toolbox.checkIframeCreation = function() {
+  const interval = setInterval(function() {
+    if ($('.iframedialog').length) {
+      window.saturne.toolbox.checkIframeChange();
+      clearInterval(interval);
+    }
+  }, 100);
+};
+
+/**
+ * Check if the iframe change
+ * If the iframe change, reload the page
+ *
+ * @memberof Saturne_Framework_Toolbox
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @returns {void}
+ */
+window.saturne.toolbox.checkIframeChange = function() {
+  const iframe = $('.iframedialog')[0];
+  let url = iframe.contentWindow.location.href;
+
+  const interval = setInterval(function() {
+    if (url !== iframe.contentWindow.location.href) {
+      if (url === 'about:blank') {
+        url = iframe.contentWindow.location.href;
+      } else {
+        location.reload();
+        clearInterval(interval);
+      }
+    }
+  }, 100);
+};
