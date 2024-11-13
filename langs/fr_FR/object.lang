@@ -75,7 +75,7 @@ ObjectMustBeLockedToArchive      = %s doit être au statut (verrouillé) afin de
 
 # Confirm box - Boite de confirmation
 ValidateObject          = Valider %s
-ConfirmValidateObject   = Êtes-vous sûr de vouloir valider %s ? <br> La validation permet aux participants de signer le document mais <b> empêche l'ajout de nouveaux participants ou la modification de %s. </b>
+ConfirmValidateObject   = Êtes-vous sûr de vouloir valider %s ? <br> La validation permet aux participants de signer le document mais <b> empêche l'ajout de nouveaux participants </b><i>(sauf si la configuration Gestion de l'ajout des participants sur le status est activé)</i><b> ou la modification de %s. </b>
 ReOpenObject            = Ouvrir à nouveau %s
 ConfirmReOpenObject     = Êtes-vous sûr de vouloir rouvrir %s ? La réouverture permet la modification de %s et l'ajout de nouveaux participants mais <b>toutes les signatures du document seront perdues</b>.
 LockObject              = Verrouiller %s

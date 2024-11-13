@@ -75,7 +75,7 @@ ObjectMustBeLockedToArchive      = %s must be in status (locked) in order to arc
 
 # Confirm box
 ValidateObject          = Validate %s
-ConfirmValidateObject   = Are you sure you want to validate %s? <br> Validation allows participants to sign the document but <b> prevents adding new participants or changing %s. </b>
+ConfirmValidateObject   = Are you sure you want to validate %s? <br> Validation allows participants to sign the document but <b> prevents new participants from being added </b><i>(unless the Manage adding participants on status configuration is enabled)</i><b> or %s from being modified. </b>
 ReOpenObject            = Open %s again
 ConfirmReOpenObject     = Are you sure you want to reopen %s ? Reopening allows %s to be modified and new participants to be added but all document signatures will be lost
 LockObject              = Lock %s

@@ -67,21 +67,22 @@ AttendantTableModeAdvanced = Advanced view
 SignatureSaveButton        = Save signature
 
 # Data
-Attendant           = Attendant
-Attendants          = Attendants
-InternalAttendant   = Internal attendant
-InternalAttendants  = Internal attendants
-ExternalAttendant   = External attendant
-ExternalAttendants  = External attendants
-NoAttendants        = No linked attendants. To add attendants, the status must be "Draft (to be validated)".
-CloneAttendants     = Clone attendants
-NoAttendant         = No %s present for %s.
-Present             = Present
-Absent              = Absent
-Delay               = Delay
-ElectronicSignature = Electronic signature
-Signatory           = Signatory
-Responsible         = Responsible
+Attendant                        = Attendant
+Attendants                       = Attendants
+InternalAttendant                = Internal attendant
+InternalAttendant                = Internal attendants
+ExternalAttendant                = External attendant
+ExternalAttendant                = External attendants
+NoAttendants                     = No linked attendants. To add attendants, the status must be "Draft (to be validated)".
+NoAttendantsWithStatusManagement = No linked participants. To add participants, the status must be "Draft (to be validated) or Validated (awaiting signature)".
+CloneAttendants                  = Clone attendants
+NoAttendant                      = No %s present for %s.
+Present                          = Present
+Absent                           = Absent
+Delay                            = Delay
+ElectronicSignature              = Electronic signature
+Signatory                        = Signatory
+Responsible                      = Responsible
 
 # Public interface
 SavedSignature = Signature saved
