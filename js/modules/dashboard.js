@@ -60,13 +60,11 @@ window.saturne.dashboard.init = function() {
  */
 window.saturne.dashboard.event = function() {
     $(document).on('change', '#disabledWidget, #disabledGraph', window.saturne.dashboard.addDashBoardInfo);
-
     $(document).on('click', '.select-dataset-dashboard-info', window.saturne.dashboard.selectDatasetDashboardInfo);
-
     $(document).on('click', '#dashboard-graph-filter', window.saturne.dashboard.openGraphFilter);
     $(document).on('click', '#dashboard-graph-filter-submit', window.saturne.dashboard.selectDashboardFilter);
-
     $(document).on('click', '#dashboard-close-item', window.saturne.dashboard.closeDashboardItem);
+    $(document).on('click', '#export-csv', window.saturne.dashboard.exportCSV);
 };
 
 /**
@@ -232,3 +230,45 @@ window.saturne.dashboard.configureDashboard = function(data, loaderElem, refresh
     error: function() {}
   });
 };
+
+/**
+ * Export graph to CSV
+ *
+ * @memberof Saturne_Dashboard
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param {Event} e Event
+ *
+ * @returns {void}
+ */
+window.saturne.dashboard.exportCSV = function(e) {
+  e.preventDefault();
+  let button         = $(this);
+  let token          = window.saturne.toolbox.getToken();
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+
+  let graph = button.parent().find('input[name="graph"]').val();
+
+  window.saturne.loader.display(button);
+
+  $.ajax({
+    url: document.URL + querySeparator + 'action=generate_csv&token=' + token,
+    type: 'POST',
+    data: graph,
+    success: function(resp) {
+      let url        = window.URL.createObjectURL(new Blob([resp], { type: 'text/csv' }));
+      let graphName  = button.data('graph-name').replace(/ /g, '_');
+      let date       = new Date();
+      let dateFormat = date.getFullYear() + ('0' + (date.getMonth() + 1)).slice(-2) + ('0' + date.getDate()).slice(-2);
+      let fileName   = dateFormat + '_' +  graphName + '.csv';
+
+      button.after($('<a href="' + url + '" download="' + fileName + '"></a>'));
+      button.next()[0].click();
+
+      window.saturne.loader.remove(button);
+    },
+    error: function() {}
+  })
+}

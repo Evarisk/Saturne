@@ -316,16 +316,12 @@ class SaturneDashboard
                                 $graph->setShowLegend($dashboardGraph['showlegend'] ?? 2);
                                 $graph->draw($fileName[$uniqueKey], $fileUrl[$uniqueKey]);
                                 print '<div class="' . $dashboardGraph['moreCSS'] . '" id="graph-' . $dashboardGraph['name'] . '">';
-
-                                $downloadCSV  = '<form method="POST" action="' . $_SERVER['PHP_SELF'] . (GETPOSTISSET('id') ? '?id=' . GETPOST('id') : '') . '">';
-                                //$downloadCSV  = '<div class="flex flex-row justify-end">';
-                                $downloadCSV .= '<input type="hidden" name="token" value="' . newToken() . '">';
-                                $downloadCSV .= '<input type="hidden" name="action" value="generate_csv">';
-                                $downloadCSV .= '<input type="hidden" name="graph" value="' . http_build_query($dashboardGraph) . '">';
-                                $downloadCSV .= '<button class="wpeo-button no-load button-grey">';
-                                $downloadCSV .= img_picto('ExportCSV', 'fontawesome_file-csv_fas_#31AD29_1em');
-                                //$downloadCSV .= '</button>';
-                                $downloadCSV .= '</button></form>';
+                              
+                                $downloadCSV  = '<div class="flex flex-row justify-end">';
+                                $downloadCSV .= '<input type="hidden" name="graph" value="' . dol_escape_htmltag(json_encode($dashboardGraph, JSON_UNESCAPED_UNICODE)) . '">';
+                                $downloadCSV .= '<button class="wpeo-button no-load button-grey" id="export-csv" data-graph-name="' . dol_sanitizeFileName(dol_strtolower($dashboardGraph['title'])) . '">';
+                                $downloadCSV .= img_picto($langs->transnoentities('ExportGraphCSV'), 'fontawesome_file-csv_fas_#31AD29_1em');
+                                $downloadCSV .= '</button>';
                                 if (!empty($dashboardGraph['name'])) {
                                     $downloadCSV .= '<button class="wpeo-button button-transparent" type="button" data-item-type="graph" data-item-name="' . $dashboardGraph['name'] . '" data-item-suppress="graph-' . $dashboardGraph['name'] . '" data-item-refresh="add-graph-box" id="dashboard-close-item">';
                                     $downloadCSV .= img_picto('Close', 'fontawesome_times_fas_light-grey_1em', '', '', '', '', '', 'close-dashboard-widget');
@@ -333,8 +329,7 @@ class SaturneDashboard
                                 }
                                 $downloadCSV .= '</div>';
                                 $dashboardGraph['morehtmlright'] .= $downloadCSV;
-
-
+                              
                                 print load_fiche_titre($dashboardGraph['title'], $dashboardGraph['morehtmlright'], $dashboardGraph['picto']);
                                 print $graph->show();
                                 print '</div>';

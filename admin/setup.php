@@ -151,6 +151,16 @@ print '</td><td class="center">';
 print ajax_constantonoff('SATURNE_USE_CREATE_DOCUMENT_ON_ARCHIVE');
 print '</td></tr>';
 
+// Manage saturne attendants add status
+print '<tr class="oddeven"><td>';
+print  $langs->trans('AttendantsAddStatusManagement');
+print '</td><td>';
+print $langs->trans('AttendantsAddStatusManagementDescription');
+print '</td><td class="center">';
+print ajax_constantonoff('SATURNE_ATTENDANTS_ADD_STATUS_MANAGEMENT');
+print '</td></tr>';
+
+
 // Use fast upload improvement
 print '<tr class="oddeven"><td>';
 print  $langs->trans('UseFastUploadImprovement');

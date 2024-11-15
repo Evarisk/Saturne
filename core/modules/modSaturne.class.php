@@ -115,6 +115,7 @@ class modSaturne extends DolibarrModules
             'js' => [
 				'/saturne/js/saturne.js',
 				'/saturne/js/modules/menu.js',
+                '/saturne/js/modules/toolbox.js',
 			],
             // Set here all hooks context managed by module. To find available hook context, make a "grep -r '>initHooks(' *" on source code. You can also set hook context to 'all'
             'hooks' => [
@@ -181,6 +182,7 @@ class modSaturne extends DolibarrModules
             $i++ => ['SATURNE_USE_CAPTCHA', 'integer', 0, '', 0, 'current'],
             $i++ => ['SATURNE_USE_ALL_EMAIL_MODE', 'integer', 1, '', 0, 'current'],
             $i++ => ['SATURNE_USE_CREATE_DOCUMENT_ON_ARCHIVE', 'integer', 1, '', 0, 'current'],
+            $i++ => ['SATURNE_ATTENDANTS_ADD_STATUS_MANAGEMENT', 'integer', 0, '', 0, 'current'],
             $i++ => ['SATURNE_MEDIA_MAX_WIDTH_MINI', 'integer', 128, '', 0, 'current'],
             $i++ => ['SATURNE_MEDIA_MAX_HEIGHT_MINI', 'integer', 72, '', 0, 'current'],
             $i++ => ['SATURNE_MEDIA_MAX_WIDTH_SMALL', 'integer', 480, '', 0, 'current'],
