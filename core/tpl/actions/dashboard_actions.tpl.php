@@ -31,7 +31,7 @@
 if ($action == 'adddashboardinfo' || $action == 'closedashboardinfo') {
     $data                = json_decode(file_get_contents('php://input'), true);
     $dashboardWidgetName = $data['dashboardWidgetName'];
-    $confName            = strtoupper($moduleName) . '_DISABLED_DASHBOARD_INFO';
+    $confName            = dol_strtoupper($moduleName) . '_DISABLED_DASHBOARD_INFO';
     $visible             = json_decode($user->conf->$confName);
 
     if ($action == 'adddashboardinfo') {
