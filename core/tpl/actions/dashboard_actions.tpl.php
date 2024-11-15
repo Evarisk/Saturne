@@ -31,7 +31,7 @@
 if ($action == 'adddashboardinfo' || $action == 'closedashboardinfo') {
     $data                = json_decode(file_get_contents('php://input'), true);
     $dashboardWidgetName = $data['dashboardWidgetName'];
-    $confName            = strtoupper($moduleName) . '_DISABLED_DASHBOARD_INFO';
+    $confName            = dol_strtoupper($moduleName) . '_DISABLED_DASHBOARD_INFO';
     $visible             = json_decode($user->conf->$confName);
 
     if ($action == 'adddashboardinfo') {
@@ -42,6 +42,50 @@ if ($action == 'adddashboardinfo' || $action == 'closedashboardinfo') {
 
     $tabparam[$confName] = json_encode($visible);
 
+    dol_set_user_param($db, $conf, $user, $tabparam);
+    $action = '';
+}
+
+if ($action == 'dashboardfilter') {
+    $data     = json_decode(file_get_contents('php://input'), true);
+    $confName = strtoupper($moduleName) . '_DASHBOARD_CONFIG';
+    $config   = json_decode($user->conf->$confName) ?? new stdClass();
+
+    $widget = $data['widget'] ?? null;
+    if (!isset($config->widgets) && $widget != null) {
+        $config->widgets = new stdClass();
+    }
+    $graph  = $data['graph'] ?? null;
+    if (!isset($config->graphs) && $graph != null) {
+        $config->graphs = new stdClass();
+    }
+    $filters = $data['graphFilters'] ?? [];
+    if (!isset($config->filters)) {
+        $config->filters = new stdClass();
+    }
+
+    if ($widget != null) {
+        if (isset($config->widgets->$widget)) {
+            unset($config->widgets->$widget);
+        } else {
+            $config->widgets->$widget = false;
+        }
+    }
+    if ($graph != null) {
+        if (isset($config->graphs->$graph->hide)) {
+            unset($config->graphs->$graph);
+        } else {
+            if (!isset($config->graphs->$graph)) {
+                $config->graphs->$graph = new stdClass();
+            }
+            $config->graphs->$graph->hide = true;
+        }
+    }
+    foreach ($filters as $filter => $filterValue) {
+        $config->filters->$filter = $filterValue;
+    }
+
+    $tabparam[$confName] = json_encode($config);
     dol_set_user_param($db, $conf, $user, $tabparam);
     $action = '';
 }

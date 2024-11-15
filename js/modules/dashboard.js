@@ -59,10 +59,11 @@ window.saturne.dashboard.init = function() {
  * @returns {void}
  */
 window.saturne.dashboard.event = function() {
-    $(document).on('change', '.add-dashboard-widget', window.saturne.dashboard.addDashBoardInfo);
-    $(document).on('click', '.close-dashboard-widget', window.saturne.dashboard.closeDashBoardInfo);
+    $(document).on('change', '#disabledWidget, #disabledGraph', window.saturne.dashboard.addDashBoardInfo);
     $(document).on('click', '.select-dataset-dashboard-info', window.saturne.dashboard.selectDatasetDashboardInfo);
-
+    $(document).on('click', '#dashboard-graph-filter', window.saturne.dashboard.openGraphFilter);
+    $(document).on('click', '#dashboard-graph-filter-submit', window.saturne.dashboard.selectDashboardFilter);
+    $(document).on('click', '#dashboard-close-item', window.saturne.dashboard.closeDashboardItem);
     $(document).on('click', '#export-csv', window.saturne.dashboard.exportCSV);
 };
 
@@ -77,58 +78,10 @@ window.saturne.dashboard.event = function() {
  * @returns {void}
  */
 window.saturne.dashboard.addDashBoardInfo = function() {
-    const dashboardWidgetForm = document.getElementById('dashBoardForm');
-    const formData            = new FormData(dashboardWidgetForm);
-    let dashboardWidgetName   = formData.get('boxcombo');
-    let token                 = window.saturne.toolbox.getToken();
-    let querySeparator        = window.saturne.toolbox.getQuerySeparator(document.URL);
 
-    $.ajax({
-        url: document.URL + querySeparator + 'action=adddashboardinfo&token=' + token,
-        type: "POST",
-        processData: false,
-        data: JSON.stringify({
-            dashboardWidgetName: dashboardWidgetName
-        }),
-        contentType: false,
-        success: function(resp) {
-          $('.fichecenter').replaceWith($(resp).find('.fichecenter'));
-        },
-        error: function() {}
-    });
-};
+    let loaderElem    = $(this).data('id-load') ? $('#' + $(this).data('id-load')) : $(this);
 
-/**
- * Close widget dashboard info.
- *
- * @memberof Saturne_Dashboard
- *
- * @since   1.1.0
- * @version 1.1.0
- *
- * @returns {void}
- */
-window.saturne.dashboard.closeDashBoardInfo = function() {
-    let box = $(this);
-    let dashboardWidgetName = box.data('widgetname');
-    let token = window.saturne.toolbox.getToken();
-    let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
-
-    $.ajax({
-        url: document.URL + querySeparator + 'action=closedashboardinfo&token=' + token,
-        type: "POST",
-        processData: false,
-        data: JSON.stringify({
-            dashboardWidgetName: dashboardWidgetName
-        }),
-        contentType: false,
-        success: function(resp) {
-            box.closest('.wpeo-infobox').fadeOut(400);
-            $('.add-widget-box').attr('style', '');
-            $('.add-widget-box').html($(resp).find('.add-widget-box').children())
-        },
-        error: function() {}
-    });
+    window.saturne.dashboard.configureDashboard({[$(this).data('item-type')]: $(this).val()}, loaderElem, $(this).data('id-refresh'));
 };
 
 /**
@@ -161,6 +114,121 @@ window.saturne.dashboard.selectDatasetDashboardInfo = function() {
         },
         error: function() {}
     });
+};
+
+/**
+ * Show dashboard filters
+ *
+ * @memberof Saturne_Dashboard
+ *
+ * @since   1.1.0
+ * @version 1.1.0
+ *
+ * @returns {void}
+ */
+window.saturne.dashboard.openGraphFilter = function() {
+  let refId         = $(this).data('ref-id');
+  let filterSection = $('#' + refId);
+
+  if (filterSection.is(':hidden')) {
+    filterSection.css('display', 'flex');
+    filterSection.hide();
+    filterSection.fadeIn(800);
+  } else {
+    filterSection.fadeOut(800);
+  }
+};
+
+/**
+ * Select dashboard filter
+ *
+ * @memberof Saturne_Dashboard
+ *
+ * @since   1.1.0
+ * @version 1.1.0
+ *
+ * @returns {void}
+ */
+window.saturne.dashboard.selectDashboardFilter = function(e) {
+  let button = $(e.target).closest('button');
+
+  let inputs = $("#" + button.data('ref-id')).find('input, select');
+  let values = {};
+  inputs.each(function() {
+    values[$(this).attr('name')] = $(this).val();
+  });
+
+  let data = {
+    graphFilters: values,
+  }
+
+  window.saturne.dashboard.configureDashboard(data, $("#" + button.data('ref-id')), button.data('item-refresh'));
+};
+
+/**
+ * Close dashboard item
+ *
+ * @memberof Saturne_Dashboard
+ *
+ * @since   1.1.0
+ * @version 1.1.0
+ *
+ * @returns {void}
+ */
+window.saturne.dashboard.closeDashboardItem = function() {
+  let box = $(this);
+  let itemName      = box.data('item-name');
+  let itemType      = box.data('item-type');
+  let itemRefreshId = box.data('item-refresh');
+  let itemSuppress  = $('#' + box.data('item-suppress'));
+
+  let data = {
+    [itemType]: itemName,
+  };
+  window.saturne.dashboard.configureDashboard(data, box, itemRefreshId, itemSuppress);
+};
+
+/**
+ * Configure dashboard
+ *
+ * @param data
+ * @param loaderElem
+ * @param refreshElemId
+ * @param itemSuppress
+ */
+window.saturne.dashboard.configureDashboard = function(data, loaderElem, refreshElemId = null, itemSuppress = null) {
+
+  let token = window.saturne.toolbox.getToken();
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+
+  window.saturne.loader.display(loaderElem);
+
+  $.ajax({
+    url: document.URL + querySeparator + 'action=dashboardfilter&token=' + token,
+    type: "POST",
+    processData: false,
+    data: JSON.stringify(data),
+    contentType: false,
+    success: function(resp) {
+      window.saturne.loader.remove(loaderElem);
+
+      if (refreshElemId) {
+        let refreshElem = $('#' + refreshElemId);
+        refreshElem.fadeOut(400, function() {
+          refreshElem.replaceWith($(resp).find('#' + refreshElemId));
+          let newRefreshElem = $('#' + refreshElemId);
+          newRefreshElem.hide();
+          newRefreshElem.fadeIn(400);
+        });
+      }
+      if (itemSuppress) {
+        itemSuppress.fadeOut(400);
+      } else {
+        loaderElem.replaceWith($(resp).find("#" + loaderElem.attr('id')));
+      }
+    },
+    error: function() {}
+  });
 };
 
 /**

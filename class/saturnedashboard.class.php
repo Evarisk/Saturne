@@ -79,6 +79,12 @@ class SaturneDashboard
                 if (key_exists('graphs', $dashboardData)) {
                     $dashboardInfos['graphs'][$key] = $dashboardData['graphs'];
                 }
+                if (key_exists('disabledGraphs', $dashboardData)) {
+                    $dashboardInfos['disabledGraphs'] = array_merge($dashboardInfos['disabledGraphs'] ?? [], $dashboardData['disabledGraphs']);
+                }
+                if (key_exists('graphsFilters', $dashboardData)) {
+                    $dashboardInfos['graphsFilters'] = array_merge($dashboardInfos['graphsFilters'] ?? [], $dashboardData['graphsFilters']);
+                }
             }
         }
 
@@ -108,8 +114,9 @@ class SaturneDashboard
         print '<input type="hidden" name="token" value="' . newToken() . '">';
         print '<input type="hidden" name="action" value="view">';
 
-        $confName            = strtoupper($moduleNameLowerCase) . '_DISABLED_DASHBOARD_INFO';
+        $confName            = dol_strtoupper($moduleNameLowerCase) . '_DASHBOARD_CONFIG';
         $disableWidgetList   = json_decode($user->conf->$confName);
+        $disableWidgetList   = $disableWidgetList->widgets ?? new stdClass();
         $dashboardWidgetsArray = [];
         if (is_array($dashboards['widgets']) && !empty($dashboards['widgets'])) {
             foreach ($dashboards['widgets'] as $dashboardWidgets) {
@@ -121,11 +128,11 @@ class SaturneDashboard
             }
         }
 
-        print '<div class="add-widget-box" style="' . (!empty((array)$disableWidgetList) ? '' : 'display:none') . '">';
-        print Form::selectarray('boxcombo', $dashboardWidgetsArray, -1, $langs->trans('ChooseBoxToAdd'), 0, 0, '', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint add-dashboard-widget', 0, 'hidden selected', 0, 1);
+        print '<div class="add-widget-box" id="add-widget-box" style="' . (!empty((array)$disableWidgetList) ? '' : 'display:none') . '">';
+        print Form::selectarray('disabledWidget', $dashboardWidgetsArray, -1, $langs->trans('ChooseBoxToAddWidget'), 0, 0, 'data-item-type="widget" data-id-refresh="widget-dashboard" data-id-load="add-widget-box"', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint add-dashboard-widget', 0, 'hidden selected', 0, 1);
         if (!empty($conf->use_javascript_ajax)) {
             include_once DOL_DOCUMENT_ROOT . '/core/lib/ajax.lib.php';
-            print ajax_combobox('boxcombo');
+            print ajax_combobox('disabledWidget');
         }
         print '</div>';
 
@@ -135,7 +142,7 @@ class SaturneDashboard
                 foreach ($dashboardWidgets as $key => $dashboardWidget) {
                     if (!isset($disableWidgetList->$key) && is_array($dashboardWidget) && !empty($dashboardWidget)) {
 
-                        $widget .= '<div class="wpeo-infobox">';
+                        $widget .= '<div class="wpeo-infobox" id="widget-' . $key . '">';
 
                             $widget .= '<div class="wpeo-infobox__header">';
                                 $widget .= '<div class="header__icon-container">';
@@ -143,7 +150,7 @@ class SaturneDashboard
                                     $widget .= '<i class="header__icon ' . $dashboardWidget['picto'] . '" style="color: ' . ($dashboardWidget['pictoColor'] ?? '#0D8AFF') . ';"></i>';
                                 $widget .= '</div>';
                                 $widget .= '<div class="header__title">' . ($dashboardWidget['title'] ?? $langs->transnoentities('Title')) . '</div>';
-                                $widget .= '<i class="close-dashboard-widget header__close fas fa-times" data-widgetname="' . $key . '"></i>';
+                                $widget .= '<i class="close-dashboard-widget header__close fas fa-times" data-item-type="widget" data-item-name="' . $key . '" data-item-suppress="widget-' . $key . '" data-item-refresh="add-widget-box" id="dashboard-close-item"></i>';
                             $widget .= '</div>';
 
                         $widget .= '<div class="wpeo-infobox__body">';
@@ -196,10 +203,50 @@ class SaturneDashboard
                     }
                 }
             }
-            print '<div class="opened-dash-board-wrap"><div class="wpeo-infobox-container box-flex-container">' . $widget . '</div></div>';
+            print '<div class="opened-dash-board-wrap"><div class="wpeo-infobox-container box-flex-container" id="widget-dashboard">' . $widget . '</div></div>';
         }
 
-        print '<div class="graph-dashboard wpeo-grid grid-2">';
+        if (!empty($dashboards['graphsFilters']) && is_array($dashboards['graphsFilters'])) {
+            print '<div class="graph-filter-container">';
+
+            print '<button class="wpeo-button button-grey" type="button" id="dashboard-graph-filter" data-ref-id="graph-filters" >';
+            print img_picto($langs->transnoentities('Filter'), 'fontawesome_filter_fas_grey_1em');
+            print '<span class="marginleftonly">' . $langs->transnoentities('Filters') . '</span>';
+            print '</button>';
+
+            print '<div id="graph-filters flex-row" style="display: none; margin-top: 1em;">';
+
+            print '<div class="flex flex-col">';
+            foreach ($dashboards['graphsFilters'] as $key => $dashboardGraphFilter) {
+                switch ($dashboardGraphFilter['type']) {
+                    case 'selectarray':
+                        print '<div class="flex flex-row">';
+                        print '<span class="marginrightonly">' . $dashboardGraphFilter['title'] . '</span>';
+                        print Form::selectarray($dashboardGraphFilter['filter'], $dashboardGraphFilter['values'], $dashboardGraphFilter['currentValue'], $dashboardGraphFilter['title'], 0, 0, '', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint', 0, 'hidden selected', 0, 1);
+                        print '</div>';
+                        break;
+                    default :
+                        break;
+                }
+            }
+            print '</div>';
+
+            print '<button class="marginleftonly button_search self-end" type="button" id="dashboard-graph-filter-submit" data-ref-id="graph-filters" data-item-refresh="graph-dashboard">';
+            print img_picto($langs->transnoentities('Reload'), 'fontawesome_redo_fas_grey_1em');
+            print '</button>';
+            print '</div>';
+            print '</div>';
+        }
+
+        print '<div class="add-graph-box" id="add-graph-box" style="margin-top: 10px; ' . (!empty($dashboards['disabledGraphs']) ? '' : 'display:none') . '">';
+        print Form::selectarray('disabledGraph', $dashboards['disabledGraphs'], -1, $langs->trans('ChooseBoxToAddGraph'), 0, 0, 'data-item-type="graph" data-id-refresh="graph-dashboard" data-id-load="add-graph-box"', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint', 0, 'hidden selected', 0, 1);
+        if (!empty($conf->use_javascript_ajax)) {
+            include_once DOL_DOCUMENT_ROOT . '/core/lib/ajax.lib.php';
+            print ajax_combobox('disabledGraph');
+        }
+        print '</div>';
+
+        print '<div class="graph-dashboard wpeo-grid grid-2" id="graph-dashboard">';
 
         if (is_array($dashboards['graphs']) && !empty($dashboards['graphs'])) {
             foreach ($dashboards['graphs'] as $dashboardGraphs) {
@@ -268,14 +315,21 @@ class SaturneDashboard
                                 $graph->SetHeight($dashboardGraph['height'] ?? $height);
                                 $graph->setShowLegend($dashboardGraph['showlegend'] ?? 2);
                                 $graph->draw($fileName[$uniqueKey], $fileUrl[$uniqueKey]);
-                                print '<div class="' . $dashboardGraph['moreCSS'] . '">';
-
-                                $downloadCSV  = '<input type="hidden" name="graph" value="' . dol_escape_htmltag(json_encode($dashboardGraph, JSON_UNESCAPED_UNICODE)) . '">';
+                                print '<div class="' . $dashboardGraph['moreCSS'] . '" id="graph-' . $dashboardGraph['name'] . '">';
+                              
+                                $downloadCSV  = '<div class="flex flex-row justify-end">';
+                                $downloadCSV .= '<input type="hidden" name="graph" value="' . dol_escape_htmltag(json_encode($dashboardGraph, JSON_UNESCAPED_UNICODE)) . '">';
                                 $downloadCSV .= '<button class="wpeo-button no-load button-grey" id="export-csv" data-graph-name="' . dol_sanitizeFileName(dol_strtolower($dashboardGraph['title'])) . '">';
-                                $downloadCSV .= img_picto($langs->transnoentities('ExportGraphCSV'), 'fontawesome_file-csv_fas_#31AD29_15px');
+                                $downloadCSV .= img_picto($langs->transnoentities('ExportGraphCSV'), 'fontawesome_file-csv_fas_#31AD29_1em');
                                 $downloadCSV .= '</button>';
+                                if (!empty($dashboardGraph['name'])) {
+                                    $downloadCSV .= '<button class="wpeo-button button-transparent" type="button" data-item-type="graph" data-item-name="' . $dashboardGraph['name'] . '" data-item-suppress="graph-' . $dashboardGraph['name'] . '" data-item-refresh="add-graph-box" id="dashboard-close-item">';
+                                    $downloadCSV .= img_picto('Close', 'fontawesome_times_fas_light-grey_1em', '', '', '', '', '', 'close-dashboard-widget');
+                                    $downloadCSV .= '</button>';
+                                }
+                                $downloadCSV .= '</div>';
                                 $dashboardGraph['morehtmlright'] .= $downloadCSV;
-
+                              
                                 print load_fiche_titre($dashboardGraph['title'], $dashboardGraph['morehtmlright'], $dashboardGraph['picto']);
                                 print $graph->show();
                                 print '</div>';
@@ -286,13 +340,18 @@ class SaturneDashboard
             }
         }
 
-        print '</div>';
-
         if (is_array($dashboards['lists']) && !empty($dashboards['lists'])) {
             foreach ($dashboards['lists'] as $dashboardLists) {
                 foreach ($dashboardLists as $dashboardList) {
                     if (is_array($dashboardList['data']) && !empty($dashboardList['data'])) {
-                        print '<div>';
+                        print '<div id="graph-' . $dashboardList['name'] . '" style="width: 100%">';
+
+                        if (!empty($dashboardList['name'])) {
+                            $dashboardList['morehtmlright'] = '<button class="wpeo-button button-transparent" type="button" data-item-type="graph" data-item-name="' . $dashboardList['name'] . '" data-item-suppress="graph-' . $dashboardList['name'] . '" data-item-refresh="add-graph-box" id="dashboard-close-item">';
+                            $dashboardList['morehtmlright'] .= img_picto('Close', 'fontawesome_times_fas_light-grey_1em', '', '', '', '', '', 'close-dashboard-widget');
+                            $dashboardList['morehtmlright'] .= '</button>';
+                        }
+
                         print load_fiche_titre($dashboardList['title'], $dashboardList['morehtmlright'], $dashboardList['picto']);
                         print '<table class="noborder centpercent">';
                         print '<tr class="liste_titre">';
@@ -312,6 +371,7 @@ class SaturneDashboard
                 }
             }
         }
+        print '</div>';
 
         print '</form>';
     }
