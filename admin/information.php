@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2022-2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,37 +37,40 @@ require_once DOL_DOCUMENT_ROOT . '/includes/parsedown/Parsedown.php';
 require_once __DIR__ . '/../lib/saturne.lib.php';
 
 // Global variables definitions
-global $db, $langs;
+global $db, $langs, $user;
 
 // Load translation files required by the page
 saturne_load_langs(['admin']);
 
 // Get parameters
-$filename   = GETPOST('filename', 'alpha');
-$tabName    = GETPOST('tab_name', 'alpha');
-$backtopage = GETPOST('backtopage', 'alpha');
+$fileName = GETPOST('filename', 'alpha');
+$tabName  = GETPOST('tab_name', 'alpha');
 
 // Initialize technical objects
 $parsedown = new Parsedown();
+
+// Security check - Protection if external user
+$permissionToRead = $user->hasRight('saturne', 'adminpage', 'read');
+saturne_check_access($permissionToRead);
 
 /*
  * View
  */
 
-$title    = $langs->trans('ModuleSetup', 'Saturne');
-$help_url = 'FR:Module_Saturne';
+$title   = $langs->trans('ModuleSetup', 'Saturne');
+$helpUrl = 'FR:Module_Saturne';
 
-saturne_header(0, '', $title, $help_url);
+saturne_header(0, '', $title, $helpUrl);
 
 // Subheader
-$linkback = '<a href="' . ($backtopage ?: DOL_URL_ROOT . '/admin/modules.php?restore_lastsearch_values=1') . '">' . $langs->trans('BackToModuleList') . '</a>';
-print load_fiche_titre($title, $linkback, 'title_setup');
+$linkBack = '<a href="' . DOL_URL_ROOT . '/admin/modules.php' . '">' . $langs->trans('BackToModuleList') . '</a>';
+print load_fiche_titre($title, $linkBack, 'title_setup');
 
 // Configuration header
 $head = saturne_admin_prepare_head();
 print dol_get_fiche_head($head, $tabName, $title, -1, 'saturne_color@saturne');
 
-$filePath = dol_buildpath('saturne/' . $filename . '.md');
+$filePath = dol_buildpath('saturne/' . $fileName . '.md');
 $content  = file_get_contents($filePath);
 print $parsedown->text($content);
 

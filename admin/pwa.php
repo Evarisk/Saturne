@@ -33,19 +33,19 @@ if (file_exists('../saturne.main.inc.php')) {
 // Get module parameters
 $moduleName          = GETPOST('module_name', 'alpha');
 $startUrl            = GETPOST('start_url', 'alpha');
-$moduleNameLowerCase = strtolower($moduleName);
+$moduleNameLowerCase = dol_strtolower($moduleName);
 
 // Load Dolibarr libraries
 require_once TCPDF_PATH . 'tcpdf_barcodes_2d.php';
 
-// Load Module Libraries
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '.lib.php';
+// Load Module libraries
+saturne_load_module_files($moduleName);
 
 // Global variables definitions
 global $conf, $db, $hookmanager, $langs, $user;
 
 // Load translation files required by the page
-saturne_load_langs();
+saturne_load_langs(['admin']);
 
 // Get parameters
 $action = GETPOST('action', 'alpha');
@@ -56,7 +56,7 @@ $form = new Form($db);
 $hookmanager->initHooks([$moduleNameLowerCase . 'pwaadmin', 'saturneadmin']); // Note that conf->hooks_modules contains array
 
 // Security check - Protection if external user
-$permissionToRead = $user->rights->$moduleNameLowerCase->adminpage->read;
+$permissionToRead = $user->hasRight($moduleNameLowerCase, 'adminpage', 'read');
 saturne_check_access($permissionToRead);
 
 /*
@@ -66,7 +66,7 @@ saturne_check_access($permissionToRead);
 if ($action == 'generate_QRCode') {
     $urlToEncode = GETPOST('urlToEncode');
 
-    $barcode = new TCPDF2DBarcode($urlToEncode, 'QRCODE,L');
+    $barcode = new TCPDF2DBarcode($urlToEncode, 'QRCODE,H');
 
     dol_mkdir($conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/pwa/qrcode/');
     $file = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/pwa/qrcode/' . 'barcode_' . dol_print_date(dol_now(), 'dayhourlog') . '.png';
@@ -90,7 +90,7 @@ $helpUrl = 'FR:Module_' . $moduleName;
 saturne_header(0, '', $title, $helpUrl);
 
 // Subheader
-$linkBack = '<a href="' . DOL_URL_ROOT . '/admin/modules.php?restore_lastsearch_values=1' . '">' . $langs->trans('BackToModuleList') . '</a>';
+$linkBack = '<a href="' . DOL_URL_ROOT . '/admin/modules.php' . '">' . $langs->trans('BackToModuleList') . '</a>';
 print load_fiche_titre($title, $linkBack, 'title_setup');
 
 // Configuration header
@@ -107,7 +107,7 @@ print load_fiche_titre($langs->transnoentities('PWAQRCodeGenerationManagement'),
 print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '">';
 print '<input type="hidden" name="token" value="' . newToken() . '">';
 print '<input type="hidden" name="action" value="generate_QRCode">';
-print '<input hidden name="urlToEncode" value="' . $startUrl . '">';
+print '<input type="hidden" name="urlToEncode" value="' . $startUrl . '">';
 
 print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
