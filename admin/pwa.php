@@ -72,8 +72,7 @@ if ($action == 'generate_QRCode') {
     $file = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/pwa/qrcode/' . 'barcode_' . dol_print_date(dol_now(), 'dayhourlog') . '.png';
 
     $imageData = $barcode->getBarcodePngData();
-    $imageData = imagecreatefromstring($imageData);
-    imagepng($imageData, $file);
+    file_put_contents($file, $imageData);
 
     setEventMessage('SavedConfig');
     header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&start_url=' . $urlToEncode);
