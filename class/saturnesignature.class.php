@@ -537,53 +537,84 @@ class SaturneSignature extends SaturneObject
     /**
      * Fetch signatory from database
      *
-     * @param  string    $role        Role of resource
-     * @param  int       $fk_object   ID of object linked
-     * @param  string    $object_type ID of object linked
-     * @return array|int
+     * @param  string    $role       Role of resource
+     * @param  int       $fkObject   ID of object linked
+     * @param  string    $objectType Type of object
+     * @return array|int             Array of signatories if OK, -1 if KO
      * @throws Exception
      */
-    public function fetchSignatory(string $role, int $fk_object, string $object_type)
+    public function fetchSignatory(string $role, int $fkObject, string $objectType)
     {
-        if (!empty($fk_object)) {
-            $filter = ['customsql' => 'fk_object=' . $fk_object . ' AND status > 0 AND object_type="' . $object_type . '"'];
-            if (strlen($role)) {
-                $filter['customsql'] .= ' AND role = "' . $role . '"';
-                return $this->fetchAll('', '', 0, 0, $filter);
-            } else {
-                $signatories = $this->fetchAll('', '', 0, 0, $filter);
-                if (!empty($signatories) && $signatories > 0) {
-                    $signatoriesArray = [];
-                    foreach ($signatories as $signatory) {
-                        $signatoriesArray[$signatory->role][$signatory->id] = $signatory;
-                    }
-                    return $signatoriesArray;
-                } else {
-                    return 0;
-                }
-            }
-        } else {
-            return 0;
+        global $langs;
+
+        $langs->load('error@saturne');
+
+        if ($fkObject <= 0) {
+            throw new InvalidArgumentException($langs->transnoentities('ErrorArgumentMustBePositiveInteger', '$fkObject'));
         }
+
+        if (empty($objectType)) {
+            throw new InvalidArgumentException($langs->transnoentities('ErrorArgumentMustBeNotEmptyString', '$objectType'));
+        }
+
+        $filter = [
+            'customsql' => sprintf(
+                'fk_object=%d AND object_type="%s" AND status > 0',
+                $fkObject,
+                $objectType
+            )
+        ];
+
+        if (!empty($role)) {
+            $filter['customsql'] .= sprintf(' AND role="%s"', $role);
+            return $this->fetchAll('', '', 0, 0, $filter);
+        }
+
+        $signatories = $this->fetchAll('', '', 0, 0, $filter);
+
+        if (!is_array($signatories) || empty($signatories)) {
+            return -1;
+        }
+
+        return array_reduce($signatories, function ($signatoriesArray, $signatory) {
+            $signatoriesArray[$signatory->role][$signatory->id] = $signatory;
+            return $signatoriesArray;
+        }, []);
     }
 
     /**
      * Fetch signatories in database with parent ID
      *
-     * @param  int           $fk_object   ID of object linked
-     * @param  string        $object_type Type of object
-     * @param  string        $morefilter  Filter
-     * @return array|integer
+     * @param  int       $fkObject   ID of object linked
+     * @param  string    $objectType Type of object
+     * @param  string    $moreFilter Filter SQL
+     * @return array|int             Array of signatories if OK, -1 if KO
      * @throws Exception
      */
-    public function fetchSignatories(int $fk_object, string $object_type, string $morefilter = '1 = 1')
+    public function fetchSignatories(int $fkObject, string $objectType, string $moreFilter = '1 = 1')
     {
-        if (!empty($fk_object)) {
-            $filter = ['customsql' => 'fk_object=' . $fk_object . ' AND ' . $morefilter . ' AND object_type="' . $object_type . '"' . ' AND status > 0'];
-            return $this->fetchAll('', '', 0, 0, $filter);
-        } else {
-            return [];
+        global $langs;
+
+        $langs->load('error@saturne');
+
+        if ($fkObject <= 0) {
+            throw new InvalidArgumentException($langs->transnoentities('ErrorArgumentMustBePositiveInteger', '$fkObject'));
         }
+
+        if (empty($objectType)) {
+            throw new InvalidArgumentException($langs->transnoentities('ErrorArgumentMustBeNotEmptyString', '$objectType'));
+        }
+
+        $filter = [
+            'customsql' => sprintf(
+                'fk_object=%d AND object_type="%s" AND status > 0 AND %s',
+                $fkObject,
+                $objectType,
+                $moreFilter
+            )
+        ];
+
+        return $this->fetchAll('', '', 0, 0, $filter);
     }
 
     /**
