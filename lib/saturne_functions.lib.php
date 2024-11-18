@@ -608,3 +608,31 @@ function saturne_show_notice(string $title = '', string $message = '', string $t
 
     return $out;
 }
+
+/**
+ * Manage extra fields for add and update
+ *
+ * @param  array     $extraFieldsArrays Array of extra fields
+ * @throws Exception
+ */
+function saturne_manage_extrafiels(array $extraFieldsArrays): void
+{
+    global $db;
+
+    require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
+
+    $extraFields = new ExtraFields($db);
+
+    foreach ($extraFieldsArrays as $key => $extraField) {
+        foreach ($extraField['elementtype'] as $extraFieldElementType) {
+            $result = $extraFields->update($key, $extraField['Label'], $extraField['type'], $extraField['length'] ?? '', $extraFieldElementType, 0, 0, $extraField['position'], $extraField['params'], '', '', $extraField['list'], ($extraField['help'][$extraFieldElementType] ?? $extraField['help'] ?? ''), '', '', $extraField['entity'] ?? '', $extraField['langfile'], $extraField['enabled'] . ' && isModEnabled("' . $extraFieldElementType . '")', 0, 0, $extraField['moreparams'] ?? []);
+            if ($result < 0) {
+                throw new Exception($db->lasterror());
+            }
+            $result = $extraFields->addExtraField($key, $extraField['Label'], $extraField['type'], $extraField['position'], $extraField['length'] ?? '', $extraFieldElementType, 0, 0, '', $extraField['params'], $extraField['alwayseditable'], '', $extraField['list'], ($extraField['help'][$extraFieldElementType] ?? $extraField['help'] ?? ''), '', $extraField['entity'] ?? '', $extraField['langfile'], $extraField['enabled'] . ' && isModEnabled("' . $extraFieldElementType . '")', 0, 0, $extraField['moreparams'] ?? []);
+            if ($result < 0) {
+                throw new Exception($db->lasterror());
+            }
+        }
+    }
+}
