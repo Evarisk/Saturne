@@ -99,7 +99,7 @@ function saturne_check_access($permission, object $object = null, bool $allowExt
     }
 
 	if (isModEnabled('multicompany')) {
-		if ($object->id > 0) {
+		if (!is_null($object) && $object->id > 0) {
 			if ($object->entity != $conf->entity) {
 				setEventMessage($langs->trans('ChangeEntityRedirection'), 'warnings');
 				$urltogo = dol_buildpath('/custom/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'index.php?mainmenu=' . $moduleNameLowerCase, 1);
