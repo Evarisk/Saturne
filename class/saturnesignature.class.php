@@ -252,7 +252,7 @@ class SaturneSignature extends SaturneObject
     /**
      * @var int|null Attendance
      */
-    public ?int $attendance;
+    public ?int $attendance = SaturneSignature::ATTENDANCE_PRESENT;
 
     /**
      * @var string|null Json
@@ -323,7 +323,7 @@ class SaturneSignature extends SaturneObject
             foreach ($filter as $key => $value) {
                 if ($key == 't.rowid') {
                     $sqlwhere[] = $key . '=' . $value;
-                } elseif (in_array($this->fields[$key]['type'], ['date', 'datetime', 'timestamp'])) {
+                } elseif (isset($this->fields[$key]['type']) && in_array($this->fields[$key]['type'], ['date', 'datetime', 'timestamp'])) {
                     $sqlwhere[] = $key . ' = \'' . $this->db->idate($value) . '\'';
                 } elseif ($key == 'customsql') {
                     $sqlwhere[] = $value;
