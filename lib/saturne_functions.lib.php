@@ -209,6 +209,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
     if ($resHook < 0) {
         setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
     } else {
+        $customMoreHtmlRef = '';
         if (!empty($hookmanager->resArray)) {
             list($customMoreHtmlRef, $moreParams) = $hookmanager->resArray;
         } else if (!empty($hookmanager->resPrint)) {
@@ -286,7 +287,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
                     }
                 } else {
                     $BannerElementObject->fetch($object->$objectKey);
-                    if ($bannerElement == 'societe' || $bannerElement == $moreParams['bannerElement']) {
+                    if ($bannerElement == 'societe' || !empty($moreParams['bannerElement']) && $bannerElement == $moreParams['bannerElement']) {
                         $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1) : '';
                     } elseif ($bannerElement == 'project') {
                         $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1, '', 1) : '';
@@ -315,16 +316,16 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
         $resHook = $hookmanager->executeHooks('saturneBannerTabCustomSubdir', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
         if ($resHook > 0) {
             if (!empty($hookmanager->resArray)) {
-                if ($hookmanager->resArray['modulepart']) {
+                if (!empty($hookmanager->resArray['modulepart'])) {
                     $modulePart = $hookmanager->resArray['modulepart'];
                 }
-                if ($hookmanager->resArray['dir']) {
+                if (!empty($hookmanager->resArray['dir'])) {
                     $baseDir = $hookmanager->resArray['dir'];
                 }
-                if ($hookmanager->resArray['subdir']) {
+                if (!empty($hookmanager->resArray['subdir'])) {
                     $subDir = $hookmanager->resArray['subdir'];
                 }
-                if ($hookmanager->resArray['photoLimit']) {
+                if (!empty($hookmanager->resArray['photoLimit'])) {
                     $photoLimit = $hookmanager->resArray['photoLimit'];
                 }
             }

@@ -48,13 +48,13 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
 
 	$filearray = dol_dir_list($dir, 'files', 0, '', '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_DESC : SORT_ASC));
 
-    if ($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS == 1) {
+    if (getDolUserInt('SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS')) {
         $yesterdayTimeStamp = dol_time_plus_duree(dol_now(), -1, 'd');
         $filearray = array_filter($filearray, function($file) use ($yesterdayTimeStamp) {
             return $file['date'] > $yesterdayTimeStamp;
         });
     }
-    if ($user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS == 1) {
+    if (getDolUserInt('SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS')) {
         $moduleObjectMedias = dol_dir_list($conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1], 'files', 1, '', '.odt|.pdf|barcode|_mini|_medium|_small|_large');
         $filearray          = array_filter($filearray, function($file) use ($conf, $moduleNameLowerCase, $moduleObjectMedias) {
             $fileExists = array_search($file['name'], array_column($moduleObjectMedias, 'name'));
@@ -71,10 +71,11 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
 			$filearray = dol_sort_array($filearray, $sortfield, $sortorder);
 		}
 
-		$moduleImageNumberPerPageConf = strtoupper($moduleName) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
-		for ($i = (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf); $i < ($conf->global->$moduleImageNumberPerPageConf + (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf));  $i++) {
+        $confName                     = strtoupper($moduleName) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
+        $moduleImageNumberPerPageConf = getDolGlobalInt($confName);
+		for ($i = (($offset - 1) * $moduleImageNumberPerPageConf); $i < ($moduleImageNumberPerPageConf + (($offset - 1) * $moduleImageNumberPerPageConf));  $i++) {
 
-            $fileName = $filearray[$i]['name'];
+            $fileName = $filearray[$i]['name'] ?? '';
             if (image_format_supported($fileName) >= 0) {
                 $nbphoto++;
 
@@ -371,7 +372,7 @@ function saturne_get_thumb_name(string $filename, string $thumbType = 'small'): 
  * Return media linked elements count
  *
  * @param  string $moduleName Module name
- * @param  string $fileName       File name
+ * @param  string $fileName   File name
  * @return string $output     Show media linked element count
  *
  */
@@ -398,14 +399,16 @@ function saturne_get_media_linked_elements(string $moduleName, string $fileName)
         $object    = new $className($db);
 
         $mediaLinkedElements[$fileArray['name']][$element[0]]['picto'] = $object->picto;
-        $mediaLinkedElements[$fileArray['name']][$element[0]]['value']++;
+        if (isset($mediaLinkedElements[$fileArray['name']][$element[0]]['value'])) {
+            $mediaLinkedElements[$fileArray['name']][$element[0]]['value']++;
+        }
     }
 
     $output = '<div class="linked-element">';
     foreach ($mediaLinkedElements as $mediaLinkedElement) {
         foreach ($mediaLinkedElement as $key => $linkedElement) {
             $output .= '<span class="paddingleft paddingright">' . img_picto($langs->trans(ucfirst($key)), $linkedElement['picto'], 'class="paddingright"');
-            $output .= $linkedElement['value'];
+            $output .= $linkedElement['value'] ?? 0;
             $output .= '</span>';
         }
     }
