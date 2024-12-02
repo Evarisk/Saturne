@@ -18,33 +18,33 @@
 /**
  * \file    class/saturnedashboard.class.php
  * \ingroup saturne
- * \brief   Class file for manage SaturneDashboard.
+ * \brief   Class file for manage SaturneDashboard
  */
 
-// Load Dolibarr libraries.
+// Load Dolibarr libraries
 require_once DOL_DOCUMENT_ROOT . '/core/class/dolgraph.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 
 /**
- * Class for SaturneDashboard.
+ * Class for SaturneDashboard
  */
 class SaturneDashboard
 {
     /**
-     * @var DoliDB Database handler.
+     * @var DoliDB Database handler
      */
     public DoliDB $db;
 
     /**
-     * @var string Module name.
+     * @var string Module name
      */
-    public $module = 'saturne';
+    public string $module = 'saturne';
 
     /**
-     * Constructor.
+     * Constructor
      *
-     * @param DoliDB $db                  Database handler.
-     * @param string $moduleNameLowerCase Module name.
+     * @param DoliDB $db                  Database handler
+     * @param string $moduleNameLowerCase Module name
      */
     public function __construct(DoliDB $db, string $moduleNameLowerCase = 'saturne')
     {
@@ -94,12 +94,11 @@ class SaturneDashboard
     /**
      * Show dashboard
      *
-     * @param array|null      $moreParams    Parameters for load dashboard info
+     * @param array|null  $moreParams    Parameters for load dashboard info
      *
      * @return void
-     * @throws Exception
      */
-    public function show_dashboard(?array $moreParams = [])
+    public function show_dashboard(?array $moreParams = []): void
     {
         global $conf, $form, $langs, $moduleNameLowerCase, $user;
 
@@ -316,7 +315,7 @@ class SaturneDashboard
                                 $graph->setShowLegend($dashboardGraph['showlegend'] ?? 2);
                                 $graph->draw($fileName[$uniqueKey], $fileUrl[$uniqueKey]);
                                 print '<div class="' . $dashboardGraph['moreCSS'] . '" id="graph-' . $dashboardGraph['name'] . '">';
-                              
+
                                 $downloadCSV  = '<div class="flex flex-row justify-end">';
                                 $downloadCSV .= '<input type="hidden" name="graph" value="' . dol_escape_htmltag(json_encode($dashboardGraph, JSON_UNESCAPED_UNICODE)) . '">';
                                 $downloadCSV .= '<button class="wpeo-button no-load button-grey" id="export-csv" data-graph-name="' . dol_sanitizeFileName(dol_strtolower($dashboardGraph['title'])) . '">';
@@ -329,7 +328,7 @@ class SaturneDashboard
                                 }
                                 $downloadCSV .= '</div>';
                                 $dashboardGraph['morehtmlright'] .= $downloadCSV;
-                              
+
                                 print load_fiche_titre($dashboardGraph['title'], $dashboardGraph['morehtmlright'], $dashboardGraph['picto']);
                                 print $graph->show();
                                 print '</div>';
