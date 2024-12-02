@@ -83,10 +83,10 @@ class SaturneTask extends Task
      */
     public function load_dashboard($projectId): array
     {
-        global $user, $langs;
+        global $langs;
 
         $confName        = dol_strtoupper($this->module) . '_DASHBOARD_CONFIG';
-        $dashboardConfig = json_decode($user->conf->$confName);
+        $dashboardConfig = json_decode(getDolUserString($confName));
         $array = ['graphs' => [], 'disabledGraphs' => []];
 
         if (empty($dashboardConfig->graphs->TasksRepartition->hide)) {
@@ -346,7 +346,6 @@ class SaturneTask extends Task
                 $newobj->fk_project    = $obj->project_id;
                 $newobj->project_ref   = $obj->project_ref;
                 $newobj->project_label = $obj->project_label;
-                $newobj->public        = $obj->project_public;
 
                 $newobj->fk_task	= $obj->task_id;
                 $newobj->task_ref   = $obj->task_ref;

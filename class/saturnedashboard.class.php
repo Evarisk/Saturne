@@ -101,7 +101,7 @@ class SaturneDashboard
      */
     public function show_dashboard(?array $moreParams = [])
     {
-        global $conf, $form, $langs, $moduleNameLowerCase, $user;
+        global $conf, $form, $langs, $moduleNameLowerCase;
 
         $width  = DolGraph::getDefaultGraphSizeForStats('width');
         $height = DolGraph::getDefaultGraphSizeForStats('height');
@@ -115,7 +115,7 @@ class SaturneDashboard
         print '<input type="hidden" name="action" value="view">';
 
         $confName            = dol_strtoupper($moduleNameLowerCase) . '_DASHBOARD_CONFIG';
-        $disableWidgetList   = json_decode($user->conf->$confName);
+        $disableWidgetList   = json_decode(getDolUserString($confName));
         $disableWidgetList   = $disableWidgetList->widgets ?? new stdClass();
         $dashboardWidgetsArray = [];
         if (is_array($dashboards['widgets']) && !empty($dashboards['widgets'])) {
@@ -179,7 +179,7 @@ class SaturneDashboard
                                 }
                             }
                             $widget .= '</ul>';
-                            if (is_array($dashboardWidget['moreParams']) && (!empty($dashboardWidget['moreParams']))) {
+                            if (!empty($dashboardWidget['moreParams']) && is_array($dashboardWidget['moreParams'])) {
                                 $widget .= '<div class="body__content">';
                                 foreach ($dashboardWidget['moreParams'] as $dashboardWidgetMoreParamsKey => $dashboardWidgetMoreParams) {
                                     switch ($dashboardWidgetMoreParamsKey) {
@@ -315,8 +315,8 @@ class SaturneDashboard
                                 $graph->SetHeight($dashboardGraph['height'] ?? $height);
                                 $graph->setShowLegend($dashboardGraph['showlegend'] ?? 2);
                                 $graph->draw($fileName[$uniqueKey], $fileUrl[$uniqueKey]);
-                                print '<div class="' . $dashboardGraph['moreCSS'] . '" id="graph-' . $dashboardGraph['name'] . '">';
-                              
+                                print '<div' . (isset($dashboardGraph['moreCSS']) ? 'class="' . $dashboardGraph['moreCSS'] . '"' : '') . 'id="graph-' . $dashboardGraph['name'] . '">';
+
                                 $downloadCSV  = '<div class="flex flex-row justify-end">';
                                 $downloadCSV .= '<input type="hidden" name="graph" value="' . dol_escape_htmltag(json_encode($dashboardGraph, JSON_UNESCAPED_UNICODE)) . '">';
                                 $downloadCSV .= '<button class="wpeo-button no-load button-grey" id="export-csv" data-graph-name="' . dol_sanitizeFileName(dol_strtolower($dashboardGraph['title'])) . '">';
@@ -328,8 +328,12 @@ class SaturneDashboard
                                     $downloadCSV .= '</button>';
                                 }
                                 $downloadCSV .= '</div>';
-                                $dashboardGraph['morehtmlright'] .= $downloadCSV;
-                              
+                                if (isset($dashboardGraph['morehtmlright'])) {
+                                    $dashboardGraph['morehtmlright'] .= $downloadCSV;
+                                } else {
+                                    $dashboardGraph['morehtmlright'] = $downloadCSV;
+                                }
+
                                 print load_fiche_titre($dashboardGraph['title'], $dashboardGraph['morehtmlright'], $dashboardGraph['picto']);
                                 print $graph->show();
                                 print '</div>';
@@ -362,7 +366,7 @@ class SaturneDashboard
                         foreach ($dashboardList['data'] as $dashboardListDatasets) {
                             print '<tr class="oddeven">';
                             foreach ($dashboardListDatasets as $key => $dashboardGraphDataset) {
-                                print '<td class="' . ($conf->browser->layout == 'classic' ? 'nowraponall tdoverflowmax200 ' : '') . (($key != 'Ref') ? 'center ' : '') . $dashboardGraphDataset['morecss'] . '"' . $dashboardGraphDataset['moreAttr'] . '>' . $dashboardGraphDataset['value'] . '</td>';
+                                print '<td class="' . ($conf->browser->layout == 'classic' ? 'nowraponall tdoverflowmax200 ' : '') . (($key != 'Ref') ? 'center ' : '') . ($dashboardGraphDataset['morecss'] ?? '') . '"' . ($dashboardGraphDataset['moreAttr'] ?? '') . '>' . $dashboardGraphDataset['value'] . '</td>';
                             }
                             print '</tr>';
                         }
