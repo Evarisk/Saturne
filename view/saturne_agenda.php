@@ -108,8 +108,8 @@ if ($id > 0 || !empty($ref)) {
 }
 
 // Security check - Protection if external user
-$permissiontoread = $user->rights->$moduleNameLowerCase->$objectType->read;
-$permissiontoadd  = $user->rights->$moduleNameLowerCase->$objectType->write;
+$permissiontoread = $user->hasRight($moduleNameLowerCase, $objectType, 'read');
+$permissiontoadd  = $user->hasRight($moduleNameLowerCase, $objectType, 'write');
 saturne_check_access($permissiontoread, $object);
 
 /*
