@@ -618,7 +618,7 @@ function saturne_show_notice(string $title = '', string $message = '', string $t
  */
 function saturne_manage_extrafields(array $extraFieldsArrays, array $commonExtraFieldsValue = []): void
 {
-    global $db;
+    global $db, $langs;
 
     require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
 
@@ -626,64 +626,59 @@ function saturne_manage_extrafields(array $extraFieldsArrays, array $commonExtra
 
     foreach ($extraFieldsArrays as $key => $extraField) {
         if (!isset($extraField['elementtype']) || !is_array($extraField['elementtype'])) {
-            dol_syslog("Error: Missing or invalid 'elementtype' for key $key", LOG_ERR);
-            continue;
+            throw new Exception($langs->transnoentities('ExtrafieldsFieldMissing', 'elementtype', $key));
         }
 
         foreach ($extraField['elementtype'] as $extraFieldElementType) {
-            try {
-                // Update ExtraField
-                $result = $extraFields->update(
-                    $key, $extraField['Label'], $extraField['type'], $extraField['length'] ?? '',
-                    $extraFieldElementType,
-                    $extraField['unique']   ?? $commonExtraFieldsValue['unique']   ?? 0,
-                    $extraField['required'] ?? $commonExtraFieldsValue['required'] ?? 0,
-                    $extraField['position'],
-                    $extraField['params'] ? ['options' => $extraField['params']] : '',
-                    $extraField['alwayseditable'] ?? $commonExtraFieldsValue['alwayseditable'] ?? 0,
-                    $extraField['perms']          ?? $commonExtraFieldsValue['perms']          ?? '',
-                    $extraField['list']           ?? $commonExtraFieldsValue['list']           ?? '',
-                    $extraField['help'][$extraFieldElementType] ?? $extraField['help'] ?? $commonExtraFieldsValue['help'] ?? '',
-                    $extraField['default']     ?? $commonExtraFieldsValue['default']     ?? '',
-                    $extraField['computed']    ?? $commonExtraFieldsValue['computed']    ?? '',
-                    $extraField['entity']      ?? $commonExtraFieldsValue['entity']      ?? '',
-                    $extraField['langfile']    ?? $commonExtraFieldsValue['langfile']    ?? '',
-                    $extraField['enabled']     ?? $commonExtraFieldsValue['enabled']     ?? '1',
-                    $extraField['totalizable'] ?? $commonExtraFieldsValue['totalizable'] ?? 0,
-                    $extraField['printable']   ?? $commonExtraFieldsValue['printable']   ?? 0,
-                    $extraField['moreparams']  ?? $commonExtraFieldsValue['moreparams']  ?? []
-                );
+            // Update ExtraField
+            $result = $extraFields->update(
+                $key, $extraField['Label'], $extraField['type'], $extraField['length'] ?? '',
+                $extraFieldElementType,
+                $extraField['unique']   ?? $commonExtraFieldsValue['unique']   ?? 0,
+                $extraField['required'] ?? $commonExtraFieldsValue['required'] ?? 0,
+                $extraField['position'],
+                $extraField['params'] ? ['options' => $extraField['params']] : '',
+                $extraField['alwayseditable'] ?? $commonExtraFieldsValue['alwayseditable'] ?? 0,
+                $extraField['perms']          ?? $commonExtraFieldsValue['perms']          ?? '',
+                $extraField['list']           ?? $commonExtraFieldsValue['list']           ?? '',
+                $extraField['help'][$extraFieldElementType] ?? $extraField['help'] ?? $commonExtraFieldsValue['help'] ?? '',
+                $extraField['default']     ?? $commonExtraFieldsValue['default']     ?? '',
+                $extraField['computed']    ?? $commonExtraFieldsValue['computed']    ?? '',
+                $extraField['entity']      ?? $commonExtraFieldsValue['entity']      ?? '',
+                $extraField['langfile']    ?? $commonExtraFieldsValue['langfile']    ?? '',
+                $extraField['enabled']     ?? $commonExtraFieldsValue['enabled']     ?? '1',
+                $extraField['totalizable'] ?? $commonExtraFieldsValue['totalizable'] ?? 0,
+                $extraField['printable']   ?? $commonExtraFieldsValue['printable']   ?? 0,
+                $extraField['moreparams']  ?? $commonExtraFieldsValue['moreparams']  ?? []
+            );
 
-                if ($result > 0) {
-                    throw new Exception("Failed to update ExtraField for key $key.");
-                }
+            if ($result < 0) {
+                throw new Exception($langs->transnoentities('ExtrafieldsFieldUpdateFailed', $key));
+            }
 
-                // Add ExtraField
-                $result = $extraFields->addExtraField(
-                    $key, $extraField['Label'], $extraField['type'], $extraField['position'],
-                    $extraField['length']   ?? '', $extraFieldElementType,
-                    $extraField['unique']   ?? $commonExtraFieldsValue['unique']   ?? 0,
-                    $extraField['required'] ?? $commonExtraFieldsValue['required'] ?? 0,
-                    $extraField['default']  ?? $commonExtraFieldsValue['default']  ?? '',
-                    $extraField['params'] ? ['options' => $extraField['params']] : '',
-                    $extraField['alwayseditable'] ?? $commonExtraFieldsValue['alwayseditable'] ?? 0,
-                    $extraField['perms']          ?? $commonExtraFieldsValue['perms']          ?? '',
-                    $extraField['list']           ?? $commonExtraFieldsValue['list']           ?? '',
-                    $extraField['help'][$extraFieldElementType] ?? $extraField['help'] ?? $commonExtraFieldsValue['help'] ?? '',
-                    $extraField['computed']    ?? $commonExtraFieldsValue['computed']    ?? '',
-                    $extraField['entity']      ?? $commonExtraFieldsValue['entity']      ?? '',
-                    $extraField['langfile']    ?? $commonExtraFieldsValue['langfile']    ?? '',
-                    $extraField['enabled']     ?? $commonExtraFieldsValue['enabled']     ?? '1',
-                    $extraField['totalizable'] ?? $commonExtraFieldsValue['totalizable'] ?? 0,
-                    $extraField['printable']   ?? $commonExtraFieldsValue['printable']   ?? 0,
-                    $extraField['moreparams']  ?? $commonExtraFieldsValue['moreparams']  ?? []
-                );
+            // Add ExtraField
+            $result = $extraFields->addExtraField(
+                $key, $extraField['Label'], $extraField['type'], $extraField['position'],
+                $extraField['length']   ?? '', $extraFieldElementType,
+                $extraField['unique']   ?? $commonExtraFieldsValue['unique']   ?? 0,
+                $extraField['required'] ?? $commonExtraFieldsValue['required'] ?? 0,
+                $extraField['default']  ?? $commonExtraFieldsValue['default']  ?? '',
+                $extraField['params'] ? ['options' => $extraField['params']] : '',
+                $extraField['alwayseditable'] ?? $commonExtraFieldsValue['alwayseditable'] ?? 0,
+                $extraField['perms']          ?? $commonExtraFieldsValue['perms']          ?? '',
+                $extraField['list']           ?? $commonExtraFieldsValue['list']           ?? '',
+                $extraField['help'][$extraFieldElementType] ?? $extraField['help'] ?? $commonExtraFieldsValue['help'] ?? '',
+                $extraField['computed']    ?? $commonExtraFieldsValue['computed']    ?? '',
+                $extraField['entity']      ?? $commonExtraFieldsValue['entity']      ?? '',
+                $extraField['langfile']    ?? $commonExtraFieldsValue['langfile']    ?? '',
+                $extraField['enabled']     ?? $commonExtraFieldsValue['enabled']     ?? '1',
+                $extraField['totalizable'] ?? $commonExtraFieldsValue['totalizable'] ?? 0,
+                $extraField['printable']   ?? $commonExtraFieldsValue['printable']   ?? 0,
+                $extraField['moreparams']  ?? $commonExtraFieldsValue['moreparams']  ?? []
+            );
 
-                if ($result > 0) {
-                    throw new Exception("Failed to add ExtraField for key $key.");
-                }
-            } catch (Exception $e) {
-                dol_syslog($e->getMessage(), LOG_ERR);
+            if ($result < 0) {
+                throw new Exception($langs->transnoentities('ExtrafieldsFieldAddFailed', $key));
             }
         }
     }
