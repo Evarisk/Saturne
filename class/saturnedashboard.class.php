@@ -248,7 +248,7 @@ class SaturneDashboard
 
         print '<div class="graph-dashboard wpeo-grid grid-2" id="graph-dashboard">';
 
-        if (is_array($dashboards['graphs']) && !empty($dashboards['graphs'])) {
+        if (!empty($dashboards['graphs']) && is_array($dashboards['graphs'])) {
             foreach ($dashboards['graphs'] as $dashboardGraphs) {
                 if (is_array($dashboardGraphs) && !empty($dashboardGraphs)) {
                     foreach ($dashboardGraphs as $keyElement => $dashboardGraph) {
@@ -356,7 +356,7 @@ class SaturneDashboard
                             $dashboardList['morehtmlright'] .= '</button>';
                         }
 
-                        print load_fiche_titre($dashboardList['title'], $dashboardList['morehtmlright'], $dashboardList['picto']);
+                        print load_fiche_titre($dashboardList['title'], $dashboardList['morehtmlright'] ?? '', $dashboardList['picto'] ?? '');
                         print '<table class="noborder centpercent">';
                         print '<tr class="liste_titre">';
                         foreach ($dashboardList['labels'] as $key => $dashboardListLabel) {
