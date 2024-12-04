@@ -118,7 +118,7 @@ class SaturneDashboard
         $disableWidgetList   = json_decode(getDolUserString($confName));
         $disableWidgetList   = $disableWidgetList->widgets ?? new stdClass();
         $dashboardWidgetsArray = [];
-        if (is_array($dashboards['widgets']) && !empty($dashboards['widgets'])) {
+        if (isset($dashboards['widgets']) && is_array($dashboards['widgets'])) {
             foreach ($dashboards['widgets'] as $dashboardWidgets) {
                 foreach ($dashboardWidgets as $key => $dashboardWidget) {
                     if (isset($disableWidgetList->$key) && $disableWidgetList->$key == 0) {
@@ -136,7 +136,7 @@ class SaturneDashboard
         }
         print '</div>';
 
-        if (is_array($dashboards['widgets']) && !empty($dashboards['widgets'])) {
+        if (isset($dashboards['widgets']) && is_array($dashboards['widgets'])) {
             $widget = '';
             foreach ($dashboards['widgets'] as $dashboardWidgets) {
                 foreach ($dashboardWidgets as $key => $dashboardWidget) {
@@ -248,7 +248,7 @@ class SaturneDashboard
 
         print '<div class="graph-dashboard wpeo-grid grid-2" id="graph-dashboard">';
 
-        if (!empty($dashboards['graphs']) && is_array($dashboards['graphs'])) {
+        if (isset($dashboards['graphs']) && is_array($dashboards['graphs'])) {
             foreach ($dashboards['graphs'] as $dashboardGraphs) {
                 if (is_array($dashboardGraphs) && !empty($dashboardGraphs)) {
                     foreach ($dashboardGraphs as $keyElement => $dashboardGraph) {
@@ -344,11 +344,11 @@ class SaturneDashboard
             }
         }
 
-        if (is_array($dashboards['lists']) && !empty($dashboards['lists'])) {
+        if (isset($dashboards['lists']) && is_array($dashboards['lists'])) {
             foreach ($dashboards['lists'] as $dashboardLists) {
                 foreach ($dashboardLists as $dashboardList) {
                     if (is_array($dashboardList['data']) && !empty($dashboardList['data'])) {
-                        print '<div id="graph-' . $dashboardList['name'] . '" style="width: 100%">';
+                        print '<div id="graph-' . ($dashboardList['name'] ?? '') . '" style="width: 100%">';
 
                         if (!empty($dashboardList['name'])) {
                             $dashboardList['morehtmlright'] = '<button class="wpeo-button button-transparent" type="button" data-item-type="graph" data-item-name="' . $dashboardList['name'] . '" data-item-suppress="graph-' . $dashboardList['name'] . '" data-item-refresh="add-graph-box" id="dashboard-close-item">';
