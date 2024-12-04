@@ -315,7 +315,7 @@ class SaturneDashboard
                                 $graph->SetHeight($dashboardGraph['height'] ?? $height);
                                 $graph->setShowLegend($dashboardGraph['showlegend'] ?? 2);
                                 $graph->draw($fileName[$uniqueKey], $fileUrl[$uniqueKey]);
-                                print '<div' . (isset($dashboardGraph['moreCSS']) ? 'class="' . $dashboardGraph['moreCSS'] . '"' : '') . 'id="graph-' . $dashboardGraph['name'] . '">';
+                                print '<div' . (isset($dashboardGraph['moreCSS']) ? ' class="' . $dashboardGraph['moreCSS'] . '"' : '') . ' id="graph-' . $dashboardGraph['name'] . '">';
 
                                 $downloadCSV  = '<div class="flex flex-row justify-end">';
                                 $downloadCSV .= '<input type="hidden" name="graph" value="' . dol_escape_htmltag(json_encode($dashboardGraph, JSON_UNESCAPED_UNICODE)) . '">';
