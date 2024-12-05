@@ -616,17 +616,47 @@ function saturne_show_notice(string $title = '', string $message = '', string $t
  * @param  array     $commonExtraFieldsValue Array of common extra fields value
  * @throws Exception
  */
-function saturne_manage_extrafiels(array $extraFieldsArrays, array $commonExtraFieldsValue = []): void
+function saturne_manage_extrafields(array $extraFieldsArrays, array $commonExtraFieldsValue = []): void
 {
-    global $db;
+    global $db, $langs;
 
     require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
 
     $extraFields = new ExtraFields($db);
 
     foreach ($extraFieldsArrays as $key => $extraField) {
+        if (!isset($extraField['elementtype']) || !is_array($extraField['elementtype'])) {
+            throw new Exception($langs->transnoentities('ExtrafieldsFieldMissing', 'elementtype', $key));
+        }
+
         foreach ($extraField['elementtype'] as $extraFieldElementType) {
-            $extraFields->update(
+            // Add ExtraField
+            $result = $extraFields->addExtraField(
+                $key, $extraField['Label'], $extraField['type'], $extraField['position'],
+                $extraField['length']   ?? '', $extraFieldElementType,
+                $extraField['unique']   ?? $commonExtraFieldsValue['unique']   ?? 0,
+                $extraField['required'] ?? $commonExtraFieldsValue['required'] ?? 0,
+                $extraField['default']  ?? $commonExtraFieldsValue['default']  ?? '',
+                $extraField['params'] ? ['options' => $extraField['params']] : '',
+                $extraField['alwayseditable'] ?? $commonExtraFieldsValue['alwayseditable'] ?? 0,
+                $extraField['perms']          ?? $commonExtraFieldsValue['perms']          ?? '',
+                $extraField['list']           ?? $commonExtraFieldsValue['list']           ?? '',
+                $extraField['help'][$extraFieldElementType] ?? $extraField['help'] ?? $commonExtraFieldsValue['help'] ?? '',
+                $extraField['computed']    ?? $commonExtraFieldsValue['computed']    ?? '',
+                $extraField['entity']      ?? $commonExtraFieldsValue['entity']      ?? '',
+                $extraField['langfile']    ?? $commonExtraFieldsValue['langfile']    ?? '',
+                $extraField['enabled']     ?? $commonExtraFieldsValue['enabled']     ?? '1',
+                $extraField['totalizable'] ?? $commonExtraFieldsValue['totalizable'] ?? 0,
+                $extraField['printable']   ?? $commonExtraFieldsValue['printable']   ?? 0,
+                $extraField['moreparams']  ?? $commonExtraFieldsValue['moreparams']  ?? []
+            );
+
+            if ($result < 0) {
+                throw new Exception($langs->transnoentities('ExtrafieldsFieldAddFailed', $key));
+            }
+
+            // Update ExtraField
+            $result = $extraFields->update(
                 $key, $extraField['Label'], $extraField['type'], $extraField['length'] ?? '',
                 $extraFieldElementType,
                 $extraField['unique']   ?? $commonExtraFieldsValue['unique']   ?? 0,
@@ -647,25 +677,9 @@ function saturne_manage_extrafiels(array $extraFieldsArrays, array $commonExtraF
                 $extraField['moreparams']  ?? $commonExtraFieldsValue['moreparams']  ?? []
             );
 
-            $extraFields->addExtraField(
-                $key, $extraField['Label'], $extraField['type'], $extraField['position'],
-                $extraField['length']   ?? '', $extraFieldElementType,
-                $extraField['unique']   ?? $commonExtraFieldsValue['unique']   ?? 0,
-                $extraField['required'] ?? $commonExtraFieldsValue['required'] ?? 0,
-                $extraField['default']  ?? $commonExtraFieldsValue['default']  ?? '',
-                $extraField['params'] ? ['options' => $extraField['params']] : '',
-                $extraField['alwayseditable'] ?? $commonExtraFieldsValue['alwayseditable'] ?? 0,
-                $extraField['perms']          ?? $commonExtraFieldsValue['perms']          ?? '',
-                $extraField['list']           ?? $commonExtraFieldsValue['list']           ?? '',
-                $extraField['help'][$extraFieldElementType] ?? $extraField['help'] ?? $commonExtraFieldsValue['help'] ?? '',
-                $extraField['computed']    ?? $commonExtraFieldsValue['computed']    ?? '',
-                $extraField['entity']      ?? $commonExtraFieldsValue['entity']      ?? '',
-                $extraField['langfile']    ?? $commonExtraFieldsValue['langfile']    ?? '',
-                $extraField['enabled']     ?? $commonExtraFieldsValue['enabled']     ?? '1',
-                $extraField['totalizable'] ?? $commonExtraFieldsValue['totalizable'] ?? 0,
-                $extraField['printable']   ?? $commonExtraFieldsValue['printable']   ?? 0,
-                $extraField['moreparams']  ?? $commonExtraFieldsValue['moreparams']  ?? []
-            );
+            if ($result < 0) {
+                throw new Exception($langs->transnoentities('ExtrafieldsFieldUpdateFailed', $key));
+            }
         }
     }
 }

@@ -90,3 +90,8 @@ Responsible                      = Responsable
 # Public interface - Interface publique
 SavedSignature = Signature enregistrée
 
+# Temp
+ExtrafieldsFieldMissing      = Missing or invalid '%s' for key %s
+ExtrafieldsFieldUpdateFailed = Failed to update extrafield for key %s
+ExtrafieldsFieldAddFailed    = Failed to add extrafield for key %s
+
