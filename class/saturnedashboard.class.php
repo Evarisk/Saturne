@@ -213,7 +213,7 @@ class SaturneDashboard
             print '<span class="marginleftonly">' . $langs->transnoentities('Filters') . '</span>';
             print '</button>';
 
-            print '<div id="graph-filters flex-row" style="display: none; margin-top: 1em;">';
+            print '<div class="flex-row" id="graph-filters" style="display: none; margin-top: 1em;">';
 
             print '<div class="flex flex-col">';
             foreach ($dashboards['graphsFilters'] as $key => $dashboardGraphFilter) {
