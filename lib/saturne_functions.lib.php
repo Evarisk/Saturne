@@ -153,11 +153,16 @@ function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', st
 		if ($object->element == 'contrat') {
 			$element = 'contract';
 		} else if ($object->element == 'project_task') {
-			$element = 'task';
-		}
+            $element = 'task';
+        }
 
         $prepareHead = $element . '_prepare_head';
-        $head = $prepareHead($object);
+        if (function_exists($prepareHead)) {
+            $head = $prepareHead($object);
+        } else {
+            $prepareHead = $element . 'PrepareHead';
+            $head = $prepareHead($object);
+        }
     }
 	if (property_exists($object, 'picto')) {
 		$picto = $object->picto;
