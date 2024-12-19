@@ -38,7 +38,7 @@
  * @return int|array                         0 < if KO, array of pages if OK
  * @throws Exception|Error
  */
-function saturne_fetch_all_object_type(string $className = '', string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = [], string $filtermode = 'AND', bool $extraFieldManagement = false, bool $multiEntityManagement = true, bool $categoryManagement = false, string $joinManagement = '')
+function saturne_fetch_all_object_type(string $className = '', string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = [], string $filtermode = 'AND', bool $extraFieldManagement = false, bool $multiEntityManagement = true, bool $categoryManagement = false, string $joinManagement = '', array $moreparams = [])
 {
     dol_syslog(__METHOD__, LOG_DEBUG);
 
@@ -62,18 +62,22 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
         $extraFields->fetch_name_optionals_label($object->table_element);
         $optionsArray = (!empty($extraFields->attributes[$object->table_element]['label']) ? $extraFields->attributes[$object->table_element]['label'] : null);
     }
-
-	$objectFields = $object->getFieldList('t');
-	if (strstr($objectFields, 't.fk_prospectlevel')) {
-		$objectFields = preg_replace('/t.fk_prospectlevel,/','', $objectFields);
-	}
-    if (is_array($optionsArray) && !empty($optionsArray) && $extraFieldManagement) {
-        foreach ($optionsArray as $name => $label) {
-            if (empty($extrafields->attributes[$object->table_element]['type'][$name]) || $extrafields->attributes[$object->table_element]['type'][$name] != 'separate') {
-                $objectFields .= ", eft." . $name;
+    if (empty($moreparams['count'])) {
+        $objectFields = $object->getFieldList('t');
+        if (strstr($objectFields, 't.fk_prospectlevel')) {
+            $objectFields = preg_replace('/t.fk_prospectlevel,/','', $objectFields);
+        }
+        if (is_array($optionsArray) && !empty($optionsArray) && $extraFieldManagement) {
+            foreach ($optionsArray as $name => $label) {
+                if (empty($extrafields->attributes[$object->table_element]['type'][$name]) || $extrafields->attributes[$object->table_element]['type'][$name] != 'separate') {
+                    $objectFields .= ", eft." . $name;
+                }
             }
         }
+    } else {
+        $objectFields = 'COUNT(*) as nb';
     }
+
     $sql = 'SELECT ';
     $sql .= $objectFields;
     $sql .= ' FROM `' . MAIN_DB_PREFIX . $object->table_element . '` as t';
@@ -125,27 +129,38 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
 
     $resql = $object->db->query($sql);
     if ($resql) {
-        $num = $object->db->num_rows($resql);
-        $i = 0;
-        while ($i < ($limit ? min($limit, $num) : $num)) {
-            $obj = $object->db->fetch_object($resql);
+        if (empty($moreparams['count'])) {
+            $num = $object->db->num_rows($resql);
+            $i = 0;
+            while ($i < ($limit ? min($limit, $num) : $num)) {
+                $obj = $object->db->fetch_object($resql);
 
-            $record = new $className($db);
-            $record->setVarsFromFetchObj($obj);
+                $record = new $className($db);
+                $record->setVarsFromFetchObj($obj);
 
-            if (is_array($optionsArray) && !empty($optionsArray) && $extraFieldManagement) {
-                foreach ($optionsArray as $key => $value) {
-                    $record->array_options['options_' . $key] = $obj->$key;
+                if (is_array($optionsArray) && !empty($optionsArray) && $extraFieldManagement) {
+                    foreach ($optionsArray as $key => $value) {
+                        $record->array_options['options_' . $key] = $obj->$key;
+                    }
                 }
+
+                $records[$record->id] = $record;
+
+                $i++;
+                $object->db->free($resql);
+                return $records;
+            }
+        } else {
+            $nb = 0;
+
+            $obj = $object->db->fetch_object($resql);
+            if ($obj) {
+                $nb = $obj->nb;
             }
 
-            $records[$record->id] = $record;
-
-            $i++;
+            $object->db->free($resql);
+            return $nb;
         }
-        $object->db->free($resql);
-
-        return $records;
     } else {
         $object->errors[] = 'Error ' . $object->db->lasterror();
         dol_syslog(__METHOD__ . ' ' . join(',', $object->errors), LOG_ERR);
