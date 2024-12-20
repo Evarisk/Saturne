@@ -65,7 +65,7 @@
 
         <div class="public-card__content signature">
             <div class="signature-element">
-                <?php if (empty($signatory->signature) && $object->status == 1 && $signatory->attendance != SaturneSignature::ATTENDANCE_ABSENT) : ?>
+                <?php if (empty($signatory->signature) && ((defined(get_class($object) . '::STATUS_VALIDATED') && $object->status == $object::STATUS_VALIDATED) || $object->status == 1) && $signatory->attendance != SaturneSignature::ATTENDANCE_ABSENT) : ?>
                     <canvas class="canvas-container editable canvas-signature"></canvas>
                     <div class="signature-erase wpeo-button button-square-40 button-rounded button-grey"><span><i class="fas fa-eraser"></i></span></div>
                 <?php else : ?>
@@ -77,7 +77,7 @@
         </div>
 
         <div class="public-card__footer">
-            <?php if (empty($signatory->signature) && $object->status == 1 && $signatory->attendance != SaturneSignature::ATTENDANCE_ABSENT) : ?>
+            <?php if (empty($signatory->signature) && ((defined(get_class($object) . '::STATUS_VALIDATED') && $object->status == $object::STATUS_VALIDATED) || $object->status == 1) && $signatory->attendance != SaturneSignature::ATTENDANCE_ABSENT) : ?>
                 <div class="signature-validate wpeo-button button-grey <?php echo $moreParams['moreCSS'] ?? ''; ?>"><i class="fas fa-save"></i> <?php echo $langs->trans('SignatureSaveButton'); ?></div>
             <?php endif; ?>
         </div>
