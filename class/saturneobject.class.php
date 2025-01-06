@@ -462,7 +462,7 @@ abstract class SaturneObject extends CommonObject
 			$linkclose = ($morecss ? ' class="' . $morecss . '"' : '');
 		}
 
-		if ($option == 'nolink' || $withpicto == 3) {
+		if ($option == 'nolink') {
 			$linkstart = '<span';
 		} else {
 			$linkstart = '<a href="' . $url . '"';
@@ -471,7 +471,7 @@ abstract class SaturneObject extends CommonObject
             $linkstart .= 'target=_blank';
         }
 		$linkstart .= $linkclose . '>';
-		if ($option == 'nolink' || $withpicto == 3 || empty($url)) {
+		if ($option == 'nolink' || empty($url)) {
 			$linkend = '</span>';
 		} else {
 			$linkend = '</a>';
@@ -490,6 +490,9 @@ abstract class SaturneObject extends CommonObject
 		$result .= $linkend;
 
         if ($withpicto != 2) {
+            if ($withpicto == 3) {
+                $addLabel = 1;
+            }
             $result .= (($addLabel && property_exists($this, 'label')) ? '<span class="opacitymedium">' . ' - ' . dol_trunc($this->label, ($addLabel > 1 ? $addLabel : 0)) . '</span>' : '');
         }
 
