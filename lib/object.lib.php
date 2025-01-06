@@ -314,8 +314,8 @@ function saturne_get_objects_metadata(string $type = ''): array
     // 'table_element'  => Object name in database
     // 'fk_parent'      => OPTIONAL : Name of parent for objects as productlot, contact, task
     // 'parent_post'    => OPTIONAL : Name of parent post (retrieved by GETPOST() function, it can be different from fk_parent
-    // 'hook_name_card' => Hook name object card
-    // 'hook_name_list' => Hook name object list
+    // 'hook_name_card' => Hook name object card from initHooks
+    // 'hook_name_list' => Hook name object list from initHooks
     // 'create_url'     => Path to creation card, no need to add "?action=create"
     // 'class_path'     => Path to object class
     // 'lib_path'       => Path to object lib
@@ -581,6 +581,46 @@ function saturne_get_objects_metadata(string $type = ''): array
             'class_path'     => 'product/stock/class/entrepot.class.php',
             'lib_path'       => 'core/lib/stock.lib.php',
         ];
+
+        $objectsMetadata['inventory'] = [
+            'mainmenu'       => '',
+            'leftmenu'       => 'stock_inventories',
+            'langs'          => 'Inventories',
+            'langfile'       => 'stocks',
+            'picto'          => 'inventory',
+            'color'          => '#a69944',
+            'class_name'     => 'Inventory',
+            'post_name'      => 'fk_inventory',
+            'link_name'      => 'stock_inventory',
+            'tab_type'       => 'inventory',
+            'table_element'  => 'inventory',
+            'name_field'     => 'ref',
+            'hook_name_card' => 'inventorycard',
+            'hook_name_list' => 'inventorylist',
+            'create_url'     => 'product/inventory/card.php',
+            'class_path'     => 'product/inventory/class/inventory.class.php',
+            'lib_path'       => 'product/inventory/lib/inventory.lib.php',
+        ];
+
+        $objectsMetadata['mouvement'] = [
+            'mainmenu'       => '',
+            'leftmenu'       => '',
+            'langs'          => 'Movements',
+            'langfile'       => 'stocks',
+            'picto'          => 'movement',
+            'color'          => '#a69944',
+            'class_name'     => 'MouvementStock',
+            'post_name'      => 'fk_stock_mouvement',
+            'link_name'      => 'stock_mouvement',
+            'tab_type'       => '',
+            'table_element'  => 'stock_mouvement',
+            'name_field'     => 'id',
+            'hook_name_card' => '',
+            'hook_name_list' => 'movementlist',
+            'create_url'     => '',
+            'class_path'     => 'product/stock/class/mouvementstock.class.php',
+            'lib_path'       => '',
+        ];
     }
 
     if (isModEnabled('expedition')) {
@@ -625,6 +665,114 @@ function saturne_get_objects_metadata(string $type = ''): array
         ];
     }
 
+    if (isModEnabled('mrp')) {
+        $objectsMetadata['bom'] = [
+            'mainmenu'       => 'mrp',
+            'leftmenu'       => 'bom',
+            'langs'          => 'MenuBOM',
+            'langfile'       => 'mrp',
+            'picto'          => 'bom',
+            'color'          => '#a69944',
+            'class_name'     => 'BOM',
+            'post_name'      => 'fk_bom',
+            'link_name'      => 'bom',
+            'tab_type'       => 'bom@mrp',
+            'table_element'  => 'bom_bom',
+            'name_field'     => 'ref',
+            'hook_name_card' => 'bomcard',
+            'hook_name_list' => 'bomlist',
+            'create_url'     => 'bom/bom_card.php',
+            'class_path'     => 'bom/class/bom.class.php',
+            'lib_path'       => 'bom/lib/bom.lib.php',
+        ];
+
+        $objectsMetadata['mrp'] = [
+            'mainmenu'       => 'mrp',
+            'leftmenu'       => 'mo',
+            'langs'          => 'Mrp',
+            'langfile'       => 'mrp',
+            'picto'          => 'mrp',
+            'color'          => '#a69944',
+            'class_name'     => 'Mo',
+            'post_name'      => 'fk_mo',
+            'link_name'      => 'mo',
+            'tab_type'       => 'mo@mrp',
+            'table_element'  => 'mrp_mo',
+            'name_field'     => 'ref',
+            'hook_name_card' => 'mocard',
+            'hook_name_list' => 'molist',
+            'create_url'     => 'mrp/mo_card.php',
+            'class_path'     => 'mrp/class/mo.class.php',
+            'lib_path'       => 'mrp/lib/mrp_mo.lib.php',
+        ];
+    }
+
+    if (isModEnabled('reception')) {
+        $objectsMetadata['reception'] = [
+            'mainmenu'       => 'products',
+            'leftmenu'       => 'receptions',
+            'langs'          => 'Receptions',
+            'langfile'       => 'receptions',
+            'picto'          => 'dollyrevert',
+            'color'          => '#599caf',
+            'class_name'     => 'Reception',
+            'post_name'      => 'fk_reception',
+            'link_name'      => 'reception',
+            'tab_type'       => 'reception',
+            'table_element'  => 'reception',
+            'name_field'     => 'ref_supplier',
+            'hook_name_card' => 'receptioncard',
+            'hook_name_list' => 'receptionlist',
+            'create_url'     => 'reception/card.php',
+            'class_path'     => 'reception/class/reception.class.php',
+            'lib_path'       => 'core/lib/reception.lib.php',
+        ];
+    }
+
+    if (isModEnabled('ficheinter')) {
+        $objectsMetadata['ficheinter'] = [
+            'mainmenu'       => 'commercial',
+            'leftmenu'       => 'ficheinter',
+            'langs'          => 'Interventions',
+            'langfile'       => 'interventions',
+            'picto'          => 'intervention',
+            'color'          => '#3bbfa8',
+            'class_name'     => 'Fichinter',
+            'post_name'      => 'fk_fichinter',
+            'link_name'      => 'fichinter',
+            'tab_type'       => 'fichinter',
+            'table_element'  => 'fichinter',
+            'name_field'     => 'ref',
+            'hook_name_card' => 'interventioncard',
+            'hook_name_list' => 'interventionlist',
+            'create_url'     => 'fichinter/card.php',
+            'class_path'     => 'fichinter/class/fichinter.class.php',
+            'lib_path'       => 'core/lib/fichinter.lib.php',
+        ];
+    }
+
+    if (isModEnabled('fournisseur')) {
+        $objectsMetadata['supplier_order'] = [
+            'mainmenu'       => 'products',
+            'leftmenu'       => 'orders_suppliers',
+            'langs'          => 'SupplierOrders',
+            'langfile'       => 'orders',
+            'picto'          => 'supplier_order',
+            'color'          => '#599caf',
+            'class_name'     => 'CommandeFournisseur',
+            'post_name'      => 'fk_supplier_order',
+            'link_name'      => 'fournisseur_order',
+            'tab_type'       => 'ordersupplier',
+            'table_element'  => 'commande_fournisseur',
+            'name_field'     => 'ref',
+            'hook_name_card' => 'ordersuppliercard',
+            'hook_name_list' => 'supplierorderlist',
+            'create_url'     => 'fourn/commande/card.php',
+            'class_path'     => 'fourn/class/fournisseur.commande.class.php',
+            'lib_path'       => 'core/lib/fourn.lib.php',
+        ];
+    }
+
     // Hook to add controllable objects from other modules
     if (!is_object($hookmanager)) {
         include_once DOL_DOCUMENT_ROOT . '/core/class/hookmanager.class.php';
@@ -643,8 +791,12 @@ function saturne_get_objects_metadata(string $type = ''): array
     if (is_array($objectsMetadata) && !empty($objectsMetadata)) {
         foreach($objectsMetadata as $objectType => $objectMetadata) {
             if ($objectType != 'context' && $objectType != 'currentcontext') {
-                require_once DOL_DOCUMENT_ROOT . '/' . $objectMetadata['class_path'];
-                require_once DOL_DOCUMENT_ROOT . '/' . $objectMetadata['lib_path'];
+                if (!empty($objectMetadata['class_path'])) {
+                    require_once DOL_DOCUMENT_ROOT . '/' . $objectMetadata['class_path'];
+                }
+                if (!empty($objectMetadata['lib_path'])) {
+                    require_once DOL_DOCUMENT_ROOT . '/' . $objectMetadata['lib_path'];
+                }
                 $object       = new $objectMetadata['class_name']($db);
                 $tableElement = $object->table_element;
 
