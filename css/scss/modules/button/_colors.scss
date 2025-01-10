@@ -57,6 +57,12 @@
     background: $color__orange;
     border-color: $color__orange;
   }
+
+  &.button-custom {
+    background: var(--color__const__custom);
+    border-color: var(--color__const__custom);
+  }
+
   &.button-transparent {
     background: transparent;
     border-color: transparent;
