@@ -354,19 +354,14 @@ class SaturneDashboard
                         print load_fiche_titre($dashboardList['title'], $dashboardList['morehtmlright'], $dashboardList['picto']);
                         print '<table class="noborder centpercent">';
                         print '<tr class="liste_titre">';
-                        foreach ($dashboardList['labels'] as $dashboardListLabel) {
-                            print '<td class="' . ($conf->browser->layout == 'classic' ? 'nowraponall tdoverflowmax200 ' : '') . (($dashboardListLabel != 'Ref') ? 'center' : '') . '">' . $langs->transnoentities($dashboardListLabel) . '</td>';
+                        foreach ($dashboardList['labels'] as $key => $dashboardListLabel) {
+                            print '<td class="' . ($conf->browser->layout == 'classic' ? 'nowraponall tdoverflowmax200 ' : '') . (($key != 'Ref') ? 'center' : '') . '">' . $langs->transnoentities($dashboardListLabel) . '</td>';
                         }
                         print '</tr>';
-                        foreach ($dashboardList['data'] as $key => $dashboardListDatasets) {
+                        foreach ($dashboardList['data'] as $dashboardListDatasets) {
                             print '<tr class="oddeven">';
-                            foreach ($dashboardList['labels'] as $label) {
-                                if (isset($dashboardListDatasets[$label])) {
-                                    $dashboardListDataset = $dashboardListDatasets[$label];
-                                    print '<td class="' . ($conf->browser->layout == 'classic' ? 'nowraponall tdoverflowmax200 ' : '') . (($key != 'Ref') ? 'center ' : '') . $dashboardListDataset['morecss'] . '"' . $dashboardListDataset['moreAttr'] . '>' . $dashboardListDataset['value'] . '</td>';
-                                } else if ($key == 'Total') {
-                                    print '<td></td>';
-                                }
+                            foreach ($dashboardListDatasets as $key => $dashboardGraphDataset) {
+                                print '<td class="' . ($conf->browser->layout == 'classic' ? 'nowraponall tdoverflowmax200 ' : '') . (($key != 'Ref') ? 'center ' : '') . $dashboardGraphDataset['morecss'] . '"' . $dashboardGraphDataset['moreAttr'] . '>' . $dashboardGraphDataset['value'] . '</td>';
                             }
                             print '</tr>';
                         }
