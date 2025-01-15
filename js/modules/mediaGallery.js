@@ -414,6 +414,9 @@ window.saturne.mediaGallery.unlinkFile = function( event ) {
   $(document).on('click', '.confirmation-delete', function() {
     $(document).off('click', '.confirmation-delete');
     $(document).off('click', '.confirmation-close');
+
+    window.saturne.loader.display($(this));
+
     $.ajax({
       url: document.URL + querySeparator + "subaction=unlinkFile&token=" + token,
       type: "POST",
@@ -441,6 +444,20 @@ window.saturne.mediaGallery.unlinkFile = function( event ) {
           $('.linked-medias.' + objectPhotoClass).replaceWith($(resp).find('.linked-medias.' + objectPhotoClass))
         } else if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
           $('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
+        } else if ($('.linked-medias.' + objectSubtype + ' .linked-medias-list').length > 0) {
+          var $linkedMediasList = $('.linked-medias.' + objectSubtype + ' .linked-medias-list');
+          $linkedMediasList.fadeOut(300, function() {
+            var $newContent = $(resp).find('.linked-medias.' + objectSubtype + ' .linked-medias-list');
+            $(this).replaceWith($newContent.hide());
+            $newContent.fadeIn(300);
+          });
+        } else {
+          var $linkedMediasList = $('.linked-medias.linked-medias-list.' + objectSubtype);
+          $linkedMediasList.fadeOut(300, function() {
+            var $newContent = $(resp).find('.linked-medias.linked-medias-list.' + objectSubtype);
+            $(this).replaceWith($newContent.hide());
+            $newContent.fadeIn(300);
+          });
         }
 
         $('.wpeo-loader').removeClass('wpeo-loader')
