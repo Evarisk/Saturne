@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2021-2023 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2021-2025 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
 		$this->name        = preg_replace('/^Interface/i', '', get_class($this));
 		$this->family      = 'demo';
 		$this->description = 'Saturne triggers.';
-		$this->version     = '1.6.0';
+		$this->version     = '1.7.0';
 		$this->picto       = 'saturne@saturne';
 	}
 
