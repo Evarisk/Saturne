@@ -12,8 +12,6 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
- * Library javascript to enable Browser notifications
  */
 
 /**
@@ -21,6 +19,8 @@
  * \ingroup toolbox
  * \brief   JavaScript file toolbox for module Saturne
  */
+
+'use strict';
 
 /**
  * Init toolbox JS
@@ -169,14 +169,17 @@ window.saturne.toolbox.checkIframeChange = function() {
   }, 100);
 };
 
-/*
-  * Check if the device is a phone
-  * @memberof Saturne_Framework_Toolbox
-  * @since   1.8.0
-  * @version 1.8.0
-  * @returns {boolean} True if the device is a phone, false otherwise
-*/
+/**
+ * Check if the device is a phone
+ *
+ * @memberof Saturne_Framework_Toolbox
+ *
+ * @since   1.8.0
+ * @version 1.8.0
+ *
+ * @returns {boolean} True if the device is a phone, false otherwise
+ */
 window.saturne.toolbox.isPhone = function() {
-  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  const userAgent = navigator.userAgent || window.opera;
   return /android|iphone|ipad|ipod|blackberry|windows phone/i.test(userAgent);
-}
+};
