@@ -147,9 +147,9 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
                 $records[$record->id] = $record;
 
                 $i++;
-                $object->db->free($resql);
-                return $records;
             }
+            $object->db->free($resql);
+            return $records;
         } else {
             $nb = 0;
 

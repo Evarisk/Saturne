@@ -103,13 +103,15 @@ window.saturne.media.event = function() {
  */
 window.saturne.media.uploadImage = function() {
   const fastUploadOptions = $(this).closest('.linked-medias').find('.fast-upload-options');
-  const objectSubType     = fastUploadOptions.attr('data-from-subtype');
-  const objectSubdir      = fastUploadOptions.attr('data-from-subdir');
+  const objectType    = fastUploadOptions.attr('data-from-type');
+  const objectSubType = fastUploadOptions.attr('data-from-subtype');
+  const objectSubdir  = fastUploadOptions.attr('data-from-subdir');
   if (this.files && this.files[0]) {
     var reader = new FileReader();
 
     reader.onload = function(event) {
       $(document).find('.modal-upload-image').addClass('modal-active');
+      $('.modal-upload-image').find('.fast-upload-options').attr('data-from-type', objectType);
       $('.modal-upload-image').find('.fast-upload-options').attr('data-from-subtype', objectSubType);
       $('.modal-upload-image').find('.fast-upload-options').attr('data-from-subdir', objectSubdir);
       window.saturne.media.drawImageOnCanvas(event);
@@ -220,6 +222,7 @@ window.saturne.media.createImg = function() {
   let canvas = $(this).closest('.modal-upload-image').find('canvas')[0];
   let img    = canvas.toDataURL('image/png');
 
+  let objectType    = $(this).closest('.modal-upload-image').find('.fast-upload-options').attr('data-from-type');
   let objectSubType = $(this).closest('.modal-upload-image').find('.fast-upload-options').attr('data-from-subtype');
   let objectSubdir  = $(this).closest('.modal-upload-image').find('.fast-upload-options').attr('data-from-subdir');
 
@@ -234,6 +237,7 @@ window.saturne.media.createImg = function() {
     contentType: 'application/octet-stream',
     data: JSON.stringify({
       img: img,
+      objectType: objectType,
       objectSubType: objectSubType,
       objectSubdir: objectSubdir
     }),
