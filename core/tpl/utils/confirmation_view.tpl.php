@@ -30,6 +30,7 @@
 
 <div class="card__confirmation" style="display: none;">
     <div class="confirmation-container">
+        <div class="confirmation-close-button confirmation-close"><i class="fas fa-2x fa-times"></i></div>
         <?php
         print $confirmationParams['picto'] ? img_picto('', $confirmationParams['picto'], 'class="confirmation-icon"') : '';
         print $confirmationParams['confirmationTitle'] ? '<div style="color: ' . $confirmationParams['color'] . ';" class="confirmation-title"> ' . $langs->transnoentities($confirmationParams['confirmationTitle']) . ' </div>' : '';

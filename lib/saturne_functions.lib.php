@@ -153,11 +153,16 @@ function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', st
 		if ($object->element == 'contrat') {
 			$element = 'contract';
 		} else if ($object->element == 'project_task') {
-			$element = 'task';
-		}
+            $element = 'task';
+        }
 
         $prepareHead = $element . '_prepare_head';
-        $head = $prepareHead($object);
+        if (function_exists($prepareHead)) {
+            $head = $prepareHead($object);
+        } else {
+            $prepareHead = $element . 'PrepareHead';
+            $head = $prepareHead($object);
+        }
     }
 	if (property_exists($object, 'picto')) {
 		$picto = $object->picto;
@@ -562,4 +567,124 @@ function saturne_create_category(string $label = '', string $type = '', int $fkP
     }
 
     return $result;
+}
+
+/**
+ * Show notice
+ *
+ * @param  string   $title        Title
+ * @param  string   $message      Message
+ * @param  string   $type         Type of the notice
+ * @param  string   $id           HTML Id for the notice
+ * @param  bool     $visible      Visibility of the notice
+ * @param  bool     $closeButton  Button to close
+ * @param  string   $moreCss      More css
+ * @param  string[] $translations Array of translations to manipulate notice with JS
+ * @param  string[] $moreAttr     More html attributes
+ *
+ * @return string
+ */
+function saturne_show_notice(string $title = '', string $message = '', string $type = 'error', string $id = 'notice-infos', bool $visible = false, bool $closeButton = true, string $moreCss = '', array $translations = [], array $moreAttr = []): string
+{
+    $out = '<div class="wpeo-notice notice-' . $type;
+    if (!$visible) {
+        $out .= ' hidden';
+    }
+    $out .= ' ' . $moreCss . '"';
+    $out .= ' id="' . $id . '"';
+    foreach ($moreAttr as $attr => $value) {
+        $out .= ' ' . $attr . '="' . $value . '"';
+    }
+    $out .= '>';
+
+    foreach ($translations as $name => $translation) {
+        $out .= '<input type="hidden" name="' . $name . '" value="' . $translation . '">';
+    }
+
+    $out .= '<div class="notice-content">';
+    $out .= '<div class="notice-title">' . $title . '</div>';
+    $out .= '<div class="notice-message">' . $message . '</div>';
+    $out .= '</div>';
+
+    if ($closeButton) {
+        $out .= '<div class="notice-close"><i class="fas fa-times"></i></div>';
+    }
+    $out .= '</div>';
+
+    return $out;
+}
+
+/**
+ * Manage extra fields for add and update
+ *
+ * @param  array     $extraFieldsArrays      Array of extra fields
+ * @param  array     $commonExtraFieldsValue Array of common extra fields value
+ * @throws Exception
+ */
+function saturne_manage_extrafields(array $extraFieldsArrays, array $commonExtraFieldsValue = []): void
+{
+    global $db, $langs;
+
+    require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
+
+    $extraFields = new ExtraFields($db);
+
+    foreach ($extraFieldsArrays as $key => $extraField) {
+        if (!isset($extraField['elementtype']) || !is_array($extraField['elementtype'])) {
+            throw new Exception($langs->transnoentities('ExtrafieldsFieldMissing', 'elementtype', $key));
+        }
+
+        foreach ($extraField['elementtype'] as $extraFieldElementType) {
+            // Add ExtraField
+            $result = $extraFields->addExtraField(
+                $key, $extraField['Label'], $extraField['type'], $extraField['position'],
+                $extraField['length']   ?? '', $extraFieldElementType,
+                $extraField['unique']   ?? $commonExtraFieldsValue['unique']   ?? 0,
+                $extraField['required'] ?? $commonExtraFieldsValue['required'] ?? 0,
+                $extraField['default']  ?? $commonExtraFieldsValue['default']  ?? '',
+                $extraField['params'] ? ['options' => $extraField['params']] : '',
+                $extraField['alwayseditable'] ?? $commonExtraFieldsValue['alwayseditable'] ?? 0,
+                $extraField['perms']          ?? $commonExtraFieldsValue['perms']          ?? '',
+                $extraField['list']           ?? $commonExtraFieldsValue['list']           ?? '',
+                $extraField['help'][$extraFieldElementType] ?? $extraField['help'] ?? $commonExtraFieldsValue['help'] ?? '',
+                $extraField['computed']    ?? $commonExtraFieldsValue['computed']    ?? '',
+                $extraField['entity']      ?? $commonExtraFieldsValue['entity']      ?? '',
+                $extraField['langfile']    ?? $commonExtraFieldsValue['langfile']    ?? '',
+                $extraField['enabled']     ?? $commonExtraFieldsValue['enabled']     ?? '1',
+                $extraField['totalizable'] ?? $commonExtraFieldsValue['totalizable'] ?? 0,
+                $extraField['printable']   ?? $commonExtraFieldsValue['printable']   ?? 0,
+                $extraField['moreparams']  ?? $commonExtraFieldsValue['moreparams']  ?? []
+            );
+
+            if ($result < 0) {
+                throw new Exception($langs->transnoentities('ExtrafieldsFieldAddFailed', $key));
+            }
+
+            // Update ExtraField
+            $result = $extraFields->update(
+                $key, $extraField['Label'], $extraField['type'], $extraField['length'] ?? '',
+                $extraFieldElementType,
+                $extraField['unique']   ?? $commonExtraFieldsValue['unique']   ?? 0,
+                $extraField['required'] ?? $commonExtraFieldsValue['required'] ?? 0,
+                $extraField['position'],
+                $extraField['params'] ? ['options' => $extraField['params']] : '',
+                $extraField['alwayseditable'] ?? $commonExtraFieldsValue['alwayseditable'] ?? 0,
+                $extraField['perms']          ?? $commonExtraFieldsValue['perms']          ?? '',
+                $extraField['list']           ?? $commonExtraFieldsValue['list']           ?? '',
+                $extraField['help'][$extraFieldElementType] ?? $extraField['help'] ?? $commonExtraFieldsValue['help'] ?? '',
+                $extraField['default']     ?? $commonExtraFieldsValue['default']     ?? '',
+                $extraField['computed']    ?? $commonExtraFieldsValue['computed']    ?? '',
+                $extraField['entity']      ?? $commonExtraFieldsValue['entity']      ?? '',
+                $extraField['langfile']    ?? $commonExtraFieldsValue['langfile']    ?? '',
+                $extraField['enabled']     ?? $commonExtraFieldsValue['enabled']     ?? '1',
+                $extraField['totalizable'] ?? $commonExtraFieldsValue['totalizable'] ?? 0,
+                $extraField['printable']   ?? $commonExtraFieldsValue['printable']   ?? 0,
+                $extraField['moreparams']  ?? $commonExtraFieldsValue['moreparams']  ?? []
+            );
+
+            if ($result < 0) {
+                throw new Exception($langs->transnoentities('ExtrafieldsFieldUpdateFailed', $key));
+            }
+        }
+    }
 }

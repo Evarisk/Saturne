@@ -41,7 +41,7 @@ $form = new Form($db);
 // Array for the sizes of thumbs
 $mediaSizes = ['mini', 'small', 'medium', 'large'];
 
-if ( ! $error && $subaction == 'uploadPhoto' && ! empty($conf->global->MAIN_UPLOAD_DOC)) {
+if (!(isset($error) && $error) && $subaction == 'uploadPhoto' && ! empty($conf->global->MAIN_UPLOAD_DOC)) {
 
 	// Define relativepath and upload_dir
 	$relativepath                                             = $moduleNameLowerCase . '/medias';
@@ -108,10 +108,13 @@ if ($subaction == 'add_img') {
         }
     } else {
         $modObjectName       = dol_strtoupper($moduleNameLowerCase) . '_' . dol_strtoupper($object->element) . '_ADDON';
-        $numberingModuleName = [$object->element => $conf->global->$modObjectName];
-        list($modObject)     = saturne_require_objects_mod($numberingModuleName, $moduleNameLowerCase);
-
-        $pathToObjectImg = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $object->element . '/tmp/' . $modObject->prefix . '0/' . $data['objectSubdir'];
+        $numberingModuleName = [$object->element => getDolGlobalString($modObjectName)];
+        if ($numberingModuleName[$data['objectType']] != '') {
+            list($modObject) = saturne_require_objects_mod($numberingModuleName, $moduleNameLowerCase);
+            $pathToObjectImg = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $object->element . '/tmp/' . $modObject->prefix . '0/' . $data['objectSubdir'];
+        } else {
+            $pathToObjectImg = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $data['objectType'] . '/tmp/' . $data['objectSubdir'] . '/';
+        }
     }
 
     if (!dol_is_dir($pathToObjectImg)) {
@@ -122,8 +125,8 @@ if ($subaction == 'add_img') {
 
     // Create thumbs
     foreach($mediaSizes as $size) {
-        $confWidth  = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_' . dol_strtoupper($size);
-        $confHeight = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size);
+        $confWidth  = 'SATURNE_MEDIA_MAX_WIDTH_' . dol_strtoupper($size);
+        $confHeight = 'SATURNE_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size);
         vignette($pathToECMImg . '/' . $fileName, $conf->global->$confWidth, $conf->global->$confHeight, '_' . $size);
         vignette($pathToObjectImg . '/' . $fileName, $conf->global->$confWidth, $conf->global->$confHeight, '_' . $size);
     }
@@ -148,10 +151,13 @@ if ($subaction == 'addFiles') {
         $pathToObjectImg = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $objectType . '/' . $object->ref . '/' . $data['objectSubdir'];
     } else {
         $modObjectName       = dol_strtoupper($moduleNameLowerCase) . '_' . dol_strtoupper($objectType) . '_ADDON';
-        $numberingModuleName = [$objectType => $conf->global->$modObjectName];
-        list($modObject)     = saturne_require_objects_mod($numberingModuleName, $moduleNameLowerCase);
-
-        $pathToObjectImg = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $objectType . '/tmp/' . $modObject->prefix . '0/' . $data['objectSubdir'];
+        $numberingModuleName = [$objectType => getDolGlobalString($modObjectName)];
+        if ($numberingModuleName[$objectType] != '') {
+            list($modObject) = saturne_require_objects_mod($numberingModuleName, $moduleNameLowerCase);
+            $pathToObjectImg = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $objectType . '/tmp/' . $modObject->prefix . '0/' . $data['objectSubdir'];
+        } else {
+            $pathToObjectImg = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $objectType . '/tmp/' . $data['objectSubdir'] . '/';
+        }
     }
 
     if (!dol_is_dir($pathToObjectImg)) {
@@ -176,8 +182,8 @@ if ($subaction == 'addFiles') {
 
             // Create thumbs
             foreach($mediaSizes as $size) {
-                $confWidth  = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_' . dol_strtoupper($size);
-                $confHeight = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size);
+                $confWidth  = 'SATURNE_MEDIA_MAX_WIDTH_' . dol_strtoupper($size);
+                $confHeight = 'SATURNE_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size);
                 vignette($pathToObjectImg . '/' . $fileName, $conf->global->$confWidth, $conf->global->$confHeight, '_' . $size);
             }
         }
@@ -264,7 +270,7 @@ if ($subaction == 'addToFavorite') {
     }
 }
 
-if ( ! $error && $subaction == 'pagination') {
+if (!(isset($error) && $error) && $subaction == 'pagination') {
 	$data = json_decode(file_get_contents('php://input'), true);
 
 	$offset       = $data['offset'];
@@ -273,7 +279,7 @@ if ( ! $error && $subaction == 'pagination') {
 	$loadedPageArray = saturne_load_pagination($pagesCounter, [], $offset);
 }
 
-if ( ! $error && $subaction == 'toggleTodayMedias') {
+if (!(isset($error) && $error) && $subaction == 'toggleTodayMedias') {
     $toggleValue = GETPOST('toggle_today_medias');
 
     $tabparam['SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS'] = $toggleValue;
@@ -281,7 +287,7 @@ if ( ! $error && $subaction == 'toggleTodayMedias') {
     dol_set_user_param($db, $conf,$user, $tabparam);
 }
 
-if ( ! $error && $subaction == 'toggleUnlinkedMedias') {
+if (!(isset($error) && $error) && $subaction == 'toggleUnlinkedMedias') {
     $toggleValue = GETPOST('toggle_unlinked_medias');
 
     $tabparam['SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS'] = $toggleValue;
@@ -289,24 +295,24 @@ if ( ! $error && $subaction == 'toggleUnlinkedMedias') {
     dol_set_user_param($db, $conf,$user, $tabparam);
 }
 
-if (!$error && $subaction == 'regenerate_thumbs') {
+if (!(isset($error) && $error) && $subaction == 'regenerate_thumbs') {
     $data = json_decode(file_get_contents('php://input'), true);
 
     foreach($mediaSizes as $size) {
-        $confWidth  = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_' . dol_strtoupper($size);
-        $confHeight = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size);
+        $confWidth  = 'SATURNE_MEDIA_MAX_WIDTH_' . dol_strtoupper($size);
+        $confHeight = 'SATURNE_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size);
         vignette($data['fullname'], $conf->global->$confWidth, $conf->global->$confHeight, '_' . $size);
     }
 }
 
-if (is_array($submitFileErrorText)) {
+if (!empty($submitFileErrorText) && is_array($submitFileErrorText)) {
 	print '<input class="error-medias" value="'. htmlspecialchars(json_encode($submitFileErrorText)) .'">';
 }
 
 require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
 
 <!-- START MEDIA GALLERY MODAL -->
-<div class="wpeo-modal modal-photo" id="media_gallery" data-id="<?php echo $object->id ?: 0?>">
+<div class="wpeo-modal modal-photo" id="media_gallery" data-id="<?php echo (isset($object) && $object) ? $object->id : 0 ?>">
 	<div class="modal-container wpeo-modal-event">
 		<!-- Modal-Header -->
 		<div class="modal-header">
@@ -333,19 +339,12 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
 				</div>
 			</div>
 			<div class="wpeo-gridlayout grid-3">
-				<div class="modal-add-media">
-					<?php
-					print '<input type="hidden" name="token" value="'.newToken().'">';
-					if (( ! empty($conf->use_javascript_ajax) && empty($conf->global->MAIN_ECM_DISABLE_JS)) || ! empty($section)) {
-						$sectiondir = GETPOST('file', 'alpha') ? GETPOST('file', 'alpha') : GETPOST('section_dir', 'alpha');
-						print '<!-- Start form to attach new file in '. $moduleNameLowerCase .'_photo_view.tpl.php sectionid=' . $section . ' sectiondir=' . $sectiondir . ' -->' . "\n";
-						include_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
-						print '<strong>' . $langs->trans('AddFile') . '</strong>'
-						?>
-						<input type="file" id="add_media_to_gallery" class="flat minwidth400 maxwidth200onsmartphone" name="userfile[]" multiple accept>
-					<?php } else print '&nbsp;'; ?>
-					<div class="underbanner clearboth"></div>
-				</div>
+                <div class="modal-add-media">
+                    <input type="hidden" name="token" value="<?php echo newToken(); ?>">
+                    <strong><?php echo $langs->trans('AddFile'); ?></strong>
+                    <input type="file" id="add_media_to_gallery" class="flat minwidth400 maxwidth200onsmartphone" name="userfile[]" multiple accept>
+                    <div class="underbanner clearboth"></div>
+                </div>
 				<div class="form-element">
 					<span class="form-label"><strong><?php print $langs->trans('SearchFile') ?></strong></span>
 					<div class="form-field-container">
@@ -360,7 +359,7 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
                 <div>
                     <div>
                         <?php print img_picto($langs->trans('Link'), 'link') . ' ' . $form->textwithpicto($langs->trans('UnlinkedMedias'), $langs->trans('ShowOnlyUnlinkedMedias'));
-                        if ($user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS) {
+                        if (isset($user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS) && $user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS) {
                             print '<span id="del_unlinked_medias" value="0" class="valignmiddle linkobject toggle-unlinked-medias ' . (!empty($user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS) ? '' : 'hideobject') . '">' . img_picto($langs->trans('Enabled'), 'switch_on') . '</span>';
                         } else {
                             print '<span id="set_unlinked_medias" value="1" class="valignmiddle linkobject toggle-unlinked-medias ' . (!empty($user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS) ? 'hideobject' : '') . '">' . img_picto($langs->trans('Disabled'), 'switch_off') . '</span>';
@@ -368,7 +367,7 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
                     </div>
                     <div>
                         <?php print img_picto($langs->trans('Calendar'), 'calendar') . ' ' . $form->textwithpicto($langs->trans('Today'), $langs->trans('ShowOnlyMediasAddedToday'));
-                        if ($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS) {
+                        if (isset($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS) && $user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS) {
                             print '<span id="del_today_medias" value="0" class="valignmiddle linkobject toggle-today-medias ' . (!empty($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS) ? '' : 'hideobject') . '">' . img_picto($langs->trans('Enabled'), 'switch_on') . '</span>';
                         } else {
                             print '<span id="set_today_medias" value="1" class="valignmiddle linkobject toggle-today-medias ' . (!empty($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS) ? 'hideobject' : '') . '">' . img_picto($langs->trans('Disabled'), 'switch_off') . '</span>';
@@ -391,13 +390,13 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
 			<?php
 			$filearray                    = dol_dir_list($conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias/', "files", 0, '', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC);
 			$moduleImageNumberPerPageConf = strtoupper($moduleNameLowerCase) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
-            if ($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS == 1) {
+            if (isset($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS) && $user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS == 1) {
                 $yesterdayTimeStamp = dol_time_plus_duree(dol_now(), -1, 'd');
                 $filearray = array_filter($filearray, function($file) use ($yesterdayTimeStamp) {
                     return $file['date'] > $yesterdayTimeStamp;
                 });
             }
-            if ($user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS == 1) {
+            if (isset($user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS) && $user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS == 1) {
                 $filearray = array_filter($filearray, function($file) use ($conf, $moduleNameLowerCase) {
                     $regexFormattedFileName = preg_quote($file['name'], '/');
                     $fileArrays             = dol_dir_list($conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1], 'files', 1, $regexFormattedFileName, '.odt|.pdf|barcode|_mini|_medium|_small|_large');
@@ -407,9 +406,9 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
            }
             $allMediasNumber = count($filearray);
 			$pagesCounter    = $conf->global->$moduleImageNumberPerPageConf ? ceil($allMediasNumber/($conf->global->$moduleImageNumberPerPageConf ?: 1)) : 1;
-			$page_array      = saturne_load_pagination($pagesCounter, $loadedPageArray, $offset);
+			$page_array      = saturne_load_pagination($pagesCounter, $loadedPageArray ?? [], $offset ?? 0);
 
-			print saturne_show_pagination($pagesCounter, $page_array, $offset); ?>
+			print saturne_show_pagination($pagesCounter, $page_array, $offset ?? 0); ?>
 			<div class="save-photo wpeo-button button-blue button-disable" value="">
                 <span><?php echo $langs->trans('Add'); ?></span>
 			</div>

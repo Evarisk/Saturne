@@ -100,7 +100,7 @@ class ActionsSaturne
     }
 
     /**
-     *  Overloading the emailElementlist function : replacing the parent's function with the one below
+     * Overloading the emailElementlist function : replacing the parent's function with the one below
      *
      * @param  array $parameters Hook metadatas (context, etc...)
      * @return int               0 < on error, 0 on success, 1 to replace standard code
@@ -108,15 +108,14 @@ class ActionsSaturne
     public function emailElementlist(array $parameters): int
     {
         global $user, $langs;
-
-        // do something only for the context 'somecontext1' or 'somecontext2'
         if (strpos($parameters['context'], 'emailtemplates') !== false) {
             if (isModEnabled('saturne') && $user->hasRight('saturne', 'adminpage', 'read')) {
-                $pictopath = dol_buildpath('/custom/saturne/img/saturne_color.png', 1);
+                $pictopath = dol_buildpath('custom/saturne/img/saturne_color.png', 1);
                 $picto     = img_picto('', $pictopath, '', 1, 0, 0, '', 'pictoModule');
 
-                $value['saturne'] = $picto . dol_escape_htmltag($langs->trans('Saturne'));
-
+                foreach (['saturne', 'saturne_document', 'saturne_signature'] as $key) {
+                    $value[$key] = $picto . dol_escape_htmltag($langs->trans('Saturne'));
+                }
                 $this->results = $value;
             }
         }
@@ -146,6 +145,41 @@ class ActionsSaturne
             $out .= '<script src="' . dol_buildpath($resourcesRequired['signature'], 1) . '"></script>';
 
             $this->resprints = $out;
+        }
+
+        return 0; // or return 1 to replace standard code
+    }
+
+    /**
+     *  Overloading the llxHeader function : replacing the parent's function with the one below
+     *
+     * @param  array $parameters Hook metadatas (context, etc...)
+     * @return int               0 < on error, 0 on success, 1 to replace standard code
+     * @throws Exception
+     */
+    public function llxHeader(array $parameters): int
+    {
+        if (strpos($parameters['context'], 'index') !== false) {
+            require_once __DIR__ . '/saturneredirection.class.php';
+
+            $saturneRedirection = new SaturneRedirection($this->db);
+
+            $originalUrl = GETPOST('original_url', 'alpha');
+
+            $redirections = $saturneRedirection->fetchAll();
+            if (is_array($redirections) && !empty($redirections)) {
+                foreach($redirections as $redirection) {
+                    //check redirection from url, if not beginning with a / add it
+                    $urlToCheck = $redirection->from_url;
+                    if (strpos($redirection->from_url, '/') !== 0) {
+                        $urlToCheck = '/' . $redirection->from_url;
+                    }
+                    if ($urlToCheck == '/' . $originalUrl) {
+                        header('Location: ' . $redirection->to_url);
+                        exit;
+                    }
+                }
+            }
         }
 
         return 0; // or return 1 to replace standard code

@@ -31,7 +31,7 @@
 
 print load_fiche_titre($langs->trans($attendantTableMode == 'advanced' ? $signatoryRole : 'Attendants'), '', '');
 
-if (!empty($signatories) || (empty($signatories) && $object->status == $object::STATUS_DRAFT)) {
+if (!empty($signatories) || (empty($signatories) && $object->status == $object::STATUS_DRAFT) || ($object->status == $object::STATUS_VALIDATED && getDolGlobalInt('SATURNE_ATTENDANTS_ADD_STATUS_MANAGEMENT'))) {
     print '<table class="border centpercent tableforfield">';
 
     print '<tr class="liste_titre">';
@@ -159,7 +159,7 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
             print '<div class="dropdown-toggle wpeo-button ' . $cssButton . '"><i class="fas ' . $userIcon . '"></i></div>';
         }
         print '</td><td class="center">';
-        if ($object->status == $object::STATUS_DRAFT && $permissiontoadd) {
+        if (($object->status == $object::STATUS_DRAFT || ($object->status == $object::STATUS_VALIDATED && getDolGlobalInt('SATURNE_ATTENDANTS_ADD_STATUS_MANAGEMENT'))) && $permissiontoadd) {
             print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode . '">';
             print '<input type="hidden" name="token" value="' . newToken() . '">';
             print '<input type="hidden" name="action" value="delete_attendant">';
@@ -177,7 +177,7 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
 
     require __DIR__ . '/attendants_table_add_view.tpl.php';
 } else {
-    print '<div class="opacitymedium">' . $langs->trans('NoAttendants') . '</div><br>';
+    print '<div class="opacitymedium">' . $langs->trans('NoAttendants' . ($object->status == $object::STATUS_VALIDATED && getDolGlobalInt('SATURNE_ATTENDANTS_ADD_STATUS_MANAGEMENT') ? 'WithStatusManagement' : '')) . '</div><br>';
 
     require __DIR__ . '/attendants_table_add_view.tpl.php';
 }

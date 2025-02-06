@@ -44,7 +44,7 @@
 - PHP : 7.4.33
 - Compatibilité : Dolibarr 16.0.0 - 18.0.3
 - Documentation : [Wiki DoliLetter](https://wiki.dolibarr.org/index.php/Module_DoliLetter)
-- Projet GitHub : [Projet DoliLetter](https://github.com/Eoxia/doliletter/projects?type=classic)
+- Projet GitHub : [Projet DoliLetter](https://github.com/Eoxia/doliletter/projects?query=is%3Aopen)
 
 ### Fonctionnalités
 
@@ -58,7 +58,7 @@
 - PHP : 7.4.33
 - Compatibilité : Dolibarr 16.0.0 - 18.0.3
 - Documentation : [Wiki DoliWPshop](https://wiki.dolibarr.org/index.php/Module_DoliWPshop)
-- Projet GitHub : [Projet DoliWPshop](https://github.com/Eoxia/doliwpshop/projects?type=classic)
+- Projet GitHub : [Projet DoliWPshop](https://github.com/Eoxia/doliwpshop/projects?query=is%3Aopen)
 
 ### Fonctionnalités
 
@@ -76,7 +76,7 @@
 - PHP : 7.4.33
 - Compatibilité : Dolibarr 16.0.0 - 18.0.3
 - Documentation : [Wiki DoliTemplate](https://wiki.dolibarr.org/index.php/Module_DoliTemplate)
-- Projet GitHub : [Projet DoliTemplate](https://github.com/Eoxia/dolitemplate/projects?type=classic)
+- Projet GitHub : [Projet DoliTemplate](https://github.com/Eoxia/dolitemplate/projects?query=is%3Aopen)
 
 ### Fonctionnalités
 
@@ -91,7 +91,7 @@
 - PHP : 7.4.33
 - Compatibilité : Dolibarr 16.0.0 - 18.0.3
 - Documentation : [Wiki Priseo](https://wiki.dolibarr.org/index.php/Module_Priseo)
-- Projet Github : [Projet Priseo](https://github.com/Evarisk/priseo/projects?type=classic)
+- Projet Github : [Projet Priseo](https://github.com/Evarisk/priseo/projects?query=is%3Aopen)
 
 ### Fonctionnalités
 
@@ -106,7 +106,7 @@
 - PHP : 7.4.33
 - Compatibilité : Dolibarr 16.0.0 - 18.0.3
 - Documentation : [Wiki DoliFraisPro](https://wiki.dolibarr.org/index.php/Module_DoliFraisPro)
-- Projet Github : [Projet DoliFraisPro](https://github.com/Eoxia/dolifraispro/projects?type=classic)
+- Projet Github : [Projet DoliFraisPro](https://github.com/Eoxia/dolifraispro/projects?query=is%3Aopen)
 
 ### Fonctionnalités
 

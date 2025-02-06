@@ -36,35 +36,46 @@ ReadAdminPage = Accéder à la configuration du module %s
 #
 
 # Data - Donnée
-ModuleSettings                      = Réglages
-ModuleSetup                         = Configuration du module %s
-Contributing                        = Contribution
-SaturneModule                       = Module %s
-GeneralConfig                       = Configuration générale
-ConfigData                          = Données configurables de %s
-Configs                             = Configuration des %s
-ConfigDatas                         = Configurations
-ModuleMediaGallery                  = Configuration des médias de %s
-SavedMediaData                      = Enregistrement des données des médias
-EnablePublicInterface               = Interface publique
-EnablePublicInterfaceDescription    = Activation des interfaces publiques
-ShowCompanyLogo                     = Afficher le logo de la société
-ShowCompanyLogoDescription          = Activez cette option pour masquer le logo de la société dans les pages d'interface publique
-UseCaptcha                          = Code graphique (CAPTCHA)
-UseCaptchaDescription               = Utilisation du code graphique (CAPTCHA) sur les pages d'interfaces publique
-UseAllEmailMode                     = Utilisation de tous les modes de configuration des emails
-UseAllEmailModeDescription          = Autorise l'utilisation de tous les modes de configuration des emails par défaut, seul le mode SMTP est autorisé
-UseFastUploadImprovement            = Utilisation chargement rapide d'image amélioré
-UseFastUploadImprovementDescription = Activez cette option pour améliorer le chargement rapide d'image <br> Option disponible : <ul><li>Rotation d'image</li><li>Dessin  sur l'image</li><li>Enregistrement de l'image sur un format réduit</li></ul>
-SignaturePublicInterfaceForbidden   = Accès interdit à l'interface publique de signature
-ObjectVisibleDescription            = Afficher le champ %s
-ShowSignatureSpecimen               = Voir les signatures sur les documents specimens
-ShowSignatureSpecimenDescription    = Permet la visualisation des signatures sur les documents specimens
-SavedConfig                         = Configuration sauvegardée
-ErrorSavedConfig                    = Une erreur est survenue lors de la configuration
-Config                              = Configuration
-Extrafields                         = Attributs supplémentaires
-ClickHereToGoToTheConfigPage        = Veuillez cliquer ici pour vous rendre sur la page de configuration
+ModuleSettings                           = Réglages
+ModuleSetup                              = Configuration du module %s
+Contributing                             = Contribution
+SaturneModule                            = Module %s
+GeneralConfig                            = Configuration générale
+ConfigData                               = Données configurables de %s
+Configs                                  = Configuration des %s
+ConfigDatas                              = Configurations
+ModuleMediaGallery                       = Configuration des médias de %s
+SavedMediaData                           = Enregistrement des données des médias
+EnablePublicInterface                    = Interface publique
+EnablePublicInterfaceDescription         = Activation des interfaces publiques
+ShowCompanyLogo                          = Afficher le logo de la société
+ShowCompanyLogoDescription               = Activez cette option pour masquer le logo de la société dans les pages d'interface publique
+UseCaptcha                               = Code graphique (CAPTCHA)
+UseCaptchaDescription                    = Utilisation du code graphique (CAPTCHA) sur les pages d'interfaces publique
+UseAllEmailMode                          = Utilisation de tous les modes de configuration des emails
+UseAllEmailModeDescription               = Autorise l'utilisation de tous les modes de configuration des emails par défaut, seul le mode SMTP est autorisé
+AttendantsAddStatusManagement            = Gestion de l'ajout des participants sur le status Validé (en attente de signature)
+AttendantsAddStatusManagementDescription = Activez cette option pour ajouter des participants sur le status Validé (en attente de signature)
+UseFastUploadImprovement                 = Utilisation chargement rapide d'image amélioré
+UseFastUploadImprovementDescription      = Activez cette option pour améliorer le chargement rapide d'image <br> Option disponible : <ul><li>Rotation d'image</li><li>Dessin  sur l'image</li><li>Enregistrement de l'image sur un format réduit</li></ul>
+SignaturePublicInterfaceForbidden        = Accès interdit à l'interface publique de signature
+ObjectVisibleDescription                 = Afficher le champ %s
+ShowSignatureSpecimen                    = Voir les signatures sur les documents specimens
+ShowSignatureSpecimenDescription         = Permet la visualisation des signatures sur les documents specimens
+SavedConfig                              = Configuration sauvegardée
+ErrorSavedConfig                         = Une erreur est survenue lors de la configuration
+Config                                   = Configuration
+Extrafields                              = Attributs supplémentaires
+ClickHereToGoToTheConfigPage             = Veuillez cliquer ici pour vous rendre sur la page de configuration
+
+# Redirections - Redirections
+Redirections = Redirections
+FromURL      = Depuis l'URL
+ToURL        = Vers l'URL
+FromUrlHelp  = Saisissez l'URL de départ. Par exemple, pour rediriger depuis https://www.evarisk.com/depuis/la/page, saisissez "/depuis/la/page"
+ToUrlHelp    = Saisissez l'URL de destination. Par exemple, pour rediriger vers https://www.evarisk.com/vers/la/page, saisissez "/vers/la/page"
+
+
 
 # Mod Numbering - Modèle de numérotation
 NumberingModule = Modèle de numérotation
@@ -143,7 +154,8 @@ ModuleHasBeenUpdatedTo     = %s a été mis à jour en version %s
 ModulePatchNote            = Note de mise à jour %s %s
 ShowPatchNote              = Consulter la note de mise à jour
 DontShowPatchNote          = Ne plus afficher la note de mise à jour
-ChooseBoxToAdd             = Ajouter le widget au tableau de bord
+ChooseBoxToAddWidget       = Ajouter le widget au tableau de bord
+ChooseBoxToAddGraph        = Ajouter le graphique au tableau de bord
 SetupDefaultDataNotCreated = Vous n'avez pas créé les données par défaut de %s
 HowToSetupDefaultData      = Pour configurer les données par défaut de %s, veuillez cliquer sur ce lien :
 ConfigDefaultData          = Configuration des données par défaut de %s
@@ -170,6 +182,8 @@ AutomaticPdfGeneration                  = Génération automatique des PDF
 AutomaticPdfGenerationDescription       = Crée automatiquement le document en PDF lors de la génération
 ManualPdfGeneration                     = Génération manuelle des PDF
 ManualPdfGenerationDescription          = Ajout d'un bouton pour créer un document ODT en PDF
+UseCreateDocumentOnArchive              = Génération document lors de l'archive
+UseCreateDocumentOnArchiveDescription   = Création automatique du document lors de l'archivage
 FileCouldNotBeGeneratedInPDF            = Le fichier n'a pas pu être généré en PDF
 CheckDocumentationToEnablePDFGeneration = Veuillez vous référer à la documentation pour la génération en PDF : <a target="_blank" href="https://wiki.dolibarr.org/index.php?title=Module_Saturne">Documentation</a>
 PDFGenerationTooltip                    = Appuyez sur ce bouton pour générer le document ODT en PDF
@@ -238,6 +252,8 @@ ExportData = Exporter mes données
 #
 
 # Data - Donnée
-SocietyAttendants = Tiers des participants externe
-Back = Retour
-DeleteFiles = Êtes vous sur de vouloir supprimer les <span class="filesLinked"></span> media(s) sélectionné(s) ?
+SocietyAttendants   = Tiers des participants externe
+Back                = Retour
+DeleteFiles         = Êtes vous sur de vouloir supprimer les <span class="filesLinked"></span> media(s) sélectionné(s) ?
+RecordingInProgress = Enregistrement en cours...
+ExportGraphCSV      = Exporter le graphique en CSV

@@ -43,7 +43,7 @@
 - Compatibilité : Dolibarr 16.0.0 - 18.0.3
 - Saturne Framework : 1.2.0
 - Documentation : [Wiki DigiQuali](https://wiki.dolibarr.org/index.php/Module_DigiQuali)
-- Projet Github : [Projet DigiQuali](https://github.com/Evarisk/digiquali/projects?type=classic)
+- Projet Github : [Projet DigiQuali](https://github.com/Evarisk/digiquali/projects?query=is%3Aopen)
 
 ### Fonctionnalités
 

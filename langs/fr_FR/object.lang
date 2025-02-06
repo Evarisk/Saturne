@@ -41,6 +41,10 @@ ObjectUnlinkTrigger     = %s %s délié(e)
 ObjectValidated = %s a été validé(e)
 ObjectReOpened  = %s a été rouvert(e)
 
+# SetEventMessage - Notice erreur
+ErrorCreateObject = Erreur : création d'un(e) %s
+ErrorDeleteObject = Erreur : suppression d'un(e) %s
+
 # Numbering modules
 SaturneGenericMaskCodes = Ce champ se compose d'un préfixe suivi d'un suffixe. Par exemple : ABC{000} donnera ABC001, ABC002, etc.  Vous pouvez ajouter autant de zéro que vous le souhaitez.
 
@@ -67,11 +71,11 @@ ObjectMustBeValidatedToSign      = %s doit être au statut (validé) pour que le
 AllSignatoriesMustHaveSigned     = Tous les participants doivent avoir signé pour verrouiller %s
 ObjectMustBeValidatedToSendEmail = %s doit être au statut (validé) pour envoyer un email
 ObjectMustBeLockedToSendEmail    = %s doit être au statut (verrouillé) pour envoyer un email
-ObjectMustBeLockedToArchive      = %s doit être au statut (verrouillé) et le document généré afin de pouvoir l'archiver
+ObjectMustBeLockedToArchive      = %s doit être au statut (verrouillé) afin de pouvoir l'archiver
 
 # Confirm box - Boite de confirmation
 ValidateObject          = Valider %s
-ConfirmValidateObject   = Êtes-vous sûr de vouloir valider %s ? <br> La validation permet aux participants de signer le document mais <b> empêche l'ajout de nouveaux participants ou la modification de %s. </b>
+ConfirmValidateObject   = Êtes-vous sûr de vouloir valider %s ? <br> La validation permet aux participants de signer le document mais <b> empêche l'ajout de nouveaux participants </b><i>(sauf si la configuration Gestion de l'ajout des participants sur le status est activé)</i><b> ou la modification de %s. </b>
 ReOpenObject            = Ouvrir à nouveau %s
 ConfirmReOpenObject     = Êtes-vous sûr de vouloir rouvrir %s ? La réouverture permet la modification de %s et l'ajout de nouveaux participants mais <b>toutes les signatures du document seront perdues</b>.
 LockObject              = Verrouiller %s
@@ -102,9 +106,9 @@ ActionsOnObject = Événements sur %s
 DisplayMoreInfo = Afficher plus d'informations
 
 # Email - Mail
-ObjectLabel     = Récapitulatif
-ObjectSubject   = Email document
-ObjectContent   = Veuillez trouver ci-joint le/les document(s) ODT lié(s) à __THETYPE__.
+ObjectEmailDocumentLabel   = SAT_Document
+ObjectEmailDocumentTopic   = [__[MAIN_INFO_SOCIETE_NOM]__] Récapitulatif __TYPE__ __REF__
+ObjectEmailDocumentContent = Bonjour,<br /><br />Veuillez trouver ci-joint le/les document(s) ODT lié(s) à __THETYPE__.<br /><br />Bien cordialement,<br /><br />Service QHSE<br />__USER_FULLNAME__<br />__USER_EMAIL__<br />__MYCOMPANY_NAME__<br />__MYCOMPANY_FULLADDRESS__<br />__MYCOMPANY_EMAIL__
 
 # Config Trigger Info - Configuration Infos Événements
 ObjectCreated  = Création d'un(e) %s

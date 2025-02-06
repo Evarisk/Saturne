@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2022-2025 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,7 +75,7 @@ class modSaturne extends DolibarrModules
 		$this->editor_url  = 'https://evarisk.com/';
 
         // Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
-		$this->version = '1.6.0';
+		$this->version = '1.7.0';
 
         // Url to the file with your last numberversion of this module
         //$this->url_last_version = 'http://www.example.com/versionmodule.txt';
@@ -115,6 +115,7 @@ class modSaturne extends DolibarrModules
             'js' => [
 				'/saturne/js/saturne.js',
 				'/saturne/js/modules/menu.js',
+                '/saturne/js/modules/toolbox.js',
 			],
             // Set here all hooks context managed by module. To find available hook context, make a "grep -r '>initHooks(' *" on source code. You can also set hook context to 'all'
             'hooks' => [
@@ -122,7 +123,8 @@ class modSaturne extends DolibarrModules
                 'emailtemplates',
 				'usercard',
                 'category',
-                'categoryindex'
+                'categoryindex',
+                'index'
             ],
             // Set this to 1 if features of module are opened to external users
             'moduleforexternal' => 0,
@@ -161,7 +163,7 @@ class modSaturne extends DolibarrModules
 
         // Prerequisites
 		$this->phpmin = [7, 4]; // Minimum version of PHP required by module
-		$this->need_dolibarr_version = [17, 0]; // Minimum version of Dolibarr required by module
+		$this->need_dolibarr_version = [19, 0]; // Minimum version of Dolibarr required by module
 
         // Messages at activation
 		$this->warnings_activation = []; // Warning to show when we activate module. array('always'='text') or array('FR'='textfr','MX'='textmx'...)
@@ -173,12 +175,25 @@ class modSaturne extends DolibarrModules
         //                             2 => array('SATURNE_MYNEWCONST2', 'chaine', 'myvalue', 'This is another constant to add', 0, 'current', 1)
         // );
         $i = 0;
-		$this->const = [
+        $this->const = [
             // CONST MODULE
+            $i++ => ['SATURNE_VERSION','chaine', $this->version, '', 0, 'current'],
+            $i++ => ['SATURNE_DB_VERSION', 'chaine', $this->version, '', 0, 'current'],
             $i++ => ['SATURNE_ENABLE_PUBLIC_INTERFACE', 'integer', 1, '', 0, 'current'],
             $i++ => ['SATURNE_SHOW_COMPANY_LOGO', 'integer', 0, '', 0, 'current'],
             $i++ => ['SATURNE_USE_CAPTCHA', 'integer', 0, '', 0, 'current'],
             $i++ => ['SATURNE_USE_ALL_EMAIL_MODE', 'integer', 1, '', 0, 'current'],
+            $i++ => ['SATURNE_USE_CREATE_DOCUMENT_ON_ARCHIVE', 'integer', 1, '', 0, 'current'],
+            $i++ => ['SATURNE_ATTENDANTS_ADD_STATUS_MANAGEMENT', 'integer', 0, '', 0, 'current'],
+            $i++ => ['SATURNE_MEDIA_MAX_WIDTH_MINI', 'integer', 128, '', 0, 'current'],
+            $i++ => ['SATURNE_MEDIA_MAX_HEIGHT_MINI', 'integer', 72, '', 0, 'current'],
+            $i++ => ['SATURNE_MEDIA_MAX_WIDTH_SMALL', 'integer', 480, '', 0, 'current'],
+            $i++ => ['SATURNE_MEDIA_MAX_HEIGHT_SMALL', 'integer', 270, '', 0, 'current'],
+            $i++ => ['SATURNE_MEDIA_MAX_WIDTH_MEDIUM', 'integer', 854, '', 0, 'current'],
+            $i++ => ['SATURNE_MEDIA_MAX_HEIGHT_MEDIUM', 'integer', 480, '', 0, 'current'],
+            $i++ => ['SATURNE_MEDIA_MAX_WIDTH_LARGE', 'integer', 1280, '', 0, 'current'],
+            $i++ => ['SATURNE_MEDIA_MAX_HEIGHT_LARGE', 'integer', 720, '', 0, 'current'],
+            $i++ => ['SATURNE_DISPLAY_NUMBER_MEDIA_GALLERY', 'integer', 8, '', 0, 'current'],
 
             // CONST DOLIBARR
             $i   => ['MAIN_ALLOW_SVG_FILES_AS_IMAGES', 'integer', 1, '', 0, 'current']
@@ -274,56 +289,118 @@ class modSaturne extends DolibarrModules
 	}
 
     /**
-     *  Function called when module is enabled.
-     *  The init function add constants, boxes, permissions and menus (defined in constructor) into Dolibarr database.
-     *  It also creates data directories
+     * Function called when module is enabled
+     * The init function add constants, boxes, permissions and menus (defined in constructor) into Dolibarr database
+     * It also creates data directories
      *
-     * @param  string    $options Options when enabling module ('', 'noboxes')
-     * @return int                1 if OK, 0 if KO
+     * @param  string     $options Options when enabling module ('', 'noboxes')
+     * @return int                 1 if OK, 0 if KO
+     * @throws Exception
      */
-	public function init($options = ''): int
+    public function init($options = ''): int
     {
-		global $langs;
+        global $conf, $langs, $user;
 
-		// Permissions
-		$this->remove($options);
-		$sql = [];
+        // Permissions
+        $this->remove($options);
 
-		// Load sql sub folders
-		$sqlFolder = scandir(__DIR__ . '/../../sql');
-		foreach ($sqlFolder as $subFolder) {
-			if ( ! preg_match('/\./', $subFolder)) {
-				$this->_load_tables('/saturne/sql/' . $subFolder . '/');
-			}
-		}
+        $sql = [];
+        // Load sql sub folders
+        $sqlFolder = scandir(__DIR__ . '/../../sql');
+        foreach ($sqlFolder as $subFolder) {
+            if (!preg_match('/\./', $subFolder)) {
+                $this->_load_tables('/saturne/sql/' . $subFolder . '/');
+            }
+        }
 
-		// Create extrafields during init
-		include_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
-		$extra_fields = new ExtraFields($this->db);
+        $result = $this->_load_tables('/saturne/sql/');
+        if ($result < 0) {
+            return -1; // Do not activate module if error 'not allowed' returned when loading module SQL queries (the _load_table run sql with run_sql with the error allowed parameter set to 'default')
+        }
 
-//		$extra_fields->update('electronic_signature', $langs->transnoentities('TrainingSessionLocation'), 'varchar', '', 'contrat', 0, 0, 1850, '', '', '', 1);
-		$extra_fields->addExtraField('electronic_signature', $langs->transnoentities('ElectronicSignature'), 'text', '','', 'user', 0, 0, '', '', '', '', 1);
+        dolibarr_set_const($this->db, 'SATURNE_VERSION', $this->version, 'chaine', 0, '', $conf->entity);
+        dolibarr_set_const($this->db, 'SATURNE_VERSION_DB_VERSION', $this->version, 'chaine', 0, '', $conf->entity);
 
+        require_once __DIR__ . '/../../class/saturneredirection.class.php';
 
-		$result = $this->_load_tables('/saturne/sql/');
-		if ($result < 0) {
-			return -1; // Do not activate module if error 'not allowed' returned when loading module SQL queries (the _load_table run sql with run_sql with the error allowed parameter set to 'default')
-		}
+        $saturneRedirection = new SaturneRedirection($this->db);
+        $saturneRedirection->adaptHtAccess();
 
-		return $this->_init($sql, $options);
-	}
+        // Load Saturne libraries
+        require_once __DIR__ . '/../../../saturne/class/saturnemail.class.php';
+
+        $saturneMail = new SaturneMail($this->db);
+
+        $saturneMail->position = 100;
+
+        $emailTemplates = [
+            'email_template_document' => [
+                'type_template' => 'document',
+                'label'         => 'ObjectEmailDocumentLabel',
+                'topic'         => 'ObjectEmailDocumentTopic',
+                'content'       => 'ObjectEmailDocumentContent'
+            ],
+            'email_template_global_signature' => [
+                'type_template' => 'signature',
+                'label'         => 'EmailGlobalSignatureLabel',
+                'topic'         => 'EmailGlobalSignatureTopic',
+                'content'       => 'EmailGlobalSignatureContent'
+            ],
+            'email_template_signature' => [
+                'type_template' => 'signature',
+                'label'         => 'EmailSignatureLabel',
+                'topic'         => 'EmailSignatureTopic',
+                'content'       => 'EmailSignatureContent'
+            ]
+        ];
+
+        foreach ($emailTemplates as $emailTemplate => $emailTemplateData) {
+            $saturneMail->entity        = 0;
+            $saturneMail->module        = 'saturne';
+            $saturneMail->type_template = 'saturne_' . $emailTemplateData['type_template'];
+            $saturneMail->lang          = 'fr_FR';
+            $saturneMail->datec         = $this->db->idate(dol_now());
+            $saturneMail->label         = $langs->transnoentities($emailTemplateData['label']);
+            $saturneMail->position++;
+            $saturneMail->enabled       = "isModEnabled('saturne')";
+            $saturneMail->topic         = $langs->transnoentities($emailTemplateData['topic']);
+            $saturneMail->content       = $langs->transnoentities($emailTemplateData['content']);
+            $saturneMail->joinfiles     = 1;
+            if ($saturneMail->fetch(getDolGlobalInt('SATURNE_' . dol_strtoupper($emailTemplate))) == 0) {
+                $emailTemplateID = $saturneMail->create($user);
+                dolibarr_set_const($this->db, 'SATURNE_' . dol_strtoupper($emailTemplate), $emailTemplateID, 'integer', 0, '', $conf->entity);
+            }
+        }
+
+        // Create extrafields during init
+        require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
+        $extraFields = new ExtraFields($this->db);
+
+        $extraFieldsArrays = [
+            'electronic_signature' => ['Label' => 'ElectronicSignature', 'type' => 'text', 'elementtype' => ['user'], 'position' => 100, 'list' => 1, 'entity' => 0, 'langfile' => 'saturne@saturne', 'enabled' => "isModEnabled('saturne')"]
+        ];
+
+        foreach ($extraFieldsArrays as $key => $extraField) {
+            foreach ($extraField['elementtype'] as $extraFieldElementType) {
+                $extraFields->update($key, $extraField['Label'], $extraField['type'], $extraField['length'], $extraFieldElementType, 0, 0, $this->numero . $extraField['position'], $extraField['params'], '', '', $extraField['list'], ($extraField['help'][$extraFieldElementType] ?? $extraField['help']), '', '', $extraField['entity'], $extraField['langfile'], $extraField['enabled'] . ' && isModEnabled("' . $extraFieldElementType . '")', 0, 0, $extraField['css']);
+                $extraFields->addExtraField($key, $extraField['Label'], $extraField['type'], $this->numero . $extraField['position'], $extraField['length'], $extraFieldElementType, 0, 0, '', $extraField['params'], $extraField['alwayseditable'], '', $extraField['list'], $extraField['help'], '', $extraField['entity'], $extraField['langfile'], $extraField['enabled'] . ' && isModEnabled("' . $extraFieldElementType . '")', 0, 0, $extraField['css']);
+            }
+        }
+
+        return $this->_init($sql, $options);
+    }
 
     /**
-     *  Function called when module is disabled.
-     *  Remove from database constants, boxes and permissions from Dolibarr database.
-     *  Data directories are not deleted
+     * Function called when module is disabled
+     * Remove from database constants, boxes and permissions from Dolibarr database
+     * Data directories are not deleted
      *
-     *  @param      string	$options    Options when enabling module ('', 'noboxes')
-     *  @return     int                 1 if OK, 0 if KO
+     * @param  string $options Options when enabling module ('', 'noboxes')
+     * @return int             1 if OK, 0 if KO
      */
-	public function remove($options = ''): int
+    public function remove($options = ''): int
     {
-		$sql = [];
-		return $this->_remove($sql, $options);
-	}
+        $sql = [];
+        return $this->_remove($sql, $options);
+    }
 }

@@ -26,7 +26,7 @@
  * Global     : $conf, $db, $hookmanager, $langs, $user,
  * Parameters : $action,
  * Objects    : $object, $document
- * Variable   : $permissiontoadd, $moduleNameLowerCase, $permissiontodelete
+ * Variable   : $permissiontoadd, $permissiontodelete, $shouldRedirect (optional)
  */
 
 // Build doc action.
@@ -65,10 +65,13 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
             asort($modelLists);
             $modelLists = array_filter($modelLists, 'saturne_remove_index');
             foreach ($modelLists as $key => $modelList) {
-                $confName = dol_strtoupper($moduleNameLowerCase . '_' . $document->element) . '_DEFAULT_MODEL';
+                $confName = dol_strtoupper($object->module . '_' . $document->element) . '_DEFAULT_MODEL';
                 if (dol_strlen(getDolGlobalString($confName)) > 0 && strpos($key, getDolGlobalString($confName)) !== false) {
                     $model = $key;
                 }
+            }
+            if (!dol_strlen($model)) {
+                $model = key($modelLists);
             }
         }
     } else {
@@ -95,13 +98,15 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
             if ($document->element != $documentType[0]) {
                 $document->element = $documentType[0];
             }
-            setEventMessages($langs->trans('FileGenerated') . ' - ' . '<a href=' . DOL_URL_ROOT . '/document.php?modulepart=' . (!empty($moreParams['modulePart']) ? $moreParams['modulePart'] : $moduleNameLowerCase) . '&file=' . urlencode((empty($moreParams['modulePart']) ? $document->element . '/' : '') . (dol_strlen($object->ref) > 0 ? $object->ref . '/' : '') . $document->last_main_doc) . '&entity=' . $conf->entity . '"' . '>' . $document->last_main_doc . '</a>', []);
+            setEventMessages($langs->trans('FileGenerated') . ' - ' . '<a href=' . DOL_URL_ROOT . '/document.php?modulepart=' . (!empty($moreParams['modulePart']) ? $moreParams['modulePart'] : $object->module) . '&file=' . urlencode((empty($moreParams['modulePart']) ? $document->element . '/' : '') . (dol_strlen($object->ref) > 0 ? $object->ref . '/' : '') . $document->last_main_doc) . '&entity=' . $conf->entity . '"' . '>' . $document->last_main_doc . '</a>', []);
             $urlToRedirect = $_SERVER['REQUEST_URI'];
             $urlToRedirect = preg_replace('/#builddoc$/', '', $urlToRedirect);
             $urlToRedirect = preg_replace('/action=builddoc&?/', '', $urlToRedirect); // To avoid infinite loop.
             $urlToRedirect = preg_replace('/forcebuilddoc=1&?/', '', $urlToRedirect); // To avoid infinite loop.
-            header('Location: ' . $urlToRedirect);
-            exit;
+            if (!isset($shouldRedirect) || $shouldRedirect) {
+                header('Location: ' . $urlToRedirect);
+                exit;
+            }
         }
     }
 }

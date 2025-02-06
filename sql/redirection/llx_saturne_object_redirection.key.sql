@@ -1,4 +1,4 @@
--- Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
+-- Copyright (C) 2024 EVARISK <technique@evarisk.com>
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -13,5 +13,6 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see https://www.gnu.org/licenses/.
 
--- 1.3.0
-INSERT INTO llx_c_actioncomm (id, code, libelle, type, module, active, position) VALUES (100, 'AC_PUBLIC', 'PublicInterface', 'module', 'saturne@saturne', 1, 100);
+ALTER TABLE llx_saturne_object_redirection ADD INDEX idx_saturne_object_redirection_rowid (rowid);
+ALTER TABLE llx_saturne_object_redirection ADD INDEX idx_saturne_object_redirection_status (status);
+ALTER TABLE llx_saturne_object_redirection ADD CONSTRAINT llx_saturne_object_redirection_fk_user_creat FOREIGN KEY (fk_user_creat) REFERENCES llx_user(rowid);

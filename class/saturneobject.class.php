@@ -433,6 +433,9 @@ abstract class SaturneObject extends CommonObject
 		}
 		$label .= '<br>';
 		$label .= '<b>' . $langs->trans('Ref') . ' : </b> ' . $this->ref;
+        if (property_exists($this, 'label')) {
+            $label .= '<br><b>' . $langs->transnoentities('Label') . ' : </b> ' . $this->label;
+        }
 
 		$url = dol_buildpath('/' . $this->module . '/view/' . $this->element . '/' . $this->element . '_card.php', 1) . '?id=' . $this->id;
 
@@ -487,6 +490,9 @@ abstract class SaturneObject extends CommonObject
 		$result .= $linkend;
 
         if ($withpicto != 2) {
+            if ($withpicto == 3) {
+                $addLabel = 1;
+            }
             $result .= (($addLabel && property_exists($this, 'label')) ? '<span class="opacitymedium">' . ' - ' . dol_trunc($this->label, ($addLabel > 1 ? $addLabel : 0)) . '</span>' : '');
         }
 

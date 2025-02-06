@@ -1,4 +1,4 @@
--- Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
+-- Copyright (C) 2024 EVARISK <technique@evarisk.com>
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -13,5 +13,15 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see https://www.gnu.org/licenses/.
 
--- 1.3.0
-INSERT INTO llx_c_actioncomm (id, code, libelle, type, module, active, position) VALUES (100, 'AC_PUBLIC', 'PublicInterface', 'module', 'saturne@saturne', 1, 100);
+CREATE TABLE llx_saturne_object_redirection(
+  rowid         integer AUTO_INCREMENT PRIMARY KEY NOT NULL,
+  entity        integer DEFAULT 1 NOT NULL,
+  date_creation datetime NOT NULL,
+  tms           timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  import_key    varchar(14),
+  status        integer DEFAULT 1 NOT NULL,
+  from_url      text,
+  to_url        text,
+  fk_user_creat integer NOT NULL,
+  fk_user_modif integer
+) ENGINE=innodb;

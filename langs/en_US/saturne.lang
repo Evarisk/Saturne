@@ -36,35 +36,46 @@ ReadAdminPage = Access the module configuration %s
 #
 
 # Data
-ModuleSettings                      = Settings
-ModuleSetup                         = Module configuration %s
-Contributing                        = Contributing
-SaturneModule                       = %s module
-GeneralConfig                       = General configuration
-ConfigData                          = Configurable data from %s
-Configs                             = Configurable % data
-ConfigDatas                         = Configurations
-ModuleMediaGallery                  = Configuration of %s media
-SavedMediaData                      = Recording of media data
-EnablePublicInterface               = Public interface
-EnablePublicInterfaceDescription    = Activation of public interfaces
-ShowCompanyLogo                     = Display the company logo
-ShowCompanyLogoDescription          = Enable this option to hide the company logo in the public interface pages
-UseCaptcha                          = Graphic code (CAPTCHA)
-UseCaptchaDescription               = Use of graphic code (CAPTCHA) on public interface pages
-UseAllEmailMode                     = Use of all email configuration modes
-UseAllEmailModeDescription          = Allow the use of all email configuration modes by default, only SMTP mode is allowed
-UseFastUploadImprovement            = Improved fast image loading
-UseFastUploadImprovementDescription = Activate this option to improve image loading speed <br> Option available : <ul><li>Image rotation</li><li>Drawing on the image</li><li>Saving the image on a reduced format</li></ul>
-SignaturePublicInterfaceForbidden   = No access to the public signature interface
-ShowSpecimen                        = See signatures on specimen documents
-ShowSpecimenDescription             = Allows viewing of signatures on specimen documents
-ObjectVisibleDescription            = Display the %s field
-SavedConfig                         = Saved configuration
-ErrorSavedConfig                    = An error occurred during the configuration
-Config                              = Configuration
-Extrafields                         = Extra attributes
-ClickHereToGoToTheConfigPage        = Click here to go to the configuration page
+ModuleSettings                           = Settings
+ModuleSetup                              = Module configuration %s
+Contributing                             = Contributing
+SaturneModule                            = %s module
+GeneralConfig                            = General configuration
+ConfigData                               = Configurable data from %s
+Configs                                  = Configurable % data
+ConfigDatas                              = Configurations
+ModuleMediaGallery                       = Configuration of %s media
+SavedMediaData                           = Recording of media data
+EnablePublicInterface                    = Public interface
+EnablePublicInterfaceDescription         = Activation of public interfaces
+ShowCompanyLogo                          = Display the company logo
+ShowCompanyLogoDescription               = Enable this option to hide the company logo in the public interface pages
+UseCaptcha                               = Graphic code (CAPTCHA)
+UseCaptchaDescription                    = Use of graphic code (CAPTCHA) on public interface pages
+UseAllEmailMode                          = Use of all email configuration modes
+UseAllEmailModeDescription               = Allow the use of all email configuration modes by default, only SMTP mode is allowed
+AttendantsAddStatusManagement            = Manage the addition of participants on the status Validated (awaiting signature)
+AttendantsAddStatusManagementDescription = Activate this option to add participants to the Validated (awaiting signature) status
+UseFastUploadImprovement                 = Improved fast image loading
+UseFastUploadImprovementDescription      = Activate this option to improve image loading speed <br> Option available : <ul><li>Image rotation</li><li>Drawing on the image</li><li>Saving the image on a reduced format</li></ul>
+SignaturePublicInterfaceForbidden        = No access to the public signature interface
+ShowSpecimen                             = See signatures on specimen documents
+ShowSpecimenDescription                  = Allows viewing of signatures on specimen documents
+ObjectVisibleDescription                 = Display the %s field
+SavedConfig                              = Saved configuration
+ErrorSavedConfig                         = An error occurred during the configuration
+Config                                   = Configuration
+Extrafields                              = Extra attributes
+ClickHereToGoToTheConfigPage             = Click here to go to the configuration page
+
+# Redirections
+Redirections = Redirections
+FromURL      = From URL
+ToURL        = To URL
+FromUrlHelp  = Enter the starting URL. For example, to redirect from https://www.evarisk.com/depuis/la/page, enter “/from/the/page”.
+ToUrlHelp    = Enter the destination URL. For example, to redirect to https://www.evarisk.com/vers/la/page, enter “/to/the/page”.
+
+
 
 # Mod Numbering
 NumberingModule = Numbering model
@@ -143,7 +154,8 @@ ModuleHasBeenUpdatedTo     = %s has been updated to %s
 ModulePatchNote            = Update note %s %s
 ShowPatchNote              = See the update note
 DontShowPatchNote          = No longer display the update note
-ChooseBoxToAdd             = Add widget to dashboard
+ChooseBoxToAddWidget       = Add a widget to the dashboard
+ChooseBoxToAddGraph        = Add a graph to the dashboard
 SetupDefaultDataNotCreated = You have not created default data for %s
 HowToSetupDefaultData      = To set up %s default data, please click on this link :
 ConfigDefaultData          = Configure %s default data
@@ -170,6 +182,8 @@ AutomaticPdfGeneration                  = Automatic generation of PDFs
 AutomaticPdfGenerationDescription       = Automatically creates the document as a PDF when it is generated
 ManualPdfGeneration                     = Manual generation of PDFs
 ManualPdfGenerationDescription          = Added a button to create an ODT document in PDF
+UseCreateDocumentOnArchive              = Document generation during archiving
+UseCreateDocumentOnArchiveDescription   = Automatic creation of the document during archiving
 FileCouldNotBeGeneratedInPDF            = The file could not be generated in PDF
 CheckDocumentationToEnablePDFGeneration = Please refer to the documentation for the PDF generation : <a target="_blank" href="https://wiki.dolibarr.org/index.php?title=Module_Digirisk#Impression_du_Document_Unique_au_format_pdf_-_.28.2A.pdf.29">Documentation</a>
 PDFGenerationTooltip                    = Appuyez sur ce bouton pour générer le document ODT en PDF
@@ -238,6 +252,8 @@ ExportData = Export my data
 #
 
 # Data
-SocietyAttendants = Third party external attendants
-Back = Back
-DeleteFiles = Are you sure that you want to delete <span class="filesLinked"></span> selected files ?
+SocietyAttendants   = Third party external attendants
+Back                = Back
+DeleteFiles         = Are you sure that you want to delete <span class="filesLinked"></span> selected files ?
+RecordingInProgress = Recording in progress...
+ExportGraphCSV      = Export the graph in CSV format

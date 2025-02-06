@@ -37,9 +37,13 @@ ObjectSignedTrigger     = Signing %s %s
 ObjectImportTrigger     = Import of %s %s
 ObjectUnlinkTrigger     = Unlink of %s %s
 
-# SetEventMessage
+# SetEventMessage - Notice info
 ObjectValidated = %s has been validated
 ObjectReOpened  = %s has been re-opened
+
+# SetEventMessage - Notice error
+ErrorCreateObject = Error: creation of a %s
+ErrorDeleteObject = Error: deleting a %s
 
 # Numbering modules
 SaturneGenericMaskCodes = This field consists of a prefix followed by a suffix. For example, ABC{000} will result in ABC001, ABC002, etc. You can add as many zeros as you wish.
@@ -67,11 +71,11 @@ ObjectMustBeValidatedToSign      = %s must be in status (validated) for particip
 AllSignatoriesMustHaveSigned     = All participants must have signed to lock %s
 ObjectMustBeValidatedToSendEmail = %s must be in (validated) status to send an email
 ObjectMustBeLockedToSendEmail    = %s must be in (locked) status to send an email
-ObjectMustBeLockedToArchive      = %s must be in status (locked) and the document generated in order to archive it
+ObjectMustBeLockedToArchive      = %s must be in status (locked) in order to archive it
 
 # Confirm box
 ValidateObject          = Validate %s
-ConfirmValidateObject   = Are you sure you want to validate %s? <br> Validation allows participants to sign the document but <b> prevents adding new participants or changing %s. </b>
+ConfirmValidateObject   = Are you sure you want to validate %s? <br> Validation allows participants to sign the document but <b> prevents new participants from being added </b><i>(unless the Manage adding participants on status configuration is enabled)</i><b> or %s from being modified. </b>
 ReOpenObject            = Open %s again
 ConfirmReOpenObject     = Are you sure you want to reopen %s ? Reopening allows %s to be modified and new participants to be added but all document signatures will be lost
 LockObject              = Lock %s
@@ -102,9 +106,9 @@ ActionsOnObject = Events on %s
 DisplayMoreInfo = View more information
 
 # Email - Mail
-ObjectLabel     = Summary
-ObjectSubject   = Email document
-ObjectContent   = Please find attached the ODT document(s) related to __THETYPE__.
+ObjectEmailDocumentLabel   = SAT_Document
+ObjectEmailDocumentTopic   = [__[MAIN_INFO_SOCIETY_NAME]__] __TYPE__ __REF__ Summary
+ObjectEmailDocumentContent = Hello,<br /><br />Please find attached the ODT document(s) related to __THETYPE__.<br /><br />Yours sincerely,<br /><br />QHSE Department<br />__USER_FULLNAME__<br />__USER_EMAIL__<br />__MYCOMPANY_NAME__<br />__MYCOMPANY_FULLADDRESS__<br />__MYCOMPANY_EMAIL__
 
 # Config Trigger Info
 ObjectCreated  = Creation of %s
