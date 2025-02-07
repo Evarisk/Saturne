@@ -53,28 +53,11 @@ foreach ($object->fields as $key => $val) {
     } elseif (isset($val['type']) && in_array($val['type'], ['double(24,8)', 'double(6,3)', 'integer', 'real', 'price']) && !in_array($key, ['id', 'rowid', 'ref', 'status']) && $val['label'] != 'TechnicalID' && empty($val['arrayofkeyval'])) {
         $cssForField .= ' right';
     }
-    if (!empty($arrayfields['t.' . $key]['checked'])) {
-        //@todo spec
-//        if (preg_match('/MasterWorker/', $arrayfields['t.' . $key]['label']) || preg_match('/ExtSociety/', $arrayfields['t.' . $key]['label']) || preg_match('/NbIntervenants/', $arrayfields['t.' . $key]['label']) || preg_match('/NbInterventions/', $arrayfields['t.' . $key]['label']) || preg_match('/Location/', $arrayfields['t.' . $key]['label'])) {
-//            $disablesort = 1;
-//        } else {
-//            $disablesort = 0;
-//        }
-//        print getTitleFieldOfList($arrayfields['t.' . $key]['label'], 0, $_SERVER['PHP_SELF'], 't.' . $key, '', $param ?? '', ($cssForField ? 'class="' . $cssForField . '"' : ''), $sortfield, $sortorder, ($cssForField ? $cssForField . ' ' : ''), $disablesort) . "\n";
 
-        print getTitleFieldOfList($arrayfields['t.' . $key]['label'], 0, $_SERVER['PHP_SELF'], 't.' . $key, '', $param ?? '', ($cssForField ? 'class="' . $cssForField . '"' : ''), $sortfield, $sortorder, ($cssForField ? $cssForField .' ' : ''), 0, (empty($val['helplist']) ? '' : $val['helplist']));
+    if (!empty($arrayfields['t.' . $key]['checked'])) {
+        print getTitleFieldOfList($arrayfields['t.' . $key]['label'], 0, $_SERVER['PHP_SELF'], 't.' . $key, '', $param ?? '', ($cssForField ? 'class="' . $cssForField . '"' : ''), $sortfield, $sortorder, ($cssForField ? $cssForField .' ' : ''), (empty($val['disablesort']) ? '' : $val['disablesort']), (empty($val['helplist']) ? '' : $val['helplist']));
         $totalarray['nbfield']++;
     }
-    //@todo spec
-//    if ($key == 'Custom') {
-//        foreach ($val as $resource) {
-//            if ($resource['checked']) {
-//                print '<td>';
-//                print $langs->trans($resource['label']);
-//                print '</td>';
-//            }
-//        }
-//    }
 }
 
 // Extra fields
