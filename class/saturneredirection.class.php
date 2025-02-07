@@ -150,23 +150,25 @@ class SaturneRedirection extends SaturneObject
     public function adaptHtAccess()
     {
         $toUrl = DOL_MAIN_URL_ROOT . '/index.php?original_url=$1';
-
         $redirectionLines  = "RewriteCond %{REQUEST_FILENAME} !-f" . PHP_EOL;
         $redirectionLines .= "RewriteCond %{REQUEST_FILENAME} !-d" . PHP_EOL;
         $redirectionLines .= "RewriteRule ^(.*)$ $toUrl" . PHP_EOL;
 
-        $htaccessContent = file_get_contents(DOL_DOCUMENT_ROOT . '/../.htaccess');
+        if (file_exists(DOL_DOCUMENT_ROOT . '/../.htaccess')
+            && is_writable(DOL_DOCUMENT_ROOT . '/../.htaccess')) {
+            $htaccessContent = file_get_contents(DOL_DOCUMENT_ROOT . '/../.htaccess');
 
-        if (!strpos($htaccessContent, $redirectionLines)) {
+            if (!strpos($htaccessContent, $redirectionLines)) {
 
-            $rewriteEnginePos = strpos($htaccessContent, 'RewriteEngine on');
-            if ($rewriteEnginePos === false) {
-                $rewriteEngineLine   = 'RewriteEngine on' . PHP_EOL;
-                $allRedirectionLines = $rewriteEngineLine . "\n" . $redirectionLines;
+                $rewriteEnginePos = strpos($htaccessContent, 'RewriteEngine on');
+                if ($rewriteEnginePos === false) {
+                    $rewriteEngineLine   = 'RewriteEngine on' . PHP_EOL;
+                    $allRedirectionLines = $rewriteEngineLine . "\n" . $redirectionLines;
+                }
+
+                $newHtaccessContent = $htaccessContent . "\n" . ($allRedirectionLines ?? $redirectionLines);
+                file_put_contents(DOL_DOCUMENT_ROOT . '/../.htaccess', $newHtaccessContent);
             }
-
-            $newHtaccessContent = $htaccessContent . "\n" . ($allRedirectionLines ?? $redirectionLines);
-            file_put_contents(DOL_DOCUMENT_ROOT . '/../.htaccess', $newHtaccessContent);
         }
     }
 }
