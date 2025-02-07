@@ -155,8 +155,9 @@ class SaturneRedirection extends SaturneObject
         $redirectionLines .= "RewriteCond %{REQUEST_FILENAME} !-d" . PHP_EOL;
         $redirectionLines .= "RewriteRule ^(.*)$ $toUrl" . PHP_EOL;
 
-        $htaccessContent = file_get_contents(DOL_DOCUMENT_ROOT . '/../.htaccess');
-
+        if (file_exists(DOL_DOCUMENT_ROOT . '/../.htaccess')) {
+            $htaccessContent = file_get_contents(DOL_DOCUMENT_ROOT . '/../.htaccess');
+        }
         if (!strpos($htaccessContent, $redirectionLines)) {
 
             $rewriteEnginePos = strpos($htaccessContent, 'RewriteEngine on');
