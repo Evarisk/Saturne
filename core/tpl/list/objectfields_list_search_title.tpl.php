@@ -27,10 +27,6 @@
  * Variable : $arrayfields, $param, $selectedfields, $sortfield, $sortorder
  */
 
-if (isset($param) && !is_string($param)) {
-    die();
-}
-
 $totalarray            = [];
 $totalarray['nbfield'] = 0;
 
@@ -55,7 +51,7 @@ foreach ($object->fields as $key => $val) {
     }
 
     if (!empty($arrayfields['t.' . $key]['checked'])) {
-        print getTitleFieldOfList($arrayfields['t.' . $key]['label'], 0, $_SERVER['PHP_SELF'], 't.' . $key, '', $param ?? '', ($cssForField ? 'class="' . $cssForField . '"' : ''), $sortfield, $sortorder, ($cssForField ? $cssForField .' ' : ''), (empty($val['disablesort']) ? '' : $val['disablesort']), (empty($val['helplist']) ? '' : $val['helplist']));
+        print getTitleFieldOfList($arrayfields['t.' . $key]['label'], 0, $_SERVER['PHP_SELF'], 't.' . $key, '', $param, ($cssForField ? 'class="' . $cssForField . '"' : ''), $sortfield, $sortorder, ($cssForField ? $cssForField .' ' : ''), (empty($val['disablesort']) ? '' : $val['disablesort']), (empty($val['helplist']) ? '' : $val['helplist']));
         $totalarray['nbfield']++;
     }
 }
@@ -64,7 +60,7 @@ foreach ($object->fields as $key => $val) {
 require_once DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_list_search_title.tpl.php';
 
 // Hook fields
-$parameters = ['arrayfields' => $arrayfields, 'param' => $param ?? '', 'sortfield' => $sortfield, 'sortorder' => $sortorder, 'totalarray' => &$totalarray];
+$parameters = ['arrayfields' => $arrayfields, 'param' => $param, 'sortfield' => $sortfield, 'sortorder' => $sortorder, 'totalarray' => &$totalarray];
 $hookmanager->executeHooks('printFieldListTitle', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
 print $hookmanager->resPrint;
 
@@ -75,3 +71,13 @@ if (!getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
 }
 
 print '</tr>';
+
+// Detect if we need a fetch on each output line
+$needToFetchEachLine = 0;
+if (isset($extrafields->attributes[$object->table_element]['computed']) && is_array($extrafields->attributes[$object->table_element]['computed']) && count($extrafields->attributes[$object->table_element]['computed']) > 0) {
+    foreach ($extrafields->attributes[$object->table_element]['computed'] as $key => $val) {
+        if (!is_null($val) && preg_match('/\$object/', $val)) {
+            $needToFetchEachLine++; // There is at least one compute field that use $object
+        }
+    }
+}

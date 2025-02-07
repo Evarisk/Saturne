@@ -61,7 +61,7 @@ foreach ($object->fields as $key => $val) {
 
         if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) {
             if (empty($val['searchmulti'])) {
-                print $form->selectarray('search_' . $key, $val['arrayofkeyval'], $search[$key] ?? '', 1, 0, 0, '', 1, 0, 0, '', 'maxwidth100'. ($key == 'status' ? ' search_status width100 onrightofpage' : ''));
+                print $form->selectarray('search_' . $key, $val['arrayofkeyval'], $search[$key] ?? '', 1, 0, 0, '', 1, 0, 0, '', 'maxwidth100' . ($key == 'status' ? ' search_status width100 onrightofpage' : ''));
             } else {
                 print $form->multiselectarray('search_' . $key, $val['arrayofkeyval'], $search[$key] ?? '', 0, 0, 'maxwidth100'. ($key == 'status' ? ' search_status width100 onrightofpage' : ''), 1);
             }
@@ -85,16 +85,6 @@ foreach ($object->fields as $key => $val) {
         print '</td>';
     }
 }
-
-//@todo spec
-//foreach ($evaluation->fields as $key => $val) {
-//    $cssforfield                        = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
-//    if ($key == 'status') $cssforfield .= ($cssforfield ? ' ' : '') . 'center';
-//    if ( ! empty($arrayfields['evaluation.' . $key]['checked'])) {
-//        print '<td class="liste_titre' . '">';
-//        print '</td>';
-//    }
-//}
 
 // Extra fields
 require_once DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_list_search_input.tpl.php';

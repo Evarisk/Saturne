@@ -130,12 +130,6 @@ while ($i < $iMaxInLoop) {
                     print $object->getLibStatut(3);
                 } elseif ($key == 'rowid') {
                     print $object->showOutputField($val, $key, $object->id);
-                } elseif ($key == 'ref') {
-                    print '<i class="fas fa-info"></i>  ' . $object->getNomUrl();
-                } elseif ($key == 'date_start') {
-                    print dol_print_date($object->date_start, 'dayhour', 'tzserver'); // We suppose dates without time are always gmt (storage of course + output)
-                } elseif ($key == 'date_end') {
-                    print dol_print_date($object->date_end, 'dayhour', 'tzserver');   // We suppose dates without time are always gmt (storage of course + output)
                 } else {
                     print $object->showOutputField($val, $key, $object->$key);
                 }
