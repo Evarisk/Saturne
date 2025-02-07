@@ -114,10 +114,18 @@ while ($i < $iMaxInLoop) {
 
             if (!empty($arrayfields['t.'.$key]['checked'])) {
                 print '<td' . ($cssForField ? ' class="' . $cssForField . ((preg_match('/tdoverflow/', $cssForField) && !in_array($val['type'], ['ip', 'url']) && !is_numeric($object->$key)) ? ' classfortooltip' : '') . '"' : '');
-                if (preg_match('/tdoverflow/', $cssForField) && !in_array($val['type'], ['ip', 'url']) && !is_numeric($object->$key) && $key != 'ref') {
+                if (preg_match('/tdoverflow/', $cssForField) && !in_array($val['type'], ['ip', 'url']) && !is_numeric($object->$key) && $key != 'ref' && !in_array($key,['ref'])) {
                     print ' title="' . dol_escape_htmltag($object->$key) . '"';
                 }
                 print '>';
+
+                $parameters = ['arrayfields' => $arrayfields, 'key' => $key, 'val' => $val];
+                $hookmanager->executeHooks('saturnePrintFieldListLoopObject', $parameters, $object);
+                if (!empty($hookmanager->resArray[$key])) {
+                    print $hookmanager->resArray[$key];
+                    continue;
+                }
+
                 if ($key == 'status') {
                     print $object->getLibStatut(3);
                 } elseif ($key == 'rowid') {
@@ -132,6 +140,7 @@ while ($i < $iMaxInLoop) {
                     print $object->showOutputField($val, $key, $object->$key);
                 }
                 print '</td>';
+
                 if (!$i) {
                     $totalarray['nbfield']++;
                 }
@@ -148,47 +157,6 @@ while ($i < $iMaxInLoop) {
                     $totalarray['val']['t.' . $key] += $object->$key;
                 }
             }
-//            if ($key == 'Custom') {
-//                foreach ($val as $name => $resource) {
-//                    if ($resource['checked']) {
-//                        print '<td>';
-//                        if ($resource['label'] == 'MasterWorker') {
-//                            $element = $signatory->fetchSignatory('MasterWorker', $object->id, 'preventionplan');
-//                            if (is_array($element)) {
-//                                $element = array_shift($element);
-//                                $usertmp->fetch($element->element_id);
-//                                print $usertmp->getNomUrl(1);
-//                            }
-//                        } elseif ($resource['label'] == 'ExtSociety') {
-//                            $extSociety = $digiriskresources->fetchResourcesFromObject('ExtSociety', $object);
-//                            if ($extSociety > 0) {
-//                                print $extSociety->getNomUrl(1);
-//                            }
-//                        }
-//                        if ($resource['label'] == 'ExtSocietyResponsible') {
-//                            $element = $signatory->fetchSignatory('ExtSocietyResponsible', $object->id, 'preventionplan');
-//                            if (is_array($element)) {
-//                                $element = array_shift($element);
-//                                $contact->fetch($element->element_id);
-//                                print $contact->getNomUrl(1);
-//                            }
-//                        }
-//                        if ($resource['label'] == 'ExtSocietyAttendant') {
-//                            $extSociety_intervenants = $signatory->fetchSignatory('ExtSocietyAttendant', $object->id, 'preventionplan');
-//                            if (is_array($extSociety_intervenants) && ! empty($extSociety_intervenants) && $extSociety_intervenants > 0) {
-//                                foreach ($extSociety_intervenants as $element) {
-//                                    if ($element > 0) {
-//                                        $contact->fetch($element->element_id);
-//                                        print $contact->getNomUrl(1);
-//                                        print '<br>';
-//                                    }
-//                                }
-//                            }
-//                        }
-//                        print '</td>';
-//                    }
-//                }
-//            }
         }
 
         // Extra fields

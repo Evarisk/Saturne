@@ -53,7 +53,7 @@ foreach ($object->fields as $key => $val) {
         print '<td class="liste_titre' . ($cssForField ? ' ' . $cssForField : '') . ($key == 'status' ? ' parentonrightofpage' : '') . '">';
 
         $parameters = ['arrayfields' => $arrayfields, 'key' => $key, 'val' => $val, 'search' => $search];
-        $hookmanager->executeHooks('saturnePrintFieldListSearch', $parameters, $object, $action);
+        $hookmanager->executeHooks('saturnePrintFieldListSearch', $parameters, $object);
         if (!empty($hookmanager->resArray[$key])) {
             print $hookmanager->resArray[$key];
             continue;
