@@ -110,7 +110,7 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
                                 print '<img class="photo photo' . $j . '" width="' . $maxWidth . '" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/public/theme/common/nophoto.png">';
                             } ?>
                         </figure>
-                        <?php print saturne_get_media_linked_elements($moduleName, $fileName); ?>
+                        <?php // print saturne_get_media_linked_elements($moduleName, $fileName); ?>
                         <div class="title"><?php echo $fileName; ?></div>
                     </div><?php
                     $j++;
