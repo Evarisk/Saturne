@@ -396,7 +396,7 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
                     return $file['date'] > $yesterdayTimeStamp;
                 });
             }
-            if (isset($user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS) && $user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS == 1) {
+            if (getDolGlobalInt('SATURNE_MEDIA_GALLERY_SHOW_ALL_MEDIA_INFOS')) {
                 $filearray = array_filter($filearray, function($file) use ($conf, $moduleNameLowerCase) {
                     $regexFormattedFileName = preg_quote($file['name'], '/');
                     $fileArrays             = dol_dir_list($conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1], 'files', 1, $regexFormattedFileName, '.odt|.pdf|barcode|_mini|_medium|_small|_large');
