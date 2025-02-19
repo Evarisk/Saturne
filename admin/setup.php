@@ -170,6 +170,15 @@ print '</td><td class="center">';
 print ajax_constantonoff('SATURNE_USE_FAST_UPLOAD_IMPROVEMENT');
 print '</td></tr>';
 
+// Show all medias and infos about medias
+print '<tr class="oddeven"><td>';
+print  $langs->trans('ShowAllMediaInfos');
+print '</td><td>';
+print $langs->transnoentities('ShowAllMediaInfosDescription');
+print '</td><td class="center">';
+print ajax_constantonoff('SATURNE_MEDIA_GALLERY_SHOW_ALL_MEDIA_INFOS');
+print '</td></tr>';
+
 // End of the table
 print '</table>';
 

@@ -54,7 +54,7 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
             return $file['date'] > $yesterdayTimeStamp;
         });
     }
-    if ($user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS == 1) {
+    if (getDolGlobalInt('SATURNE_MEDIA_GALLERY_SHOW_ALL_MEDIA_INFOS')) {
         $moduleObjectMedias = dol_dir_list($conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1], 'files', 1, '', '.odt|.pdf|barcode|_mini|_medium|_small|_large');
         $filearray          = array_filter($filearray, function($file) use ($conf, $moduleNameLowerCase, $moduleObjectMedias) {
             $fileExists = array_search($file['name'], array_column($moduleObjectMedias, 'name'));
@@ -110,7 +110,11 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
                                 print '<img class="photo photo' . $j . '" width="' . $maxWidth . '" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/public/theme/common/nophoto.png">';
                             } ?>
                         </figure>
-                        <?php print saturne_get_media_linked_elements($moduleName, $fileName); ?>
+                        <?php
+                        if (getDolGlobalInt('SATURNE_MEDIA_GALLERY_SHOW_ALL_MEDIA_INFOS')) {
+                            print saturne_get_media_linked_elements($moduleName, $fileName);
+                        }
+                        ?>
                         <div class="title"><?php echo $fileName; ?></div>
                     </div><?php
                     $j++;

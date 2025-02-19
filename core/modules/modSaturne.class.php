@@ -75,7 +75,7 @@ class modSaturne extends DolibarrModules
 		$this->editor_url  = 'https://evarisk.com/';
 
         // Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
-		$this->version = '1.7.0';
+		$this->version = '1.8.0';
 
         // Url to the file with your last numberversion of this module
         //$this->url_last_version = 'http://www.example.com/versionmodule.txt';
@@ -185,6 +185,7 @@ class modSaturne extends DolibarrModules
             $i++ => ['SATURNE_USE_ALL_EMAIL_MODE', 'integer', 1, '', 0, 'current'],
             $i++ => ['SATURNE_USE_CREATE_DOCUMENT_ON_ARCHIVE', 'integer', 1, '', 0, 'current'],
             $i++ => ['SATURNE_ATTENDANTS_ADD_STATUS_MANAGEMENT', 'integer', 0, '', 0, 'current'],
+            $i++ => ['SATURNE_MEDIA_GALLERY_SHOW_ALL_MEDIA_INFOS', 'integer', 0, '', 0, 'current'],
             $i++ => ['SATURNE_MEDIA_MAX_WIDTH_MINI', 'integer', 128, '', 0, 'current'],
             $i++ => ['SATURNE_MEDIA_MAX_HEIGHT_MINI', 'integer', 72, '', 0, 'current'],
             $i++ => ['SATURNE_MEDIA_MAX_WIDTH_SMALL', 'integer', 480, '', 0, 'current'],
