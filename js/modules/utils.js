@@ -218,3 +218,55 @@ window.saturne.utils.checkMoreParams = function(checkMoreParams) {
     $(checkMoreParams.removeAttr.element).removeAttr(checkMoreParams.removeAttr.value);
   }
 };
+
+/**
+ * Toggles a configuration setting based on a button state and updates the UI dynamically
+ *
+ * This function is used to send an AJAX request to toggle a specific setting and dynamically
+ * update the relevant UI elements based on the response
+ *
+ * @memberof Saturne_Utils
+ *
+ * @since   1.8.0
+ * @version 1.8.0
+ *
+ * @param {string} action  - The action name to send in the AJAX request
+ * @param {string} dataKey - The key name for the data payload
+ */
+window.saturne.utils.toggleSetting = function(action, dataKey) {
+  // Store the current button and retrieve the query parameters
+  let $button        = $(this);
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+  let token          = window.saturne.toolbox.getToken();
+  let newValue       = $button.hasClass('fa-toggle-off') ? 1 : 0;
+
+  // Get the list of elements to update after the AJAX response, from the data-update-targets attribute
+  let updateTargets  = $button.data('update-targets')?.split(',') || []; // Defaults to empty if no targets specified
+
+  // Show the loading animation for the button
+  window.saturne.loader.display($button);
+
+  // Perform the AJAX request
+  $.ajax({
+    url: `${document.URL}${querySeparator}action=${action}&token=${token}`,
+    type: 'POST',
+    processData: false,
+    data: JSON.stringify({
+      [dataKey]: newValue
+    }),
+    contentType: false,
+    success: function(resp) {
+      // Loop through each element in the updateTargets array
+      updateTargets.forEach(selector => {
+        // Find the new content in the response
+        let $newContent = $(resp).find(selector);
+
+        // If the new content exists, replace the old content with the new one
+        if ($newContent.length) {
+          $(selector).replaceWith($newContent);
+        }
+      });
+    },
+    error: function() {}
+  });
+};
