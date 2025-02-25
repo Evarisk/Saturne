@@ -44,6 +44,7 @@
             </div>
 
             <div class="header-objet">
+                <?php if (!empty($object->id)) { ?>
                 <div class="objet-container">
                     <div class="objet-info">
                         <div class="objet-type"><?php echo $langs->trans(ucfirst($objectType)); ?></div>
@@ -60,6 +61,7 @@
                         <?php endif; ?>
                     </div>
                 </div>
+                <?php } ?>
             </div>
         </div>
 
