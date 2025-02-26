@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2022-2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,22 +18,19 @@
 /**
  * \file    admin/setup.php
  * \ingroup saturne
- * \brief   Saturne setup page.
+ * \brief   Saturne setup page
  */
 
 // Load Saturne environment
 if (file_exists('../saturne.main.inc.php')) {
-	require_once __DIR__ . '/../saturne.main.inc.php';
+    require_once __DIR__ . '/../saturne.main.inc.php';
 } elseif (file_exists('../../saturne.main.inc.php')) {
-	require_once __DIR__ . '/../../saturne.main.inc.php';
+    require_once __DIR__ . '/../../saturne.main.inc.php';
 } else {
     die('Include of saturne main fails');
 }
 
-
-// Libraries
-require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
-
+// Load Saturne libraries
 require_once __DIR__ . '/../lib/saturne.lib.php';
 
 // Global variables definitions
@@ -46,13 +43,12 @@ saturne_load_langs(['admin']);
 $form = new Form($db);
 
 // Parameters
-$action     = GETPOST('action', 'alpha');
-$value      = GETPOST('value', 'alpha');
-$backtopage = GETPOST('backtopage', 'alpha');
+$action = GETPOST('action', 'alpha');
+$value  = GETPOST('value', 'alpha');
 
 // Security check - Protection if external user
-$permissiontoread = $user->rights->saturne->adminpage->read;
-saturne_check_access($permissiontoread);
+$permissionToRead = $user->hasRight('saturne', 'adminpage', 'read');
+saturne_check_access($permissionToRead);
 
 /*
  * Actions
@@ -82,15 +78,14 @@ if ($action == 'set_media_infos') {
  * View
  */
 
-$title    = $langs->trans('ModuleSetup', 'Saturne');
-$help_url  = 'FR:Module_Saturne#Configuration';
+$title   = $langs->trans('ModuleSetup', 'Saturne');
+$helpUrl = 'FR:Module_Saturne#Configuration';
 
-saturne_header(0,'', $title, $help_url);
+saturne_header(0,'', $title, $helpUrl);
 
 // Subheader
-$linkback = '<a href="' . ($backtopage ?: DOL_URL_ROOT . '/admin/modules.php?restore_lastsearch_values=1') . '">' . $langs->trans('BackToModuleList') . '</a>';
-
-print load_fiche_titre($title, $linkback, 'title_setup');
+$linkBack = '<a href="' . DOL_URL_ROOT . '/admin/modules.php' . '">' . $langs->trans('BackToModuleList') . '</a>';
+print load_fiche_titre($title, $linkBack, 'title_setup');
 
 // Configuration header
 $head = saturne_admin_prepare_head();
@@ -160,7 +155,6 @@ print '</td><td class="center">';
 print ajax_constantonoff('SATURNE_ATTENDANTS_ADD_STATUS_MANAGEMENT');
 print '</td></tr>';
 
-
 // Use fast upload improvement
 print '<tr class="oddeven"><td>';
 print  $langs->trans('UseFastUploadImprovement');
@@ -187,7 +181,7 @@ print load_fiche_titre($langs->trans('Configs', $langs->transnoentities('MediasM
 print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '" name="media_data">';
 print '<input type="hidden" name="token" value="' . newToken() . '">';
 print '<input type="hidden" name="action" value="set_media_infos">';
-print '<table class="noborder centpercent editmode">';
+print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
 print '<td>' . $langs->trans('Name') . '</td>';
 print '<td>' . $langs->trans('Description') . '</td>';
