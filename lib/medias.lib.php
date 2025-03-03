@@ -48,13 +48,13 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
 
 	$filearray = dol_dir_list($dir, 'files', 0, '', '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_DESC : SORT_ASC));
 
-    if ($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS == 1) {
+    if (Isset($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS) && $user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS == 1) {
         $yesterdayTimeStamp = dol_time_plus_duree(dol_now(), -1, 'd');
         $filearray = array_filter($filearray, function($file) use ($yesterdayTimeStamp) {
             return $file['date'] > $yesterdayTimeStamp;
         });
     }
-    if (getDolGlobalInt('SATURNE_MEDIA_GALLERY_SHOW_ALL_MEDIA_INFOS')) {
+    if (isset($user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS) && $user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS == 1) {
         $moduleObjectMedias = dol_dir_list($conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1], 'files', 1, '', '.odt|.pdf|barcode|_mini|_medium|_small|_large');
         $filearray          = array_filter($filearray, function($file) use ($conf, $moduleNameLowerCase, $moduleObjectMedias) {
             $fileExists = array_search($file['name'], array_column($moduleObjectMedias, 'name'));
@@ -110,11 +110,7 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
                                 print '<img class="photo photo' . $j . '" width="' . $maxWidth . '" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/public/theme/common/nophoto.png">';
                             } ?>
                         </figure>
-                        <?php
-                        if (getDolGlobalInt('SATURNE_MEDIA_GALLERY_SHOW_ALL_MEDIA_INFOS')) {
-                            print saturne_get_media_linked_elements($moduleName, $fileName);
-                        }
-                        ?>
+                        <?php print saturne_get_media_linked_elements($moduleName, $fileName); ?>
                         <div class="title"><?php echo $fileName; ?></div>
                     </div><?php
                     $j++;
@@ -183,11 +179,19 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 			$filearray = dol_sort_array($filearray, $sortfield, $sortorder);
 		}
 		$favoriteExists = 0;
-		foreach ($filearray as $file) {
-			if ($file['name'] == $object->$favorite_field) {
-				$favoriteExists = 1;
+		// Initialize favoriteExists flag to avoid undefined variable warning
+		$favoriteExists = 0;
+
+		// Check if the object's favorite field is set to avoid potential warnings in PHP 8
+		if (isset($object->$favorite_field)) {
+			foreach ($filearray as $file) {
+				// Ensure the 'name' index exists in the file array and perform a strict comparison
+				if (isset($file['name']) && $file['name'] === $object->$favorite_field) {
+					$favoriteExists = 1;
+					break; // Stop the loop once the favorite file is found
+				}
 			}
-		}
+		}		
 
 		foreach ($filearray as $file) {
 			$photo    = '';
@@ -254,7 +258,30 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 								$return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo '. $morecss .'"  src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdirthumb . $photo_vignette) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . $object->id . '">';
 							} else {
 								$return .= '<!-- Show original file -->';
-								$return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo '. $morecss .' photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . $object->id . '">';
+								// Ensure required variables are defined to prevent undefined variable warnings
+								$maxWidth = isset($maxWidth) ? $maxWidth : 0;
+								$maxHeight = isset($maxHeight) ? $maxHeight : 0;
+								$morecss   = isset($morecss)   ? $morecss   : '';
+								$modulepart = isset($modulepart) ? $modulepart : '';
+								$pdir      = isset($pdir)      ? $pdir      : '';
+								$photo     = isset($photo)     ? $photo     : '';
+								$alt       = isset($alt)       ? $alt       : '';
+
+								// Ensure object and its id property are defined
+								if (!isset($object) || !isset($object->id)) {
+									$object = new stdClass();
+									$object->id = 0;
+								}
+
+								// Build the image HTML; duplicate height attribute removed
+								$return .= '<img width="' . $maxWidth . 
+										'" height="' . $maxHeight . 
+										'" class="photo ' . $morecss . ' photowithmargin" ' .
+										'src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . 
+										'&entity=' . $conf->entity . 
+										'&file=' . urlencode($pdir . $photo) . 
+										'" title="' . dol_escape_htmltag($alt) . 
+										'" data-object-id="' . $object->id . '">';
 							}
 						}
 
@@ -347,7 +374,18 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 			}
 		}
 	} else {
-        $return .= '<img  width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo '. $morecss .' photowithmargin" src="' . DOL_URL_ROOT . '/public/theme/common/nophoto.png" title="' . $langs->trans('NoPhotoYet') . '" data-object-id="' . $object->id . '">';
+		// Ensure variables are defined to avoid PHP warnings (compatible with PHP 8 and Dolibarr v20)
+		$maxWidth = $maxWidth ?? '';       // Default to empty string if not set
+		$maxHeight = $maxHeight ?? '';     // Default to empty string if not set
+		$morecss = $morecss ?? '';         // Default to empty string if not set
+
+		// Set default translation for "NoPhotoYet" if $langs or method trans is not available
+		$imgTitle = (isset($langs) && method_exists($langs, 'trans')) ? $langs->trans('NoPhotoYet') : 'No photo available';
+
+		// Ensure $object and its id are defined to avoid warnings
+		$objectId = (isset($object) && isset($object->id)) ? $object->id : '';
+
+		$return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $morecss . ' photowithmargin" src="' . DOL_URL_ROOT . '/public/theme/common/nophoto.png" title="' . $imgTitle . '" data-object-id="' . $objectId . '">';
     }
 
 	if (is_object($object)) {

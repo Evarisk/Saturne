@@ -26,7 +26,8 @@ if ($action == 'delete_all_conf') {
 	}
 }
 
-if (is_array($constArray) && !empty($constArray)) {
+// Check if $constArray is defined, is an array, and is not empty
+if (isset($constArray) && is_array($constArray) && !empty($constArray)) {
     // Config Data
     print load_fiche_titre($langs->transnoentities('Config'), '', '');
 
@@ -52,7 +53,20 @@ if (is_array($constArray) && !empty($constArray)) {
         print '</td>';
         print '<td class="center">';
         if ($user->admin) {
-            print ajax_constantonoff($const['disabled'] == 1 ? '' : $const['code'], $input ?? [], $entity ?? null, $revertonoff ?? 0, $strict ?? 0, $forceReload ?? 0, $marginleftonlyshort ?? 2 , $forcenoajax ?? 0, $setzeroinsteadofdel ?? 1, $suffix ?? '', $mode ?? '');
+            print ajax_constantonoff(
+                (isset($const['disabled']) && $const['disabled'] == 1) ? '' : ($const['code'] ?? ''),
+                $input ?? [],
+                $entity ?? null,
+                $revertonoff ?? 0,
+                $strict ?? 0,
+                $forceReload ?? 0,
+                $marginleftonlyshort ?? 2,
+                $forcenoajax ?? 0,
+                $setzeroinsteadofdel ?? 1,
+                $suffix ?? '',
+                $mode ?? ''
+            );
+            
         }
         print '</td>';
         print '</tr>';

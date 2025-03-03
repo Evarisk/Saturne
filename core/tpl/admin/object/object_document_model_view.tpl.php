@@ -74,10 +74,37 @@ if (is_array($filelist) && !empty($filelist)) {
                 // Default
                 print '<td class="center">';
                 $defaultModelConf = strtoupper($moduleName) . '_' . strtoupper($documentParentType) . '_DEFAULT_MODEL';
-                if ($conf->global->$defaultModelConf == $name) {
+                if (isset($conf->global->{$defaultModelConf}) && $conf->global->{$defaultModelConf} == $name) {
                     print img_picto($langs->trans('Default'), 'on');
                 } else {
-                    print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setdoc&model_name=' . $name .'&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), 'off') . '</a>';
+                    // If $name is not set, default to an empty string
+                    $modelName = isset($name) ? $name : '';
+
+                    // If $module is not set or properties do not exist, use default empty values
+                    $moduleScandir = (isset($module) && isset($module->scandir)) ? $module->scandir : '';
+                    $moduleLabel   = (isset($module) && isset($module->name)) ? $module->name : '';
+
+                    // Ensure $moduleName is defined
+                    $moduleNameValue = isset($moduleName) ? $moduleName : '';
+
+                    // Extract type from $modelName, default to empty string if not available
+                    $typeParts = explode('_', $modelName);
+                    $type = isset($typeParts[0]) ? $typeParts[0] : '';
+
+                    // Generate a token
+                    $token = newToken();
+
+                    // Build the URL with proper encoding to ensure safe query parameters
+                    $url = $_SERVER['PHP_SELF'] . '?action=setdoc'
+                        . '&model_name=' . urlencode($modelName)
+                        . '&const=' . urlencode($moduleScandir)
+                        . '&label=' . urlencode($moduleLabel)
+                        . '&type=' . urlencode($type)
+                        . '&module_name=' . urlencode($moduleNameValue)
+                        . '&token=' . urlencode($token);
+
+                    // Print the reposition link with an icon
+                    print '<a class="reposition" href="' . $url . '">' . img_picto($langs->trans('Disabled'), 'off') . '</a>';
                 }
                 print '</td>';
 

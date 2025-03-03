@@ -161,7 +161,7 @@ abstract class SaturneObject extends CommonObject
 			foreach ($filter as $key => $value) {
 				if ($key == 't.rowid') {
 					$sqlwhere[] = $key . ' = ' . ((int) $value);
-				} elseif (in_array($this->fields[$key]['type'], ['date', 'datetime', 'timestamp'])) {
+				} elseif (isset($this->fields[$key]['type']) && in_array($this->fields[$key]['type'], ['date', 'datetime', 'timestamp'], true)) {
 					$sqlwhere[] = $key . " = '" . $this->db->idate($value) . "'";
 				} elseif ($key == 'customsql') {
 					$sqlwhere[] = $value;

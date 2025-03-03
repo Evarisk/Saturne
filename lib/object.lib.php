@@ -100,18 +100,27 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
 
     // Manage filter
     $sqlwhere = [];
-    if (count($filter) > 0) {
+    if (!empty($filter)) { // Check if filter is not empty
         foreach ($filter as $key => $value) {
-            if ($key == 't.rowid') {
+            // Handle row id filtering
+            if ($key === 't.rowid') {
                 $sqlwhere[] = $key . ' = ' . $value;
-            } elseif (in_array($object->fields[$key]['type'], ['date', 'datetime', 'timestamp'])) {
-                $sqlwhere[] = $key .' = \'' . $object->db->idate($value) . '\'';
-            } elseif ($key == 'customsql') {
+            }
+            // Handle custom SQL clause
+            elseif ($key === 'customsql') {
                 $sqlwhere[] = $value;
-            } elseif (strpos($value, '%') === false) {
-                $sqlwhere[] = $key .' IN (' . $object->db->sanitize($object->db->escape($value)) . ')';
-            } else {
-                $sqlwhere[] = $key .' LIKE \'%' . $object->db->escape($value) . '%\'';
+            }
+            // Check if field type exists and if it is a date type
+            elseif (isset($object->fields[$key]['type']) && in_array($object->fields[$key]['type'], ['date', 'datetime', 'timestamp'], true)) {
+                $sqlwhere[] = $key . ' = \'' . $object->db->idate($value) . '\'';
+            }
+            // If no wildcard present in the value, use IN clause with sanitized input
+            elseif (strpos($value, '%') === false) {
+                $sqlwhere[] = $key . ' IN (' . $object->db->sanitize($object->db->escape($value)) . ')';
+            }
+            // Default: use LIKE clause with escaped value
+            else {
+                $sqlwhere[] = $key . ' LIKE \'%' . $object->db->escape($value) . '%\'';
             }
         }
     }

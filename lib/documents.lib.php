@@ -51,6 +51,7 @@
 function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, string $urlsource, $genallowed, int $delallowed = 0, string $modelselected = '', int $allowgenifempty = 1, int $forcenomultilang = 0, int $notused = 0, int $noform = 0, string $param = '', string $title = '', string $buttonlabel = '', string $codelang = '', string $morepicto = '', $object = null, int $hideifempty = 0, string $removeaction = 'remove_file', int $active = 1, string $tooltiptext = ''): string
 {
 	global $conf, $db, $form, $hookmanager, $langs;
+	
 
 	if (!is_object($form)) {
         $form = new Form($db);
@@ -130,6 +131,7 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
                 $modellist = getListOfModels($db, $type);
             } else {
                 require_once __DIR__ . '/../core/modules/saturne/modules_saturne.php';
+				/** @var DoliDB $db */
                 $saturneDocumentModel = new SaturneDocumentModel($db, $modulepart, $submodulepart);
                 $documentType = strtolower($submodulepart);
                 $modellist = $saturneDocumentModel->liste_modeles($db, $documentType);
@@ -309,7 +311,9 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 
                 // Preview
                 if (!empty($conf->use_javascript_ajax) && ($conf->browser->layout != 'phone')) {
-                    $tmparray = getAdvancedPreviewUrl($modulepart, $relativepath, 1, '&entity=' . $entity);
+                    // Ensure $entity is defined to avoid undefined variable warnings in PHP8
+					$entityParam = isset($entity) ? '&entity=' . $entity : '';
+					$tmparray = getAdvancedPreviewUrl($modulepart, $relativepath, 1, $entityParam);
                     if ($tmparray && $tmparray['url']) {
                         $out .= '<a href="'.$tmparray['url'].'"'.($tmparray['css'] ? ' class="'.$tmparray['css'].'"' : '').($tmparray['mime'] ? ' mime="'.$tmparray['mime'].'"' : '').($tmparray['target'] ? ' target="'.$tmparray['target'].'"' : '').'>';
                         //$out.= img_picto('','detail');
