@@ -1,0 +1,259 @@
+# Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#
+# Saturne
+#
+
+# Data - Donnée
+ModuleSaturneName   = Saturne
+ModuleSaturneDesc   = Framework et librairie d'objets et fonctions d'Evarisk
+ModuleConfig        = Configuration
+ModuleConfigSaturne = Configuration Saturne
+MinimizeMenu        = Réduire le menu
+
+# Right - Droit
+LireModule    = Consulter %s
+ReadModule    = Consulter %s (read)
+ReadAdminPage = Accéder à la configuration du module %s
+
+
+
+#
+# Config page - Page d'administration
+#
+
+# Data - Donnée
+ModuleSettings                           = Réglages
+ModuleSetup                              = Configuration du module %s
+Contributing                             = Contribution
+SaturneModule                            = Module %s
+GeneralConfig                            = Configuration générale
+ConfigData                               = Données configurables de %s
+Configs                                  = Configuration des %s
+ConfigDatas                              = Configurations
+ModuleMediaGallery                       = Configuration des médias de %s
+SavedMediaData                           = Enregistrement des données des médias
+EnablePublicInterface                    = Interface publique
+EnablePublicInterfaceDescription         = Activation des interfaces publiques
+ShowCompanyLogo                          = Afficher le logo de la société
+ShowCompanyLogoDescription               = Activez cette option pour masquer le logo de la société dans les pages d'interface publique
+UseCaptcha                               = Code graphique (CAPTCHA)
+UseCaptchaDescription                    = Utilisation du code graphique (CAPTCHA) sur les pages d'interfaces publique
+UseAllEmailMode                          = Utilisation de tous les modes de configuration des emails
+UseAllEmailModeDescription               = Autorise l'utilisation de tous les modes de configuration des emails par défaut, seul le mode SMTP est autorisé
+AttendantsAddStatusManagement            = Gestion de l'ajout des participants sur le status Validé (en attente de signature)
+AttendantsAddStatusManagementDescription = Activez cette option pour ajouter des participants sur le status Validé (en attente de signature)
+UseFastUploadImprovement                 = Utilisation chargement rapide d'image amélioré
+UseFastUploadImprovementDescription      = Activez cette option pour améliorer le chargement rapide d'image <br> Option disponible : <ul><li>Rotation d'image</li><li>Dessin  sur l'image</li><li>Enregistrement de l'image sur un format réduit</li></ul>
+SignaturePublicInterfaceForbidden        = Accès interdit à l'interface publique de signature
+ObjectVisibleDescription                 = Afficher le champ %s
+ShowSignatureSpecimen                    = Voir les signatures sur les documents specimens
+ShowSignatureSpecimenDescription         = Permet la visualisation des signatures sur les documents specimens
+SavedConfig                              = Configuration sauvegardée
+ErrorSavedConfig                         = Une erreur est survenue lors de la configuration
+Config                                   = Configuration
+Extrafields                              = Attributs supplémentaires
+ClickHereToGoToTheConfigPage             = Veuillez cliquer ici pour vous rendre sur la page de configuration
+
+# Redirections - Redirections
+Redirections = Redirections
+FromURL      = Depuis l'URL
+ToURL        = Vers l'URL
+FromUrlHelp  = Saisissez l'URL de départ. Par exemple, pour rediriger depuis https://www.evarisk.com/depuis/la/page, saisissez "/depuis/la/page"
+ToUrlHelp    = Saisissez l'URL de destination. Par exemple, pour rediriger vers https://www.evarisk.com/vers/la/page, saisissez "/vers/la/page"
+
+
+
+# Mod Numbering - Modèle de numérotation
+NumberingModule = Modèle de numérotation
+NumberingModuleDet = Modèle de numérotation des lignes
+StandardModel   = Renvoie le numéro sous la forme %syymm-nnnn où yy est l'année, mm le mois et nnnn est un compteur séquentiel sans rupture et sans remise à 0.
+
+# ODT Template - Template ODT
+YourDocuments               = Documents
+DocumentTemplate            = Modèle de documents
+ODTDefaultTemplateName      = ODT par défaut
+ErrorFileNotFound           = Fichier non trouvé
+ErrorNoSocietyLogo          = Aucun logo de la société renseigné
+CustomODT                   = ODT personnalisé
+ErrorWrongFileNameExtension = Erreur : mauvaise extension de fichier %s
+
+# Trigger - Événements
+ConfTrigger                 = Configuration des événements
+ConfEventAuto               = Configuration des événements automatiques
+AdvancedTriggers            = Contenu des événéments avancé
+AdvancedTriggersDescription = Active une description détaillée des événements de %s
+
+
+
+#
+# About - Page À propos
+#
+
+# Data - Donnée
+About       = À propos
+ModuleAbout = À propos de %s
+
+
+
+#
+# Sécurité
+#
+
+# Data - Donnée
+ChangeEntityRedirection = Vous avez été redirigé car vous avez changé d'entité
+EnableSaturne           = Veuillez activer le module Saturne pour accéder à cette page
+
+
+
+#
+# Public Interface - Interface publique
+#
+
+# Data - Donnée
+PublicInterfaceObject                  = Interface publique %s
+PublicInterfaceUseSignatoryDescription = Utilisation de la signature sur l'interface publique
+PublicInterfaceUser                    = Utilisateur par défaut
+PublicInterfaceUserDescription         = Utilisateur utilisé sur l'interface publique
+PublicInterfaceForbidden               = Accès interdit à l'interface publique %s
+
+
+#
+# PWA - Progressive Web App
+#
+
+# Data - Donnée
+PWA                           = Application Web Progressive
+PWAQRCodeGenerationManagement = Gestion de la génération des QRCodes PWA
+GeneratePWAQRCode             = Génération du QRCode PWA
+GeneratePWAQRCodeDescription  = Cette option permet de générer le QRCode de l'application web progressive
+
+
+
+#
+# Index - Accueil
+#
+
+# Data - Donnée
+ModuleArea                 = Bienvenue sur %s
+ModuleUpdate               = Mise à jour de %s :
+ModuleHasBeenUpdatedTo     = %s a été mis à jour en version %s
+ModulePatchNote            = Note de mise à jour %s %s
+ShowPatchNote              = Consulter la note de mise à jour
+DontShowPatchNote          = Ne plus afficher la note de mise à jour
+ChooseBoxToAddWidget       = Ajouter le widget au tableau de bord
+ChooseBoxToAddGraph        = Ajouter le graphique au tableau de bord
+SetupDefaultDataNotCreated = Vous n'avez pas créé les données par défaut de %s
+HowToSetupDefaultData      = Pour configurer les données par défaut de %s, veuillez cliquer sur ce lien :
+ConfigDefaultData          = Configuration des données par défaut de %s
+
+
+
+#
+# Schedules - horaires
+#
+
+# Data - Donnée
+Schedules      = Horaires
+SchedulesSaved = Les horaires ont bien été enregistrés
+
+
+
+#
+# Documents - Documents
+#
+
+# Data - Donnée
+DocumentsMin                            = documents
+AutomaticPdfGeneration                  = Génération automatique des PDF
+AutomaticPdfGenerationDescription       = Crée automatiquement le document en PDF lors de la génération
+ManualPdfGeneration                     = Génération manuelle des PDF
+ManualPdfGenerationDescription          = Ajout d'un bouton pour créer un document ODT en PDF
+UseCreateDocumentOnArchive              = Génération document lors de l'archive
+UseCreateDocumentOnArchiveDescription   = Création automatique du document lors de l'archivage
+FileCouldNotBeGeneratedInPDF            = Le fichier n'a pas pu être généré en PDF
+CheckDocumentationToEnablePDFGeneration = Veuillez vous référer à la documentation pour la génération en PDF : <a target="_blank" href="https://wiki.dolibarr.org/index.php?title=Module_Saturne">Documentation</a>
+PDFGenerationTooltip                    = Appuyez sur ce bouton pour générer le document ODT en PDF
+PDFGeneration                           = Génération du document PDF
+NoData                                  = N/A
+
+
+
+#
+# Email - Mail
+#
+
+# Data - Donnée
+SendMailSubject = Email
+QHSEService     = Service QHSE
+WithKindRegards = Bien cordialement
+ConfigEmail     = Cliquez sur ce lien pour vous rendre à la configuration des emails
+
+
+
+#
+# Modal - Modal
+#
+
+# Data - Donnée
+CloseModal = Fermer
+
+
+
+#
+# Certificate - Certificat
+#
+
+# Data - Donnée
+FkElement              = Élément lié
+ElementType            = Type d'élément
+CertificateExpired     = Il y a %s certificat(s) expiré(s)
+NoCertificate          = Aucun certificat
+checkDateEndJob        = Vérification de la date de fin des certificats
+checkDateEndJobComment = Vérification et mise à jour du statut des certificats expirés en fonction de la date de fin
+
+
+
+#
+# Triggers
+#
+
+# Data - Donnée
+EntityNumber = Numéro de l'entité
+EntityName   = Nom de l'entité
+
+
+
+#
+# Tools - Outils
+#
+
+# Data - Donnée
+Tools      = Outils
+ExportData = Exporter mes données
+
+
+
+#
+# Other - Autres
+#
+
+# Data - Donnée
+SocietyAttendants   = Tiers des participants externe
+Back                = Retour
+DeleteFiles         = Êtes vous sur de vouloir supprimer les <span class="filesLinked"></span> media(s) sélectionné(s) ?
+RecordingInProgress = Enregistrement en cours...
+ExportGraphCSV      = Exporter le graphique en CSV

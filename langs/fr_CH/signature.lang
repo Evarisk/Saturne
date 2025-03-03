@@ -1,0 +1,97 @@
+# Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#
+# Signature - Signature
+#
+
+# Trigger - Déclencheur
+AddAttendantTrigger     = Ajout d'un participant : %s
+SignedTrigger           = Signature du participant effectuée %s
+PendingSignatureTrigger = Email envoyé, en attente de la signature du participant %s
+AttendanceDelayTrigger  = Participant %s en retard
+AttendanceAbsentTrigger = Participant %s absent
+DeletedTrigger          = Participant %s supprimé
+
+# SetEventMessage - Notice info
+BeCareful               = Attention
+AddAttendantMessage     = Ajout du participant : %s
+DeleteAttendantMessage  = Suppression du participant : %s
+SignAttendantMessage    = Le participant %s a signé
+SendEmailAt             = Envoi de l'email à %s
+ErrorSetupEmail         = Erreur de configuration des mails, vous n'avez pas configuré votre serveur d'envoi de mail en mode SMTP <br> Veuillez utiliser le mode SMTP pour une meilleure délivrabilité et sécurisation des emails
+NoEmailSet              = Aucun email renseigné : %s
+AddAttendants           = Ajouter participants
+
+# Mail - Mail
+EmailSignatureLabel         = SAT_Signature
+EmailSignatureTopic         = [__[MAIN_INFO_SOCIETE_NOM]__] Signature __OBJECT_ELEMENT__ __REF__
+EmailSignatureContent       = Bonjour,<br />Veuillez trouver ci-joint le lien de signature du document.<br />__SATURNE_SIGNATORY_URL__
+SignatureEmailURL           = Lien de signature du document
+EmailGlobalSignatureLabel   = SAT_Global_Signature
+EmailGlobalSignatureTopic   = [__[MAIN_INFO_SOCIETE_NOM]__] Liens de signature pour __OBJECT_THE_ELEMENT__ __REF__
+EmailGlobalSignatureContent = Bonjour,<br /><br />Suite à votre __OBJECT_ELEMENT__ "__OBJECT_LABEL_OR_REF__" en date du __OBJECT_DATE_START_OR_DATE_CREATION__, veuillez trouver ci-dessous les liens de signature du document "__DOCUMENT_TYPE__" des différents participants :<br /><br />__SIGNATORIES_BY_ROLE_SIGNATURE_EMAIL_URL__Nous vous remercions de bien vouloir leur transmettre.<br /><br />Vous en souhaitant une excellente réception,<br /><br />Cordialement
+
+# Status - Statut
+Registered       = Inscrit
+PendingSignature = En attente de signature
+Signed           = Signé
+
+# Header table - Entête de tableau
+Role             = Rôle
+SignatureLink    = Lien signature
+SendMailDate     = Date d'envoi d'email
+SignatureDate    = Date de signature
+Attendance       = Présence
+SignatureActions = Actions
+
+# Button - Bouton
+GoToValidate               = Valider %s
+GoToLock                   = Verrouiller %s
+SendEmail                  = Envoyer un email
+SendGlobalSignatureMail    = Envoyer un email de signature à tous les participants
+DeleteAttendant            = Supprimer le participant
+Sign                       = Signer
+Erase                      = Effacer
+AttendantTableModeSimple   = Vue simplifiée
+AttendantTableModeAdvanced = Vue avancée
+SignatureSaveButton        = Enregistrer la signature
+
+# Data - Donnée
+Attendant                        = Participant
+Attendants                       = Participants
+InternalAttendant                = Participant interne
+InternalAttendants               = Participants internes
+ExternalAttendant                = Participant externe
+ExternalAttendants               = Participants externes
+NoAttendants                     = Pas de participants liés. Pour ajouter des participants, le statut doit être "Brouillon (à valider)".
+NoAttendantsWithStatusManagement = Pas de participants liés. Pour ajouter des participants, le statut doit être "Brouillon (à valider) ou Validé (en attente de signature)".
+CloneAttendants                  = Cloner les participants
+NoAttendant                      = Aucun %s présent pour %s.
+Present                          = Présent
+Absent                           = Absent
+Delay                            = En retard
+ElectronicSignature              = Signature électronique
+Signatory                        = Signataire
+Responsible                      = Responsable
+
+# Public interface - Interface publique
+SavedSignature = Signature enregistrée
+
+# Temp
+ExtrafieldsFieldMissing      = Missing or invalid '%s' for key %s
+ExtrafieldsFieldUpdateFailed = Failed to update extrafield for key %s
+ExtrafieldsFieldAddFailed    = Failed to add extrafield for key %s
+
