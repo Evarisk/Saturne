@@ -27,7 +27,6 @@ require_once __DIR__ . '/medias.lib.php';
 require_once __DIR__ . '/pagination.lib.php';
 require_once __DIR__ . '/documents.lib.php';
 require_once __DIR__ . '/object.lib.php';
-require_once __DIR__ . '/debug.lib.php';
 
 /**
  * Print llxHeader with Saturne custom enhancements
@@ -99,16 +98,22 @@ function saturne_check_access($permission, object $object = null, bool $allowExt
         }
     }
 
-	if (isModEnabled('multicompany')) {
-		if ($object->id > 0) {
-			if ($object->entity != $conf->entity) {
-				setEventMessage($langs->trans('ChangeEntityRedirection'), 'warnings');
-				$urltogo = dol_buildpath('/custom/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'index.php?mainmenu=' . $moduleNameLowerCase, 1);
-				header('Location: ' . $urltogo);
-				exit;
-			}
-		}
-	}
+    // Check if multicompany module is enabled and validate object and configuration properties
+    if (
+        isModEnabled('multicompany') &&
+        isset($object) && is_object($object) &&
+        isset($object->id) && $object->id > 0 &&
+        isset($object->entity) &&
+        isset($conf) && is_object($conf) &&
+        isset($conf->entity) &&
+        $object->entity != $conf->entity
+    ) {
+        // Set warning message and redirect to the module index page
+        setEventMessage($langs->trans('ChangeEntityRedirection'), 'warnings');
+        $urltogo = dol_buildpath('/custom/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'index.php?mainmenu=' . $moduleNameLowerCase, 1);
+        header('Location: ' . $urltogo);
+        exit;
+    }
 }
 
 /**
@@ -221,7 +226,13 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
             $customMoreHtmlRef = $hookmanager->resPrint;
         }
 
-        $saturneMoreHtmlRef .= $customMoreHtmlRef;
+    // Ensure $saturneMoreHtmlRef is defined to avoid undefined variable warnings
+    if (!isset($saturneMoreHtmlRef)) {
+        $saturneMoreHtmlRef = '';
+    }
+
+    // Append $customMoreHtmlRef if it is defined, otherwise append an empty string
+    $saturneMoreHtmlRef .= $customMoreHtmlRef ?? '';
     }
 
     // Banner
@@ -291,11 +302,19 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
                         }
                     }
                 } else {
-                    $BannerElementObject->fetch($object->$objectKey);
-                    if ($bannerElement == 'societe' || $bannerElement == $moreParams['bannerElement']) {
-                        $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1) : '';
+                    // Ensure that the property exists and is cast to an integer to avoid PHP 8 warnings
+                    $objectValue = isset($object->$objectKey) ? (int) $object->$objectKey : 0;
+
+                    // Fetch the banner element using the sanitized value
+                    $BannerElementObject->fetch($objectValue);
+
+                    // Use null coalescing operator to safely access $moreParams['bannerElement']
+                    if ($bannerElement == 'societe' || $bannerElement == ($moreParams['bannerElement'] ?? '')) {
+                        // Append URL if object value is greater than zero
+                        $saturneMoreHtmlRef .= $objectValue > 0 ? $BannerElementObject->getNomUrl(1) : '';
                     } elseif ($bannerElement == 'project') {
-                        $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1, '', 1) : '';
+                        // Append URL with additional parameter if banner element is 'project'
+                        $saturneMoreHtmlRef .= $objectValue > 0 ? $BannerElementObject->getNomUrl(1, '', 1) : '';
                     }
                 }
                 $saturneMoreHtmlRef .= '<br>';
@@ -319,20 +338,22 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
         $subDir     = $object->element . '/'. $object->ref . '/photos/';
 
         $resHook = $hookmanager->executeHooks('saturneBannerTabCustomSubdir', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
-        if ($resHook > 0) {
-            if (!empty($hookmanager->resArray)) {
-                if ($hookmanager->resArray['modulepart']) {
-                    $modulePart = $hookmanager->resArray['modulepart'];
-                }
-                if ($hookmanager->resArray['dir']) {
-                    $baseDir = $hookmanager->resArray['dir'];
-                }
-                if ($hookmanager->resArray['subdir']) {
-                    $subDir = $hookmanager->resArray['subdir'];
-                }
-                if ($hookmanager->resArray['photoLimit']) {
-                    $photoLimit = $hookmanager->resArray['photoLimit'];
-                }
+        if ($resHook > 0 && !empty($hookmanager->resArray)) {
+            // If the module part is provided, assign it
+            if (!empty($hookmanager->resArray['modulepart'])) {
+                $modulePart = $hookmanager->resArray['modulepart'];
+            }
+            // If the base directory is provided, assign it
+            if (!empty($hookmanager->resArray['dir'])) {
+                $baseDir = $hookmanager->resArray['dir'];
+            }
+            // If the subdirectory is provided, assign it
+            if (!empty($hookmanager->resArray['subdir'])) {
+                $subDir = $hookmanager->resArray['subdir'];
+            }
+            // If the photo limit is provided, assign it
+            if (!empty($hookmanager->resArray['photoLimit'])) {
+                $photoLimit = $hookmanager->resArray['photoLimit'];
             }
         }
 
@@ -379,6 +400,7 @@ function saturne_load_langs(array $domains = [])
 function saturne_select_dictionary(string $htmlName, string $dictionaryTable, string $keyField = 'code', string $labelField = 'label', string $selected = '', int $useEmpty = 0, string $moreAttrib = '', string $placeHolder = '', string $moreCSS = 'minwidth150'): string
 {
 	global $langs, $db;
+    /** @var object|null $db */
 
 	$langs->load('admin');
 
@@ -431,6 +453,7 @@ function saturne_select_dictionary(string $htmlName, string $dictionaryTable, st
 function saturne_fetch_dictionary(string $tableName, string $sortOrder = 'ASC', string $sortField = 't.position')
 {
 	global $db;
+        /** @var object|null $db */
 
 	$sql  = 'SELECT t.rowid, t.entity, t.ref, t.label, t.description, t.active, t.position';
 	$sql .= ' FROM ' . MAIN_DB_PREFIX . $tableName . ' as t';
@@ -643,7 +666,7 @@ function saturne_manage_extrafields(array $extraFieldsArrays, array $commonExtra
                 $extraField['unique']   ?? $commonExtraFieldsValue['unique']   ?? 0,
                 $extraField['required'] ?? $commonExtraFieldsValue['required'] ?? 0,
                 $extraField['default']  ?? $commonExtraFieldsValue['default']  ?? '',
-                $extraField['params'] ? ['options' => $extraField['params']] : '',
+                (isset($extraField['params']) && !empty($extraField['params'])) ? ['options' => $extraField['params']] : '',
                 $extraField['alwayseditable'] ?? $commonExtraFieldsValue['alwayseditable'] ?? 0,
                 $extraField['perms']          ?? $commonExtraFieldsValue['perms']          ?? '',
                 $extraField['list']           ?? $commonExtraFieldsValue['list']           ?? '',
@@ -668,7 +691,7 @@ function saturne_manage_extrafields(array $extraFieldsArrays, array $commonExtra
                 $extraField['unique']   ?? $commonExtraFieldsValue['unique']   ?? 0,
                 $extraField['required'] ?? $commonExtraFieldsValue['required'] ?? 0,
                 $extraField['position'],
-                $extraField['params'] ? ['options' => $extraField['params']] : '',
+                (isset($extraField['params']) && !empty($extraField['params'])) ? ['options' => $extraField['params']] : '',
                 $extraField['alwayseditable'] ?? $commonExtraFieldsValue['alwayseditable'] ?? 0,
                 $extraField['perms']          ?? $commonExtraFieldsValue['perms']          ?? '',
                 $extraField['list']           ?? $commonExtraFieldsValue['list']           ?? '',

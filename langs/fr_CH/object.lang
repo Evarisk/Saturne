@@ -1,0 +1,118 @@
+# Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#
+# Object - Generic object
+#
+
+# Right - Droit
+ReadObjects   = Consulter les %s
+CreateObjects = Créer/Modifier les %s
+DeleteObjects = Supprimer les %s
+
+# Trigger - Déclencheur
+ObjectCreateTrigger     = %s %s créé(e)
+ObjectModifyTrigger     = %s %s modifié(e)
+ObjectDeleteTrigger     = %s %s supprimé(e)
+ObjectUnValidateTrigger = %s %s réouvert(e)
+ObjectValidateTrigger   = %s %s validé(e)
+ObjectLockedTrigger     = %s %s verrouillé(e) - Prêt pour la génération du document
+ObjectSentByMailTrigger = Mail envoyé
+ObjectArchivedTrigger   = %s %s archivé(e)
+ObjectExpiredTrigger    = %s %s expiré(e)
+ObjectGenerateTrigger   = %s %s généré(e)
+ObjectSignedTrigger     = %s %s signé(e)
+ObjectImportTrigger     = %s %s importé(e)
+ObjectUnlinkTrigger     = %s %s délié(e)
+
+# SetEventMessage - Notice info
+ObjectValidated = %s a été validé(e)
+ObjectReOpened  = %s a été rouvert(e)
+
+# SetEventMessage - Notice erreur
+ErrorCreateObject = Erreur : création d'un(e) %s
+ErrorDeleteObject = Erreur : suppression d'un(e) %s
+
+# Numbering modules
+SaturneGenericMaskCodes = Ce champ se compose d'un préfixe suivi d'un suffixe. Par exemple : ABC{000} donnera ABC001, ABC002, etc.  Vous pouvez ajouter autant de zéro que vous le souhaitez.
+
+# Status - Statut
+StatusDraft              = Brouillon (à valider)
+Validated                = Validé
+ValidatePendingSignature = Validé (en attente de signature)
+Locked                   = Verrouillé
+Archived                 = Archivé
+Expired                  = Expiré
+
+# Button - Bouton
+ReOpenDoli                       = Rouvrir
+Sign                             = Signer
+Lock                             = Verrouiller
+Archive                          = Archiver
+Clone                            = Cloner
+ObjectMustBeDraft                = %s doit être au statut (brouillon)
+ObjectMustBeValidated            = %s doit être au statut (validé)
+ObjectMustBeLocked               = %s doit être au statut (verrouillé)
+ObjectMustBeValidatedToGenerate  = %s doit être au statut (validé) pour générer le document
+ObjectMustBeLockedToGenerate     = %s doit être au statut (verrouillé) pour générer le document
+ObjectMustBeValidatedToSign      = %s doit être au statut (validé) pour que les participants puissent signer
+AllSignatoriesMustHaveSigned     = Tous les participants doivent avoir signé pour verrouiller %s
+ObjectMustBeValidatedToSendEmail = %s doit être au statut (validé) pour envoyer un email
+ObjectMustBeLockedToSendEmail    = %s doit être au statut (verrouillé) pour envoyer un email
+ObjectMustBeLockedToArchive      = %s doit être au statut (verrouillé) afin de pouvoir l'archiver
+
+# Confirm box - Boite de confirmation
+ValidateObject          = Valider %s
+ConfirmValidateObject   = Êtes-vous sûr de vouloir valider %s ? <br> La validation permet aux participants de signer le document mais <b> empêche l'ajout de nouveaux participants </b><i>(sauf si la configuration Gestion de l'ajout des participants sur le status est activé)</i><b> ou la modification de %s. </b>
+ReOpenObject            = Ouvrir à nouveau %s
+ConfirmReOpenObject     = Êtes-vous sûr de vouloir rouvrir %s ? La réouverture permet la modification de %s et l'ajout de nouveaux participants mais <b>toutes les signatures du document seront perdues</b>.
+LockObject              = Verrouiller %s
+ConfirmLockObject       = Êtes-vous sûr de vouloir verrouiller %s ?<br>Ce verrouillage permet de figer les données et la génération du document.
+CloneObject             = Cloner %s
+NewLabelForClone        = Nouveau libellé de %s
+ConfirmCloneObject      = Êtes-vous sûr de vouloir cloner %s <b>%s</b> ?
+DeleteObject            = Supprimer %s
+RemoveFileObject        = Supprimer le document
+ConfirmRemoveFileObject = Êtes-vous sûr de vouloir <b>supprimer</b> le document %s ?<br><b> Cette action est irréversible. Le document sera définitivement supprimé. </b>
+ArchiveObject           = Archiver %s
+ConfirmArchiveObject    = Êtes-vous sûr de vouloir archiver %s ?
+CloneCategories         = Cloner les tags/catégories ?
+ClonePhotos             = Cloner les photos ?
+
+# Confirm mass box - Boite de confirmation mass action
+ConfirmMassLock              = Confirmation de verrouillage en masse
+ConfirmMassLockingQuestion   = Êtes-vous sur de vouloir verrouiller les %d enregistrement(s) sélectionné(s) ?
+ConfirmMassArchive           = Confirmation de archivage en masse
+ConfirmMassArchivingQuestion = Êtes-vous sur de vouloir archiver les %d enregistrement(s) sélectionné(s) ?
+
+# SetEventMessage mass action - Notice mass action
+RecordsArchived = %d enregistrement(s) archivé(s)
+ObjectNotFound  = %s non trouvé(e)
+
+# Data - Donnée
+ActionsOnObject = Événements sur %s
+DisplayMoreInfo = Afficher plus d'informations
+
+# Email - Mail
+ObjectEmailDocumentLabel   = SAT_Document
+ObjectEmailDocumentTopic   = [__[MAIN_INFO_SOCIETE_NOM]__] Récapitulatif __TYPE__ __REF__
+ObjectEmailDocumentContent = Bonjour,<br /><br />Veuillez trouver ci-joint le/les document(s) ODT lié(s) à __THETYPE__.<br /><br />Bien cordialement,<br /><br />Service QHSE<br />__USER_FULLNAME__<br />__USER_EMAIL__<br />__MYCOMPANY_NAME__<br />__MYCOMPANY_FULLADDRESS__<br />__MYCOMPANY_EMAIL__
+
+# Config Trigger Info - Configuration Infos Événements
+ObjectCreated  = Création d'un(e) %s
+ObjectModified = Modifcation d'un(e) %s
+ObjectDeleted  = Suppression d'un(e) %s
+ObjectValidate = Validation d'un(e) %s
+ObjectLock     = Verrouillage d'un(e) %s

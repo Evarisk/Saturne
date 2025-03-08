@@ -114,10 +114,10 @@ class SaturneDashboard
         print '<input type="hidden" name="action" value="view">';
 
         $confName            = dol_strtoupper($moduleNameLowerCase) . '_DASHBOARD_CONFIG';
-        $disableWidgetList   = json_decode($user->conf->$confName);
+        $disableWidgetList   = json_decode($user->conf->$confName ?? '');
         $disableWidgetList   = $disableWidgetList->widgets ?? new stdClass();
         $dashboardWidgetsArray = [];
-        if (is_array($dashboards['widgets']) && !empty($dashboards['widgets'])) {
+        if (isset($dashboards['widgets']) && is_array($dashboards['widgets']) && !empty($dashboards['widgets'])) {
             foreach ($dashboards['widgets'] as $dashboardWidgets) {
                 foreach ($dashboardWidgets as $key => $dashboardWidget) {
                     if (isset($disableWidgetList->$key) && $disableWidgetList->$key == 0) {
@@ -135,7 +135,7 @@ class SaturneDashboard
         }
         print '</div>';
 
-        if (is_array($dashboards['widgets']) && !empty($dashboards['widgets'])) {
+        if (isset($dashboards['widgets']) && is_array($dashboards['widgets']) && !empty($dashboards['widgets'])) {
             $widget = '';
             foreach ($dashboards['widgets'] as $dashboardWidgets) {
                 foreach ($dashboardWidgets as $key => $dashboardWidget) {
@@ -178,7 +178,7 @@ class SaturneDashboard
                                 }
                             }
                             $widget .= '</ul>';
-                            if (is_array($dashboardWidget['moreParams']) && (!empty($dashboardWidget['moreParams']))) {
+                            if (isset($dashboardWidget['moreParams']) && is_array($dashboardWidget['moreParams']) && (!empty($dashboardWidget['moreParams']))) {
                                 $widget .= '<div class="body__content">';
                                 foreach ($dashboardWidget['moreParams'] as $dashboardWidgetMoreParamsKey => $dashboardWidgetMoreParams) {
                                     switch ($dashboardWidgetMoreParamsKey) {
@@ -238,7 +238,29 @@ class SaturneDashboard
         }
 
         print '<div class="add-graph-box" id="add-graph-box" style="margin-top: 10px; ' . (!empty($dashboards['disabledGraphs']) ? '' : 'display:none') . '">';
-        print Form::selectarray('disabledGraph', $dashboards['disabledGraphs'], -1, $langs->trans('ChooseBoxToAddGraph'), 0, 0, 'data-item-type="graph" data-id-refresh="graph-dashboard" data-id-load="add-graph-box"', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint', 0, 'hidden selected', 0, 1);
+        // Ensure the 'disabledGraphs' index exists in $dashboards array to avoid undefined index warnings
+        $disabledGraphs = isset($dashboards['disabledGraphs']) && is_array($dashboards['disabledGraphs']) ? $dashboards['disabledGraphs'] : array();
+
+        // Print the select box for graphs with proper attributes and default values
+        print Form::selectarray(
+            'disabledGraph',                                  // Field name
+            $disabledGraphs,                                  // Options array
+            -1,                                               // Default selected value
+            $langs->trans('ChooseBoxToAddGraph'),             // Translated prompt message
+            0,                                                // Optional parameter (unused, default: 0)
+            0,                                                // Optional parameter (unused, default: 0)
+            'data-item-type="graph" data-id-refresh="graph-dashboard" data-id-load="add-graph-box"', // HTML attributes
+            1,                                                // Optional parameter (default: 1)
+            0,                                                // Optional parameter (default: 0)
+            0,                                                // Optional parameter (default: 0)
+            'DESC',                                           // Sorting order
+            'maxwidth300 widthcentpercentminusx hideonprint',  // CSS classes for styling
+            0,                                                // Optional parameter (default: 0)
+            'hidden selected',                                // Additional attributes or CSS classes
+            0,                                                // Optional parameter (default: 0)
+            1                                                 // Optional parameter (default: 1)
+        );
+
         if (!empty($conf->use_javascript_ajax)) {
             include_once DOL_DOCUMENT_ROOT . '/core/lib/ajax.lib.php';
             print ajax_combobox('disabledGraph');
@@ -247,13 +269,13 @@ class SaturneDashboard
 
         print '<div class="graph-dashboard wpeo-grid grid-2" id="graph-dashboard">';
 
-        if (is_array($dashboards['graphs']) && !empty($dashboards['graphs'])) {
+        if (isset($dashboards['graphs']) && is_array($dashboards['graphs']) && !empty($dashboards['graphs'])) {
             foreach ($dashboards['graphs'] as $dashboardGraphs) {
                 if (is_array($dashboardGraphs) && !empty($dashboardGraphs)) {
                     foreach ($dashboardGraphs as $keyElement => $dashboardGraph) {
                         $nbDataset = 0;
                         $uniqueKey = strip_tags($dashboardGraph['title']) . $keyElement;
-                        if (is_array($dashboardGraph['data']) && !empty($dashboardGraph['data'])) {
+                        if (isset($dashboardGraph['data']) && is_array($dashboardGraph['data']) && !empty($dashboardGraph['data'])) {
                             if ($dashboardGraph['dataset'] >= 2) {
                                 foreach ($dashboardGraph['data'] as $dashboardGraphDatasets) {
                                     unset($dashboardGraphDatasets[0]);
@@ -314,7 +336,9 @@ class SaturneDashboard
                                 $graph->SetHeight($dashboardGraph['height'] ?? $height);
                                 $graph->setShowLegend($dashboardGraph['showlegend'] ?? 2);
                                 $graph->draw($fileName[$uniqueKey], $fileUrl[$uniqueKey]);
-                                print '<div class="' . $dashboardGraph['moreCSS'] . '" id="graph-' . $dashboardGraph['name'] . '">';
+                                // Use null coalescing operator to ensure indices exist and avoid undefined index warnings in PHP 8 and Dolibarr V20.
+                                print '<div class="' . ($dashboardGraph['moreCSS'] ?? '') . '" id="graph-' . ($dashboardGraph['name'] ?? '') . '">';
+
 
                                 $downloadCSV  = '<div class="flex flex-row justify-end">';
                                 $downloadCSV .= '<input type="hidden" name="graph" value="' . dol_escape_htmltag(json_encode($dashboardGraph, JSON_UNESCAPED_UNICODE)) . '">';
@@ -327,7 +351,18 @@ class SaturneDashboard
                                     $downloadCSV .= '</button>';
                                 }
                                 $downloadCSV .= '</div>';
-                                $dashboardGraph['morehtmlright'] .= $downloadCSV;
+                                // Ensure $dashboardGraph is an array to avoid undefined variable warnings
+                                if (!isset($dashboardGraph) || !is_array($dashboardGraph)) {
+                                    $dashboardGraph = [];
+                                }
+
+                                // Initialize 'morehtmlright' key if not already set
+                                if (!isset($dashboardGraph['morehtmlright'])) {
+                                    $dashboardGraph['morehtmlright'] = '';
+                                }
+
+                                // Append $downloadCSV content if defined, otherwise append an empty string
+                                $dashboardGraph['morehtmlright'] .= isset($downloadCSV) ? $downloadCSV : '';
 
                                 print load_fiche_titre($dashboardGraph['title'], $dashboardGraph['morehtmlright'], $dashboardGraph['picto']);
                                 print $graph->show();
@@ -339,7 +374,7 @@ class SaturneDashboard
             }
         }
 
-        if (is_array($dashboards['lists']) && !empty($dashboards['lists'])) {
+        if (isset($dashboards['lists']) && is_array($dashboards['lists']) && !empty($dashboards['lists'])) {
             foreach ($dashboards['lists'] as $dashboardLists) {
                 foreach ($dashboardLists as $dashboardList) {
                     if (is_array($dashboardList['data']) && !empty($dashboardList['data'])) {
@@ -361,8 +396,23 @@ class SaturneDashboard
                         foreach ($dashboardList['data'] as $dashboardListDatasets) {
                             print '<tr class="oddeven">';
                             foreach ($dashboardListDatasets as $key => $dashboardGraphDataset) {
-                                print '<td class="' . ($conf->browser->layout == 'classic' ? 'nowraponall tdoverflowmax200 ' : '') . (($key != 'Ref') ? 'center ' : '') . $dashboardGraphDataset['morecss'] . '"' . $dashboardGraphDataset['moreAttr'] . '>' . $dashboardGraphDataset['value'] . '</td>';
+                                // Retrieve optional attributes with fallback to empty string if not defined
+                                $morecss = $dashboardGraphDataset['morecss'] ?? '';
+                                $moreAttr = $dashboardGraphDataset['moreAttr'] ?? '';
+                                $value   = $dashboardGraphDataset['value'] ?? '';
+                                
+                                // Use layout setting if available; fallback to empty string if not defined
+                                $layout = $conf->browser->layout ?? '';
+                                
+                                // Build the class string conditionally
+                                $class = ($layout === 'classic' ? 'nowraponall tdoverflowmax200 ' : '')
+                                       . (($key != 'Ref') ? 'center ' : '')
+                                       . $morecss;
+                                
+                                // Print the table cell with all attributes
+                                print '<td class="' . $class . '" ' . $moreAttr . '>' . $value . '</td>';
                             }
+                            
                             print '</tr>';
                         }
                         print '</table></div>';

@@ -46,12 +46,12 @@
             <div class="header-objet">
                 <div class="objet-container">
                     <div class="objet-info">
-                        <div class="objet-type"><?php echo $langs->trans(ucfirst($objectType)); ?></div>
+                        <div class="objet-type"><?php echo $langs->trans(ucfirst($objectType ?? '')); ?></div>
                         <div class="objet-label"><?php echo $object->ref . ' ' . $object->label; ?></div>
                     </div>
                     <div class="objet-actions file-generation">
                         <?php $path = DOL_MAIN_URL_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/'; ?>
-                        <input type="hidden" class="specimen-name" data-specimen-name="<?php echo $objectType . '_specimen_' . $trackID . '.odt'; ?>">
+                        <input type="hidden" class="specimen-name" data-specimen-name="<?php echo ($objectType ?? '') . '_specimen_' . ($trackID ?? '') . '.odt'; ?>">
                         <input type="hidden" class="specimen-path" data-specimen-path="<?php echo $path; ?>">
                         <?php if (GETPOSTISSET('document_type') && $fileExists) : ?>
                             <div class="wpeo-button button-square-40 button-rounded button-blue auto-download"><i class="fas fa-download"></i></div>

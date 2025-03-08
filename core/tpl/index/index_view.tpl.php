@@ -65,7 +65,7 @@ $helpUrl = 'FR:Module_' . $moduleName;
 
 saturne_header(0, '', $title . ' ' . $modModule->version, $helpUrl);
 
-print load_fiche_titre($title . ' ' . $modModule->version, $morehtmlright, $moduleNameLowerCase . '_color.png@' . $moduleNameLowerCase);
+print load_fiche_titre($title . ' ' . $modModule->version,$morehtmlright = $morehtmlright ?? '', $moduleNameLowerCase . '_color.png@' . $moduleNameLowerCase);
 
 $moduleJustUpdated   = strtoupper($moduleName) . '_JUST_UPDATED';
 $moduleVersion       = strtoupper($moduleName) . '_VERSION';
@@ -80,7 +80,7 @@ if ($conf->global->$moduleVersion != $modModule->version) {
     dolibarr_set_const($db, $moduleShowPatchNote, 1, 'integer', 0, '', $conf->entity);
 }
 
-if ($conf->global->$moduleJustUpdated == 1) : ?>
+if (isset($conf->global->{$moduleJustUpdated}) && $conf->global->{$moduleJustUpdated} == 1) :    ?>
     <div class="wpeo-notice notice-success">
         <div class="notice-content">
             <div class="notice-subtitle"><strong><?php echo $langs->trans('ModuleUpdate', $moduleName); ?></strong>

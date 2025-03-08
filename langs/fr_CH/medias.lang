@@ -1,0 +1,57 @@
+# Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#
+# Media Gallery - Bibliothèque de médias
+#
+
+# Data - Donnée
+MediasMin                 = médias
+MediaGallery              = Bibliothèque de médias
+ErrorThisFileSizeTooLarge = Le fichier %s est trop volumineux
+ErrorThisFileExists       = Le fichier %s existe déjà
+EmptyMediaGallery         = La bibliothèque de médias est vide
+SearchFile                = Rechercher un fichier
+PhotoWellSent             = La photo a été ajoutée à la bibliothèque de médias
+PhotoNotSent              = La photo ne s'est pas correctement envoyée
+MediaData                 = Configuration des médias
+ConfirmUnlinkMedia        = Êtes vous sur de vouloir détacher le media sélectionné ?
+AddPhotoFromComputer      = Ajouter une photo depuis la galerie de l'appareil
+AddPhotoFromMediaGallery  = Ajouter une photo depuis la galerie des médias
+
+# Config page - Page d'administration
+MediaMaxWidthMini                    = Largeur du média mini
+MediaMaxWidthMiniDescription         = Largeur du média (dimension mini) avec pour ratio 16:9
+MediaMaxHeightMini                   = Hauteur du média mini
+MediaMaxHeightMiniDescription        = Hauteur du média (dimension mini) avec pour ratio 16:9
+MediaMaxWidthSmall                   = Largeur du média small
+MediaMaxWidthSmallDescription        = Largeur du média (dimension small) avec pour ratio 16:9
+MediaMaxHeightSmall                  = Hauteur du média small
+MediaMaxHeightSmallDescription       = Hauteur du média (dimension small) avec pour ratio 16:9
+MediaMaxWidthMedium                  = Largeur du média medium
+MediaMaxWidthMediumDescription       = Largeur du média (dimension medium) avec pour ratio 16:9
+MediaMaxHeightMedium                 = Hauteur du média medium
+MediaMaxHeightMediumDescription      = Hauteur du média (dimension medium) avec pour ratio 16:9
+MediaMaxWidthLarge                   = Largeur du média large
+MediaMaxWidthLargeDescription        = Largeur du média (dimension large) avec pour ratio 16:9
+MediaMaxHeightLarge                  = Hauteur du média large
+MediaMaxHeightLargeDescription       = Hauteur du média (dimension large) avec pour ratio 16:9
+DisplayNumberMediaGallery            = Nombre de médias affichés dans la bibliothèque de médias
+DisplayNumberMediaGalleryDescription = Affiche 8 médias (par défaut) par page dans la bibliothèque de médias
+MediaSizeDocument                    = Taille des médias
+MediaSizeDocumentDescription         = Sélection de la taille des médias dans les documents
+ShowOnlyMediasAddedToday             = N'afficher que les médias ajoutés aujourd'hui
+ShowOnlyUnlinkedMedias               = N'afficher que les médias liés à aucun objet
+UnlinkedMedias                       = Médias non liés

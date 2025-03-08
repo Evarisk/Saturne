@@ -75,7 +75,7 @@ class modSaturne extends DolibarrModules
 		$this->editor_url  = 'https://evarisk.com/';
 
         // Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
-		$this->version = '1.8.0';
+		$this->version = '1.7.0';
 
         // Url to the file with your last numberversion of this module
         //$this->url_last_version = 'http://www.example.com/versionmodule.txt';
@@ -185,7 +185,6 @@ class modSaturne extends DolibarrModules
             $i++ => ['SATURNE_USE_ALL_EMAIL_MODE', 'integer', 1, '', 0, 'current'],
             $i++ => ['SATURNE_USE_CREATE_DOCUMENT_ON_ARCHIVE', 'integer', 1, '', 0, 'current'],
             $i++ => ['SATURNE_ATTENDANTS_ADD_STATUS_MANAGEMENT', 'integer', 0, '', 0, 'current'],
-            $i++ => ['SATURNE_MEDIA_GALLERY_SHOW_ALL_MEDIA_INFOS', 'integer', 0, '', 0, 'current'],
             $i++ => ['SATURNE_MEDIA_MAX_WIDTH_MINI', 'integer', 128, '', 0, 'current'],
             $i++ => ['SATURNE_MEDIA_MAX_HEIGHT_MINI', 'integer', 72, '', 0, 'current'],
             $i++ => ['SATURNE_MEDIA_MAX_WIDTH_SMALL', 'integer', 480, '', 0, 'current'],
@@ -249,8 +248,8 @@ class modSaturne extends DolibarrModules
 				'url'      => '/'. $moduleNameLowerCase .'/admin/setup.php',
 				'langs'    => $moduleNameLowerCase . '@' . $moduleNameLowerCase,
 				'position' => 2000 + $r,
-				'enabled'  => '$conf->'. $moduleNameLowerCase .'->enabled',
-				'perms'    => '$user->rights->'. $moduleNameLowerCase .'->adminpage->read',
+				'enabled'  => 'isModEnabled(\''. $moduleNameLowerCase .'\')',
+				'perms'    => 'isset($user->rights->'. $moduleNameLowerCase .'->adminpage->read)' && '$user->rights->'. $moduleNameLowerCase .'->adminpage->read',
 				'target'   => '',
 				'user'     => 0,
 			];
@@ -265,8 +264,8 @@ class modSaturne extends DolibarrModules
                 'url'      => '/saturne/admin/setup.php',
                 'langs'    => 'saturne@saturne',
                 'position' => 2000 + $r,
-                'enabled'  => '$conf->saturne->enabled',
-                'perms'    => '$user->rights->saturne->adminpage->read',
+                'enabled'  => 'isModEnabled(\'saturne\')',
+                'perms'    => 'isset($user->rights->saturne->adminpage->read)' && '$user->rights->saturne->adminpage->read',
                 'target'   => '',
                 'user'     => 0,
             ];
@@ -281,8 +280,8 @@ class modSaturne extends DolibarrModules
 				'url'      => '',
 				'langs'    => $moduleNameLowerCase . '@' . $moduleNameLowerCase,
 				'position' => 2000 + $r,
-				'enabled'  => '$conf->'. $moduleNameLowerCase .'->enabled',
-				'perms'    => '$user->rights->'. $moduleNameLowerCase .'->lire',
+				'enabled'  => 'isModEnabled(\''. $moduleNameLowerCase .'\')',
+				'perms'    => 'isset($user->rights->'. $moduleNameLowerCase .'->lire)' && '$user->rights->'. $moduleNameLowerCase .'->lire', 
 				'target'   => '',
 				'user'     => 0,
 			];
@@ -381,12 +380,77 @@ class modSaturne extends DolibarrModules
             'electronic_signature' => ['Label' => 'ElectronicSignature', 'type' => 'text', 'elementtype' => ['user'], 'position' => 100, 'list' => 1, 'entity' => 0, 'langfile' => 'saturne@saturne', 'enabled' => "isModEnabled('saturne')"]
         ];
 
-        foreach ($extraFieldsArrays as $key => $extraField) {
-            foreach ($extraField['elementtype'] as $extraFieldElementType) {
-                $extraFields->update($key, $extraField['Label'], $extraField['type'], $extraField['length'], $extraFieldElementType, 0, 0, $this->numero . $extraField['position'], $extraField['params'], '', '', $extraField['list'], ($extraField['help'][$extraFieldElementType] ?? $extraField['help']), '', '', $extraField['entity'], $extraField['langfile'], $extraField['enabled'] . ' && isModEnabled("' . $extraFieldElementType . '")', 0, 0, $extraField['css']);
-                $extraFields->addExtraField($key, $extraField['Label'], $extraField['type'], $this->numero . $extraField['position'], $extraField['length'], $extraFieldElementType, 0, 0, '', $extraField['params'], $extraField['alwayseditable'], '', $extraField['list'], $extraField['help'], '', $extraField['entity'], $extraField['langfile'], $extraField['enabled'] . ' && isModEnabled("' . $extraFieldElementType . '")', 0, 0, $extraField['css']);
-            }
+foreach ($extraFieldsArrays as $key => $extraField) {
+    // Ensure 'elementtype' is defined and is an array to avoid warnings
+    if (!empty($extraField['elementtype']) && is_array($extraField['elementtype'])) {
+        foreach ($extraField['elementtype'] as $extraFieldElementType) {
+            // Use null coalescing to set default values if indexes are missing
+            $label         = $extraField['Label']         ?? '';
+            $type          = $extraField['type']          ?? '';
+            $length        = $extraField['length']        ?? 0;
+            $position      = $this->numero . ($extraField['position'] ?? '');
+            $params        = $extraField['params']        ?? '';
+            $list          = $extraField['list']          ?? '';
+            $help          = $extraField['help'][$extraFieldElementType] ?? ($extraField['help'] ?? '');
+            $entity        = $extraField['entity']        ?? '';
+            $langfile      = $extraField['langfile']      ?? '';
+            $enabled       = ($extraField['enabled']       ?? '') . ' && isModEnabled("' . $extraFieldElementType . '")';
+            $css           = $extraField['css']           ?? '';
+            $alwayseditable= $extraField['alwayseditable']?? 0;
+
+            // Update the extra field using provided values
+            $extraFields->update(
+                $key,
+                $label,
+                $type,
+                $length,
+                $extraFieldElementType,
+                0,
+                0,
+                $position,
+                $params,
+                '',
+                '',
+                $list,
+                $help,
+                '',
+                '',
+                $entity,
+                $langfile,
+                $enabled,
+                0,
+                0,
+                $css
+            );
+
+            // Add the extra field using provided values
+            $extraFields->addExtraField(
+                $key,
+                $label,
+                $type,
+                $position,
+                $length,
+                $extraFieldElementType,
+                0,
+                0,
+                '',
+                $params,
+                $alwayseditable,
+                '',
+                $list,
+                $extraField['help'] ?? '',
+                '',
+                $entity,
+                $langfile,
+                $enabled,
+                0,
+                0,
+                $css
+            );
         }
+    }
+}
+
 
         return $this->_init($sql, $options);
     }

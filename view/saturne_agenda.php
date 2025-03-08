@@ -107,9 +107,12 @@ if ($id > 0 || !empty($ref)) {
     $upload_dir = $conf->$moduleNameLowerCase->multidir_output[!empty($object->entity) ? $object->entity : $conf->entity] . '/' . $object->id;
 }
 
-// Security check - Protection if external user
-$permissiontoread = $user->rights->$moduleNameLowerCase->$objectType->read;
-$permissiontoadd  = $user->rights->$moduleNameLowerCase->$objectType->write;
+// Set default read permission
+$permissiontoread = $user->rights?->{$moduleNameLowerCase}?->{$objectType}?->read ?? 0;
+
+// Use the PHP 8 nullsafe operator to safely access nested properties without warnings
+$permissiontoadd = $user->rights->{$moduleNameLowerCase}?->{$objectType}?->write ?? 0;
+
 saturne_check_access($permissiontoread, $object);
 
 /*
@@ -202,4 +205,5 @@ if ($id > 0 || !empty($ref)) {
 
 // End of page
 llxFooter();
+    /** @var object|null $db */
 $db->close();
