@@ -23,8 +23,10 @@
 
 /**
  * The following vars must be defined :
- * Global   : $db, $hookmanager, $langs
- * Variable : $arrayfields, $form, $object, $search
+ * Globals    : $conf (extrafields_list_search_input.tpl), $db, $hookmanager, $langs
+ * Parameters : $action, $sortfield, $sortorder
+ * Objects    : $form, $extrafields (extrafields_list_search_input.tpl), $object,
+ * Variable   : $arrayfields, $search, $search_array_options (extrafields_list_search_input.tpl)
  */
 
 // Fields title search
@@ -40,15 +42,7 @@ if (getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
 }
 
 foreach ($object->fields as $key => $val) {
-    $cssForField = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
-    if ($key == 'status') {
-        $cssForField .= ' center';
-    } elseif (isset($val['type']) && in_array($val['type'], ['date', 'datetime', 'timestamp'])) {
-        $cssForField .= ' center';
-    } elseif (isset($val['type']) && in_array($val['type'], ['double(24,8)', 'double(6,3)', 'integer', 'real', 'price']) && !in_array($key, ['id', 'rowid', 'ref', 'status']) && $val['label'] != 'TechnicalID' && empty($val['arrayofkeyval'])) {
-        $cssForField .= ' right';
-    }
-
+    $cssForField = saturne_css_for_field($val, $key);
     if (!empty($arrayfields['t.' . $key]['checked'])) {
         print '<td class="liste_titre' . ($cssForField ? ' ' . $cssForField : '') . ($key == 'status' ? ' parentonrightofpage' : '') . '">';
 
@@ -59,27 +53,29 @@ foreach ($object->fields as $key => $val) {
             continue;
         }
 
-        if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) {
-            if (empty($val['searchmulti'])) {
-                print $form->selectarray('search_' . $key, $val['arrayofkeyval'], $search[$key] ?? '', 1, 0, 0, '', 1, 0, 0, '', 'maxwidth100' . ($key == 'status' ? ' search_status width100 onrightofpage' : ''));
+        if (empty($val['disablesearch'])) {
+            if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) {
+                if (empty($val['searchmulti'])) {
+                    print $form->selectarray('search_' . $key, $val['arrayofkeyval'], $search[$key] ?? '', 1, 0, 0, '', 1, 0, 0, '', 'maxwidth150' . ($key == 'status' ? ' search_status onrightofpage' : ''));
+                } else {
+                    print $form->multiselectarray('search_' . $key, $val['arrayofkeyval'], $search[$key] ?? '', 0, 0, 'maxwidth150'. ($key == 'status' ? ' search_status onrightofpage' : ''), 1);
+                }
+            } elseif ((strpos($val['type'], 'integer:') === 0) || (strpos($val['type'], 'sellist:') === 0)) {
+                print $object->showInputField($val, $key, $search[$key] ?? '', '', '', 'search_', $cssForField . ' maxwidth250', 1);
+            } elseif (in_array($val['type'], ['date', 'datetime', 'timestamp'])) {
+                print '<div class="nowrap">';
+                print $form->selectDate($search[$key . '_dtstart'] ?? '', 'search_' . $key . '_dtstart', 0, 0, 1, '', 1, 0, 0, '', '', '', '', 1, '', $langs->trans('From'));
+                print '</div>';
+                print '<div class="nowrap">';
+                print $form->selectDate($search[$key . '_dtend'] ?? '', 'search_' . $key . '_dtend', 0, 0, 1, '', 1, 0, 0, '', '', '', '', 1, '', $langs->trans('to'));
+                print '</div>';
+            } elseif ($key == 'lang') {
+                require_once DOL_DOCUMENT_ROOT . '/core/class/html.formadmin.class.php';
+                $formAdmin = new FormAdmin($db);
+                print $formAdmin->select_language(($search[$key] ?? ''), 'search_lang', 0, [], 1, 0, 0, 'minwidth100imp maxwidth125', 2);
             } else {
-                print $form->multiselectarray('search_' . $key, $val['arrayofkeyval'], $search[$key] ?? '', 0, 0, 'maxwidth100'. ($key == 'status' ? ' search_status width100 onrightofpage' : ''), 1);
+                print '<input type="text" class="flat maxwidth' . (in_array($val['type'], ['integer', 'price']) ? '50' : '75') . '" name="search_' . $key . '" value="' . dol_escape_htmltag($search[$key] ?? '') . '">';
             }
-        } elseif ((strpos($val['type'], 'integer:') === 0) || (strpos($val['type'], 'sellist:') === 0)) {
-            print $object->showInputField($val, $key, $search[$key] ?? '', '', '', 'search_', $cssForField . ' maxwidth250', 1);
-        } elseif (preg_match('/^(date|timestamp|datetime)/', $val['type'])) {
-            print '<div class="nowrap">';
-            print $form->selectDate($search[$key . '_dtstart'] ?? '', 'search_' . $key . '_dtstart', 0, 0, 1, '', 1, 0, 0, '', '', '', '', 1, '', $langs->trans('From'));
-            print '</div>';
-            print '<div class="nowrap">';
-            print $form->selectDate($search[$key . '_dtend'] ?? '', 'search_' . $key . '_dtend', 0, 0, 1, '', 1, 0, 0, '', '', '', '', 1, '', $langs->trans('to'));
-            print '</div>';
-        } elseif ($key == 'lang') {
-            require_once DOL_DOCUMENT_ROOT . '/core/class/html.formadmin.class.php';
-            $formAdmin = new FormAdmin($db);
-            print $formAdmin->select_language(($search[$key] ?? ''), 'search_lang', 0, [], 1, 0, 0, 'minwidth100imp maxwidth125', 2);
-        } else {
-            print '<input type="text" class="flat maxwidth' . (in_array($val['type'], ['integer', 'price']) ? '50' : '75') . '" name="search_' . $key . '" value="' . dol_escape_htmltag($search[$key] ?? '') . '">';
         }
 
         print '</td>';

@@ -757,7 +757,7 @@ function saturne_css_for_field(array $val, string $key): string
     } elseif (in_array($key, ['fk_soc', 'fk_user'])) {
         $cssForField = 'tdoverflowmax100';
     }
-    $cssForField .= (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
+    $cssForField .= (empty($val['csslist']) ? (empty($val['css']) ? '' : ' ' . $val['css']) : ' ' . $val['csslist']);
 
     return $cssForField;
 }

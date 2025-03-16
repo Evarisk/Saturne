@@ -25,7 +25,7 @@
  * The following vars must be defined :
  * Globals    : $conf (extrafields_list_print_fields.tpl), $db, $hookmanager
  * Parameters : $action, $limit, $massaction, $massactionbutton, $mode
- * Objects    : $object, $extrafields (extrafields_list_print_fields.tpl)
+ * Objects    : $extrafields (extrafields_list_print_fields.tpl), $object
  * Variables  : $arrayfields, $arrayOfSelected, $limit, $num, $resql, $totalarray
  */
 
