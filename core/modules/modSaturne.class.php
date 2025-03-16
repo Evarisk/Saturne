@@ -124,7 +124,8 @@ class modSaturne extends DolibarrModules
 				'usercard',
                 'category',
                 'categoryindex',
-                'index'
+                'index',
+                'elementproperties'
             ],
             // Set this to 1 if features of module are opened to external users
             'moduleforexternal' => 0,
