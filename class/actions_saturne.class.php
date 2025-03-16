@@ -327,4 +327,29 @@ class ActionsSaturne
 
         return 0; // or return 1 to replace standard code
     }
+
+    /**
+     * Overloading the getElementProperties function : replacing the parent's function with the one below
+     *
+     * @param  array $parameters Hook metadata (context, etc...)
+     * @return int               0 < on error, 0 on success, 1 to replace standard code
+     */
+    public function getElementProperties(array $parameters): int
+    {
+        if (isModEnabled('stock') && $parameters['elementType'] == 'stockmouvement') {
+            $parameters['elementProperties'] = [
+                'module'        => 'stock',
+                'element'       => 'stock',
+                'table_element' => 'stock_mouvement',
+                'subelement'    => 'mouvement',
+                'classpath'     => 'product/stock/class',
+                'classfile'     => 'mouvementstock',
+                'classname'     => 'MouvementStock'
+            ];
+
+            $this->results = $parameters['elementProperties'];
+        }
+
+        return 0; // or return 1 to replace standard code
+    }
 }
