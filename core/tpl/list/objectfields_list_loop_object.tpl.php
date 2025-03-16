@@ -23,10 +23,10 @@
 
 /**
  * The following vars must be defined :
- * Globals     : conf (extrafields_list_print_fields.tpl), $db, $hookmanager
- * Parameters : $limit, $massaction, $massactionbutton, $mode
- * Objects    : $object, extrafields (extrafields_list_print_fields.tpl)
- * Variables  : $arrayOfSelected, $limit, $num, $resql, $totalarray
+ * Globals    : $conf (extrafields_list_print_fields.tpl), $db, $hookmanager
+ * Parameters : $action, $limit, $massaction, $massactionbutton, $mode
+ * Objects    : $object, $extrafields (extrafields_list_print_fields.tpl)
+ * Variables  : $arrayfields, $arrayOfSelected, $limit, $num, $resql, $totalarray
  */
 
 // Loop on record

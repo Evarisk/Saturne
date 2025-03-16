@@ -23,8 +23,10 @@
 
 /**
  * The following vars must be defined :
- * Global   : $hookmanager, $langs
- * Variable : $arrayfields, $param, $selectedfields, $sortfield, $sortorder
+ * Globals    : $conf (extrafields_list_search_title.tpl), $hookmanager, $langs
+ * Parameters : $action, $sortfield, $sortorder
+ * Objects    : $object, $extrafields
+ * Variables  : $arrayfields, $param, $selectedFields
  */
 
 $totalarray            = [];
@@ -36,22 +38,15 @@ print '<tr class="liste_titre">';
 
 // Action column
 if (getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
-    print getTitleFieldOfList($selectedfields, 0, $_SERVER['PHP_SELF'], '', '', '', '', $sortfield, $sortorder, 'center maxwidthsearch');
+    print getTitleFieldOfList($selectedFields, 0, $_SERVER['PHP_SELF'], '', '', '', '', $sortfield, $sortorder, 'center maxwidthsearch');
     $totalarray['nbfield']++;
 }
 
 foreach ($object->fields as $key => $val) {
-    $cssForField = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
-    if ($key == 'status') {
-        $cssForField .= ' center';
-    } elseif (isset($val['type']) && in_array($val['type'], ['date', 'datetime', 'timestamp'])) {
-        $cssForField .= ' center';
-    } elseif (isset($val['type']) && in_array($val['type'], ['double(24,8)', 'double(6,3)', 'integer', 'real', 'price']) && !in_array($key, ['id', 'rowid', 'ref', 'status']) && $val['label'] != 'TechnicalID' && empty($val['arrayofkeyval'])) {
-        $cssForField .= ' right';
-    }
-
+    $cssForField  = 'maxwidthsearch ';
+    $cssForField .= saturne_css_for_field($val, $key);
     if (!empty($arrayfields['t.' . $key]['checked'])) {
-        print getTitleFieldOfList($arrayfields['t.' . $key]['label'], 0, $_SERVER['PHP_SELF'], 't.' . $key, '', $param, ($cssForField ? 'class="' . $cssForField . '"' : ''), $sortfield, $sortorder, ($cssForField ? $cssForField .' ' : ''), (empty($val['disablesort']) ? '' : $val['disablesort']), (empty($val['helplist']) ? '' : $val['helplist']));
+        print getTitleFieldOfList($arrayfields['t.' . $key]['label'], 0, $_SERVER['PHP_SELF'], 't.' . $key, '', $param, ($cssForField ? 'class="' . $cssForField . '"' : ''), $sortfield, $sortorder, ($cssForField ? $cssForField . ' ' : ''), (empty($val['disablesort']) ? '' : $val['disablesort']), (empty($val['helplist']) ? '' : $val['helplist']));
         $totalarray['nbfield']++;
     }
 }
@@ -66,7 +61,7 @@ print $hookmanager->resPrint;
 
 // Action column
 if (!getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
-    print getTitleFieldOfList($selectedfields, 0, $_SERVER['PHP_SELF'], '', '', '', '', $sortfield, $sortorder, 'center maxwidthsearch');
+    print getTitleFieldOfList($selectedFields, 0, $_SERVER['PHP_SELF'], '', '', '', '', $sortfield, $sortorder, 'center maxwidthsearch');
     $totalarray['nbfield']++;
 }
 
