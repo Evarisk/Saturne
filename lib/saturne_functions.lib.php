@@ -733,3 +733,31 @@ function saturne_load_pagination_parameters(): array
 
     return $paginationParameters;
 }
+
+/**
+ * CSS for field in list
+ *
+ * @param  array   $val         Array of field
+ * @param  string  $key         Key of field
+ * @return string  $cssForField CSS for field
+ */
+function saturne_css_for_field(array $val, string $key): string
+{
+    $cssForField = '';
+    if ($key == 'status') {
+        $cssForField = 'center';
+    } elseif (isset($val['type']) && in_array($val['type'], ['date', 'datetime', 'timestamp'])) {
+        $cssForField = 'center';
+    } elseif (isset($val['type']) && in_array($val['type'], ['double(24,8)', 'double(6,3)', 'integer', 'real', 'price']) && !in_array($key, ['id', 'rowid', 'ref', 'status']) && $val['label'] != 'TechnicalID' && empty($val['arrayofkeyval'])) {
+        $cssForField = 'right';
+    } elseif (isset($val['type']) && $val['type'] == 'timestamp') {
+        $cssForField = 'nowraponall';
+    } elseif ($key == 'ref') {
+        $cssForField = 'nowraponall';
+    } elseif (in_array($key, ['fk_soc', 'fk_user'])) {
+        $cssForField = 'tdoverflowmax100';
+    }
+    $cssForField .= (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
+
+    return $cssForField;
+}

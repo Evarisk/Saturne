@@ -23,10 +23,10 @@
 
 /**
  * The following vars must be defined :
- * Global     : $db, $hookmanager, $langs
- * Parameters : $limit, $massaction, massactionbutton, $mode, $sortfield, $sortorder
- * Objects    : $object
- * Variable   : $arrayofselected, $num, $resql, $totalarray
+ * Globals     : conf (extrafields_list_print_fields.tpl), $db, $hookmanager
+ * Parameters : $limit, $massaction, $massactionbutton, $mode
+ * Objects    : $object, extrafields (extrafields_list_print_fields.tpl)
+ * Variables  : $arrayOfSelected, $limit, $num, $resql, $totalarray
  */
 
 // Loop on record
@@ -59,6 +59,9 @@ while ($i < $iMaxInLoop) {
         $object->thirdparty = $companyobj;
     }*/
 
+    $parameters = [];
+    $hookmanager->executeHooks('saturneSetVarsFromFetchObj', $parameters, $object);
+
     if ($mode == 'kanban') {
         if ($i == 0) {
             print '<tr class="trkanban"><td colspan="' . $savNbField . '">';
@@ -68,7 +71,7 @@ while ($i < $iMaxInLoop) {
         $selected = -1;
         if ($massactionbutton || $massaction) { // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
             $selected = 0;
-            if (in_array($object->id, $arrayofselected)) {
+            if (in_array($object->id, $arrayOfSelected)) {
                 $selected = 1;
             }
         }
@@ -86,7 +89,7 @@ while ($i < $iMaxInLoop) {
             print '<td class="nowrap center">';
             if ($massactionbutton || $massaction) { // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
                 $selected = 0;
-                if (in_array($object->id, $arrayofselected)) {
+                if (in_array($object->id, $arrayOfSelected)) {
                     $selected = 1;
                 }
                 print '<input id="cb' . $object->id . '" class="flat checkforselect" type="checkbox" name="toselect[]" value="' . $object->id . '"' . ($selected ? ' checked="checked"' : '') . '>';
@@ -99,22 +102,10 @@ while ($i < $iMaxInLoop) {
 
         // Fields
         foreach ($object->fields as $key => $val) {
-            $cssForField = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
-            if ($key == 'status') {
-                $cssForField .= ' center';
-            } elseif (isset($val['type']) && in_array($val['type'], ['date', 'datetime', 'timestamp'])) {
-                $cssForField .= ' center';
-            } elseif (isset($val['type']) && in_array($val['type'], ['double(24,8)', 'double(6,3)', 'integer', 'real', 'price']) && !in_array($key, ['id', 'rowid', 'ref', 'status']) && $val['label'] != 'TechnicalID' && empty($val['arrayofkeyval'])) {
-                $cssForField .= ' right';
-            } elseif ($key == 'ref') {
-                $cssForField .= ' nowraponall';
-            } elseif (in_array($key, ['fk_soc', 'fk_user'])) {
-                $cssForField .= ' tdoverflowmax100';
-            }
-
-            if (!empty($arrayfields['t.'.$key]['checked'])) {
+            $cssForField = saturne_css_for_field($val, $key);
+            if (!empty($arrayfields['t.' . $key]['checked'])) {
                 print '<td' . ($cssForField ? ' class="' . $cssForField . ((preg_match('/tdoverflow/', $cssForField) && !in_array($val['type'], ['ip', 'url']) && !is_numeric($object->$key)) ? ' classfortooltip' : '') . '"' : '');
-                if (preg_match('/tdoverflow/', $cssForField) && !in_array($val['type'], ['ip', 'url']) && !is_numeric($object->$key) && $key != 'ref' && !in_array($key,['ref'])) {
+                if (preg_match('/tdoverflow/', $cssForField) && !in_array($val['type'], ['ip', 'url']) && !is_numeric($object->$key) && $key != 'ref') {
                     print ' title="' . dol_escape_htmltag($object->$key) . '"';
                 }
                 print '>';
@@ -127,7 +118,7 @@ while ($i < $iMaxInLoop) {
                 }
 
                 if ($key == 'status') {
-                    print $object->getLibStatut(3);
+                    print $object->getLibStatut(5); // @todo 3 ou 5 faire un paramètre
                 } elseif ($key == 'rowid') {
                     print $object->showOutputField($val, $key, $object->id);
                 } else {
@@ -166,7 +157,7 @@ while ($i < $iMaxInLoop) {
             print '<td class="nowrap center">';
             if ($massactionbutton || $massaction) { // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
                 $selected = 0;
-                if (in_array($object->id, $arrayofselected)) {
+                if (in_array($object->id, $arrayOfSelected)) {
                     $selected = 1;
                 }
                 print '<input id="cb' . $object->id . '" class="flat checkforselect" type="checkbox" name="toselect[]" value="' . $object->id . '"' . ($selected ? ' checked="checked"' : '') . '>';
@@ -176,9 +167,7 @@ while ($i < $iMaxInLoop) {
                 $totalarray['nbfield']++;
             }
         }
-
         print '</tr>';
     }
-
     $i++;
 }
