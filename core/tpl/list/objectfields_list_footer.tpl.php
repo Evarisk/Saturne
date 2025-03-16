@@ -23,8 +23,10 @@
 
 /**
  * The following vars must be defined :
- * Global   : $db, $hookmanager, $langs
- * Variable : $arrayfields, $num, $resql, $sql
+ * Globals    : $db, $hookmanager, $langs
+ * Objects    : $object, $form (list_print_total.tpl)
+ * Parameters : $action
+ * Variables  : $arrayfields, limit (list_print_total.tpl), $num, $offset (list_print_total.tpl), $resql, $sql, $totalarray (list_print_total.tpl)
  */
 
 // Show total line
@@ -46,3 +48,7 @@ $db->free($resql);
 $parameters = ['arrayfields' => $arrayfields, 'sql' => $sql];
 $hookmanager->executeHooks('printFieldListFooter', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
 print $hookmanager->resPrint;
+
+print '</table>';
+print '</div>';
+print '</form>';
