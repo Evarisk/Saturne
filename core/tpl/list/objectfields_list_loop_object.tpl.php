@@ -24,9 +24,9 @@
 /**
  * The following vars must be defined :
  * Globals    : $conf (extrafields_list_print_fields.tpl), $db, $hookmanager
- * Parameters : $action, $limit, $massaction, $massactionbutton, $mode
+ * Parameters : $action, $limit, $massaction, $massActionButton, $mode
  * Objects    : $extrafields (extrafields_list_print_fields.tpl), $object
- * Variables  : $arrayfields, $arrayOfSelected, $limit, $num, $resql, $totalarray
+ * Variables  : $arrayfields, $arrayofselected, $num, $resql, $totalarray
  */
 
 // Loop on record
@@ -69,9 +69,9 @@ while ($i < $iMaxInLoop) {
         }
         // Output Kanban
         $selected = -1;
-        if ($massactionbutton || $massaction) { // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
+        if ($massActionButton || $massaction) { // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
             $selected = 0;
-            if (in_array($object->id, $arrayOfSelected)) {
+            if (in_array($object->id, $arrayofselected)) {
                 $selected = 1;
             }
         }
@@ -87,9 +87,9 @@ while ($i < $iMaxInLoop) {
         // Action column
         if (getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
             print '<td class="nowrap center">';
-            if ($massactionbutton || $massaction) { // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
+            if ($massActionButton || $massaction) { // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
                 $selected = 0;
-                if (in_array($object->id, $arrayOfSelected)) {
+                if (in_array($object->id, $arrayofselected)) {
                     $selected = 1;
                 }
                 print '<input id="cb' . $object->id . '" class="flat checkforselect" type="checkbox" name="toselect[]" value="' . $object->id . '"' . ($selected ? ' checked="checked"' : '') . '>';
@@ -155,9 +155,9 @@ while ($i < $iMaxInLoop) {
         // Action column
         if (!getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
             print '<td class="nowrap center">';
-            if ($massactionbutton || $massaction) { // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
+            if ($massActionButton || $massaction) { // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
                 $selected = 0;
-                if (in_array($object->id, $arrayOfSelected)) {
+                if (in_array($object->id, $arrayofselected)) {
                     $selected = 1;
                 }
                 print '<input id="cb' . $object->id . '" class="flat checkforselect" type="checkbox" name="toselect[]" value="' . $object->id . '"' . ($selected ? ' checked="checked"' : '') . '>';
