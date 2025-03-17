@@ -162,10 +162,14 @@ if (!empty($moreForFilter)) {
     print '</div>';
 }
 
-$varPage           = empty($contextpage) ? $_SERVER['PHP_SELF'] : $contextpage;
-$htmlOfSelectArray = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varPage, getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')); // This also change content of $arrayfields with user setup
-$selectedFields    = ($mode != 'kanban' ? $htmlOfSelectArray : '');
-$selectedFields   .= (count($arrayOfMassActions) ? $form->showCheckAddButtons('checkforselect', 1) : '');
+$selectedFields = '';
+if ($mode != 'pwa' && $mode != 'kanban') {
+    $varPage        = $contextpage ?: $_SERVER['PHP_SELF'];
+    $selectedFields = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varPage, getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN'));
+}
+if (!empty($arrayOfMassActions)) {
+    $selectedFields .= $form->showCheckAddButtons('checkforselect', 1);
+}
 
 print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you don't need reserved height for your table
 print '<table class="tagtable nobottomiftotal noborder liste' . ($moreForFilter ? ' listwithfilterbefore' : '') . '">';
