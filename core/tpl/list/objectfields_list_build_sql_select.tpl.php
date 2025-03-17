@@ -118,7 +118,7 @@ if ($searchAll) {
 require_once DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_list_search_sql.tpl.php';
 
 // Add where from hooks
-$parameters = [];
+$parameters = ['search' => $search];
 $hookmanager->executeHooks('printFieldListWhere', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
 $sql .= $hookmanager->resPrint;
 
