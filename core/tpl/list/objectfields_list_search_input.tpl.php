@@ -25,7 +25,7 @@
  * The following vars must be defined :
  * Globals    : $conf (extrafields_list_search_input.tpl), $db, $hookmanager, $langs
  * Parameters : $action, $sortfield, $sortorder
- * Objects    : $form, $extrafields (extrafields_list_search_input.tpl), $object,
+ * Objects    : $extrafields (extrafields_list_search_input.tpl), $form, $object,
  * Variable   : $arrayfields, $search, $search_array_options (extrafields_list_search_input.tpl)
  */
 

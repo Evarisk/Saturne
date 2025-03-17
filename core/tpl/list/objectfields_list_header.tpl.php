@@ -25,8 +25,8 @@
  * The following vars must be defined :
  * Globals    : $conf, $db, $hookmanager, $langs, $user
  * Parameters : $action, $limit, $contextpage, $massaction, $mode, $optioncss, $page, $searchAll, $sortfield, $sortorder, $toselect
- * Objects    : $categorie, $form, $extrafields (extrafields_list_search_param.tpl), $object
- * Variables  : $arrayfields, $fieldsToSearchAll, $formMoreParams (optional), $nbtotalofrecords, $num, $permissiontoadd, $resql, $search, $search_array_options (extrafields_list_search_param.tpl), $searchCategories, $sql, $title
+ * Objects    : $categorie, $extrafields (extrafields_list_search_param.tpl), $form, $object
+ * Variables  : $arrayfields, $fieldsToSearchAll, $formMoreParams (optional), $nbTotalOfRecords, $num, $permissiontoadd, $resql, $search, $search_array_options (extrafields_list_search_param.tpl), $searchCategories, $sql, $title
  */
 
 // Output page
@@ -120,7 +120,7 @@ $newCardButton .= dolGetButtonTitle($langs->trans('ViewKanban'), '', 'fa fa-th-l
 $newCardButton .= dolGetButtonTitleSeparator();
 $newCardButton .= dolGetButtonTitle($langs->trans('New' . ucfirst($object->element)), '', 'fa fa-plus-circle', dol_buildpath('custom/' . $object->module . '/view/' . $object->element . '/' . $object->element . '_card.php', 1) . '?action=create' . ($moreUrlParameters ?? ''), '', $permissiontoadd);
 
-print_barre_liste($title, $page, $_SERVER['PHP_SELF'], $param, $sortfield, $sortorder, $massActionButton, $num, $nbtotalofrecords, $object->picto, 0, $newCardButton, '', $limit, 0, 0, 1);
+print_barre_liste($title, $page, $_SERVER['PHP_SELF'], $param, $sortfield, $sortorder, $massActionButton, $num, $nbTotalOfRecords, $object->picto, 0, $newCardButton, '', $limit, 0, 0, 1);
 
 // Add code for pre mass action (confirmation or email presend form)
 //$topicmail = "SendMyObjectRef";
