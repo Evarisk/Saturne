@@ -56,9 +56,9 @@ foreach ($object->fields as $key => $val) {
         if (empty($val['disablesearch'])) {
             if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) {
                 if (empty($val['searchmulti'])) {
-                    print $form->selectarray('search_' . $key, $val['arrayofkeyval'], $search[$key] ?? '', 1, 0, 0, '', 1, 0, 0, '', 'maxwidth150' . ($key == 'status' ? ' search_status onrightofpage' : ''));
+                    print $form->selectarray('search_' . $key, $val['arrayofkeyval'], $search[$key] ?? '', 1, 0, 0, '', 1, 0, 0, '', 'maxwidth100' . ($key == 'status' ? ' search_status onrightofpage' : ''));
                 } else {
-                    print $form->multiselectarray('search_' . $key, $val['arrayofkeyval'], $search[$key] ?? '', 0, 0, 'maxwidth150'. ($key == 'status' ? ' search_status onrightofpage' : ''), 1);
+                    print $form->multiselectarray('search_' . $key, $val['arrayofkeyval'], $search[$key] ?? '', 0, 0, 'maxwidth100' . ($key == 'status' ? ' search_status onrightofpage' : ''), 1);
                 }
             } elseif (isset($val['type']) && ((strpos($val['type'], 'integer:') === 0) || (strpos($val['type'], 'sellist:') === 0))) {
                 print $object->showInputField($val, $key, $search[$key] ?? '', '', '', 'search_', $cssForField . ' maxwidth250', 1);
