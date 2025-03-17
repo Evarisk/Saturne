@@ -815,7 +815,7 @@ function saturne_get_objects_metadata(string $type = ''): array
     $parameters = ['objectsMetadata' => $objectsMetadata];
     $hookmanager->executeHooks('saturneExtendGetObjectsMetadata', $parameters);
     if (is_array($hookmanager->resArray) && !empty($hookmanager->resArray)) {
-        $objectsMetadata = $hookmanager->resArray;
+        $objectsMetadata = array_merge($objectsMetadata, $hookmanager->resArray);
     }
 
     $objectsMetadataArray = [];
