@@ -60,9 +60,9 @@ foreach ($object->fields as $key => $val) {
                 } else {
                     print $form->multiselectarray('search_' . $key, $val['arrayofkeyval'], $search[$key] ?? '', 0, 0, 'maxwidth150'. ($key == 'status' ? ' search_status onrightofpage' : ''), 1);
                 }
-            } elseif ((strpos($val['type'], 'integer:') === 0) || (strpos($val['type'], 'sellist:') === 0)) {
+            } elseif (isset($val['type']) && ((strpos($val['type'], 'integer:') === 0) || (strpos($val['type'], 'sellist:') === 0))) {
                 print $object->showInputField($val, $key, $search[$key] ?? '', '', '', 'search_', $cssForField . ' maxwidth250', 1);
-            } elseif (in_array($val['type'], ['date', 'datetime', 'timestamp'])) {
+            } elseif (isset($val['type']) && in_array($val['type'], ['date', 'datetime', 'timestamp'])) {
                 print '<div class="nowrap">';
                 print $form->selectDate($search[$key . '_dtstart'] ?? '', 'search_' . $key . '_dtstart', 0, 0, 1, '', 1, 0, 0, '', '', '', '', 1, '', $langs->trans('From'));
                 print '</div>';
@@ -74,7 +74,7 @@ foreach ($object->fields as $key => $val) {
                 $formAdmin = new FormAdmin($db);
                 print $formAdmin->select_language(($search[$key] ?? ''), 'search_lang', 0, [], 1, 0, 0, 'minwidth100imp maxwidth125', 2);
             } else {
-                print '<input type="text" class="flat maxwidth' . (in_array($val['type'], ['integer', 'price']) ? '50' : '75') . '" name="search_' . $key . '" value="' . dol_escape_htmltag($search[$key] ?? '') . '">';
+                print '<input type="text" class="flat maxwidth' . (isset($val['type']) && in_array($val['type'], ['integer', 'price']) ? '50' : '75') . '" name="search_' . $key . '" value="' . dol_escape_htmltag($search[$key] ?? '') . '">';
             }
         }
 
