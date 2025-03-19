@@ -161,7 +161,7 @@ abstract class SaturneObject extends CommonObject
 			foreach ($filter as $key => $value) {
 				if ($key == 't.rowid') {
 					$sqlwhere[] = $key . ' = ' . ((int) $value);
-				} elseif (in_array($this->fields[$key]['type'], ['date', 'datetime', 'timestamp'])) {
+				} elseif (isset($this->fields[$key]['type']) && in_array($this->fields[$key]['type'], ['date', 'datetime', 'timestamp'])) {
 					$sqlwhere[] = $key . " = '" . $this->db->idate($value) . "'";
 				} elseif ($key == 'customsql') {
 					$sqlwhere[] = $value;
@@ -673,8 +673,8 @@ abstract class SaturneObject extends CommonObject
 		$user = new User($db);
 		$now  = dol_now();
 
-		$ret  = $langs->trans('Ref') . ' : ' . $object->ref . '<br>';
-        $ret .= $langs->trans('TechnicalID') . ' : ' . $object->id . '<br>';
+        $ret  = $langs->trans('TechnicalID') . ' : ' . $object->id . '<br>';
+		$ret .= $langs->trans('Ref') . ' : ' . $object->ref . '<br>';
         $ret .= (isset($object->label) && !empty($object->label) ? $langs->transnoentities('Label') . ' : ' . $object->label . '<br>' : '');
 		$ret .= (isset($object->description) && !empty($object->description) ? $langs->transnoentities('Description') . ' : ' . $object->description . '<br>' : '');
 		$ret .= (isset($object->type) && !empty($object->type) ? $langs->transnoentities('Type') . ' : ' .  $langs->transnoentities($object->type) . '<br>' : '');

@@ -100,7 +100,7 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
         foreach ($filter as $key => $value) {
             if ($key == 't.rowid') {
                 $sqlwhere[] = $key . ' = ' . $value;
-            } elseif (in_array($object->fields[$key]['type'], ['date', 'datetime', 'timestamp'])) {
+            } elseif (isset($object->fields[$key]['type']) && in_array($object->fields[$key]['type'], ['date', 'datetime', 'timestamp'])) {
                 $sqlwhere[] = $key .' = \'' . $object->db->idate($value) . '\'';
             } elseif ($key == 'customsql') {
                 $sqlwhere[] = $value;
@@ -374,6 +374,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'mainmenu'       => '',
             'leftmenu'       => 'users',
             'langs'          => 'User',
+            'langfile'       => 'users',
             'picto'          => 'user',
             'color'          => '#79633f',
             'class_name'     => 'User',
