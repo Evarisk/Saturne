@@ -113,9 +113,9 @@ class SaturneDashboard
         print '<input type="hidden" name="token" value="' . newToken() . '">';
         print '<input type="hidden" name="action" value="view">';
 
-        $confName            = dol_strtoupper($moduleNameLowerCase) . '_DASHBOARD_CONFIG';
-        $disableWidgetList   = json_decode($user->conf->$confName);
-        $disableWidgetList   = $disableWidgetList->widgets ?? new stdClass();
+        $confName              = dol_strtoupper($moduleNameLowerCase) . '_DASHBOARD_CONFIG';
+        $disableWidgetList     = property_exists($user->conf, $confName) ? json_decode($user->conf->$confName) : null;
+        $disableWidgetList     = $disableWidgetList->widgets ?? new stdClass();
         $dashboardWidgetsArray = [];
         if (!empty($dashboards['widgets']) && is_array($dashboards['widgets'])) {
             foreach ($dashboards['widgets'] as $dashboardWidgets) {
