@@ -373,7 +373,7 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
 			<div class="ecm-photo-list-content">
 				<?php
 				$relativepath = $moduleNameLowerCase . '/medias/thumbs';
-				print saturne_show_medias($moduleNameLowerCase, 'ecm', $conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias', ($conf->browser->layout == 'phone' ? 'mini' : 'small'), 80, 80, (!empty($offset) ? $offset : 1));
+				print saturne_show_medias($moduleNameLowerCase, 'ecm', $conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias', 'mini', 80, 80, (!empty($offset) ? $offset : 1));
 				?>
 			</div>
 		</div>

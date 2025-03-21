@@ -91,6 +91,13 @@ window.saturne.modal.openModal = function ( event ) {
   $('#'+modalToOpen).attr('data-from-subdir', fromSubdir);
   $('#'+modalToOpen).attr('data-photo-class', photoClass);
 
+  // Load images dynamically
+  $(".photo").each(function () {
+    if (!$(this).attr("src")) {
+      $(this).attr("src", $(this).data("src"));
+    }
+  });
+
     if (fromModule) {
         if (typeof window.saturne.modal.addMoreOpenModalData == 'function') {
             window.saturne.modal.addMoreOpenModalData(modalToOpen, $(this));

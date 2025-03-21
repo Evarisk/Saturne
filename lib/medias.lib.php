@@ -103,11 +103,11 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
                                 $fullpath           = $path . '/' . urlencode($shownFileName) . '&entity=' . $conf->entity;
                                 print '<input class="filename" type="hidden" value="' . $fileName . '">';
                                 print '<a class="clicked-photo-preview" href="' . $advancedPreviewUrl . '"><i class="fas fa-2x fa-search-plus"></i></a>';
-                                print '<img class="photo photo' . $j . '" width="' . $maxWidth . '" height="' . $maxHeight . '" src="' . $fullpath . '">';
+                                print '<img class="photo photo' . $j . '" width="' . $maxWidth . '" height="' . $maxHeight . '" data-src="' . $fullpath . '" loading="lazy">';
                             } else {
                                 print '<input type="hidden" class="fullname" data-fullname="' . $filearray[$i]['fullname'] . '">';
                                 print '<i class="clicked-photo-preview regenerate-thumbs fas fa-redo"></i>';
-                                print '<img class="photo photo' . $j . '" width="' . $maxWidth . '" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/public/theme/common/nophoto.png">';
+                                print '<img class="photo photo' . $j . '" width="' . $maxWidth . '" height="' . $maxHeight . '" data-src="' . DOL_URL_ROOT . '/public/theme/common/nophoto.png" loading="lazy">';
                             } ?>
                         </figure>
                         <?php
