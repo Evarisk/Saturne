@@ -376,19 +376,11 @@ class modSaturne extends DolibarrModules
         }
 
         // Create extrafields during init
-        require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
-        $extraFields = new ExtraFields($this->db);
-
         $extraFieldsArrays = [
-            'electronic_signature' => ['Label' => 'ElectronicSignature', 'type' => 'text', 'elementtype' => ['user'], 'position' => 100, 'list' => 1, 'entity' => 0, 'langfile' => 'saturne@saturne', 'enabled' => "isModEnabled('saturne')"]
+            'electronic_signature' => ['Label' => 'ElectronicSignature', 'type' => 'text', 'elementtype' => ['user'], 'position' => $this->numero . 10, 'list' => 1, 'entity' => 0, 'langfile' => 'saturne@saturne', 'enabled' => "isModEnabled('saturne') && isModEnabled('user')"]
         ];
 
-        foreach ($extraFieldsArrays as $key => $extraField) {
-            foreach ($extraField['elementtype'] as $extraFieldElementType) {
-                $extraFields->update($key, $extraField['Label'], $extraField['type'], $extraField['length'], $extraFieldElementType, 0, 0, $this->numero . $extraField['position'], $extraField['params'], '', '', $extraField['list'], ($extraField['help'][$extraFieldElementType] ?? $extraField['help']), '', '', $extraField['entity'], $extraField['langfile'], $extraField['enabled'] . ' && isModEnabled("' . $extraFieldElementType . '")', 0, 0, $extraField['css']);
-                $extraFields->addExtraField($key, $extraField['Label'], $extraField['type'], $this->numero . $extraField['position'], $extraField['length'], $extraFieldElementType, 0, 0, '', $extraField['params'], $extraField['alwayseditable'], '', $extraField['list'], $extraField['help'], '', $extraField['entity'], $extraField['langfile'], $extraField['enabled'] . ' && isModEnabled("' . $extraFieldElementType . '")', 0, 0, $extraField['css']);
-            }
-        }
+        saturne_manage_extrafields($extraFieldsArrays);
 
         return $this->_init($sql, $options);
     }
