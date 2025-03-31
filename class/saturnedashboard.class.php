@@ -169,7 +169,7 @@ class SaturneDashboard
                                                     if (isset($dashboardWidget['moreContent'][$i]) && $dashboardWidget['moreContent'][$i] !== '') {
                                                         $widget .= $dashboardWidget['moreContent'][$i];
                                                     }
-                                                } else {
+                                                } elseif (isset($dashboardWidget['customContent'][$i]) && $dashboardWidget['customContent'][$i] !== '') {
                                                     $widget .= $dashboardWidget['customContent'][$i];
                                                 }
                                             $widget .= '</span>';
@@ -178,7 +178,7 @@ class SaturneDashboard
                                 }
                             }
                             $widget .= '</ul>';
-                            if (is_array($dashboardWidget['moreParams']) && (!empty($dashboardWidget['moreParams']))) {
+                            if (!empty($dashboardWidget['moreParams']) && is_array($dashboardWidget['moreParams'])) {
                                 $widget .= '<div class="body__content">';
                                 foreach ($dashboardWidget['moreParams'] as $dashboardWidgetMoreParamsKey => $dashboardWidgetMoreParams) {
                                     switch ($dashboardWidgetMoreParamsKey) {
@@ -247,7 +247,7 @@ class SaturneDashboard
 
         print '<div class="graph-dashboard wpeo-grid grid-2" id="graph-dashboard">';
 
-        if (is_array($dashboards['graphs']) && !empty($dashboards['graphs'])) {
+        if (!empty($dashboards['graphs']) && is_array($dashboards['graphs'])) {
             foreach ($dashboards['graphs'] as $dashboardGraphs) {
                 if (is_array($dashboardGraphs) && !empty($dashboardGraphs)) {
                     foreach ($dashboardGraphs as $keyElement => $dashboardGraph) {
@@ -339,7 +339,7 @@ class SaturneDashboard
             }
         }
 
-        if (is_array($dashboards['lists']) && !empty($dashboards['lists'])) {
+        if (!empty($dashboards['lists']) && is_array($dashboards['lists'])) {
             foreach ($dashboards['lists'] as $dashboardLists) {
                 foreach ($dashboardLists as $dashboardList) {
                     if (is_array($dashboardList['data']) && !empty($dashboardList['data'])) {
