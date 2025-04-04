@@ -37,7 +37,7 @@ $moduleNameLowerCase = dol_strtolower($moduleName);
 // Load Dolibarr libraries
 require_once TCPDF_PATH . 'tcpdf_barcodes_2d.php';
 
-// Load Module libraries
+// Load Saturne libraries
 require_once __DIR__ . '/../lib/saturne.lib.php';
 require_once __DIR__ . '/../class/saturneredirection.class.php';
 
@@ -45,7 +45,7 @@ require_once __DIR__ . '/../class/saturneredirection.class.php';
 global $conf, $db, $hookmanager, $langs, $user;
 
 // Load translation files required by the page
-saturne_load_langs();
+saturne_load_langs(['admin']);
 
 // Get parameters
 $action  = GETPOST('action', 'alpha');
@@ -61,7 +61,7 @@ $form = new Form($db);
 $hookmanager->initHooks([$moduleNameLowerCase . 'redirectionadmin', 'saturneadmin']); // Note that conf->hooks_modules contains array
 
 // Security check - Protection if external user
-$permissionToRead = $user->rights->$moduleNameLowerCase->adminpage->read;
+$permissionToRead = $user->hasRight($moduleNameLowerCase, 'adminpage', 'read');
 saturne_check_access($permissionToRead);
 
 /*
@@ -117,8 +117,8 @@ $helpUrl = 'FR:Module_' . $moduleName;
 saturne_header(0, '', $title, $helpUrl);
 
 // Subheader
-$linkBack = '<a href="' . DOL_URL_ROOT . '/admin/modules.php?restore_lastsearch_values=1' . '">' . $langs->trans('BackToModuleList') . '</a>';
-print load_fiche_titre($title, '', 'title_setup');
+$linkBack = '<a href="' . DOL_URL_ROOT . '/admin/modules.php' . '">' . $langs->trans('BackToModuleList') . '</a>';
+print load_fiche_titre($title, $linkBack, 'title_setup');
 
 // Configuration header
 $preHead = $moduleNameLowerCase . '_admin_prepare_head';
