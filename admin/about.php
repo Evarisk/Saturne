@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2022-2025 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,64 +18,68 @@
 /**
  * \file    admin/about.php
  * \ingroup saturne
- * \brief   About page of module Saturne.
+ * \brief   About page of module Saturne
  */
 
-// Load Saturne environment.
-if (file_exists('../saturne.main.inc.php')) {
-    require_once __DIR__ . '/../saturne.main.inc.php';
-} elseif (file_exists('../../saturne.main.inc.php')) {
-    require_once __DIR__ . '/../../saturne.main.inc.php';
-} else {
+// Load Saturne environment
+if (!file_exists('../saturne.main.inc.php')) {
     die('Include of saturne main fails');
 }
+require_once __DIR__ . '/../saturne.main.inc.php';
 
-// Get module parameters.
-$moduleName          = GETPOST('module_name', 'alpha');
-$moduleNameLowerCase = strtolower($moduleName);
+// Get module parameters
+$moduleName          = GETPOST('module_name', 'aZ') ?: 'Saturne';
+$moduleNameLowerCase = dol_strtolower($moduleName);
 
-// Load Module Libraries.
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '.lib.php';
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/core/modules/mod' . $moduleName . '.class.php';
+// Build the paths for the required files
+$moduleLibPath   = dol_buildpath($moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '.lib.php');
+$moduleClassPath = dol_buildpath($moduleNameLowerCase . '/core/modules/mod' . $moduleName . '.class.php');
 
-// Global variables definitions.
+// Check if files exist before including them
+if (!(is_file($moduleLibPath) && is_readable($moduleLibPath)) || !(is_file($moduleClassPath) && is_readable($moduleClassPath))) {
+    die('Failed to require ' . $moduleNameLowerCase . ' libraries: Files not found. Paths: ' . $moduleLibPath . ' , ' . $moduleClassPath);
+}
+// Load Module Libraries
+require_once $moduleLibPath;
+require_once $moduleClassPath;
+
+// Global variables definitions
 global $db, $langs, $user;
 
-// Load translation files required by the page.
-saturne_load_langs(['admin']);
+// Load translation files required by the page
+saturne_load_langs();
 
-// Initialize technical objects.
+// Initialize technical objects
 $className = 'mod' . $moduleName;
 $modModule = new $className($db);
 
-// Get parameters.
-$backtopage = GETPOST('backtopage', 'alpha');
+// Permissions
+$permissionToRead = $user->hasRight($moduleNameLowerCase, 'adminpage', 'read');
 
-// Security check - Protection if external user.
-$permissiontoread = $user->rights->$moduleNameLowerCase->adminpage->read;
-saturne_check_access($permissiontoread);
+// Security check
+saturne_check_access($permissionToRead);
 
 /*
  * View
  */
 
-$title    = $langs->trans('ModuleSetup', $moduleName);
-$help_url = 'FR:Module_' . $moduleName;
+$title   = $langs->trans('ModuleSetup', $moduleName);
+$helpUrl = 'FR:Module_' . $moduleName;
 
-saturne_header(0, '', $title, $help_url);
+saturne_header(0, '', $title, $helpUrl);
 
-// Subheader.
-$linkback = '<a href="' . ($backtopage ?: DOL_URL_ROOT . '/admin/modules.php?restore_lastsearch_values=1') . '">' . $langs->trans('BackToModuleList') . '</a>';
-print load_fiche_titre($title, $linkback, 'title_setup');
+// Subheader
+$linkBack = '<a href="' . DOL_URL_ROOT . '/admin/modules.php?restore_lastsearch_values=1' . '">' . $langs->trans('BackToModuleList') . '</a>';
+print load_fiche_titre($title, $linkBack, 'title_setup');
 
-// Configuration header.
+// Configuration header
 $preHead = $moduleNameLowerCase . '_admin_prepare_head';
-$head = $preHead();
+$head    = $preHead();
 print dol_get_fiche_head($head, 'about', $title, -1, $moduleNameLowerCase . '_color@' . $moduleNameLowerCase);
 
 print $modModule->getDescLong();
 
-// Page end.
+// Page end
 print dol_get_fiche_end();
 llxFooter();
 $db->close();
