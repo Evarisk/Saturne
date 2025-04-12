@@ -203,7 +203,7 @@ class ActionsSaturne
 
             $signatory = new SaturneSignature($this->db);
 
-            $signatory->fetch(0, '', ' AND fk_object = ' . $id . ' AND status > 0 AND object_type = "user" AND role = "UserSignature"');
+            $signatory->fetch(0, '', ' AND fk_object = ' . $id . ' AND status > 0 AND object_type = \'user\' AND role = \'UserSignature\'');
 
             $pictoPath = dol_buildpath('/saturne/img/saturne_color.png', 1);
 
@@ -273,7 +273,7 @@ class ActionsSaturne
             $signatory = new SaturneSignature($this->db);
             $data      = json_decode(file_get_contents('php://input'), true);
 
-            $result = $signatory->fetch(0, '', ' AND fk_object = ' . $id . ' AND status > 0 AND object_type = "user" AND role = "UserSignature"');
+            $result = $signatory->fetch(0, '', ' AND fk_object = ' . $id . ' AND status > 0 AND object_type = \'user\' AND role = \'UserSignature\'');
             if ($result <= 0) {
                 $signatory->setSignatory($id, $user->element, 'user', [$id], 'UserSignature');
             }
