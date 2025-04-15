@@ -46,15 +46,20 @@
  * @param  string            $removeaction     (optional) The action to remove a file
  * @param  int               $active           (optional) To show gen button disabled
  * @param  string            $tooltiptext      (optional) Tooltip text when gen button disabled
+ * @param  string            $sortfield        (optional) Allows to sort the list of files by a field
+ * @param  string            $sortorder        (optional) Allows to sort the list of files with a specific order
  * @return string                              Output string with HTML array of documents (might be empty string)
  */
-function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, string $urlsource, $genallowed, int $delallowed = 0, string $modelselected = '', int $allowgenifempty = 1, int $forcenomultilang = 0, int $notused = 0, int $noform = 0, string $param = '', string $title = '', string $buttonlabel = '', string $codelang = '', string $morepicto = '', $object = null, int $hideifempty = 0, string $removeaction = 'remove_file', int $active = 1, string $tooltiptext = ''): string
+function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, string $urlsource, $genallowed, int $delallowed = 0, string $modelselected = '', int $allowgenifempty = 1, int $forcenomultilang = 0, int $notused = 0, int $noform = 0, string $param = '', string $title = '', string $buttonlabel = '', string $codelang = '', string $morepicto = '', $object = null, int $hideifempty = 0, string $removeaction = 'remove_file', int $active = 1, string $tooltiptext = '', string $sortfield = '', string $sortorder = ''): string
 {
-	global $conf, $db, $form, $hookmanager, $langs;
+	global $conf, $db, $form, $hookmanager, $langs, $user;
 
 	if (!is_object($form)) {
         $form = new Form($db);
     }
+
+    require_once __DIR__ . '/../class/saturneqrcode.class.php';
+    $QRCode = new SaturneQRCode($db);
 
 	include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 
@@ -62,6 +67,23 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 	if ( ! preg_match('/entity=[0-9]+/', $param)) {
 		$param .= ($param ? '&' : '') . 'entity=' . (!empty($object->entity) ? $object->entity : $conf->entity);
 	}
+
+    if (empty($sortfield)) {
+        if (GETPOST('sortfield')) {
+            $sortfield = GETPOST('sortfield');
+        } else {
+            $sortfield = 'name';
+        }
+    }
+
+
+    if (empty($sortorder)) {
+        if (GETPOST('sortorder')) {
+            $sortorder = GETPOST('sortorder');
+        } else {
+            $sortorder = 'desc';
+        }
+    }
 
 	$hookmanager->initHooks(['formfile']);
 
@@ -75,7 +97,37 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
         } else {
             $fileList = dol_dir_list($filedir, 'files', 0, '(\.jpg|\.jpeg|\.png|\.odt|\.zip|\.pdf)', '', 'date', SORT_DESC, 1);
         }
-	}
+    }
+
+    if (GETPOST('search_name')) {
+        $fileList = array_filter($fileList, function($file) {
+            return strpos($file['name'], GETPOST('search_name')) !== false;
+        });
+    }
+
+    if (GETPOST('search_date')) {
+        $search_date = GETPOST('search_date');
+        $fileList = array_filter($fileList, function($file) use ($search_date) {
+            $file_date = date('Y-m-d', $file['date']);
+            return $file_date === $search_date;
+        });
+    }
+
+
+    $fileList = dol_sort_array($fileList, $sortfield, $sortorder);
+
+    $page = GETPOST('page', 'int') ?: 1;
+    $filePerPage = 20;
+    $fileListLength = 0;
+    if (is_array($fileList) && !empty($fileList)) {
+        $fileListLength = count($fileList);
+    }
+
+    if ($fileListLength > $filePerPage) {
+        $fileList = array_slice($fileList, ($page - 1 ) * $filePerPage, $filePerPage);
+    }
+
+    $pageNumber = ceil($fileListLength / $filePerPage);
 
 	if ($hideifempty && empty($fileList)) {
         return '';
@@ -215,6 +267,20 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
                 $genbutton = '';
             }
             $out .= $genbutton;
+            $querySeparator = (strpos($_SERVER['REQUEST_URI'], '?') === false) ? '?' : '&';
+
+            $out .= '<div class="pagination">';
+            if($page > 1) {
+                $out .= '<a href="'. $_SERVER['PHP_SELF'] . '?page=' . ($page - 1) .'&sortfield=' . $sortfield . '&sortorder=' . $sortorder . '#builddoc_form"><i class="fas fa-chevron-left"></i></a>';
+                $out .= '&nbsp;&nbsp;&nbsp;&nbsp;';
+            }
+            $out .= '<input hidden id="page_number" value="' . $pageNumber . '">';
+            $out .= '<input name="change_pagination" id="change_pagination" class="maxwidth25" value="' . $page . '" name="page">';
+            $out .= ' / ';
+            $out .= '<a href="'. $_SERVER['PHP_SELF'] . '?page=' . $pageNumber .'&sortfield=' . $sortfield . '&sortorder=' . $sortorder . '#builddoc_form">' . $pageNumber . '</a>';
+            $out .= '&nbsp;&nbsp;&nbsp;&nbsp;';
+            $out .= '<a href="'. $_SERVER['PHP_SELF'] . '?page=' . ($page + 1) .'&sortfield=' . $sortfield . '&sortorder=' . $sortorder . '#builddoc_form"><i class="fas fa-chevron-right"></i></a>';
+            $out .= '</div>';
 		} else {
 			$out .= '<div class="float">' . $langs->trans('Files') . '</div>';
 		}
@@ -225,6 +291,7 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
             $out .= $form->textwithpicto($langs->trans('Help'), $htmltooltip, 1, 0);
             $out .= '</span>';
         }
+        $out .= '</th><th>';
 		$out .= '</th>';
 
 		if (!empty($hookmanager->hooks['formfile'])) {
@@ -240,6 +307,27 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 			$out .= '<td></td>';
 		}
 		$out .= '</tr>';
+        $out .= '<tr class="liste_titre">';
+        $out .= get_document_title_search('text', 'Name');
+        $out .= '<td></td>';
+        $out .= get_document_title_search('date', 'Date', 'right');
+        $out .= '<td></td>';
+        $out .= '<td></td>';
+        $out .= '<td class="right ">';
+        $out .= '<i class="saturne-search-button fas fa-search" style="cursor: pointer;"></i>';
+        $out .= '&nbsp;&nbsp;&nbsp;';
+        $out .= '<i class="saturne-cancel-button fas fa-times" style="cursor: pointer;"></i>';
+        $out .= '</td>';
+
+        $out .= '</tr>';
+        $out .= '<tr class="liste_titre">';
+        $out .= get_document_title_field($sortfield, $sortorder, 'Name');
+        $out .= get_document_title_field($sortfield, $sortorder, 'Size', true, 'right');
+        $out .= get_document_title_field($sortfield, $sortorder, 'Date', true, 'right');
+        $out .= get_document_title_field($sortfield, $sortorder, 'PDF', false, 'right');
+        $out .= get_document_title_field($sortfield, $sortorder, 'QRCode', false, 'right');
+        $out .= get_document_title_field($sortfield, $sortorder, 'Action', false, 'right');
+        $out .= '</tr>';
 
 		// Execute hooks
 		$parameters = ['colspan' => ($colspan + $colspanmore), 'socid' => ($GLOBALS['socid'] ?? ''), 'id' => ($GLOBALS['id'] ?? ''), 'modulepart' => $modulepart];
@@ -258,7 +346,6 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 		if (is_object($object) && $object->id > 0) {
 			require_once DOL_DOCUMENT_ROOT . '/core/class/link.class.php';
 			$link      = new Link($db);
-			$sortfield = $sortorder = null;
 			$link->fetchAll($link_list, $object->element, $object->id, $sortfield, $sortorder);
 		}
 
@@ -271,6 +358,23 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 			$out        .= '<div class="div-table-responsive-no-min">';
 			$out        .= '<table class="noborder centpercent" id="' . $modulepart . '_table">' . "\n";
 		}
+
+        $out .= '<div id="pdfModal" class="wpeo-modal">
+                    <div class="modal-container">
+                        <div class="modal-header">
+                            <h2>QR Code</h2>
+                        </div>
+                        <div class="modal-content" style="display: flex; justify-content: center">
+                            <div id="pdfPreview">
+                                <!-- Le PDF sera affiché ici dans un iframe -->
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="downloadBtn" style="margin-top: 10px;"><i class="fas fa-download fa-2x"></i></button>
+                        </div>
+                    </div>
+                </div>';
+
 
 		// Loop on each file found
 		if (is_array($fileList)) {
@@ -344,6 +448,26 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 					$out .= '</td>';
 				}
 
+                //Show QR Code
+                $documentQRCode = $QRCode->fetchAll('', '', 0, 0, ['url' => $documenturl . '?modulepart=' . $modulepart . '&amp;file=' . urlencode($relativepath) . ($param ? '&' . $param : '')]);
+                if (is_array($documentQRCode) && !empty($documentQRCode)) {
+                    $documentQRCode = array_shift($documentQRCode);
+                } else {
+                    $QRCode->url = DOL_URL_ROOT . '/document.php?modulepart=' . $modulepart . '&amp;file=' . urlencode($relativepath) . ($param ? '&' . $param : '');
+                    $QRCode->encoded_qr_code = $QRCode->getQRCodeBase64($QRCode->url);
+                    $QRCode->status = 1;
+                    $QRCode->module_name = $modulepart;
+                    $QRCode->create($user);
+                    $documentQRCode = $QRCode;
+
+                }
+
+                $out .= '<td class="right preview-qr-code">';
+                $out .= '<input hidden class="qrcode-base64" value="'. $documentQRCode->encoded_qr_code .'">';
+                $out .= img_picto($langs->trans("QRCodeGeneration"), 'fontawesome_fa-qrcode_fas_blue');
+                $out .= ' ' . $form->textwithpicto('', $langs->trans('QRCodeGenerationTooltip'));
+                $out .= '</td>';
+
 				if ($delallowed || $morepicto) {
 					$out .= '<td class="right nowraponall">';
 					if ($delallowed) {
@@ -410,6 +534,52 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 	$out .= '<!-- End show_document -->' . "\n";
 
 	return $out;
+}
+
+/**
+ * Get document title field
+ *
+ * @param string $sortfield
+ * @param string $sortorder
+ * @param string $name
+ * @param bool $sortable
+ * @param string $morehtml
+ * @return string
+ */
+function get_document_title_field(string $sortfield, string $sortorder, string $name, bool $sortable = true, string $morehtml = ''): string {
+    global $langs;
+
+    $querySeparator = (strpos($_SERVER['PHP_SELF'], '?') === false) ? '?' : '&';
+    $out = '<th class="'. $morehtml .'">';
+    if ($sortable) {
+        $out .= '<a href="'. $_SERVER['PHP_SELF'] . $querySeparator . 'sortfield='. (strtolower($name)) .'&sortorder=' . ($sortorder == 'desc' ? 'asc' : 'desc') .'#builddoc_form">';
+        $out .= ($sortfield == strtolower($name) ? '<u>' : '');
+    }
+    $out .= $langs->trans($name);
+    if ($sortable) {
+        $out .= ' ' . ($sortfield == strtolower($name) ? ($sortorder == 'asc' ? '<i class="fas fa-chevron-up"></i>' : '<i class="fas fa-chevron-down"></i>') : '');
+        $out .= ($sortfield == strtolower($name) ? '</u>' : '');
+        $out .= '</a>';
+    }
+    $out .='</th>';
+
+    return $out;
+}
+
+/**
+ * Get document title search
+ *
+ * @param string $type
+ * @param string $name
+ * @param string $morehtml
+ * @return string
+ */
+function get_document_title_search(string $type, string $name, string $morehtml = ''): string
+{
+    $out = '<td class="'. $morehtml .'">';
+    $out .= '<input class="saturne-search" id="search_' . strtolower($name) . '" type="'. $type .'"  name="search_' . strtolower($name) . '" value="' . GETPOST('search_' . strtolower($name)) . '">';
+    $out .= '</td>';
+    return $out;
 }
 
 /**

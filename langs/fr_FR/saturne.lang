@@ -248,6 +248,19 @@ Tools      = Outils
 ExportData = Exporter mes données
 
 
+#
+#
+#
+
+QRCode = QR Code
+URLToEncode = URL à encoder
+HowToUseURLToEncode = Ecrivez l'URL vers laquelle le QR Code doit pointer
+QRCodeCreated = QR Code créé
+QRCodeUpdated = QR Code mis à jour
+QRCodeRemoved = QR Code supprimé
+URLToEncodeRequired = L'URL à encoder est obligatoire
+QRCodeGenerationTooltip = Appuyez sur ce bouton pour voir le QR Code
+
 
 #
 # Other - Autres
