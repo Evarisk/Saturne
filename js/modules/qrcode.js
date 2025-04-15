@@ -55,26 +55,19 @@ window.saturne.qrcode.event = function() {
 };
 
 
-// Fonction pour afficher le QR code dans une modal
 window.saturne.qrcode.previewQRCode = function() {
-  // Obtenir l'image du QR code à partir des données de l'élément
   let QRCodeBase64 = $(this).find('.qrcode-base64').val();
-
-  // Créer un élément d'image
   const img = document.createElement('img');
   img.src = QRCodeBase64;
   img.alt = 'QR Code';
   img.style.maxWidth = '100%';
 
-  // Insérer l'image dans le conteneur désigné
   const pdfPreview = document.getElementById('pdfPreview');
-  pdfPreview.innerHTML = ''; // Vider le conteneur d'abord
+  pdfPreview.innerHTML = '';
   pdfPreview.appendChild(img);
 
-  // Afficher la modal
   $('#pdfModal').addClass('modal-active');
 
-  // Ajouter un bouton de téléchargement
   const downloadBtn = document.getElementById('downloadBtn');
   downloadBtn.onclick = function() {
     const a = document.createElement('a');
