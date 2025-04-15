@@ -81,7 +81,7 @@ function saturne_header(int $load_media_gallery = 0, string $head = '', string $
  * @param object|null $object            Object in current page
  * @param bool        $allowExternalUser Allow external user to have access at current page
  */
-function saturne_check_access($permission, object $object = null, bool $allowExternalUser = false)
+function saturne_check_access($permission, ?object $object = null, bool $allowExternalUser = false)
 {
     global $conf, $langs, $user, $moduleNameLowerCase;
 
@@ -100,7 +100,7 @@ function saturne_check_access($permission, object $object = null, bool $allowExt
     }
 
 	if (isModEnabled('multicompany')) {
-		if ($object->id > 0) {
+		if ($object !== null && $object->id > 0) {
 			if ($object->entity != $conf->entity) {
 				setEventMessage($langs->trans('ChangeEntityRedirection'), 'warnings');
 				$urltogo = dol_buildpath('/custom/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'index.php?mainmenu=' . $moduleNameLowerCase, 1);
@@ -643,7 +643,7 @@ function saturne_manage_extrafields(array $extraFieldsArrays, array $commonExtra
                 $extraField['unique']   ?? $commonExtraFieldsValue['unique']   ?? 0,
                 $extraField['required'] ?? $commonExtraFieldsValue['required'] ?? 0,
                 $extraField['default']  ?? $commonExtraFieldsValue['default']  ?? '',
-                $extraField['params'] ? ['options' => $extraField['params']] : '',
+                (isset($extraField['params']) ? ['options' => $extraField['params']] : ''),
                 $extraField['alwayseditable'] ?? $commonExtraFieldsValue['alwayseditable'] ?? 0,
                 $extraField['perms']          ?? $commonExtraFieldsValue['perms']          ?? '',
                 $extraField['list']           ?? $commonExtraFieldsValue['list']           ?? '',
@@ -668,7 +668,7 @@ function saturne_manage_extrafields(array $extraFieldsArrays, array $commonExtra
                 $extraField['unique']   ?? $commonExtraFieldsValue['unique']   ?? 0,
                 $extraField['required'] ?? $commonExtraFieldsValue['required'] ?? 0,
                 $extraField['position'],
-                $extraField['params'] ? ['options' => $extraField['params']] : '',
+                (isset($extraField['params']) ? ['options' => $extraField['params']] : ''),
                 $extraField['alwayseditable'] ?? $commonExtraFieldsValue['alwayseditable'] ?? 0,
                 $extraField['perms']          ?? $commonExtraFieldsValue['perms']          ?? '',
                 $extraField['list']           ?? $commonExtraFieldsValue['list']           ?? '',

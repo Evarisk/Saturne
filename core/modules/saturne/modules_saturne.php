@@ -154,11 +154,10 @@ abstract class ModeleNumRefSaturne
     {
         global $db, $conf;
 
-        $sqlLike = '____-%';
-        $hideDate = 0;
+        $sqlLike    = '____-%';
         $suffixSize = 4;
 
-        // First we get the max value.
+        // First we get the max value
         $posIndice = dol_strlen($this->prefix) + dol_strlen($sqlLike);
         $sql = 'SELECT MAX(CAST(SUBSTRING(ref FROM ' . $posIndice . ') AS SIGNED)) as max';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . $object->table_element;
@@ -181,16 +180,16 @@ abstract class ModeleNumRefSaturne
         }
 
         $date = !empty($object->date_creation) ? $object->date_creation : dol_now();
-        $yymm = strftime('%y%m', $date);
+        $yymm = dol_print_date($date, "%y%m");
 
         if ($max >= (pow(10, 4) - 1)) {
-            $num = $max + 1; // If counter > 9999, we do not format on 4 chars, we take number as it is.
+            $num = $max + 1; // If counter > 9999, we do not format on 4 chars, we take number as it is
         } else {
             $num = sprintf('%0'. $suffixSize .'s', $max + 1);
         }
 
         dol_syslog(get_class($this) . '::getNextValue return ' . $this->prefix . $yymm . '-' . $num);
-        return $this->prefix . ($hideDate ? '' : $yymm . '-') . $num;
+        return $this->prefix . $yymm . '-' . $num;
     }
 
     /**

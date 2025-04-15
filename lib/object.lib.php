@@ -237,7 +237,7 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
             if (!empty($object->note_public)) {
                 $nbNote++;
             }
-            $head[$h][0] = dol_buildpath('/saturne/view/saturne_note.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType;
+            $head[$h][0] = dol_buildpath('/saturne/view/saturne_note.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType . ((dol_strlen($moreparam['handlePhoto']) > 0) ? '&handle_photo=' . $moreparam['handlePhoto'] : false);
             $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-comment pictofixedwidth"></i>' . $langs->trans('Notes') : '<i class="fas fa-comment"></i>';
             if ($nbNote > 0) {
                 $head[$h][1] .= (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '<span class="badge marginleftonlyshort">' . $nbNote . '</span>' : '');
@@ -643,7 +643,7 @@ function saturne_get_objects_metadata(string $type = ''): array
     }
 
     if (isModEnabled('expedition')) {
-        $objectsMetadata['expedition'] = [
+        $objectsMetadata['shipping'] = [
             'mainmenu'       => '',
             'leftmenu'       => 'sendings',
             'langs'          => 'Shipments',
@@ -651,7 +651,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'picto'          => 'dolly',
             'class_name'     => 'SaturneExpedition',
             'post_name'      => 'fk_expedition',
-            'link_name'      => 'expedition',
+            'link_name'      => 'shipping',
             'tab_type'       => 'delivery',
             'table_element'  => 'expedition',
             'name_field'     => 'ref',

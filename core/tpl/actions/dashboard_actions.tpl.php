@@ -127,6 +127,7 @@ if ($action == 'generate_csv') {
             }
         }
 
+        $content = [];
         if ($mode == 1 && !empty($dataset) && !empty($labels)) {
             foreach ($dataset as $values) {
                 $row = 0;

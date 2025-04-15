@@ -65,7 +65,7 @@ $helpUrl = 'FR:Module_' . $moduleName;
 
 saturne_header(0, '', $title . ' ' . $modModule->version, $helpUrl);
 
-print load_fiche_titre($title . ' ' . $modModule->version, $morehtmlright, $moduleNameLowerCase . '_color.png@' . $moduleNameLowerCase);
+print load_fiche_titre($title . ' ' . $modModule->version, $morehtmlright ?? '', $moduleNameLowerCase . '_color.png@' . $moduleNameLowerCase);
 
 $moduleJustUpdated   = strtoupper($moduleName) . '_JUST_UPDATED';
 $moduleVersion       = strtoupper($moduleName) . '_VERSION';
