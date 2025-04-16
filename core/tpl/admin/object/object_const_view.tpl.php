@@ -8,7 +8,7 @@ if ($reshook > 0) {
 if ($action == 'add_all_conf') {
     if (is_array($constArray) && !empty($constArray)) {
         foreach ($constArray[$moduleNameLowerCase] as $const) {
-            if (getDolGlobalInt($const['code']) == 0 && !isset($const['disabled'])) {
+            if (getDolGlobalInt($const['code']) == 0 && empty($const['disabled'])) {
                 dolibarr_set_const($db, $const['code'], 1, 'integer', 0, '', $conf->entity);
             }
         }
@@ -18,7 +18,7 @@ if ($action == 'add_all_conf') {
 if ($action == 'delete_all_conf') {
     if (is_array($constArray) && !empty($constArray)) {
         foreach ($constArray[$moduleNameLowerCase] as $const) {
-            if (getDolGlobalInt($const['code']) == 1 && !isset($const['disabled'])) {
+            if (getDolGlobalInt($const['code']) == 1 && empty($const['disabled'])) {
                 dolibarr_set_const($db, $const['code'], 0, 'integer', 0, '', $conf->entity);
             }
         }
@@ -48,8 +48,8 @@ if (is_array($constArray) && !empty($constArray)) {
         print $langs->trans($const['description']);
         print '</td>';
         print '<td class="center">';
-        if ($user->admin) {
-            print ajax_constantonoff(!isset($const['disabled']) ? $const['code'] : '', [], null, 0, 0, 0, 2 , 0, 1);
+        if ($user->admin && empty($const['disabled'])) {
+            print ajax_constantonoff($const['code'], [], null, 0, 0, 0, 2 , 0, 1);
         }
         print '</td></tr>';
     }
