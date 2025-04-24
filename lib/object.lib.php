@@ -80,9 +80,9 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
 
     $sql = 'SELECT ';
     $sql .= $objectFields;
-    $sql .= ' FROM `' . MAIN_DB_PREFIX . $object->table_element . '` as t';
+    $sql .= ' FROM "' . MAIN_DB_PREFIX . $object->table_element . '" as t';
     if ($extraFieldManagement) {
-        $sql .= ' LEFT JOIN `' . MAIN_DB_PREFIX . $object->table_element . '_extrafields` as eft ON t.rowid = eft.fk_object';
+        $sql .= ' LEFT JOIN "' . MAIN_DB_PREFIX . $object->table_element . '_extrafields" as eft ON t.rowid = eft.fk_object';
     }
     if (dol_strlen($joinManagement) > 0) {
         $sql .= $joinManagement;

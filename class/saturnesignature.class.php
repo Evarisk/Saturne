@@ -545,9 +545,9 @@ class SaturneSignature extends SaturneObject
      */
     public function fetchSignatory(string $role, int $fk_object, string $object_type)
     {
-        $filter = ['customsql' => 'fk_object=' . $fk_object . ' AND status > 0 AND object_type="' . $object_type . '"'];
+        $filter = ['customsql' => 'fk_object=' . $fk_object . ' AND status > 0 AND object_type=\'' . $object_type . '\''];
         if (strlen($role)) {
-            $filter['customsql'] .= ' AND role = "' . $role . '"';
+            $filter['customsql'] .= ' AND role = \'' . $role . '\'';
             return $this->fetchAll('', '', 0, 0, $filter);
         } else {
             $signatories = $this->fetchAll('', '', 0, 0, $filter);
@@ -574,7 +574,7 @@ class SaturneSignature extends SaturneObject
      */
     public function fetchSignatories(int $fk_object, string $object_type, string $morefilter = '1 = 1')
     {
-        $filter = ['customsql' => 'fk_object=' . $fk_object . ' AND ' . $morefilter . ' AND object_type="' . $object_type . '"' . ' AND status > 0'];
+        $filter = ['customsql' => 'fk_object=' . $fk_object . ' AND ' . $morefilter . ' AND object_type=\'' . $object_type . '\'' . ' AND status > 0'];
         return $this->fetchAll('', '', 0, 0, $filter);
     }
 
@@ -646,7 +646,7 @@ class SaturneSignature extends SaturneObject
     {
         global $user;
 
-        $filter              = ['customsql' => ' role="' . $role . '" AND fk_object=' . $fk_object . ' AND status=1 AND object_type="' . $object_type . '"'];
+        $filter              = ['customsql' => ' role="' . $role . '" AND fk_object=' . $fk_object . ' AND status=1 AND object_type=\'' . $object_type . '\''];
         $signatoriesToDelete = $this->fetchAll('', '', 0, 0, $filter);
         if (!empty($signatoriesToDelete) && $signatoriesToDelete > 0) {
             foreach ($signatoriesToDelete as $signatoryToDelete) {
