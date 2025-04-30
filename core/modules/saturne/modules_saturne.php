@@ -523,23 +523,23 @@ class SaturneDocumentModel extends CommonDocGenerator
     }
 
     /**
-     * Set tmparray vars.
+     * Set tmparray vars
      *
-     * @param  array       $tmpArray    Temp array contains all document data.
-     * @param  Odf|Segment $listLines   Object to fill with data to convert in ODT Segment.
-     * @param  Translate   $outputLangs Lang object to use for output.
-     * @param  bool        $segmentVars It's ODT Segment or not.
+     * @param  array       $tmpArray    Temp array contains all document data
+     * @param  Odf|Segment $listLines   Object to fill with data to convert in ODT Segment
+     * @param  Translate   $outputLangs Lang object to use for output
+     * @param  bool        $segmentVars It's ODT Segment or not
      *
      * @throws Exception
      */
-    public function setTmpArrayVars(array $tmpArray, $listLines, Translate $outputLangs, bool $segmentVars = true)
+    public static function setTmpArrayVars(array $tmpArray, $listLines, Translate $outputLangs, bool $segmentVars = true)
     {
         unset($tmpArray['object_fields']);
         unset($tmpArray['object_lines']);
 
         foreach ($tmpArray as $key => $val) {
             try {
-                if (preg_match('/photo/', $key) || preg_match('/logo$/', $key)) {
+                if (preg_match('/photo|picto/', $key) || preg_match('/logo$/', $key)) {
                     // Image.
                     if (file_exists($val)) {
                         $listLines->setImage($key, $val);
@@ -561,7 +561,9 @@ class SaturneDocumentModel extends CommonDocGenerator
                         dol_imageResizeOrCrop($val, 0, $newWidth, $newHeight);
                     }
                     $listLines->setImage($key, $val);
-                } elseif (empty($val)) { // Text.
+                } elseif (preg_match('/nocheck/', $key)) { // Text without check
+                    $listLines->setVars($key, $val, true, 'UTF-8');
+                } elseif (empty($val) && $val != '0') { // Text.
                     $listLines->setVars($key, $outputLangs->trans('NoData'), true, 'UTF-8');
                 } else {
                     $listLines->setVars($key, html_entity_decode($val, ENT_QUOTES | ENT_HTML5), true, 'UTF-8');
