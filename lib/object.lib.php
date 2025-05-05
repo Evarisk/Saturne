@@ -38,7 +38,7 @@
  * @return int|array                         0 < if KO, array of pages if OK
  * @throws Exception|Error
  */
-function saturne_fetch_all_object_type(string $className = '', string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = [], string $filtermode = 'AND', bool $extraFieldManagement = false, bool $multiEntityManagement = true, bool $categoryManagement = false, string $joinManagement = '', array $moreparams = [])
+function saturne_fetch_all_object_type(string $className = '', string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = [], string $filtermode = 'AND', bool $extraFieldManagement = false, bool $multiEntityManagement = true, bool $categoryManagement = false, string $joinManagement = '', array $moreparams = [], string $selectManagement = '', array $moreSelects = [], string $groupByManagement = '')
 {
     dol_syslog(__METHOD__, LOG_DEBUG);
 
@@ -80,6 +80,9 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
 
     $sql = 'SELECT ';
     $sql .= $objectFields;
+    if (dol_strlen($selectManagement) > 0) {
+        $sql .= $selectManagement;
+    }
     $sql .= ' FROM `' . MAIN_DB_PREFIX . $object->table_element . '` as t';
     if ($extraFieldManagement) {
         $sql .= ' LEFT JOIN `' . MAIN_DB_PREFIX . $object->table_element . '_extrafields` as eft ON t.rowid = eft.fk_object';
@@ -93,7 +96,7 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
         $sql .= Categorie::getFilterJoinQuery($object->element, 't.rowid');
     }
     if ($multiEntityManagement && isset($object->ismultientitymanaged) && $object->ismultientitymanaged == 1) {
-        $sql .= ' WHERE t.entity IN (' . getEntity($object->table_element) . ')';
+        $sql .= ' WHERE t.entity IN (' . getEntity($object->element) . ')';
     } else {
         $sql .= ' WHERE 1 = 1';
     }
@@ -120,6 +123,10 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
         $sql .= ' AND (' . implode(' ' . $filtermode . ' ', $sqlwhere) . ')';
     }
 
+    if (dol_strlen($groupByManagement) > 0) {
+        $sql .= $groupByManagement;
+    }
+
     if (!empty($sortfield)) {
         $sql .= $object->db->order($sortfield, $sortorder);
     }
@@ -137,6 +144,12 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
 
                 $record = new $className($db);
                 $record->setVarsFromFetchObj($obj);
+
+                if (dol_strlen($selectManagement) > 0) {
+                    foreach ($moreSelects as $moreSelect) {
+                        $record->$moreSelect = $obj->$moreSelect;
+                    }
+                }
 
                 if (is_array($optionsArray) && !empty($optionsArray) && $extraFieldManagement) {
                     foreach ($optionsArray as $key => $value) {
