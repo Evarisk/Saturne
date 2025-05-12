@@ -570,6 +570,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'class_path'     => 'contrat/class/contrat.class.php',
             'lib_path'       => 'core/lib/contract.lib.php',
         ];
+        //@todo backward compatibility
+        $objectsMetadata['contrat'] = $objectsMetadata['contract'];
     }
 
     if (isModEnabled('ticket')) {
