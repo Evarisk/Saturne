@@ -29,7 +29,7 @@
  * Variable   : $permissiontoadd
  */
 
-if (($action == 'set_societe' || $action == 'set_project') && $permissiontoadd) {
+if (($action == 'set_societe' || $action == 'set_project' || $action == 'set_contrat') && $permissiontoadd) {
     $objectKey = explode('_', $action);
     $objectKey = $objectKey[1] . '_key';
     $object->setValueFrom(GETPOST($objectKey), GETPOST(GETPOST($objectKey), 'int'), '', '', 'int', '', $user, strtoupper($object->element) . '_MODIFY');
