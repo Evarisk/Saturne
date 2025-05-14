@@ -106,16 +106,16 @@ abstract class SaturneObject extends CommonObject
      *
      * @param  int|string  $id            ID object
      * @param  string|null $ref           Ref
-     * @param  string      $morewhere     More SQL filters (' AND ...')
-     * @param  int<0,1>    $noextrafields 0 = Default to load extrafields, 1 = No extrafields
-     * @param  int<0,1>    $nolines       0 = Default to load lines, 1 = No lines
+     * @param  string      $moreWhere     More SQL filters (' AND ...')
+     * @param  int<0,1>    $noExtraFields 0 = Default to load extrafields, 1 = No extrafields
+     * @param  int<0,1>    $noLines       0 = Default to load lines, 1 = No lines
      * @return int                        0 < if KO, 0 if not found, > 0 if OK
      */
-    public function fetch($id, ?string $ref = '', string $morewhere = '', int $noextrafields = 0, int $nolines = 0): int
+    public function fetch($id, ?string $ref = '', string $moreWhere = '', int $noExtraFields = 0, int $noLines = 0): int
     {
-        $result = $this->fetchCommon($id, $ref, $morewhere, $noextrafields);
-        if ($result > 0 && !empty($this->table_element_line) && empty($nolines)) {
-            $this->fetchLines($noextrafields);
+        $result = $this->fetchCommon($id, $ref, $moreWhere, $noExtraFields);
+        if ($result > 0 && !empty($this->table_element_line) && empty($noLines)) {
+            $this->fetchLines('', $noExtraFields);
         }
         return $result;
     }
