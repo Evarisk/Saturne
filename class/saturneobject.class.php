@@ -104,16 +104,18 @@ abstract class SaturneObject extends CommonObject
     /**
      * Load object in memory from the database
      *
-     * @param  int|string  $id        ID object
-     * @param  string|null $ref       Ref
-     * @param  string      $morewhere More SQL filters (' AND ...')
-     * @return int                    0 < if KO, 0 if not found, > 0 if OK
+     * @param  int|string  $id            ID object
+     * @param  string|null $ref           Ref
+     * @param  string      $moreWhere     More SQL filters (' AND ...')
+     * @param  int<0,1>    $noExtraFields 0 = Default to load extrafields, 1 = No extrafields
+     * @param  int<0,1>    $noLines       0 = Default to load lines, 1 = No lines
+     * @return int                        0 < if KO, 0 if not found, > 0 if OK
      */
-    public function fetch($id, string $ref = null, string $morewhere = ''): int
+    public function fetch($id, ?string $ref = '', string $moreWhere = '', int $noExtraFields = 0, int $noLines = 0): int
     {
-        $result = $this->fetchCommon($id, $ref, $morewhere);
-        if ($result > 0 && !empty($this->table_element_line)) {
-            $this->fetchLines();
+        $result = $this->fetchCommon($id, $ref, $moreWhere, $noExtraFields);
+        if ($result > 0 && !empty($this->table_element_line) && empty($noLines)) {
+            $this->fetchLines('', $noExtraFields);
         }
         return $result;
     }
@@ -121,12 +123,14 @@ abstract class SaturneObject extends CommonObject
     /**
      * Load object lines in memory from the database
      *
-     * @return int 0 < if KO, 0 if not found, >0 if OK
+     * @param  string    $morewhere     More SQL filters (' AND ...')
+     * @param  int<0,1>  $noextrafields 0 = Default to load extrafields, 1 = No extrafields
+     * @return int<-1,1>                Return integer 0 < if KO, 0 if not found, > 0 if OK
      */
-    public function fetchLines(): int
+    public function fetchLines(string $morewhere = '', int $noextrafields = 0): int
     {
         $this->lines = [];
-        return $this->fetchLinesCommon();
+        return $this->fetchLinesCommon($morewhere, $noextrafields);
     }
 
 	/**
