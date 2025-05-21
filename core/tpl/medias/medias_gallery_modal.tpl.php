@@ -342,7 +342,7 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
                 <div class="modal-add-media">
                     <input type="hidden" name="token" value="<?php echo newToken(); ?>">
                     <strong><?php echo $langs->trans('AddFile'); ?></strong>
-                    <input type="file" id="add_media_to_gallery" class="flat minwidth400 maxwidth200onsmartphone" name="userfile[]" multiple accept>
+                    <input type="file" id="add_media_to_gallery" class="flat minwidth400 maxwidth200onsmartphone" name="userfile[]" multiple accept='image/*'>
                     <div class="underbanner clearboth"></div>
                 </div>
 				<div class="form-element">
