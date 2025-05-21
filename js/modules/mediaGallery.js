@@ -158,6 +158,7 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
       }
 			//refresh media gallery & unselect selected medias
 			mediaGallery.html($(resp).find('#media_gallery').children())
+      window.saturne.modal.loadLazyImages();
 		},
 	});
 };
@@ -239,6 +240,7 @@ window.saturne.mediaGallery.deleteFilesRequest = function(fileNames) {
     }),
     success: function(resp) {
       $('#media_gallery .modal-container').replaceWith($(resp).find('#media_gallery .modal-container'));
+      window.saturne.modal.loadLazyImages();
     },
     error: function() {}
   });
@@ -339,6 +341,7 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 							mediaGallery.attr('data-from-subtype', objectSubtype);
 							mediaGallery.attr('data-from-subdir', objectSubdir);
 							mediaGallery.find('.wpeo-button').attr('value', objectId);
+              window.saturne.modal.loadLazyImages();
 						})
 					}, 800)
 				}
@@ -461,6 +464,7 @@ window.saturne.mediaGallery.unlinkFile = function( event ) {
         }
 
         $('.wpeo-loader').removeClass('wpeo-loader')
+        window.saturne.modal.loadLazyImages();
       }
     });
   });
@@ -537,6 +541,7 @@ window.saturne.mediaGallery.addToFavorite = function( event ) {
       if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
         $('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
       }
+      window.saturne.modal.loadLazyImages();
 		}
 	});
 };
@@ -616,6 +621,7 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
 
               //refresh media gallery & unselect selected medias
               mediaGallery.html($(resp).find('#media_gallery').children())
+              window.saturne.modal.loadLazyImages();
 						},
 					});
 				}
@@ -676,6 +682,7 @@ window.saturne.mediaGallery.selectPage = function( event ) {
 			mediaGallery.find('.modal-options').attr('data-from-type', objectType)
 			mediaGallery.find('.modal-options').attr('data-from-subtype', objectSubtype)
 			mediaGallery.find('.modal-options').attr('data-from-subdir', objectSubdir)
+      window.saturne.modal.loadLazyImages();
 		},
 		error: function ( ) {
 		}
@@ -709,6 +716,7 @@ window.saturne.mediaGallery.toggleTodayMedias = function( event ) {
       $('.toggle-today-medias').replaceWith($(resp).find('.toggle-today-medias'))
       $('.ecm-photo-list-content').replaceWith($(resp).find('.ecm-photo-list-content'))
       $('.wpeo-pagination').replaceWith($(resp).find('.wpeo-pagination'))
+      window.saturne.modal.loadLazyImages();
     },
     error: function ( ) {
     }
@@ -742,6 +750,7 @@ window.saturne.mediaGallery.toggleUnlinkedMedias = function( event ) {
       $('.toggle-unlinked-medias').replaceWith($(resp).find('.toggle-unlinked-medias'))
       $('.ecm-photo-list-content').replaceWith($(resp).find('.ecm-photo-list-content'))
       $('.wpeo-pagination').replaceWith($(resp).find('.wpeo-pagination'))
+      window.saturne.modal.loadLazyImages();
     },
     error: function ( ) {
     }
@@ -773,6 +782,7 @@ window.saturne.mediaGallery.regenerateThumbs = function() {
     contentType: false,
     success: function(resp) {
       $('.ecm-photo-list-content').replaceWith($(resp).find('.ecm-photo-list-content'));
+      window.saturne.modal.loadLazyImages();
     },
     error: function() {}
   });

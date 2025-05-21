@@ -91,12 +91,7 @@ window.saturne.modal.openModal = function ( event ) {
   $('#'+modalToOpen).attr('data-from-subdir', fromSubdir);
   $('#'+modalToOpen).attr('data-photo-class', photoClass);
 
-  // Load images dynamically
-  $(".photo").each(function () {
-    if (!$(this).attr("src")) {
-      $(this).attr("src", $(this).data("src"));
-    }
-  });
+  window.saturne.modal.loadLazyImages();
 
     if (fromModule) {
         if (typeof window.saturne.modal.addMoreOpenModalData == 'function') {
@@ -142,3 +137,29 @@ window.saturne.modal.closeModal = function ( event ) {
 window.saturne.modal.refreshModal = function ( event ) {
 	window.location.reload();
 };
+
+/**
+ * Lazy loads images inside the modal
+ *
+ * Loops through all `.photo` elements with a `data-src` attribute,
+ * sets the `src` attribute to trigger image loading,
+ * and marks them as loaded by adding `data-loaded="true"`
+ *
+ * This function should be called:
+ * - When the modal is opened
+ * - After dynamically adding new images with `data-src` to the modal or other functions
+ *
+ * @since   21.0.0
+ * @version 21.0.0
+ *
+ * @return {void}
+ */
+window.saturne.modal.loadLazyImages = function () {
+  $('.photo[data-src]').each(function () {
+    const $img = $(this);
+    if (!$img.attr('data-loaded')) {
+      $img.attr('src', $img.data('src'));
+      $img.attr('data-loaded', 'true');
+    }
+  });
+}
