@@ -45,7 +45,7 @@ if ($action == 'update_mask' && $permissiontoread) {
     } else {
         dolibarr_set_const($db, $documentMaskConst, $documentMask, 'chaine', 0, '', $conf->entity);
         setEventMessage('SavedConfig');
-        header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
+        header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&object_type=' . $objectType);
         exit;
     }
 }
