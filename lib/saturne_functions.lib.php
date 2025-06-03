@@ -32,33 +32,34 @@ require_once __DIR__ . '/debug.lib.php';
 /**
  * Print llxHeader with Saturne custom enhancements
  *
- * @param int    $load_media_gallery Load media gallery on page
- * @param string $head               Show header
- * @param string $title              Page title
- * @param string $help_url           Help url shown in "?" tooltip
- * @param string $target       	     Target to use on links
- * @param int    $disablejs          More content into html header
- * @param int    $disablehead        More content into html header
- * @param array  $arrayofjs          Array of complementary js files
- * @param array  $arrayofcss         Array of complementary css files
- * @param string $morequerystring    Query string to add to the link "print" to get same parameters (use only if autodetect fails)
- * @param string $morecssonbody      More CSS on body tag. For example 'classforhorizontalscrolloftabs'.
- * @param string $replacemainareaby  Replace call to main_area() by a print of this string
- * @param int    $disablenofollow    Disable the "nofollow" on meta robot header
- * @param int    $disablenoindex     Disable the "noindex" on meta robot header
+ * @param int $load_media_gallery Load media gallery on page
+ * @param string $head Show header
+ * @param string $title Page title
+ * @param string $help_url Help url shown in "?" tooltip
+ * @param string $target Target to use on links
+ * @param int $disablejs More content into html header
+ * @param int $disablehead More content into html header
+ * @param array $arrayofjs Array of complementary js files
+ * @param array $arrayofcss Array of complementary css files
+ * @param string $morequerystring Query string to add to the link "print" to get same parameters (use only if autodetect fails)
+ * @param string $morecssonbody More CSS on body tag. For example 'classforhorizontalscrolloftabs'.
+ * @param string $replacemainareaby Replace call to main_area() by a print of this string
+ * @param int $disablenofollow Disable the "nofollow" on meta robot header
+ * @param int $disablenoindex Disable the "noindex" on meta robot header
+ * @throws Exception
  */
 function saturne_header(int $load_media_gallery = 0, string $head = '', string $title = '', string $help_url = '', string $target = '', int $disablejs = 0, int $disablehead = 0, array $arrayofjs = [], array $arrayofcss = [], string $morequerystring = '', string $morecssonbody = '', string $replacemainareaby = '', int $disablenofollow = 0, int $disablenoindex = 0)
 {
-	global $moduleNameLowerCase;
+    global $moduleNameLowerCase;
 
-	//CSS
-	$arrayofcss[] = '/saturne/css/saturne.min.css';
+    //CSS
+    $arrayofcss[] = '/saturne/css/saturne.min.css';
     if (file_exists(__DIR__ . '/../../' . $moduleNameLowerCase . '/css/' . $moduleNameLowerCase . '.min.css')) {
         $arrayofcss[] = '/' . $moduleNameLowerCase . '/css/' . $moduleNameLowerCase . '.min.css';
     }
 
-	//JS
-	$arrayofjs[] = '/saturne/js/saturne.min.js';
+    //JS
+    $arrayofjs[] = '/saturne/js/saturne.min.js';
     if ($load_media_gallery) {
         $arrayofjs[] = '/saturne/js/includes/signature-pad.min.js';
     }
@@ -66,12 +67,254 @@ function saturne_header(int $load_media_gallery = 0, string $head = '', string $
         $arrayofjs[] = '/' . $moduleNameLowerCase . '/js/' . $moduleNameLowerCase . '.min.js';
     }
 
-	llxHeader($head, $title, $help_url, $target, $disablejs, $disablehead, $arrayofjs, $arrayofcss, $morequerystring, $morecssonbody, $replacemainareaby, $disablenofollow, $disablenoindex);
+    llxHeader($head, $title, $help_url, $target, $disablejs, $disablehead, $arrayofjs, $arrayofcss, $morequerystring, $morecssonbody, $replacemainareaby, $disablenofollow, $disablenoindex);
 
-	if ($load_media_gallery) {
-		//Media gallery
-		include __DIR__ . '/../core/tpl/medias/medias_gallery_modal.tpl.php';
-	}
+    if ($load_media_gallery) {
+        //Media gallery
+        include __DIR__ . '/../core/tpl/medias/medias_gallery_modal.tpl.php';
+    }
+}
+
+/**
+ * @throws Exception
+ */
+function saturne_more_left_menu($moduleName, $objectType): void
+{
+    global $conf, $db, $langs, $user;
+
+    require_once __DIR__ . '/../class/saturneelement.class.php';
+//    require_once __DIR__ . '/../class/digiriskelement/groupment.class.php';
+//    require_once __DIR__ . '/../class/digiriskelement/workunit.class.php';
+
+    $saturneElement = new SaturneElement($db, $moduleName, $objectType);
+
+//    $numberingModules = [
+//        'digiriskelement/groupment' => getDolGlobalString('DIGIRISKDOLIBARR_GROUPMENT_ADDON'),
+//        'digiriskelement/workunit'  => getDolGlobalString('DIGIRISKDOLIBARR_WORKUNIT_ADDON')
+//    ];
+
+//    list($modGroupment, $modWorkUnit) = saturne_require_objects_mod($numberingModules, $saturneElement->module);
+
+    // Body navigation digirisk
+    $filter           = 't.entity IN (' . $conf->entity . ') AND t.fk_standard = ' . getDolGlobalInt(dol_strtoupper($saturneElement->module) . '_ACTIVE_STANDARD');
+    $filter          .= !getDolGlobalInt('DIGIRISKDOLIBARR_SHOW_HIDDEN_DIGIRISKELEMENT') ? ' AND t.status = ' . SaturneElement::STATUS_VALIDATED : '';
+    $saturneElements = saturne_fetch_all_object_type('SaturneElement', '', 'position', 0, 0, ['customsql' => $filter]);
+    if (!is_array($saturneElements) || empty($saturneElements)) {
+        $saturneElements = [];
+    }
+
+    $saturneElementTree = saturne_recurse_tree(0, 0, $saturneElements); ?>
+
+    <div class="digirisk-wrap">
+        <i class="fas fa-bars pictofixedwidth"></i><?php echo "Navigation UT/GP"; ?>
+        <div class="navigation-container">
+            <div class="society-header">
+                <a href="<?php echo dol_buildpath('custom/' . $saturneElement->module . '/view/' . $saturneElement->module . 'standard/' . $saturneElement->module . 'standard_card.php?id=' . getDolGlobalInt(dol_strtoupper($saturneElement->module) . '_ACTIVE_STANDARD'), 1); ?>" class="linkElement">
+                    <i class="fas fa-building pictofixedwidth"><span class="title"><?php echo getDolGlobalString('MAIN_INFO_SOCIETE_NOM'); ?></span></i>
+                </a>
+                <?php if ($user->hasRight($saturneElement->module, $saturneElement->element, 'write')) : ?>
+                    <div class="add-container">
+                        <a id="newGroupment" href="<?php echo dol_buildpath('custom/' . $saturneElement->module . '/view/' . $saturneElement->element . '/' . $saturneElement->element . '_card.php?action=create&element_type=groupment&fk_parent=0', 1); ?>">
+                            <div class="wpeo-button button-square-40 button-secondary wpeo-tooltip-event" data-direction="bottom" data-color="light" aria-label="<?php echo $langs->trans('NewGroupment'); ?>"><strong><?php //echo $modGroupment->prefix; ?></strong><span class="button-add animated fas fa-plus-circle"></span></div>
+                        </a>
+                        <a id="newWorkunit" href="<?php echo dol_buildpath('custom/digiriskdolibarr/view/digiriskelement/digiriskelement_card.php?action=create&element_type=workunit&fk_parent=0', 1);?>">
+                            <div class="wpeo-button button-square-40 wpeo-tooltip-event" data-direction="bottom" data-color="light" aria-label="<?php echo $langs->trans('NewWorkUnit'); ?>"><strong><?php //echo $modWorkUnit->prefix; ?></strong><span class="button-add animated fas fa-plus-circle"></span></div>
+                        </a>
+                    </div>
+                <?php endif; ?>
+            </div>
+            <?php if (!empty($saturneElements)) : ?>
+                <div class="toolbar">
+                    <div class="toggle-plus tooltip hover" aria-label="<?php echo $langs->trans('UnwrapAll'); ?>"><span class="icon fas fa-plus-square"></span></div>
+                    <div class="toggle-minus tooltip hover" aria-label="<?php echo $langs->trans('WrapAll'); ?>"><span class="icon fas fa-minus-square"></span></div>
+                </div>
+            <?php else : ?>
+                <div class="society-header">
+                    <a id="newGroupment" href="<?php echo dol_buildpath('custom/' . $moduleName . '/view/' . $moduleName . 'element/' . $moduleName . 'element_card.php?action=create&element_type=groupment&fk_parent=0', 1); ?>">
+                        <div class="wpeo-button button-square-40 button-secondary wpeo-tooltip-event" data-direction="bottom" data-color="light" aria-label="<?php echo $langs->trans('NewGroupment'); ?>"><strong><?php //echo $modGroupment->prefix; ?></strong><span class="button-add animated fas fa-plus-circle"></span></div>
+                    </a>
+                    <a id="newWorkunit" href="<?php echo dol_buildpath('custom/digiriskdolibarr/view/digiriskelement/digiriskelement_card.php?action=create&element_type=workunit&fk_parent=0', 1);?>">
+                        <div class="wpeo-button button-square-40 wpeo-tooltip-event" data-direction="bottom" data-color="light" aria-label="<?php echo $langs->trans('NewWorkUnit'); ?>"><strong><?php //echo $modWorkUnit->prefix; ?></strong><span class="button-add animated fas fa-plus-circle"></span></div>
+                    </a>
+                </div>
+            <?php endif; ?>
+            <ul class="workunit-list">
+                <script>
+                    if (localStorage.maximized == 'false') {
+                        $('#id-left').attr('style', 'display:none !important')
+                    }
+                </script>
+                <?php saturne_display_recurse_tree($saturneElementTree); ?>
+                <script>
+                    // Get previous menu to display it
+                    var MENU = localStorage.menu;
+                    if (MENU == null || MENU == '') {
+                        MENU = new Set()
+                    } else {
+                        MENU = JSON.parse(MENU);
+                        MENU = new Set(MENU);
+                    }
+
+                    MENU.forEach((id) =>  {
+                        jQuery( '#menu'+id).removeClass( 'fa-chevron-right').addClass( 'fa-chevron-down' );
+                        jQuery( '#unit'+id ).addClass( 'toggled' );
+                    });
+
+                    <?php //$saturneElement->fetch(GETPOST('id') ?: GETPOST('fromid')); ?>
+                    var idParent = <?php //echo json_encode($saturneElement->fk_parent);?> ;
+
+                    jQuery( '#menu'+idParent).removeClass( 'fa-chevron-right').addClass( 'fa-chevron-down' );
+                    jQuery( '#unit'+idParent ).addClass( 'toggled' );
+
+                    // Set active unit active
+                    jQuery( '.digirisk-wrap .navigation-container .unit.active' ).removeClass( 'active' );
+
+                    var params = new window.URLSearchParams(window.location.search);
+                    var id = params.get('id');
+                    id = !id ? params.get('fromid') : id
+
+                    if ((document.URL.match(/digiriskelement/) || document.URL.match(/accident/)) && !document.URL.match(/type=standard/)) {
+                        var elementBranch = <?php //echo json_encode($saturneElement->getBranch(GETPOST('id'))); ?>;
+                        elementBranch.forEach((id) =>  {
+                            jQuery( '#menu'+id).removeClass( 'fa-chevron-right').addClass( 'fa-chevron-down' );
+                            jQuery( '#unit'+id ).addClass( 'toggled' );
+                        });
+
+                        jQuery( '#unit'  + id ).addClass( 'active' );
+                        jQuery( '#unit'  + id ).closest( '.unit' ).attr( 'value', id );
+
+                        var container = jQuery('.navigation-container');
+                        $(container).animate({
+                            scrollTop: $("#unit"  + id).offset().top - 100
+                        }, 500);
+                    }
+                </script>
+            </ul>
+        </div>
+    </div>
+    <?php
+}
+
+/**
+ *	Display Recursive tree process
+ *
+ * @param	array $digiriskElementTree Global Digirisk Element list after recursive process
+ * @return	void
+ */
+function saturne_display_recurse_tree($digiriskElementTree)
+{
+    include_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
+
+    global $conf, $langs, $user, $moduleNameLowerCase;
+
+//    $numberingModules = [
+//        'digiriskelement/groupment' => $conf->global->DIGIRISKDOLIBARR_GROUPMENT_ADDON,
+//        'digiriskelement/workunit' => $conf->global->DIGIRISKDOLIBARR_WORKUNIT_ADDON,
+//    ];
+
+    //list($modGroupment, $modWorkUnit) = saturne_require_objects_mod($numberingModules, $moduleNameLowerCase);
+
+    if ($user->rights->digiriskdolibarr->digiriskelement->read) {
+        if ( ! empty($digiriskElementTree)) {
+            $riskType = GETPOSTISSET('risk_type') && !empty(GETPOST('risk_type')) ? GETPOST('risk_type') : 'risk';
+            foreach ($digiriskElementTree as $element) { ?>
+                <?php if ($element['object']->id == $conf->global->DIGIRISKDOLIBARR_DIGIRISKELEMENT_TRASH) : ?>
+                    <hr>
+                <?php endif; ?>
+                <li class="unit type-<?php echo $element['object']->element_type; ?>" id="unit<?php  echo $element['object']->id; ?>">
+                    <div class="unit-container">
+                        <?php if ($element['object']->element_type == 'groupment' && count($element['children'])) { ?>
+                            <div class="toggle-unit">
+                                <i class="toggle-icon fas fa-chevron-right" id="menu<?php echo $element['object']->id;?>"></i>
+                            </div>
+                        <?php } else { ?>
+                            <div class="spacer"></div>
+                        <?php }
+                        print '<span class="open-media-gallery add-media modal-open photo digirisk-element-photo-'. $element['object']->id .'" value="0">';
+                        print '<input type="hidden" class="modal-options" data-modal-to-open="media_gallery" data-from-id="'. $element['object']->id .'" data-from-type="'. $element['object']->element_type .'" data-from-subtype="photo" data-from-subdir="" data-photo-class="digirisk-element-photo-'. $element['object']->id .'"/>';
+                        print saturne_show_medias_linked('digiriskdolibarr', $conf->digiriskdolibarr->multidir_output[$conf->entity] . '/' . $element['object']->element_type . '/' . $element['object']->ref, 'small', 1, 0, 0, 0, 50, 50, 1, 0, 0, $element['object']->element_type . '/' . $element['object']->ref, $element['object'], 'photo', 0, 0, 0, 1, 'cursorpointer');
+                        print '</span>';
+                        ?>
+                        <div class="title" id="scores" value="<?php echo $element['object']->id ?>">
+                            <?php
+                            if ($user->rights->digiriskdolibarr->risk->read) : ?>
+                                <a id="slider" class="linkElement id<?php echo $element['object']->id;?>" href="<?php echo dol_buildpath('/custom/digiriskdolibarr/view/digiriskelement/digiriskelement_risk.php?id=' . $element['object']->id . '&risk_type=' . $riskType, 1);?>">
+								<span class="title-container">
+									<span class="ref"><?php echo $element['object']->ref; ?></span>
+									<span class="name"><?php echo dol_trunc($element['object']->label, 20); ?></span>
+								</span>
+                                </a>
+                            <?php else : ?>
+                                <a id="slider" class="linkElement id<?php echo $element['object']->id;?>" href="<?php echo dol_buildpath('/custom/digiriskdolibarr/view/digiriskelement/digiriskelement_card.php?id=' . $element['object']->id, 1);?>">
+								<span class="title-container">
+									<span class="ref"><?php echo $element['object']->ref; ?></span>
+									<span class="name"><?php echo dol_trunc($element['object']->label, 20); ?></span>
+								</span>
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                        <?php if ($user->rights->digiriskdolibarr->digiriskelement->write) : ?>
+                            <?php if ($element['object']->element_type == 'groupment') : ?>
+                                <div class="add-container">
+                                    <a id="newGroupment" href="<?php echo dol_buildpath('/custom/digiriskdolibarr/view/digiriskelement/digiriskelement_card.php?action=create&element_type=groupment&fk_parent=' . $element['object']->id, 1);?>">
+                                        <div
+                                            class="wpeo-button button-secondary button-square-40 wpeo-tooltip-event"
+                                            data-direction="bottom" data-color="light"
+                                            aria-label="<?php echo $langs->trans('NewGroupment'); ?>">
+                                            <strong><?php //echo $modGroupment->prefix; ?></strong>
+                                            <span class="button-add animated fas fa-plus-circle"></span>
+                                        </div>
+                                    </a>
+                                    <a id="newWorkunit" href="<?php echo dol_buildpath('/custom/digiriskdolibarr/view/digiriskelement/digiriskelement_card.php?action=create&element_type=workunit&fk_parent=' . $element['object']->id, 1);?>">
+                                        <div
+                                            class="wpeo-button button-square-40 wpeo-tooltip-event"
+                                            data-direction="bottom" data-color="light"
+                                            aria-label="<?php echo $langs->trans('NewWorkUnit'); ?>">
+                                            <strong><?php //echo $modWorkUnit->prefix; ?></strong>
+                                            <span class="button-add animated fas fa-plus-circle"></span>
+                                        </div>
+                                    </a>
+                                </div>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
+                    <ul class="sub-list"><?php display_recurse_tree($element['children']) ?></ul>
+                </li>
+                <?php if ($element['object']->id == $conf->global->DIGIRISKDOLIBARR_DIGIRISKELEMENT_TRASH) : ?>
+                    <hr>
+                <?php endif; ?>
+            <?php }
+        }
+    } else {
+        print $langs->trans('YouDontHaveTheRightToSeeThis');
+    }
+}
+
+/**
+ * Recursive tree process
+ *
+ * @param  int   $parentID                  Element parent id of Digirisk Element object
+ * @param  int   $depth                     Depth of tree
+ * @param  array $digiriskElements          Global Digirisk Element list
+ * @param  bool  $addCurrentDigiriskElement Add current digirisk element info
+ * @return array $tree                      Global Digirisk Element list after recursive process
+ */
+function saturne_recurse_tree(int $parentID, int $depth, array $digiriskElements, bool $addCurrentDigiriskElement = false): array
+{
+    $tree = [];
+
+    foreach ($digiriskElements as $digiriskElement) {
+        if ($digiriskElement->fk_parent == $parentID || ($digiriskElement->id == $parentID && $addCurrentDigiriskElement)) {
+            $tree[$digiriskElement->id] = [
+                'id'       => $digiriskElement->id,
+                'depth'    => $depth,
+                'object'   => $digiriskElement,
+                'children' => saturne_recurse_tree($digiriskElement->id, $depth + 1, $digiriskElements)
+            ];
+        }
+    }
+
+    return $tree;
 }
 
 /**
