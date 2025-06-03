@@ -49,6 +49,11 @@ abstract class SaturneObject extends CommonObject
     public $isextrafieldmanaged = 1;
 
     /**
+     * @var int Does object support category module ? 0 = No, 1 = Yes
+     */
+    public int $isCategoryManaged = 1;
+
+    /**
      * Constructor.
      *
      * @param DoliDb $db                  Database handler
@@ -628,7 +633,11 @@ abstract class SaturneObject extends CommonObject
      */
     public function setCategories($categories)
     {
-        return parent::setCategoriesCommon($categories, $this->element);
+        if ($this->isCategoryManaged == 1) {
+            return parent::setCategoriesCommon($categories, $this->element);
+        } else {
+            return 0;
+        }
     }
 
 	/**
