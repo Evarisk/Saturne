@@ -128,13 +128,13 @@ class SaturneElement extends SaturneObject
         'status'           => ['type' => 'smallint',     'label' => 'Status',           'enabled' => 1, 'position' => 70,  'notnull' => 1, 'visible' => -2, 'default' => 1, 'index' => 1, 'arrayofkeyval' => [-2 => 'Trashed', 1 => 'Validated', 3 => 'Archived']],
         'label'            => ['type' => 'varchar(255)', 'label' => 'Label',            'enabled' => 1, 'position' => 110, 'notnull' => 1, 'visible' => 1, 'searchall' => 1, 'css' => 'maxwidth500 widthcentpercentminusxx'],
         'description'      => ['type' => 'html',         'label' => 'Description',      'enabled' => 1, 'position' => 120, 'notnull' => 0, 'visible' => 1],
-        'element_type'     => ['type' => 'select',       'label' => 'ElementType',      'enabled' => 1, 'position' => 100, 'notnull' => 1, 'visible' => 1],
+        'element_type'     => ['type' => 'select',       'label' => 'ElementType',      'enabled' => 1, 'position' => 100, 'notnull' => 1, 'visible' => 1, 'noteditable' => 1],
         'photo'            => ['type' => 'varchar(255)', 'label' => 'Photo',            'enabled' => 1, 'position' => 130, 'notnull' => 0, 'visible' => -2],
         'position'         => ['type' => 'integer',      'label' => 'Position',         'enabled' => 1, 'position' => 140, 'notnull' => 1, 'visible' => -2],
-        'fk_parent'        => ['type' => 'integer',      'label' => 'ParentElement',    'enabled' => 1, 'position' => 90,  'notnull' => 1, 'visible' => 1, 'noteditable' => 1],
-        'fk_standard'      => ['type' => 'integer:SaturneStandard:saturne/class/saturnestandard.class.php', 'label' => 'Standard',                       'enabled' => 1, 'position' => 80,  'notnull' => 1,  'visible' => 1,  'noteditable' => 1],
-        'fk_user_creat'    => ['type' => 'integer:User:user/class/user.class.php',                          'label' => 'UserAuthor', 'picto'  => 'user', 'enabled' => 1, 'position' => 150, 'notnull' => 1,  'visible' => -2, 'index'   => 1, 'foreignkey' => 'user.rowid'],
-        'fk_user_modif'    => ['type' => 'integer:User:user/class/user.class.php',                          'label' => 'UserModif',  'picto'  => 'user', 'enabled' => 1, 'position' => 160, 'notnull' => -1, 'visible' => -2, 'index'   => 1, 'foreignkey' => 'user.rowid']
+        'fk_standard'      => ['type' => 'integer:SaturneStandard:saturne/class/saturnestandard.class.php', 'label' => 'Standard/Reference',             'enabled' => 1, 'position' => 80,  'notnull' => 1,  'visible' => 1,  'index' => 1, 'foreignkey' => 'saturne_standard.rowid',       'noteditable' => 1],
+        'fk_parent'        => ['type' => 'integer:SaturneElement:saturne/class/saturneelement.class.php',   'label' => 'ParentElement',                  'enabled' => 1, 'position' => 90,  'notnull' => 1,  'visible' => 1,  'index' => 1, 'foreignkey' => 'saturne_object_element.rowid', 'noteditable' => 1],
+        'fk_user_creat'    => ['type' => 'integer:User:user/class/user.class.php',                          'label' => 'UserAuthor', 'picto'  => 'user', 'enabled' => 1, 'position' => 150, 'notnull' => 1,  'visible' => -2, 'index' => 1, 'foreignkey' => 'user.rowid'],
+        'fk_user_modif'    => ['type' => 'integer:User:user/class/user.class.php',                          'label' => 'UserModif',  'picto'  => 'user', 'enabled' => 1, 'position' => 160, 'notnull' => -1, 'visible' => -2, 'index' => 1, 'foreignkey' => 'user.rowid']
     ];
 //        'show_in_selector' => ['type' => 'boolean',      'label' => 'ShowInSelectOnPublicTicketInterface', 'enabled' => 1, 'position' => 106, 'notnull' => 1, 'visible' => 1, 'default' => 1,],
 
@@ -171,7 +171,7 @@ class SaturneElement extends SaturneObject
     /**
      * @var string Import key
      */
-    public $import_key = 0;
+    public $import_key;
 
     /**
      * @var int Status
@@ -221,20 +221,20 @@ class SaturneElement extends SaturneObject
     public function create(User $user, bool $notrigger = false): int
     {
         global $conf;
-        if (empty($this->ref)) {
-            $type = 'DIGIRISKDOLIBARR_' . dol_strtoupper($this->element_type) . '_ADDON';
-            $objectMod = $conf->global->$type;
-            $numberingModules = [
-                'digiriskelement/' . $this->element_type => $objectMod
-            ];
-            list($refDigiriskElementMod) = saturne_require_objects_mod($numberingModules, 'digiriskdolibarr');
+//        if (empty($this->ref)) {
+//            $type = 'DIGIRISKDOLIBARR_' . dol_strtoupper($this->element_type) . '_ADDON';
+//            $objectMod = $conf->global->$type;
+//            $numberingModules = [
+//                'digiriskelement/' . $this->element_type => $objectMod
+//            ];
+//            list($refDigiriskElementMod) = saturne_require_objects_mod($numberingModules, 'digiriskdolibarr');
+//
+//            $ref = $refDigiriskElementMod->getNextValue($this);
+//            $this->ref = $ref;
+//        }
 
-            $ref = $refDigiriskElementMod->getNextValue($this);
-            $this->ref = $ref;
-        }
-        $this->element = $this->element_type . '@digiriskdolibarr';
-        $this->fk_standard = $conf->global->DIGIRISKDOLIBARR_ACTIVE_STANDARD;
-        $this->status = 1;
+        $this->status      = self::STATUS_VALIDATED;
+        $this->fk_standard = getDolGlobalInt(dol_strtoupper($this->module) . '_ACTIVE_STANDARD');
 
         return $this->createCommon($user, $notrigger);
     }
@@ -249,8 +249,8 @@ class SaturneElement extends SaturneObject
      */
     public function delete(User $user, bool $notrigger = false, bool $softDelete = true): int
     {
-        $this->fk_parent = getDolGlobalInt(dol_strtoupper($this->module) . '_' . dol_strtoupper($this->element) . '_TRASH');
         $this->status    = self::STATUS_TRASHED;
+        $this->fk_parent = getDolGlobalInt(dol_strtoupper($this->module) . '_' . dol_strtoupper($this->element) . '_TRASH');
 
         return $this->update($user, true);
     }

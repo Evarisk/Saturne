@@ -78,15 +78,15 @@ function saturne_header(int $load_media_gallery = 0, string $head = '', string $
 /**
  * @throws Exception
  */
-function saturne_more_left_menu($moduleName, $objectType): void
+function saturne_more_left_menu($moduleNameLowerCase, $objectType): void
 {
     global $conf, $db, $langs, $user;
 
-    require_once __DIR__ . '/../class/saturneelement.class.php';
+    require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . dol_strtolower($objectType) . '.class.php';
 //    require_once __DIR__ . '/../class/digiriskelement/groupment.class.php';
 //    require_once __DIR__ . '/../class/digiriskelement/workunit.class.php';
 
-    $saturneElement = new SaturneElement($db, $moduleName, $objectType);
+    $objectElement = new $objectType($db);
 
 //    $numberingModules = [
 //        'digiriskelement/groupment' => getDolGlobalString('DIGIRISKDOLIBARR_GROUPMENT_ADDON'),
@@ -95,46 +95,46 @@ function saturne_more_left_menu($moduleName, $objectType): void
 
 //    list($modGroupment, $modWorkUnit) = saturne_require_objects_mod($numberingModules, $saturneElement->module);
 
-    // Body navigation digirisk
-    $filter           = 't.entity IN (' . $conf->entity . ') AND t.fk_standard = ' . getDolGlobalInt(dol_strtoupper($saturneElement->module) . '_ACTIVE_STANDARD');
-    $filter          .= !getDolGlobalInt('DIGIRISKDOLIBARR_SHOW_HIDDEN_DIGIRISKELEMENT') ? ' AND t.status = ' . SaturneElement::STATUS_VALIDATED : '';
-    $saturneElements = saturne_fetch_all_object_type('SaturneElement', '', 'position', 0, 0, ['customsql' => $filter]);
-    if (!is_array($saturneElements) || empty($saturneElements)) {
-        $saturneElements = [];
+    // Body navigation
+    $filter         = 't.entity IN (' . $conf->entity . ') AND t.fk_standard = ' . getDolGlobalInt(dol_strtoupper($objectElement->module) . '_ACTIVE_STANDARD');
+    $filter        .= !getDolGlobalInt('DIGIRISKDOLIBARR_SHOW_HIDDEN_DIGIRISKELEMENT') ? ' AND t.status = ' . SaturneElement::STATUS_VALIDATED : '';
+    $objectElements = saturne_fetch_all_object_type($objectType, '', 'position', 0, 0, ['customsql' => $filter]);
+    if (!is_array($objectElements) || empty($objectElements)) {
+        $objectElements = [];
     }
 
-    $saturneElementTree = saturne_recurse_tree(0, 0, $saturneElements); ?>
+    $objectElementTree = saturne_recurse_tree(getDolGlobalInt(dol_strtoupper($objectElement->module) . '_ACTIVE_STANDARD'), 0, $objectElements); ?>
 
     <div class="digirisk-wrap">
         <i class="fas fa-bars pictofixedwidth"></i><?php echo "Navigation UT/GP"; ?>
         <div class="navigation-container">
             <div class="society-header">
-                <a href="<?php echo dol_buildpath('custom/' . $saturneElement->module . '/view/' . $saturneElement->module . 'standard/' . $saturneElement->module . 'standard_card.php?id=' . getDolGlobalInt(dol_strtoupper($saturneElement->module) . '_ACTIVE_STANDARD'), 1); ?>" class="linkElement">
+                <a href="<?php echo dol_buildpath('custom/' . $objectElement->module . '/view/' . $objectElement->module . 'standard/' . $objectElement->module . 'standard_card.php?id=' . getDolGlobalInt(dol_strtoupper($objectElement->module) . '_ACTIVE_STANDARD'), 1); ?>" class="linkElement">
                     <i class="fas fa-building pictofixedwidth"><span class="title"><?php echo getDolGlobalString('MAIN_INFO_SOCIETE_NOM'); ?></span></i>
                 </a>
-                <?php if ($user->hasRight($saturneElement->module, $saturneElement->element, 'write')) : ?>
+                <?php if ($user->hasRight($objectElement->module, $objectElement->element, 'write')) : ?>
                     <div class="add-container">
-                        <a id="newGroupment" href="<?php echo dol_buildpath('custom/' . $saturneElement->module . '/view/' . $saturneElement->element . '/' . $saturneElement->element . '_card.php?action=create&element_type=groupment&fk_parent=0', 1); ?>">
-                            <div class="wpeo-button button-square-40 button-secondary wpeo-tooltip-event" data-direction="bottom" data-color="light" aria-label="<?php echo $langs->trans('NewGroupment'); ?>"><strong><?php //echo $modGroupment->prefix; ?></strong><span class="button-add animated fas fa-plus-circle"></span></div>
+                        <a id="newGroupment" href="<?php echo dol_buildpath('custom/' . $objectElement->module . '/view/' . $objectElement->element . '/' . $objectElement->element . '_card.php?action=create&element_type=0', 1); ?>">
+                            <div class="wpeo-button button-square-40 button-secondary wpeo-tooltip-event" data-direction="bottom" data-color="light" aria-label="<?php echo $langs->trans($objectElement->fields['element_type']['arrayofkeyval'][0]); ?>"><strong><?php //echo $modGroupment->prefix; ?></strong><span class="button-add animated fas fa-plus-circle"></span></div>
                         </a>
-                        <a id="newWorkunit" href="<?php echo dol_buildpath('custom/digiriskdolibarr/view/digiriskelement/digiriskelement_card.php?action=create&element_type=workunit&fk_parent=0', 1);?>">
-                            <div class="wpeo-button button-square-40 wpeo-tooltip-event" data-direction="bottom" data-color="light" aria-label="<?php echo $langs->trans('NewWorkUnit'); ?>"><strong><?php //echo $modWorkUnit->prefix; ?></strong><span class="button-add animated fas fa-plus-circle"></span></div>
+                        <a id="newWorkunit" href="<?php echo dol_buildpath('custom/' . $objectElement->module . '/view/' . $objectElement->element . '/' . $objectElement->element . '_card.php?action=create&element_type=1', 1); ?>">
+                            <div class="wpeo-button button-square-40 wpeo-tooltip-event" data-direction="bottom" data-color="light" aria-label="<?php echo $langs->trans($objectElement->fields['element_type']['arrayofkeyval'][1]); ?>"><strong><?php //echo $modWorkUnit->prefix; ?></strong><span class="button-add animated fas fa-plus-circle"></span></div>
                         </a>
                     </div>
                 <?php endif; ?>
             </div>
-            <?php if (!empty($saturneElements)) : ?>
+            <?php if (!empty($objectElements)) : ?>
                 <div class="toolbar">
                     <div class="toggle-plus tooltip hover" aria-label="<?php echo $langs->trans('UnwrapAll'); ?>"><span class="icon fas fa-plus-square"></span></div>
                     <div class="toggle-minus tooltip hover" aria-label="<?php echo $langs->trans('WrapAll'); ?>"><span class="icon fas fa-minus-square"></span></div>
                 </div>
             <?php else : ?>
                 <div class="society-header">
-                    <a id="newGroupment" href="<?php echo dol_buildpath('custom/' . $moduleName . '/view/' . $moduleName . 'element/' . $moduleName . 'element_card.php?action=create&element_type=groupment&fk_parent=0', 1); ?>">
-                        <div class="wpeo-button button-square-40 button-secondary wpeo-tooltip-event" data-direction="bottom" data-color="light" aria-label="<?php echo $langs->trans('NewGroupment'); ?>"><strong><?php //echo $modGroupment->prefix; ?></strong><span class="button-add animated fas fa-plus-circle"></span></div>
+                    <a id="newGroupment" href="<?php echo dol_buildpath('custom/' . $objectElement->module . '/view/' . $objectElement->element . '/' . $objectElement->element . '_card.php?action=create&element_type=0', 1); ?>">
+                        <div class="wpeo-button button-square-40 button-secondary wpeo-tooltip-event" data-direction="bottom" data-color="light" aria-label="<?php echo $langs->trans($objectElement->fields['element_type']['arrayofkeyval'][0]); ?>"><strong><?php //echo $modGroupment->prefix; ?></strong><span class="button-add animated fas fa-plus-circle"></span></div>
                     </a>
-                    <a id="newWorkunit" href="<?php echo dol_buildpath('custom/digiriskdolibarr/view/digiriskelement/digiriskelement_card.php?action=create&element_type=workunit&fk_parent=0', 1);?>">
-                        <div class="wpeo-button button-square-40 wpeo-tooltip-event" data-direction="bottom" data-color="light" aria-label="<?php echo $langs->trans('NewWorkUnit'); ?>"><strong><?php //echo $modWorkUnit->prefix; ?></strong><span class="button-add animated fas fa-plus-circle"></span></div>
+                    <a id="newWorkunit" href="<?php echo dol_buildpath('custom/' . $objectElement->module . '/view/' . $objectElement->element . '/' . $objectElement->element . '_card.php?action=create&element_type=1', 1); ?>">
+                        <div class="wpeo-button button-square-40 wpeo-tooltip-event" data-direction="bottom" data-color="light" aria-label="<?php echo $langs->trans($objectElement->fields['element_type']['arrayofkeyval'][1]); ?>"><strong><?php //echo $modWorkUnit->prefix; ?></strong><span class="button-add animated fas fa-plus-circle"></span></div>
                     </a>
                 </div>
             <?php endif; ?>
@@ -144,7 +144,7 @@ function saturne_more_left_menu($moduleName, $objectType): void
                         $('#id-left').attr('style', 'display:none !important')
                     }
                 </script>
-                <?php saturne_display_recurse_tree($saturneElementTree); ?>
+                <?php saturne_display_recurse_tree($objectElementTree, $objectElement); ?>
                 <script>
                     // Get previous menu to display it
                     var MENU = localStorage.menu;
@@ -196,16 +196,15 @@ function saturne_more_left_menu($moduleName, $objectType): void
 }
 
 /**
- *	Display Recursive tree process
+ * Display recursive tree process
  *
- * @param	array $digiriskElementTree Global Digirisk Element list after recursive process
- * @return	void
+ * @param  array  $objectElementTree Global Object Element list after recursive process
+ * @param  object $objectElement     Object Element (Digirisk Element, DigiQuali Element, etc.)
+ * @return void
  */
-function saturne_display_recurse_tree($digiriskElementTree)
+function saturne_display_recurse_tree(array $objectElementTree, object $objectElement): void
 {
-    include_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
-
-    global $conf, $langs, $user, $moduleNameLowerCase;
+    global $conf, $langs, $user;
 
 //    $numberingModules = [
 //        'digiriskelement/groupment' => $conf->global->DIGIRISKDOLIBARR_GROUPMENT_ADDON,
@@ -214,79 +213,78 @@ function saturne_display_recurse_tree($digiriskElementTree)
 
     //list($modGroupment, $modWorkUnit) = saturne_require_objects_mod($numberingModules, $moduleNameLowerCase);
 
-    if ($user->rights->digiriskdolibarr->digiriskelement->read) {
-        if ( ! empty($digiriskElementTree)) {
-            $riskType = GETPOSTISSET('risk_type') && !empty(GETPOST('risk_type')) ? GETPOST('risk_type') : 'risk';
-            foreach ($digiriskElementTree as $element) { ?>
-                <?php if ($element['object']->id == $conf->global->DIGIRISKDOLIBARR_DIGIRISKELEMENT_TRASH) : ?>
-                    <hr>
-                <?php endif; ?>
-                <li class="unit type-<?php echo $element['object']->element_type; ?>" id="unit<?php  echo $element['object']->id; ?>">
-                    <div class="unit-container">
-                        <?php if ($element['object']->element_type == 'groupment' && count($element['children'])) { ?>
-                            <div class="toggle-unit">
-                                <i class="toggle-icon fas fa-chevron-right" id="menu<?php echo $element['object']->id;?>"></i>
-                            </div>
-                        <?php } else { ?>
-                            <div class="spacer"></div>
-                        <?php }
-                        print '<span class="open-media-gallery add-media modal-open photo digirisk-element-photo-'. $element['object']->id .'" value="0">';
-                        print '<input type="hidden" class="modal-options" data-modal-to-open="media_gallery" data-from-id="'. $element['object']->id .'" data-from-type="'. $element['object']->element_type .'" data-from-subtype="photo" data-from-subdir="" data-photo-class="digirisk-element-photo-'. $element['object']->id .'"/>';
-                        print saturne_show_medias_linked('digiriskdolibarr', $conf->digiriskdolibarr->multidir_output[$conf->entity] . '/' . $element['object']->element_type . '/' . $element['object']->ref, 'small', 1, 0, 0, 0, 50, 50, 1, 0, 0, $element['object']->element_type . '/' . $element['object']->ref, $element['object'], 'photo', 0, 0, 0, 1, 'cursorpointer');
-                        print '</span>';
-                        ?>
-                        <div class="title" id="scores" value="<?php echo $element['object']->id ?>">
-                            <?php
-                            if ($user->rights->digiriskdolibarr->risk->read) : ?>
-                                <a id="slider" class="linkElement id<?php echo $element['object']->id;?>" href="<?php echo dol_buildpath('/custom/digiriskdolibarr/view/digiriskelement/digiriskelement_risk.php?id=' . $element['object']->id . '&risk_type=' . $riskType, 1);?>">
-								<span class="title-container">
-									<span class="ref"><?php echo $element['object']->ref; ?></span>
-									<span class="name"><?php echo dol_trunc($element['object']->label, 20); ?></span>
-								</span>
-                                </a>
-                            <?php else : ?>
-                                <a id="slider" class="linkElement id<?php echo $element['object']->id;?>" href="<?php echo dol_buildpath('/custom/digiriskdolibarr/view/digiriskelement/digiriskelement_card.php?id=' . $element['object']->id, 1);?>">
-								<span class="title-container">
-									<span class="ref"><?php echo $element['object']->ref; ?></span>
-									<span class="name"><?php echo dol_trunc($element['object']->label, 20); ?></span>
-								</span>
-                                </a>
-                            <?php endif; ?>
-                        </div>
-                        <?php if ($user->rights->digiriskdolibarr->digiriskelement->write) : ?>
-                            <?php if ($element['object']->element_type == 'groupment') : ?>
-                                <div class="add-container">
-                                    <a id="newGroupment" href="<?php echo dol_buildpath('/custom/digiriskdolibarr/view/digiriskelement/digiriskelement_card.php?action=create&element_type=groupment&fk_parent=' . $element['object']->id, 1);?>">
-                                        <div
-                                            class="wpeo-button button-secondary button-square-40 wpeo-tooltip-event"
-                                            data-direction="bottom" data-color="light"
-                                            aria-label="<?php echo $langs->trans('NewGroupment'); ?>">
-                                            <strong><?php //echo $modGroupment->prefix; ?></strong>
-                                            <span class="button-add animated fas fa-plus-circle"></span>
-                                        </div>
-                                    </a>
-                                    <a id="newWorkunit" href="<?php echo dol_buildpath('/custom/digiriskdolibarr/view/digiriskelement/digiriskelement_card.php?action=create&element_type=workunit&fk_parent=' . $element['object']->id, 1);?>">
-                                        <div
-                                            class="wpeo-button button-square-40 wpeo-tooltip-event"
-                                            data-direction="bottom" data-color="light"
-                                            aria-label="<?php echo $langs->trans('NewWorkUnit'); ?>">
-                                            <strong><?php //echo $modWorkUnit->prefix; ?></strong>
-                                            <span class="button-add animated fas fa-plus-circle"></span>
-                                        </div>
-                                    </a>
-                                </div>
-                            <?php endif; ?>
-                        <?php endif; ?>
-                    </div>
-                    <ul class="sub-list"><?php display_recurse_tree($element['children']) ?></ul>
-                </li>
-                <?php if ($element['object']->id == $conf->global->DIGIRISKDOLIBARR_DIGIRISKELEMENT_TRASH) : ?>
-                    <hr>
-                <?php endif; ?>
-            <?php }
-        }
-    } else {
+    if (empty($objectElementTree) || !$user->hasRight($objectElement->module, $objectElement->element, 'read')) {
         print $langs->trans('YouDontHaveTheRightToSeeThis');
+        return;
+    }
+
+    //$riskType = GETPOSTISSET('risk_type') && !empty(GETPOST('risk_type')) ? GETPOST('risk_type') : 'risk';
+    foreach ($objectElementTree as $objectElement) {
+        if ($objectElement['object']->id == getDolGlobalInt('DIGIRISKDOLIBARR_DIGIRISKELEMENT_TRASH')) {
+            print '<hr>';
+        } ?>
+        <li class="unit type-<?php echo $objectElement['object']->element_type; ?>" id="unit<?php  echo $objectElement['object']->id; ?>">
+            <div class="unit-container">
+                <?php if ($objectElement['object']->element_type == 'groupment' && count($objectElement['children'])) { ?>
+                    <div class="toggle-unit">
+                        <i class="toggle-icon fas fa-chevron-right" id="menu<?php echo $objectElement['object']->id;?>"></i>
+                    </div>
+                <?php } else { ?>
+                    <div class="spacer"></div>
+                <?php }
+                print '<span class="open-media-gallery add-media modal-open photo digirisk-element-photo-'. $objectElement['object']->id .'" value="0">';
+                print '<input type="hidden" class="modal-options" data-modal-to-open="media_gallery" data-from-id="'. $objectElement['object']->id .'" data-from-type="'. $objectElement['object']->element_type .'" data-from-subtype="photo" data-from-subdir="" data-photo-class="digirisk-element-photo-'. $objectElement['object']->id .'"/>';
+                print saturne_show_medias_linked('digiriskdolibarr', $conf->digiriskdolibarr->multidir_output[$conf->entity] . '/' . $objectElement['object']->element_type . '/' . $objectElement['object']->ref, 'small', 1, 0, 0, 0, 50, 50, 1, 0, 0, $objectElement['object']->element_type . '/' . $objectElement['object']->ref, $objectElement['object'], 'photo', 0, 0, 0, 1, 'cursorpointer');
+                print '</span>';
+                ?>
+                <div class="title" id="scores" value="<?php echo $objectElement['object']->id ?>">
+                    <?php
+                    if ($user->rights->digiriskdolibarr->risk->read) : ?>
+                        <a id="slider" class="linkElement id<?php echo $objectElement['object']->id;?>" href="<?php echo dol_buildpath('/custom/digiriskdolibarr/view/digiriskelement/digiriskelement_risk.php?id=' . $objectElement['object']->id . '&risk_type=' . $riskType, 1);?>">
+                        <span class="title-container">
+                            <span class="ref"><?php echo $objectElement['object']->ref; ?></span>
+                            <span class="name"><?php echo dol_trunc($objectElement['object']->label, 20); ?></span>
+                        </span>
+                        </a>
+                    <?php else : ?>
+                        <a id="slider" class="linkElement id<?php echo $objectElement['object']->id;?>" href="<?php echo dol_buildpath('/custom/digiriskdolibarr/view/digiriskelement/digiriskelement_card.php?id=' . $objectElement['object']->id, 1);?>">
+                        <span class="title-container">
+                            <span class="ref"><?php echo $objectElement['object']->ref; ?></span>
+                            <span class="name"><?php echo dol_trunc($objectElement['object']->label, 20); ?></span>
+                        </span>
+                        </a>
+                    <?php endif; ?>
+                </div>
+                <?php if ($user->rights->digiriskdolibarr->digiriskelement->write) : ?>
+                    <?php if ($objectElement['object']->element_type == 'groupment') : ?>
+                        <div class="add-container">
+                            <a id="newGroupment" href="<?php echo dol_buildpath('/custom/digiriskdolibarr/view/digiriskelement/digiriskelement_card.php?action=create&element_type=groupment&fk_parent=' . $objectElement['object']->id, 1);?>">
+                                <div
+                                    class="wpeo-button button-secondary button-square-40 wpeo-tooltip-event"
+                                    data-direction="bottom" data-color="light"
+                                    aria-label="<?php echo $langs->trans('NewGroupment'); ?>">
+                                    <strong><?php //echo $modGroupment->prefix; ?></strong>
+                                    <span class="button-add animated fas fa-plus-circle"></span>
+                                </div>
+                            </a>
+                            <a id="newWorkunit" href="<?php echo dol_buildpath('/custom/digiriskdolibarr/view/digiriskelement/digiriskelement_card.php?action=create&element_type=workunit&fk_parent=' . $objectElement['object']->id, 1);?>">
+                                <div
+                                    class="wpeo-button button-square-40 wpeo-tooltip-event"
+                                    data-direction="bottom" data-color="light"
+                                    aria-label="<?php echo $langs->trans('NewWorkUnit'); ?>">
+                                    <strong><?php //echo $modWorkUnit->prefix; ?></strong>
+                                    <span class="button-add animated fas fa-plus-circle"></span>
+                                </div>
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </div>
+            <ul class="sub-list"><?php saturne_display_recurse_tree($objectElement['children'], $objectElement['object']) ?></ul>
+        </li>
+        <?php if ($objectElement['object']->id == getDolGlobalInt('DIGIRISKDOLIBARR_DIGIRISKELEMENT_TRASH')) {
+            print '<hr>';
+        }
     }
 }
 
