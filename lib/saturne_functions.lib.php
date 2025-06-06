@@ -28,6 +28,7 @@ require_once __DIR__ . '/pagination.lib.php';
 require_once __DIR__ . '/documents.lib.php';
 require_once __DIR__ . '/object.lib.php';
 require_once __DIR__ . '/debug.lib.php';
+require_once __DIR__ . '/component.lib.php';
 
 /**
  * Print llxHeader with Saturne custom enhancements
@@ -240,14 +241,14 @@ function saturne_display_recurse_tree(array $objectElementTree, object $objectEl
                 <div class="title" id="scores" value="<?php echo $objectElement['object']->id ?>">
                     <?php
                     if ($user->rights->digiriskdolibarr->risk->read) : ?>
-                        <a id="slider" class="linkElement id<?php echo $objectElement['object']->id;?>" href="<?php echo dol_buildpath('/custom/digiriskdolibarr/view/digiriskelement/digiriskelement_risk.php?id=' . $objectElement['object']->id . '&risk_type=' . $riskType, 1);?>">
+                        <a id="slider" class="linkElement id<?php echo $objectElement['object']->id; ?>" href="<?php echo dol_buildpath('custom/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_view.php?id=' . $objectElement['object']->id . '&risk_type=' . $riskType, 1); ?>">
                         <span class="title-container">
                             <span class="ref"><?php echo $objectElement['object']->ref; ?></span>
                             <span class="name"><?php echo dol_trunc($objectElement['object']->label, 20); ?></span>
                         </span>
                         </a>
                     <?php else : ?>
-                        <a id="slider" class="linkElement id<?php echo $objectElement['object']->id;?>" href="<?php echo dol_buildpath('/custom/digiriskdolibarr/view/digiriskelement/digiriskelement_card.php?id=' . $objectElement['object']->id, 1);?>">
+                        <a id="slider" class="linkElement id<?php echo $objectElement['object']->id;?>" href="<?php echo dol_buildpath('custom/digiriskdolibarr/view/digiriskelement/digiriskelement_card.php?id=' . $objectElement['object']->id, 1);?>">
                         <span class="title-container">
                             <span class="ref"><?php echo $objectElement['object']->ref; ?></span>
                             <span class="name"><?php echo dol_trunc($objectElement['object']->label, 20); ?></span>

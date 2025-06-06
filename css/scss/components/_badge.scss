@@ -1,0 +1,239 @@
+//.badge {
+//  display: flex;
+//  align-items: center;
+//  border-radius: 10px;
+//  padding: 10px 15px;
+//  max-width: 400px;
+//  font-family: Arial, sans-serif;
+//  box-shadow: 0 0 0 1px var(--badge-border-color);
+//  background-color: var(--badge-bg);
+//
+//  &__icon {
+//    width: 40px;
+//    height: 40px;
+//    border-radius: 10px;
+//    display: flex;
+//    align-items: center;
+//    justify-content: center;
+//    font-size: 20px;
+//    margin-right: 10px;
+//    color: var(--badge-icon-color);
+//    background-color: var(--badge-icon-bg);
+//  }
+//
+//  &__text {
+//    display: flex;
+//    flex-direction: column;
+//  }
+//
+//  &__title {
+//    font-weight: bold;
+//    font-size: 14px;
+//    color: var(--badge-title-color);
+//  }
+//
+//  &__description {
+//    font-size: 14px;
+//    color: var(--badge-description-color);
+//  }
+//
+//  // Thèmes
+//  &--default {
+//    --badge-bg: #f1f6ff;
+//    --badge-border-color: #dbe5f5;
+//    --badge-icon-bg: #e6efff;
+//    --badge-icon-color: #4a72b2;
+//    --badge-title-color: #2d4e8a;
+//    --badge-description-color: #333;
+//  }
+//
+//  &--success {
+//    --badge-bg: #e9fff3;
+//    --badge-border-color: #c1f2d5;
+//    --badge-icon-bg: #cbf3e5;
+//    --badge-icon-color: #239e70;
+//    --badge-title-color: #1b6e4d;
+//    --badge-description-color: #2a5544;
+//  }
+//
+//  &--warning {
+//    --badge-bg: #fff9e6;
+//    --badge-border-color: #ffecb3;
+//    --badge-icon-bg: #fff0b3;
+//    --badge-icon-color: #cc9900;
+//    --badge-title-color: #8a6d1b;
+//    --badge-description-color: #665c00;
+//  }
+//}
+
+// scss/_badge_component.scss
+
+// Variables for easy customization
+$card-bg: #fff;
+$card-border-radius: 12px;
+$card-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+$card-max-width: 500px;
+$card-padding: 15px 20px;
+$card-margin-bottom: 20px;
+
+$font-family: Arial, sans-serif;
+$text-color: #333;
+
+$icon-circle-size: 48px;
+$icon-circle-bg: #e0e0e0;
+$icon-color: #666;
+$icon-fa-size: 28px; // Renamed for clarity that it's for Font Awesome
+
+$badge-title-color: #004d99;
+$badge-detail-color: #777;
+
+$actions-group-bg: #f0f8ff;
+$actions-group-border-radius: 20px;
+$actions-button-size: 38px;
+$actions-button-gap: 8px;
+$actions-button-hover-bg: rgba(0, 0, 0, 0.05);
+
+$default-action-icon-color: #007bff;
+$default-action-icon-hover-color: #0056b3;
+
+// Specific action colors for modifiers
+.action-button--add .fa-solid { color: #007bff; }
+.action-button--edit .fa-solid { color: #ffc107; }
+.action-button--delete .fa-solid { color: #dc3545; }
+
+.action-button--add:hover .fa-solid { color: #0056b3; }
+.action-button--edit:hover .fa-solid { color: #e0a800; }
+.action-button--delete:hover .fa-solid { color: #c82333; }
+
+$badge-actions-transition: opacity 0.3s ease-in-out; // Nouvelle variable pour la transition
+
+
+.badge { // Renamed from badge-component (Block)
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: $card-bg;
+  border-radius: $card-border-radius;
+  padding: $card-padding;
+  margin-bottom: $card-margin-bottom;
+  box-shadow: $card-shadow;
+  max-width: $card-max-width;
+  font-family: $font-family;
+  color: $text-color;
+
+  &__info { // Element: badge__info
+    display: flex;
+    align-items: center;
+  }
+
+  &__icon { // Element: badge__icon
+    width: $icon-circle-size;
+    height: $icon-circle-size;
+    background-color: $icon-circle-bg;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    color: $icon-color;
+
+    .fa-solid, .fa-regular, .fa-light, .fa-brands, .fa {
+      font-size: $icon-fa-size;
+      width: auto;
+      height: auto;
+      display: block;
+    }
+  }
+
+  &__details-wrapper { // Element: badge__details-wrapper
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__title { // Element: badge__title
+    font-weight: bold;
+    font-size: 1.1em;
+    color: $badge-title-color;
+    margin-bottom: 3px;
+  }
+
+  &__detail { // Element: badge__detail
+    font-size: 0.9em;
+    color: $badge-detail-color;
+    margin-top: 2px;
+  }
+
+  &__actions { // Element: badge__actions
+    display: flex;
+    gap: $actions-button-gap;
+    background-color: $actions-group-bg;
+    border-radius: $actions-group-border-radius;
+    padding: 4px;
+
+    // ---- NOUVEAUX STYLES POUR CACHER/AFFICHER AU SURVOL ----
+    opacity: 0; // Masqué par défaut
+    pointer-events: none; // Désactive les événements de souris quand masqué
+    transition: $badge-actions-transition; // Ajoute une transition douce
+    // ---- FIN DES NOUVEAUX STYLES ----
+  }
+
+  .action-button { // This class is not BEM specific here, as it's within actions.
+    // Could be badge__action-button if we want to be strict.
+    width: $actions-button-size;
+    height: $actions-button-size;
+    border: none;
+    border-radius: 50%;
+    background-color: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+    padding: 0;
+
+    .fa-solid, .fa-regular, .fa-light, .fa-brands, .fa {
+      font-size: 20px;
+      color: $default-action-icon-color;
+    }
+
+    &:hover {
+      background-color: $actions-button-hover-bg;
+
+      .fa-solid, .fa-regular, .fa-light, .fa-brands, .fa {
+        color: $default-action-icon-hover-color;
+      }
+    }
+  }
+
+  // Specific action colors for modifiers
+  .action-button--add .fa-solid { color: #007bff; }
+  .action-button--edit .fa-solid { color: #ffc107; }
+  .action-button--delete .fa-solid { color: #dc3545; }
+
+  .action-button--add:hover .fa-solid { color: #0056b3; }
+  .action-button--edit:hover .fa-solid { color: #e0a800; }
+  .action-button--delete:hover .fa-solid { color: #c82333; }
+
+
+  // ---- NOUVELLE RÈGLE : Affiche les actions au survol du bloc principal .badge ----
+  &:hover {
+    .badge__actions {
+      opacity: 1; // Rendu visible
+      pointer-events: auto; // Réactive les événements de souris
+    }
+  }
+  // ---- FIN NOUVELLE RÈGLE ----
+
+  /* Optional: Adjust for smaller screens if needed */
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 15px;
+
+    &__actions { // Targeting badge__actions
+      margin-top: 15px;
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
