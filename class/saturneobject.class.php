@@ -585,26 +585,19 @@ abstract class SaturneObject extends CommonObject
     /**
      * Returns the reference to the following non-used object depending on the active numbering module
      *
-     *  @return string Object free reference
+     * @param  string $objectType Object type (used to get the numbering module if $this->element is not wanted for this object)
+     *
+     * @return string             Object free reference
      */
-	public function getNextNumRef(): string
-	{
-		global $langs, $conf;
+    public function getNextNumRef(string $objectType = ''): string
+    {
+        global $langs, $conf;
 
-        $moduleNameUpperCase = strtoupper($this->module);
-        $moduleNameLowerCase = strtolower($this->module);
-        $objectType          = $this->element;
-        $numRefConf          = $moduleNameUpperCase . '_' . strtoupper($objectType) . '_ADDON';
-
-		if (empty($conf->global->$numRefConf)) {
-			$conf->global->$numRefConf = 'mod_' . $objectType . '_standard';
-		}
-
-        //Numbering modules
-        $numberingModuleName = [
-            $objectType => $conf->global->$numRefConf,
-        ];
-        list($objNumberingModule) = saturne_require_objects_mod($numberingModuleName, $moduleNameLowerCase);
+        $moduleNameUpperCase      = dol_strtoupper($this->module);
+        $element                  = $objectType ?: $this->element;
+        $modRefConfName           = $moduleNameUpperCase . '_' . dol_strtoupper($element) . '_ADDON';
+        $numberingModuleName      = [$objectType ? $this->element . '/' . $element : $element => getDolGlobalString($modRefConfName, 'mod_' . $element . '_standard')];
+        list($objNumberingModule) = saturne_require_objects_mod($numberingModuleName, dol_strtolower($this->module));
 
         if (is_object($objNumberingModule)) {
             $numRef = $objNumberingModule->getNextValue($this);

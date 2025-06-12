@@ -105,6 +105,7 @@ $default-action-icon-hover-color: #0056b3;
 .action-button--edit:hover .fa-solid { color: #e0a800; }
 .action-button--delete:hover .fa-solid { color: #c82333; }
 
+$badge-transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; // Mise à jour pour inclure le scale et l'ombre
 $badge-actions-transition: opacity 0.3s ease-in-out; // Nouvelle variable pour la transition
 
 
@@ -117,6 +118,13 @@ $badge-actions-transition: opacity 0.3s ease-in-out; // Nouvelle variable pour l
   padding: $card-padding;
   margin-bottom: $card-margin-bottom;
   box-shadow: $card-shadow;
+
+  // ---- NOUVEAUX STYLES POUR LE SCALE ET L'OMBRE AU SURVOL ----
+  transform: scale(1); // Assure une base de scale de 1
+  transition: $badge-transition; // Applique la transition
+  cursor: pointer; // Indique que l'élément est interactif
+  // ---- FIN NOUVEAUX STYLES ----
+
   max-width: $card-max-width;
   font-family: $font-family;
   color: $text-color;
@@ -217,6 +225,9 @@ $badge-actions-transition: opacity 0.3s ease-in-out; // Nouvelle variable pour l
 
   // ---- NOUVELLE RÈGLE : Affiche les actions au survol du bloc principal .badge ----
   &:hover {
+    transform: scale(1.02); // Légère augmentation de taille (2%)
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15); // Augmente l'ombre pour un effet de "pop"
+
     .badge__actions {
       opacity: 1; // Rendu visible
       pointer-events: auto; // Réactive les événements de souris
@@ -230,10 +241,95 @@ $badge-actions-transition: opacity 0.3s ease-in-out; // Nouvelle variable pour l
     align-items: flex-start;
     padding: 15px;
 
+    // Sur les petits écrans, désactiver le scale et l'ombre au survol pour éviter des problèmes tactiles
+    transform: none;
+    box-shadow: $card-shadow; // Revenir à l'ombre par défaut
+    cursor: default; // Enlève le pointeur si on ne scale pas
+
+    &:hover { // Empêche le scale au survol sur les petits écrans
+      transform: none;
+      box-shadow: $card-shadow;
+    }
+
     &__actions { // Targeting badge__actions
       margin-top: 15px;
       width: 100%;
       justify-content: center;
+      opacity: 1;
+      pointer-events: auto;
     }
   }
+}
+
+// scss/_modal_header.scss
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+  background-color: #f8f8f8; /* Légèrement différent pour le header */
+  border-top-left-radius: 12px; /* Assurez-vous que c'est cohérent avec le border-radius de votre modale */
+  border-top-right-radius: 12px;
+
+  .modal-header__info {
+    display: flex;
+    align-items: center;
+
+    .modal-header__icon {
+      width: 40px; /* Plus petit que le badge standard */
+      height: 40px;
+      background-color: #e0e0e0;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 10px; /* Espace plus petit */
+      color: #666;
+
+      .fa-solid, .fa-regular, .fa-light, .fa-brands, .fa {
+        font-size: 20px; /* Taille de l'icône plus petite */
+        width: auto;
+        height: auto;
+        display: block;
+      }
+    }
+
+    .modal-header__details-wrapper {
+      display: flex;
+      flex-direction: column;
+
+      .modal-header__title {
+        font-weight: bold;
+        font-size: 1.0em; /* Légèrement plus petit que le badge */
+        color: #004d99;
+        margin-bottom: 2px;
+      }
+
+      .modal-header__detail {
+        font-size: 0.8em; /* Plus petit */
+        color: #777;
+      }
+    }
+  }
+
+  .modal-header__close-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #999;
+    cursor: pointer;
+    padding: 5px;
+    line-height: 1; /* Empêche les sauts de ligne inattendus */
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: #333;
+    }
+  }
+}
+
+.add-container .button-label {
+  font-weight: bold;
 }

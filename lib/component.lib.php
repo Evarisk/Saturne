@@ -70,13 +70,15 @@
  */
 function saturne_get_badge_component_html(array $args = []): string
 {
+    global $langs;
+
     $defaults = [
         'id'        => '',
         'className' => '',
-        'iconClass' => 'fa-solid fa-user', // Default Font Awesome user icon
+        'iconClass' => 'fas fa-user',
         'title'     => 'Untitled',
-        'details'   => [],
-        'actions'   => [],
+        'details'   => [$langs->transnoentities('NotKnown')],
+        'actions'   => []
     ];
 
     $merged_args = array_merge( $defaults, $args );
@@ -86,7 +88,7 @@ function saturne_get_badge_component_html(array $args = []): string
     // Main block class is 'badge', then add any custom classes
     $classNames     = 'badge ' . htmlspecialchars( $merged_args['className'] );
     $iconClass      = htmlspecialchars( $merged_args['iconClass'] );
-    $title          = htmlspecialchars( $merged_args['title'] );
+    $title          = $langs->transnoentities($merged_args['title']);
     $details        = (array) $merged_args['details'];
     $actions        = (array) $merged_args['actions'];
 
@@ -116,18 +118,37 @@ function saturne_get_badge_component_html(array $args = []): string
             $tag = empty( $actionHref ) ? 'button' : 'a';
             $typeAttribute = ( $tag === 'button' ) ? ' type="button"' : '';
 
+            // Build hidden inputs HTML
+            $hiddenInputsHtml = '';
+            if ( isset( $action['hiddenInputs'] ) && is_array( $action['hiddenInputs'] ) ) {
+                foreach ( $action['hiddenInputs'] as $input ) {
+                    $inputName  = isset( $input['name'] ) ? ' name="' . htmlspecialchars( $input['name'] ) . '"' : '';
+                    $inputValue = isset( $input['value'] ) ? ' value="' . htmlspecialchars( $input['value'] ) . '"' : '';
+                    $inputClass = isset( $input['class'] ) ? ' class="' . htmlspecialchars( $input['class'] ) . '"' : '';
+
+                    $inputDataAttrs = '';
+                    if ( isset( $input['data'] ) && is_array( $input['data'] ) ) {
+                        foreach ( $input['data'] as $dataKey => $dataValue ) {
+                            $inputDataAttrs .= ' data-' . htmlspecialchars( $dataKey ) . '="' . htmlspecialchars( $dataValue ) . '"';
+                        }
+                    }
+                    $hiddenInputsHtml .= "<input type=\"hidden\"{$inputName}{$inputValue}{$inputClass}{$inputDataAttrs}>";
+                }
+            }
+
             $actionButtonsHtml .= <<<BUTTON
             <{$tag} class="{$fullButtonClasses}" aria-label="{$actionLabel}"{$actionHref}{$typeAttribute}{$actionOnClick}>
                 <i class="{$actionIconClass}"></i>
+                {$hiddenInputsHtml}
             </{$tag}>
-BUTTON;
+            BUTTON;
         }
 
         $actionButtonsHtml = <<<ACTIONS
             <div class="badge__actions">
                 {$actionButtonsHtml}
             </div>
-ACTIONS;
+        ACTIONS;
     }
 
     // Main HTML using heredoc
@@ -144,6 +165,107 @@ ACTIONS;
         </div>
         {$actionButtonsHtml}
     </div>
+    HTML;
+
+    return $html;
+}
+
+
+// functions.php
+
+// (Gardez toutes vos fonctions existantes ici : saturne_get_badge_component_html, etc.)
+
+
+/**
+ * Generates the HTML for a generic modal header's recap section.
+ *
+ * @param array $args      {
+ *                         Optional. Array of arguments for the header content.
+ *
+ * @type string $iconClass Optional. The Font Awesome class string for the main icon (e.g., 'fa-solid fa-user').
+ *                         Defaults to 'fa-solid fa-user'.
+ * @type string $title     The main title for the header. Default 'Untitled'.
+ * @type array  $details   Optional. An array of strings for additional detail lines.
+ *                         Each string will be rendered in a .modal-header__detail div.
+ *                         }
+ * @return string The HTML string for the modal header's recap content.
+ */
+function saturne_get_modal_header_recap_html($args = array())
+{
+    $defaults = array(
+        'iconClass' => 'fa-solid fa-user',
+        'title'     => 'Untitled',
+        'details'   => array(),
+    );
+
+    $merged_args = array_merge($defaults, $args);
+
+    $iconClass = htmlspecialchars($merged_args['iconClass']);
+    $title = htmlspecialchars($merged_args['title']);
+    $details = (array)$merged_args['details'];
+
+    // Build details HTML
+    $detailsHtml = '';
+    foreach ($details as $detail) {
+        $detailsHtml .= '<div class="modal-header__detail">' . htmlspecialchars($detail) . '</div>';
+    }
+
+    $html = <<<HTML
+    <div class="modal-header__info">
+        <div class="modal-header__icon">
+            <i class="{$iconClass}"></i>
+        </div>
+        <div class="modal-header__details-wrapper">
+            <div class="modal-header__title">{$title}</div>
+            {$detailsHtml}
+        </div>
+    </div>
+HTML;
+
+    return $html;
+}
+
+function saturne_get_button_component_html(array $args = []): string
+{
+    global $langs;
+
+    $defaults = [
+        'id'            => '',
+        'className'     => '',
+        'iconClass'     => 'fas fa-plus',
+        'label'         => $langs->transnoentities('Add'),
+        'href'          => '#',
+        'onClick'       => '',
+        'modifierClass' => '',
+        'moreAttr'      => [], // NOUVEAU : Tableau pour les attributs supplémentaires
+    ];
+
+    $merged_args = array_merge($defaults, $args);
+
+    // Sanitize and prepare data
+    $componentId    = !empty($merged_args['id']) ? ' id="' . htmlspecialchars($merged_args['id']) . '"' : '';
+    $classNames     = 'button-component ' . htmlspecialchars($merged_args['className']);
+    $iconClass      = htmlspecialchars($merged_args['iconClass']);
+    $label          = htmlspecialchars($merged_args['label']);
+    $href           = htmlspecialchars($merged_args['href']);
+    $onClick        = htmlspecialchars($merged_args['onClick']);
+    $modifierClass  = !empty($merged_args['modifierClass']) ? ' button-component--' . htmlspecialchars($merged_args['modifierClass']) : '';
+
+    // NOUVEAU : Préparation des attributs supplémentaires
+    $additionalAttributes = '';
+    foreach ($merged_args['moreAttr'] as $attrName => $attrValue) {
+        // Assurez-vous que les noms d'attributs sont valides pour HTML
+        // et que les valeurs sont correctement échappées.
+        // On pourrait ajouter une validation plus robuste pour $attrName si nécessaire.
+        $additionalAttributes .= ' ' . htmlspecialchars($attrName) . '="' . htmlspecialchars($attrValue) . '"';
+    }
+
+    // Build the button HTML
+    $html = <<<HTML
+    <a{$componentId} class="{$classNames}{$modifierClass}" href="{$href}" onclick="{$onClick}"{$additionalAttributes}>
+        <i class="{$iconClass}"></i>
+        <span class="button-label">{$label}</span>
+    </a>
     HTML;
 
     return $html;

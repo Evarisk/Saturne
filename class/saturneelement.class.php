@@ -199,6 +199,9 @@ class SaturneElement extends SaturneObject
 
     // END MODULEBUILDER PROPERTIES
 
+    public const ELEMENT_TYPE_0 = '';
+    public const ELEMENT_TYPE_1 = '';
+
     /**
      * Constructor
      *
@@ -212,31 +215,26 @@ class SaturneElement extends SaturneObject
     }
 
     /**
-     * Create object into database.
+     * Create object into database
      *
-     * @param User $user User that creates.
-     * @param bool $notrigger false = launch triggers after, true = disable triggers.
-     * @return int             0 < if KO, ID of created object if OK.
+     * @param  User $user      User that creates
+     * @param  bool $notrigger false = launch triggers after, true = disable triggers
+     * @return int             0 < if KO, ID of created object if OK
      */
     public function create(User $user, bool $notrigger = false): int
     {
-        global $conf;
-//        if (empty($this->ref)) {
-//            $type = 'DIGIRISKDOLIBARR_' . dol_strtoupper($this->element_type) . '_ADDON';
-//            $objectMod = $conf->global->$type;
-//            $numberingModules = [
-//                'digiriskelement/' . $this->element_type => $objectMod
-//            ];
-//            list($refDigiriskElementMod) = saturne_require_objects_mod($numberingModules, 'digiriskdolibarr');
-//
-//            $ref = $refDigiriskElementMod->getNextValue($this);
-//            $this->ref = $ref;
-//        }
+        if ($this->element_type == 0) {
+            $this->element_type = $this::ELEMENT_TYPE_0;
+        }
+        if ($this->element_type == 1) {
+            $this->element_type = $this::ELEMENT_TYPE_1;
+        }
 
-        $this->status      = self::STATUS_VALIDATED;
-        $this->fk_standard = getDolGlobalInt(dol_strtoupper($this->module) . '_ACTIVE_STANDARD');
+        $this->ref          = $this->getNextNumRef($this->element_type);
+        $this->status       = self::STATUS_VALIDATED;
+        $this->fk_standard  = getDolGlobalInt(dol_strtoupper($this->module) . '_ACTIVE_STANDARD');
 
-        return $this->createCommon($user, $notrigger);
+        return parent::create($user, $notrigger);
     }
 
     /**

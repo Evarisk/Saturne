@@ -110,35 +110,50 @@ function saturne_more_left_menu($moduleNameLowerCase, $objectType): void
         <i class="fas fa-bars pictofixedwidth"></i><?php echo "Navigation UT/GP"; ?>
         <div class="navigation-container">
             <div class="society-header">
-                <a href="<?php echo dol_buildpath('custom/' . $objectElement->module . '/view/' . $objectElement->module . 'standard/' . $objectElement->module . 'standard_card.php?id=' . getDolGlobalInt(dol_strtoupper($objectElement->module) . '_ACTIVE_STANDARD'), 1); ?>" class="linkElement">
-                    <i class="fas fa-building pictofixedwidth"><span class="title"><?php echo getDolGlobalString('MAIN_INFO_SOCIETE_NOM'); ?></span></i>
-                </a>
+                <?php
+                    echo saturne_get_button_component_html([
+                        'className' => 'linkElement', //@tod meilleur nom de classe
+                        'href'      => dol_buildpath('custom/' . $objectElement->module . '/view/' . $objectElement->module . 'standard/' . $objectElement->module . 'standard_card.php?id=' . getDolGlobalInt(dol_strtoupper($objectElement->module) . '_ACTIVE_STANDARD'), 1),
+                        'iconClass' => 'fas fa-sitemap pictofixedwidth',
+                        'label'     => $langs->trans('Mapping'), //getDolGlobalString('MAIN_INFO_SOCIETE_NOM');
+                    ]);
+                ?>
                 <?php if ($user->hasRight($objectElement->module, $objectElement->element, 'write')) : ?>
                     <div class="add-container">
-                        <a id="newGroupment" href="<?php echo dol_buildpath('custom/' . $objectElement->module . '/view/' . $objectElement->element . '/' . $objectElement->element . '_card.php?action=create&element_type=0', 1); ?>">
-                            <div class="wpeo-button button-square-40 button-secondary wpeo-tooltip-event" data-direction="bottom" data-color="light" aria-label="<?php echo $langs->trans($objectElement->fields['element_type']['arrayofkeyval'][0]); ?>"><strong><?php //echo $modGroupment->prefix; ?></strong><span class="button-add animated fas fa-plus-circle"></span></div>
-                        </a>
-                        <a id="newWorkunit" href="<?php echo dol_buildpath('custom/' . $objectElement->module . '/view/' . $objectElement->element . '/' . $objectElement->element . '_card.php?action=create&element_type=1', 1); ?>">
-                            <div class="wpeo-button button-square-40 wpeo-tooltip-event" data-direction="bottom" data-color="light" aria-label="<?php echo $langs->trans($objectElement->fields['element_type']['arrayofkeyval'][1]); ?>"><strong><?php //echo $modWorkUnit->prefix; ?></strong><span class="button-add animated fas fa-plus-circle"></span></div>
-                        </a>
+                        <?php
+                            echo saturne_get_button_component_html([
+                                'className' => 'wpeo-button button-square-40 button-secondary wpeo-tooltip-event',
+                                'href'      => dol_buildpath('custom/' . $objectElement->module . '/view/' . $objectElement->element . '/' . $objectElement->element . '_card.php?action=create&element_type=0', 1),
+                                'moreAttr'  => [
+                                    'data-direction' => 'bottom',
+                                    'data-color'     => 'light',
+                                    'aria-label'     => $langs->trans($objectElement->fields['element_type']['arrayofkeyval'][0])
+                                ],
+                                'iconClass' => 'button-add fas fa-plus-circle',
+                                'label'     => 'P' //@todo gérer le prefix
+                            ]);
+
+                            echo saturne_get_button_component_html([
+                                'className' => 'wpeo-button button-square-40 wpeo-tooltip-event',
+                                'href'      => dol_buildpath('custom/' . $objectElement->module . '/view/' . $objectElement->element . '/' . $objectElement->element . '_card.php?action=create&element_type=1', 1),
+                                'moreAttr'  => [
+                                    'data-direction' => 'bottom',
+                                    'data-color'     => 'light',
+                                    'aria-label'     => $langs->trans($objectElement->fields['element_type']['arrayofkeyval'][1])
+                                ],
+                                'iconClass' => 'button-add fas fa-plus-circle',
+                                'label'     => 'SP' //@todo gérer le prefix
+                            ]);
+                        ?>
+                    </div>
+                <?php endif; ?>
+                <?php if (!empty($objectElements)) : ?>
+                    <div class="toolbar">
+                        <div class="toggle-plus" aria-label="<?php echo $langs->trans('UnwrapAll'); ?>"><span class="icon fas fa-plus-square"></span></div>
+                        <div class="toggle-minus" aria-label="<?php echo $langs->trans('WrapAll'); ?>"><span class="icon fas fa-minus-square"></span></div>
                     </div>
                 <?php endif; ?>
             </div>
-            <?php if (!empty($objectElements)) : ?>
-                <div class="toolbar">
-                    <div class="toggle-plus tooltip hover" aria-label="<?php echo $langs->trans('UnwrapAll'); ?>"><span class="icon fas fa-plus-square"></span></div>
-                    <div class="toggle-minus tooltip hover" aria-label="<?php echo $langs->trans('WrapAll'); ?>"><span class="icon fas fa-minus-square"></span></div>
-                </div>
-            <?php else : ?>
-                <div class="society-header">
-                    <a id="newGroupment" href="<?php echo dol_buildpath('custom/' . $objectElement->module . '/view/' . $objectElement->element . '/' . $objectElement->element . '_card.php?action=create&element_type=0', 1); ?>">
-                        <div class="wpeo-button button-square-40 button-secondary wpeo-tooltip-event" data-direction="bottom" data-color="light" aria-label="<?php echo $langs->trans($objectElement->fields['element_type']['arrayofkeyval'][0]); ?>"><strong><?php //echo $modGroupment->prefix; ?></strong><span class="button-add animated fas fa-plus-circle"></span></div>
-                    </a>
-                    <a id="newWorkunit" href="<?php echo dol_buildpath('custom/' . $objectElement->module . '/view/' . $objectElement->element . '/' . $objectElement->element . '_card.php?action=create&element_type=1', 1); ?>">
-                        <div class="wpeo-button button-square-40 wpeo-tooltip-event" data-direction="bottom" data-color="light" aria-label="<?php echo $langs->trans($objectElement->fields['element_type']['arrayofkeyval'][1]); ?>"><strong><?php //echo $modWorkUnit->prefix; ?></strong><span class="button-add animated fas fa-plus-circle"></span></div>
-                    </a>
-                </div>
-            <?php endif; ?>
             <ul class="workunit-list">
                 <script>
                     if (localStorage.maximized == 'false') {
@@ -207,13 +222,6 @@ function saturne_display_recurse_tree(array $objectElementTree, object $objectEl
 {
     global $conf, $langs, $user;
 
-//    $numberingModules = [
-//        'digiriskelement/groupment' => $conf->global->DIGIRISKDOLIBARR_GROUPMENT_ADDON,
-//        'digiriskelement/workunit' => $conf->global->DIGIRISKDOLIBARR_WORKUNIT_ADDON,
-//    ];
-
-    //list($modGroupment, $modWorkUnit) = saturne_require_objects_mod($numberingModules, $moduleNameLowerCase);
-
     if (empty($objectElementTree) || !$user->hasRight($objectElement->module, $objectElement->element, 'read')) {
         print $langs->trans('YouDontHaveTheRightToSeeThis');
         return;
@@ -226,9 +234,9 @@ function saturne_display_recurse_tree(array $objectElementTree, object $objectEl
         } ?>
         <li class="unit type-<?php echo $objectElement['object']->element_type; ?>" id="unit<?php  echo $objectElement['object']->id; ?>">
             <div class="unit-container">
-                <?php if ($objectElement['object']->element_type == 'groupment' && count($objectElement['children'])) { ?>
+                <?php if ($objectElement['object']->element_type == $objectElement['object']::ELEMENT_TYPE_0 && count($objectElement['children'])) { ?>
                     <div class="toggle-unit">
-                        <i class="toggle-icon fas fa-chevron-right" id="menu<?php echo $objectElement['object']->id;?>"></i>
+                        <i class="toggle-icon fas fa-chevron-right" id="menu<?php echo $objectElement['object']->id; ?>"></i>
                     </div>
                 <?php } else { ?>
                     <div class="spacer"></div>
@@ -256,14 +264,14 @@ function saturne_display_recurse_tree(array $objectElementTree, object $objectEl
                         </a>
                     <?php endif; ?>
                 </div>
-                <?php if ($user->rights->digiriskdolibarr->digiriskelement->write) : ?>
-                    <?php if ($objectElement['object']->element_type == 'groupment') : ?>
+                <?php if ($user->hasRight($objectElement['object']->module, $objectElement['object']->element, 'read')) : ?>
+                    <?php if ($objectElement['object']->element_type == $objectElement['object']::ELEMENT_TYPE_0) : ?>
                         <div class="add-container">
                             <a id="newGroupment" href="<?php echo dol_buildpath('/custom/digiriskdolibarr/view/digiriskelement/digiriskelement_card.php?action=create&element_type=groupment&fk_parent=' . $objectElement['object']->id, 1);?>">
                                 <div
                                     class="wpeo-button button-secondary button-square-40 wpeo-tooltip-event"
                                     data-direction="bottom" data-color="light"
-                                    aria-label="<?php echo $langs->trans('NewGroupment'); ?>">
+                                    aria-label="<?php echo $langs->trans('New' . dol_ucfirst($objectElement['object']::ELEMENT_TYPE_0)); ?>">
                                     <strong><?php //echo $modGroupment->prefix; ?></strong>
                                     <span class="button-add animated fas fa-plus-circle"></span>
                                 </div>
@@ -272,7 +280,7 @@ function saturne_display_recurse_tree(array $objectElementTree, object $objectEl
                                 <div
                                     class="wpeo-button button-square-40 wpeo-tooltip-event"
                                     data-direction="bottom" data-color="light"
-                                    aria-label="<?php echo $langs->trans('NewWorkUnit'); ?>">
+                                    aria-label="<?php echo $langs->trans('New' . dol_ucfirst($objectElement['object']::ELEMENT_TYPE_1)); ?>">
                                     <strong><?php //echo $modWorkUnit->prefix; ?></strong>
                                     <span class="button-add animated fas fa-plus-circle"></span>
                                 </div>
@@ -281,7 +289,9 @@ function saturne_display_recurse_tree(array $objectElementTree, object $objectEl
                     <?php endif; ?>
                 <?php endif; ?>
             </div>
-            <ul class="sub-list"><?php saturne_display_recurse_tree($objectElement['children'], $objectElement['object']) ?></ul>
+            <?php if (!empty($objectElement['children'])) : ?>
+                <ul class="sub-list"><?php saturne_display_recurse_tree($objectElement['children'], $objectElement['object']) ?></ul>
+            <?php endif; ?>
         </li>
         <?php if ($objectElement['object']->id == getDolGlobalInt('DIGIRISKDOLIBARR_DIGIRISKELEMENT_TRASH')) {
             print '<hr>';
@@ -308,8 +318,12 @@ function saturne_recurse_tree(int $parentID, int $depth, array $digiriskElements
                 'id'       => $digiriskElement->id,
                 'depth'    => $depth,
                 'object'   => $digiriskElement,
-                'children' => saturne_recurse_tree($digiriskElement->id, $depth + 1, $digiriskElements)
+                'children' => []
             ];
+
+            if ($digiriskElement->fk_parent != $digiriskElement->fk_standard) {
+                $tree[$digiriskElement->id]['children'] = saturne_recurse_tree($digiriskElement->id, $depth + 1, $digiriskElements);
+            }
         }
     }
 
@@ -595,7 +609,7 @@ function saturne_load_langs(array $domains = [])
 {
 	global $langs, $moduleNameLowerCase;
 
-	$langs->loadLangs(['saturne@saturne', 'object@saturne', 'signature@saturne', 'medias@saturne', $moduleNameLowerCase . '@' . $moduleNameLowerCase]);
+	$langs->loadLangs(['saturne@saturne', 'object@saturne', 'signature@saturne', 'medias@saturne', 'component@saturne', $moduleNameLowerCase . '@' . $moduleNameLowerCase]);
 
 	if (!empty($domains)) {
 		foreach ($domains as $domain) {
