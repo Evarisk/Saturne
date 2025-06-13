@@ -47,12 +47,13 @@ global $conf, $db, $langs, $hookmanager, $user;
 saturne_load_langs();
 
 // Get parameters
-$id         = GETPOST('id', 'int');
-$ref        = GETPOST('ref', 'alpha');
-$action     = GETPOST('action', 'aZ09');
-$cancel     = GETPOST('cancel', 'aZ09');
-$backtopage = GETPOST('backtopage', 'alpha');
-$subaction  = GETPOST('subaction', 'alpha');
+$id          = GETPOST('id', 'int');
+$ref         = GETPOST('ref', 'alpha');
+$action      = GETPOST('action', 'aZ09');
+$cancel      = GETPOST('cancel', 'aZ09');
+$backtopage  = GETPOST('backtopage', 'alpha');
+$handlePhoto = GETPOST('handle_photo', 'alpha');
+$subaction   = GETPOST('subaction', 'alpha');
 
 // Initialize technical objects
 $className   = ucfirst($objectType);
@@ -101,7 +102,7 @@ saturne_header(0, '', $title, $help_url);
 
 if ($id > 0 || !empty($ref)) {
     saturne_get_fiche_head($object, 'note', $title);
-    saturne_banner_tab($object, 'ref', '', 1, 'ref', 'ref', '', !empty($object->photo));
+    saturne_banner_tab($object, 'ref', '', 1, 'ref', 'ref', '', ((!empty($object->photo) && dol_strlen($handlePhoto) > 0) ? $handlePhoto : false));
 
     print '<div class="fichecenter">';
 

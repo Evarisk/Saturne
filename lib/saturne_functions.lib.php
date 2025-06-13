@@ -81,7 +81,7 @@ function saturne_header(int $load_media_gallery = 0, string $head = '', string $
  * @param object|null $object            Object in current page
  * @param bool        $allowExternalUser Allow external user to have access at current page
  */
-function saturne_check_access($permission, object $object = null, bool $allowExternalUser = false)
+function saturne_check_access($permission, ?object $object = null, bool $allowExternalUser = false)
 {
     global $conf, $langs, $user, $moduleNameLowerCase;
 
@@ -100,7 +100,7 @@ function saturne_check_access($permission, object $object = null, bool $allowExt
     }
 
 	if (isModEnabled('multicompany')) {
-		if ($object->id > 0) {
+		if ($object !== null && $object->id > 0) {
 			if ($object->entity != $conf->entity) {
 				setEventMessage($langs->trans('ChangeEntityRedirection'), 'warnings');
 				$urltogo = dol_buildpath('/custom/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'index.php?mainmenu=' . $moduleNameLowerCase, 1);
@@ -643,7 +643,7 @@ function saturne_manage_extrafields(array $extraFieldsArrays, array $commonExtra
                 $extraField['unique']   ?? $commonExtraFieldsValue['unique']   ?? 0,
                 $extraField['required'] ?? $commonExtraFieldsValue['required'] ?? 0,
                 $extraField['default']  ?? $commonExtraFieldsValue['default']  ?? '',
-                $extraField['params'] ? ['options' => $extraField['params']] : '',
+                (isset($extraField['params']) ? ['options' => $extraField['params']] : ''),
                 $extraField['alwayseditable'] ?? $commonExtraFieldsValue['alwayseditable'] ?? 0,
                 $extraField['perms']          ?? $commonExtraFieldsValue['perms']          ?? '',
                 $extraField['list']           ?? $commonExtraFieldsValue['list']           ?? '',
@@ -668,7 +668,7 @@ function saturne_manage_extrafields(array $extraFieldsArrays, array $commonExtra
                 $extraField['unique']   ?? $commonExtraFieldsValue['unique']   ?? 0,
                 $extraField['required'] ?? $commonExtraFieldsValue['required'] ?? 0,
                 $extraField['position'],
-                $extraField['params'] ? ['options' => $extraField['params']] : '',
+                (isset($extraField['params']) ? ['options' => $extraField['params']] : ''),
                 $extraField['alwayseditable'] ?? $commonExtraFieldsValue['alwayseditable'] ?? 0,
                 $extraField['perms']          ?? $commonExtraFieldsValue['perms']          ?? '',
                 $extraField['list']           ?? $commonExtraFieldsValue['list']           ?? '',
@@ -688,4 +688,75 @@ function saturne_manage_extrafields(array $extraFieldsArrays, array $commonExtra
             }
         }
     }
+}
+
+/**
+ * Load list parameters
+ *
+ * @param string $contexName     Context name
+ * @return array $listParameters Array of list parameters
+ */
+function saturne_load_list_parameters(string $contexName): array
+{
+    $listParameters = [];
+
+    $listParameters['confirm']     = GETPOST('confirm', 'alpha');      // Result of a confirmation
+    $listParameters['toselect']    = GETPOST('toselect', 'array:int'); // Array of ids of elements selected into a list
+    $listParameters['contextpage'] = GETPOSTISSET('contextpage') ? GETPOST('contextpage', 'aZ') : $contexName . 'list'; // To manage different context of search
+    $listParameters['optioncss']   = GETPOST('optioncss', 'aZ'); // Option for the css output (always '' except when 'print')
+    $listParameters['mode']        = GETPOST('mode', 'aZ');      // The display mode ('list', 'kanban', 'pwa', 'calendar', 'gantt', ...)
+    //$listParameters['groupby']     = GETPOST('groupby', 'aZ09'); // Example: $groupby = 'p.fk_opp_status' or $groupby = 'p.fk_statut'
+
+    return $listParameters;
+}
+
+
+/**
+ * Load pagination parameters for list
+ *
+ * @return array $paginationParameters Array of pagination parameters
+ */
+function saturne_load_pagination_parameters(): array
+{
+    global $conf;
+
+    $paginationParameters = [];
+
+    $paginationParameters['limit']     = GETPOSTINT('limit') ? GETPOSTINT('limit') : $conf->liste_limit;
+    $paginationParameters['sortfield'] = GETPOST('sortfield', 'aZ09comma');
+    $paginationParameters['sortorder'] = GETPOST('sortorder', 'aZ09comma');
+    $paginationParameters['page']      = GETPOSTISSET('pageplusone') ? (GETPOSTINT('pageplusone') - 1) : GETPOSTINT('page');
+    if (empty($paginationParameters['page']) || $paginationParameters['page'] < 0 || GETPOST('button_search', 'alpha') || GETPOST('button_removefilter', 'alpha')) {
+        // If $paginationParameters['page'] is not defined, or '' or -1 or if we click on clear filters
+        $paginationParameters['page'] = 0;
+    }
+    $paginationParameters['offset'] = $paginationParameters['limit'] * $paginationParameters['page'];
+
+    return $paginationParameters;
+}
+
+/**
+ * CSS for field in list
+ *
+ * @param  array   $val         Array of field
+ * @param  string  $key         Key of field
+ * @return string  $cssForField CSS for field
+ */
+function saturne_css_for_field(array $val, string $key): string
+{
+    $cssForField = '';
+    if ($key == 'status') {
+        $cssForField = 'center';
+    } elseif (isset($val['type']) && in_array($val['type'], ['date', 'datetime', 'timestamp'])) {
+        $cssForField = 'center';
+    } elseif (isset($val['type']) && in_array($val['type'], ['double(24,8)', 'double(6,3)', 'integer', 'real', 'price']) && !in_array($key, ['id', 'rowid', 'ref', 'status']) && $val['label'] != 'TechnicalID' && empty($val['arrayofkeyval'])) {
+        $cssForField = 'right';
+    } elseif (isset($val['type']) && $val['type'] == 'timestamp') {
+        $cssForField = 'nowraponall';
+    } elseif ($key == 'ref') {
+        $cssForField = 'nowraponall';
+    }
+    $cssForField .= (empty($val['csslist']) ? (empty($val['css']) ? '' : ' ' . $val['css']) : ' ' . $val['csslist']);
+
+    return $cssForField;
 }

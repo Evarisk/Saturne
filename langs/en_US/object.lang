@@ -22,16 +22,23 @@ ReadObjects   = Read %s
 CreateObjects = Create/Modify %s
 DeleteObjects = Delete %s
 
-# Trigger
-ObjectCreateTrigger     = Creation of %s %s
-ObjectModifyTrigger     = Modification of %s %s
-ObjectDeleteTrigger     = Deletion of %s %s
+# Backward compatibility Trigger -- need to remove in the future
 ObjectUnValidateTrigger = Reopening of %s %s
-ObjectValidateTrigger   = Pending signature of the participants of %s %s
 ObjectLockedTrigger     = Locking %s %s - Ready for document generation
 ObjectSentByMailTrigger = Mail sent
 ObjectArchivedTrigger   = Archiving %s %s
 ObjectExpiredTrigger    = Expiring %s %s
+
+# Trigger
+ObjectCreateTrigger     = Creation of %s %s
+ObjectModifyTrigger     = Modification of %s %s
+ObjectDeleteTrigger     = Deletion of %s %s
+ObjectUnvalidateTrigger = Reopening of %s %s
+ObjectValidateTrigger   = Pending signature of the participants of %s %s
+ObjectLockTrigger       = Locking %s %s - Ready for document generation
+ObjectSentbymailTrigger = Mail sent
+ObjectArchiveTrigger    = Archiving %s %s
+ObjectExpireTrigger     = Expiring %s %s
 ObjectGenerateTrigger   = Generating %s %s
 ObjectSignedTrigger     = Signing %s %s
 ObjectImportTrigger     = Import of %s %s
@@ -116,3 +123,6 @@ ObjectModified = Modification of %s
 ObjectDeleted  = Deletion of %s
 ObjectValidate = Validation of %s
 ObjectLock     = Locking of %s
+
+# Fields
+TrackID = Tracking ID

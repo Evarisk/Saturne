@@ -22,16 +22,23 @@ ReadObjects   = Consulter les %s
 CreateObjects = Créer/Modifier les %s
 DeleteObjects = Supprimer les %s
 
-# Trigger - Déclencheur
-ObjectCreateTrigger     = %s %s créé(e)
-ObjectModifyTrigger     = %s %s modifié(e)
-ObjectDeleteTrigger     = %s %s supprimé(e)
+# Backward compatibility Trigger -- need to remove in the future
 ObjectUnValidateTrigger = %s %s réouvert(e)
-ObjectValidateTrigger   = %s %s validé(e)
 ObjectLockedTrigger     = %s %s verrouillé(e) - Prêt pour la génération du document
 ObjectSentByMailTrigger = Mail envoyé
 ObjectArchivedTrigger   = %s %s archivé(e)
 ObjectExpiredTrigger    = %s %s expiré(e)
+
+# Trigger - Déclencheur
+ObjectCreateTrigger     = %s %s créé(e)
+ObjectModifyTrigger     = %s %s modifié(e)
+ObjectDeleteTrigger     = %s %s supprimé(e)
+ObjectUnvalidateTrigger = %s %s réouvert(e)
+ObjectValidateTrigger   = %s %s validé(e)
+ObjectLockTrigger       = %s %s verrouillé(e) - Prêt pour la génération du document
+ObjectSentbymailTrigger = Mail envoyé
+ObjectArchiveTrigger    = %s %s archivé(e)
+ObjectExpireTrigger     = %s %s expiré(e)
 ObjectGenerateTrigger   = %s %s généré(e)
 ObjectSignedTrigger     = %s %s signé(e)
 ObjectImportTrigger     = %s %s importé(e)
@@ -116,3 +123,6 @@ ObjectModified = Modifcation d'un(e) %s
 ObjectDeleted  = Suppression d'un(e) %s
 ObjectValidate = Validation d'un(e) %s
 ObjectLock     = Verrouillage d'un(e) %s
+
+# Fields - Champs
+TrackID = ID de suivi

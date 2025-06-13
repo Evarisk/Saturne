@@ -38,7 +38,7 @@
  * @return int|array                         0 < if KO, array of pages if OK
  * @throws Exception|Error
  */
-function saturne_fetch_all_object_type(string $className = '', string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = [], string $filtermode = 'AND', bool $extraFieldManagement = false, bool $multiEntityManagement = true, bool $categoryManagement = false, string $joinManagement = '', array $moreparams = [])
+function saturne_fetch_all_object_type(string $className = '', string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = [], string $filtermode = 'AND', bool $extraFieldManagement = false, bool $multiEntityManagement = true, bool $categoryManagement = false, string $joinManagement = '', array $moreparams = [], string $selectManagement = '', array $moreSelects = [], string $groupByManagement = '')
 {
     dol_syslog(__METHOD__, LOG_DEBUG);
 
@@ -80,6 +80,9 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
 
     $sql = 'SELECT ';
     $sql .= $objectFields;
+    if (dol_strlen($selectManagement) > 0) {
+        $sql .= $selectManagement;
+    }
     $sql .= ' FROM `' . MAIN_DB_PREFIX . $object->table_element . '` as t';
     if ($extraFieldManagement) {
         $sql .= ' LEFT JOIN `' . MAIN_DB_PREFIX . $object->table_element . '_extrafields` as eft ON t.rowid = eft.fk_object';
@@ -93,7 +96,7 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
         $sql .= Categorie::getFilterJoinQuery($object->element, 't.rowid');
     }
     if ($multiEntityManagement && isset($object->ismultientitymanaged) && $object->ismultientitymanaged == 1) {
-        $sql .= ' WHERE t.entity IN (' . getEntity($object->table_element) . ')';
+        $sql .= ' WHERE t.entity IN (' . getEntity($object->element) . ')';
     } else {
         $sql .= ' WHERE 1 = 1';
     }
@@ -104,7 +107,7 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
         foreach ($filter as $key => $value) {
             if ($key == 't.rowid') {
                 $sqlwhere[] = $key . ' = ' . $value;
-            } elseif (in_array($object->fields[$key]['type'], ['date', 'datetime', 'timestamp'])) {
+            } elseif (isset($object->fields[$key]['type']) && in_array($object->fields[$key]['type'], ['date', 'datetime', 'timestamp'])) {
                 $sqlwhere[] = $key .' = \'' . $object->db->idate($value) . '\'';
             } elseif ($key == 'customsql') {
                 $sqlwhere[] = $value;
@@ -118,6 +121,10 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
 
     if (count($sqlwhere) > 0) {
         $sql .= ' AND (' . implode(' ' . $filtermode . ' ', $sqlwhere) . ')';
+    }
+
+    if (dol_strlen($groupByManagement) > 0) {
+        $sql .= $groupByManagement;
     }
 
     if (!empty($sortfield)) {
@@ -137,6 +144,12 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
 
                 $record = new $className($db);
                 $record->setVarsFromFetchObj($obj);
+
+                if (dol_strlen($selectManagement) > 0) {
+                    foreach ($moreSelects as $moreSelect) {
+                        $record->$moreSelect = $obj->$moreSelect;
+                    }
+                }
 
                 if (is_array($optionsArray) && !empty($optionsArray) && $extraFieldManagement) {
                     foreach ($optionsArray as $key => $value) {
@@ -237,7 +250,7 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
             if (!empty($object->note_public)) {
                 $nbNote++;
             }
-            $head[$h][0] = dol_buildpath('/saturne/view/saturne_note.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType;
+            $head[$h][0] = dol_buildpath('/saturne/view/saturne_note.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType . ((dol_strlen($moreparam['handlePhoto']) > 0) ? '&handle_photo=' . $moreparam['handlePhoto'] : false);
             $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-comment pictofixedwidth"></i>' . $langs->trans('Notes') : '<i class="fas fa-comment"></i>';
             if ($nbNote > 0) {
                 $head[$h][1] .= (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '<span class="badge marginleftonlyshort">' . $nbNote . '</span>' : '');
@@ -323,12 +336,13 @@ function saturne_get_objects_metadata(string $type = ''): array
     // 'color'          => Picto color
     // 'class_name'     => Class name
     // 'name_field'     => Object name to be shown (ref, label, firstname, etc.)
+    // 'label_field'    => Object name to be shown (ref, label, firstname, etc.)
     // 'post_name'      => Name of post sent retrieved by GETPOST() function
-    // 'link_name'      => Name of object sourcetype in llx_element_element
+    // 'link_name'      => Name of object sourcetype in llx_element_element, special case for task we need to write module_task
     // 'tab_type'       => Tab type element for prepare_head function
     // 'table_element'  => Object name in database
     // 'fk_parent'      => OPTIONAL : Name of parent for objects as productlot, contact, task
-    // 'parent_post'    => OPTIONAL : Name of parent post (retrieved by GETPOST() function, it can be different from fk_parent
+    // 'parent_post'    => OPTIONAL : Name of parent post retrieved by GETPOST() function, it can be different from fk_parent
     // 'hook_name_card' => Hook name object card from initHooks
     // 'hook_name_list' => Hook name object list from initHooks
     // 'create_url'     => Path to creation card, no need to add "?action=create"
@@ -369,7 +383,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'color'          => '#a69944',
             'class_name'     => 'ProductLot',
             'post_name'      => 'fk_productlot',
-            'link_name'      => 'productbatch',
+            'link_name'      => 'productlot',
             'tab_type'       => 'productlot',
             'table_element'  => 'product_lot',
             'name_field'     => 'batch',
@@ -388,6 +402,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'mainmenu'       => '',
             'leftmenu'       => 'users',
             'langs'          => 'User',
+            'langfile'       => 'users',
             'picto'          => 'user',
             'color'          => '#79633f',
             'class_name'     => 'User',
@@ -460,6 +475,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'link_name'      => 'project',
             'tab_type'       => 'project',
             'name_field'     => 'ref, title',
+            'label_field'    => 'title',
             'hook_name_card' => 'projectcard',
             'hook_name_list' => 'projectlist',
             'create_url'     => 'projet/card.php',
@@ -473,18 +489,19 @@ function saturne_get_objects_metadata(string $type = ''): array
             'langfile'       => 'projects',
             'picto'          => 'projecttask',
             'color'          => '#6c6aa8',
-            'class_name'     => 'Task',
+            'class_name'     => 'SaturneTask',
             'post_name'      => 'fk_task',
             'link_name'      => 'project_task',
             'tab_type'       => 'task',
             'table_element'  => 'projet_task',
             'name_field'     => 'label',
+            'label_field'    => 'label',
             'fk_parent'      => 'fk_projet',
             'parent_post'    => 'fk_project',
             'hook_name_card' => 'projecttaskcard',
             'hook_name_list' => 'tasklist',
             'create_url'     => 'projet/tasks.php',
-            'class_path'     => 'projet/class/task.class.php',
+            'class_path'     => 'custom/saturne/class/task/saturnetask.class.php',
             'lib_path'       => 'core/lib/project.lib.php',
         ];
     }
@@ -553,6 +570,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'class_path'     => 'contrat/class/contrat.class.php',
             'lib_path'       => 'core/lib/contract.lib.php',
         ];
+        //@todo backward compatibility
+        $objectsMetadata['contrat'] = $objectsMetadata['contract'];
     }
 
     if (isModEnabled('ticket')) {
@@ -626,8 +645,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'color'          => '#a69944',
             'class_name'     => 'MouvementStock',
             'post_name'      => 'fk_stock_mouvement',
-            'link_name'      => 'stock_mouvement',
-            'tab_type'       => '',
+            'link_name'      => 'stockmouvement',
+            'tab_type'       => 'stock_mouvement',
             'table_element'  => 'stock_mouvement',
             'name_field'     => 'id',
             'hook_name_card' => '',
@@ -639,21 +658,21 @@ function saturne_get_objects_metadata(string $type = ''): array
     }
 
     if (isModEnabled('expedition')) {
-        $objectsMetadata['expedition'] = [
+        $objectsMetadata['shipping'] = [
             'mainmenu'       => '',
             'leftmenu'       => 'sendings',
             'langs'          => 'Shipments',
             'langfile'       => 'sendings',
             'picto'          => 'dolly',
-            'class_name'     => 'Expedition',
+            'class_name'     => 'SaturneExpedition',
             'post_name'      => 'fk_expedition',
-            'link_name'      => 'expedition',
+            'link_name'      => 'shipping',
             'tab_type'       => 'delivery',
             'table_element'  => 'expedition',
             'name_field'     => 'ref',
             'hook_name_card' => 'ordershipmentcard',
             'hook_name_list' => 'propallist',
-            'class_path'     => 'expedition/class/expedition.class.php',
+            'class_path'     => 'custom/saturne/class/dolibarrobjects/saturneexpedition.class.php',
             'lib_path'       => 'core/lib/expedition.lib.php',
         ];
     }
@@ -730,16 +749,16 @@ function saturne_get_objects_metadata(string $type = ''): array
             'langfile'       => 'receptions',
             'picto'          => 'dollyrevert',
             'color'          => '#599caf',
-            'class_name'     => 'Reception',
+            'class_name'     => 'SaturneReception',
             'post_name'      => 'fk_reception',
             'link_name'      => 'reception',
             'tab_type'       => 'reception',
             'table_element'  => 'reception',
-            'name_field'     => 'ref_supplier',
+            'name_field'     => 'ref',
             'hook_name_card' => 'receptioncard',
             'hook_name_list' => 'receptionlist',
             'create_url'     => 'reception/card.php',
-            'class_path'     => 'reception/class/reception.class.php',
+            'class_path'     => 'custom/saturne/class/dolibarrobjects/saturnereception.class.php',
             'lib_path'       => 'core/lib/reception.lib.php',
         ];
     }
@@ -766,17 +785,39 @@ function saturne_get_objects_metadata(string $type = ''): array
         ];
     }
 
+    if (isModEnabled('supplier_proposal')) {
+        $objectsMetadata['supplier_proposal'] = [
+            'mainmenu'       => 'commercial',
+            'leftmenu'       => 'propals_supplier',
+            'langs'          => 'SupplierProposalShort',
+            'langfile'       => 'supplier_proposal',
+            'picto'          => 'supplier_proposal',
+            'color'          => '#599caf',
+            'class_name'     => 'SaturneSupplierProposal',
+            'post_name'      => 'fk_supplier_proposal',
+            'link_name'      => 'supplier_proposal',
+            'tab_type'       => 'supplier_proposal',
+            'table_element'  => 'supplier_proposal',
+            'name_field'     => 'ref',
+            'hook_name_card' => 'supplier_proposalcard',
+            'hook_name_list' => 'supplier_proposallist',
+            'create_url'     => 'supplier_proposal/card.php',
+            'class_path'     => 'custom/saturne/class/dolibarrobjects/saturnesupplierproposal.class.php',
+            'lib_path'       => 'core/lib/supplier_proposal.lib.php',
+        ];
+    }
+
     if (isModEnabled('fournisseur')) {
         $objectsMetadata['supplier_order'] = [
-            'mainmenu'       => 'products',
+            'mainmenu'       => 'commercial',
             'leftmenu'       => 'orders_suppliers',
-            'langs'          => 'SupplierOrders',
+            'langs'          => 'SupplierOrder',
             'langfile'       => 'orders',
             'picto'          => 'supplier_order',
             'color'          => '#599caf',
             'class_name'     => 'CommandeFournisseur',
             'post_name'      => 'fk_supplier_order',
-            'link_name'      => 'fournisseur_order',
+            'link_name'      => 'order_supplier',
             'tab_type'       => 'ordersupplier',
             'table_element'  => 'commande_fournisseur',
             'name_field'     => 'ref',
@@ -786,19 +827,26 @@ function saturne_get_objects_metadata(string $type = ''): array
             'class_path'     => 'fourn/class/fournisseur.commande.class.php',
             'lib_path'       => 'core/lib/fourn.lib.php',
         ];
+        //$objectsMetadata['supplier_invoice'] = [
+//            'langs'      => 'SupplierInvoice',
+//            'langfile'   => 'bills',
+//            'picto'      => 'supplier_invoice',
+//            'className'  => 'FactureFournisseur',
+//            'post_name'  => 'fk_supplier_invoice',
+//            'link_name'  => 'facture_fournisseur',
+//            'tab_type'   => 'supplier_invoice',
+//            'name_field' => 'ref',
+//            'create_url' => 'fourn/facture/card.php',
+//            'class_path' => 'fourn/class/fournisseur.facture.class.php',
+//        ];
     }
 
     // Hook to add controllable objects from other modules
-    if (!is_object($hookmanager)) {
-        include_once DOL_DOCUMENT_ROOT . '/core/class/hookmanager.class.php';
-        $hookmanager = new HookManager($db);
-    }
     $hookmanager->initHooks(['saturnegetobjectsmetadata']);
-
-    $resHook = $hookmanager->executeHooks('extendGetObjectsMetadata', $objectsMetadata);
-
-    if ($resHook && (is_array($hookmanager->resArray) && !empty($hookmanager->resArray))) {
-        $objectsMetadata = $hookmanager->resArray;
+    $parameters = ['objectsMetadata' => $objectsMetadata];
+    $hookmanager->executeHooks('saturneExtendGetObjectsMetadata', $parameters);
+    if (is_array($hookmanager->resArray) && !empty($hookmanager->resArray)) {
+        $objectsMetadata = array_merge($objectsMetadata, $hookmanager->resArray);
     }
 
     $objectsMetadataArray = [];
@@ -816,7 +864,6 @@ function saturne_get_objects_metadata(string $type = ''): array
                 $tableElement = $object->table_element;
 
                 $objectsMetadataArray[$objectType] = [
-                    'name'           => ucfirst($objectType),
                     'mainmenu'       => $objectMetadata['mainmenu'] ?? '',
                     'leftmenu'       => $objectMetadata['leftmenu'] ?? '',
                     'langs'          => $objectMetadata['langs'] ?? '',
@@ -825,6 +872,7 @@ function saturne_get_objects_metadata(string $type = ''): array
                     'color'          => $objectMetadata['color'] ?? '',
                     'class_name'     => $objectMetadata['class_name'] ?? '',
                     'name_field'     => $objectMetadata['name_field'] ?? '',
+                    'label_field'    => $objectMetadata['label_field'] ?? '',
                     'post_name'      => $objectMetadata['post_name'] ?? '',
                     'link_name'      => $objectMetadata['link_name'] ?? '',
                     'tab_type'       => $objectMetadata['tab_type'] ?? '',
@@ -836,12 +884,18 @@ function saturne_get_objects_metadata(string $type = ''): array
                     'create_url'     => $objectMetadata['create_url'] ?? '',
                     'class_path'     => $objectMetadata['class_path'] ?? '',
                     'lib_path'       => $objectMetadata['lib_path'] ?? '',
+                    'object'         => $object
                 ];
                 if (!empty($objectMetadata['langfile'])) {
                     $langs->load($objectMetadata['langfile']);
                 }
                 if (dol_strlen($type) > 0 && empty($otherNameType)) {
                     $otherNameType = (!empty(array_search($type, $objectMetadata)) ? $objectType : '');
+                }
+                $parameters = ['objectsMetadataArray' => $objectsMetadataArray, 'objectType' => $objectType];
+                $hookmanager->executeHooks('saturneMoreObjectsMetadata', $parameters);
+                if (is_array($hookmanager->resArray) && !empty($hookmanager->resArray)) {
+                    $objectsMetadataArray[$objectType] = array_merge($hookmanager->resArray, $objectsMetadataArray[$objectType]);
                 }
             }
         }

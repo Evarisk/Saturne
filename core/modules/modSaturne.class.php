@@ -75,7 +75,7 @@ class modSaturne extends DolibarrModules
 		$this->editor_url  = 'https://evarisk.com/';
 
         // Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
-		$this->version = '1.8.0';
+		$this->version = '21.0.0';
 
         // Url to the file with your last numberversion of this module
         //$this->url_last_version = 'http://www.example.com/versionmodule.txt';
@@ -124,7 +124,8 @@ class modSaturne extends DolibarrModules
 				'usercard',
                 'category',
                 'categoryindex',
-                'index'
+                'index',
+                'elementproperties'
             ],
             // Set this to 1 if features of module are opened to external users
             'moduleforexternal' => 0,
@@ -139,7 +140,8 @@ class modSaturne extends DolibarrModules
             'DoliSIRH'         => 'dolisirh',
             'DigiriskDolibarr' => 'digiriskdolibarr',
             'EasyURL'          => 'easyurl',
-            'GMAO'             => 'gmao'
+            'GMAO'             => 'gmao',
+            'DigiKanban'       => 'digikanban',
         ];
 
         // Data directories to create when module is enabled.
@@ -163,7 +165,7 @@ class modSaturne extends DolibarrModules
 
         // Prerequisites
 		$this->phpmin = [7, 4]; // Minimum version of PHP required by module
-		$this->need_dolibarr_version = [19, 0]; // Minimum version of Dolibarr required by module
+		$this->need_dolibarr_version = [20, 0]; // Minimum version of Dolibarr required by module
 
         // Messages at activation
 		$this->warnings_activation = []; // Warning to show when we activate module. array('always'='text') or array('FR'='textfr','MX'='textmx'...)
@@ -374,19 +376,11 @@ class modSaturne extends DolibarrModules
         }
 
         // Create extrafields during init
-        require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
-        $extraFields = new ExtraFields($this->db);
-
         $extraFieldsArrays = [
-            'electronic_signature' => ['Label' => 'ElectronicSignature', 'type' => 'text', 'elementtype' => ['user'], 'position' => 100, 'list' => 1, 'entity' => 0, 'langfile' => 'saturne@saturne', 'enabled' => "isModEnabled('saturne')"]
+            'electronic_signature' => ['Label' => 'ElectronicSignature', 'type' => 'text', 'elementtype' => ['user'], 'position' => $this->numero . 10, 'list' => 1, 'entity' => 0, 'langfile' => 'saturne@saturne', 'enabled' => "isModEnabled('saturne') && isModEnabled('user')"]
         ];
 
-        foreach ($extraFieldsArrays as $key => $extraField) {
-            foreach ($extraField['elementtype'] as $extraFieldElementType) {
-                $extraFields->update($key, $extraField['Label'], $extraField['type'], $extraField['length'], $extraFieldElementType, 0, 0, $this->numero . $extraField['position'], $extraField['params'], '', '', $extraField['list'], ($extraField['help'][$extraFieldElementType] ?? $extraField['help']), '', '', $extraField['entity'], $extraField['langfile'], $extraField['enabled'] . ' && isModEnabled("' . $extraFieldElementType . '")', 0, 0, $extraField['css']);
-                $extraFields->addExtraField($key, $extraField['Label'], $extraField['type'], $this->numero . $extraField['position'], $extraField['length'], $extraFieldElementType, 0, 0, '', $extraField['params'], $extraField['alwayseditable'], '', $extraField['list'], $extraField['help'], '', $extraField['entity'], $extraField['langfile'], $extraField['enabled'] . ' && isModEnabled("' . $extraFieldElementType . '")', 0, 0, $extraField['css']);
-            }
-        }
+        saturne_manage_extrafields($extraFieldsArrays);
 
         return $this->_init($sql, $options);
     }

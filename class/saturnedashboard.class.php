@@ -113,11 +113,11 @@ class SaturneDashboard
         print '<input type="hidden" name="token" value="' . newToken() . '">';
         print '<input type="hidden" name="action" value="view">';
 
-        $confName            = dol_strtoupper($moduleNameLowerCase) . '_DASHBOARD_CONFIG';
-        $disableWidgetList   = json_decode($user->conf->$confName);
-        $disableWidgetList   = $disableWidgetList->widgets ?? new stdClass();
+        $confName              = dol_strtoupper($moduleNameLowerCase) . '_DASHBOARD_CONFIG';
+        $disableWidgetList     = property_exists($user->conf, $confName) ? json_decode($user->conf->$confName) : null;
+        $disableWidgetList     = $disableWidgetList->widgets ?? new stdClass();
         $dashboardWidgetsArray = [];
-        if (is_array($dashboards['widgets']) && !empty($dashboards['widgets'])) {
+        if (!empty($dashboards['widgets']) && is_array($dashboards['widgets'])) {
             foreach ($dashboards['widgets'] as $dashboardWidgets) {
                 foreach ($dashboardWidgets as $key => $dashboardWidget) {
                     if (isset($disableWidgetList->$key) && $disableWidgetList->$key == 0) {
@@ -135,7 +135,7 @@ class SaturneDashboard
         }
         print '</div>';
 
-        if (is_array($dashboards['widgets']) && !empty($dashboards['widgets'])) {
+        if (!empty($dashboards['widgets']) && is_array($dashboards['widgets'])) {
             $widget = '';
             foreach ($dashboards['widgets'] as $dashboardWidgets) {
                 foreach ($dashboardWidgets as $key => $dashboardWidget) {
@@ -169,7 +169,7 @@ class SaturneDashboard
                                                     if (isset($dashboardWidget['moreContent'][$i]) && $dashboardWidget['moreContent'][$i] !== '') {
                                                         $widget .= $dashboardWidget['moreContent'][$i];
                                                     }
-                                                } else {
+                                                } elseif (isset($dashboardWidget['customContent'][$i]) && $dashboardWidget['customContent'][$i] !== '') {
                                                     $widget .= $dashboardWidget['customContent'][$i];
                                                 }
                                             $widget .= '</span>';
@@ -178,7 +178,7 @@ class SaturneDashboard
                                 }
                             }
                             $widget .= '</ul>';
-                            if (is_array($dashboardWidget['moreParams']) && (!empty($dashboardWidget['moreParams']))) {
+                            if (!empty($dashboardWidget['moreParams']) && is_array($dashboardWidget['moreParams'])) {
                                 $widget .= '<div class="body__content">';
                                 foreach ($dashboardWidget['moreParams'] as $dashboardWidgetMoreParamsKey => $dashboardWidgetMoreParams) {
                                     switch ($dashboardWidgetMoreParamsKey) {
@@ -247,7 +247,7 @@ class SaturneDashboard
 
         print '<div class="graph-dashboard wpeo-grid grid-2" id="graph-dashboard">';
 
-        if (is_array($dashboards['graphs']) && !empty($dashboards['graphs'])) {
+        if (!empty($dashboards['graphs']) && is_array($dashboards['graphs'])) {
             foreach ($dashboards['graphs'] as $dashboardGraphs) {
                 if (is_array($dashboardGraphs) && !empty($dashboardGraphs)) {
                     foreach ($dashboardGraphs as $keyElement => $dashboardGraph) {
@@ -314,7 +314,7 @@ class SaturneDashboard
                                 $graph->SetHeight($dashboardGraph['height'] ?? $height);
                                 $graph->setShowLegend($dashboardGraph['showlegend'] ?? 2);
                                 $graph->draw($fileName[$uniqueKey], $fileUrl[$uniqueKey]);
-                                print '<div class="' . $dashboardGraph['moreCSS'] . '" id="graph-' . $dashboardGraph['name'] . '">';
+                                print '<div class="' . ($dashboardGraph['moreCSS'] ?? '') . '" id="graph-' . $dashboardGraph['name'] . '">';
 
                                 $downloadCSV  = '<div class="flex flex-row justify-end">';
                                 $downloadCSV .= '<input type="hidden" name="graph" value="' . dol_escape_htmltag(json_encode($dashboardGraph, JSON_UNESCAPED_UNICODE)) . '">';
@@ -327,7 +327,7 @@ class SaturneDashboard
                                     $downloadCSV .= '</button>';
                                 }
                                 $downloadCSV .= '</div>';
-                                $dashboardGraph['morehtmlright'] .= $downloadCSV;
+                                $dashboardGraph['morehtmlright'] = ($dashboardGraph['morehtmlright'] ?? '') . $downloadCSV;
 
                                 print load_fiche_titre($dashboardGraph['title'], $dashboardGraph['morehtmlright'], $dashboardGraph['picto']);
                                 print $graph->show();
@@ -339,7 +339,7 @@ class SaturneDashboard
             }
         }
 
-        if (is_array($dashboards['lists']) && !empty($dashboards['lists'])) {
+        if (!empty($dashboards['lists']) && is_array($dashboards['lists'])) {
             foreach ($dashboards['lists'] as $dashboardLists) {
                 foreach ($dashboardLists as $dashboardList) {
                     if (is_array($dashboardList['data']) && !empty($dashboardList['data'])) {
@@ -361,7 +361,7 @@ class SaturneDashboard
                         foreach ($dashboardList['data'] as $dashboardListDatasets) {
                             print '<tr class="oddeven">';
                             foreach ($dashboardListDatasets as $key => $dashboardGraphDataset) {
-                                print '<td class="' . ($conf->browser->layout == 'classic' ? 'nowraponall tdoverflowmax200 ' : '') . (($key != 'Ref') ? 'center ' : '') . $dashboardGraphDataset['morecss'] . '"' . $dashboardGraphDataset['moreAttr'] . '>' . $dashboardGraphDataset['value'] . '</td>';
+                                print '<td class="' . ($conf->browser->layout == 'classic' ? 'nowraponall tdoverflowmax200 ' : '') . (($key != 'Ref') ? 'center ' : '') . ($dashboardGraphDataset['morecss'] ?? '') . '"' . ($dashboardGraphDataset['moreAttr'] ?? '') . '>' . $dashboardGraphDataset['value'] . '</td>';
                             }
                             print '</tr>';
                         }

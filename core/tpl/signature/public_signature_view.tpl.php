@@ -43,6 +43,7 @@
                 <div class="information-user"><?php echo dol_strtoupper($signatory->lastname) . ' ' . ucfirst($signatory->firstname); ?></div>
             </div>
 
+            <?php if (!empty($object->id)) : ?>
             <div class="header-objet">
                 <div class="objet-container">
                     <div class="objet-info">
@@ -61,6 +62,7 @@
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
         </div>
 
         <div class="public-card__content signature">

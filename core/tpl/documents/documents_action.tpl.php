@@ -36,7 +36,7 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
     $outputLangs = $langs;
     $newLang = '';
 
-    if ($conf->global->MAIN_MULTILANGS && empty($newLang) && GETPOST('lang_id', 'aZ09')) {
+    if (getDolGlobalInt('MAIN_MULTILANGS') && empty($newLang) && GETPOST('lang_id', 'aZ09')) {
         $newLang = GETPOST('lang_id', 'aZ09');
     }
     if (!empty($newLang)) {

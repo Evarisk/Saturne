@@ -342,7 +342,7 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
                 <div class="modal-add-media">
                     <input type="hidden" name="token" value="<?php echo newToken(); ?>">
                     <strong><?php echo $langs->trans('AddFile'); ?></strong>
-                    <input type="file" id="add_media_to_gallery" class="flat minwidth400 maxwidth200onsmartphone" name="userfile[]" multiple accept>
+                    <input type="file" id="add_media_to_gallery" class="flat minwidth400 maxwidth200onsmartphone" name="userfile[]" multiple accept='image/*'>
                     <div class="underbanner clearboth"></div>
                 </div>
 				<div class="form-element">
@@ -358,7 +358,16 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
 				</div>
                 <div>
                     <div>
-                        <?php print img_picto($langs->trans('Calendar'), 'calendar') . ' ' . $form->textwithpicto($langs->trans('Today'), $langs->trans('ShowOnlyMediasAddedToday'));
+                        <?php
+                        if (getDolGlobalInt('SATURNE_MEDIA_GALLERY_SHOW_ALL_MEDIA_INFOS')) {
+                            print img_picto($langs->trans('Link'), 'link') . ' ' . $form->textwithpicto($langs->trans('UnlinkedMedias'), $langs->trans('ShowOnlyUnlinkedMedias'));
+                            if (isset($user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS) && $user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS) {
+                                print '<span id="del_unlinked_medias" value="0" class="valignmiddle linkobject toggle-unlinked-medias ' . (!empty($user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS) ? '' : 'hideobject') . '">' . img_picto($langs->trans('Enabled'), 'switch_on') . '</span>';
+                            } else {
+                                print '<span id="set_unlinked_medias" value="1" class="valignmiddle linkobject toggle-unlinked-medias ' . (!empty($user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS) ? 'hideobject' : '') . '">' . img_picto($langs->trans('Disabled'), 'switch_off') . '</span>';
+                            }
+                        }
+                        print img_picto($langs->trans('Calendar'), 'calendar') . ' ' . $form->textwithpicto($langs->trans('Today'), $langs->trans('ShowOnlyMediasAddedToday'));
                         if (isset($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS) && $user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS) {
                             print '<span id="del_today_medias" value="0" class="valignmiddle linkobject toggle-today-medias ' . (!empty($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS) ? '' : 'hideobject') . '">' . img_picto($langs->trans('Enabled'), 'switch_on') . '</span>';
                         } else {
@@ -373,7 +382,7 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
 			<div class="ecm-photo-list-content">
 				<?php
 				$relativepath = $moduleNameLowerCase . '/medias/thumbs';
-				print saturne_show_medias($moduleNameLowerCase, 'ecm', $conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias', ($conf->browser->layout == 'phone' ? 'mini' : 'small'), 80, 80, (!empty($offset) ? $offset : 1));
+				print saturne_show_medias($moduleNameLowerCase, 'ecm', $conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias', 'small', 80, 80, (!empty($offset) ? $offset : 1));
 				?>
 			</div>
 		</div>
@@ -395,7 +404,7 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
 
                     return count($fileArrays) == 0;
                 });
-           }
+            }
             $allMediasNumber = count($filearray);
 			$pagesCounter    = $conf->global->$moduleImageNumberPerPageConf ? ceil($allMediasNumber/($conf->global->$moduleImageNumberPerPageConf ?: 1)) : 1;
 			$page_array      = saturne_load_pagination($pagesCounter, $loadedPageArray ?? [], $offset ?? 0);

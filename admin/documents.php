@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2021-2024 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2021-2025 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,18 +31,25 @@ if (file_exists('../saturne.main.inc.php')) {
 }
 
 // Get module parameters
-$moduleName = GETPOST('module_name');
+$moduleName = GETPOST('module_name', 'aZ') ?: 'Saturne';
 if (dol_strlen($moduleName) > 0 && strpos($moduleName, '#') !== false) {
     $moduleName = explode('#', $moduleName)[0];
 }
-$moduleNameLowerCase = strtolower($moduleName);
+$moduleNameLowerCase = dol_strtolower($moduleName);
 
 // Load Dolibarr libraries
 require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 
-// Load Module libraries
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '.lib.php';
+// Build the paths for the required files
+$moduleLibPath = dol_buildpath($moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '.lib.php');
+
+// Check if files exist before including them
+if (!(is_file($moduleLibPath) && is_readable($moduleLibPath))) {
+    die('Failed to require ' . $moduleNameLowerCase . ' libraries: Files not found. Paths: ' . $moduleLibPath);
+}
+// Load Module Libraries
+require_once $moduleLibPath;
 
 // Global variables definitions
 global $conf, $db, $hookmanager, $langs, $user;
@@ -64,178 +71,189 @@ $pageY      = GETPOST('page_y', 'int');
 
 $hookmanager->initHooks([$moduleNameLowerCase . 'admindocuments']); // Note that conf->hooks_modules contains array
 
-// Security check - Protection if external user
-$permissiontoread = $user->rights->$moduleNameLowerCase->adminpage->read;
-saturne_check_access($permissiontoread);
+// Permissions
+$permissionToRead = $user->hasRight($moduleNameLowerCase, 'adminpage', 'read');
+
+// Security check
+saturne_check_access($permissionToRead);
 
 /*
  * Actions
  */
 
-// Actions set_mod, update_mask
-require_once __DIR__ . '/../core/tpl/actions/admin_conf_actions.tpl.php';
-
-// Activate a model
-if ($action == 'set') {
-    addDocumentModel($modelName, $type, $label, $const);
-    header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
-    exit;
-} elseif ($action == 'del') {
-    delDocumentModel($modelName, $type);
-    header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
-    exit;
+$object     = null;
+$parameters = [];
+$resHook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+if ($resHook < 0) {
+    setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 }
 
-// Set default model
-if ($action == 'setdoc') {
-    $confName = dol_strtoupper($moduleName . '_' . $type) . '_DEFAULT_MODEL';
-    dolibarr_set_const($db, $confName, $modelName, 'chaine', 0, '', $conf->entity);
-    header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
-    exit;
-}
+if (empty($resHook)) {
+    // Actions set_mod, update_mask
+    require_once __DIR__ . '/../core/tpl/actions/admin_conf_actions.tpl.php';
 
-if ($action == 'deletefile' && $modulepart == 'ecm' && !empty($user->admin)) {
-    include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
-    $keyforuploaddir = GETPOST('keyforuploaddir', 'aZ09');
-
-    $listofdir = explode(',', preg_replace('/[\r\n]+/', ',', trim(getDolGlobalString($keyforuploaddir))));
-    foreach ($listofdir as $key => $tmpdir) {
-        $tmpdir = preg_replace('/DOL_DATA_ROOT\/*/', '', $tmpdir);	// Clean string if we found a hardcoded DOL_DATA_ROOT
-        if (!$tmpdir) {
-            unset($listofdir[$key]);
-            continue;
-        }
-        $tmpdir = DOL_DATA_ROOT.'/'.$tmpdir;	// Complete with DOL_DATA_ROOT. Only files into DOL_DATA_ROOT can be reach/set
-        if (!is_dir($tmpdir)) {
-            if (empty($nomessageinsetmoduleoptions)) {
-                setEventMessages($langs->trans('ErrorDirNotFound', $tmpdir), null, 'warnings');
-            }
-        } else {
-            $upload_dir = $tmpdir;
-            break;	// So we take the first directory found into setup $conf->global->$keyforuploaddir
-        }
-    }
-
-    $filetodelete = $tmpdir.'/'.GETPOST('file');
-    $result = dol_delete_file($filetodelete);
-    if ($result > 0) {
-        setEventMessages($langs->trans('FileWasRemoved', GETPOST('file')), null);
+    // Activate a model
+    if ($action == 'set') {
+        addDocumentModel($modelName, $type, $label, $const);
+        header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
+        exit;
+    } elseif ($action == 'del') {
+        delDocumentModel($modelName, $type);
         header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
         exit;
     }
-}
 
-if ($action == 'setModuleOptions') {
-    $error = 0;
-    include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
-    $keyforuploaddir = GETPOST('keyforuploaddir', 'aZ09');
-
-    $listofdir = explode(',', preg_replace('/[\r\n]+/', ',', trim(getDolGlobalString($keyforuploaddir))));
-    foreach ($listofdir as $key => $tmpdir) {
-        $tmpdir = preg_replace('/DOL_DATA_ROOT\/*/', '', $tmpdir);	// Clean string if we found a hardcoded DOL_DATA_ROOT
-        if (!$tmpdir) {
-            unset($listofdir[$key]);
-            continue;
-        }
-        $tmpdir = DOL_DATA_ROOT.'/'.$tmpdir;	// Complete with DOL_DATA_ROOT. Only files into DOL_DATA_ROOT can be reach/set
-        if (!is_dir($tmpdir)) {
-            if (empty($nomessageinsetmoduleoptions)) {
-                setEventMessages($langs->trans('ErrorDirNotFound', $tmpdir), null, 'warnings');
-            }
-        } else {
-            $upload_dir = $tmpdir;
-            break;	// So we take the first directory found into setup $conf->global->$keyforuploaddir
-        }
+    // Set default model
+    if ($action == 'setdoc') {
+        $confName = dol_strtoupper($moduleName . '_' . $type) . '_DEFAULT_MODEL';
+        dolibarr_set_const($db, $confName, $modelName, 'chaine', 0, '', $conf->entity);
+        header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
+        exit;
     }
 
-    if (!empty($_FILES)) {
-        if (is_array($_FILES['userfile']['tmp_name'])) {
-            $userfiles = $_FILES['userfile']['tmp_name'];
-        } else {
-            $userfiles = array($_FILES['userfile']['tmp_name']);
-        }
+    if ($action == 'deletefile' && $modulepart == 'ecm' && !empty($user->admin)) {
+        include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+        $keyforuploaddir = GETPOST('keyforuploaddir', 'aZ09');
 
-        foreach ($userfiles as $key => $userfile) {
-            if (empty($_FILES['userfile']['tmp_name'][$key])) {
-                $error++;
-                if ($_FILES['userfile']['error'][$key] == 1 || $_FILES['userfile']['error'][$key] == 2) {
-                    setEventMessages($langs->trans('ErrorFileSizeTooLarge'), null, 'errors');
-                } else {
-                    setEventMessages($langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv('File')), null, 'errors');
+        $listofdir = explode(',', preg_replace('/[\r\n]+/', ',', trim(getDolGlobalString($keyforuploaddir))));
+        foreach ($listofdir as $key => $tmpdir) {
+            $tmpdir = preg_replace('/DOL_DATA_ROOT\/*/', '', $tmpdir);    // Clean string if we found a hardcoded DOL_DATA_ROOT
+            if (!$tmpdir) {
+                unset($listofdir[$key]);
+                continue;
+            }
+            $tmpdir = DOL_DATA_ROOT . '/' . $tmpdir;    // Complete with DOL_DATA_ROOT. Only files into DOL_DATA_ROOT can be reach/set
+            if (!is_dir($tmpdir)) {
+                if (empty($nomessageinsetmoduleoptions)) {
+                    setEventMessages($langs->trans('ErrorDirNotFound', $tmpdir), null, 'warnings');
                 }
-            }
-            if (pathinfo($_FILES['userfile']['name'], PATHINFO_EXTENSION) != 'odt') {
-                $error++;
-                setEventMessages($langs->trans('ErrorWrongFileNameExtension', $_FILES['userfile']['name']), [], 'errors');
-            }
-        }
-
-        if (!$error) {
-            $allowoverwrite = (GETPOST('overwritefile', 'int') ? 1 : 0);
-            if (!empty($tmpdir)) {
-                $result = dol_add_file_process($tmpdir, $allowoverwrite, 1, 'userfile', GETPOST('savingdocmask', 'alpha'));
+            } else {
+                $upload_dir = $tmpdir;
+                break;    // So we take the first directory found into setup $conf->global->$keyforuploaddir
             }
         }
-    }
-}
 
-if ($action == 'update_documents_config') {
-    $vignette = GETPOST('vignette', 'alpha');
-    $result   = dolibarr_set_const($db, strtoupper($moduleName) . '_DOCUMENT_MEDIA_VIGNETTE_USED', $vignette, 'chaine', 0, '', $conf->entity);
-
-    if ($result > 0) {
-        setEventMessage($langs->trans('SavedConfig'));
-    } else {
-        setEventMessage($langs->trans('ErrorSavedConfig'), 'errors');
-    }
-}
-
-if ($action == 'specimen') {
-    $documentType = explode('_', $modelName)[1];
-
-    require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . $documentType . '.class.php';
-
-    $document = new $documentType($db);
-
-    // Search template files
-    $dir = __DIR__ . '/../../' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $documentType . '/';
-    $file = 'pdf_' .  $modelName . '.modules.php';
-    if (file_exists($dir . $file)) {
-        $moreParams['object']     = new stdClass();
-        $moreParams['user']       = $user;
-        $moreParams['specimen']   = 1;
-        $moreParams['zone']       = 'public';
-        $moreParams['objectType'] = str_replace('document', '', $documentType);
-
-        $result = $document->generateDocument($modelName, $langs, 0, 0, 0, $moreParams);
-        if ($result <= 0) {
-            setEventMessages($document->error, $document->errors, 'errors');
-        } else {
-            setEventMessages($langs->trans('FileGenerated') . ' - ' . '<a href=' . DOL_URL_ROOT . '/document.php?modulepart=' . $moreParams['objectType'] . '&file=' . urlencode('public_specimen/' . $document->last_main_doc) . '&entity=' . $conf->entity . '"' . '>' . $document->last_main_doc . '</a>', []);
+        $filetodelete = $tmpdir . '/' . GETPOST('file');
+        $result = dol_delete_file($filetodelete);
+        if ($result > 0) {
+            setEventMessages($langs->trans('FileWasRemoved', GETPOST('file')), null);
             header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
             exit;
         }
     }
-}
 
-if ($action == 'download_template') {
-    $fileName = GETPOST('filename');
-    dol_copy(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/doctemplates/' . $type . '/' . $fileName, DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $fileName);
-}
+    if ($action == 'setModuleOptions') {
+        $error = 0;
+        include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+        $keyforuploaddir = GETPOST('keyforuploaddir', 'aZ09');
 
-if ($action == 'remove_file') {
-    $fileName = GETPOST('filename');
-    dol_delete_file(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $fileName);
+        $listofdir = explode(',', preg_replace('/[\r\n]+/', ',', trim(getDolGlobalString($keyforuploaddir))));
+        foreach ($listofdir as $key => $tmpdir) {
+            $tmpdir = preg_replace('/DOL_DATA_ROOT\/*/', '', $tmpdir);    // Clean string if we found a hardcoded DOL_DATA_ROOT
+            if (!$tmpdir) {
+                unset($listofdir[$key]);
+                continue;
+            }
+            $tmpdir = DOL_DATA_ROOT . '/' . $tmpdir;    // Complete with DOL_DATA_ROOT. Only files into DOL_DATA_ROOT can be reach/set
+            if (!is_dir($tmpdir)) {
+                if (empty($nomessageinsetmoduleoptions)) {
+                    setEventMessages($langs->trans('ErrorDirNotFound', $tmpdir), null, 'warnings');
+                }
+            } else {
+                $upload_dir = $tmpdir;
+                break;    // So we take the first directory found into setup $conf->global->$keyforuploaddir
+            }
+        }
+
+        if (!empty($_FILES)) {
+            if (is_array($_FILES['userfile']['tmp_name'])) {
+                $userfiles = $_FILES['userfile']['tmp_name'];
+            } else {
+                $userfiles = array($_FILES['userfile']['tmp_name']);
+            }
+
+            foreach ($userfiles as $key => $userfile) {
+                if (empty($_FILES['userfile']['tmp_name'][$key])) {
+                    $error++;
+                    if ($_FILES['userfile']['error'][$key] == 1 || $_FILES['userfile']['error'][$key] == 2) {
+                        setEventMessages($langs->trans('ErrorFileSizeTooLarge'), null, 'errors');
+                    } else {
+                        setEventMessages($langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv('File')), null, 'errors');
+                    }
+                }
+                if (pathinfo($_FILES['userfile']['name'], PATHINFO_EXTENSION) != 'odt') {
+                    $error++;
+                    setEventMessages($langs->trans('ErrorWrongFileNameExtension', $_FILES['userfile']['name']), [], 'errors');
+                }
+            }
+
+            if (!$error) {
+                $allowoverwrite = (GETPOST('overwritefile', 'int') ? 1 : 0);
+                if (!empty($tmpdir)) {
+                    $result = dol_add_file_process($tmpdir, $allowoverwrite, 1, 'userfile', GETPOST('savingdocmask', 'alpha'));
+                }
+            }
+        }
+    }
+
+    if ($action == 'update_documents_config') {
+        $vignette = GETPOST('vignette', 'alpha');
+        $result = dolibarr_set_const($db, strtoupper($moduleName) . '_DOCUMENT_MEDIA_VIGNETTE_USED', $vignette, 'chaine', 0, '', $conf->entity);
+
+        if ($result > 0) {
+            setEventMessage($langs->trans('SavedConfig'));
+        } else {
+            setEventMessage($langs->trans('ErrorSavedConfig'), 'errors');
+        }
+    }
+
+    if ($action == 'specimen') {
+        $documentType = explode('_', $modelName)[1];
+
+        require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . $documentType . '.class.php';
+
+        $document = new $documentType($db);
+
+        // Search template files
+        $dir = __DIR__ . '/../../' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $documentType . '/';
+        $file = 'pdf_' . $modelName . '.modules.php';
+        if (file_exists($dir . $file)) {
+            $moreParams['object'] = new stdClass();
+            $moreParams['user'] = $user;
+            $moreParams['specimen'] = 1;
+            $moreParams['zone'] = 'public';
+            $moreParams['objectType'] = str_replace('document', '', $documentType);
+
+            $result = $document->generateDocument($modelName, $langs, 0, 0, 0, $moreParams);
+            if ($result <= 0) {
+                setEventMessages($document->error, $document->errors, 'errors');
+            } else {
+                setEventMessages($langs->trans('FileGenerated') . ' - ' . '<a href=' . DOL_URL_ROOT . '/document.php?modulepart=' . $moreParams['objectType'] . '&file=' . urlencode('public_specimen/' . $document->last_main_doc) . '&entity=' . $conf->entity . '"' . '>' . $document->last_main_doc . '</a>', []);
+                header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
+                exit;
+            }
+        }
+    }
+
+    if ($action == 'download_template') {
+        $fileName = GETPOST('filename');
+        dol_copy(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/doctemplates/' . $type . '/' . $fileName, DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $fileName);
+    }
+
+    if ($action == 'remove_file') {
+        $fileName = GETPOST('filename');
+        dol_delete_file(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $fileName);
+    }
 }
 
 /*
  * View
  */
 
-$title    = $langs->trans('ModuleSetup', $moduleName);
-$help_url = 'FR:Module_' . $moduleName;
+$title   = $langs->trans('ModuleSetup', $moduleName);
+$helpUrl = 'FR:Module_' . $moduleName;
 
-saturne_header(0, '', $title, $help_url);
+saturne_header(0, '', $title, $helpUrl);
 
 ?>
     <script>
