@@ -22,10 +22,13 @@
  */
 
 // Load Saturne environment
-if (!file_exists('../saturne.main.inc.php')) {
+if (file_exists('../saturne.main.inc.php')) {
+    require_once __DIR__ . '/../saturne.main.inc.php';
+} elseif (file_exists('../../saturne.main.inc.php')) {
+    require_once __DIR__ . '/../../saturne.main.inc.php';
+} else {
     die('Include of saturne main fails');
 }
-require_once __DIR__ . '/../saturne.main.inc.php';
 
 // Get module parameters
 $moduleName = GETPOST('module_name', 'aZ') ?: 'Saturne';
