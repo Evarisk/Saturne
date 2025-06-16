@@ -227,17 +227,16 @@ HTML;
 
 function saturne_get_button_component_html(array $args = []): string
 {
-    global $langs;
-
     $defaults = [
         'id'            => '',
         'className'     => '',
-        'iconClass'     => 'fas fa-plus',
-        'label'         => $langs->transnoentities('Add'),
+        'iconClass'     => '', // Icon is now optional, as not all components might have one
         'href'          => '#',
         'onClick'       => '',
         'modifierClass' => '',
         'moreAttr'      => [], // NOUVEAU : Tableau pour les attributs supplémentaires
+        'spans'         => [], // NEW: Array for multiple span configurations
+        'tag'           => 'a', // NEW: Allows defining the main HTML tag (e.g., 'a', 'div', 'button')
     ];
 
     $merged_args = array_merge($defaults, $args);
@@ -246,26 +245,52 @@ function saturne_get_button_component_html(array $args = []): string
     $componentId    = !empty($merged_args['id']) ? ' id="' . htmlspecialchars($merged_args['id']) . '"' : '';
     $classNames     = 'button-component ' . htmlspecialchars($merged_args['className']);
     $iconClass      = htmlspecialchars($merged_args['iconClass']);
-    $label          = htmlspecialchars($merged_args['label']);
     $href           = htmlspecialchars($merged_args['href']);
     $onClick        = htmlspecialchars($merged_args['onClick']);
     $modifierClass  = !empty($merged_args['modifierClass']) ? ' button-component--' . htmlspecialchars($merged_args['modifierClass']) : '';
+    $mainTag        = htmlspecialchars($merged_args['tag']);
 
-    // NOUVEAU : Préparation des attributs supplémentaires
+    // Prepare additional attributes
     $additionalAttributes = '';
     foreach ($merged_args['moreAttr'] as $attrName => $attrValue) {
-        // Assurez-vous que les noms d'attributs sont valides pour HTML
-        // et que les valeurs sont correctement échappées.
-        // On pourrait ajouter une validation plus robuste pour $attrName si nécessaire.
         $additionalAttributes .= ' ' . htmlspecialchars($attrName) . '="' . htmlspecialchars($attrValue) . '"';
     }
 
-    // Build the button HTML
+    // Build span HTML
+    $spanHtml = '';
+    foreach ($merged_args['spans'] as $spanConfig) {
+        $spanDefaults = [
+            'className' => '',
+            'label'     => '',
+            'moreAttr'  => [],
+        ];
+        $mergedSpanConfig = array_merge($spanDefaults, $spanConfig);
+
+        $spanClassNames = htmlspecialchars($mergedSpanConfig['className']);
+        $spanLabel      = htmlspecialchars($mergedSpanConfig['label']);
+
+        $spanAdditionalAttributes = '';
+        foreach ($mergedSpanConfig['moreAttr'] as $spanAttrName => $spanAttrValue) {
+            $spanAdditionalAttributes .= ' ' . htmlspecialchars($spanAttrName) . '="' . htmlspecialchars($spanAttrValue) . '"';
+        }
+
+        $spanHtml .= '<span class="' . $spanClassNames . '"' . $spanAdditionalAttributes . '>' . $spanLabel . '</span>';
+    }
+
+    // Build the component HTML
     $html = <<<HTML
-    <a{$componentId} class="{$classNames}{$modifierClass}" href="{$href}" onclick="{$onClick}"{$additionalAttributes}>
+    <{$mainTag}{$componentId} class="{$classNames}{$modifierClass}" href="{$href}" onclick="{$onClick}"{$additionalAttributes}>
+    HTML;
+
+    if (!empty($iconClass)) {
+        $html .= <<<HTML
         <i class="{$iconClass}"></i>
-        <span class="button-label">{$label}</span>
-    </a>
+        HTML;
+    }
+
+    $html .= <<<HTML
+        {$spanHtml}
+    </{$mainTag}>
     HTML;
 
     return $html;

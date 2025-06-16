@@ -84,19 +84,9 @@ function saturne_more_left_menu($moduleNameLowerCase, $objectType): void
     global $conf, $db, $langs, $user;
 
     require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . dol_strtolower($objectType) . '.class.php';
-//    require_once __DIR__ . '/../class/digiriskelement/groupment.class.php';
-//    require_once __DIR__ . '/../class/digiriskelement/workunit.class.php';
 
     $objectElement = new $objectType($db);
 
-//    $numberingModules = [
-//        'digiriskelement/groupment' => getDolGlobalString('DIGIRISKDOLIBARR_GROUPMENT_ADDON'),
-//        'digiriskelement/workunit'  => getDolGlobalString('DIGIRISKDOLIBARR_WORKUNIT_ADDON')
-//    ];
-
-//    list($modGroupment, $modWorkUnit) = saturne_require_objects_mod($numberingModules, $saturneElement->module);
-
-    // Body navigation
     $filter         = 't.entity IN (' . $conf->entity . ') AND t.fk_standard = ' . getDolGlobalInt(dol_strtoupper($objectElement->module) . '_ACTIVE_STANDARD');
     $filter        .= !getDolGlobalInt('DIGIRISKDOLIBARR_SHOW_HIDDEN_DIGIRISKELEMENT') ? ' AND t.status = ' . SaturneElement::STATUS_VALIDATED : '';
     $objectElements = saturne_fetch_all_object_type($objectType, '', 'position', 0, 0, ['customsql' => $filter]);
@@ -115,7 +105,11 @@ function saturne_more_left_menu($moduleNameLowerCase, $objectType): void
                         'className' => 'linkElement', //@tod meilleur nom de classe
                         'href'      => dol_buildpath('custom/' . $objectElement->module . '/view/' . $objectElement->module . 'standard/' . $objectElement->module . 'standard_card.php?id=' . getDolGlobalInt(dol_strtoupper($objectElement->module) . '_ACTIVE_STANDARD'), 1),
                         'iconClass' => 'fas fa-sitemap pictofixedwidth',
-                        'label'     => $langs->trans('Mapping'), //getDolGlobalString('MAIN_INFO_SOCIETE_NOM');
+                        'spans'     => [
+                            [
+                                'label' => $langs->trans('Mapping') // //getDolGlobalString('MAIN_INFO_SOCIETE_NOM');
+                            ]
+                        ]
                     ]);
                 ?>
                 <?php if ($user->hasRight($objectElement->module, $objectElement->element, 'write')) : ?>
@@ -130,7 +124,12 @@ function saturne_more_left_menu($moduleNameLowerCase, $objectType): void
                                     'aria-label'     => $langs->trans($objectElement->fields['element_type']['arrayofkeyval'][0])
                                 ],
                                 'iconClass' => 'button-add fas fa-plus-circle',
-                                'label'     => 'P' //@todo gérer le prefix
+                                'spans'     => [
+                                    [
+                                        'className' => 'button-label',
+                                        'label'     => 'P'
+                                    ]
+                                ]
                             ]);
 
                             echo saturne_get_button_component_html([
@@ -142,7 +141,12 @@ function saturne_more_left_menu($moduleNameLowerCase, $objectType): void
                                     'aria-label'     => $langs->trans($objectElement->fields['element_type']['arrayofkeyval'][1])
                                 ],
                                 'iconClass' => 'button-add fas fa-plus-circle',
-                                'label'     => 'SP' //@todo gérer le prefix
+                                'spans'     => [
+                                    [
+                                        'className' => 'button-label',
+                                        'label'     => 'SP'
+                                    ]
+                                ]
                             ]);
                         ?>
                     </div>
@@ -246,47 +250,63 @@ function saturne_display_recurse_tree(array $objectElementTree, object $objectEl
                 print saturne_show_medias_linked('digiriskdolibarr', $conf->digiriskdolibarr->multidir_output[$conf->entity] . '/' . $objectElement['object']->element_type . '/' . $objectElement['object']->ref, 'small', 1, 0, 0, 0, 50, 50, 1, 0, 0, $objectElement['object']->element_type . '/' . $objectElement['object']->ref, $objectElement['object'], 'photo', 0, 0, 0, 1, 'cursorpointer');
                 print '</span>';
                 ?>
-                <div class="title" id="scores" value="<?php echo $objectElement['object']->id ?>">
+                <div class="title-container">
                     <?php
-                    if ($user->rights->digiriskdolibarr->risk->read) : ?>
-                        <a id="slider" class="linkElement id<?php echo $objectElement['object']->id; ?>" href="<?php echo dol_buildpath('custom/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_view.php?id=' . $objectElement['object']->id . '&risk_type=' . $riskType, 1); ?>">
-                        <span class="title-container">
-                            <span class="ref"><?php echo $objectElement['object']->ref; ?></span>
-                            <span class="name"><?php echo dol_trunc($objectElement['object']->label, 20); ?></span>
-                        </span>
-                        </a>
-                    <?php else : ?>
-                        <a id="slider" class="linkElement id<?php echo $objectElement['object']->id;?>" href="<?php echo dol_buildpath('custom/digiriskdolibarr/view/digiriskelement/digiriskelement_card.php?id=' . $objectElement['object']->id, 1);?>">
-                        <span class="title-container">
-                            <span class="ref"><?php echo $objectElement['object']->ref; ?></span>
-                            <span class="name"><?php echo dol_trunc($objectElement['object']->label, 20); ?></span>
-                        </span>
-                        </a>
-                    <?php endif; ?>
+                        echo saturne_get_button_component_html([
+                            'id'        => 'slider',
+                            'className' => 'linkElement',
+                            'href'      => dol_buildpath('custom/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_view.php?id=' . $objectElement['object']->id . '&risk_type=' . $riskType, 1), //@todo gérer le lien
+                            'spans' => [
+                                [
+                                    'className' => 'ref',
+                                    'label'     => $objectElement['object']->ref, // Assuming $objectElement is defined elsewhere
+                                ],
+                                [
+                                    'className' => 'name',
+                                    'label'     => dol_trunc($objectElement['object']->label, 20), // Assuming dol_trunc is defined elsewhere
+                                ]
+                            ],
+                        ]);
+                    ?>
                 </div>
-                <?php if ($user->hasRight($objectElement['object']->module, $objectElement['object']->element, 'read')) : ?>
-                    <?php if ($objectElement['object']->element_type == $objectElement['object']::ELEMENT_TYPE_0) : ?>
-                        <div class="add-container">
-                            <a id="newGroupment" href="<?php echo dol_buildpath('/custom/digiriskdolibarr/view/digiriskelement/digiriskelement_card.php?action=create&element_type=groupment&fk_parent=' . $objectElement['object']->id, 1);?>">
-                                <div
-                                    class="wpeo-button button-secondary button-square-40 wpeo-tooltip-event"
-                                    data-direction="bottom" data-color="light"
-                                    aria-label="<?php echo $langs->trans('New' . dol_ucfirst($objectElement['object']::ELEMENT_TYPE_0)); ?>">
-                                    <strong><?php //echo $modGroupment->prefix; ?></strong>
-                                    <span class="button-add animated fas fa-plus-circle"></span>
-                                </div>
-                            </a>
-                            <a id="newWorkunit" href="<?php echo dol_buildpath('/custom/digiriskdolibarr/view/digiriskelement/digiriskelement_card.php?action=create&element_type=workunit&fk_parent=' . $objectElement['object']->id, 1);?>">
-                                <div
-                                    class="wpeo-button button-square-40 wpeo-tooltip-event"
-                                    data-direction="bottom" data-color="light"
-                                    aria-label="<?php echo $langs->trans('New' . dol_ucfirst($objectElement['object']::ELEMENT_TYPE_1)); ?>">
-                                    <strong><?php //echo $modWorkUnit->prefix; ?></strong>
-                                    <span class="button-add animated fas fa-plus-circle"></span>
-                                </div>
-                            </a>
-                        </div>
-                    <?php endif; ?>
+                <?php if ($user->hasRight($objectElement['object']->module, $objectElement['object']->element, 'write') && $objectElement['object']->element_type == $objectElement['object']::ELEMENT_TYPE_0) : ?>
+                    <div class="add-container">
+                        <?php
+                            echo saturne_get_button_component_html([
+                                'className' => 'wpeo-button button-square-40 button-secondary wpeo-tooltip-event',
+                                'href'      => dol_buildpath('custom/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_card.php?action=create&element_type=0&fk_parent=' . $objectElement['object']->id, 1),
+                                'moreAttr'  => [
+                                    'data-direction' => 'bottom',
+                                    'data-color'     => 'light',
+                                    'aria-label'     => $langs->trans($objectElement['object']->fields['element_type']['arrayofkeyval'][0])
+                                ],
+                                'iconClass' => 'button-add fas fa-plus-circle',
+                                'spans'     => [
+                                    [
+                                        'className' => 'button-label',
+                                        'label'     => 'P'
+                                    ]
+                                ]
+                            ]);
+
+                            echo saturne_get_button_component_html([
+                                'className' => 'wpeo-button button-square-40 wpeo-tooltip-event',
+                                'href'      => dol_buildpath('custom/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_card.php?action=create&element_type=1&fk_parent=' . $objectElement['object']->id, 1),
+                                'moreAttr'  => [
+                                    'data-direction' => 'bottom',
+                                    'data-color'     => 'light',
+                                    'aria-label'     => $langs->trans($objectElement['object']->fields['element_type']['arrayofkeyval'][1])
+                                ],
+                                'iconClass' => 'button-add fas fa-plus-circle',
+                                'spans'     => [
+                                    [
+                                        'className' => 'button-label',
+                                        'label'     => 'SP'
+                                    ]
+                                ]
+                            ]);
+                        ?>
+                    </div>
                 <?php endif; ?>
             </div>
             <?php if (!empty($objectElement['children'])) : ?>
@@ -320,10 +340,7 @@ function saturne_recurse_tree(int $parentID, int $depth, array $digiriskElements
                 'object'   => $digiriskElement,
                 'children' => []
             ];
-
-            if ($digiriskElement->fk_parent != $digiriskElement->fk_standard) {
-                $tree[$digiriskElement->id]['children'] = saturne_recurse_tree($digiriskElement->id, $depth + 1, $digiriskElements);
-            }
+            $tree[$digiriskElement->id]['children'] = saturne_recurse_tree($digiriskElement->id, $depth + 1, $digiriskElements);
         }
     }
 
