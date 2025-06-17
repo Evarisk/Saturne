@@ -86,7 +86,7 @@ function saturne_get_badge_component_html(array $args = []): string
     // Sanitize and prepare data
     $componentId    = ! empty( $merged_args['id'] ) ? ' id="' . htmlspecialchars( $merged_args['id'] ) . '"' : '';
     // Main block class is 'badge', then add any custom classes
-    $classNames     = 'badge ' . htmlspecialchars( $merged_args['className'] );
+    $classNames     = 'wpeo-badge ' . htmlspecialchars( $merged_args['className'] );
     $iconClass      = htmlspecialchars( $merged_args['iconClass'] );
     $title          = $langs->transnoentities($merged_args['title']);
     $details        = (array) $merged_args['details'];

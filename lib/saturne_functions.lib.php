@@ -96,63 +96,67 @@ function saturne_more_left_menu($moduleNameLowerCase, $objectType): void
 
     $objectElementTree = saturne_recurse_tree(getDolGlobalInt(dol_strtoupper($objectElement->module) . '_ACTIVE_STANDARD'), 0, $objectElements); ?>
 
-    <div class="digirisk-wrap">
-        <i class="fas fa-bars pictofixedwidth"></i><?php echo "Navigation UT/GP"; ?>
-        <div class="navigation-container">
-            <div class="society-header">
-                <?php
-                    echo saturne_get_button_component_html([
-                        'className' => 'linkElement', //@tod meilleur nom de classe
-                        'href'      => dol_buildpath('custom/' . $objectElement->module . '/view/' . $objectElement->module . 'standard/' . $objectElement->module . 'standard_card.php?id=' . getDolGlobalInt(dol_strtoupper($objectElement->module) . '_ACTIVE_STANDARD'), 1),
-                        'iconClass' => 'fas fa-sitemap pictofixedwidth',
-                        'spans'     => [
-                            [
-                                'label' => $langs->trans('Mapping') // //getDolGlobalString('MAIN_INFO_SOCIETE_NOM');
+    <div class="sidebar-secondary digirisk-wrap">
+        <div class="sidebar-secondary_responsive">
+            <i class="fas fa-bars pictofixedwidth"></i><?php echo "Navigation UT/GP"; ?>
+        </div>
+        <div class="sidebar-secondary__container">
+            <div class="sidebar-secondary__header">
+                <div class="sidebar-secondary__header-top">
+                    <?php
+                        echo saturne_get_button_component_html([
+                            'className' => 'linkElement', //@tod meilleur nom de classe
+                            'href'      => dol_buildpath('custom/' . $objectElement->module . '/view/' . $objectElement->module . 'standard/' . $objectElement->module . 'standard_card.php?id=' . getDolGlobalInt(dol_strtoupper($objectElement->module) . '_ACTIVE_STANDARD'), 1),
+                            'iconClass' => 'fas fa-sitemap pictofixedwidth',
+                            'spans'     => [
+                                [
+                                    'label' => $langs->trans('Mapping') // //getDolGlobalString('MAIN_INFO_SOCIETE_NOM');
+                                ]
                             ]
-                        ]
-                    ]);
-                ?>
-                <?php if ($user->hasRight($objectElement->module, $objectElement->element, 'write')) : ?>
-                    <div class="add-container">
-                        <?php
-                            echo saturne_get_button_component_html([
-                                'className' => 'wpeo-button button-square-40 button-secondary wpeo-tooltip-event',
-                                'href'      => dol_buildpath('custom/' . $objectElement->module . '/view/' . $objectElement->element . '/' . $objectElement->element . '_card.php?action=create&element_type=0', 1),
-                                'moreAttr'  => [
-                                    'data-direction' => 'bottom',
-                                    'data-color'     => 'light',
-                                    'aria-label'     => $langs->trans($objectElement->fields['element_type']['arrayofkeyval'][0])
-                                ],
-                                'iconClass' => 'button-add fas fa-plus-circle',
-                                'spans'     => [
-                                    [
-                                        'className' => 'button-label',
-                                        'label'     => 'P'
+                        ]);
+                    ?>
+                    <?php if ($user->hasRight($objectElement->module, $objectElement->element, 'write')) : ?>
+                        <div class="add-container">
+                            <?php
+                                echo saturne_get_button_component_html([
+                                    'className' => 'wpeo-button button-square-40 button-secondary wpeo-tooltip-event',
+                                    'href'      => dol_buildpath('custom/' . $objectElement->module . '/view/' . $objectElement->element . '/' . $objectElement->element . '_card.php?action=create&element_type=0', 1),
+                                    'moreAttr'  => [
+                                        'data-direction' => 'bottom',
+                                        'data-color'     => 'light',
+                                        'aria-label'     => $langs->trans($objectElement->fields['element_type']['arrayofkeyval'][0])
+                                    ],
+                                    'iconClass' => 'button-add fas fa-plus-circle',
+                                    'spans'     => [
+                                        [
+                                            'className' => 'button-label',
+                                            'label'     => 'P'
+                                        ]
                                     ]
-                                ]
-                            ]);
+                                ]);
 
-                            echo saturne_get_button_component_html([
-                                'className' => 'wpeo-button button-square-40 wpeo-tooltip-event',
-                                'href'      => dol_buildpath('custom/' . $objectElement->module . '/view/' . $objectElement->element . '/' . $objectElement->element . '_card.php?action=create&element_type=1', 1),
-                                'moreAttr'  => [
-                                    'data-direction' => 'bottom',
-                                    'data-color'     => 'light',
-                                    'aria-label'     => $langs->trans($objectElement->fields['element_type']['arrayofkeyval'][1])
-                                ],
-                                'iconClass' => 'button-add fas fa-plus-circle',
-                                'spans'     => [
-                                    [
-                                        'className' => 'button-label',
-                                        'label'     => 'SP'
+                                echo saturne_get_button_component_html([
+                                    'className' => 'wpeo-button button-square-40 wpeo-tooltip-event',
+                                    'href'      => dol_buildpath('custom/' . $objectElement->module . '/view/' . $objectElement->element . '/' . $objectElement->element . '_card.php?action=create&element_type=1', 1),
+                                    'moreAttr'  => [
+                                        'data-direction' => 'bottom',
+                                        'data-color'     => 'light',
+                                        'aria-label'     => $langs->trans($objectElement->fields['element_type']['arrayofkeyval'][1])
+                                    ],
+                                    'iconClass' => 'button-add fas fa-plus-circle',
+                                    'spans'     => [
+                                        [
+                                            'className' => 'button-label',
+                                            'label'     => 'SP'
+                                        ]
                                     ]
-                                ]
-                            ]);
-                        ?>
-                    </div>
-                <?php endif; ?>
+                                ]);
+                            ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
                 <?php if (!empty($objectElements)) : ?>
-                    <div class="toolbar">
+                    <div class="sidebar-secondary__header-toolbar">
                         <div class="toggle-plus" aria-label="<?php echo $langs->trans('UnwrapAll'); ?>"><span class="icon fas fa-plus-square"></span></div>
                         <div class="toggle-minus" aria-label="<?php echo $langs->trans('WrapAll'); ?>"><span class="icon fas fa-minus-square"></span></div>
                     </div>
@@ -234,7 +238,7 @@ function saturne_display_recurse_tree(array $objectElementTree, object $objectEl
     //$riskType = GETPOSTISSET('risk_type') && !empty(GETPOST('risk_type')) ? GETPOST('risk_type') : 'risk';
     foreach ($objectElementTree as $objectElement) {
         if ($objectElement['object']->id == getDolGlobalInt('DIGIRISKDOLIBARR_DIGIRISKELEMENT_TRASH')) {
-            print '<hr>';
+//            print '<hr>';
         } ?>
         <li class="unit type-<?php echo $objectElement['object']->element_type; ?>" id="unit<?php  echo $objectElement['object']->id; ?>">
             <div class="unit-container">
@@ -314,7 +318,7 @@ function saturne_display_recurse_tree(array $objectElementTree, object $objectEl
             <?php endif; ?>
         </li>
         <?php if ($objectElement['object']->id == getDolGlobalInt('DIGIRISKDOLIBARR_DIGIRISKELEMENT_TRASH')) {
-            print '<hr>';
+//            print '<hr>';
         }
     }
 }

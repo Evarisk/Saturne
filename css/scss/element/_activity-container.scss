@@ -1,0 +1,30 @@
+#activity-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.activity-container {
+  border: 1px solid $color__tertiary-light;
+  border-radius: 10px;
+
+  .activity-container__header {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    padding: 0.5em;
+
+    .wpeo-button {
+      margin-left: auto;
+    }
+  }
+  .activity-container__body {
+    background: rgba($color__tertiary-light, 0.5);
+    padding: 0.5em;
+
+    &.wpeo-gridlayout {
+      gap: 0.5em;
+    }
+  }
+}
