@@ -74,6 +74,7 @@ function saturne_get_badge_component_html(array $args = []): string
 
     $defaults = [
         'id'        => '',
+        'field'     => '', // Optional field name for the badge, useful for data binding
         'className' => '',
         'iconClass' => 'fas fa-user',
         'title'     => 'Untitled',
@@ -95,7 +96,7 @@ function saturne_get_badge_component_html(array $args = []): string
     // Build details HTML
     $detailsHtml = '';
     foreach ( $details as $detail ) {
-        $detailsHtml .= '<div class="badge__detail">' . htmlspecialchars( $detail ) . '</div>'; // BEM class
+        $detailsHtml .= '<div class="badge__detail" contenteditable="true" data-field="' . $merged_args['field'] . '">' . htmlspecialchars( $detail ) . '</div>'; // BEM class
     }
 
     // Build actions HTML
