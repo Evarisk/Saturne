@@ -89,7 +89,17 @@ foreach ($search as $key => $val) {
             if ($val == '-1' || ($val === '0' && (empty($object->fields[$key]['arrayofkeyval']) || !array_key_exists('0', $object->fields[$key]['arrayofkeyval'])))) {
                 $val = '';
             }
-            $mode_search = 2;
+            if (!empty($object->fields[$key]['arrayofkeyval'])) {
+                $keys = array_keys($object->fields[$key]['arrayofkeyval']);
+                $keysAreInt = count(array_filter($keys, 'is_int')) === count($keys);
+                if($keysAreInt){
+                    $mode_search = 2;
+                }else{
+                    $mode_search = 3;
+                }
+            } else  {
+                $mode_search = 2;
+            }
         }
         if (empty($object->fields[$key]['searchmulti'])) {
             if (!is_array($val) && $val != '') {
