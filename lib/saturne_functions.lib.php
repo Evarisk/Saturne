@@ -94,7 +94,7 @@ function saturne_more_left_menu($moduleNameLowerCase, $objectType): void
         $objectElements = [];
     }
 
-    $objectElementTree = saturne_recurse_tree(getDolGlobalInt(dol_strtoupper($objectElement->module) . '_ACTIVE_STANDARD'), 0, $objectElements); ?>
+    $objectElementTree = saturne_recurse_tree(0, 0, $objectElements); ?>
 
     <div class="sidebar-secondary digirisk-wrap">
         <div class="sidebar-secondary_responsive">
@@ -342,9 +342,8 @@ function saturne_recurse_tree(int $parentID, int $depth, array $digiriskElements
                 'id'       => $digiriskElement->id,
                 'depth'    => $depth,
                 'object'   => $digiriskElement,
-                'children' => []
+                'children' => saturne_recurse_tree($digiriskElement->id, $depth + 1, $digiriskElements)
             ];
-            $tree[$digiriskElement->id]['children'] = saturne_recurse_tree($digiriskElement->id, $depth + 1, $digiriskElements);
         }
     }
 
