@@ -753,4 +753,43 @@ abstract class SaturneObject extends CommonObject
             return -1;
         }
     }
+    
+    /**
+	 * Return validation test result for a field
+	 *
+	 * @param array<string,array{type:string,label:string,enabled:int<0,2>|string,position:int,notnull?:int,visible:int<-2,5>|string,alwayseditable?:int<0,1>,noteditable?:int<0,1>,default?:string,index?:int,foreignkey?:string,searchall?:int<0,1>,isameasure?:int<0,1>,css?:string,csslist?:string,help?:string,showoncombobox?:int<0,2>,disabled?:int<0,1>,arrayofkeyval?:array<int,string>,autofocusoncreate?:int<0,1>,comment?:string,copytoclipboard?:int<1,2>,validate?:int<0,1>,bounds?:array<min?:int|float,max?:int|float}>	$fields	Array of properties of field to show
+	 * @param  	string  $fieldKey           Key of attribute
+	 * @param	string  $fieldValue         Value of attribute
+	 * @return 	bool 						Return false if fail true on success, see $this->error for error message
+	 */
+	public function validateField($fields, $fieldKey, $fieldValue)
+	{
+		global $langs;
+
+		$validationResult = true;
+
+		$commonValidationResult = parent::validateField($fields, $fieldKey, $fieldValue);
+
+		if ($commonValidationResult) {
+			$field = $fields[$fieldKey] ?? null;
+			if (isset($field)) {
+				if (isset($field['bounds']['min'])) {
+					$min = $field['bounds']['min'];
+					if ($fieldValue < $min) {
+						$this->setFieldError($fieldKey, $langs->trans('FieldMinValue', strtolower(html_entity_decode($langs->trans($field['label']), ENT_COMPAT, 'UTF-8')), $min));
+						$validationResult = false;
+					}
+				}
+				if (isset($field['bounds']['max'])) {
+					$max = $field['bounds']['max'];
+					if ($fieldValue > $max) {
+						$this->setFieldError($fieldKey, $langs->trans('FieldMaxValue', strtolower(html_entity_decode($langs->trans($field['label']), ENT_COMPAT, 'UTF-8')), $max));
+						$validationResult = false;
+					}
+				}
+			}
+		}
+
+		return $commonValidationResult && $validationResult;
+	}
 }
