@@ -663,6 +663,96 @@ abstract class SaturneObject extends CommonObject
 	}
 
 	/**
+	 *	Delete all links between an object $this
+	 *
+	 *	@param	?int	$sourceid		Object source id
+	 *	@param  string	$sourcetype		Object source type
+	 *	@param  ?int	$targetid		Object target id
+	 *	@param  string	$targettype		Object target type
+	 *  @param	int		$rowid			Row id of line to delete. If defined, other parameters are not used.
+	 * 	@param	?User	$f_user			User that create
+	 * 	@param	int<0,1>	$notrigger		1=Does not execute triggers, 0= execute triggers
+	 *	@return     					int	>0 if OK, <0 if KO
+	 *	@see	add_object_linked(), updateObjectLinked(), fetchObjectLinked()
+	 */
+	public function deleteObjectLinked($sourceid = null, $sourcetype = '', $targetid = null, $targettype = '', $rowid = 0, $f_user = null, $notrigger = 0)
+	{
+		global $user;
+		$deletesource = false;
+		$deletetarget = false;
+		$f_user = isset($f_user) ? $f_user : $user;
+
+        if (!empty($sourceid) && !empty($sourcetype) && !empty($targetid) && !empty($targettype)) {
+            $deletesource = true;
+			$deletetarget = true;
+        } else if (!empty($sourceid) && !empty($sourcetype) && empty($targetid) && empty($targettype)) {
+			$deletesource = true;
+		} elseif (empty($sourceid) && empty($sourcetype) && !empty($targetid) && !empty($targettype)) {
+			$deletetarget = true;
+		}
+
+		$sourceid = (!empty($sourceid) ? $sourceid : $this->id);
+		$sourcetype = (!empty($sourcetype) ? $sourcetype : $this->element);
+		$targetid = (!empty($targetid) ? $targetid : $this->id);
+		$targettype = (!empty($targettype) ? $targettype : $this->element);
+		$this->db->begin();
+		$error = 0;
+
+		if (!$notrigger) {
+			// Call trigger
+			$this->context['link_id'] = $rowid;
+			$this->context['link_source_id'] = $sourceid;
+			$this->context['link_source_type'] = $sourcetype;
+			$this->context['link_target_id'] = $targetid;
+			$this->context['link_target_type'] = $targettype;
+			$result = $this->call_trigger('OBJECT_LINK_DELETE', $f_user);
+			if ($result < 0) {
+				$error++;
+			}
+			// End call triggers
+		}
+
+		if (!$error) {
+			$sql = "DELETE FROM " . $this->db->prefix() . "element_element";
+			$sql .= " WHERE";
+			if ($rowid > 0) {
+				$sql .= " rowid = " . ((int) $rowid);
+			} else {
+                if ($deletesource && $deletetarget) {
+                    $sql .= " (fk_source = " . ((int) $sourceid) . " AND sourcetype = '" . $this->db->escape($sourcetype) . "')";
+					$sql .= " AND";
+					$sql .= " (fk_target = " . ((int) $targetid) . " AND targettype = '" . $this->db->escape($targettype) . "')";
+                }else if ($deletesource) {
+					$sql .= " fk_source = " . ((int) $sourceid) . " AND sourcetype = '" . $this->db->escape($sourcetype) . "'";
+					$sql .= " AND fk_target = " . ((int) $sourceid) . " AND targettype = '" . $this->db->escape($targettype) . "'";
+				} elseif ($deletetarget) {
+					$sql .= " fk_target = " . ((int) $targetid) . " AND targettype = '" . $this->db->escape($targettype) . "'";
+					$sql .= " AND fk_source = " . ((int) $targetid) . " AND sourcetype = '" . $this->db->escape($targettype) . "'";
+				} else {
+					$sql .= " (fk_source = " . ((int) $sourceid) . " AND sourcetype = '" . $this->db->escape($sourcetype) . "')";
+					$sql .= " OR";
+					$sql .= " (fk_target = " . ((int) $targetid) . " AND targettype = '" . $this->db->escape($targettype) . "')";
+				}
+			}
+
+			dol_syslog(get_class($this) . "::deleteObjectLinked", LOG_DEBUG);
+			if (!$this->db->query($sql)) {
+				$this->error = $this->db->lasterror();
+				$this->errors[] = $this->error;
+				$error++;
+			}
+		}
+
+		if (!$error) {
+			$this->db->commit();
+			return 1;
+		} else {
+			$this->db->rollback();
+			return 0;
+		}
+	}
+
+	/**
 	 * Write generic information of trigger description
 	 *
 	 * @param  SaturneObject $object Object calling the trigger
