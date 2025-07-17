@@ -766,6 +766,9 @@ class SaturneDocumentModel extends CommonDocGenerator
     {
         global $action, $conf, $hookmanager, $langs, $moduleNameLowerCase, $mysoc;
 
+        // Load Dolibarr libraries
+        require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php'; // Need for get_substitutionarray_mysoc
+
         $object = $moreParam['object'];
 
         if (empty($srcTemplatePath)) {
