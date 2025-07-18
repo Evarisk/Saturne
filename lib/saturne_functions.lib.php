@@ -184,8 +184,8 @@ function saturne_more_left_menu($moduleNameLowerCase, $objectType): void
                         jQuery( '#unit'+id ).addClass( 'toggled' );
                     });
 
-                    <?php //$saturneElement->fetch(GETPOST('id') ?: GETPOST('fromid')); ?>
-                    var idParent = <?php //echo json_encode($saturneElement->fk_parent);?> ;
+                    <?php $objectElement->fetch(GETPOST('id') ?: GETPOST('fromid')); ?>
+                    var idParent = <?php echo json_encode($objectElement->fk_parent);?> ;
 
                     jQuery( '#menu'+idParent).removeClass( 'fa-chevron-right').addClass( 'fa-chevron-down' );
                     jQuery( '#unit'+idParent ).addClass( 'toggled' );
@@ -197,21 +197,21 @@ function saturne_more_left_menu($moduleNameLowerCase, $objectType): void
                     var id = params.get('id');
                     id = !id ? params.get('fromid') : id
 
-                    if ((document.URL.match(/digiriskelement/) || document.URL.match(/accident/)) && !document.URL.match(/type=standard/)) {
-                        var elementBranch = <?php //echo json_encode($saturneElement->getBranch(GETPOST('id'))); ?>;
-                        elementBranch.forEach((id) =>  {
-                            jQuery( '#menu'+id).removeClass( 'fa-chevron-right').addClass( 'fa-chevron-down' );
-                            jQuery( '#unit'+id ).addClass( 'toggled' );
-                        });
-
-                        jQuery( '#unit'  + id ).addClass( 'active' );
-                        jQuery( '#unit'  + id ).closest( '.unit' ).attr( 'value', id );
-
-                        var container = jQuery('.navigation-container');
-                        $(container).animate({
-                            scrollTop: $("#unit"  + id).offset().top - 100
-                        }, 500);
-                    }
+                    //if ((document.URL.match(/digiriskelement/) || document.URL.match(/accident/)) && !document.URL.match(/type=standard/)) {
+                    //    //var elementBranch = <?php ////echo json_encode($objectElement->getBranch(GETPOST('id'))); ?>////;
+                    //    //elementBranch.forEach((id) =>  {
+                    //    //    jQuery( '#menu'+id).removeClass( 'fa-chevron-right').addClass( 'fa-chevron-down' );
+                    //    //    jQuery( '#unit'+id ).addClass( 'toggled' );
+                    //    //});
+                    //
+                    //    jQuery( '#unit'  + id ).addClass( 'active' );
+                    //    jQuery( '#unit'  + id ).closest( '.unit' ).attr( 'value', id );
+                    //
+                    //    var container = jQuery('.navigation-container');
+                    //    $(container).animate({
+                    //        scrollTop: $("#unit"  + id).offset().top - 100
+                    //    }, 500);
+                    //}
                 </script>
             </ul>
         </div>

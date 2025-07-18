@@ -199,7 +199,8 @@ class modSaturne extends DolibarrModules
             $i++ => ['SATURNE_DISPLAY_NUMBER_MEDIA_GALLERY', 'integer', 8, '', 0, 'current'],
 
             // CONST DOLIBARR
-            $i   => ['MAIN_ALLOW_SVG_FILES_AS_IMAGES', 'integer', 1, '', 0, 'current']
+            $i++ => ['MAIN_ALLOW_SVG_FILES_AS_IMAGES', 'integer', 1, '', 0, 'current'],
+            $i   => ['MAIN_CACHE_COUNT ', 'integer', 1, '', 0, 'current']
 
 		];
 

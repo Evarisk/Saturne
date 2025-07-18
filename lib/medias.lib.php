@@ -417,3 +417,36 @@ function saturne_get_media_linked_elements(string $moduleName, string $fileName)
 
     return $output;
 }
+
+function saturne_show_media_buttons(): string
+{
+    global $object, $onPhone;
+
+    if (empty($object) || !is_object($object)) {
+        return '';
+    }
+
+    $fastUploadImprovement = getDolGlobalInt('SATURNE_USE_FAST_UPLOAD_IMPROVEMENT') ? '-improvement' : '';
+
+    // Define the output HTML
+    $output = <<<HTML
+    <div class="add-medias">
+        <input type="hidden" class="fast-upload-options" data-from-subtype="photo" data-from-subdir="photos" />
+        <input type="hidden" class="favorite-photo" id="photo" name="photo" value="<?php echo $object->photo ?>" />
+        <label>
+            <button class="wpeo-button button-square-40">
+                <span class="fas fa-camera" aria-hidden="true"></span><span class="button-add fas fa-plus-circle" aria-hidden="true"></span>
+            </button>
+            <input type="file" class="fast-upload{$fastUploadImprovement}" id="fast-upload-photo-default" name="userfile[]" capture="environment" accept="image/*" hidden multiple />
+        </label>
+        <label>
+            <button class="wpeo-button button-square-40 modal-open">
+                <input type="hidden" class="modal-options" data-modal-to-open="media_gallery" data-from-id="<?php echo $object->id ?>" data-from-type="control" data-from-subtype="photo" data-from-subdir="photos" />
+                <span class="fas fa-folder-open"></span><span class="fas fa-plus-circle button-add"></span>
+            </button>
+        </label>
+    </div>
+    HTML;
+
+    return $output;
+}

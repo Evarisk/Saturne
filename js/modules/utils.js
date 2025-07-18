@@ -270,3 +270,20 @@ window.saturne.utils.toggleSetting = function(action, dataKey) {
     error: function() {}
   });
 };
+
+/**
+ * Helper function to get an input's value, ensuring it's a number and within 0-100.
+ *
+ * @since   21.1.0
+ * @version 21.1.0
+ *
+ * @param  {jQuery} $input The jQuery object of the input field.
+ * @return {number} The sanitized number value.
+ */
+window.saturne.utils.getSanitizedPercentageValue = function($input) {
+  let value = parseFloat($input.val());
+  if (isNaN(value)) {
+    value = 0;
+  }
+  return Math.max(0, Math.min(100, value));
+};

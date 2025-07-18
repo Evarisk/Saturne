@@ -95,11 +95,11 @@ window.saturne.modal.openModal = function ( event ) {
 
   window.saturne.modal.loadLazyImages();
 
-    if (fromModule) {
-        if (typeof window.saturne.modal.addMoreOpenModalData == 'function') {
-            window.saturne.modal.addMoreOpenModalData(modalToOpen, $(this));
-        }
+  if (fromModule) {
+    if (typeof window.saturne.modal.addMoreOpenModalData === 'function') {
+        window.saturne.modal.addMoreOpenModalData(modalToOpen, $(this));
     }
+  };
 
 	$('#'+modalToOpen).find('.wpeo-button').attr('value', fromId);
 	$('#'+modalToOpen).addClass('modal-active');
