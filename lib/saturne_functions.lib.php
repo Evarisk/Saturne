@@ -240,7 +240,7 @@ function saturne_display_recurse_tree(array $objectElementTree, object $objectEl
         if ($objectElement['object']->id == getDolGlobalInt('DIGIRISKDOLIBARR_DIGIRISKELEMENT_TRASH')) {
 //            print '<hr>';
         } ?>
-        <li class="unit type-<?php echo $objectElement['object']->element_type; ?>" id="unit<?php  echo $objectElement['object']->id; ?>">
+        <li class="unit type-<?php echo $objectElement['object']->element_type; ?>" id="unit<?php  echo $objectElement['object']->id; ?>" data-object-id="<?php  echo $objectElement['object']->id; ?>">
             <div class="unit-container">
                 <?php if ($objectElement['object']->element_type == $objectElement['object']::ELEMENT_TYPE_0 && count($objectElement['children'])) { ?>
                     <div class="toggle-unit">
