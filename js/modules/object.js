@@ -22,10 +22,10 @@
  * \brief   JavaScript object file for module Saturne
  */
 
+'use strict';
+
 /**
  * Init object JS
- *
- * @memberof Saturne_Object
  *
  * @since   1.2.1
  * @version 1.2.1
@@ -36,8 +36,6 @@ window.saturne.object = {};
 
 /**
  * Object init
- *
- * @memberof Saturne_Object
  *
  * @since   1.2.1
  * @version 1.2.1
@@ -50,8 +48,6 @@ window.saturne.object.init = function() {
 
 /**
  * Object event
- *
- * @memberof Saturne_Object
  *
  * @since   1.2.1
  * @version 1.2.1
@@ -78,4 +74,81 @@ window.saturne.object.toggleObjectInfos = function() {
     $(this).removeClass('fa-caret-square-down').addClass('fa-minus-square');
     $(this).closest('.fiche').find('.fichecenter.object-infos').removeClass('hidden');
   }
+};
+
+window.saturne.object.getFields = function getFields(mode, objectElement, fromId = null, fromType = null) {
+  let datas = {};
+  $(`#${objectElement}_${mode} .input-ajax`).each(function() {
+    const $this    = $(this);
+    let fieldName  = $this.attr('name');
+    let fieldValue = $this.val();
+
+    if (fieldName) {
+      datas[fieldName] = fieldValue;
+    }
+  });
+
+  if (fromId !== null) {
+    datas.fk_object_id = fromId;
+  }
+  if (fromType !== null) {
+    datas.fk_object_element = fromType;
+  }
+
+  return JSON.stringify(datas);
+};
+
+window.saturne.object.ajax = function ajax(mode, objectElement, additionalDatas = {}, successCallback = null) {
+  const token          = window.saturne.toolbox.getToken();
+  const querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+
+  let formData    = JSON.parse(window.saturne.object.getFields(mode, objectElement));
+  const finalData = { ...formData, ...additionalDatas };
+
+  $.ajax({
+    url: `${document.URL}${querySeparator}&action=${mode}_${objectElement}&token=${token}`,
+    type: 'POST',
+    contentType: 'application/json; charset=utf-8',
+    dataType: 'json',
+    data: JSON.stringify(finalData),
+    success: function (resp) {
+      if (typeof successCallback === 'function') {
+        successCallback(resp);
+      }
+    },
+    // error: function(xhr, status, error) {
+    //   console.error(`Error ${objectElement}:`, xhr.responseText || error);
+    // }
+  });
+};
+
+window.saturne.object.ObjectFromModal = function ObjectFromModal(mode, objectElement) {
+  const $this  = $(this);
+  const $modal = $this.closest(`#${objectElement}_${mode}`);
+  const fromId = $modal.data('from-id');
+  const $list  = $(document).find(`#${objectElement}_list_container_${fromId}`);
+
+  window.saturne.loader.display($list);
+
+  let additionalDatas = {};
+  if (mode === 'create') {
+    const fromType  = $modal.data('from-type');
+    additionalDatas = { fk_object_id: fromId, fk_object_element: fromType };
+  } else if (mode === 'update') {
+    const objectId  = $modal.data('object-id');
+    additionalDatas = { object_id: objectId };
+  }
+
+  window.saturne.object.ajax(
+    mode,
+    objectElement,
+    additionalDatas,
+    function(resp) {
+      window.saturne.object.reloadListSuccess(objectElement, $list, fromId, resp);
+    }
+  );
+};
+
+window.saturne.object.reloadListSuccess = function reloadListSuccess(objectElement, $list, fromId, resp) {
+  $list.replaceWith($(resp).find(`#${objectElement}_list_container_${fromId}`));
 };
