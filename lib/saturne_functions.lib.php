@@ -157,62 +157,12 @@ function saturne_more_left_menu($moduleNameLowerCase, $objectType): void
                 </div>
                 <?php if (!empty($objectElements)) : ?>
                     <div class="sidebar-secondary__header-toolbar">
-                        <div class="toggle-plus" aria-label="<?php echo $langs->trans('UnwrapAll'); ?>"><span class="icon fas fa-plus-square"></span></div>
-                        <div class="toggle-minus" aria-label="<?php echo $langs->trans('WrapAll'); ?>"><span class="icon fas fa-minus-square"></span></div>
+                        <div class="toggle-all toggle-minus" aria-label="<?php echo $langs->trans('WrapAll'); ?>"><span class="icon fas fa-minus-square"></span></div>
                     </div>
                 <?php endif; ?>
             </div>
             <ul class="workunit-list">
-                <script>
-                    if (localStorage.maximized == 'false') {
-                        $('#id-left').attr('style', 'display:none !important')
-                    }
-                </script>
                 <?php saturne_display_recurse_tree($objectElementTree, $objectElement); ?>
-                <script>
-                    // Get previous menu to display it
-                    var MENU = localStorage.menu;
-                    if (MENU == null || MENU == '') {
-                        MENU = new Set()
-                    } else {
-                        MENU = JSON.parse(MENU);
-                        MENU = new Set(MENU);
-                    }
-
-                    MENU.forEach((id) =>  {
-                        jQuery( '#menu'+id).removeClass( 'fa-chevron-right').addClass( 'fa-chevron-down' );
-                        jQuery( '#unit'+id ).addClass( 'toggled' );
-                    });
-
-                    <?php $objectElement->fetch(GETPOST('id') ?: GETPOST('fromid')); ?>
-                    var idParent = <?php echo json_encode($objectElement->fk_parent);?> ;
-
-                    jQuery( '#menu'+idParent).removeClass( 'fa-chevron-right').addClass( 'fa-chevron-down' );
-                    jQuery( '#unit'+idParent ).addClass( 'toggled' );
-
-                    // Set active unit active
-                    jQuery( '.digirisk-wrap .navigation-container .unit.active' ).removeClass( 'active' );
-
-                    var params = new window.URLSearchParams(window.location.search);
-                    var id = params.get('id');
-                    id = !id ? params.get('fromid') : id
-
-                    //if ((document.URL.match(/digiriskelement/) || document.URL.match(/accident/)) && !document.URL.match(/type=standard/)) {
-                    //    //var elementBranch = <?php ////echo json_encode($objectElement->getBranch(GETPOST('id'))); ?>////;
-                    //    //elementBranch.forEach((id) =>  {
-                    //    //    jQuery( '#menu'+id).removeClass( 'fa-chevron-right').addClass( 'fa-chevron-down' );
-                    //    //    jQuery( '#unit'+id ).addClass( 'toggled' );
-                    //    //});
-                    //
-                    //    jQuery( '#unit'  + id ).addClass( 'active' );
-                    //    jQuery( '#unit'  + id ).closest( '.unit' ).attr( 'value', id );
-                    //
-                    //    var container = jQuery('.navigation-container');
-                    //    $(container).animate({
-                    //        scrollTop: $("#unit"  + id).offset().top - 100
-                    //    }, 500);
-                    //}
-                </script>
             </ul>
         </div>
     </div>

@@ -118,6 +118,7 @@ body.sidebar-secondary-opened {
         min-width: 30px;
         width: 30px;
         text-align: center;
+        align-content: center;
         transition: all 0.2s ease-out;
 
         &:hover {
@@ -160,7 +161,6 @@ body.sidebar-secondary-opened {
         width: 100%;
         padding-left: 1em;
         display: flex;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 
         .linkElement {
           width: 100%;
@@ -209,14 +209,10 @@ body.sidebar-secondary-opened {
       }
     }
 
-    .unit.active {
-      background: $color__secondary;
-
-      > .unit-container {
-        .name {
-          font-weight: 600;
-          color: #fff;
-        }
+    .unit-container.active {
+      background: rgba(0,0,0,0.1);
+      .name {
+        font-weight: 600;
       }
     }
 
