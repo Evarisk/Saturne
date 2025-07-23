@@ -244,7 +244,7 @@ class modSaturne extends DolibarrModules
 			$this->menu[$r++] = [
 				'fk_menu'  => 'fk_mainmenu=' . $moduleNameLowerCase,
 				'type'     => 'left',
-				'titre'    => $langs->trans('ModuleConfig'),
+				'titre'    => $langs->trans('ModuleConfig', $moduleName),
 				'prefix'   => '<i class="fas fa-cog pictofixedwidth"></i>',
 				'mainmenu' => $moduleNameLowerCase,
 				'leftmenu' => $moduleNameLowerCase . 'config',
