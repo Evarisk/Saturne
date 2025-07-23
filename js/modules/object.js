@@ -109,16 +109,15 @@ window.saturne.object.ajax = function ajax(mode, objectElement, additionalDatas 
     url: `${document.URL}${querySeparator}&action=${mode}_${objectElement}&token=${token}`,
     type: 'POST',
     contentType: 'application/json; charset=utf-8',
-    dataType: 'json',
     data: JSON.stringify(finalData),
     success: function (resp) {
       if (typeof successCallback === 'function') {
         successCallback(resp);
       }
     },
-    // error: function(xhr, status, error) {
-    //   console.error(`Error ${objectElement}:`, xhr.responseText || error);
-    // }
+    error: function(xhr, status, error) {
+      console.error(`Error ${objectElement}:`, xhr.responseText || error);
+    }
   });
 };
 
@@ -144,11 +143,12 @@ window.saturne.object.ObjectFromModal = function ObjectFromModal(mode, objectEle
     objectElement,
     additionalDatas,
     function(resp) {
-      window.saturne.object.reloadListSuccess(objectElement, $list, fromId, resp);
+      window.saturne.object.reloadListSuccess($modal, mode, objectElement, $list, fromId, resp);
     }
   );
 };
 
-window.saturne.object.reloadListSuccess = function reloadListSuccess(objectElement, $list, fromId, resp) {
+window.saturne.object.reloadListSuccess = function reloadListSuccess($modal, mode, objectElement, $list, fromId, resp) {
+  $modal.replaceWith($(resp).find(`#${objectElement}_${mode}`));
   $list.replaceWith($(resp).find(`#${objectElement}_list_container_${fromId}`));
 };

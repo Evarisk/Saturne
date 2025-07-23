@@ -70,7 +70,7 @@ body.sidebar-secondary-opened {
       padding-left: 10px;
       padding-right: 10px;
 
-      .toggle-plus, .toggle-minus {
+      .toggle-all {
         display: inline-block;
         padding: 3px;
         transition: all 0.2s ease-out;
@@ -178,8 +178,15 @@ body.sidebar-secondary-opened {
           text-transform: uppercase;
           font-weight: 600;
           display: inline-block;
-          background: $color__primary;
           padding: 0.2em 0.4em;
+
+          &.type-process {
+            background: $color__secondary;
+          }
+
+          &.type-subprocess {
+            background: $color__primary;
+          }
         }
 
         .name {
@@ -214,10 +221,6 @@ body.sidebar-secondary-opened {
       .name {
         font-weight: 600;
       }
-    }
-
-    .unit.type-workunit .unit-container .ref {
-      background: $color__primary;
     }
 
     /** Toggle */

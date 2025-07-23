@@ -20,6 +20,7 @@
   "globals": {
     "angular": false,
     "module": false,
-    "require": false
+    "require": false,
+    "URLSearchParams": true
   }
 }

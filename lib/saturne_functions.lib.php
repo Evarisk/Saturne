@@ -157,7 +157,7 @@ function saturne_more_left_menu($moduleNameLowerCase, $objectType): void
                 </div>
                 <?php if (!empty($objectElements)) : ?>
                     <div class="sidebar-secondary__header-toolbar">
-                        <div class="toggle-all toggle-minus" aria-label="<?php echo $langs->trans('WrapAll'); ?>"><span class="icon fas fa-minus-square"></span></div>
+                        <div class="toggle-all toggle-minus" aria-label="<?php echo $langs->trans('WrapAll'); ?>"><span class="toggle-all-icon fas fa-caret-square-down"></span></div>
                     </div>
                 <?php endif; ?>
             </div>
@@ -212,7 +212,7 @@ function saturne_display_recurse_tree(array $objectElementTree, object $objectEl
                             'href'      => dol_buildpath('custom/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_view.php?id=' . $objectElement['object']->id . '&risk_type=' . $riskType, 1), //@todo gérer le lien
                             'spans' => [
                                 [
-                                    'className' => 'ref',
+                                    'className' => 'ref type-' . $objectElement['object']->element_type,
                                     'label'     => $objectElement['object']->ref, // Assuming $objectElement is defined elsewhere
                                 ],
                                 [
