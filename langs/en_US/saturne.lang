@@ -25,9 +25,10 @@ ModuleConfigSaturne = Configuration Saturne
 MinimizeMenu        = Minimize the menu
 
 # Right
-LireModule    = Read %s
-ReadModule    = Read %s (read)
-ReadAdminPage = Access the module configuration %s
+LireModule                  = Read %s
+ReadModule                  = Read %s (read)
+ReadAdminPage               = Access the module configuration %s
+YouDontHaveTheRightOnObject = You don't have the rights on %s
 
 
 

@@ -180,8 +180,8 @@ function saturne_display_recurse_tree(array $objectElementTree, object $objectEl
 {
     global $conf, $langs, $user;
 
-    if (empty($objectElementTree) || !$user->hasRight($objectElement->module, $objectElement->element, 'read')) {
-        print $langs->trans('YouDontHaveTheRightToSeeThis');
+    if (!$user->hasRight($objectElement->module, $objectElement->element, 'read')) {
+        print $langs->trans('YouDontHaveTheRightOnObject', $objectElement->element);
         return;
     }
 

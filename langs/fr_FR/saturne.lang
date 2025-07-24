@@ -25,9 +25,10 @@ ModuleConfigSaturne = Configuration Saturne
 MinimizeMenu        = Réduire le menu
 
 # Right - Droit
-LireModule    = Consulter %s
-ReadModule    = Consulter %s (read)
-ReadAdminPage = Accéder à la configuration du module %s
+LireModule                  = Consulter %s
+ReadModule                  = Consulter %s (read)
+ReadAdminPage               = Accéder à la configuration du module %s
+YouDontHaveTheRightOnObject = Vous n'avez pas les droits sur %s
 
 
 
