@@ -2,7 +2,7 @@
   "bitwise": true,
   "curly": true,
   "eqeqeq": true,
-  "esversion": 8,
+  "esversion": 9,
   "forin": true,
   "freeze": true,
   "latedef": "nofunc",
@@ -20,6 +20,7 @@
   "globals": {
     "angular": false,
     "module": false,
-    "require": false
+    "require": false,
+    "URLSearchParams": true
   }
 }

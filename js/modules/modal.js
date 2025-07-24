@@ -75,6 +75,7 @@ window.saturne.modal.openModal = function ( event ) {
 	let fromSubdir  = modalOptions.attr('data-from-subdir');
   let fromModule  = modalOptions.attr('data-from-module');
   let photoClass  = modalOptions.attr('data-photo-class');
+  let fromField   = modalOptions.attr('data-from-field');
 
 	let urlWithoutTag = '';
 	if (document.URL.match(/#/)) {
@@ -90,14 +91,15 @@ window.saturne.modal.openModal = function ( event ) {
 	$('#'+modalToOpen).attr('data-from-subtype', fromSubtype);
   $('#'+modalToOpen).attr('data-from-subdir', fromSubdir);
   $('#'+modalToOpen).attr('data-photo-class', photoClass);
+  $('#'+modalToOpen).attr('data-from-field', fromField);
 
   window.saturne.modal.loadLazyImages();
 
-    if (fromModule) {
-        if (typeof window.saturne.modal.addMoreOpenModalData == 'function') {
-            window.saturne.modal.addMoreOpenModalData(modalToOpen, $(this));
-        }
+  if (fromModule) {
+    if (typeof window.saturne.modal.addMoreOpenModalData === 'function') {
+        window.saturne.modal.addMoreOpenModalData(modalToOpen, $(this));
     }
+  };
 
 	$('#'+modalToOpen).find('.wpeo-button').attr('value', fromId);
 	$('#'+modalToOpen).addClass('modal-active');

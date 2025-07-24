@@ -49,6 +49,11 @@ abstract class SaturneObject extends CommonObject
     public $isextrafieldmanaged = 1;
 
     /**
+     * @var int Does object support category module ? 0 = No, 1 = Yes
+     */
+    public int $isCategoryManaged = 1;
+
+    /**
      * Constructor.
      *
      * @param DoliDb $db                  Database handler
@@ -497,7 +502,7 @@ abstract class SaturneObject extends CommonObject
             if ($withpicto == 3) {
                 $addLabel = 1;
             }
-            $result .= (($addLabel && property_exists($this, 'label')) ? '<span class="opacitymedium">' . ' - ' . dol_trunc($this->label, ($addLabel > 1 ? $addLabel : 0)) . '</span>' : '');
+            $result .= (($addLabel && property_exists($this, 'label')) ? '<span class="opacitymedium"> - <span contenteditable="true" data-field="label">' . dol_trunc($this->label, ($addLabel > 1 ? $addLabel : 0)) . '</span></span>' : '');
         }
 
 		$hookmanager->initHooks([$this->element . 'dao']);
@@ -580,26 +585,19 @@ abstract class SaturneObject extends CommonObject
     /**
      * Returns the reference to the following non-used object depending on the active numbering module
      *
-     *  @return string Object free reference
+     * @param  string $objectType Object type (used to get the numbering module if $this->element is not wanted for this object)
+     *
+     * @return string             Object free reference
      */
-	public function getNextNumRef(): string
-	{
-		global $langs, $conf;
+    public function getNextNumRef(string $objectType = ''): string
+    {
+        global $langs, $conf;
 
-        $moduleNameUpperCase = strtoupper($this->module);
-        $moduleNameLowerCase = strtolower($this->module);
-        $objectType          = $this->element;
-        $numRefConf          = $moduleNameUpperCase . '_' . strtoupper($objectType) . '_ADDON';
-
-		if (empty($conf->global->$numRefConf)) {
-			$conf->global->$numRefConf = 'mod_' . $objectType . '_standard';
-		}
-
-        //Numbering modules
-        $numberingModuleName = [
-            $objectType => $conf->global->$numRefConf,
-        ];
-        list($objNumberingModule) = saturne_require_objects_mod($numberingModuleName, $moduleNameLowerCase);
+        $moduleNameUpperCase      = dol_strtoupper($this->module);
+        $element                  = $objectType ?: $this->element;
+        $modRefConfName           = $moduleNameUpperCase . '_' . dol_strtoupper($element) . '_ADDON';
+        $numberingModuleName      = [$objectType ? $this->element . '/' . $element : $element => getDolGlobalString($modRefConfName, 'mod_' . $element . '_standard')];
+        list($objNumberingModule) = saturne_require_objects_mod($numberingModuleName, dol_strtolower($this->module));
 
         if (is_object($objNumberingModule)) {
             $numRef = $objNumberingModule->getNextValue($this);
@@ -628,7 +626,11 @@ abstract class SaturneObject extends CommonObject
      */
     public function setCategories($categories)
     {
-        return parent::setCategoriesCommon($categories, $this->element);
+        if ($this->isCategoryManaged == 1) {
+            return parent::setCategoriesCommon($categories, $this->element);
+        } else {
+            return 0;
+        }
     }
 
 	/**

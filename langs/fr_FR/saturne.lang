@@ -230,6 +230,15 @@ checkDateEndJobComment = Vérification et mise à jour du statut des certificats
 
 
 #
+# Element - element
+#
+# Data - Donnée
+Standard/Reference = Norme/Référenciel
+ParentElement      = Élément parent
+
+
+
+#
 # Triggers
 #
 
