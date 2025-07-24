@@ -1,16 +1,16 @@
 <?php
 
 if ($action == 'pdfGeneration') {
-	global $langs, $moduleName, $moduleNameLowerCase;
+	global $langs;
 
     require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 
-	$moduleNameUpperCase = dol_strtoupper($moduleName);
-	$filename = GETPOST('file');
+    $moduleNameUpperCase = dol_strtoupper($moduleName);
+    $filename = GETPOST('file');
 
-	$file = $upload_dir . '/' . $filename;
+    $file = $upload_dir . '/' . $filename;
 
-	// Open and load template
+    // Open and load template
 	require_once ODTPHP_PATH . 'odf.php';
 	try {
 		$odfHandler = new odf(
@@ -32,7 +32,7 @@ if ($action == 'pdfGeneration') {
 	$fileInfos = pathinfo($filename);
 	$pdfName   = $fileInfos['filename'] . '.pdf';
     $pdfName   = dol_sanitizeFileName($pdfName);
-    
+
 	$manualPdfGenerationConf = $moduleNameUpperCase . '_MANUAL_PDF_GENERATION';
 
 	// Write new file

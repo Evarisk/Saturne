@@ -665,6 +665,96 @@ abstract class SaturneObject extends CommonObject
 	}
 
 	/**
+	 *	Delete all links between an object $this
+	 *
+	 *	@param	?int	$sourceid		Object source id
+	 *	@param  string	$sourcetype		Object source type
+	 *	@param  ?int	$targetid		Object target id
+	 *	@param  string	$targettype		Object target type
+	 *  @param	int		$rowid			Row id of line to delete. If defined, other parameters are not used.
+	 * 	@param	?User	$f_user			User that create
+	 * 	@param	int<0,1>	$notrigger		1=Does not execute triggers, 0= execute triggers
+	 *	@return     					int	>0 if OK, <0 if KO
+	 *	@see	add_object_linked(), updateObjectLinked(), fetchObjectLinked()
+	 */
+	public function deleteObjectLinked($sourceid = null, $sourcetype = '', $targetid = null, $targettype = '', $rowid = 0, $f_user = null, $notrigger = 0)
+	{
+		global $user;
+		$deletesource = false;
+		$deletetarget = false;
+		$f_user = isset($f_user) ? $f_user : $user;
+
+        if (!empty($sourceid) && !empty($sourcetype) && !empty($targetid) && !empty($targettype)) {
+            $deletesource = true;
+			$deletetarget = true;
+        } else if (!empty($sourceid) && !empty($sourcetype) && empty($targetid) && empty($targettype)) {
+			$deletesource = true;
+		} elseif (empty($sourceid) && empty($sourcetype) && !empty($targetid) && !empty($targettype)) {
+			$deletetarget = true;
+		}
+
+		$sourceid = (!empty($sourceid) ? $sourceid : $this->id);
+		$sourcetype = (!empty($sourcetype) ? $sourcetype : $this->element);
+		$targetid = (!empty($targetid) ? $targetid : $this->id);
+		$targettype = (!empty($targettype) ? $targettype : $this->element);
+		$this->db->begin();
+		$error = 0;
+
+		if (!$notrigger) {
+			// Call trigger
+			$this->context['link_id'] = $rowid;
+			$this->context['link_source_id'] = $sourceid;
+			$this->context['link_source_type'] = $sourcetype;
+			$this->context['link_target_id'] = $targetid;
+			$this->context['link_target_type'] = $targettype;
+			$result = $this->call_trigger('OBJECT_LINK_DELETE', $f_user);
+			if ($result < 0) {
+				$error++;
+			}
+			// End call triggers
+		}
+
+		if (!$error) {
+			$sql = "DELETE FROM " . $this->db->prefix() . "element_element";
+			$sql .= " WHERE";
+			if ($rowid > 0) {
+				$sql .= " rowid = " . ((int) $rowid);
+			} else {
+                if ($deletesource && $deletetarget) {
+                    $sql .= " (fk_source = " . ((int) $sourceid) . " AND sourcetype = '" . $this->db->escape($sourcetype) . "')";
+					$sql .= " AND";
+					$sql .= " (fk_target = " . ((int) $targetid) . " AND targettype = '" . $this->db->escape($targettype) . "')";
+                }else if ($deletesource) {
+					$sql .= " fk_source = " . ((int) $sourceid) . " AND sourcetype = '" . $this->db->escape($sourcetype) . "'";
+					$sql .= " AND fk_target = " . ((int) $sourceid) . " AND targettype = '" . $this->db->escape($targettype) . "'";
+				} elseif ($deletetarget) {
+					$sql .= " fk_target = " . ((int) $targetid) . " AND targettype = '" . $this->db->escape($targettype) . "'";
+					$sql .= " AND fk_source = " . ((int) $targetid) . " AND sourcetype = '" . $this->db->escape($targettype) . "'";
+				} else {
+					$sql .= " (fk_source = " . ((int) $sourceid) . " AND sourcetype = '" . $this->db->escape($sourcetype) . "')";
+					$sql .= " OR";
+					$sql .= " (fk_target = " . ((int) $targetid) . " AND targettype = '" . $this->db->escape($targettype) . "')";
+				}
+			}
+
+			dol_syslog(get_class($this) . "::deleteObjectLinked", LOG_DEBUG);
+			if (!$this->db->query($sql)) {
+				$this->error = $this->db->lasterror();
+				$this->errors[] = $this->error;
+				$error++;
+			}
+		}
+
+		if (!$error) {
+			$this->db->commit();
+			return 1;
+		} else {
+			$this->db->rollback();
+			return 0;
+		}
+	}
+
+	/**
 	 * Write generic information of trigger description
 	 *
 	 * @param  SaturneObject $object Object calling the trigger
@@ -755,4 +845,43 @@ abstract class SaturneObject extends CommonObject
             return -1;
         }
     }
+    
+    /**
+	 * Return validation test result for a field
+	 *
+	 * @param array<string,array{type:string,label:string,enabled:int<0,2>|string,position:int,notnull?:int,visible:int<-2,5>|string,alwayseditable?:int<0,1>,noteditable?:int<0,1>,default?:string,index?:int,foreignkey?:string,searchall?:int<0,1>,isameasure?:int<0,1>,css?:string,csslist?:string,help?:string,showoncombobox?:int<0,2>,disabled?:int<0,1>,arrayofkeyval?:array<int,string>,autofocusoncreate?:int<0,1>,comment?:string,copytoclipboard?:int<1,2>,validate?:int<0,1>,bounds?:array<min?:int|float,max?:int|float}>	$fields	Array of properties of field to show
+	 * @param  	string  $fieldKey           Key of attribute
+	 * @param	string  $fieldValue         Value of attribute
+	 * @return 	bool 						Return false if fail true on success, see $this->error for error message
+	 */
+	public function validateField($fields, $fieldKey, $fieldValue)
+	{
+		global $langs;
+
+		$validationResult = true;
+
+		$commonValidationResult = parent::validateField($fields, $fieldKey, $fieldValue);
+
+		if ($commonValidationResult) {
+			$field = $fields[$fieldKey] ?? null;
+			if (isset($field)) {
+				if (isset($field['bounds']['min'])) {
+					$min = $field['bounds']['min'];
+					if ($fieldValue < $min) {
+						$this->setFieldError($fieldKey, $langs->trans('FieldMinValue', strtolower(html_entity_decode($langs->trans($field['label']), ENT_COMPAT, 'UTF-8')), $min));
+						$validationResult = false;
+					}
+				}
+				if (isset($field['bounds']['max'])) {
+					$max = $field['bounds']['max'];
+					if ($fieldValue > $max) {
+						$this->setFieldError($fieldKey, $langs->trans('FieldMaxValue', strtolower(html_entity_decode($langs->trans($field['label']), ENT_COMPAT, 'UTF-8')), $max));
+						$validationResult = false;
+					}
+				}
+			}
+		}
+
+		return $commonValidationResult && $validationResult;
+	}
 }

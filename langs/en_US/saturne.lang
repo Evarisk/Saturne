@@ -20,7 +20,7 @@
 # Data
 ModuleSaturneName   = Saturne
 ModuleSaturneDesc   = Evarisk framework and library of objects and functions
-ModuleConfig        = Configuration
+ModuleConfig        = Configuration %s
 ModuleConfigSaturne = Configuration Saturne
 MinimizeMenu        = Minimize the menu
 

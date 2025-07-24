@@ -20,7 +20,7 @@
 # Data - Donnée
 ModuleSaturneName   = Saturne
 ModuleSaturneDesc   = Framework et librairie d'objets et fonctions d'Evarisk
-ModuleConfig        = Configuration
+ModuleConfig        = Configuration %s
 ModuleConfigSaturne = Configuration Saturne
 MinimizeMenu        = Réduire le menu
 
