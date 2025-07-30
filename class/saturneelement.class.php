@@ -131,12 +131,11 @@ class SaturneElement extends SaturneObject
         'element_type'     => ['type' => 'select',       'label' => 'ElementType',      'enabled' => 1, 'position' => 100, 'notnull' => 1, 'visible' => 1, 'noteditable' => 1],
         'photo'            => ['type' => 'varchar(255)', 'label' => 'Photo',            'enabled' => 1, 'position' => 130, 'notnull' => 0, 'visible' => -2],
         'position'         => ['type' => 'integer',      'label' => 'Position',         'enabled' => 1, 'position' => 140, 'notnull' => 1, 'visible' => -2],
-        'fk_standard'      => ['type' => 'integer:SaturneStandard:saturne/class/saturnestandard.class.php', 'label' => 'Standard/Reference',             'enabled' => 1, 'position' => 80,  'notnull' => 1,  'visible' => 1,  'index' => 1, 'foreignkey' => 'saturne_standard.rowid',       'noteditable' => 1],
-        'fk_parent'        => ['type' => 'integer',                                                         'label' => 'ParentElement',                  'enabled' => 1, 'position' => 90,  'notnull' => 1,  'visible' => 1,  'index' => 1, 'noteditable' => 1, 'default' => 0],
+        'fk_element'       => ['type' => 'integer:SaturneElement:saturne/class/saturneelement.class.php',   'label' => 'ParentElement',                  'enabled' => 1, 'position' => 90,  'notnull' => 0,  'visible' => 0,  'index' => 1],
+        'fk_standard'      => ['type' => 'integer:SaturneStandard:saturne/class/saturnestandard.class.php', 'label' => 'Standard/Reference',             'enabled' => 1, 'position' => 80,  'notnull' => 1,  'visible' => 0,  'index' => 1, 'foreignkey' => 'saturne_standard.rowid', 'noteditable' => 1],
         'fk_user_creat'    => ['type' => 'integer:User:user/class/user.class.php',                          'label' => 'UserAuthor', 'picto'  => 'user', 'enabled' => 1, 'position' => 150, 'notnull' => 1,  'visible' => -2, 'index' => 1, 'foreignkey' => 'user.rowid'],
         'fk_user_modif'    => ['type' => 'integer:User:user/class/user.class.php',                          'label' => 'UserModif',  'picto'  => 'user', 'enabled' => 1, 'position' => 160, 'notnull' => -1, 'visible' => -2, 'index' => 1, 'foreignkey' => 'user.rowid']
     ];
-//        'show_in_selector' => ['type' => 'boolean',      'label' => 'ShowInSelectOnPublicTicketInterface', 'enabled' => 1, 'position' => 106, 'notnull' => 1, 'visible' => 1, 'default' => 1,],
 
     /**
      * @var int ID
@@ -182,7 +181,6 @@ class SaturneElement extends SaturneObject
     public $description;
     public $element_type;
     public $photo;
-    public $show_in_selector;
 
     /**
      * @var int Object parent ID
@@ -193,7 +191,7 @@ class SaturneElement extends SaturneObject
      * @var int User ID
      */
     public $fk_user_creat;
-    public $fk_parent;
+    public $fk_element;
     public $fk_standard;
     public $position;
 
@@ -230,9 +228,9 @@ class SaturneElement extends SaturneObject
             $this->element_type = $this::ELEMENT_TYPE_1;
         }
 
-        $this->ref          = $this->getNextNumRef($this->element_type);
-        $this->status       = self::STATUS_VALIDATED;
-        $this->fk_standard  = getDolGlobalInt(dol_strtoupper($this->module) . '_ACTIVE_STANDARD');
+        $this->ref         = $this->ref ?? $this->getNextNumRef($this->element_type);
+        $this->status      = self::STATUS_VALIDATED;
+        $this->fk_standard = $this->fk_standard ?? getDolGlobalInt(dol_strtoupper($this->module) . '_ACTIVE_STANDARD');
 
         return parent::create($user, $notrigger);
     }
@@ -247,8 +245,8 @@ class SaturneElement extends SaturneObject
      */
     public function delete(User $user, bool $notrigger = false, bool $softDelete = true): int
     {
-        $this->status    = self::STATUS_TRASHED;
-        $this->fk_parent = getDolGlobalInt(dol_strtoupper($this->module) . '_' . dol_strtoupper($this->element) . '_TRASH');
+        $this->status     = self::STATUS_TRASHED;
+        $this->fk_element = getDolGlobalInt(dol_strtoupper($this->module) . '_' . dol_strtoupper($this->element) . '_TRASH');
 
         return $this->update($user, true);
     }
