@@ -218,7 +218,7 @@ function saturne_recurse_tree($moreParams, ?int $parentID = null, int $depth = 0
 {
     global $conf;
 
-    require_once __DIR__ . '/../../' . $moreParams['moduleNameLowerCase'] . '/class/' . $moreParams['objectClassName'] . '.class.php';
+    require_once __DIR__ . '/../../' . $moreParams['moduleNameLowerCase'] . '/class/' . $moreParams['objectElement'] . '.class.php';
 
     $filter         = 't.entity IN (' . $conf->entity . ') AND t.fk_standard = ' . getDolGlobalInt(dol_strtoupper($moreParams['moduleNameLowerCase']) . '_ACTIVE_STANDARD');
     $filter        .= ' AND t.status = ' . SaturneElement::STATUS_VALIDATED;
