@@ -28,6 +28,9 @@
  * Variable   : $upload_dir
  */
 
+// Load Dolibarr libraries
+require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php'; // use for dol_set_user_param
+
 if ($action == 'adddashboardinfo' || $action == 'closedashboardinfo') {
     $data                = json_decode(file_get_contents('php://input'), true);
     $dashboardWidgetName = $data['dashboardWidgetName'];
