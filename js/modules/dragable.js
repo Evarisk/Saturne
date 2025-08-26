@@ -60,7 +60,7 @@ window.saturne.dragable.event = function() {
   $('.dragable-container').sortable({
     items: '.dragable-item',
     connectedWith: '.dragable-container',
-    cursor: 'move',
+    cursor: 'grabbing',
     opacity: 0.6,
     tolerence: 'pointer',
     start: function(event, ui) {
