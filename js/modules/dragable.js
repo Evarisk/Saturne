@@ -77,9 +77,11 @@ window.saturne.dragable.submit = function() {
   $this = $(this);
   $container = $this.closest('.dragable-container');
 
-  let action   = $container.data('action') || 'dragableSubmit';
-  let loader   = $container.data('loader') || 'default';
-  let elements = $container.find('.dragable-item').map(function() {
+  let action         = $container.data('action') || 'dragableSubmit';
+  let loader         = $container.data('loader') || 'default';
+  let successMessage = $container.data('success-message');
+  let errorMessage   = $container.data('error-message');
+  let elements       = $container.find('.dragable-item').map(function() {
     return $(this).data('name');
   }).toArray();
 
@@ -98,11 +100,17 @@ window.saturne.dragable.submit = function() {
     success: function(response) {
       if (loader !== 'none') {
         window.saturne.loader.remove($container);
+        if (successMessage) {
+          $.jnotify(successMessage, {color: 'green'});
+        }
       }
     },
     error: function(response) {
       if (loader !== 'none') {
         window.saturne.loader.remove($containers);
+        if (errorMessage) {
+          $.jnotify(errorMessage, {color: 'red'});
+        }
       }
     }
   });
