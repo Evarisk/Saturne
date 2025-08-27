@@ -504,6 +504,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'class_path'     => 'custom/saturne/class/task/saturnetask.class.php',
             'lib_path'       => 'core/lib/project.lib.php',
         ];
+        $objectsMetadata['project_task'] = $objectsMetadata['task'];
     }
 
     if (isModEnabled('facture')) {
