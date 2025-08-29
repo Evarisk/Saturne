@@ -343,7 +343,7 @@ class SaturneDashboard
             foreach ($dashboards['lists'] as $dashboardLists) {
                 foreach ($dashboardLists as $dashboardList) {
                     if (is_array($dashboardList['data']) && !empty($dashboardList['data'])) {
-                        print '<div id="graph-' . $dashboardList['name'] . '" style="width: 100%">';
+                        print '<div id="graph-' . $dashboardList['name'] . '"' . (empty($dashboardList['noFullSize']) ? 'style="width: 100%"' : '') . '>';
 
                         if (!empty($dashboardList['name'])) {
                             $dashboardList['morehtmlright'] = '<button class="wpeo-button button-transparent" type="button" data-item-type="graph" data-item-name="' . $dashboardList['name'] . '" data-item-suppress="graph-' . $dashboardList['name'] . '" data-item-refresh="add-graph-box" id="dashboard-close-item">';
