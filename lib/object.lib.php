@@ -474,6 +474,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'post_name'      => 'fk_project',
             'link_name'      => 'project',
             'tab_type'       => 'project',
+            'table_element'  => 'projet',
             'name_field'     => 'ref, title',
             'label_field'    => 'title',
             'hook_name_card' => 'projectcard',
