@@ -125,7 +125,8 @@ class modSaturne extends DolibarrModules
                 'category',
                 'categoryindex',
                 'index',
-                'elementproperties'
+                'elementproperties',
+                'saturnegetobjectsmetadata'
             ],
             // Set this to 1 if features of module are opened to external users
             'moduleforexternal' => 0,
@@ -378,7 +379,8 @@ class modSaturne extends DolibarrModules
 
         // Create extrafields during init
         $extraFieldsArrays = [
-            'electronic_signature' => ['Label' => 'ElectronicSignature', 'type' => 'text', 'elementtype' => ['user'], 'position' => $this->numero . 10, 'list' => 1, 'entity' => 0, 'langfile' => 'saturne@saturne', 'enabled' => "isModEnabled('saturne') && isModEnabled('user')"]
+            'electronic_signature' => ['Label' => 'ElectronicSignature', 'type' => 'text', 'elementtype' => ['user'], 'position' => $this->numero . 10, 'list' => 1, 'entity' => 0, 'langfile' => 'saturne@saturne', 'enabled' => "isModEnabled('saturne') && isModEnabled('user')"],
+            'favorite'             => ['Label' => 'Favorite', 'type' => 'boolean', 'elementtype' => ['links', 'ecm_files'], 'position' => $this->numero . 20, 'list' => 0, 'entity' => 0, 'langfile' => 'saturne@saturne', 'enabled' => "isModEnabled('saturne')"]
         ];
 
         saturne_manage_extrafields($extraFieldsArrays);
