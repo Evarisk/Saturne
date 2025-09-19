@@ -247,7 +247,7 @@ class ActionsSaturne
                 $('.user_extras_electronic_signature').html(<?php echo json_encode($out); ?>);
             </script>
             <?php
-        } elseif (strpos($parameters['context'], 'formfile') !== false) {
+        } elseif (strpos($_SERVER['PHP_SELF'], '/document.php') !== false) {
 
             require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
             require_once DOL_DOCUMENT_ROOT . '/core/class/link.class.php';
