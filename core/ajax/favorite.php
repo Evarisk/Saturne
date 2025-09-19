@@ -16,9 +16,9 @@
  */
 
 /**
- * \file    utils/actions.php
+ * \file    core/ajax/favorite.php
  * \ingroup saturne
- * \brief   Saturne actions
+ * \brief   Saturne ajax action favorite
  */
 
 // Load Saturne environment
@@ -32,7 +32,7 @@ if (file_exists('../saturne.main.inc.php')) {
 
 global $db, $user, $conf, $langs;
 
-require_once __DIR__ . '/../lib/object.lib.php';
+require_once __DIR__ . '../../../lib/object.lib.php';
 
 $action = GETPOST('action', 'aZ09');
 

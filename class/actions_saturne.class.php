@@ -336,8 +336,9 @@ class ActionsSaturne
                                 params.append('action', 'toggle_favorite');
 
                                 $.ajax({
-                                    url: '" . DOL_URL_ROOT . "/custom/saturne/utils/actions.php?' + params.toString(),
+                                    url: '" . DOL_URL_ROOT . "/custom/saturne/core/ajax/favorite.php?' + params.toString(),
                                     method: 'POST',
+                                    contentType: 'application/json charset=utf-8',
                                     success: function(response) {
                                         var data = JSON.parse(response);
                                         if (data.error) {
