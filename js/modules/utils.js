@@ -35,6 +35,16 @@
 window.saturne.utils = {};
 
 /**
+ * Flag indicating whether the user's timezone is already stored in the PHP session.
+ *
+ * @since   21.1.0
+ * @version 21.1.0
+ *
+ * @type {boolean}
+ */
+window.saturne.utils.timezoneDefined = false;
+
+/**
  * Utils init
  *
  * @memberof Saturne_Utils
@@ -286,4 +296,54 @@ window.saturne.utils.getSanitizedPercentageValue = function($input) {
     value = 0;
   }
   return Math.max(0, Math.min(100, value));
+};
+
+/**
+ * Helper function to get the browser's timezone in IANA format.
+ *
+ * @since   21.1.0
+ * @version 21.1.0
+ *
+ * @return {string} The detected timezone (e.g. "Europe/Paris").
+ */
+window.saturne.utils.getBrowserTimezone = function getBrowserTimezone() {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } catch (e) {
+    return 'UTC';
+  }
+};
+
+
+/**
+ * Helper function to send the browser's timezone to the server via POST
+ * so it can be stored in a PHP session.
+ *
+ * @since   21.1.0
+ * @version 21.1.0
+ *
+ * @param  {string} timezone The timezone to send to the server.
+ * @return {Promise} A jQuery Promise that resolves when the request is done.
+ */
+window.saturne.utils.storeTimezoneInSession = function(timezone) {
+  return $.post(window.location.href, { tz: timezone });
+};
+
+/**
+ * Helper function to ensure the timezone is stored in the PHP session.
+ * If not, sends it via AJAX and reloads the page.
+ *
+ * @since   21.1.0
+ * @version 21.1.0
+ *
+ * @return {void}
+ */
+window.saturne.utils.ensureTimezoneInSession = function() {
+  if (!window.saturne.utils.timezoneDefined) {
+    const tz = window.saturne.utils.getBrowserTimezone();
+    window.saturne.utils.storeTimezoneInSession(tz)
+      .done(function() {
+        location.reload();
+      });
+  }
 };
