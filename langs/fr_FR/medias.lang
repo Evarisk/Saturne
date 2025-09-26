@@ -55,3 +55,6 @@ MediaSizeDocumentDescription         = Sélection de la taille des médias dans 
 ShowOnlyMediasAddedToday             = N'afficher que les médias ajoutés aujourd'hui
 ShowOnlyUnlinkedMedias               = N'afficher que les médias liés à aucun objet
 UnlinkedMedias                       = Médias non liés
+
+# Analyse AI
+AIAnalyseImage	= Analyse de l'image: %s
