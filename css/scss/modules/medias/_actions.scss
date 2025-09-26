@@ -1,7 +1,7 @@
 .media-container {
   position: relative;
 
-  .media-gallery-unlink, .media-gallery-favorite {
+  .media-gallery-unlink, .media-gallery-favorite, .media-gallery-ai {
     width: 30px !important;
     height: 30px !important;
     line-height: 30px !important;
@@ -34,5 +34,24 @@
   .photo {
     aspect-ratio: 1/1;
     object-fit: cover;
+  }
+
+  .media-gallery-ai {
+    top:auto;
+    bottom:-10px;
+    left: -10px;
+    background:#0d8aff !important;
+
+    &:hover {
+      color:rgba(0,0,0,.6) !important;
+    }
+
+    &.colorsuccess {
+      background:#9ACD32 !important;
+    }
+
+    &.colorerror {
+      background:#DC143C !important;
+    }
   }
 }

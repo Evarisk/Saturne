@@ -65,6 +65,7 @@ window.saturne.mediaGallery.event = function() {
   $( document ).on( 'click', '.toggle-today-medias', window.saturne.mediaGallery.toggleTodayMedias );
   $( document ).on( 'click', '.toggle-unlinked-medias', window.saturne.mediaGallery.toggleUnlinkedMedias );
   $(document).on('click', '.regenerate-thumbs', window.saturne.mediaGallery.regenerateThumbs);
+  $(document).on( 'click', '.media-gallery-ai', window.saturne.mediaGallery.readFileAI);
 }
 
 /**
@@ -787,3 +788,73 @@ window.saturne.mediaGallery.regenerateThumbs = function() {
     error: function() {}
   });
 };
+
+/**
+ * Read file with AI
+ *
+ * @since   22.0.0
+ * @version 22.0.0
+ *
+ * @return {void}
+ */
+window.saturne.mediaGallery.readFileAI = function(e) {
+  e.preventDefault();
+
+  let token = window.saturne.toolbox.getToken();
+  let mediaContainer   = $(this).closest('.media-container');
+  let filepath         = mediaContainer.find('.file-path').val();
+  let filename         = mediaContainer.find('.file-name').val();
+
+  let fullButton = $(this);
+  let icon = fullButton.find('.button-icon');
+  icon.removeClass('fa-magic').addClass('fa-circle-notch fa-spin');
+
+  let descriptionTextarea = $('textarea#description');
+
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+
+  $.ajax({
+    url: document.URL + querySeparator + "subaction=readFileAI&token=" + token,
+    type: 'POST',
+    contentType: "application/json; charset=utf-8",
+    dataType: "json",
+    data: JSON.stringify({
+      token: token,
+      filepath: filepath,
+      filename: filename
+    }),
+    success: function(response) {
+
+      if (response.success) {
+
+        fullButton.addClass('colorsuccess');
+        icon.removeClass('fa-circle-notch fa-spin').addClass('fa-check');
+
+        // Contact
+        if (response.type == 'contact') {
+          $('#easycrm_firstname').val(response.contact.nom);
+          $('#easycrm_lastname').val(response.contact.prenom);
+          $('#projectphone').val(response.contact.telephone.trim());
+          $('#easycrm_email').val(response.contact.email);
+        }
+
+        // Description
+        let descValue = descriptionTextarea.val();
+        if (descValue !== "") {
+          descValue += "\n";
+        }
+        descValue += response.text;
+        descriptionTextarea.val(descValue);
+
+      } else {
+        fullButton.addClass('colorerror');
+        icon.removeClass('fa-circle-notch fa-spin').addClass('fa-times');
+        console.error(response.error);
+      }
+    },
+    error: function(xhr, status, error) {
+      fullButton.addClass('colorerror');
+      icon.removeClass('fa-circle-notch fa-spin').addClass('fa-times');
+    }
+  });
+});
