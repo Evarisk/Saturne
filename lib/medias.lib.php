@@ -324,6 +324,15 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 							<i class="fas fa-unlink button-icon"></i>
 						</div>';
 				}
+				// ADDED_FOR_AI
+				if (isModEnabled('ai')) {
+					$return .=
+						'<div class="wpeo-button button-square-50 button-blue ' . $object->element . ' media-gallery-ai" value="' . $object->id . '">
+							<input class="element-linked-id" type="hidden" value="' . ($object->id > 0 ? $object->id : 0) . '">
+							<input class="filename" type="hidden" value="' . $photo . '">
+							<i class="fas fa-magic button-icon"></i>
+						</div>';
+				}
 				if ($showdiv) {
 					$return .= "</div>\n";
 				}

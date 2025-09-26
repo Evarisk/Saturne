@@ -132,7 +132,7 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
                 require_once __DIR__ . '/../core/modules/saturne/modules_saturne.php';
                 $saturneDocumentModel = new SaturneDocumentModel($db, $modulepart, $submodulepart);
                 $documentType = strtolower($submodulepart);
-                $modellist = $saturneDocumentModel->liste_modeles($db, $documentType);
+                $modellist = $saturneDocumentModel->liste_modeles($db, $documentType, 100);
             }
         }
 
