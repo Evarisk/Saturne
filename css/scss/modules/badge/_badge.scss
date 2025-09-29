@@ -1,0 +1,108 @@
+.wpeo-badge {
+  //background: #fff;
+  padding: 1em;
+  border-radius: 10px;
+  position: relative;
+
+  &::before {
+    display: block;
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    background: #fff;
+    transition: all 0.1s ease-out;
+  }
+
+  .badge__info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    z-index: 10;
+
+    .badge__icon {
+      width: 35px;
+      min-width: 35px;
+      height: 35px;
+      line-height: 35px;
+      text-align: center;
+      border-radius: 50%;
+      margin: 0;
+      background: rgba($color__tertiary-light, 0.5);
+
+      i {
+        color: rgba($color__tertiary, 0.5);
+        font-size: 16px;
+      }
+    }
+    .badge__details-wrapper {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+
+      .badge__title {
+        font-size: 12px;
+        font-weight: 600;
+        color: $color__tertiary;
+        margin: 0;
+      }
+      .badge__detail {
+        color: #000;
+        font-weight: 400;
+        font-size: 14px;
+        margin: 0;
+
+        &.badge__detail--empty {
+          color: rgba(0,0,0,0.4);
+        }
+      }
+    }
+  }
+  .badge__actions {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 0;
+    background: rgba($color__tertiary-light, 0.5);
+    padding: 0.4em;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    z-index: 10;
+    opacity: 0;
+
+    .action-button {
+      width: 38px;
+      height: 38px;
+      line-height: 38px;
+      border: none;
+      border-radius: 50%;
+      background-color: #fff;
+      transition: all 0.2s ease-out;
+
+      &:hover {
+        cursor: pointer;
+        background: rgba(255,255,255,0.5);
+      }
+    }
+  }
+
+  &:hover {
+    z-index: 10;
+    cursor: pointer;
+
+    &::before {
+      box-shadow: 0 0 20px 0 rgba(0,0,0,0.10);
+      transform: scaleX(1.03) scaleY(1.05);
+    }
+
+    .badge__actions {
+      opacity: 1;
+    }
+  }
+}

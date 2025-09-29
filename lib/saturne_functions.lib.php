@@ -28,37 +28,39 @@ require_once __DIR__ . '/pagination.lib.php';
 require_once __DIR__ . '/documents.lib.php';
 require_once __DIR__ . '/object.lib.php';
 require_once __DIR__ . '/debug.lib.php';
+require_once __DIR__ . '/component.lib.php';
 
 /**
  * Print llxHeader with Saturne custom enhancements
  *
- * @param int    $load_media_gallery Load media gallery on page
- * @param string $head               Show header
- * @param string $title              Page title
- * @param string $help_url           Help url shown in "?" tooltip
- * @param string $target       	     Target to use on links
- * @param int    $disablejs          More content into html header
- * @param int    $disablehead        More content into html header
- * @param array  $arrayofjs          Array of complementary js files
- * @param array  $arrayofcss         Array of complementary css files
- * @param string $morequerystring    Query string to add to the link "print" to get same parameters (use only if autodetect fails)
- * @param string $morecssonbody      More CSS on body tag. For example 'classforhorizontalscrolloftabs'.
- * @param string $replacemainareaby  Replace call to main_area() by a print of this string
- * @param int    $disablenofollow    Disable the "nofollow" on meta robot header
- * @param int    $disablenoindex     Disable the "noindex" on meta robot header
+ * @param int $load_media_gallery Load media gallery on page
+ * @param string $head Show header
+ * @param string $title Page title
+ * @param string $help_url Help url shown in "?" tooltip
+ * @param string $target Target to use on links
+ * @param int $disablejs More content into html header
+ * @param int $disablehead More content into html header
+ * @param array $arrayofjs Array of complementary js files
+ * @param array $arrayofcss Array of complementary css files
+ * @param string $morequerystring Query string to add to the link "print" to get same parameters (use only if autodetect fails)
+ * @param string $morecssonbody More CSS on body tag. For example 'classforhorizontalscrolloftabs'.
+ * @param string $replacemainareaby Replace call to main_area() by a print of this string
+ * @param int $disablenofollow Disable the "nofollow" on meta robot header
+ * @param int $disablenoindex Disable the "noindex" on meta robot header
+ * @throws Exception
  */
 function saturne_header(int $load_media_gallery = 0, string $head = '', string $title = '', string $help_url = '', string $target = '', int $disablejs = 0, int $disablehead = 0, array $arrayofjs = [], array $arrayofcss = [], string $morequerystring = '', string $morecssonbody = '', string $replacemainareaby = '', int $disablenofollow = 0, int $disablenoindex = 0)
 {
-	global $moduleNameLowerCase;
+    global $moduleNameLowerCase;
 
-	//CSS
-	$arrayofcss[] = '/saturne/css/saturne.min.css';
+    //CSS
+    $arrayofcss[] = '/saturne/css/saturne.min.css';
     if (file_exists(__DIR__ . '/../../' . $moduleNameLowerCase . '/css/' . $moduleNameLowerCase . '.min.css')) {
         $arrayofcss[] = '/' . $moduleNameLowerCase . '/css/' . $moduleNameLowerCase . '.min.css';
     }
 
-	//JS
-	$arrayofjs[] = '/saturne/js/saturne.min.js';
+    //JS
+    $arrayofjs[] = '/saturne/js/saturne.min.js';
     if ($load_media_gallery) {
         $arrayofjs[] = '/saturne/js/includes/signature-pad.min.js';
     }
@@ -66,12 +68,178 @@ function saturne_header(int $load_media_gallery = 0, string $head = '', string $
         $arrayofjs[] = '/' . $moduleNameLowerCase . '/js/' . $moduleNameLowerCase . '.min.js';
     }
 
-	llxHeader($head, $title, $help_url, $target, $disablejs, $disablehead, $arrayofjs, $arrayofcss, $morequerystring, $morecssonbody, $replacemainareaby, $disablenofollow, $disablenoindex);
+    llxHeader($head, $title, $help_url, $target, $disablejs, $disablehead, $arrayofjs, $arrayofcss, $morequerystring, $morecssonbody, $replacemainareaby, $disablenofollow, $disablenoindex);
 
-	if ($load_media_gallery) {
-		//Media gallery
-		include __DIR__ . '/../core/tpl/medias/medias_gallery_modal.tpl.php';
-	}
+    if ($load_media_gallery) {
+        //Media gallery
+        include __DIR__ . '/../core/tpl/medias/medias_gallery_modal.tpl.php';
+    }
+}
+
+/**
+ * Displays an extended left-hand menu, typically used for secondary navigation within a module.
+ *
+ * This function generates a navigation menu based on a recursive tree structure
+ * and displays it using a dedicated template. It requires global $langs and $user
+ * objects for rendering the template.
+ *
+ * @param array $moreParams An associative array containing parameters to customize the menu display.
+ * Expected keys include:
+ * - 'objectModule' (string): The primary module name (e.g., 'digiquali').
+ * - 'objectElement' (string): The specific element within the module (e.g., 'digiqualielement').
+ * - 'sideBarSecondaryNavigationTitle' (string): The main title for the secondary navigation section,
+ * typically translated (e.g., '$langs->trans("DigiQualiElementNavigationTitle")').
+ * - 'sideBarSecondaryTitle' (string): A secondary title or subtitle for the sidebar,
+ * typically translated (e.g., '$langs->trans("Mapping")').
+ *
+ * @return void
+ *
+ * @throws Exception If there are issues including the template file or if
+ * `saturne_recurse_tree()` encounters an unhandled error.
+ */
+function saturne_more_left_menu(array $moreParams): void
+{
+    global $langs, $user; // $langs and $user are used in tpl
+
+    // Generates the hierarchical data structure for the menu.
+    $objectElementTree = saturne_recurse_tree($moreParams, 0);
+
+    require_once __DIR__ . '/../core/tpl/menu/more_left_menu_view.tpl.php';
+}
+
+/**
+ * Display recursive tree process
+ *
+ * @param  array $moreParams
+ * @param  array $objectElementTree Global Object Element list after recursive process
+ * @return void
+ */
+function saturne_display_recurse_tree(array $moreParams, array $objectElementTree): void
+{
+    global $conf, $langs, $user;
+
+    if (!$user->hasRight($moreParams['moduleNameLowerCase'], $moreParams['objectElement'], 'read')) {
+        print $langs->transnoentities('YouDontHaveTheRightOnObject', $langs->trans(dol_ucfirst($moreParams['objectElement'])));
+        return;
+    }
+
+    foreach ($objectElementTree as $objectElement) { ?>
+        <li class="unit type-<?php echo $objectElement['object']->element_type; ?>" id="unit<?php  echo $objectElement['object']->id; ?>" data-object-id="<?php  echo $objectElement['object']->id; ?>">
+            <div class="unit-container">
+                <?php if ($objectElement['object']->element_type == $objectElement['object']::ELEMENT_TYPE_0 && count($objectElement['children'])) { ?>
+                    <div class="toggle-unit">
+                        <i class="toggle-icon fas fa-chevron-right" id="menu<?php echo $objectElement['object']->id; ?>"></i>
+                    </div>
+                <?php } else { ?>
+                    <div class="spacer"></div>
+                <?php }
+                print '<span class="open-media-gallery add-media modal-open photo digirisk-element-photo-'. $objectElement['object']->id .'" value="0">';
+                print '<input type="hidden" class="modal-options" data-modal-to-open="media_gallery" data-from-id="'. $objectElement['object']->id .'" data-from-type="'. $objectElement['object']->element_type .'" data-from-subtype="photo" data-from-subdir="" data-photo-class="digirisk-element-photo-'. $objectElement['object']->id .'"/>';
+                print saturne_show_medias_linked('digiriskdolibarr', $conf->digiriskdolibarr->multidir_output[$conf->entity] . '/' . $objectElement['object']->element_type . '/' . $objectElement['object']->ref, 'small', 1, 0, 0, 0, 50, 50, 1, 0, 0, $objectElement['object']->element_type . '/' . $objectElement['object']->ref, $objectElement['object'], 'photo', 0, 0, 0, 1, 'cursorpointer');
+                print '</span>';
+                ?>
+                <div class="title-container">
+                    <?php
+                        echo saturne_get_button_component_html([
+                            'id'        => 'slider',
+                            'className' => 'linkElement',
+                            'href'      => dol_buildpath('custom/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_view.php?id=' . $objectElement['object']->id . '&risk_type=' . $riskType, 1), //@todo gérer le lien
+                            'spans' => [
+                                [
+                                    'className' => 'ref type-' . $objectElement['object']->element_type,
+                                    'label'     => $objectElement['object']->ref, // Assuming $objectElement is defined elsewhere
+                                ],
+                                [
+                                    'className' => 'name',
+                                    'label'     => dol_trunc($objectElement['object']->label, 20), // Assuming dol_trunc is defined elsewhere
+                                ]
+                            ],
+                        ]);
+                    ?>
+                </div>
+                <?php if ($user->hasRight($objectElement['object']->module, $objectElement['object']->element, 'write') && $objectElement['object']->element_type == $objectElement['object']::ELEMENT_TYPE_0) : ?>
+                    <div class="add-container">
+                        <?php
+                            echo saturne_get_button_component_html([
+                                'className' => 'wpeo-button button-square-40 button-secondary wpeo-tooltip-event',
+                                'href'      => dol_buildpath('custom/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_card.php?action=create&element_type=0&fk_element=' . $objectElement['object']->id, 1),
+                                'moreAttr'  => [
+                                    'data-direction' => 'bottom',
+                                    'data-color'     => 'light',
+                                    'aria-label'     => $langs->trans($objectElement['object']->fields['element_type']['arrayofkeyval'][0])
+                                ],
+                                'iconClass' => 'button-add fas fa-plus-circle',
+                                'spans'     => [
+                                    [
+                                        'className' => 'button-label',
+                                        'label'     => 'P'
+                                    ]
+                                ]
+                            ]);
+
+                            echo saturne_get_button_component_html([
+                                'className' => 'wpeo-button button-square-40 wpeo-tooltip-event',
+                                'href'      => dol_buildpath('custom/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_card.php?action=create&element_type=1&fk_element=' . $objectElement['object']->id, 1),
+                                'moreAttr'  => [
+                                    'data-direction' => 'bottom',
+                                    'data-color'     => 'light',
+                                    'aria-label'     => $langs->trans($objectElement['object']->fields['element_type']['arrayofkeyval'][1])
+                                ],
+                                'iconClass' => 'button-add fas fa-plus-circle',
+                                'spans'     => [
+                                    [
+                                        'className' => 'button-label',
+                                        'label'     => 'SP'
+                                    ]
+                                ]
+                            ]);
+                        ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+            <?php if (!empty($objectElement['children'])) : ?>
+                <ul class="sub-list"><?php saturne_display_recurse_tree($moreParams, $objectElement['children']) ?></ul>
+            <?php endif; ?>
+        </li>
+        <?php
+    }
+}
+
+/**
+ * Recursive tree process
+ *
+ * @param  int|null  $parentID                  Element parent id of Digirisk Element object
+ * @param  int       $depth                     Depth of tree
+ * @param  bool      $addCurrentDigiriskElement Add current digirisk element info
+ * @return array     $tree                      Global Digirisk Element list after recursive process
+ * @throws Exception
+ */
+function saturne_recurse_tree($moreParams, ?int $parentID = null, int $depth = 0, bool $addCurrentDigiriskElement = false): array
+{
+    global $conf;
+
+    require_once __DIR__ . '/../../' . $moreParams['moduleNameLowerCase'] . '/class/' . $moreParams['objectElement'] . '.class.php';
+
+    $filter         = 't.entity IN (' . $conf->entity . ') AND t.fk_standard = ' . getDolGlobalInt(dol_strtoupper($moreParams['moduleNameLowerCase']) . '_ACTIVE_STANDARD');
+    $filter        .= ' AND t.status = ' . SaturneElement::STATUS_VALIDATED;
+    $objectElements = saturne_fetch_all_object_type($moreParams['objectClassName'], '', 'position', 0, 0, ['customsql' => $filter]);
+    if (!is_array($objectElements) || empty($objectElements)) {
+        $objectElements = [];
+    }
+
+    $tree = [];
+    foreach ($objectElements as $objectElement) {
+        if ($objectElement->fk_element == $parentID || ($objectElement->id == $parentID && $addCurrentDigiriskElement)) {
+            $tree[$objectElement->id] = [
+                'id'       => $objectElement->id,
+                'depth'    => $depth,
+                'object'   => $objectElement,
+                'children' => saturne_recurse_tree($moreParams, $objectElement->id, $depth + 1)
+            ];
+        }
+    }
+
+    return $tree;
 }
 
 /**
@@ -353,7 +521,7 @@ function saturne_load_langs(array $domains = [])
 {
 	global $langs, $moduleNameLowerCase;
 
-	$langs->loadLangs(['saturne@saturne', 'object@saturne', 'signature@saturne', 'medias@saturne', $moduleNameLowerCase . '@' . $moduleNameLowerCase]);
+	$langs->loadLangs(['saturne@saturne', 'object@saturne', 'signature@saturne', 'medias@saturne', 'component@saturne', $moduleNameLowerCase . '@' . $moduleNameLowerCase]);
 
 	if (!empty($domains)) {
 		foreach ($domains as $domain) {

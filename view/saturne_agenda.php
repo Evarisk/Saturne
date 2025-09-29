@@ -151,7 +151,7 @@ if ($reshook > 0) {
     $customHeaderFunction = $hookmanager->resPrint;
     $customHeaderFunction($title, $helpUrl);
 } else {
-    saturne_header(0, '', $title, $helpUrl);
+    saturne_header($hookmanager->resArray['loadMediaGallery'] ?? 0,'', $title, $helpUrl, '', 0, 0, [], [], '', 'mod-' . $object->module . '-' . $object->element . ' page-list bodyforlist ' . $hookmanager->resArray['moreCSSOnBody'] ?? '');
 }
 
 if ($id > 0 || !empty($ref)) {

@@ -328,26 +328,27 @@ function saturne_get_objects_metadata(string $type = ''): array
 
     // To add an object :
 
-    // 'mainmenu'       => Object main menu
-    // 'leftmenu'       => Object left menu
-    // 'langs'          => Object translation
-    // 'langfile'       => File lang translation
-    // 'picto'          => Object picto for img_picto() function (equals $this->picto)
-    // 'color'          => Picto color
-    // 'class_name'     => Class name
-    // 'name_field'     => Object name to be shown (ref, label, firstname, etc.)
-    // 'label_field'    => Object name to be shown (ref, label, firstname, etc.)
-    // 'post_name'      => Name of post sent retrieved by GETPOST() function
-    // 'link_name'      => Name of object sourcetype in llx_element_element, special case for task we need to write module_task
-    // 'tab_type'       => Tab type element for prepare_head function
-    // 'table_element'  => Object name in database
-    // 'fk_parent'      => OPTIONAL : Name of parent for objects as productlot, contact, task
-    // 'parent_post'    => OPTIONAL : Name of parent post retrieved by GETPOST() function, it can be different from fk_parent
-    // 'hook_name_card' => Hook name object card from initHooks
-    // 'hook_name_list' => Hook name object list from initHooks
-    // 'create_url'     => Path to creation card, no need to add "?action=create"
-    // 'class_path'     => Path to object class
-    // 'lib_path'       => Path to object lib
+    // 'mainmenu'           => Object main menu
+    // 'leftmenu'           => Object left menu
+    // 'langs'              => Object translation
+    // 'langfile'           => File lang translation
+    // 'picto'              => Object picto for img_picto() function (equals $this->picto)
+    // 'color'              => Picto color
+    // 'class_name'         => Class name
+    // 'name_field'         => Object name to be shown (ref, label, firstname, etc.)
+    // 'label_field'        => Object name to be shown (ref, label, firstname, etc.)
+    // 'post_name'          => Name of post sent retrieved by GETPOST() function
+    // 'link_name'          => Name of object sourcetype in llx_element_element, special case for task we need to write module_task
+    // 'tab_type'           => Tab type element for prepare_head function
+    // 'table_element'      => Object name in database
+    // 'fk_parent'          => OPTIONAL : Name of parent for objects as productlot, contact, task
+    // 'parent_post'        => OPTIONAL : Name of parent post retrieved by GETPOST() function, it can be different from fk_parent
+    // 'hook_name_card'     => Hook name object card from initHooks
+    // 'hook_name_list'     => Hook name object list from initHooks
+    // 'hook_name_document' => Hook name object document from initHooks
+    // 'create_url'         => Path to creation card, no need to add "?action=create"
+    // 'class_path'         => Path to object class
+    // 'lib_path'           => Path to object lib
 
     $objectsMetadata = [];
 
@@ -464,23 +465,25 @@ function saturne_get_objects_metadata(string $type = ''): array
 
     if (isModEnabled('project')) {
         $objectsMetadata['project'] = [
-            'mainmenu'       => 'project',
-            'leftmenu'       => 'projects',
-            'langs'          => 'Project',
-            'langfile'       => 'projects',
-            'picto'          => 'project',
-            'color'          => '#6c6aa8',
-            'class_name'     => 'Project',
-            'post_name'      => 'fk_project',
-            'link_name'      => 'project',
-            'tab_type'       => 'project',
-            'name_field'     => 'ref, title',
-            'label_field'    => 'title',
-            'hook_name_card' => 'projectcard',
-            'hook_name_list' => 'projectlist',
-            'create_url'     => 'projet/card.php',
-            'class_path'     => 'projet/class/project.class.php',
-            'lib_path'       => 'core/lib/project.lib.php',
+            'mainmenu'           => 'project',
+            'leftmenu'           => 'projects',
+            'langs'              => 'Project',
+            'langfile'           => 'projects',
+            'picto'              => 'project',
+            'color'              => '#6c6aa8',
+            'class_name'         => 'Project',
+            'post_name'          => 'fk_project',
+            'link_name'          => 'project',
+            'tab_type'           => 'project',
+            'table_element'      => 'projet',
+            'name_field'         => 'ref, title',
+            'label_field'        => 'title',
+            'hook_name_card'     => 'projectcard',
+            'hook_name_list'     => 'projectlist',
+            'hook_name_document' => 'projectcarddocument',
+            'create_url'         => 'projet/card.php',
+            'class_path'         => 'projet/class/project.class.php',
+            'lib_path'           => 'core/lib/project.lib.php',
         ];
         $objectsMetadata['task'] = [
             'mainmenu'       => '',
@@ -504,6 +507,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'class_path'     => 'custom/saturne/class/task/saturnetask.class.php',
             'lib_path'       => 'core/lib/project.lib.php',
         ];
+        $objectsMetadata['project_task'] = $objectsMetadata['task'];
     }
 
     if (isModEnabled('facture')) {
@@ -864,27 +868,28 @@ function saturne_get_objects_metadata(string $type = ''): array
                 $tableElement = $object->table_element;
 
                 $objectsMetadataArray[$objectType] = [
-                    'mainmenu'       => $objectMetadata['mainmenu'] ?? '',
-                    'leftmenu'       => $objectMetadata['leftmenu'] ?? '',
-                    'langs'          => $objectMetadata['langs'] ?? '',
-                    'langfile'       => $objectMetadata['langfile'] ?? '',
-                    'picto'          => $objectMetadata['picto'] ?? '',
-                    'color'          => $objectMetadata['color'] ?? '',
-                    'class_name'     => $objectMetadata['class_name'] ?? '',
-                    'name_field'     => $objectMetadata['name_field'] ?? '',
-                    'label_field'    => $objectMetadata['label_field'] ?? '',
-                    'post_name'      => $objectMetadata['post_name'] ?? '',
-                    'link_name'      => $objectMetadata['link_name'] ?? '',
-                    'tab_type'       => $objectMetadata['tab_type'] ?? '',
-                    'table_element'  => $tableElement ?? '',
-                    'fk_parent'      => $objectMetadata['fk_parent'] ?? '',
-                    'parent_post'    => $objectMetadata['parent_post'] ?? '',
-                    'hook_name_card' => $objectMetadata['hook_name_card'] ?? '',
-                    'hook_name_list' => $objectMetadata['hook_name_list'] ?? '',
-                    'create_url'     => $objectMetadata['create_url'] ?? '',
-                    'class_path'     => $objectMetadata['class_path'] ?? '',
-                    'lib_path'       => $objectMetadata['lib_path'] ?? '',
-                    'object'         => $object
+                    'mainmenu'           => $objectMetadata['mainmenu'] ?? '',
+                    'leftmenu'           => $objectMetadata['leftmenu'] ?? '',
+                    'langs'              => $objectMetadata['langs'] ?? '',
+                    'langfile'           => $objectMetadata['langfile'] ?? '',
+                    'picto'              => $objectMetadata['picto'] ?? '',
+                    'color'              => $objectMetadata['color'] ?? '',
+                    'class_name'         => $objectMetadata['class_name'] ?? '',
+                    'name_field'         => $objectMetadata['name_field'] ?? '',
+                    'label_field'        => $objectMetadata['label_field'] ?? '',
+                    'post_name'          => $objectMetadata['post_name'] ?? '',
+                    'link_name'          => $objectMetadata['link_name'] ?? '',
+                    'tab_type'           => $objectMetadata['tab_type'] ?? '',
+                    'table_element'      => $tableElement ?? '',
+                    'fk_parent'          => $objectMetadata['fk_parent'] ?? '',
+                    'parent_post'        => $objectMetadata['parent_post'] ?? '',
+                    'hook_name_card'     => $objectMetadata['hook_name_card'] ?? '',
+                    'hook_name_list'     => $objectMetadata['hook_name_list'] ?? '',
+                    'hook_name_document' => $objectMetadata['hook_name_document'] ?? '',
+                    'create_url'         => $objectMetadata['create_url'] ?? '',
+                    'class_path'         => $objectMetadata['class_path'] ?? '',
+                    'lib_path'           => $objectMetadata['lib_path'] ?? '',
+                    'object'             => $object
                 ];
                 if (!empty($objectMetadata['langfile'])) {
                     $langs->load($objectMetadata['langfile']);

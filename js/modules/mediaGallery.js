@@ -433,6 +433,7 @@ window.saturne.mediaGallery.unlinkFile = function( event ) {
         objectId: objectId
       }),
       processData: false,
+      contentType: 'application/json',
       success: function ( resp ) {
         $('.card__confirmation').css('display', 'none');
         $('#media_gallery .modal-container').replaceWith($(resp).find('#media_gallery .modal-container'));
@@ -530,9 +531,10 @@ window.saturne.mediaGallery.addToFavorite = function( event ) {
 			objectSubtype: objectSubtype,
 			objectType: objectType,
 			objectSubdir: objectSubdir,
-			objectId: objectId
+			objectId: objectId,
 		}),
 		processData: false,
+    contentType: 'application/json',
 		success: function ( resp ) {
       if (previousFavorite != filename) {
         if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
@@ -857,4 +859,4 @@ window.saturne.mediaGallery.readFileAI = function(e) {
       icon.removeClass('fa-circle-notch fa-spin').addClass('fa-times');
     }
   });
-});
+};

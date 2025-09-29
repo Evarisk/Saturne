@@ -194,7 +194,7 @@ class ActionsSaturne
      */
     public function printCommonFooter(array $parameters): int
     {
-        global $conf, $form, $langs, $user;
+        global $langs, $user, $object, $db;
 
         if (strpos($parameters['context'], 'usercard') !== false) {
             $id = GETPOST('id');
@@ -247,6 +247,122 @@ class ActionsSaturne
                 $('.user_extras_electronic_signature').html(<?php echo json_encode($out); ?>);
             </script>
             <?php
+        } elseif (strpos($_SERVER['PHP_SELF'], '/document.php') !== false) {
+
+            require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
+            require_once DOL_DOCUMENT_ROOT . '/core/class/link.class.php';
+
+            $file    = new EcmFiles($db);
+            $tmpFile = new EcmFiles($db);
+            $file->fetchAll('', '', 0, 0, '(t.src_object_type:=:\'' . $object->table_element . '\') AND (t.src_object_id:=:' . $object->id . ')');
+
+            $favoritesFiles = [];
+            foreach ($file->lines as $singleFile) {
+
+                $tmpFile->id = $singleFile->id;
+                $tmpFile->fetch_optionals();
+
+                if (!empty($tmpFile->array_options['options_favorite'])) {
+                    $favoritesFiles[] = (int) $tmpFile->id;
+                }
+            }
+
+            $link = new Link($db);
+            $links = [];
+            $link->fetchAll($links, $object->element, $object->id);
+
+            $favoritesLinks = [];
+            foreach ($links as $singleLink) {
+                $singleLink->fetch_optionals();
+                if (!empty($singleLink->array_options['options_favorite'])) {
+                    $favoritesLinks[] = $singleLink->id;
+                }
+            }
+
+            print "
+                <script>
+                        var favoritesFiles = " . json_encode($favoritesFiles) . ";
+                        var favoritesLinks = " . json_encode($favoritesLinks) . ";
+
+                        $(document).ready(function() {
+                            $('.liste_titre').closest('table').each(function() {
+                                var isFile = $(this).attr('id') == 'tablelines';
+                                $(this).find('tr.oddeven').each(function() {
+
+                                    var fileId = -1;
+                                    if ($(this).attr('id') != undefined) {
+                                        fileId = parseInt($(this).attr('id').substring(4)); // Remove 'row-' prefix to get the ID
+                                    } else {
+                                        var href = $(this).find('.right').last().find('a').first().attr('href');
+                                        if (href) {
+                                            fileId = parseInt(new URLSearchParams(href).get('linkid'));
+                                        }
+                                    }
+
+                                    var isFavorite = false;
+                                    var starColor = '#6c757d'; // Default gray color
+
+                                    if (fileId !== -1) {
+                                        if (isFile && favoritesFiles.includes(fileId)) {
+                                            isFavorite = true;
+                                            starColor = '#ffc107'; // Yellow for favorites
+                                        } else if (!isFile && favoritesLinks.includes(fileId)) {
+                                            isFavorite = true;
+                                            starColor = '#ffc107'; // Yellow for favorites
+                                        }
+                                    }
+
+                                    var title = isFavorite ? '" . $langs->trans("RemoveFromFavorites") . "' : '" . $langs->trans("AddToFavorites") . "';
+                                    $(this).find('.right').last().prepend('<span class=\"file-favorite file-action\" title=\"' + title + '\" data-favorite=\"' + isFavorite + '\" style=\"color: ' + starColor + '; cursor: pointer; margin-right: 5px;\"><i class=\"fas fa-star\"></i></span>');
+                                });
+                            });
+
+                            // Handle star click to toggle favorite
+                            $(document).on('click', '.file-favorite', function() {
+                                var star = $(this);
+
+                                var isFile = $(this).closest('table').attr('id') == 'tablelines';
+                                var fileId = -1;
+                                var isFavorite = $(this).data('favorite') ? 1 : 0;
+                                if ($(this).closest('tr').attr('id') != undefined) {
+                                    fileId = $(this).closest('tr').attr('id').substring(4); // Remove 'row-' prefix to get the ID
+                                } else {
+                                    fileId = new URLSearchParams($(this).parent().find('a').first().attr('href')).get('linkid');
+                                }
+                                let params = new URLSearchParams(window.location.search);
+                                params.append('isFavorite', isFavorite ? 0 : 1);
+                                params.append('isFile', isFile ? 1 : 0);
+                                params.append('fileId', fileId);
+                                params.append('action', 'toggle_favorite');
+
+                                $.ajax({
+                                    url: '" . DOL_URL_ROOT . "/custom/saturne/core/ajax/favorite.php?' + params.toString(),
+                                    method: 'POST',
+                                    contentType: 'application/json charset=utf-8',
+                                    success: function(response) {
+                                        var data = JSON.parse(response);
+                                        if (data.error) {
+                                            $.jnotify(data.message, 'error');
+                                        } else {
+                                            $.jnotify(data.message, 'success');
+                                            if (isFavorite) {
+                                                star.css('color', '#6c757d');
+                                                star.data('favorite', false);
+                                                star.attr('title', '" . $langs->trans("AddToFavorites") . "');
+                                            } else {
+                                                star.css('color', '#ffc107');
+                                                star.data('favorite', true);
+                                                star.attr('title', '" . $langs->trans("RemoveFromFavorites") . "');
+                                            }
+                                        }
+                                    }
+                                });
+                            });
+
+                        });
+                </script>
+            ";
+
         }
 
         return 0; // or return 1 to replace standard code

@@ -20,14 +20,15 @@
 # Data - Donnée
 ModuleSaturneName   = Saturne
 ModuleSaturneDesc   = Framework et librairie d'objets et fonctions d'Evarisk
-ModuleConfig        = Configuration
+ModuleConfig        = Configuration %s
 ModuleConfigSaturne = Configuration Saturne
 MinimizeMenu        = Réduire le menu
 
 # Right - Droit
-LireModule    = Consulter %s
-ReadModule    = Consulter %s (read)
-ReadAdminPage = Accéder à la configuration du module %s
+LireModule                  = Consulter %s
+ReadModule                  = Consulter %s (read)
+ReadAdminPage               = Accéder à la configuration du module %s
+YouDontHaveTheRightOnObject = Vous n'avez pas les droits sur %s
 
 
 
@@ -230,6 +231,15 @@ checkDateEndJobComment = Vérification et mise à jour du statut des certificats
 
 
 #
+# Element - element
+#
+# Data - Donnée
+Standard/Reference = Norme/Référenciel
+ParentElement      = Élément parent
+
+
+
+#
 # Triggers
 #
 
@@ -259,3 +269,5 @@ Back                = Retour
 DeleteFiles         = Êtes vous sur de vouloir supprimer les <span class="filesLinked"></span> media(s) sélectionné(s) ?
 RecordingInProgress = Enregistrement en cours...
 ExportGraphCSV      = Exporter le graphique en CSV
+FavoriteSaved       = Favori enregistré
+ErrorSavingFavorite = Erreur lors de l’enregistrement du favori

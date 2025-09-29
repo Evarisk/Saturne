@@ -75,7 +75,7 @@ class modSaturne extends DolibarrModules
 		$this->editor_url  = 'https://evarisk.com/';
 
         // Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
-		$this->version = '21.0.0';
+		$this->version = '21.1.0';
 
         // Url to the file with your last numberversion of this module
         //$this->url_last_version = 'http://www.example.com/versionmodule.txt';
@@ -125,7 +125,8 @@ class modSaturne extends DolibarrModules
                 'category',
                 'categoryindex',
                 'index',
-                'elementproperties'
+                'elementproperties',
+                'saturnegetobjectsmetadata'
             ],
             // Set this to 1 if features of module are opened to external users
             'moduleforexternal' => 0,
@@ -199,7 +200,8 @@ class modSaturne extends DolibarrModules
             $i++ => ['SATURNE_DISPLAY_NUMBER_MEDIA_GALLERY', 'integer', 8, '', 0, 'current'],
 
             // CONST DOLIBARR
-            $i   => ['MAIN_ALLOW_SVG_FILES_AS_IMAGES', 'integer', 1, '', 0, 'current']
+            $i++ => ['MAIN_ALLOW_SVG_FILES_AS_IMAGES', 'integer', 1, '', 0, 'current'],
+            $i   => ['MAIN_CACHE_COUNT ', 'integer', 1, '', 0, 'current']
 
 		];
 
@@ -244,7 +246,7 @@ class modSaturne extends DolibarrModules
 			$this->menu[$r++] = [
 				'fk_menu'  => 'fk_mainmenu=' . $moduleNameLowerCase,
 				'type'     => 'left',
-				'titre'    => $langs->trans('ModuleConfig'),
+				'titre'    => $langs->trans('ModuleConfig', $moduleName),
 				'prefix'   => '<i class="fas fa-cog pictofixedwidth"></i>',
 				'mainmenu' => $moduleNameLowerCase,
 				'leftmenu' => $moduleNameLowerCase . 'config',
@@ -377,7 +379,8 @@ class modSaturne extends DolibarrModules
 
         // Create extrafields during init
         $extraFieldsArrays = [
-            'electronic_signature' => ['Label' => 'ElectronicSignature', 'type' => 'text', 'elementtype' => ['user'], 'position' => $this->numero . 10, 'list' => 1, 'entity' => 0, 'langfile' => 'saturne@saturne', 'enabled' => "isModEnabled('saturne') && isModEnabled('user')"]
+            'electronic_signature' => ['Label' => 'ElectronicSignature', 'type' => 'text', 'elementtype' => ['user'], 'position' => $this->numero . 10, 'list' => 1, 'entity' => 0, 'langfile' => 'saturne@saturne', 'enabled' => "isModEnabled('saturne') && isModEnabled('user')"],
+            'favorite'             => ['Label' => 'Favorite', 'type' => 'boolean', 'elementtype' => ['links', 'ecm_files'], 'position' => $this->numero . 20, 'list' => 0, 'entity' => 0, 'langfile' => 'saturne@saturne', 'enabled' => "isModEnabled('saturne')"]
         ];
 
         saturne_manage_extrafields($extraFieldsArrays);

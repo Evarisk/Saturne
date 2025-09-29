@@ -65,8 +65,15 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 // Load Saturne libraries
 require_once __DIR__ . '/../../class/saturnesignature.class.php';
 
+if (file_exists(__DIR__ . '/../../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php')) {
+    require_once __DIR__ . '/../../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
+} else if (file_exists(__DIR__ . '/../../../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php')) {
+    require_once __DIR__ . '/../../../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
+} else {
+    die('Include of ' . $moduleNameLowerCase . ' class fails');
+}
 // Load Module libraries
-require_once __DIR__ . '/../../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
+// rend ce path plus lisible require_once __DIR__ . '/../../../' . $moduleNameLowerCase . '/class/'
 $fileExists = file_exists('../../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . strtolower($documentType) . '.class.php');
 if ($fileExists && GETPOSTISSET('document_type')) {
     require_once __DIR__ . '/../../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . strtolower($documentType) . '.class.php';
