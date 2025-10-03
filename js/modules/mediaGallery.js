@@ -834,8 +834,8 @@ window.saturne.mediaGallery.readFileAI = function(e) {
 
         // Contact
         if (response.type == 'contact') {
-          $('#reedcrm_firstname').val(response.contact.nom);
-          $('#reedcrm_lastname').val(response.contact.prenom);
+          $('#reedcrm_firstname').val(response.contact.prenom);
+          $('#reedcrm_lastname').val(response.contact.nom);
           $('#projectphone').val(response.contact.telephone.trim());
           $('#reedcrm_email').val(response.contact.email);
         }

@@ -49,27 +49,29 @@
             </div>
             <!-- Modal-Footer-->
             <div class="modal-footer">
-                <div class="image-move butAction button-square">
-                    <span><i class="fas fa-arrows-alt"></i></span>
-                </div>
-                <div class="image-rotate-left butAction button-square">
-                    <span><i class="fas fa-undo-alt"></i></span>
-                </div>
-                <div class="image-rotate-right butAction button-square">
-                    <span><i class="fas fa-redo-alt"></i></span>
-                </div>
-<!--                <div class="image-undo butAction button-square">-->
-<!--                    <span><i class="fas fa-undo-alt"></i></span>-->
-<!--                </div>-->
-                <!-- Button to start drawing -->
-                <div class="image-drawing butAction button-square">
-                    <span><i class="fas fa-pen"></i></span>
-                </div>
-                <div class="image-erase butAction button-square">
-                    <span><i class="fas fa-eraser"></i></span>
-                </div>
-                <div class="image-validate butAction button-square" value="0">
-                    <span><i class="fas fa-check"></i></span>
+                <div class="wpeo-grid grid-6" style="gap: 0.5em; justify-content: flex-end;">
+                    <div class="image-move butAction butActionDelete button-square">
+                        <span><i class="fas fa-arrows-alt"></i></span>
+                    </div>
+                    <!-- Button to start drawing -->
+                    <div class="image-drawing butAction butActionDelete button-square">
+                        <span><i class="fas fa-pen"></i></span>
+                    </div>
+                    <div class="image-rotate-left butAction button-square">
+                        <span><i class="fas fa-undo-alt"></i></span>
+                    </div>
+                    <div class="image-rotate-right butAction button-square">
+                        <span><i class="fas fa-redo-alt"></i></span>
+                    </div>
+    <!--                <div class="image-undo butAction button-square">-->
+    <!--                    <span><i class="fas fa-undo-alt"></i></span>-->
+    <!--                </div>-->
+                    <div class="image-erase butAction button-square">
+                        <span><i class="fas fa-eraser"></i></span>
+                    </div>
+                    <div class="image-validate butAction button-square" value="0">
+                        <span><i class="fas fa-check"></i></span>
+                    </div>
                 </div>
             </div>
         </div>
