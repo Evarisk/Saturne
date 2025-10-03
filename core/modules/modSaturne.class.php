@@ -138,7 +138,7 @@ class modSaturne extends DolibarrModules
             'DigiQuali'        => 'digiquali',
             'DoliMeet'         => 'dolimeet',
             'DoliCar'          => 'dolicar',
-            'EasyCRM'          => 'easycrm',
+            'ReedCRM'          => 'reedcrm',
             'DoliSIRH'         => 'dolisirh',
             'DigiriskDolibarr' => 'digiriskdolibarr',
             'EasyURL'          => 'easyurl',

@@ -3,10 +3,10 @@
 ## Liens
 
 - Support & Assistance : [Forum dolibarr.fr](https://dolibarr.fr) / Par mail à technique@eoxia.com
-- Demo : [Demo EasyCRM](https://demodoli.digirisk.com) - ID: demo - Password: demo
+- Demo : [Demo ReedCRM](https://demodoli.digirisk.com) - ID: demo - Password: demo
 - Store : [Dolistore.com](https://dolistore.com)
 
-## <img src="https://github.com/Eoxia/EasyCRM/blob/main/img/easycrm_color.png?raw=true" width="64"/> EasyCRM
+## <img src="https://github.com/Eoxia/ReedCRM/blob/main/img/reedcrm_color.png?raw=true" width="64"/> ReedCRM
 
 ### Version et liens
 
@@ -14,8 +14,8 @@
 - PHP : 7.4.33
 - Compatibilité : Dolibarr 16.0.0 - 18.0.3
 - Saturne Framework : 1.2.0
-- Documentation : [Wiki EasyCRM](https://wiki.dolibarr.org/index.php/Module_EasyCRM)
-- Projet GitHub : [Projet EasyCRM](https://github.com/Eoxia/easycrm/projects?query=is%3Aopen)
+- Documentation : [Wiki ReedCRM](https://wiki.dolibarr.org/index.php/Module_ReedCRM)
+- Projet GitHub : [Projet ReedCRM](https://github.com/Eoxia/reedcrm/projects?query=is%3Aopen)
 
 ### Fonctionnalités
 

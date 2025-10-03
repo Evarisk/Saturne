@@ -834,10 +834,10 @@ window.saturne.mediaGallery.readFileAI = function(e) {
 
         // Contact
         if (response.type == 'contact') {
-          $('#easycrm_firstname').val(response.contact.nom);
-          $('#easycrm_lastname').val(response.contact.prenom);
+          $('#reedcrm_firstname').val(response.contact.nom);
+          $('#reedcrm_lastname').val(response.contact.prenom);
           $('#projectphone').val(response.contact.telephone.trim());
-          $('#easycrm_email').val(response.contact.email);
+          $('#reedcrm_email').val(response.contact.email);
         }
 
         // Description
