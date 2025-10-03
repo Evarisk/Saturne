@@ -31,7 +31,7 @@
 <!-- File start-->
 <div class="modal-upload-image">
     <input type="hidden" name="token" value="<?php echo newToken(); ?>">
-    <div class="wpeo-modal modal-upload-image" id="modal-upload-image" style="z-index: 1010;">
+    <div class="wpeo-modal modal-upload-image modal-close-only-with-button" id="modal-upload-image" style="z-index: 1010;">
         <?php $mediaResolution = explode('-', getDolGlobalString('SATURNE_MEDIA_RESOLUTION_USED'));
         $mediaResolution = explode('x', $mediaResolution[1]); ?>
         <input type="hidden" class="fast-upload-options" data-image-resolution-width="<?php echo $mediaResolution[0]; ?>" data-image-resolution-height="<?php echo $mediaResolution[1]; ?>">
