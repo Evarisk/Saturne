@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2024-2025 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,10 +22,10 @@
  * \brief   JavaScript media file for module Saturne
  */
 
+'use strict';
+
 /**
  * Init media JS
- *
- * @memberof Saturne_Media
  *
  * @since   1.3.0
  * @version 1.3.0
@@ -37,27 +37,21 @@ window.saturne.media = {};
 /**
  * Init rotation value of img on canvas
  *
- * @memberof Saturne_Media
- *
  * @since   1.3.0
- * @version 1.3.0
+ * @version 22.0.0
  */
 window.saturne.media.rotation = 0;
 
 /**
  * Init img in canvas
  *
- * @memberof Saturne_Media
- *
  * @since   1.3.0
  * @version 1.3.0
  */
-window.saturne.media.img;
+window.saturne.media.img = null;
 
 /**
  * Media init
- *
- * @memberof Saturne_Media
  *
  * @since   1.3.0
  * @version 1.3.0
@@ -70,8 +64,6 @@ window.saturne.media.init = function() {
 
 /**
  * Media event
- *
- * @memberof Saturne_Media
  *
  * @since   1.3.0
  * @version 1.3.0
@@ -93,8 +85,6 @@ window.saturne.media.event = function() {
 
 /**
  * Upload image action
- *
- * @memberof Saturne_Media
  *
  * @since   1.3.0
  * @version 1.3.0
@@ -124,8 +114,6 @@ window.saturne.media.uploadImage = function() {
 /**
  * Rotate image action
  *
- * @memberof Saturne_Media
- *
  * @since   1.3.0
  * @version 1.3.0
  *
@@ -138,8 +126,6 @@ window.saturne.media.rotateImage = function(degrees) {
 
 /**
  * Undo last drawing action
- *
- * @memberof Saturne_Media
  *
  * @since   1.3.0
  * @version 1.3.0
@@ -160,8 +146,6 @@ window.saturne.media.undoLastDraw = function() {
 /**
  * Clear canvas action
  *
- * @memberof Saturne_Media
- *
  * @since   1.3.0
  * @version 1.3.0
  *
@@ -175,8 +159,6 @@ window.saturne.media.clearCanvas = function() {
 
 /**
  * Draw img on canvas action
- *
- * @memberof Saturne_Media
  *
  * @since   1.3.0
  * @version 1.3.0
@@ -210,8 +192,6 @@ window.saturne.media.drawImageOnCanvas = function(event) {
 
 /**
  * create img action
- *
- * @memberof Saturne_Media
  *
  * @since   1.3.0
  * @version 1.3.0
