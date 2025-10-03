@@ -31,8 +31,10 @@
 <!-- File start-->
 <div class="modal-upload-image">
     <input type="hidden" name="token" value="<?php echo newToken(); ?>">
-    <div class="wpeo-modal modal-upload-image" id="modal-upload-image">
-        <input type="hidden" class="fast-upload-options">
+    <div class="wpeo-modal modal-upload-image" id="modal-upload-image" style="z-index: 1010;">
+        <?php $mediaResolution = explode('-', getDolGlobalString('SATURNE_MEDIA_RESOLUTION_USED'));
+        $mediaResolution = explode('x', $mediaResolution[1]); ?>
+        <input type="hidden" class="fast-upload-options" data-image-resolution-width="<?php echo $mediaResolution[0]; ?>" data-image-resolution-height="<?php echo $mediaResolution[1]; ?>">
         <div class="modal-container wpeo-modal-event">
             <!-- Modal-Header-->
             <div class="modal-header">
@@ -40,13 +42,16 @@
                 <div class="modal-close"><i class="fas fa-2x fa-times"></i></div>
             </div>
             <!-- Modal-ADD Image Content-->
-            <div class="modal-content" id="#modalContent" style="height: 75%;">
+            <div class="modal-content" id="#modalContent">
                 <div class="canvas-container">
-                    <canvas id="canvas" style="border: #0b419b solid 2px; width: 100%;"></canvas>
+                    <canvas id="canvas" style="border: #0b419b solid 2px;"></canvas>
                 </div>
             </div>
             <!-- Modal-Footer-->
             <div class="modal-footer">
+                <div class="image-move butAction button-square">
+                    <span><i class="fas fa-arrows-alt"></i></span>
+                </div>
                 <div class="image-rotate-left butAction button-square">
                     <span><i class="fas fa-undo-alt"></i></span>
                 </div>
@@ -56,6 +61,10 @@
 <!--                <div class="image-undo butAction button-square">-->
 <!--                    <span><i class="fas fa-undo-alt"></i></span>-->
 <!--                </div>-->
+                <!-- Button to start drawing -->
+                <div class="image-drawing butAction button-square">
+                    <span><i class="fas fa-pen"></i></span>
+                </div>
                 <div class="image-erase butAction button-square">
                     <span><i class="fas fa-eraser"></i></span>
                 </div>
