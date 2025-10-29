@@ -65,7 +65,11 @@ if ($object->ismultientitymanaged == 1) {
 }
 
 if (isModEnabled('categorie') && isset($categorie->MAP_OBJ_CLASS[$object->element]) && !empty($searchCategories)) {
-    $sql .= ' AND EXISTS ( SELECT 1 FROM ' . $db->prefix() . 'categorie_' . $object->element . ' AS cp WHERE t.rowid = cp.fk_' . $object->element . ' AND cp.fk_categorie IN (' . implode(',', $searchCategories) . '))';
+    $objectElement = $object->element;
+    if (!empty($object->parent_element)) {
+        $objectElement = $object->parent_element;
+    }
+    $sql .= ' AND EXISTS ( SELECT 1 FROM ' . $db->prefix() . 'categorie_' . $objectElement . ' AS cp WHERE t.rowid = cp.fk_' . $objectElement . ' AND cp.fk_categorie IN (' . implode(',', $searchCategories) . '))';
 }
 
 $sql .= ' AND t.status >= 0';
