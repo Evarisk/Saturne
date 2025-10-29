@@ -51,11 +51,11 @@ $sqlFields = $sql; // $sql fields to remove for count total
 
 $sql .= ' FROM ' . $db->prefix() . $object->table_element . ' as t';
 if (isset($extrafields->attributes[$object->table_element]['label']) && is_array($extrafields->attributes[$object->table_element]['label']) && count($extrafields->attributes[$object->table_element]['label'])) {
-    $sql .= ' LEFT JOIN ' . $db->prefix() . $object->table_element . '_extrafields as ef on (t.rowid = ef.fk_object)';
+    $sql .= ' LEFT JOIN ' . $db->prefix() . $object->table_element . '_extrafields as ef ON (t.rowid = ef.fk_object)';
 }
 
 // Add table from hooks
-$parameters = [];
+$parameters = ['search' => $search];
 $hookmanager->executeHooks('printFieldListFrom', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
 $sql .= $hookmanager->resPrint;
 if ($object->ismultientitymanaged == 1) {
@@ -68,7 +68,7 @@ if (isModEnabled('categorie') && isset($categorie->MAP_OBJ_CLASS[$object->elemen
     $sql .= ' AND EXISTS ( SELECT 1 FROM ' . $db->prefix() . 'categorie_' . $object->element . ' AS cp WHERE t.rowid = cp.fk_' . $object->element . ' AND cp.fk_categorie IN (' . implode(',', $searchCategories) . '))';
 }
 
-$sql .= ' AND status >= 0';
+$sql .= ' AND t.status >= 0';
 
 foreach ($search as $key => $val) {
     if (array_key_exists($key, $object->fields)) {
@@ -189,6 +189,6 @@ $num = $db->num_rows($resql);
 if ($num == 1 && getDolGlobalInt('MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE') && $searchAll && !$page) {
     $obj = $db->fetch_object($resql);
     $id = $obj->rowid;
-    header('Location: ' . dol_buildpath($object->module . '/' . $object->element . '_card.php', 1) . '?id=' . $id);
+    header('Location: ' . dol_buildpath($object->module . '/' . $object->element . '_card.php', 1) . '?id=' . $id); //@todo parameter
     exit;
 }
