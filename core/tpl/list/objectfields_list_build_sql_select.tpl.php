@@ -122,6 +122,14 @@ foreach ($search as $key => $val) {
                 $sql .= ' AND t.' . $db->sanitize($columnName) . " <= '" . $db->idate($val) . "'";
             }
         }
+        if ($object->fields[$columnName]['type'] == 'duration') {
+            if (preg_match('/_dtstart$/', $key)) {
+                $sql .= ' AND t.' . $db->sanitize($columnName) . " >= " . $val;
+            }
+            if (preg_match('/_dtend$/', $key)) {
+                $sql .= ' AND t.' . $db->sanitize($columnName) . " <= " . $val;
+            }
+        }
     }
 }
 if ($searchAll) {

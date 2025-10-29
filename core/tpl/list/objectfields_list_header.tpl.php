@@ -62,6 +62,8 @@ foreach ($search as $key => $val) {
             }
         }
     } elseif (preg_match('/(_dtstart|_dtend)$/', $key) && !empty($val)) {
+        $param .= '&search_' . $key . 'min=' . GETPOSTINT('search_' . $key . 'min');
+        $param .= '&search_' . $key . 'hour=' . GETPOSTINT('search_' . $key . 'hour');
         $param .= '&search_' . $key . 'month=' . GETPOSTINT('search_' . $key . 'month');
         $param .= '&search_' . $key . 'day=' . GETPOSTINT('search_' . $key . 'day');
         $param .= '&search_' . $key . 'year=' . GETPOSTINT('search_' . $key . 'year');

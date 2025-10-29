@@ -69,6 +69,13 @@ foreach ($object->fields as $key => $val) {
                 print '<div class="nowrap">';
                 print $form->selectDate($search[$key . '_dtend'] ?? '', 'search_' . $key . '_dtend', 0, 0, 1, '', 1, 0, 0, '', '', '', '', 1, '', $langs->trans('to'));
                 print '</div>';
+            } elseif (isset($val['type']) && $val['type'] == 'duration') {
+                print '<div class="nowrap">';
+                print $form->select_duration('search_' . $key . '_dtstart', $search[$key . '_dtstart'] ?? '', 0, 'text', 0, 1);
+                print '</div>';
+                print '<div class="nowrap">';
+                print $form->select_duration('search_' . $key . '_dtend', $search[$key . '_dtend'] ?? '', 0, 'text', 0, 1);
+                print '</div>';
             } elseif ($key == 'lang') {
                 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formadmin.class.php';
                 $formAdmin = new FormAdmin($db);
