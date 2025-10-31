@@ -26,13 +26,13 @@
  * Globals    : $conf (extrafields_list_print_fields.tpl), $db, $hookmanager
  * Parameters : $action, $limit, $massaction, $massActionButton, $mode
  * Objects    : $extrafields (extrafields_list_print_fields.tpl), $object
- * Variables  : $arrayfields, $arrayofselected, $num, $resql, $totalarray
+ * Variables  : $arrayfields, $arrayofselected, $num, $resql, $statusMode (optional), $totalarray
  */
 
 // Loop on record
 // --------------------------------------------------------------------
 $i                     = 0;
-$savNbField            = $totalarray['nbfield'];
+$savNbField            = $totalarray['nbfield']; // +1
 $totalarray            = [];
 $totalarray['nbfield'] = 0;
 $iMaxInLoop            = ($limit ? min($num, $limit) : $num);
@@ -118,11 +118,17 @@ while ($i < $iMaxInLoop) {
                 }
 
                 if ($key == 'status') {
-                    print $object->getLibStatut(5); // @todo 3 ou 5 faire un paramètre
+                    print $object->getLibStatut($statusMode ?? 5);
                 } elseif ($key == 'rowid') {
                     print $object->showOutputField($val, $key, $object->id);
                 } else {
+                    if ($val['contenteditable']) {
+                        print '<div class="inline-block contenteditable" contenteditable="true" data-field="' . $key . '" data-id="' . $object->id . '">';
+                    }
                     print $object->showOutputField($val, $key, $object->$key);
+                    if ($val['contenteditable']) {
+                        print '</div>';
+                    }
                 }
                 print '</td>';
 

@@ -319,6 +319,11 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
  * Get list of objects and their linked class and other infos
  *
  * @param  string    $type Object type to get the metadata from
+ *                         Object types are :
+ *                              product, productlot, user, thirdparty, contact,
+ *                              project, task, invoice, order, contract, ticket, entrepot, shipping
+ *                              propal, bom, reception, ficheinter, supplier_proposal, supplier_order
+ *
  * @return array           Array of objects with metadata | empty array if type doesn't exist
  * @throws Exception
  */
@@ -347,6 +352,7 @@ function saturne_get_objects_metadata(string $type = ''): array
     // 'hook_name_list'     => Hook name object list from initHooks
     // 'hook_name_document' => Hook name object document from initHooks
     // 'create_url'         => Path to creation card, no need to add "?action=create"
+    // 'list_url'           => Path to list page
     // 'class_path'         => Path to object class
     // 'lib_path'           => Path to object lib
 
@@ -369,6 +375,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_card' => 'productcard',
             'hook_name_list' => 'productservicelist',
             'create_url'     => 'product/card.php',
+            'list_url'       => 'product/list.php',
             'class_path'     => 'product/class/product.class.php',
             'lib_path'       => 'core/lib/product.lib.php',
         ];
@@ -393,6 +400,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_card' => 'productlotcard',
             'hook_name_list' => 'product_lotlist',
             'create_url'     => 'product/stock/productlot_card.php',
+            'list_url'       => 'product/stock/productlot_list.php',
             'class_path'     => 'product/stock/class/productlot.class.php',
             'lib_path'       => 'core/lib/product.lib.php',
         ];
@@ -415,6 +423,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_card' => 'usercard',
             'hook_name_list' => 'userlist',
             'create_url'     => 'user/card.php',
+            'list_url'       => 'user/list.php',
             'class_path'     => 'user/class/user.class.php',
             'lib_path'       => 'core/lib/usergroups.lib.php',
         ];
@@ -437,6 +446,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_card' => 'thirdpartycard',
             'hook_name_list' => 'thirdpartylist',
             'create_url'     => 'societe/card.php',
+            'list_url'       => 'societe/list.php',
             'class_path'     => 'societe/class/societe.class.php',
             'lib_path'       => 'core/lib/company.lib.php',
         ];
@@ -458,6 +468,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_card' => 'contactcard',
             'hook_name_list' => 'contactlist',
             'create_url'     => 'contact/card.php',
+            'list_url'       => 'contact/list.php',
             'class_path'     => 'contact/class/contact.class.php',
             'lib_path'       => 'core/lib/contact.lib.php',
         ];
@@ -482,6 +493,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list'     => 'projectlist',
             'hook_name_document' => 'projectcarddocument',
             'create_url'         => 'projet/card.php',
+            'list_url'           => 'projet/list.php',
             'class_path'         => 'projet/class/project.class.php',
             'lib_path'           => 'core/lib/project.lib.php',
         ];
@@ -504,6 +516,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_card' => 'projecttaskcard',
             'hook_name_list' => 'tasklist',
             'create_url'     => 'projet/tasks.php',
+            'list_url'       => 'projet/tasks/list.php',
             'class_path'     => 'custom/saturne/class/task/saturnetask.class.php',
             'lib_path'       => 'core/lib/project.lib.php',
         ];
@@ -527,6 +540,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_card' => 'invoicecard',
             'hook_name_list' => 'invoicelist',
             'create_url'     => 'compta/facture/card.php',
+            'list_url'       => 'compta/facture/list.php',
             'class_path'     => 'compta/facture/class/facture.class.php',
             'lib_path'       => 'core/lib/invoice.lib.php',
         ];
@@ -549,6 +563,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_card' => 'ordercard',
             'hook_name_list' => 'orderlist',
             'create_url'     => 'commande/card.php',
+            'list_url'       => 'commande/list.php',
             'class_path'     => 'commande/class/commande.class.php',
             'lib_path'       => 'core/lib/order.lib.php',
         ];
@@ -571,6 +586,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_card' => 'contractcard',
             'hook_name_list' => 'contractlist',
             'create_url'     => 'contrat/card.php',
+            'list_url'       => 'contrat/list.php',
             'class_path'     => 'contrat/class/contrat.class.php',
             'lib_path'       => 'core/lib/contract.lib.php',
         ];
@@ -594,6 +610,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_card' => 'ticketcard',
             'hook_name_list' => 'ticketlist',
             'create_url'     => 'ticket/card.php',
+            'list_url'       => 'ticket/list.php',
             'class_path'     => 'ticket/class/ticket.class.php',
             'lib_path'       => 'core/lib/ticket.lib.php',
         ];
@@ -616,6 +633,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_card' => 'warehousecard',
             'hook_name_list' => 'stocklist',
             'create_url'     => 'product/stock/card.php',
+            'list_url'       => 'product/stock/list.php',
             'class_path'     => 'product/stock/class/entrepot.class.php',
             'lib_path'       => 'core/lib/stock.lib.php',
         ];
@@ -636,6 +654,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_card' => 'inventorycard',
             'hook_name_list' => 'inventorylist',
             'create_url'     => 'product/inventory/card.php',
+            'list_url'       => 'product/inventory/list.php',
             'class_path'     => 'product/inventory/class/inventory.class.php',
             'lib_path'       => 'product/inventory/lib/inventory.lib.php',
         ];
@@ -656,6 +675,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_card' => '',
             'hook_name_list' => 'movementlist',
             'create_url'     => '',
+            'list_url'       => 'product/stock/movement_list.php',
             'class_path'     => 'product/stock/class/mouvementstock.class.php',
             'lib_path'       => '',
         ];
@@ -676,6 +696,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'name_field'     => 'ref',
             'hook_name_card' => 'ordershipmentcard',
             'hook_name_list' => 'propallist',
+            'list_url'       => 'expedition/list.php',
             'class_path'     => 'custom/saturne/class/dolibarrobjects/saturneexpedition.class.php',
             'lib_path'       => 'core/lib/expedition.lib.php',
         ];
@@ -698,6 +719,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_card' => 'propalcard',
             'hook_name_list' => 'propallist',
             'create_url'     => 'comm/propal/card.php',
+            'list_url'       => 'comm/propal/list.php',
             'class_path'     => 'comm/propal/class/propal.class.php',
             'lib_path'       => 'core/lib/propal.lib.php',
         ];
@@ -720,6 +742,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_card' => 'bomcard',
             'hook_name_list' => 'bomlist',
             'create_url'     => 'bom/bom_card.php',
+            'list_url'       => 'bom/bom_list.php',
             'class_path'     => 'bom/class/bom.class.php',
             'lib_path'       => 'bom/lib/bom.lib.php',
         ];
@@ -740,6 +763,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_card' => 'mocard',
             'hook_name_list' => 'molist',
             'create_url'     => 'mrp/mo_card.php',
+            'list_url'       => 'mrp/mo_list.php',
             'class_path'     => 'mrp/class/mo.class.php',
             'lib_path'       => 'mrp/lib/mrp_mo.lib.php',
         ];
@@ -762,6 +786,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_card' => 'receptioncard',
             'hook_name_list' => 'receptionlist',
             'create_url'     => 'reception/card.php',
+            'list_url'       => 'reception/list.php',
             'class_path'     => 'custom/saturne/class/dolibarrobjects/saturnereception.class.php',
             'lib_path'       => 'core/lib/reception.lib.php',
         ];
@@ -784,6 +809,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_card' => 'interventioncard',
             'hook_name_list' => 'interventionlist',
             'create_url'     => 'fichinter/card.php',
+            'list_url'       => 'fichinter/list.php',
             'class_path'     => 'fichinter/class/fichinter.class.php',
             'lib_path'       => 'core/lib/fichinter.lib.php',
         ];
@@ -806,6 +832,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_card' => 'supplier_proposalcard',
             'hook_name_list' => 'supplier_proposallist',
             'create_url'     => 'supplier_proposal/card.php',
+            'list_url'       => 'supplier_proposal/list.php',
             'class_path'     => 'custom/saturne/class/dolibarrobjects/saturnesupplierproposal.class.php',
             'lib_path'       => 'core/lib/supplier_proposal.lib.php',
         ];
@@ -828,6 +855,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_card' => 'ordersuppliercard',
             'hook_name_list' => 'supplierorderlist',
             'create_url'     => 'fourn/commande/card.php',
+            'list_url'       => 'fourn/commande/list.php',
             'class_path'     => 'fourn/class/fournisseur.commande.class.php',
             'lib_path'       => 'core/lib/fourn.lib.php',
         ];
@@ -887,6 +915,7 @@ function saturne_get_objects_metadata(string $type = ''): array
                     'hook_name_list'     => $objectMetadata['hook_name_list'] ?? '',
                     'hook_name_document' => $objectMetadata['hook_name_document'] ?? '',
                     'create_url'         => $objectMetadata['create_url'] ?? '',
+                    'list_url'           => $objectMetadata['list_url'] ?? '',
                     'class_path'         => $objectMetadata['class_path'] ?? '',
                     'lib_path'           => $objectMetadata['lib_path'] ?? '',
                     'object'             => $object
