@@ -71,6 +71,7 @@ SavedConfig                              = Configuration sauvegardée
 Config                                   = Configuration
 Extrafields                              = Attributs supplémentaires
 ClickHereToGoToTheConfigPage             = Veuillez cliquer ici pour vous rendre sur la page de configuration
+DefaultPublicInterfaceUserLastName       = Utilisateur par défaut d'interface publique
 
 # Redirections - Redirections
 Redirections = Redirections
