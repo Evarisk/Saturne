@@ -137,7 +137,8 @@ while ($i < $iMaxInLoop) {
                 }
                 if (!empty($val['isameasure']) && $val['isameasure'] == 1) {
                     if (!$i) {
-                        $totalarray['pos'][$totalarray['nbfield']] = 't.' . $key;
+                        $totalarray['pos'][$totalarray['nbfield']]  = 't.' . $key;
+                        $totalarray['type'][$totalarray['nbfield']] = $val['type'];
                     }
                     if (!isset($totalarray['val'])) {
                         $totalarray['val'] = [];
