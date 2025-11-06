@@ -154,7 +154,7 @@ print '</td>';
 print '<td>';
 $constKey = dol_strtoupper($moduleNameLowerCase) . '_DEFAULT_PUBLIC_INTERFACE_USER';
 print img_picto($langs->trans('User'), 'user', 'class="pictofixedwidth"') . $form->select_dolusers(getDolGlobalInt($constKey) > 0 ? getDolGlobalInt($constKey) : '', 'default_public_interface_user_id', 1, null, 0, '', '', '0', 0, 0, '', 0, '', 'minwidth400 maxwidth500');
-print ' <a href="' . DOL_URL_ROOT . '/user/card.php?action=create&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?module_name=' . $moduleName) . '" target="_blank"><span class="fa fa-plus-circle valignmiddle paddingleft" title="' . $langs->trans('AddUser') . '"></span></a>';
+print ' <a href="' . DOL_URL_ROOT . '/user/card.php?action=create&backtopage=' . urlencode($_SERVER['PHP_SELF'] . '?module_name=' . $moduleName) . '" target="_blank"><span class="fa fa-user-plus valignmiddle paddingleft" title="' . $langs->trans('AddUser') . '"></span></a>';
 $constKey = dol_strtoupper($moduleNameLowerCase) . '_DEFAULT_PUBLIC_INTERFACE_USER_CREATED';
 if (getDolGlobalInt($constKey) == 0) {
     print ' <a href="' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&action=create_default_public_interface_user"><span class="fa fa-plus-circle valignmiddle paddingleft" title="' . $langs->trans('AddUser') . '"></span></a>';
