@@ -1,70 +1,73 @@
-/** Info */
-.wpeo-notice.notice-info {
-  border-left: solid $color__blue 6px;
-  color: $color__blue;
-  background: rgba( $color__blue, 0.05 );
+/*--------------------------------------------------------------
+  Module : Notice Status
+  Version : 2.0.0
+  Gestion automatique via map + mixin
+--------------------------------------------------------------*/
+
+/*--------------------------------------------------------------
+  Mixin de style générique
+--------------------------------------------------------------*/
+@mixin notice-status($color, $icon) {
+  border-left: solid $color 0.375rem; // 6px
+  color: $color;
+  background: rgba($color, 0.05);
 
   &::before {
-    content: '\f05a';
+    content: $icon;
   }
-  .notice-title, .notice-subtitle, a {
-    color: $color__blue;
+
+  .notice-title,
+  .notice-subtitle,
+  a {
+    color: $color;
+  }
+
+  a {
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease, text-decoration 0.2s ease;
+    display: inline-block;
+    margin: 0.25em 1em;
+
+    &:hover {
+      color: darken($color, 10%);
+      text-decoration: underline;
+    }
   }
 }
 
-/** Error */
-.wpeo-notice.notice-error {
-  border-left: solid $color__red 6px;
-  color: $color__red;
-  background: rgba( $color__red, 0.05 );
+/*--------------------------------------------------------------
+  Map des statuts
+  (clé : nom du statut, valeur : (couleur, icône))
+--------------------------------------------------------------*/
+$notice-status: (
+  info: ($color__blue, '\f05a'),
+  error: ($color__red, '\f057'),
+  warning: ($color__yellow, '\f071'),
+  success: ($color__green, '\f058')
+);
 
-  &::before {
-    content: '\f057';
-  }
-  .notice-title, .notice-subtitle, a {
-    color: $color__red;
-  }
-}
+/*--------------------------------------------------------------
+  Génération automatique des classes
+--------------------------------------------------------------*/
+.wpeo-notice {
+  @each $status, $values in $notice-status {
+    $color: nth($values, 1);
+    $icon: nth($values, 2);
 
-/** Warning */
-.wpeo-notice.notice-warning {
-  border-left: solid $color__yellow 6px;
-  color: $color__yellow;
-  background: rgba( $color__yellow, 0.05 );
-
-  &::before {
-    content: '\f071';
+    &.notice-#{$status} {
+      @include notice-status($color, $icon);
+    }
   }
-  .notice-title, .notice-subtitle, a {
-    color: $color__yellow;
-  }
-}
 
-/** RED Warning */
-.wpeo-notice.notice-warning.notice-red {
-  border-left: solid $color__red 6px;
-  color: $color__red;
-  background: rgba( $color__red, 0.05 );
+  /* Cas particulier : notice-warning.notice-red */
+  &.notice-warning.notice-red {
+    @include notice-status($color__red, '\f071');
 
-  &::before {
-    content: '\f071';
-  }
-  .notice-title, .notice-subtitle, a {
-    color: $color__red;
-    font-size: 18px;
-  }
-}
-
-/** Success */
-.wpeo-notice.notice-success {
-  border-left: solid $color__green 6px;
-  color: $color__green;
-  background: rgba( $color__green, 0.05 );
-
-  &::before {
-    content: '\f058';
-  }
-  .notice-title, .notice-subtitle, a {
-    color: $color__green;
+    .notice-title,
+    .notice-subtitle,
+    a {
+      font-size: 1.125rem; // 18px
+    }
   }
 }
