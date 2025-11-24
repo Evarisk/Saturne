@@ -59,17 +59,19 @@ AttendantsAddStatusManagement            = Gestion de l'ajout des participants s
 AttendantsAddStatusManagementDescription = Activez cette option pour ajouter des participants sur le status Validé (en attente de signature)
 UseFastUploadImprovement                 = Utilisation chargement rapide d'image amélioré
 UseFastUploadImprovementDescription      = Activez cette option pour améliorer le chargement rapide d'image <br> Option disponible : <ul><li>Rotation d'image</li><li>Dessin  sur l'image</li><li>Enregistrement de l'image sur un format réduit</li></ul>
+MediaResolutionDescription          = Sélection de la résolution des images
 ShowAllMediaInfos                        = Afficher toutes les informations des médias
 ShowAllMediaInfosDescription             = Activez cette option pour afficher toutes les informations des médias.<br>Cela peut ralentir le chargement de la page.
 SignaturePublicInterfaceForbidden        = Accès interdit à l'interface publique de signature
 ObjectVisibleDescription                 = Afficher le champ %s
 ShowSignatureSpecimen                    = Voir les signatures sur les documents specimens
 ShowSignatureSpecimenDescription         = Permet la visualisation des signatures sur les documents specimens
-SavedConfig                              = Configuration sauvegardée
 ErrorSavedConfig                         = Une erreur est survenue lors de la configuration
+SavedConfig                              = Configuration sauvegardée
 Config                                   = Configuration
 Extrafields                              = Attributs supplémentaires
 ClickHereToGoToTheConfigPage             = Veuillez cliquer ici pour vous rendre sur la page de configuration
+DefaultPublicInterfaceUserLastName       = Utilisateur par défaut d'interface publique
 
 # Redirections - Redirections
 Redirections = Redirections
@@ -151,17 +153,22 @@ GeneratePWAQRCodeDescription  = Cette option permet de générer le QRCode de l'
 #
 
 # Data - Donnée
-ModuleArea                 = Bienvenue sur %s
-ModuleUpdate               = Mise à jour de %s :
-ModuleHasBeenUpdatedTo     = %s a été mis à jour en version %s
-ModulePatchNote            = Note de mise à jour %s %s
-ShowPatchNote              = Consulter la note de mise à jour
-DontShowPatchNote          = Ne plus afficher la note de mise à jour
-ChooseBoxToAddWidget       = Ajouter le widget au tableau de bord
-ChooseBoxToAddGraph        = Ajouter le graphique au tableau de bord
-SetupDefaultDataNotCreated = Vous n'avez pas créé les données par défaut de %s
-HowToSetupDefaultData      = Pour configurer les données par défaut de %s, veuillez cliquer sur ce lien :
-ConfigDefaultData          = Configuration des données par défaut de %s
+ModuleArea                   = Bienvenue sur %s
+ModuleUpdate                 = Mise à jour de %s :
+ModuleHasBeenUpdatedTo       = %s a été mis à jour en version %s
+ModulePatchNote              = Note de mise à jour %s %s
+ShowPatchNote                = Consulter la note de mise à jour
+DontShowPatchNote            = Ne plus afficher la note de mise à jour
+ChooseBoxToAddWidget         = Ajouter le widget au tableau de bord
+ChooseBoxToAddGraph          = Ajouter le graphique au tableau de bord
+SetupDefaultDataNotCreated   = Vous n'avez pas créé les données par défaut de %s
+HowToSetupDefaultData        = Pour configurer les données par défaut de %s, veuillez cliquer sur ce lien :
+ConfigDefaultData            = Configuration des données par défaut de %s
+MissingConfigData            = Configuration requise
+HowToSetupMissingConfigData  = Avant de pouvoir utiliser le module, certaines données doivent être configurées. Veuillez cliquer sur le(s) lien(s) ci-dessous pour compléter la configuration :
+MissingSettingConfig         = Réglages du module (configuration manquante)
+MissingPublicInterfaceConfig = Interface publique (configuration manquante)
+InitializationWarningConfig  = Cette étape est indispensable pour que le module fonctionne correctement
 
 
 

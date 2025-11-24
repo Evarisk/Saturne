@@ -347,3 +347,36 @@ window.saturne.utils.ensureTimezoneInSession = function() {
       });
   }
 };
+
+/**
+ * Helper function to ensure the timezone is stored in the PHP session.
+ * If not, sends it via AJAX and reloads the page.
+ *
+ * @since   22.0.0
+ * @version 22.0.0
+ */
+window.saturne.utils.parseDateTime = function(str) {
+  // Format attendu : dd/mm/yyyy hh:mm (secondes optionnelles)
+  const regex = /^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?$/;
+  const match = str.match(regex);
+  if (!match) return null;
+  const [, d, m, y, hh = '00', mm = '00', ss = '00'] = match;
+  const date = new Date(`${y}-${m}-${d}T${hh}:${mm}:${ss}`);
+  return isNaN(date.getTime()) ? null : date;
+};
+
+/**
+ * Helper function to ensure the timezone is stored in the PHP session.
+ * If not, sends it via AJAX and reloads the page.
+ *
+ * @since   22.0.0
+ * @version 22.0.0
+ */
+window.saturne.utils.formatDateTime = function(date) {
+  const d  = String(date.getDate()).padStart(2, '0');
+  const m  = String(date.getMonth() + 1).padStart(2, '0');
+  const y  = date.getFullYear();
+  const hh = String(date.getHours()).padStart(2, '0');
+  const mm = String(date.getMinutes()).padStart(2, '0');
+  return `${d}/${m}/${y} ${hh}:${mm}`;
+};

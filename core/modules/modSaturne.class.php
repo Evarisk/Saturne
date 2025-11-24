@@ -75,7 +75,7 @@ class modSaturne extends DolibarrModules
 		$this->editor_url  = 'https://evarisk.com/';
 
         // Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
-		$this->version = '21.1.0';
+		$this->version = '21.2.0';
 
         // Url to the file with your last numberversion of this module
         //$this->url_last_version = 'http://www.example.com/versionmodule.txt';
@@ -119,6 +119,7 @@ class modSaturne extends DolibarrModules
 			],
             // Set here all hooks context managed by module. To find available hook context, make a "grep -r '>initHooks(' *" on source code. You can also set hook context to 'all'
             'hooks' => [
+                'all',
                 'saturnepublicinterface',
                 'emailtemplates',
 				'usercard',
@@ -137,7 +138,7 @@ class modSaturne extends DolibarrModules
             'DigiQuali'        => 'digiquali',
             'DoliMeet'         => 'dolimeet',
             'DoliCar'          => 'dolicar',
-            'EasyCRM'          => 'easycrm',
+            'ReedCRM'          => 'reedcrm',
             'DoliSIRH'         => 'dolisirh',
             'DigiriskDolibarr' => 'digiriskdolibarr',
             'EasyURL'          => 'easyurl',
@@ -198,6 +199,7 @@ class modSaturne extends DolibarrModules
             $i++ => ['SATURNE_MEDIA_MAX_WIDTH_LARGE', 'integer', 1280, '', 0, 'current'],
             $i++ => ['SATURNE_MEDIA_MAX_HEIGHT_LARGE', 'integer', 720, '', 0, 'current'],
             $i++ => ['SATURNE_DISPLAY_NUMBER_MEDIA_GALLERY', 'integer', 8, '', 0, 'current'],
+            $i++ => ['SATURNE_MEDIA_RESOLUTION_USED', 'chaine', 'fullHD-1920x1080', '', 0, 'current'],
 
             // CONST DOLIBARR
             $i++ => ['MAIN_ALLOW_SVG_FILES_AS_IMAGES', 'integer', 1, '', 0, 'current'],

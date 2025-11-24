@@ -646,6 +646,8 @@ class SaturneDocumentModel extends CommonDocGenerator
                                     }
                                     break;
                                 case 'socpeople':
+                                    require_once DOL_DOCUMENT_ROOT . '/contact/class/contact.class.php';
+
                                     $contact = new Contact($this->db);
                                     $societe = new Societe($this->db);
                                     $contact->fetch($objectSignatory->element_id);

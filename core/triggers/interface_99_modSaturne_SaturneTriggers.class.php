@@ -48,7 +48,7 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
 		$this->name        = preg_replace('/^Interface/i', '', get_class($this));
 		$this->family      = 'demo';
 		$this->description = 'Saturne triggers.';
-		$this->version     = '21.1.0';
+		$this->version     = '21.2.0';
 		$this->picto       = 'saturne@saturne';
 	}
 

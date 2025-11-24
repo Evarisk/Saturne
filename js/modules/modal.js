@@ -51,7 +51,7 @@ window.saturne.modal.init = function() {
  * @return {void}
  */
 window.saturne.modal.event = function() {
-	$( document ).on( 'click', '.modal-close, .modal-active:not(.modal-container)', window.saturne.modal.closeModal );
+	$( document ).on( 'click', '.modal-close, .modal-active:not(.modal-container):not(.modal-close-only-with-button)', window.saturne.modal.closeModal );
 	$( document ).on( 'click', '.modal-open', window.saturne.modal.openModal );
 	$( document ).on( 'click', '.modal-refresh', window.saturne.modal.refreshModal );
 };

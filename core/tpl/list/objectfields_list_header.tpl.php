@@ -26,7 +26,9 @@
  * Globals    : $conf, $db, $hookmanager, $langs, $user
  * Parameters : $action, $limit, $contextpage, $massaction, $mode, $optioncss, $page, $searchAll, $sortfield, $sortorder, $toselect
  * Objects    : $categorie, $extrafields (extrafields_list_search_param.tpl), $form, $object
- * Variables  : $arrayfields, $fieldsToSearchAll, $formMoreParams (optional), $nbTotalOfRecords, $num, $permissiontoadd, $resql, $search, $search_array_options (extrafields_list_search_param.tpl), $searchCategories, $sql, $title
+ * Variables  : $arrayfields, $createUrl (optional), $fieldsToSearchAll, $formMoreParams (optional), $helpText (optional),
+ *              $nbTotalOfRecords, $num, $permissiontoadd, $resql, $search, $search_array_options (extrafields_list_search_param.tpl),
+ *              $searchCategories, $sql, $title
  */
 
 // Output page
@@ -62,6 +64,8 @@ foreach ($search as $key => $val) {
             }
         }
     } elseif (preg_match('/(_dtstart|_dtend)$/', $key) && !empty($val)) {
+        $param .= '&search_' . $key . 'min=' . GETPOSTINT('search_' . $key . 'min');
+        $param .= '&search_' . $key . 'hour=' . GETPOSTINT('search_' . $key . 'hour');
         $param .= '&search_' . $key . 'month=' . GETPOSTINT('search_' . $key . 'month');
         $param .= '&search_' . $key . 'day=' . GETPOSTINT('search_' . $key . 'day');
         $param .= '&search_' . $key . 'year=' . GETPOSTINT('search_' . $key . 'year');
@@ -115,11 +119,12 @@ if (!empty($formMoreParams)) {
     }
 }
 
-$newCardButton  = dolGetButtonTitle($langs->trans('ViewList'), '', 'fa fa-bars imgforviewmode', $_SERVER['PHP_SELF'] . '?mode=common' . preg_replace('/([&?])*mode=[^&]+/', '', $param), '', ((empty($mode) || $mode == 'common') ? 2 : 1), ['morecss' => 'reposition']);
+$newCardButton ?? '';
+$newCardButton .= dolGetButtonTitle($langs->trans('ViewList'), '', 'fa fa-bars imgforviewmode', $_SERVER['PHP_SELF'] . '?mode=common' . preg_replace('/([&?])*mode=[^&]+/', '', $param), '', ((empty($mode) || $mode == 'common') ? 2 : 1), ['morecss' => 'reposition']);
 $newCardButton .= dolGetButtonTitle($langs->trans('ViewKanban'), '', 'fa fa-th-list imgforviewmode', $_SERVER['PHP_SELF'] . '?mode=kanban' . preg_replace('/([&?])*mode=[^&]+/', '', $param), '', ($mode == 'kanban' ? 2 : 1), ['morecss' => 'reposition']);
 $newCardButton .= dolGetButtonTitle($langs->trans('ViewPwa'), '', 'fa fa-mobile imgforviewmode', $_SERVER['PHP_SELF'] . '?mode=pwa' . preg_replace('/([&?])*mode=[^&]+/', '', $param), '', ($mode == 'pwa' ? 2 : 1), ['morecss' => 'reposition']);
 $newCardButton .= dolGetButtonTitleSeparator();
-$newCardButton .= dolGetButtonTitle($langs->trans('New' . ucfirst($object->element)), '', 'fa fa-plus-circle', dol_buildpath('custom/' . $object->module . '/view/' . $object->element . '/' . $object->element . '_card.php', 1) . '?action=create' . ($moreUrlParameters ?? ''), '', $permissiontoadd);
+$newCardButton .= dolGetButtonTitle($langs->trans('New' . ucfirst($object->element)), $helpText ?? '', 'fa fa-plus-circle', ($createUrl ?? dol_buildpath('custom/' . $object->module . '/view/' . $object->element . '/' . $object->element . '_card.php', 1) . '?action=create' . ($moreUrlParameters ?? '')), '', $permissiontoadd);
 
 print_barre_liste((($conf->browser->layout == 'classic' && $mode != 'pwa') ? $title : ' '), $page, $_SERVER['PHP_SELF'], $param, $sortfield, $sortorder, $massActionButton, $num, $nbTotalOfRecords, $object->picto, 0, $newCardButton, '', $limit, 0, 0, 1);
 
