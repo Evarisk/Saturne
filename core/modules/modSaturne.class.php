@@ -241,59 +241,59 @@ class modSaturne extends DolibarrModules
         $this->rights[$r][5] = 'read';
 
         // Main menu entries to add
-		$this->menu = [];
-		$r = 0;
+        $this->menu = [];
+        $r = 0;
 
-		foreach ($modulesList as $moduleName => $moduleNameLowerCase) {
-			$this->menu[$r++] = [
-				'fk_menu'  => 'fk_mainmenu=' . $moduleNameLowerCase,
-				'type'     => 'left',
-				'titre'    => $langs->trans('ModuleConfig', $moduleName),
-				'prefix'   => '<i class="fas fa-cog pictofixedwidth"></i>',
-				'mainmenu' => $moduleNameLowerCase,
-				'leftmenu' => $moduleNameLowerCase . 'config',
-				'url'      => '/'. $moduleNameLowerCase .'/admin/setup.php',
-				'langs'    => $moduleNameLowerCase . '@' . $moduleNameLowerCase,
-				'position' => 2000 + $r,
-				'enabled'  => '$conf->'. $moduleNameLowerCase .'->enabled',
-				'perms'    => '$user->rights->'. $moduleNameLowerCase .'->adminpage->read',
-				'target'   => '',
-				'user'     => 0,
-			];
+        foreach ($modulesList as $moduleName => $moduleNameLowerCase) {
+            $this->menu[$r++] = [
+                'fk_menu'  => 'fk_mainmenu=' . $moduleNameLowerCase,
+                'type'     => 'left',
+                'titre'    => $langs->transnoentities('ModuleConfig', $moduleName),
+                'prefix'   => img_picto($langs->transnoentities('ModuleConfig', $moduleName), 'fontawesome_fa-cog_fas', 'class="pictofixedwidth"'),
+                'mainmenu' => $moduleNameLowerCase,
+                'leftmenu' => $moduleNameLowerCase . '_config',
+                'url'      => '/'. $moduleNameLowerCase . '/admin/setup.php',
+                'langs'    => $moduleNameLowerCase . '@' . $moduleNameLowerCase,
+                'position' => 2000 + $r,
+                'enabled'  => 'isModEnabled(' . $moduleNameLowerCase . ')',
+                'perms'    => '$user->hasRight(' . $moduleNameLowerCase . ', \'adminpage\', \'read\')',
+                'target'   => '',
+                'user'     => 2,
+            ];
 
             $this->menu[$r++] = [
                 'fk_menu'  => 'fk_mainmenu=' . $moduleNameLowerCase,
                 'type'     => 'left',
-                'titre'    => $langs->trans('ModuleConfigSaturne'),
-                'prefix'   => '<i class="fas fa-cog pictofixedwidth"></i>',
+                'titre'    => $langs->transnoentities('ModuleConfigSaturne'),
+                'prefix'   => img_picto($langs->transnoentities('ModuleConfigSaturne'), 'fontawesome_fa-cog_fas', 'class="pictofixedwidth"'),
                 'mainmenu' => $moduleNameLowerCase,
-                'leftmenu' => $moduleNameLowerCase . 'saturneconfig',
+                'leftmenu' => $moduleNameLowerCase . '_saturne_config',
                 'url'      => '/saturne/admin/setup.php',
                 'langs'    => 'saturne@saturne',
                 'position' => 2000 + $r,
-                'enabled'  => '$conf->saturne->enabled',
-                'perms'    => '$user->rights->saturne->adminpage->read',
+                'enabled'  => 'isModEnabled(\'saturne\')',
+                'perms'    => '$user->hasRight(\'saturne\', \'adminpage\', \'read\')',
                 'target'   => '',
-                'user'     => 0,
+                'user'     => 2,
             ];
 
-			$this->menu[$r++] = [
-				'fk_menu'  => 'fk_mainmenu=' . $moduleNameLowerCase,
-				'type'     => 'left',
-				'titre'    => $langs->transnoentities('MinimizeMenu'),
-				'prefix'   => '<i class="fas fa-chevron-circle-left pictofixedwidth saturne-toggle-menu"></i>',
-				'mainmenu' => $moduleNameLowerCase,
-				'leftmenu' => 'minimizemenu',
-				'url'      => '',
-				'langs'    => $moduleNameLowerCase . '@' . $moduleNameLowerCase,
-				'position' => 2000 + $r,
-				'enabled'  => '$conf->'. $moduleNameLowerCase .'->enabled',
-				'perms'    => '$user->rights->'. $moduleNameLowerCase .'->lire',
-				'target'   => '',
-				'user'     => 0,
-			];
-		}
-	}
+            $this->menu[$r++] = [
+                'fk_menu'  => 'fk_mainmenu=' . $moduleNameLowerCase,
+                'type'     => 'left',
+                'titre'    => $langs->transnoentities('MinimizeMenu'),
+                'prefix'   => img_picto($langs->transnoentities('MinimizeMenu'), 'fontawesome_fa-chevron-circle-left_fas', 'class="pictofixedwidth saturne-toggle-menu"'),
+                'mainmenu' => $moduleNameLowerCase,
+                'leftmenu' => $moduleNameLowerCase . '_minimizemenu',
+                'url'      => '',
+                'langs'    => $moduleNameLowerCase . '@' . $moduleNameLowerCase,
+                'position' => 2000 + $r,
+                'enabled'  => 'isModEnabled(' . $moduleNameLowerCase . ')',
+                'perms'    => '$user->hasRight(' . $moduleNameLowerCase . ', \'read\')',
+                'target'   => '',
+                'user'     => 2,
+            ];
+        }
+    }
 
     /**
      * Function called when module is enabled
