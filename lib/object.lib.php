@@ -450,6 +450,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'class_path'     => 'societe/class/societe.class.php',
             'lib_path'       => 'core/lib/company.lib.php',
         ];
+        $objectsMetadata['societe'] = $objectsMetadata['thirdparty'];
         $objectsMetadata['contact'] = [
             'mainmenu'       => '',
             'leftmenu'       => 'contacts',
