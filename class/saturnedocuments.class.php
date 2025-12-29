@@ -252,6 +252,11 @@ class SaturneDocuments extends SaturneObject
         }
 
         $result = $this->commonGenerateDocument($modelpath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
+        // Need to reset $document->error because commonGenerateDocument call unwanted function dol_delete_preview
+        if ($this->error == 'ErrorObjectNoSupportedByFunction') {
+            $this->error = '';
+        }
+
         if ($result > 0) {
             $this->call_trigger(strtoupper($this->type) . '_GENERATE', $moreparams['user']);
         }
