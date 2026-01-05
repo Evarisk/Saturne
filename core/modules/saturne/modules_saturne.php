@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2021-2023 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2021-2025 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -384,7 +384,7 @@ class SaturneDocumentModel extends CommonDocGenerator
     public string $module = '';
 
     /**
-     * @var string Document type.
+     * @var string Document type is the name of the file without suffix.
      */
     public string $document_type = '';
 
@@ -751,6 +751,64 @@ class SaturneDocumentModel extends CommonDocGenerator
         return 0;
     }
 
+    public function buildDocumentFilename($objectDocument, $outputLangs, $object, $uploadDir, $moreParam, $srcTemplatePath = '')
+    {
+        global $langs;
+
+        $confRefModName   = dol_strtoupper($this->module) . '_' . dol_strtoupper($this->document_type) . '_ADDON';
+        $numberingModules = [(!empty($moreParam['subDir']) ? $moreParam['subDir'] : $this->module . 'documents/') . $this->document_type => getDolGlobalString($confRefModName)];
+        list($refModName) = saturne_require_objects_mod($numberingModules, $this->module);
+
+        $objectDocumentRef    = $refModName->getNextValue($objectDocument);
+        $objectDocument->ref  = $objectDocumentRef;
+        $objectDocumentRef    = dol_sanitizeFileName($objectDocumentRef);
+        $objectDocument->type = $this->document_type;
+        $objectDocumentID     = $objectDocument->create($moreParam['user'], true, $object);
+        if ($objectDocumentID < 0) {
+            setEventMessages($langs->trans('ErrorCreateObject'), [], 'errors');
+            return -1;
+        }
+
+        $dir = $uploadDir . '/' . $this->document_type . (dol_strlen($object->ref) > 0 ? '/' . $object->ref : '');
+        if ($moreParam['specimen'] == 1 && $moreParam['zone'] == 'public') {
+            $dir .= '/public_specimen';
+        }
+
+        if (!file_exists($dir)) {
+            if (dol_mkdir($dir) < 0) {
+                $this->error = $langs->transnoentities('ErrorCanNotCreateDir', $dir);
+                return -1;
+            }
+        }
+
+        $newFileTmp = $this->name;
+        if ($this->type == 'odt') {
+            $newFile    = basename($srcTemplatePath);
+            $newFileTmp = preg_replace('/\.od([ts])/i', '', $newFile);
+            $newFileTmp = preg_replace('/template_/i', '', $newFileTmp);
+        }
+
+        $societyName = preg_replace('/\./', '_', getDolGlobalString('MAIN_INFO_SOCIETE_NOM'));
+        $date        = dol_print_date(dol_now(), 'dayxcard');
+        $newFileTmp  = $date . (dol_strlen($object->ref) > 0 ? '_' . $object->ref : '') . '_' . $objectDocumentRef . ($moreParam['hideTemplateName'] ? '' : '_' . $outputLangs->transnoentities($newFileTmp)) . '_' . (!empty($moreParam['documentName']) ? $moreParam['documentName'] : '') . $societyName . (!empty($moreParam['additionalName']) ? $moreParam['additionalName'] : '');
+
+        if ($moreParam['specimen'] == 1) {
+            $newFileTmp .= '_specimen';
+        }
+        $newFileTmp = str_replace(' ', '_', $newFileTmp);
+        $newFileTmp = $newFileTmp . '.' . $this->type;
+        $fileName   = dol_sanitizeFileName($newFileTmp);
+
+        $objectDocument->setValueFrom('last_main_doc', $fileName, '', null, '', '', $moreParam['user'], '', '');
+        if (!empty($objectDocument->error)) {
+            $objectDocument->errors[] = $objectDocument->ref;
+            setEventMessages($objectDocument->error, $objectDocument->errors, 'errors');
+            return -1;
+        }
+
+        return $dir . '/' . $fileName;
+    }
+
     /**
      * Function to build a document on disk
      *
@@ -790,169 +848,124 @@ class SaturneDocumentModel extends CommonDocGenerator
 
         $outputLangs->charset_output = 'UTF-8';
 
-        if ($conf->$moduleNameLowerCase->dir_output) {
-            $confRefModName   = dol_strtoupper($this->module) . '_' . dol_strtoupper($this->document_type) . '_ADDON';
-            $numberingModules = [(!empty($moreParam['subDir']) ? $moreParam['subDir'] : $moduleNameLowerCase . 'documents/') . $this->document_type => $conf->global->$confRefModName];
-            list($refModName) = saturne_require_objects_mod($numberingModules, $moduleNameLowerCase);
+        $uploadDir = getMultidirOutput($object, $moduleNameLowerCase);
+        if (!$uploadDir) {
+            setEventMessages($langs->trans('ErrorDirNotFound'), [], 'errors');
+            return -1;
+        }
 
-            $objectDocumentRef    = $refModName->getNextValue($objectDocument);
-            $objectDocument->ref  = $objectDocumentRef;
-            $objectDocument->type = $this->document_type;
-            $objectDocumentID     = $objectDocument->create($moreParam['user'], true, $object);
+        $file = $this->buildDocumentFilename($objectDocument, $outputLangs, $object, $uploadDir, $moreParam);
 
-            $objectDocument->fetch($objectDocumentID);
+        dol_mkdir($conf->$moduleNameLowerCase->dir_temp);
 
-            $objectDocumentRef = dol_sanitizeFileName($objectDocument->ref);
+        if (!is_writable($conf->$moduleNameLowerCase->dir_temp)) {
+            $this->error = 'Failed to write in temp directory ' . $conf->$moduleNameLowerCase->dir_temp;
+            dol_syslog('Error in write_file: ' . $this->error, LOG_ERR);
+            return -1;
+        }
 
-            $dir = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?? 1] . '/' . $this->document_type . (dol_strlen($object->ref) > 0 ? '/' . $object->ref : '');
+        $dir = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?? 1] . '/' . $this->document_type . (dol_strlen($object->ref) > 0 ? '/' . $object->ref : '');
 
-            $isSpecimen = !empty($moreParam['specimen']) && (int) $moreParam['specimen'] === 1;
-            $isPublic   = isset($moreParam['zone']) && $moreParam['zone'] === 'public';
-            if ($isSpecimen && $isPublic) {
-                $dir .= '/public_specimen';
+        $isSpecimen = !empty($moreParam['specimen']) && (int)$moreParam['specimen'] === 1;
+        $isPublic = isset($moreParam['zone']) && $moreParam['zone'] === 'public';
+        if ($isSpecimen && $isPublic) {
+            $dir .= '/public_specimen';
+        }
+        // Make substitution
+        $substitutionArray = [];
+        complete_substitutions_array($substitutionArray, $outputLangs, $object);
+        // Call the ODTSubstitution hook
+        $parameters = ['file' => $file, 'object' => $object, 'outputlangs' => $outputLangs, 'substitutionarray' => &$substitutionArray];
+        $hookmanager->executeHooks('ODTSubstitution', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
+
+        // Open and load template
+        require_once ODTPHP_PATH . 'odf.php';
+        try {
+            $odfHandler = new odf(
+                $srcTemplatePath,
+                [
+                    'PATH_TO_TMP' => $conf->$moduleNameLowerCase->dir_temp,
+                    'ZIP_PROXY' => 'PclZipProxy', // PhpZipProxy or PclZipProxy. Got "bad compression method" error when using PhpZipProxy
+                    'DELIMITER_LEFT' => '{',
+                    'DELIMITER_RIGHT' => '}'
+                ]
+            );
+        } catch (Exception $e) {
+            $this->error = $e->getMessage();
+            dol_syslog($e->getMessage());
+            return -1;
+        }
+
+        // Define substitution array
+        $substitutionArray = getCommonSubstitutionArray($outputLangs, 0, null, $object);
+        $arraySoc = $this->get_substitutionarray_mysoc($mysoc, $outputLangs);
+        $arraySoc['mycompany_logo'] = preg_replace('/_small/', '_mini', $arraySoc['mycompany_logo']);
+
+        $tmpArray = array_merge($substitutionArray, $arraySoc, $moreParam['tmparray']);
+        if (isModEnabled('multicompany')) {
+            $tmpArray['entity'] = $conf->entity;
+        } else {
+            $tmpArray['entity'] = '';
+
+            if ($moreParam['specimen'] == 1) {
+                $newFileTmp .= '_specimen';
             }
+            $newFileTmp = str_replace(' ', '_', $newFileTmp);
+            $newFileTmp = dol_sanitizeFileName($newFileTmp);
 
-            if (!file_exists($dir)) {
-                if (dol_mkdir($dir) < 0) {
-                    $this->error = $langs->transnoentities('ErrorCanNotCreateDir', $dir);
-                    return -1;
-                }
-            }
+            $this->fillTags($odfHandler, $outputLangs, $tmpArray, $moreParam);
 
-            if (file_exists($dir)) {
-                $newFile     = basename($srcTemplatePath);
-                $newFileTmp  = preg_replace('/\.od([ts])/i', '', $newFile);
-                $newFileTmp  = preg_replace('/template_/i', '', $newFileTmp);
-                $societyName = preg_replace('/\./', '_', $conf->global->MAIN_INFO_SOCIETE_NOM);
+            // Replace labels translated
+            $tmpArray = $outputLangs->get_translations_for_substitutions();
 
-                $date       = dol_print_date(dol_now(), 'dayxcard');
-                $newFileTmp = $date . (dol_strlen($object->ref) > 0 ? '_' . $object->ref : '') . '_' . $objectDocumentRef . ($moreParam['hideTemplateName'] ? '' : '_' . $outputLangs->transnoentities($newFileTmp)) . '_' . (!empty($moreParam['documentName'])   ? $moreParam['documentName'] : '') . $societyName . (!empty($moreParam['additionalName']) ? $moreParam['additionalName'] : '');
+            // Call the beforeODTSave hook
+            $parameters = ['odfHandler' => &$odfHandler, 'file' => $file, 'object' => $object, 'outputlangs' => $outputLangs, 'substitutionarray' => &$tmpArray];
+            $hookmanager->executeHooks('beforeODTSave', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
 
-                if ($isSpecimen) {
-                    $newFileTmp .= '_specimen';
-                }
-                $newFileTmp = str_replace(' ', '_', $newFileTmp);
-                $newFileTmp = dol_sanitizeFileName($newFileTmp);
+            $fileInfos = pathinfo($fileName);
+            $pdfName = $fileInfos['filename'] . '.pdf';
+            $confPdfName = dol_strtoupper($this->module) . '_AUTOMATIC_PDF_GENERATION';
 
-                // Get extension (ods or odt)
-                $newFileFormat = substr($newFile, strrpos($newFile, '.') + 1);
-                $fileName      = $newFileTmp . '.' . $newFileFormat;
-                $file          = $dir . '/' . $fileName;
-
-                $objectDocument->setValueFrom('last_main_doc', $fileName, '', null, '', '', $moreParam['user'], '', '');
-                if (!empty($objectDocument->error)) {
-                    $objectDocument->errors[] = $objectDocument->ref;
-                    setEventMessages($objectDocument->error, $objectDocument->errors, 'errors');
-                    return -1;
-                }
-
-                dol_mkdir($conf->$moduleNameLowerCase->dir_temp);
-
-                if (!is_writable($conf->$moduleNameLowerCase->dir_temp)) {
-                    $this->error = 'Failed to write in temp directory ' . $conf->$moduleNameLowerCase->dir_temp;
-                    dol_syslog('Error in write_file: ' . $this->error, LOG_ERR);
-                    return -1;
-                }
-
-                // Make substitution
-                $substitutionArray = [];
-                complete_substitutions_array($substitutionArray, $outputLangs, $object);
-                // Call the ODTSubstitution hook
-                $parameters = ['file' => $file, 'object' => $object, 'outputlangs' => $outputLangs, 'substitutionarray' => &$substitutionArray];
-                $hookmanager->executeHooks('ODTSubstitution', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
-
-                // Open and load template
-                require_once ODTPHP_PATH . 'odf.php';
+            // Write new file
+            if (!empty($conf->global->MAIN_ODT_AS_PDF) && $conf->global->$confPdfName > 0) {
                 try {
-                    $odfHandler = new odf(
-                        $srcTemplatePath,
-                        [
-                            'PATH_TO_TMP'     => $conf->$moduleNameLowerCase->dir_temp,
-                            'ZIP_PROXY'       => 'PclZipProxy', // PhpZipProxy or PclZipProxy. Got "bad compression method" error when using PhpZipProxy
-                            'DELIMITER_LEFT'  => '{',
-                            'DELIMITER_RIGHT' => '}'
-                        ]
-                    );
+                    $odfHandler->exportAsAttachedPDF($file);
+
+                    $documentUrl = DOL_URL_ROOT . '/document.php';
+                    setEventMessages($langs->transnoentities('FileGenerated') . ' - ' . '<a href=' . $documentUrl . '?modulepart=' . $moduleNameLowerCase . '&file=' . urlencode($this->document_type . '/' . $object->ref . '/' . $pdfName) . '&entity=' . $conf->entity . '"' . '>' . $pdfName . '</a>', []);
+                } catch (Exception $e) {
+                    $this->error = $e->getMessage();
+                    dol_syslog($e->getMessage());
+                    setEventMessages($langs->transnoentities('FileCouldNotBeGeneratedInPDF') . '<br>' . $langs->transnoentities('CheckDocumentationToEnablePDFGeneration'), [], 'errors');
+                }
+            } else {
+                try {
+                    $odfHandler->saveToDisk($file);
                 } catch (Exception $e) {
                     $this->error = $e->getMessage();
                     dol_syslog($e->getMessage());
                     return -1;
                 }
-
-                // Define substitution array
-                $substitutionArray          = getCommonSubstitutionArray($outputLangs, 0, null, $object);
-                $arraySoc                   = $this->get_substitutionarray_mysoc($mysoc, $outputLangs);
-                $arraySoc['mycompany_logo'] = preg_replace('/_small/', '_mini', $arraySoc['mycompany_logo']);
-
-                $tmpArray = array_merge($substitutionArray, $arraySoc, $moreParam['tmparray']);
-                if (isModEnabled('multicompany')) {
-                    $tmpArray['entity'] = $conf->entity;
-                } else {
-                    $tmpArray['entity'] = '';
-
-                }
-                $tmpArray['object_document_ref'] = $objectDocumentRef;
-                complete_substitutions_array($tmpArray, $outputLangs, $object);
-
-                $this->fillTags($odfHandler, $outputLangs, $tmpArray, $moreParam);
-
-                // Replace labels translated
-                $tmpArray = $outputLangs->get_translations_for_substitutions();
-
-                // Call the beforeODTSave hook
-                $parameters = ['odfHandler' => &$odfHandler, 'file' => $file, 'object' => $object, 'outputlangs' => $outputLangs, 'substitutionarray' => &$tmpArray];
-                $hookmanager->executeHooks('beforeODTSave', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
-
-                $fileInfos   = pathinfo($fileName);
-                $pdfName     = $fileInfos['filename'] . '.pdf';
-                $confPdfName = dol_strtoupper($this->module) . '_AUTOMATIC_PDF_GENERATION';
-
-                // Write new file
-                if (!empty($conf->global->MAIN_ODT_AS_PDF) && $conf->global->$confPdfName > 0) {
-                    try {
-                        $odfHandler->exportAsAttachedPDF($file);
-
-                        $documentUrl = DOL_URL_ROOT . '/document.php';
-                        setEventMessages($langs->transnoentities('FileGenerated') . ' - ' . '<a href=' . $documentUrl . '?modulepart=' . $moduleNameLowerCase . '&file=' . urlencode($this->document_type . '/' . $object->ref . '/' . $pdfName) . '&entity=' . $conf->entity . '"' . '>' . $pdfName  . '</a>', []);
-                    } catch (Exception $e) {
-                        $this->error = $e->getMessage();
-                        dol_syslog($e->getMessage());
-                        setEventMessages($langs->transnoentities('FileCouldNotBeGeneratedInPDF') . '<br>' . $langs->transnoentities('CheckDocumentationToEnablePDFGeneration'), [], 'errors');
-                    }
-                } else {
-                    try {
-                        $odfHandler->saveToDisk($file);
-                    } catch (Exception $e) {
-                        $this->error = $e->getMessage();
-                        dol_syslog($e->getMessage());
-                        return -1;
-                    }
-                }
-
-                $parameters = ['odfHandler' => &$odfHandler, 'file' => $file, 'object' => $object, 'outputlangs' => $outputLangs, 'substitutionarray' => &$tmpArray];
-                $hookmanager->executeHooks('afterODTCreation', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
-
-                if (!empty($conf->global->MAIN_UMASK)) {
-                    @chmod($file, octdec($conf->global->MAIN_UMASK));
-                }
-
-                $tempDir   = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?? 1] . '/temp/';
-                $fileArray = dol_dir_list($tempDir, 'files');
-                if (!empty($fileArray)) {
-                    foreach ($fileArray as $file) {
-                        unlink($file['fullname']);
-                    }
-                }
-
-                $odfHandler = null; // Destroy object
-
-                return 1; // Success
-            } else {
-                $this->error = $langs->transnoentities('ErrorCanNotCreateDir', $dir);
-                return -1;
             }
-        }
 
-        return -1;
+            $parameters = ['odfHandler' => &$odfHandler, 'file' => $file, 'object' => $object, 'outputlangs' => $outputLangs, 'substitutionarray' => &$tmpArray];
+            $hookmanager->executeHooks('afterODTCreation', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
+
+            if (!empty($conf->global->MAIN_UMASK)) {
+                @chmod($file, octdec($conf->global->MAIN_UMASK));
+            }
+
+            $tempDir = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?? 1] . '/temp/';
+            $fileArray = dol_dir_list($tempDir, 'files');
+            if (!empty($fileArray)) {
+                foreach ($fileArray as $file) {
+                    unlink($file['fullname']);
+                }
+            }
+
+            $odfHandler = null; // Destroy object
+
+            return 1; // Success
+        }
     }
 }
