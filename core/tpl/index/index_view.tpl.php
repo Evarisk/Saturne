@@ -119,6 +119,8 @@ if ($conf->global->$moduleShowPatchNote > 0) : ?>
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
                 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
                 curl_setopt($ch, CURLOPT_USERAGENT, $moduleName);
+                curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+                curl_setopt($ch, CURLOPT_TIMEOUT, 10);
                 $output = curl_exec($ch);
                 curl_close($ch);
                 $data = json_decode($output);
