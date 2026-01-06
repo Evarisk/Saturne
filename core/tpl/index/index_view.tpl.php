@@ -123,10 +123,15 @@ if ($conf->global->$moduleShowPatchNote > 0) : ?>
                 curl_setopt($ch, CURLOPT_TIMEOUT, 10);
                 $output = curl_exec($ch);
                 curl_close($ch);
+
+                $html = '';
                 $data = json_decode($output);
-                $data->body = preg_replace('/- #\b\d{1,4}\b/', '-', $data->body);
-                $data->body = preg_replace('/- #\b\d{1,4}\b/', '-', $data->body);
-                $html = $parse->text($data->body);
+                if ($data && isset($data->body)) {
+                    $data->body = preg_replace('/- #\b\d{1,4}\b/', '-', $data->body);
+                    $data->body = preg_replace('/- #\b\d{1,4}\b/', '-', $data->body);
+                    $html = $parse->text($data->body);
+                }
+
                 print $html;
                 ?>
             </div>
