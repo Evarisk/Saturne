@@ -306,7 +306,7 @@ class SaturneDocuments extends SaturneObject
         $document = $this->getLastDocument($moduleNameLowerCase, $fileDir, $fileType, $entity);
         if (is_array($document)) {
             $documentUrl = DOL_URL_ROOT . '/document.php';
-            $fileUrl     = $documentUrl . '?modulepart=' . $moduleNameLowerCase . '&file=' . urlencode($fileDir . '/' . $document['name']);
+            $fileUrl     = $documentUrl . '?modulepart=' . $moduleNameLowerCase . '&file=' . urlencode($fileDir . '/' . $document['name']) . '&entity=' . $entity;
             $icon        = $fileType == 'pdf' ? 'fa-file-pdf' : $icon;
             $out         = '<a class="marginleftonly" href="' . $fileUrl . '" download>' . img_picto($langs->trans('File') . ' : ' . $document['name'], $icon) . '</a>';
         }
