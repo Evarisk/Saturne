@@ -383,6 +383,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
     if ($resHook < 0) {
         setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
     } else {
+        $customMoreHtmlRef = '';
         if (!empty($hookmanager->resArray)) {
             list($customMoreHtmlRef, $moreParams) = $hookmanager->resArray;
         } else if (!empty($hookmanager->resPrint)) {
@@ -460,7 +461,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
                     }
                 } else {
                     $BannerElementObject->fetch($object->$objectKey);
-                    if ($bannerElement == 'societe' || $bannerElement == $moreParams['bannerElement']) {
+                    if ($bannerElement == 'societe' || $bannerElement == ($moreParams['bannerElement'] ?? null)) {
                         $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1) : '';
                     } elseif ($bannerElement == 'project') {
                         $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1, '', 1) : '';

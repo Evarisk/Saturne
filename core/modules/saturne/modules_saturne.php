@@ -805,7 +805,10 @@ class SaturneDocumentModel extends CommonDocGenerator
             $objectDocumentRef = dol_sanitizeFileName($objectDocument->ref);
 
             $dir = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?? 1] . '/' . $this->document_type . (dol_strlen($object->ref) > 0 ? '/' . $object->ref : '');
-            if ($moreParam['specimen'] == 1 && $moreParam['zone'] == 'public') {
+
+            $isSpecimen = !empty($moreParam['specimen']) && (int) $moreParam['specimen'] === 1;
+            $isPublic   = isset($moreParam['zone']) && $moreParam['zone'] === 'public';
+            if ($isSpecimen && $isPublic) {
                 $dir .= '/public_specimen';
             }
 
@@ -825,7 +828,7 @@ class SaturneDocumentModel extends CommonDocGenerator
                 $date       = dol_print_date(dol_now(), 'dayxcard');
                 $newFileTmp = $date . (dol_strlen($object->ref) > 0 ? '_' . $object->ref : '') . '_' . $objectDocumentRef . ($moreParam['hideTemplateName'] ? '' : '_' . $outputLangs->transnoentities($newFileTmp)) . '_' . (!empty($moreParam['documentName'])   ? $moreParam['documentName'] : '') . $societyName . (!empty($moreParam['additionalName']) ? $moreParam['additionalName'] : '');
 
-                if ($moreParam['specimen'] == 1) {
+                if ($isSpecimen) {
                     $newFileTmp .= '_specimen';
                 }
                 $newFileTmp = str_replace(' ', '_', $newFileTmp);
