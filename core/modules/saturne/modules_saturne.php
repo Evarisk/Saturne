@@ -401,6 +401,8 @@ class SaturneDocumentModel extends CommonDocGenerator
 
         parent::__construct($db);
 
+        require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
+
         $this->module         = $moduleNameLowerCase;
         $this->document_type  = $objectDocumentType;
         $this->name           = $langs->transnoentities('ODTDefaultTemplateName');
@@ -412,13 +414,14 @@ class SaturneDocumentModel extends CommonDocGenerator
 
         // Page size for A4 format.
         $this->type         = 'odt';
-        $this->page_largeur = 0;
-        $this->page_hauteur = 0;
+        $formatArray        = pdf_getFormat();
+        $this->page_largeur = $formatArray['width'];
+        $this->page_hauteur = $formatArray['height'];
         $this->format       = [$this->page_largeur, $this->page_hauteur];
-        $this->marge_gauche = 0;
-        $this->marge_droite = 0;
-        $this->marge_haute  = 0;
-        $this->marge_basse  = 0;
+        $this->marge_gauche = getDolGlobalInt('MAIN_PDF_MARGIN_LEFT', 10);
+        $this->marge_droite = getDolGlobalInt('MAIN_PDF_MARGIN_RIGHT', 10);
+        $this->marge_haute  = getDolGlobalInt('MAIN_PDF_MARGIN_TOP', 10);
+        $this->marge_basse  = getDolGlobalInt('MAIN_PDF_MARGIN_BOTTOM', 10);
 
         $this->option_logo      = 1; // Display logo.
         $this->option_multilang = 1; // Available in several languages.
