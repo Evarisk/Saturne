@@ -157,6 +157,9 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
       if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
         $('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'))
       }
+      if ($('.question__list-medias').length > 0) {
+        $('.question__list-medias').replaceWith($(resp).find('.question__list-medias'));
+      }
 			//refresh media gallery & unselect selected medias
 			mediaGallery.html($(resp).find('#media_gallery').children())
       window.saturne.modal.loadLazyImages();
