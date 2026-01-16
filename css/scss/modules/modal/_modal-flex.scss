@@ -1,0 +1,17 @@
+.wpeo-modal.modal-flex {
+  .modal-container {
+    display: flex;
+    flex-direction: column;
+
+    .modal-header {
+      height: auto;
+      padding: 0.5em 2em;
+    }
+    .modal-content {
+      height: auto;
+    }
+    .modal-footer {
+      height: auto;
+    }
+  }
+}
