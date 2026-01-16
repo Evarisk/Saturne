@@ -5,6 +5,7 @@
 	.wpeo-modal -> classe de base du mobule
 	.modalactive -> lance l'apparition de la modal
 	.no-modal-close -> désactive l'icone fermeture
+	.modal-flex -> Change l'affichage en flexbox. Le header et footer s'adaptent à la taille du contenu.
 --------------------------------------------------------------*/
 
 .wpeo-modal {
@@ -129,5 +130,17 @@
     &.center {
       text-align: center;
     }
+
+    .button-square {
+      max-width: 60px;
+      min-width: 50px;
+      aspect-ratio: 1 / 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+    }
   }
 }
+
+@import "modal-flex";
