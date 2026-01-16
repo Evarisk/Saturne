@@ -130,6 +130,16 @@
     &.center {
       text-align: center;
     }
+
+    .button-square {
+      max-width: 60px;
+      min-width: 50px;
+      aspect-ratio: 1 / 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+    }
   }
 }
 
