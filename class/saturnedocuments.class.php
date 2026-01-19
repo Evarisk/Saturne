@@ -245,13 +245,27 @@ class SaturneDocuments extends SaturneObject
      */
     public function generateDocument(string $modele, Translate $outputlangs, int $hidedetails = 0, int $hidedesc = 0, int $hideref = 0, array $moreparams = null): int
     {
-        if (is_dir(__DIR__ . '/../../' . $this->module . '/core/modules/' . $this->module . '/' . $this->module . 'documents/' . $this->element . '/') && $moreparams['zone'] == 'private') {
-            $modelpath = 'custom/' . $this->module . '/core/modules/' . $this->module . '/' . $this->module . 'documents/' . $this->element . '/';
+        $baseModulePath = $this->module . '/core/modules/' . $this->module . '/' . $this->module . 'documents/';
+
+        $classFilePath = __DIR__ . '/../../' . $baseModulePath;
+        $modelPath     = 'custom/' . $baseModulePath;
+
+        $isPrivateZone = isset($moreparams['zone']) && $moreparams['zone'] === 'private';
+        $elementPath   = $classFilePath . $this->element . '/';
+
+        if ($isPrivateZone && is_dir($elementPath)) {
+            $modelPath .= $this->element . '/';
         } else {
-            $modelpath = 'custom/' . $this->module . '/core/modules/' . $this->module . '/' . $this->module . 'documents/' . $moreparams['objectType'] . 'document/';
+            $objectType = $moreparams['objectType'] ?? '';
+            $modelPath .= $objectType . 'document/';
         }
 
-        $result = $this->commonGenerateDocument($modelpath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
+        $result = $this->commonGenerateDocument($modelPath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
+        // Need to reset $document->error because commonGenerateDocument call unwanted function dol_delete_preview
+        if ($this->error == 'ErrorObjectNoSupportedByFunction') {
+            $this->error = '';
+        }
+
         if ($result > 0) {
             $this->call_trigger(strtoupper($this->type) . '_GENERATE', $moreparams['user']);
         }
@@ -301,7 +315,7 @@ class SaturneDocuments extends SaturneObject
         $document = $this->getLastDocument($moduleNameLowerCase, $fileDir, $fileType, $entity);
         if (is_array($document)) {
             $documentUrl = DOL_URL_ROOT . '/document.php';
-            $fileUrl     = $documentUrl . '?modulepart=' . $moduleNameLowerCase . '&file=' . urlencode($fileDir . '/' . $document['name']);
+            $fileUrl     = $documentUrl . '?modulepart=' . $moduleNameLowerCase . '&file=' . urlencode($fileDir . '/' . $document['name']) . '&entity=' . $entity;
             $icon        = $fileType == 'pdf' ? 'fa-file-pdf' : $icon;
             $out         = '<a class="marginleftonly" href="' . $fileUrl . '" download>' . img_picto($langs->trans('File') . ' : ' . $document['name'], $icon) . '</a>';
         }

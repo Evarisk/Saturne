@@ -91,6 +91,10 @@ if ($conf->global->$moduleJustUpdated == 1) : ?>
     <?php dolibarr_set_const($db, $moduleJustUpdated, 0, 'integer', 0, '', $conf->entity);
 endif;
 
+define('USE_GITHUB_UPDATES', false);
+
+$data = null;
+
 if ($conf->global->$moduleShowPatchNote > 0) : ?>
     <div class="wpeo-notice notice-info">
         <input type="hidden" name="token" value="<?php echo newToken(); ?>">
@@ -114,17 +118,37 @@ if ($conf->global->$moduleShowPatchNote > 0) : ?>
             </div>
             <!-- Modal Content-->
             <div class="modal-content">
-                <?php $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, 'https://api.github.com/repos/' . strtolower($modModule->editor_name) . '/' . (!empty($moreParams['specialModuleNameLowerCase']) ? $moreParams['specialModuleNameLowerCase'] : $moduleNameLowerCase) . '/releases/tags/' . $modModule->version);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                curl_setopt($ch, CURLOPT_USERAGENT, $moduleName);
-                $output = curl_exec($ch);
-                curl_close($ch);
-                $data = json_decode($output);
-                $data->body = preg_replace('/- #\b\d{1,4}\b/', '-', $data->body);
-                $data->body = preg_replace('/- #\b\d{1,4}\b/', '-', $data->body);
-                $html = $parse->text($data->body);
+
+                <?php if (USE_GITHUB_UPDATES) {
+                    $ch = curl_init();
+
+                    curl_setopt($ch, CURLOPT_URL, 'https://api.github.com/repos/' . strtolower($modModule->editor_name) . '/' . (!empty($moreParams['specialModuleNameLowerCase']) ? $moreParams['specialModuleNameLowerCase'] : $moduleNameLowerCase) . '/releases/tags/' . $modModule->version);
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                    curl_setopt($ch, CURLOPT_USERAGENT, $moduleName);
+
+                    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+                    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+
+                    $output = curl_exec($ch);
+
+                    if (curl_errno($ch)) {
+                        // Gestion d'erreur : log et continuer
+                        error_log("Erreur curl GitHub : " . curl_error($ch));
+                    } else {
+                        $data = json_decode($output);
+                    }
+
+                    curl_close($ch);
+                }
+
+                $html = '';
+                if ($data && isset($data->body)) {
+                    $data->body = preg_replace('/- #\b\d{1,4}\b/', '-', $data->body);
+                    $data->body = preg_replace('/- #\b\d{1,4}\b/', '-', $data->body);
+                    $html = $parse->text($data->body);
+                }
+
                 print $html;
                 ?>
             </div>

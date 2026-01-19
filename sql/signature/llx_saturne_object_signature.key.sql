@@ -1,4 +1,4 @@
--- Copyright (C) 2023 EVARISK <technique@evarisk.com>
+-- Copyright (C) 2023-2025 EVARISK <technique@evarisk.com>
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -13,8 +13,8 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see https://www.gnu.org/licenses/.
 
--- @todo more keys ??
 ALTER TABLE llx_saturne_object_signature ADD INDEX idx_saturne_object_signature_rowid (rowid);
 ALTER TABLE llx_saturne_object_signature ADD INDEX idx_saturne_object_signature_status (status);
 ALTER TABLE llx_saturne_object_signature ADD INDEX idx_saturne_object_signature_element_id (element_id);
 ALTER TABLE llx_saturne_object_signature ADD INDEX idx_saturne_object_signature_fk_object (fk_object);
+ALTER TABLE llx_saturne_object_signature ADD UNIQUE uk_saturne_object_signature_signature_url (signature_url);

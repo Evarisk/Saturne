@@ -122,11 +122,11 @@ while ($i < $iMaxInLoop) {
                 } elseif ($key == 'rowid') {
                     print $object->showOutputField($val, $key, $object->id);
                 } else {
-                    if ($val['contenteditable']) {
+                    if (!empty($val['contenteditable']) && $val['contenteditable'] == 1) {
                         print '<div class="inline-block contenteditable" contenteditable="true" data-field="' . $key . '" data-id="' . $object->id . '">';
                     }
                     print $object->showOutputField($val, $key, $object->$key);
-                    if ($val['contenteditable']) {
+                    if (!empty($val['contenteditable']) && $val['contenteditable'] == 1) {
                         print '</div>';
                     }
                 }

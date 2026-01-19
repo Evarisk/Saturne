@@ -201,6 +201,6 @@ $num = $db->num_rows($resql);
 if ($num == 1 && getDolGlobalInt('MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE') && $searchAll && !$page) {
     $obj = $db->fetch_object($resql);
     $id = $obj->rowid;
-    header('Location: ' . dol_buildpath($object->module . '/' . $object->element . '_card.php', 1) . '?id=' . $id); //@todo parameter
+    header('Location: ' . dol_buildpath($object->module . '/view/' . $object->element . '/' . $object->element . '_card.php', 1) . '?id=' . $id); //@todo parameter
     exit;
 }

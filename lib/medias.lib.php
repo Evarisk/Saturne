@@ -156,7 +156,7 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
  * @param  int         $showdiv              Add div with "media-container" class
  * @return string      $return               Show medias linked
  */
-function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $size = 0, $nbmax = 0, int $nbbyrow = 5, int $showfilename = 0, int $showaction = 0, int $maxHeight = 120, int $maxWidth = 160, int $nolink = 0, int $notitle = 0, int $usesharelink = 0, string $subdir = '', object $object = null, string $favorite_field = 'photo', int $show_favorite_button = 1, int $show_unlink_button = 1 , int $use_mini_format = 0, int $show_only_favorite = 0, string $morecss = '', int $showdiv = 1): string
+function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $size = 0, $nbmax = 0, int $nbbyrow = 5, int $showfilename = 0, int $showaction = 0, int $maxHeight = 120, int $maxWidth = 160, int $nolink = 0, int $notitle = 0, int $usesharelink = 0, string $subdir = '', object $object = null, string $favorite_field = 'photo', int $show_favorite_button = 1, int $show_unlink_button = 1 , int $use_mini_format = 0, int $show_only_favorite = 0, string $morecss = '', int $showdiv = 1, array $moreParams = []): string
 {
 	global $conf, $langs, $moduleNameUpperCase;
 
@@ -324,8 +324,11 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 							<i class="fas fa-unlink button-icon"></i>
 						</div>';
 				}
+
 				// ADDED_FOR_AI
-				if (isModEnabled('ai')) {
+				if (isModEnabled('ai') && !empty($moreParams['useAi']) &&
+					(getDolGlobalString('AI_API_SERVICE') && getDolGlobalString('AI_API_' . dol_strtoupper(getDolGlobalString('AI_API_SERVICE')) . '_KEY') && getDolGlobalString('AI_API_' . dol_strtoupper(getDolGlobalString('AI_API_SERVICE')) . '_URL'))
+				) {
 					$return .=
 						'<div class="wpeo-button button-square-50 button-blue ' . $object->element . ' media-gallery-ai" value="' . $object->id . '">
 							<input class="element-linked-id" type="hidden" value="' . ($object->id > 0 ? $object->id : 0) . '">
@@ -356,7 +359,7 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 			}
 		}
 	} else {
-        $return .= '<img  width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo '. $morecss .' photowithmargin" src="' . DOL_URL_ROOT . '/public/theme/common/nophoto.png" title="' . $langs->trans('NoPhotoYet') . '" data-object-id="' . $object->id . '">';
+        $return .= '<img  width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo '. $morecss .' photowithmargin" src="' . DOL_URL_ROOT . '/public/theme/common/nophoto.png" title="' . $langs->trans('NoPhotoYet') . '">';
     }
 
 	if (is_object($object)) {

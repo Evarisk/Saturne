@@ -3,7 +3,7 @@
 ## Informations
 
 - Numéro du module : 436318
-- Dernière mise à jour : 24/11/2025
+- Dernière mise à jour : 19/01/2026
 - Éditeur : [Evarisk](https://evarisk.com)
 - Thème : Eldy Menu
 - Licence : GPLv3
@@ -11,9 +11,9 @@
 
 ### Version
 
-- Version : 21.2.0
+- Version : 22.0.0
 - PHP : 7.4.33
-- Compatibilité : Dolibarr 20.0.0 - 21.0.2
+- Compatibilité : Dolibarr 21.0.2 - 22.0.4
 
 ## Liens
 

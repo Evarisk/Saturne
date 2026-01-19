@@ -1,4 +1,4 @@
-/* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2022-2025 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,132 +19,103 @@
 /**
  * \file    js/modules/menu.js
  * \ingroup saturne
- * \brief   JavaScript file menu for module Saturne.
+ * \brief   JavaScript menu file
  */
 
+'use strict';
+
 /**
- * Initialise l'objet "menu" ainsi que la méthode "init" obligatoire pour la bibliothèque EoxiaJS.
+ * Init menu JS
  *
  * @since   1.0.0
- * @version 1.0.0
+ * @version 22.0.0
  */
 window.saturne.menu = {};
 
 /**
- * La méthode appelée automatiquement par la bibliothèque EoxiaJS.
+ * Menu init
  *
  * @since   1.0.0
- * @version 1.0.0
+ * @version 22.0.0
  *
  * @return {void}
  */
-window.saturne.menu.init = function() {
-	window.saturne.menu.event();
+window.saturne.menu.init = function init() {
+  window.saturne.menu.event();
+  window.saturne.menu.setMenu();
 };
 
 /**
- * La méthode contenant tous les événements pour le migration.
+ * Menu event initialization. Binds all necessary event listeners
  *
  * @since   1.0.0
- * @version 1.0.0
+ * @version 22.0.0
  *
  * @return {void}
  */
-window.saturne.menu.event = function() {
-	$(document).on( 'click', ' .blockvmenu', window.saturne.menu.toggleMenu);
-	$(document).ready(function() { window.saturne.menu.setMenu()});
-}
+window.saturne.menu.event = function initializeEvents() {};
 
 /**
- * Action Toggle main menu.
+ * Action set menu
  *
  * @since   8.5.0
- * @version 9.4.0
+ * @version 22.0.0
  *
  * @return {void}
  */
-window.saturne.menu.toggleMenu = function() {
+window.saturne.menu.setMenu = function setMenu() {
+  const menuLeft        = $('#id-left .vmenu');
+  const menuElement     = menuLeft.find('a.vmenu, span.vmenudisabled, span.vmenu, a.vsmenu, a.help');
+  const minimizeElement = menuElement.find('.saturne-toggle-menu');
+  const searchBox       = menuLeft.find('.blockvmenusearch');
 
-	var menu = $(this).closest('#id-left').find('a.vmenu, span.vmenudisabled, span.vmenu, a.vsmenu, a.help');
-	var elementParent = $(this).closest('#id-left').find('div.vmenu')
-	var text = '';
+  // If there is no minimize element, exit
+  if (minimizeElement.length === 0) {
+    return;
+  }
 
-	if ($(this).find('span.vmenu').find('.fa-chevron-circle-left').length > 0) {
+  minimizeElement.closest('.blockvmenulast').css('cursor', 'pointer');
 
-		menu.each(function () {
-			text = $(this).html().split('</i>');
-			if (text[1].match(/&gt;/)) {
-				text[1] = text[1].replace(/&gt;/, '')
-			}
-			$(this).attr('title', text[1])
-			$(this).html(text[0]);
-		});
+  const minimizeMenu = () => {
+    menuElement.each(function () {
+      $(this).contents().filter(function() {
+        return this.nodeType === 3;
+      }).wrap('<span class="hidden-text" style="display:none"></span>');
+    });
 
-		elementParent.css('width', '30px');
-		elementParent.find('.blockvmenusearch').hide();
-		$('span.vmenu').attr('title', ' Agrandir le menu')
+    searchBox.slideUp(200);
+    menuLeft.animate({ width: '30px' }, 200);
 
-		$('span.vmenu').html($('span.vmenu').html());
+    minimizeElement.attr('title', 'Agrandir le menu');
+    minimizeElement.removeClass('fa-chevron-circle-left').addClass('fa-chevron-circle-right');
 
-		$(this).find('span.vmenu').find('.fa-chevron-circle-left').removeClass('fa-chevron-circle-left').addClass('fa-chevron-circle-right');
-		localStorage.setItem('maximized', 'false')
+    localStorage.setItem('maximized', 'false');
+  };
 
-	} else if ($(this).find('span.vmenu').find('.fa-chevron-circle-right').length > 0) {
+  const maximizeMenu = () => {
+    menuElement.each(function () {
+      $(this).find('span.hidden-text').contents().unwrap();
+    });
 
-		menu.each(function () {
-			$(this).html($(this).html().replace('&gt;','') + ' ' + $(this).attr('title'));
-		});
+    searchBox.slideDown(200);
+    menuLeft.animate({ width: '240px' }, 200);
 
-		elementParent.css('width', '188px');
-		elementParent.find('.blockvmenusearch').show();
-		$('div.menu_titre').attr('style', 'width: 188px !important; cursor : pointer' )
-		$('span.vmenu').attr('title', ' Réduire le menu')
-		$('span.vmenu').html('<i class="fas fa-chevron-circle-left"></i> Réduire le menu');
+    minimizeElement.attr('title', 'Réduire le menu');
+    minimizeElement.removeClass('fa-chevron-circle-right').addClass('fa-chevron-circle-left');
 
-		localStorage.setItem('maximized', 'true')
+    localStorage.setItem('maximized', 'true');
+  };
 
-		$(this).find('span.vmenu').find('.fa-chevron-circle-right').removeClass('fa-chevron-circle-right').addClass('fa-chevron-circle-left');
-	}
-};
+  if (localStorage.maximized === 'false' && menuLeft.width() > 50) {
+    minimizeMenu();
+  }
 
-/**
- * Action set  menu.
- *
- * @since   8.5.0
- * @version 9.0.1
- *
- * @return {void}
- */
-window.saturne.menu.setMenu = function() {
-	if ($('.blockvmenu.blockvmenulast .saturne-toggle-menu').length > 0) {
-		$('.blockvmenu.blockvmenulast .saturne-toggle-menu').closest('.menu_titre').attr('style', 'cursor:pointer ! important')
-		if (localStorage.maximized == 'false') {
-			$('#id-left').attr('style', 'display:none !important')
-		}
-
-		if (localStorage.maximized == 'false') {
-			var text = '';
-			var menu = $('#id-left').find('a.vmenu, span.vmenudisabled, span.vmenu, a.vsmenu, a.help');
-			var elementParent = $(document).find('div.vmenu')
-
-			menu.each(function () {
-				text = $(this).html().split('</i>');
-				$(this).attr('title', text[1])
-				$(this).html(text[0]);
-				console.log(text)
-			});
-
-			$('#id-left').attr('style', 'display:block !important')
-			$('div.menu_titre').attr('style', 'width: 50px !important')
-			$('span.vmenu').attr('title', ' Agrandir le menu')
-
-			$('span.vmenu').html($('span.vmenu').html())
-			$('span.vmenu').find('.fa-chevron-circle-left').removeClass('fa-chevron-circle-left').addClass('fa-chevron-circle-right');
-
-			elementParent.css('width', '30px');
-			elementParent.find('.blockvmenusearch').hide();
-		}
-		localStorage.setItem('currentString', '')
-		localStorage.setItem('keypressNumber', 0)
-	}
+  // Toggle au clic
+  minimizeElement.closest('.blockvmenulast').off('click').on('click', function () {
+    if (menuLeft.width() > 50) {
+      minimizeMenu();
+    } else {
+      maximizeMenu();
+    }
+  });
 };
