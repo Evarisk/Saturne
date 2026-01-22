@@ -474,10 +474,11 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
     $saturneMoreHtmlRef .= '</div>';
 
     $moreParamsBannerTab = (!empty($moreParams['bannerTab']) ? $moreParams['bannerTab'] : '');
+    $moreParamsMoreHtml  = ((!empty($moreParams['moreHtml']) && $moreHtml != 'none' && $moreParams['moreHtml'] != 'none') ? $moreHtml : '');
 
     if (!$handlePhoto) {
         $moreParamsBannerTab = (empty($moreParamsBannerTab) ? '&module_name=' . $moduleName . '&object_type=' . $object->element : $moreParamsBannerTab);
-        dol_banner_tab($object, $paramId, (($moreHtml != 'none' && $moreParams['moreHtml'] != 'none') ? $moreHtml : ''), $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, $moreParamsBannerTab);
+        dol_banner_tab($object, $paramId, $moreParamsMoreHtml, $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, $moreParamsBannerTab);
     } else {
         global $conf, $form;
 
@@ -506,7 +507,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
         }
 
         $moreHtmlLeft = '<div class="floatleft inline-block valignmiddle divphotoref">' . saturne_show_medias_linked((dol_strlen($modulePart) > 0 ? $modulePart : $moduleNameLowerCase), $baseDir . '/' . $subDir, 'small', $photoLimit ?? 0, 0, 0, 0, 88, 88, 0, 0, 0, $subDir, $object, 'photo', 0, 0,0, 1) . '</div>';
-        print $form->showrefnav($object, $paramId, (($moreHtml != 'none' && $moreParams['moreHtml'] != 'none') ? $moreHtml : ''), $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, $moreParamsBannerTab, 0, $moreHtmlLeft, $object->getLibStatut(6));
+        print $form->showrefnav($object, $paramId, $moreParamsMoreHtml, $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, $moreParamsBannerTab, 0, $moreHtmlLeft, $object->getLibStatut(6));
         print '</div>';
     }
 

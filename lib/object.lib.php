@@ -214,8 +214,24 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
     }
 
     if ($user->rights->$moduleNameLowerCase->$objectType->read) {
-        $head[$h][0] = dol_buildpath('/' . $moduleNameLowerCase . '/view/' . (!empty($moreparam['parentType']) ? $moreparam['parentType'] : $objectType) . '/' . (!empty($moreparam['parentType']) ? $moreparam['parentType'] : $objectType) . '_card.php', 1) . '?id=' . $object->id . (!empty($moreparam['parentType']) ? '&object_type=' . $objectType : '');
-        $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-info-circle pictofixedwidth"></i>' . $langs->trans((!empty($moreparam['specialName']) ? ucfirst($moreparam['specialName']) : ucfirst($objectType))) : '<i class="fas fa-info-circle"></i>';
+        $defaultMoreParams = [
+            'parentType'         => $objectType, // Most of time, parentType is equal to objectType
+            'specialName'        => $objectType,
+            'documentType'       => '',
+            'attendantTableMode' => 'advanced',
+            'attendantTabName'   => 'Attendants',
+            'handlePhoto'        => false,
+            'showNav'            => 1,
+        ];
+
+        $moreparam = array_merge($defaultMoreParams, $moreparam);
+
+        $moreparam['objectType']  = ($moreparam['parentType'] !== $objectType ? '&object_type=' . $moreparam['parentType'] : '');
+        $moreparam['handlePhoto'] = ($moreparam['handlePhoto'] ? '&handle_photo=' . 1 : '');
+        $moreparam['showNav']     = ($moreparam['showNav'] ? '&show_nav=' . 1 : '');
+
+        $head[$h][0] = dol_buildpath('/' . $moduleNameLowerCase . '/view/' . $moreparam['parentType'] . '/' . $moreparam['parentType'] . '_card.php', 1) . '?id=' . $object->id . $moreparam['objectType'];
+        $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-info-circle pictofixedwidth"></i>' . $langs->trans(dol_ucfirst($moreparam['specialName'])) : '<i class="fas fa-info-circle"></i>';
         $head[$h][2] = 'card';
         $h = $h + 10;
 
@@ -233,8 +249,8 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
                 $nbAttendants = 0;
             }
 
-            $head[$h][0] = dol_buildpath('/saturne/view/saturne_attendants.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType . '&document_type=' . (!empty($moreparam['documentType']) ? $moreparam['documentType'] : '') . '&attendant_table_mode=' . (empty($moreparam['attendantTableMode']) ? 'advanced' : $moreparam['attendantTableMode']);
-            $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-file-signature pictofixedwidth"></i>' . $langs->trans((empty($moreparam['attendantTabName']) ? 'Attendants' : $moreparam['attendantTabName'])) : '<i class="fas fa-file-signature"></i>';
+            $head[$h][0] = dol_buildpath('/saturne/view/saturne_attendants.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType . '&document_type=' . $moreparam['documentType'] . '&attendant_table_mode=' . $moreparam['attendantTableMode'];
+            $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-file-signature pictofixedwidth"></i>' . $langs->trans($moreparam['attendantTabName']) : '<i class="fas fa-file-signature"></i>';
             if ($nbAttendants > 0) {
                 $head[$h][1] .= '<span class="badge marginleftonlyshort">' . $nbAttendants . '</span>';
             }
@@ -250,7 +266,7 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
             if (!empty($object->note_public)) {
                 $nbNote++;
             }
-            $head[$h][0] = dol_buildpath('/saturne/view/saturne_note.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType . ((dol_strlen($moreparam['handlePhoto']) > 0) ? '&handle_photo=' . $moreparam['handlePhoto'] : false);
+            $head[$h][0] = dol_buildpath('/saturne/view/saturne_note.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType . $moreparam['handlePhoto'];
             $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-comment pictofixedwidth"></i>' . $langs->trans('Notes') : '<i class="fas fa-comment"></i>';
             if ($nbNote > 0) {
                 $head[$h][1] .= (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '<span class="badge marginleftonlyshort">' . $nbNote . '</span>' : '');
@@ -265,7 +281,7 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
             $upload_dir = $conf->$moduleNameLowerCase->dir_output . '/' . $objectType . '/' . dol_sanitizeFileName($object->ref);
             $nbFiles = count(dol_dir_list($upload_dir, 'files', 0, '', '(\.meta|_preview.*\.png)$'));
             $nbLinks = Link::count($db, $objectType, $object->id);
-            $head[$h][0] = dol_buildpath('/saturne/view/saturne_document.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType . (($moreparam['showNav'] >= 0) ? '&show_nav=' . $moreparam['showNav'] : 1) . ((dol_strlen($moreparam['handlePhoto']) > 0) ? '&handle_photo=' . $moreparam['handlePhoto'] : false);
+            $head[$h][0] = dol_buildpath('/saturne/view/saturne_document.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType . $moreparam['showNav'] . $moreparam['handlePhoto'];
             $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-file-alt pictofixedwidth"></i>' . $langs->trans('Documents') : '<i class="fas fa-file-alt"></i>';
             if (($nbFiles + $nbLinks) > 0) {
                 $head[$h][1] .= '<span class="badge marginleftonlyshort">' . ($nbFiles + $nbLinks) . '</span>';
@@ -275,7 +291,7 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
         }
 
         if ($showAgendaTab) {
-            $head[$h][0] = dol_buildpath('/saturne/view/saturne_agenda.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType . (($moreparam['showNav'] >= 0) ? '&show_nav=' . $moreparam['showNav'] : 1) . ((dol_strlen($moreparam['handlePhoto']) > 0) ? '&handle_photo=' . $moreparam['handlePhoto'] : false);
+            $head[$h][0] = dol_buildpath('/saturne/view/saturne_agenda.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType . $moreparam['showNav'] . $moreparam['handlePhoto'];
             $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-calendar-alt pictofixedwidth"></i>' . $langs->trans('Events') . '/' . $langs->trans('Agenda') : '<i class="fas fa-calendar-alt"></i>';
             if (isModEnabled('agenda') && (!empty($user->rights->agenda->myactions->read) || !empty($user->rights->agenda->allactions->read))) {
                 $nbEvent = 0;
