@@ -394,6 +394,9 @@ window.saturne.media.createImg = function() {
         $('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'));
       }
       $('.linked-medias.' + objectSubType).html($(resp).find('.linked-medias.' + objectSubType).children());
+      if ($('.question__list-medias').length > 0) {
+        $('.question__list-medias').replaceWith($(resp).find('.question__list-medias'));
+      }
     },
     error: function () {}
   });
