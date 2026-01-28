@@ -73,8 +73,8 @@ if (!(isset($error) && $error) && $subaction == 'uploadPhoto' && ! empty($conf->
                 $confHeightLarge  = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_LARGE';
 
                 // Create thumbs
-				$imgThumbLarge  = vignette($uploadDir . '/' . $_FILES['userfile']['name'][$key], $conf->global->$confWidthLarge, $conf->global->$confHeightLarge, '_large');
-				$imgThumbMedium = vignette($uploadDir . '/' . $_FILES['userfile']['name'][$key], $conf->global->$confWidthMedium, $conf->global->$confHeightMedium, '_medium');
+				$imgThumbLarge  = saturne_vignette($uploadDir . '/' . $_FILES['userfile']['name'][$key], $conf->global->$confWidthLarge, $conf->global->$confHeightLarge, '_large');
+				$imgThumbMedium = saturne_vignette($uploadDir . '/' . $_FILES['userfile']['name'][$key], $conf->global->$confWidthMedium, $conf->global->$confHeightMedium, '_medium');
 				$result         = $ecmdir->changeNbOfFiles('+');
 			} else {
 				setEventMessages($langs->transnoentitiesnoconv("ErrorThisFileExists", $_FILES['userfile']['name'][$key], $langs->transnoentitiesnoconv("File")), null, 'errors');
@@ -127,8 +127,8 @@ if ($subaction == 'add_img') {
     foreach($mediaSizes as $size) {
         $confWidth  = 'SATURNE_MEDIA_MAX_WIDTH_' . dol_strtoupper($size);
         $confHeight = 'SATURNE_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size);
-        vignette($pathToECMImg . '/' . $fileName, $conf->global->$confWidth, $conf->global->$confHeight, '_' . $size);
-        vignette($pathToObjectImg . '/' . $fileName, $conf->global->$confWidth, $conf->global->$confHeight, '_' . $size);
+        saturne_vignette($pathToECMImg . '/' . $fileName, $conf->global->$confWidth, $conf->global->$confHeight, '_' . $size);
+        saturne_vignette($pathToObjectImg . '/' . $fileName, $conf->global->$confWidth, $conf->global->$confHeight, '_' . $size);
     }
 }
 
@@ -184,7 +184,7 @@ if ($subaction == 'addFiles') {
             foreach($mediaSizes as $size) {
                 $confWidth  = 'SATURNE_MEDIA_MAX_WIDTH_' . dol_strtoupper($size);
                 $confHeight = 'SATURNE_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size);
-                vignette($pathToObjectImg . '/' . $fileName, $conf->global->$confWidth, $conf->global->$confHeight, '_' . $size);
+                saturne_vignette($pathToObjectImg . '/' . $fileName, $conf->global->$confWidth, $conf->global->$confHeight, '_' . $size);
             }
         }
         if ($objectId > 0) {
@@ -301,7 +301,7 @@ if (!(isset($error) && $error) && $subaction == 'regenerate_thumbs') {
     foreach($mediaSizes as $size) {
         $confWidth  = 'SATURNE_MEDIA_MAX_WIDTH_' . dol_strtoupper($size);
         $confHeight = 'SATURNE_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size);
-        vignette($data['fullname'], $conf->global->$confWidth, $conf->global->$confHeight, '_' . $size);
+        saturne_vignette($data['fullname'], $conf->global->$confWidth, $conf->global->$confHeight, '_' . $size);
     }
 }
 
