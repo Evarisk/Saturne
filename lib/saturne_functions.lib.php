@@ -29,6 +29,7 @@ require_once __DIR__ . '/documents.lib.php';
 require_once __DIR__ . '/object.lib.php';
 require_once __DIR__ . '/debug.lib.php';
 require_once __DIR__ . '/component.lib.php';
+require_once __DIR__ . '/dolibarr.lib.php';
 
 /**
  * Print llxHeader with Saturne custom enhancements

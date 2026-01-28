@@ -376,11 +376,34 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
  * @return string            Thumb full name
  *
  */
-function saturne_get_thumb_name(string $filename, string $thumbType = 'small'): string
+function saturne_get_thumb_name(string $filename, string $thumbType = 'small', string $filePath = ''): string
 {
-	$imgName       = pathinfo($filename, PATHINFO_FILENAME);
-	$imgExtension  = pathinfo($filename, PATHINFO_EXTENSION);
-    return $imgName . '_' . $thumbType . '.' . $imgExtension;
+    $fileName      = pathinfo($filename, PATHINFO_FILENAME);
+    $fileExtension = pathinfo($filename, PATHINFO_EXTENSION);
+
+    if (!empty($filePath)) {
+        $filePathThumb = $filePath . '/thumbs';
+        if (!dol_is_dir($filePathThumb)) {
+            dol_mkdir($filePathThumb);
+        }
+
+        $files = dol_dir_list($filePathThumb, 'files', 0, '', '', 'name', SORT_DESC , 1);
+        if (!empty($files)) {
+            if (in_array($fileName . '_' . $thumbType . '.' . $fileExtension, array_column($files, 'name'))) {
+                return $fileName . '_' . $thumbType . '.' . $fileExtension;
+            }
+        }
+
+        $confWidth  = getDolGlobalInt('SATURNE_MEDIA_MAX_WIDTH_' . dol_strtoupper($thumbType));
+        $confHeight = getDolGlobalInt('SATURNE_MEDIA_MAX_HEIGHT_' . dol_strtoupper($thumbType));
+        if (!$confWidth || !$confHeight) {
+            return -1; //@todo throw error ?
+        }
+
+        return saturne_vignette($filePath . '/' . $filename, $confWidth, $confHeight, '_' . $thumbType);
+    }
+
+    return $fileName . '_' . $thumbType . '.' . $fileExtension;
 }
 
 /**
