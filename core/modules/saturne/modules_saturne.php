@@ -819,6 +819,84 @@ class SaturneDocumentModel extends CommonDocGenerator
     }
 
     /**
+     * Init documents values for pdf and ODT
+     *
+     * @param  Object     $object            Object of the page you are on.
+     * @param  Translate  $outputLangs       Lang object to use for output.
+     * @param  string     $srcTemplatePath   Path of the source template
+     * @param  array      $moreParam         More param (Object/user/etc)
+     * @param string      $file              Path of the source template
+     *
+     * @return int|odf|TCPDF                 Return an -1 if there is an error or return a PDF or an ODF object if success
+     * @throws Exception
+     */
+    public function initDocumentGenerator($object, $outputLangs, $srcTemplatePath,$moreParam, $file)
+    {
+        global $action, $conf, $hookmanager, $moduleNameLowerCase, $mysoc, $user;
+
+        if ($this->type == 'odt') {// Make substitution
+            $substitutionArray = [];
+            complete_substitutions_array($substitutionArray, $outputLangs, $object);
+            // Call the ODTSubstitution hook
+            $parameters = ['file' => $file, 'object' => $object, 'outputlangs' => $outputLangs, 'substitutionarray' => &$substitutionArray];
+            $hookmanager->executeHooks('ODTSubstitution', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
+
+            // Open and load template
+            require_once ODTPHP_PATH . 'odf.php';
+            try {
+                $odfHandler = new odf(
+                    $srcTemplatePath,
+                    [
+                        'PATH_TO_TMP' => $conf->$moduleNameLowerCase->dir_temp,
+                        'ZIP_PROXY' => 'PclZipProxy', // PhpZipProxy or PclZipProxy. Got "bad compression method" error when using PhpZipProxy
+                        'DELIMITER_LEFT' => '{',
+                        'DELIMITER_RIGHT' => '}'
+                    ]
+                );
+            } catch (Exception $e) {
+                $this->error = $e->getMessage();
+                dol_syslog($e->getMessage());
+                return -1;
+            }
+
+            // Define substitution array
+            $substitutionArray = getCommonSubstitutionArray($outputLangs, 0, null, $object);
+            $arrayObjectFromProperties = $this->get_substitutionarray_each_var_object($object, $outputLangs);
+            $arraySoc = $this->get_substitutionarray_mysoc($mysoc, $outputLangs);
+            $arraySoc['mycompany_logo'] = preg_replace('/_small/', '_mini', $arraySoc['mycompany_logo']);
+
+            $tmpArray = array_merge($substitutionArray, $arrayObjectFromProperties, $arraySoc, $moreParam['tmparray']);
+            if (isModEnabled('multicompany')) {
+                $tmpArray['entity'] = $conf->entity;
+            } else {
+                $tmpArray['entity'] = '';
+            }
+
+            $this->fillTags($odfHandler, $outputLangs, $tmpArray, $moreParam);
+            return $odfHandler;
+        }
+        $pdf             = pdf_getInstance($this->format);
+        $defaultFontSize = pdf_getPDFFontSize($outputLangs) + 2;
+
+        if (class_exists('TCPDF')) {
+            $pdf->setPrintHeader(false);
+            $pdf->setPrintFooter(false);
+        }
+
+        $pdf->SetFont(pdf_getPDFFont($outputLangs));
+        $pdf->Open();
+        $pdf->SetDrawColor(128, 128, 128);
+        $pdf->SetTitle($outputLangs->convToOutputCharset($this->document_type));
+        $pdf->SetSubject($outputLangs->transnoentities($this->document_type));
+        $pdf->SetCreator('Dolibarr ' . DOL_VERSION);
+        $pdf->SetAuthor($outputLangs->convToOutputCharset($user->getFullName($outputLangs)));
+        $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);
+        $pdf->setPageOrientation($this->orientation, 1, $this->marge_basse);
+        $pdf->SetAutoPageBreak(1, $this->marge_basse);
+        return $pdf;
+    }
+
+    /**
      * Function to build a document on disk
      *
      * @param  SaturneDocuments $objectDocument  Object source to build document
@@ -866,45 +944,7 @@ class SaturneDocumentModel extends CommonDocGenerator
             return -1;
         }
 
-        // Make substitution
-        $substitutionArray = [];
-        complete_substitutions_array($substitutionArray, $outputLangs, $object);
-        // Call the ODTSubstitution hook
-        $parameters = ['file' => $file, 'object' => $object, 'outputlangs' => $outputLangs, 'substitutionarray' => &$substitutionArray];
-        $hookmanager->executeHooks('ODTSubstitution', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks
-
-        // Open and load template
-        require_once ODTPHP_PATH . 'odf.php';
-        try {
-            $odfHandler = new odf(
-                $srcTemplatePath,
-                [
-                    'PATH_TO_TMP' => $conf->$moduleNameLowerCase->dir_temp,
-                    'ZIP_PROXY' => 'PclZipProxy', // PhpZipProxy or PclZipProxy. Got "bad compression method" error when using PhpZipProxy
-                    'DELIMITER_LEFT' => '{',
-                    'DELIMITER_RIGHT' => '}'
-                ]
-            );
-        } catch (Exception $e) {
-            $this->error = $e->getMessage();
-            dol_syslog($e->getMessage());
-            return -1;
-        }
-
-        // Define substitution array
-        $substitutionArray          = getCommonSubstitutionArray($outputLangs, 0, null, $object);
-        $arrayObjectFromProperties  = $this->get_substitutionarray_each_var_object($object, $outputLangs);
-        $arraySoc                   = $this->get_substitutionarray_mysoc($mysoc, $outputLangs);
-        $arraySoc['mycompany_logo'] = preg_replace('/_small/', '_mini', $arraySoc['mycompany_logo']);
-
-        $tmpArray = array_merge($substitutionArray, $arrayObjectFromProperties, $arraySoc, $moreParam['tmparray']);
-        if (isModEnabled('multicompany')) {
-            $tmpArray['entity'] = $conf->entity;
-        } else {
-            $tmpArray['entity'] = '';
-        }
-
-        $this->fillTags($odfHandler, $outputLangs, $tmpArray, $moreParam);
+        $this->type == 'pdf' ? $this->initDocumentGenerator($object, $outputLangs, $srcTemplatePath, $moreParam, $file) : $odfHandler = $this->initDocumentGenerator($object, $outputLangs, $srcTemplatePath, $moreParam, $file);
 
         // Replace labels translated
         $tmpArray = $outputLangs->get_translations_for_substitutions();
