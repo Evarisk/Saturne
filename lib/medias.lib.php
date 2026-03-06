@@ -175,7 +175,7 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 	$return  = '<!-- Photo -->' . "\n";
 	$nbphoto = 0;
 
-	$filearray = dol_dir_list($dir, 'files', 0, '', '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_DESC : SORT_ASC), 1);
+	$filearray = dol_dir_list($dir, 'files', 0,  $moreParams['filter'] ??, '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_DESC : SORT_ASC), 1);
 
 	$i = 0;
 	if (count($filearray)) {
