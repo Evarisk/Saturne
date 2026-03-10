@@ -51,8 +51,8 @@ window.saturne.contentEditable.event = function initializeEvents() {
     .on('input',      '.contenteditable', window.saturne.contentEditable.onInput)
     .on('keydown',    '.contenteditable', window.saturne.contentEditable.onKeyDown)
     .on('mouseenter', '.contenteditable', window.saturne.contentEditable.onMouseEnter)
+    .on('dblclick',   '.contenteditable', window.saturne.contentEditable.onDblClick)
     .on('click',      '.contenteditable-cal-btn', window.saturne.contentEditable.onCalBtnClick)
-    // Réinitialise Flatpickr après rechargement AJAX de la liste (pagination, filtres…)
     .on('saturne:listReloaded', function() {
       window.saturne.contentEditable.initFlatpickr();
     });
@@ -91,29 +91,21 @@ window.saturne.contentEditable.initFlatpickr = function() {
 
       onChange: function(dates) {
         if (!dates[0]) return;
-
-        // Met à jour le texte sans déclencher onBlur
         $el.text(window.saturne.utils.formatDateTime(dates[0])).data('changed', false);
-
         window.saturne.contentEditable.saveField($el, dates[0]);
       },
 
       onOpen: function(_, __, instance) {
         $wrap.find('.contenteditable-cal-btn').addClass('active');
-
-        // requestAnimationFrame : attend le rendu Flatpickr avant de lire les dimensions
         requestAnimationFrame(function() {
           const cal  = instance.calendarContainer;
           const rect = $wrap[0].getBoundingClientRect();
           const calW = cal.offsetWidth;
           const calH = cal.offsetHeight;
-
           const top  = (rect.bottom + calH + 8 > window.innerHeight)
             ? rect.top - calH - 4
             : rect.bottom + 4;
-
           const left = Math.min(rect.left, window.innerWidth - calW - 8);
-
           cal.style.position = 'fixed';
           cal.style.top      = top  + 'px';
           cal.style.left     = left + 'px';
@@ -146,9 +138,10 @@ window.saturne.contentEditable.onCalBtnClick = function(e) {
 
 /**
  * Sauvegarde le champ via AJAX.
- * Centralise l'appel pour éviter la duplication entre onBlur et onChange.
- * Lit data-element et data-table sur le champ pour être réutilisable
- * sur n'importe quel objet Dolibarr.
+ * - Annule la requête précédente si elle est encore en cours (évite les croisements)
+ * - Désactive le champ pendant la requête
+ * - Réutilisable sur n'importe quel objet Dolibarr via data-element / data-table
+ * - Logue les erreurs dans la console avec le contexte
  *
  * @since   22.0.0
  * @version 22.0.0
@@ -158,7 +151,16 @@ window.saturne.contentEditable.onCalBtnClick = function(e) {
  * @return {void}
  */
 window.saturne.contentEditable.saveField = function($el, parsed) {
-  $.ajax({
+  // Abort la requête précédente si encore en vol
+  const prevXhr = $el.data('xhr');
+  if (prevXhr) {
+    prevXhr.abort();
+  }
+
+  // Désactive le champ pendant la requête
+  $el.attr('contenteditable', 'false').addClass('ce-saving');
+
+  const xhr = $.ajax({
     url: '/dolibarr/htdocs/custom/saturne/core/ajax/saturne_update_field.php',
     method: 'POST',
     contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -172,13 +174,31 @@ window.saturne.contentEditable.saveField = function($el, parsed) {
       fieldValue: Math.floor(parsed.getTime())
     }
   })
-    .done(function()  { window.saturne.contentEditable.showFeedback($el, true); })
-    .fail(function()  { window.saturne.contentEditable.showFeedback($el, false); });
+    .done(function() {
+      window.saturne.contentEditable.showFeedback($el, true);
+    })
+    .fail(function(xhr, status) {
+      if (status === 'abort') return; // Annulation volontaire, pas une erreur
+      console.error('[contentEditable] Échec sauvegarde', {
+        field:   $el.data('field'),
+        element: $el.data('element'),
+        id:      $el.data('id'),
+        status:  status,
+        value:   $.trim($el.text())
+      });
+      window.saturne.contentEditable.showFeedback($el, false);
+    })
+    .always(function() {
+      // Réactive le champ dans tous les cas
+      $el.attr('contenteditable', 'true').removeClass('ce-saving');
+      $el.data('xhr', null);
+    });
+
+  $el.data('xhr', xhr);
 };
 
 /**
- * Marque le champ comme modifié et sauvegarde la valeur originale
- * pour permettre l'annulation via Escape.
+ * Marque le champ comme modifié
  *
  * @since   22.0.0
  * @version 22.0.0
@@ -186,6 +206,23 @@ window.saturne.contentEditable.saveField = function($el, parsed) {
  */
 window.saturne.contentEditable.onInput = function() {
   $(this).data('changed', true);
+};
+
+/**
+ * Double-clic : entre en mode édition et place le curseur à la fin
+ *
+ * @since   22.0.0
+ * @version 22.0.0
+ * @return  {void}
+ */
+window.saturne.contentEditable.onDblClick = function() {
+  const el  = this;
+  const sel = window.getSelection();
+  const rng = document.createRange();
+  rng.selectNodeContents(el);
+  rng.collapse(false); // place le curseur à la fin
+  sel.removeAllRanges();
+  sel.addRange(rng);
 };
 
 /**
@@ -230,13 +267,11 @@ window.saturne.contentEditable.showFeedback = function($el, isValid) {
   const $wrap = $el.closest('.contenteditable-wrap');
   const $td   = $el.closest('td');
 
-  // ── Feedback sur la <td> ──
   $td.removeClass('ce-valid ce-invalid');
   $td[0].offsetWidth;
   $td.addClass(isValid ? 'ce-valid' : 'ce-invalid');
 
   if (isValid) {
-    // Icône ✓ singleton appendée au body
     let $icon = $('#ce-feedback-icon');
     if (!$icon.length) {
       $icon = $('<div id="ce-feedback-icon" class="contenteditable-icon">' +
@@ -246,17 +281,13 @@ window.saturne.contentEditable.showFeedback = function($el, isValid) {
         '</div>');
       $('body').append($icon);
     }
-
     const rect = $wrap[0].getBoundingClientRect();
     $icon.css({ top: (rect.top - 10) + 'px', left: (rect.right - 10) + 'px' });
-
     $icon.removeClass('pop-valid');
     $icon[0].offsetWidth;
     $icon.addClass('pop-valid');
     $icon.one('animationend', function() { $icon.removeClass('pop-valid'); });
-
   } else {
-    // Tooltip erreur
     const msg = $el.data('error') || 'Format invalide';
     $wrap.attr('data-error-msg', msg).addClass('show-tooltip');
     clearTimeout($wrap.data('tooltipTimer'));
@@ -265,7 +296,6 @@ window.saturne.contentEditable.showFeedback = function($el, isValid) {
     }, 2500));
   }
 
-  // Nettoyage td
   clearTimeout($el.data('feedbackTimer'));
   $el.data('feedbackTimer', setTimeout(function() {
     $td.removeClass('ce-valid ce-invalid');
@@ -273,7 +303,7 @@ window.saturne.contentEditable.showFeedback = function($el, isValid) {
 };
 
 /**
- * Focus : sauvegarde la valeur originale pour Escape + reset états visuels
+ * Focus : mémorise la valeur originale (pour Escape) + reset états visuels
  *
  * @since   22.0.0
  * @version 22.0.0
@@ -281,7 +311,6 @@ window.saturne.contentEditable.showFeedback = function($el, isValid) {
  */
 window.saturne.contentEditable.onFocus = function() {
   const $el = $(this);
-  // Mémorise la valeur avant édition pour pouvoir annuler avec Escape
   $el.data('originalValue', $el.text());
   $el.removeClass('invalid');
   $el.closest('td').removeClass('ce-valid ce-invalid');
@@ -290,10 +319,10 @@ window.saturne.contentEditable.onFocus = function() {
 
 /**
  * Gestion clavier :
- *  - Enter     → sauvegarde (blur)
- *  - Escape    → annule l'édition et restaure la valeur originale
- *  - Shift+Enter → interdit (pas de retour à la ligne)
- *  - ArrowUp/Down → ±1 jour sur les champs date
+ *  - Enter       → sauvegarde (blur)
+ *  - Escape      → annule et restaure la valeur originale
+ *  - Tab         → sauvegarde et focus le prochain/précédent .contenteditable
+ *  - ArrowUp/Down → ±1 jour sur les champs datepicker
  *
  * @since   22.0.0
  * @version 22.0.0
@@ -302,8 +331,7 @@ window.saturne.contentEditable.onFocus = function() {
 window.saturne.contentEditable.onKeyDown = function(e) {
   const $el = $(this);
 
-  // Pas de retour à la ligne — stopPropagation pour éviter le conflit
-  // avec keyEvents.js qui écoute Enter sur $(document) pour déclencher .button_search
+  // Enter : sauvegarde
   if (e.key === 'Enter') {
     e.preventDefault();
     e.stopPropagation();
@@ -311,8 +339,7 @@ window.saturne.contentEditable.onKeyDown = function(e) {
     return;
   }
 
-  // Escape : annule et restaure — stopPropagation pour éviter le conflit
-  // avec keyEvents.js qui écoute Escape pour fermer les modales
+  // Escape : annule et restaure
   if (e.key === 'Escape') {
     e.preventDefault();
     e.stopPropagation();
@@ -329,13 +356,32 @@ window.saturne.contentEditable.onKeyDown = function(e) {
     return;
   }
 
+  // Tab : sauvegarde puis focus le contenteditable suivant ou précédent
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Déclenche le blur pour sauvegarder si modifié
+    $el.trigger('blur');
+
+    // Récupère tous les contenteditable visibles dans l'ordre DOM
+    const $all     = $('.contenteditable:visible');
+    const idx      = $all.index($el);
+    const $next    = e.shiftKey ? $all.eq(idx - 1) : $all.eq(idx + 1);
+
+    if ($next.length) {
+      // Petit délai pour laisser le blur/AJAX démarrer avant de changer de focus
+      setTimeout(function() { $next.focus(); }, 50);
+    }
+    return;
+  }
+
   // Flèches ↑↓ : ±1 jour sur les champs datepicker
   if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && $el.data('type') === 'datepicker') {
     e.preventDefault();
     const current = window.saturne.utils.parseDateTime($.trim($el.text())) || new Date();
     current.setDate(current.getDate() + (e.key === 'ArrowUp' ? 1 : -1));
     $el.text(window.saturne.utils.formatDateTime(current)).data('changed', true);
-
     const fp = $el.closest('.contenteditable-wrap').data('fp');
     if (fp) fp.setDate(current, false);
   }
