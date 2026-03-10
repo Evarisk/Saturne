@@ -39,7 +39,7 @@ td.ce-invalid {
 .contenteditable {
   border-radius: 3px;
   padding: 1px 3px;
-  cursor: text;
+  cursor: text; // géré ici, pas en JS inline
   outline: 1px solid transparent;
   transition: background 0.15s, outline 0.15s;
 
