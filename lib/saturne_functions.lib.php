@@ -69,6 +69,11 @@ function saturne_header(int $load_media_gallery = 0, string $head = '', string $
         $arrayofjs[] = '/' . $moduleNameLowerCase . '/js/' . $moduleNameLowerCase . '.min.js';
     }
 
+    $arrayofcss[]= 'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css';
+
+    $arrayofjs[] = 'https://cdn.jsdelivr.net/npm/flatpickr';
+    $arrayofjs[] = 'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js';
+
     llxHeader($head, $title, $help_url, $target, $disablejs, $disablehead, $arrayofjs, $arrayofcss, $morequerystring, $morecssonbody, $replacemainareaby, $disablenofollow, $disablenoindex);
 
     if ($load_media_gallery) {
