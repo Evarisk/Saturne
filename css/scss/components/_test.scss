@@ -1,27 +1,51 @@
 /* ─────────────────────────────────────────────
-   contentEditable — feedback visuel
+   contentEditable — feedback sur <td>
    ───────────────────────────────────────────── */
 
-/* Wrapper : flex inline pour rester dans la cellule du tableau */
+/* ── Cellule td : état de base ── */
+td.ce-valid {
+  animation: td-flash-valid 1.4s ease forwards;
+}
+
+td.ce-invalid {
+  animation: td-shake 0.4s ease forwards;
+  outline: 2px solid #ef4444;
+  outline-offset: -2px;
+}
+
+@keyframes td-flash-valid {
+  0%   { outline: 2px solid transparent; outline-offset: -2px; }
+  20%  { outline: 2px solid #22c55e;     outline-offset: -2px; }
+  70%  { outline: 2px solid #22c55e;     outline-offset: -2px; }
+  100% { outline: 2px solid transparent; outline-offset: -2px; }
+}
+
+@keyframes td-shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-5px); }
+  40%       { transform: translateX(5px); }
+  60%       { transform: translateX(-3px); }
+  80%       { transform: translateX(3px); }
+}
+
+/* ── Wrapper : minimal, pas de flex qui casse le layout ── */
 .contenteditable-wrap {
   position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  max-width: 100%;
+  display: inline-block;
+  white-space: nowrap;
 }
 
 /* ── Champ éditable ── */
 .contenteditable {
-  border-radius: 4px;
-  padding: 2px 4px;
+  border-radius: 3px;
+  padding: 1px 3px;
   cursor: text;
-  transition: background 0.15s, outline 0.15s;
   outline: 1px solid transparent;
+  transition: background 0.15s, outline 0.15s;
 
   &:hover {
     background: rgba(0, 0, 0, 0.04);
-    outline-color: rgba(0, 0, 0, 0.15);
+    outline-color: rgba(0, 0, 0, 0.12);
   }
 
   &:focus {
@@ -30,31 +54,14 @@
   }
 }
 
-/* ── États valid / invalid ── */
-.contenteditable.is-valid {
-  outline: 2px solid #22c55e !important;
-  background: rgba(34, 197, 94, 0.06) !important;
-}
-
-.contenteditable.is-invalid {
-  outline: 2px solid #ef4444 !important;
-  background: rgba(239, 68, 68, 0.06) !important;
-  animation: ce-shake 0.4s ease forwards;
-}
-
-@keyframes ce-shake {
-  0%, 100% { transform: translateX(0); }
-  20%       { transform: translateX(-6px); }
-  40%       { transform: translateX(6px); }
-  60%       { transform: translateX(-4px); }
-  80%       { transform: translateX(4px); }
-}
-
-/* ── Bouton calendrier ── */
-/* all:unset pour écraser les styles globaux Dolibarr sur button */
+/* ── Bouton calendrier : visible au hover de la <td> ── */
 .contenteditable-cal-btn {
   all: unset !important;
   box-sizing: border-box !important;
+  position: absolute !important;
+  top: 50% !important;
+  right: -20px !important;
+  transform: translateY(-50%) !important;
   width: 16px !important;
   height: 16px !important;
   display: inline-flex !important;
@@ -64,12 +71,9 @@
   border: 1px solid transparent !important;
   background: transparent !important;
   cursor: pointer !important;
-  flex-shrink: 0 !important;
-  opacity: 0 !important;
   padding: 0 !important;
-  margin: 0 !important;
-  line-height: 1 !important;
-  transition: opacity 0.15s, background 0.15s, border-color 0.15s !important;
+  opacity: 0 !important;
+  transition: opacity 0.15s, background 0.15s !important;
 
   svg {
     width: 11px !important;
@@ -83,40 +87,29 @@
   }
 
   &:hover {
-    background: rgba(0, 0, 0, 0.07) !important;
-    border-color: rgba(0, 0, 0, 0.15) !important;
+    background: rgba(0, 0, 0, 0.08) !important;
     svg { stroke: #333 !important; }
   }
 
   &.active {
     background: #1c1c1e !important;
-    border-color: #1c1c1e !important;
     svg { stroke: #fff !important; }
   }
 }
 
-/* Révèle le bouton au hover/focus/active */
+/* Révèle au hover de la cellule ou du wrap */
+td:hover .contenteditable-cal-btn,
+td:focus-within .contenteditable-cal-btn,
 .contenteditable-wrap:hover .contenteditable-cal-btn,
-.contenteditable-wrap:focus-within .contenteditable-cal-btn,
 .contenteditable-cal-btn.active {
   opacity: 1 !important;
 }
 
-/* Toujours visible à 40% pour les champs date */
-.contenteditable-wrap:has(.contenteditable[data-type="datepicker"]) .contenteditable-cal-btn {
-  opacity: 0.4 !important;
-}
-.contenteditable-wrap:hover .contenteditable-cal-btn,
-.contenteditable-wrap:focus-within .contenteditable-cal-btn,
-.contenteditable-cal-btn.active {
-  opacity: 1 !important;
-}
-
-/* ── Icône ✓ / ✕ — singleton appendé au body via JS ── */
+/* ── Icône ✓ — positionnée en fixed par JS ── */
 .contenteditable-icon {
   position: fixed !important;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -127,8 +120,8 @@
   z-index: 99999;
 
   svg {
-    width: 12px;
-    height: 12px;
+    width: 11px;
+    height: 11px;
     stroke: #fff;
     fill: none;
     stroke-width: 2.5;
@@ -136,54 +129,46 @@
     stroke-linejoin: round;
   }
 
-  .icon-x     { display: none; }
-  .icon-check { display: block; }
-
-  &.pop-invalid {
-    .icon-x     { display: block; }
-    .icon-check { display: none; }
-  }
-
   &.pop-valid {
     background: #22c55e;
-    animation: ce-iconPop 1.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  }
-
-  &.pop-invalid {
-    background: #ef4444;
-    animation: ce-iconPop 1.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation: ce-iconPop 1.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   }
 }
 
 @keyframes ce-iconPop {
   0%   { opacity: 0; transform: scale(0); }
-  20%  { opacity: 1; transform: scale(1.15); }
-  35%  { transform: scale(0.92); }
-  50%  { opacity: 1; transform: scale(1); }
-  75%  { opacity: 1; transform: scale(1); }
+  25%  { opacity: 1; transform: scale(1.15); }
+  40%  { transform: scale(0.92); }
+  55%  { opacity: 1; transform: scale(1); }
+  80%  { opacity: 1; transform: scale(1); }
   100% { opacity: 0; transform: scale(0.8); }
 }
 
-/* ── Message inline — caché par défaut, affiché seulement si .visible ── */
-.contenteditable-message {
-  display: none;
-  font-size: 11px;
-  margin-top: 2px;
-  font-family: monospace;
-  opacity: 0;
-  transform: translateY(-3px);
-  transition: opacity 0.2s, transform 0.2s;
-  pointer-events: none;
-  white-space: nowrap;
-
-  &.visible {
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
+/* ── Tooltip erreur ── */
+.contenteditable-wrap[data-error-msg] {
+  &::after {
+    content: attr(data-error-msg);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background: #1c1c1e;
+    color: #fff;
+    font-size: 11px;
+    font-family: monospace;
+    white-space: nowrap;
+    padding: 4px 8px;
+    border-radius: 5px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s, transform 0.15s;
+    z-index: 9999;
   }
 
-  &.msg-valid   { color: #22c55e; }
-  &.msg-invalid { color: #ef4444; }
+  &.show-tooltip::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 /* ── Overrides Flatpickr ── */
@@ -204,7 +189,6 @@
   &.today {
     border-color: #3b82f6 !important;
     color: #3b82f6 !important;
-
     &.selected { color: #fff !important; }
   }
 }

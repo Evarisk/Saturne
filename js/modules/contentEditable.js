@@ -22,12 +22,6 @@
 
 'use strict';
 
-/**
- * Init contentEditable JS
- *
- * @since   22.0.0
- * @version 22.0.0
- */
 window.saturne.contentEditable = {};
 
 /**
@@ -35,20 +29,18 @@ window.saturne.contentEditable = {};
  *
  * @since   22.0.0
  * @version 22.0.0
- *
- * @return {void}
+ * @return  {void}
  */
 window.saturne.contentEditable.init = function init() {
   window.saturne.contentEditable.event();
 };
 
 /**
- * contentEditable event initialization. Binds all necessary event listeners
+ * Binds all event listeners + initialise Flatpickr
  *
  * @since   22.0.0
  * @version 22.0.0
- *
- * @return {void}
+ * @return  {void}
  */
 window.saturne.contentEditable.event = function initializeEvents() {
   $(document)
@@ -63,14 +55,12 @@ window.saturne.contentEditable.event = function initializeEvents() {
 };
 
 /**
- * Initialise Flatpickr sur tous les champs contenteditable de type datepicker.
- * Append au body pour éviter tout overflow/z-index parent.
- * Positionne le calendrier via requestAnimationFrame (après rendu Flatpickr).
+ * Initialise Flatpickr sur tous les champs datepicker.
+ * Doit être rappelé après rechargement AJAX.
  *
  * @since   22.0.0
  * @version 22.0.0
- *
- * @return {void}
+ * @return  {void}
  */
 window.saturne.contentEditable.initFlatpickr = function() {
   $('.contenteditable[data-type="datepicker"]').each(function() {
@@ -98,7 +88,6 @@ window.saturne.contentEditable.initFlatpickr = function() {
 
         $el.text(window.saturne.utils.formatDateTime(dates[0])).data('changed', false);
 
-        // Sauvegarde AJAX directe, sans passer par onBlur
         $.ajax({
           url: '/dolibarr/htdocs/custom/saturne/core/ajax/saturne_update_field.php',
           method: 'POST',
@@ -113,15 +102,13 @@ window.saturne.contentEditable.initFlatpickr = function() {
             fieldValue: Math.floor(dates[0].getTime())
           }
         })
-          .done(function() { window.saturne.contentEditable.showFeedback($el, true); })
-          .fail(function() { window.saturne.contentEditable.showFeedback($el, false); });
+          .done(function()  { window.saturne.contentEditable.showFeedback($el, true); })
+          .fail(function()  { window.saturne.contentEditable.showFeedback($el, false); });
       },
 
       onOpen: function(_, __, instance) {
         $wrap.find('.contenteditable-cal-btn').addClass('active');
 
-        // requestAnimationFrame : attend que Flatpickr ait fini de rendre
-        // le calendrier avant de lire offsetWidth/Height (sinon = 0)
         requestAnimationFrame(function() {
           const cal  = instance.calendarContainer;
           const rect = $wrap[0].getBoundingClientRect();
@@ -143,12 +130,7 @@ window.saturne.contentEditable.initFlatpickr = function() {
 
       onClose: function() {
         $wrap.find('.contenteditable-cal-btn').removeClass('active');
-        // Planifie le retrait du feedback après 2.2s
-        clearTimeout($el.data('feedbackTimer'));
-        $el.data('feedbackTimer', setTimeout(function() {
-          $el.removeClass('is-valid is-invalid').data('changed', false);
-          $wrap.find('.contenteditable-message').removeClass('visible');
-        }, 2200));
+        $el.data('changed', false);
       }
     });
 
@@ -161,8 +143,7 @@ window.saturne.contentEditable.initFlatpickr = function() {
  *
  * @since   22.0.0
  * @version 22.0.0
- *
- * @return {void}
+ * @return  {void}
  */
 window.saturne.contentEditable.onCalBtnClick = function(e) {
   e.stopPropagation();
@@ -171,24 +152,22 @@ window.saturne.contentEditable.onCalBtnClick = function(e) {
 };
 
 /**
- * Marque l'élément comme modifié dès qu'une saisie a lieu
+ * Marque le champ comme modifié
  *
  * @since   22.0.0
  * @version 22.0.0
- *
- * @return {void}
+ * @return  {void}
  */
 window.saturne.contentEditable.onInput = function() {
   $(this).data('changed', true);
 };
 
 /**
- * Gestion du blur : validation, AJAX save et feedback visuel
+ * Blur : validation + AJAX + feedback sur la <td>
  *
  * @since   22.0.0
  * @version 22.0.0
- *
- * @return {void}
+ * @return  {void}
  */
 window.saturne.contentEditable.onBlur = function() {
   const $el    = $(this);
@@ -218,93 +197,93 @@ window.saturne.contentEditable.onBlur = function() {
         fieldValue: Math.floor(parsed.getTime())
       }
     })
-      .done(function() { window.saturne.contentEditable.showFeedback($el, true); })
-      .fail(function() { window.saturne.contentEditable.showFeedback($el, false); });
+      .done(function()  { window.saturne.contentEditable.showFeedback($el, true); })
+      .fail(function()  { window.saturne.contentEditable.showFeedback($el, false); });
 
   } else {
-    $el.addClass('invalid');
     window.saturne.contentEditable.showFeedback($el, false);
   }
 };
 
 /**
- * Affiche le feedback visuel succès ou erreur.
- * L'icône est positionnée en fixed via getBoundingClientRect.
- * L'outline is-valid/is-invalid est retiré après 2.2s.
+ * Affiche le feedback :
+ *  - Succès : flash bordure verte sur la <td> + icône ✓ qui pop
+ *  - Erreur : shake + bordure rouge sur la <td> + tooltip sur le wrap
  *
  * @since   22.0.0
  * @version 22.0.0
  *
- * @param  {jQuery}  $el      - L'élément .contenteditable ciblé
- * @param  {boolean} isValid  - true = succès, false = erreur
+ * @param  {jQuery}  $el      - L'élément .contenteditable
+ * @param  {boolean} isValid
  * @return {void}
  */
 window.saturne.contentEditable.showFeedback = function($el, isValid) {
   const $wrap = $el.closest('.contenteditable-wrap');
-  if (!$wrap.length) return;
+  const $td   = $el.closest('td');
 
-  const $icon = $wrap.find('.contenteditable-icon');
-  const $msg  = $wrap.find('.contenteditable-message');
+  // ── Feedback sur la <td> ──
+  $td.removeClass('ce-valid ce-invalid');
+  $td[0].offsetWidth; // reflow
+  $td.addClass(isValid ? 'ce-valid' : 'ce-invalid');
 
-  const msgSuccess = $el.data('success') || 'Enregistré';
-  const msgError   = $el.data('error')   || 'Format invalide';
+  if (isValid) {
+    // ── Icône ✓ singleton appendée au body ──
+    let $icon = $('#ce-feedback-icon');
+    if (!$icon.length) {
+      $icon = $('<div id="ce-feedback-icon" class="contenteditable-icon">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' +
+        '<polyline points="20 6 9 17 4 12"/>' +
+        '</svg>' +
+        '</div>');
+      $('body').append($icon);
+    }
 
-  // ── Positionne l'icône en fixed au coin haut-droit du wrap ──
-  const rect = $wrap[0].getBoundingClientRect();
-  $icon.css({
-    position: 'fixed',
-    top:      (rect.top  - 11) + 'px',
-    left:     (rect.right - 11) + 'px',
-    zIndex:   9999
-  });
+    // Positionne au coin haut-droit du wrap
+    const rect = $wrap[0].getBoundingClientRect();
+    $icon.css({ top: (rect.top - 10) + 'px', left: (rect.right - 10) + 'px' });
 
-  // ── Outline champ ──
-  $el.removeClass('is-valid is-invalid');
-  $el[0].offsetWidth; // reflow
-  $el.addClass(isValid ? 'is-valid' : 'is-invalid');
+    $icon.removeClass('pop-valid');
+    $icon[0].offsetWidth;
+    $icon.addClass('pop-valid');
+    $icon.one('animationend', function() { $icon.removeClass('pop-valid'); });
 
-  // ── Icône ──
-  $icon.removeClass('pop-valid pop-invalid');
-  $icon[0].offsetWidth;
-  $icon.addClass(isValid ? 'pop-valid' : 'pop-invalid');
-  $icon.one('animationend', function() {
-    $icon.removeClass('pop-valid pop-invalid');
-  });
+  } else {
+    // ── Tooltip erreur sur le wrap ──
+    const msg = $el.data('error') || 'Format invalide';
+    $wrap.attr('data-error-msg', msg).addClass('show-tooltip');
+    clearTimeout($wrap.data('tooltipTimer'));
+    $wrap.data('tooltipTimer', setTimeout(function() {
+      $wrap.removeClass('show-tooltip');
+    }, 2500));
+  }
 
-  // ── Message ──
-  $msg
-    .text(isValid ? msgSuccess : msgError)
-    .removeClass('msg-valid msg-invalid visible')
-    .addClass((isValid ? 'msg-valid' : 'msg-invalid') + ' visible');
-
-  // ── Nettoyage : retire is-valid/is-invalid après 2.2s ──
+  // ── Nettoyage td après animation ──
   clearTimeout($el.data('feedbackTimer'));
   $el.data('feedbackTimer', setTimeout(function() {
-    $el.removeClass('is-valid is-invalid');
-    $msg.removeClass('visible');
-  }, 2200));
+    $td.removeClass('ce-valid ce-invalid');
+  }, 1500));
 };
 
 /**
- * Gestion du focus : reset états visuels
+ * Focus : reset états visuels
  *
  * @since   22.0.0
  * @version 22.0.0
- *
- * @return {void}
+ * @return  {void}
  */
 window.saturne.contentEditable.onFocus = function() {
-  $(this).removeClass('invalid is-valid is-invalid').addClass('active');
+  const $el = $(this);
+  $el.removeClass('invalid');
+  $el.closest('td').removeClass('ce-valid ce-invalid');
+  clearTimeout($el.data('feedbackTimer'));
 };
 
 /**
- * Gestion des flèches haut/bas pour incrémenter/décrémenter la date
- * Enter = sauvegarde immédiate
+ * Flèches ↑↓ : ±1 jour — Enter : sauvegarde
  *
  * @since   22.0.0
  * @version 22.0.0
- *
- * @return {void}
+ * @return  {void}
  */
 window.saturne.contentEditable.onKeyDown = function(e) {
   if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
@@ -330,8 +309,7 @@ window.saturne.contentEditable.onKeyDown = function(e) {
  *
  * @since   22.0.0
  * @version 22.0.0
- *
- * @return {void}
+ * @return  {void}
  */
 window.saturne.contentEditable.onMouseEnter = function() {
   $(this).css('cursor', 'text');
