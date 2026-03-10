@@ -76,6 +76,13 @@ function saturne_header(int $load_media_gallery = 0, string $head = '', string $
 
     llxHeader($head, $title, $help_url, $target, $disablejs, $disablehead, $arrayofjs, $arrayofcss, $morequerystring, $morecssonbody, $replacemainareaby, $disablenofollow, $disablenoindex);
 
+    ?>
+        <script>
+            window.saturne.config = window.saturne.config || {};
+            window.saturne.config.urlRoot = '<?php echo DOL_URL_ROOT; ?>';
+        </script>
+    <?php
+
     if ($load_media_gallery) {
         //Media gallery
         include __DIR__ . '/../core/tpl/medias/medias_gallery_modal.tpl.php';
