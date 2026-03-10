@@ -125,14 +125,17 @@ while ($i < $iMaxInLoop) {
                     if (!empty($val['contenteditable']) && $val['contenteditable'] == 1) {
                         $ceType   = !empty($val['type']) && in_array($val['type'], ['date', 'datetime']) ? 'datepicker' : 'text';
                         $ceDataType = ' data-type="' . $ceType . '"';
-                        print '<div class="contenteditable-wrap"><div class="contenteditable" contenteditable="true" data-field="' . $key . '" data-id="' . $object->id . '"' . $ceDataType . ' data-success="Enregistré" data-error="Format invalide">';
+                        $ceElement = $object->element ?? 'unknown';
+                        $ceTable   = $object->table_element ?? 'unknown';
+                        $ceLabel   = !empty($val['label']) ? dol_escape_htmltag($val['label']) : dol_escape_htmltag($key);
+                        print '<div class="contenteditable-wrap"><div class="contenteditable" contenteditable="true" role="textbox" aria-label="' . $ceLabel . '" data-field="' . $key . '" data-id="' . $object->id . '" data-element="' . $ceElement . '" data-table="' . $ceTable . '"' . $ceDataType . ' data-success="Enregistré" data-error="Format invalide">';
                     }
                     print $object->showOutputField($val, $key, $object->$key);
                     if (!empty($val['contenteditable']) && $val['contenteditable'] == 1) {
                         $isDateField = !empty($val['type']) && in_array($val['type'], ['date', 'datetime']);
                         $calBtn = $isDateField ? '
-  <button class="contenteditable-cal-btn" type="button" title="Ouvrir le calendrier">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+  <button class="contenteditable-cal-btn" type="button" title="Ouvrir le calendrier" aria-label="Ouvrir le calendrier">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
       <rect x="3" y="4" width="18" height="18" rx="2"/>
       <line x1="16" y1="2" x2="16" y2="6"/>
       <line x1="8"  y1="2" x2="8"  y2="6"/>
