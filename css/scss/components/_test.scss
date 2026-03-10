@@ -1,0 +1,210 @@
+/* ─────────────────────────────────────────────
+   contentEditable — feedback visuel
+   ───────────────────────────────────────────── */
+
+/* Wrapper : flex inline pour rester dans la cellule du tableau */
+.contenteditable-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+}
+
+/* ── Champ éditable ── */
+.contenteditable {
+  border-radius: 4px;
+  padding: 2px 4px;
+  cursor: text;
+  transition: background 0.15s, outline 0.15s;
+  outline: 1px solid transparent;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.04);
+    outline-color: rgba(0, 0, 0, 0.15);
+  }
+
+  &:focus {
+    background: rgba(0, 0, 0, 0.03);
+    outline: 2px solid #3b82f6;
+  }
+}
+
+/* ── États valid / invalid ── */
+.contenteditable.is-valid {
+  outline: 2px solid #22c55e !important;
+  background: rgba(34, 197, 94, 0.06) !important;
+}
+
+.contenteditable.is-invalid {
+  outline: 2px solid #ef4444 !important;
+  background: rgba(239, 68, 68, 0.06) !important;
+  animation: ce-shake 0.4s ease forwards;
+}
+
+@keyframes ce-shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-6px); }
+  40%       { transform: translateX(6px); }
+  60%       { transform: translateX(-4px); }
+  80%       { transform: translateX(4px); }
+}
+
+/* ── Bouton calendrier ── */
+/* all:unset pour écraser les styles globaux Dolibarr sur button */
+.contenteditable-cal-btn {
+  all: unset !important;
+  box-sizing: border-box !important;
+  width: 16px !important;
+  height: 16px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 3px !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+  opacity: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+  transition: opacity 0.15s, background 0.15s, border-color 0.15s !important;
+
+  svg {
+    width: 11px !important;
+    height: 11px !important;
+    stroke: #999 !important;
+    fill: none !important;
+    stroke-width: 1.8 !important;
+    stroke-linecap: round !important;
+    display: block !important;
+    transition: stroke 0.15s !important;
+  }
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.07) !important;
+    border-color: rgba(0, 0, 0, 0.15) !important;
+    svg { stroke: #333 !important; }
+  }
+
+  &.active {
+    background: #1c1c1e !important;
+    border-color: #1c1c1e !important;
+    svg { stroke: #fff !important; }
+  }
+}
+
+/* Révèle le bouton au hover/focus/active */
+.contenteditable-wrap:hover .contenteditable-cal-btn,
+.contenteditable-wrap:focus-within .contenteditable-cal-btn,
+.contenteditable-cal-btn.active {
+  opacity: 1 !important;
+}
+
+/* Toujours visible à 40% pour les champs date */
+.contenteditable-wrap:has(.contenteditable[data-type="datepicker"]) .contenteditable-cal-btn {
+  opacity: 0.4 !important;
+}
+.contenteditable-wrap:hover .contenteditable-cal-btn,
+.contenteditable-wrap:focus-within .contenteditable-cal-btn,
+.contenteditable-cal-btn.active {
+  opacity: 1 !important;
+}
+
+/* ── Icône ✓ / ✕ — singleton appendé au body via JS ── */
+.contenteditable-icon {
+  position: fixed !important;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0);
+  pointer-events: none;
+  z-index: 99999;
+
+  svg {
+    width: 12px;
+    height: 12px;
+    stroke: #fff;
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .icon-x     { display: none; }
+  .icon-check { display: block; }
+
+  &.pop-invalid {
+    .icon-x     { display: block; }
+    .icon-check { display: none; }
+  }
+
+  &.pop-valid {
+    background: #22c55e;
+    animation: ce-iconPop 1.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  &.pop-invalid {
+    background: #ef4444;
+    animation: ce-iconPop 1.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+}
+
+@keyframes ce-iconPop {
+  0%   { opacity: 0; transform: scale(0); }
+  20%  { opacity: 1; transform: scale(1.15); }
+  35%  { transform: scale(0.92); }
+  50%  { opacity: 1; transform: scale(1); }
+  75%  { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.8); }
+}
+
+/* ── Message inline — caché par défaut, affiché seulement si .visible ── */
+.contenteditable-message {
+  display: none;
+  font-size: 11px;
+  margin-top: 2px;
+  font-family: monospace;
+  opacity: 0;
+  transform: translateY(-3px);
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+  white-space: nowrap;
+
+  &.visible {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  &.msg-valid   { color: #22c55e; }
+  &.msg-invalid { color: #ef4444; }
+}
+
+/* ── Overrides Flatpickr ── */
+.flatpickr-calendar {
+  font-family: monospace !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+  z-index: 99999 !important;
+}
+
+.flatpickr-day {
+  &.selected,
+  &.selected:hover {
+    background: #1c1c1e !important;
+    border-color: #1c1c1e !important;
+  }
+
+  &.today {
+    border-color: #3b82f6 !important;
+    color: #3b82f6 !important;
+
+    &.selected { color: #fff !important; }
+  }
+}

@@ -123,11 +123,29 @@ while ($i < $iMaxInLoop) {
                     print $object->showOutputField($val, $key, $object->id);
                 } else {
                     if (!empty($val['contenteditable']) && $val['contenteditable'] == 1) {
-                        print '<div class="inline-block contenteditable" contenteditable="true" data-field="' . $key . '" data-id="' . $object->id . '">';
+                        $ceType   = !empty($val['type']) && in_array($val['type'], ['date', 'datetime']) ? 'datepicker' : 'text';
+                        $ceDataType = ' data-type="' . $ceType . '"';
+                        print '<div class="contenteditable-wrap"><div class="contenteditable" contenteditable="true" data-field="' . $key . '" data-id="' . $object->id . '"' . $ceDataType . ' data-success="Enregistré" data-error="Format invalide">';
                     }
                     print $object->showOutputField($val, $key, $object->$key);
                     if (!empty($val['contenteditable']) && $val['contenteditable'] == 1) {
-                        print '</div>';
+                        $isDateField = !empty($val['type']) && in_array($val['type'], ['date', 'datetime']);
+                        $calBtn = $isDateField ? '
+  <button class="contenteditable-cal-btn" type="button" title="Ouvrir le calendrier">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+      <rect x="3" y="4" width="18" height="18" rx="2"/>
+      <line x1="16" y1="2" x2="16" y2="6"/>
+      <line x1="8"  y1="2" x2="8"  y2="6"/>
+      <line x1="3"  y1="10" x2="21" y2="10"/>
+    </svg>
+  </button>' : '';
+                        print '</div>' . $calBtn . '
+  <div class="contenteditable-icon">
+    <svg class="icon-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    <svg class="icon-x"     viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </div>
+  <div class="contenteditable-message"></div>
+</div>';
                     }
                 }
                 print '</td>';
