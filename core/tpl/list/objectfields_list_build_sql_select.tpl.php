@@ -72,7 +72,7 @@ if (isModEnabled('categorie') && isset($categorie->MAP_OBJ_CLASS[$object->elemen
     $sql .= ' AND EXISTS ( SELECT 1 FROM ' . $db->prefix() . 'categorie_' . $objectElement . ' AS cp WHERE t.rowid = cp.fk_' . $objectElement . ' AND cp.fk_categorie IN (' . implode(',', $searchCategories) . '))';
 }
 
-// $sql .= ' AND t.status >= 0';
+$sql .= ' AND t.status >= 0';
 
 foreach ($search as $key => $val) {
     if (array_key_exists($key, $object->fields)) {
