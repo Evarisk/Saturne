@@ -42,7 +42,15 @@ window.saturne.toolbox = {};
  *
  * @return {void}
  */
-window.saturne.toolbox.init = function() {};
+window.saturne.toolbox.init = function() {
+  $(document).on('input', '[maxlength]', function(event) {
+    window.saturne.toolbox.updateCounter(event);
+  });
+  $(document).on('blur', '[maxlength]', function(event) {
+    var $anchor = $(event.target).closest('label').length ? $(event.target).closest('label') : $(event.target);
+    $anchor.next('.char-counter').text('');
+  });
+};
 
 /**
  * Return suitable query separator
@@ -182,4 +190,29 @@ window.saturne.toolbox.checkIframeChange = function() {
 window.saturne.toolbox.isPhone = function() {
   const userAgent = navigator.userAgent || window.opera;
   return /android|iphone|ipad|ipod|blackberry|windows phone/i.test(userAgent);
+};
+
+
+window.saturne.toolbox.updateCounter = function(event) {
+  var $input = $(event.target);
+  var max = parseInt($input.attr('maxlength'));
+  if (!max) return;
+  var remaining = max - $input.val().length;
+
+  var $anchor = $input.closest('label').length ? $input.closest('label') : $input;
+  var $el = $anchor.next('.char-counter');
+  if (!$el.length) {
+    $el = $('<span class="char-counter">').css('display', 'block');
+    $anchor.after($el);
+  }
+
+  var ratio = remaining / max;
+  $el.text(remaining + ' / ' + max).css('font-size', '0.75em');
+  if (ratio <= 0.05) {
+    $el.css({ color: '#e74c3c', fontWeight: 'bold' });
+  } else if (ratio <= 0.10) {
+    $el.css({ color: '#e67e22', fontWeight: 'bold' });
+  } else {
+    $el.css({ color: '#999', fontWeight: 'normal' });
+  }
 };
