@@ -111,7 +111,7 @@ window.saturne.menu.setMenu = function setMenu() {
   }
 
   // Toggle au clic
-  minimizeElement.closest('.blockvmenulast').off('click').on('click', function () {
+  $('#id-left').off('click', '.blockvmenulast').on('click', '.blockvmenulast', function (e) {
     if (menuLeft.width() > 50) {
       minimizeMenu();
     } else {
