@@ -392,6 +392,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'productservicelist',
             'create_url'     => 'product/card.php',
             'list_url'       => 'product/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'product/class/product.class.php',
             'lib_path'       => 'core/lib/product.lib.php',
         ];
@@ -417,6 +419,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'product_lotlist',
             'create_url'     => 'product/stock/productlot_card.php',
             'list_url'       => 'product/stock/productlot_list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'product/stock/class/productlot.class.php',
             'lib_path'       => 'core/lib/product.lib.php',
         ];
@@ -440,6 +444,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'userlist',
             'create_url'     => 'user/card.php',
             'list_url'       => 'user/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'user/class/user.class.php',
             'lib_path'       => 'core/lib/usergroups.lib.php',
         ];
@@ -463,6 +469,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'thirdpartylist',
             'create_url'     => 'societe/card.php',
             'list_url'       => 'societe/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'societe/class/societe.class.php',
             'lib_path'       => 'core/lib/company.lib.php',
         ];
@@ -485,6 +493,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'contactlist',
             'create_url'     => 'contact/card.php',
             'list_url'       => 'contact/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'contact/class/contact.class.php',
             'lib_path'       => 'core/lib/contact.lib.php',
         ];
@@ -510,6 +520,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_document' => 'projectcarddocument',
             'create_url'         => 'projet/card.php',
             'list_url'           => 'projet/list.php',
+            'defaultsort'        => 't.datec',
+            'defaultorder'       => 'DESC',
             'class_path'         => 'projet/class/project.class.php',
             'lib_path'           => 'core/lib/project.lib.php',
         ];
@@ -533,6 +545,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'tasklist',
             'create_url'     => 'projet/tasks.php',
             'list_url'       => 'projet/tasks/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'custom/saturne/class/task/saturnetask.class.php',
             'lib_path'       => 'core/lib/project.lib.php',
         ];
@@ -557,6 +571,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'invoicelist',
             'create_url'     => 'compta/facture/card.php',
             'list_url'       => 'compta/facture/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'compta/facture/class/facture.class.php',
             'lib_path'       => 'core/lib/invoice.lib.php',
         ];
@@ -580,6 +596,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'orderlist',
             'create_url'     => 'commande/card.php',
             'list_url'       => 'commande/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'commande/class/commande.class.php',
             'lib_path'       => 'core/lib/order.lib.php',
         ];
@@ -603,6 +621,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'contractlist',
             'create_url'     => 'contrat/card.php',
             'list_url'       => 'contrat/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'contrat/class/contrat.class.php',
             'lib_path'       => 'core/lib/contract.lib.php',
         ];
@@ -627,6 +647,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'ticketlist',
             'create_url'     => 'ticket/card.php',
             'list_url'       => 'ticket/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'ticket/class/ticket.class.php',
             'lib_path'       => 'core/lib/ticket.lib.php',
         ];
@@ -650,6 +672,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'stocklist',
             'create_url'     => 'product/stock/card.php',
             'list_url'       => 'product/stock/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'product/stock/class/entrepot.class.php',
             'lib_path'       => 'core/lib/stock.lib.php',
         ];
@@ -671,6 +695,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'inventorylist',
             'create_url'     => 'product/inventory/card.php',
             'list_url'       => 'product/inventory/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'product/inventory/class/inventory.class.php',
             'lib_path'       => 'product/inventory/lib/inventory.lib.php',
         ];
@@ -692,6 +718,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'movementlist',
             'create_url'     => '',
             'list_url'       => 'product/stock/movement_list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'product/stock/class/mouvementstock.class.php',
             'lib_path'       => '',
         ];
@@ -713,6 +741,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_card' => 'ordershipmentcard',
             'hook_name_list' => 'propallist',
             'list_url'       => 'expedition/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'custom/saturne/class/dolibarrobjects/saturneexpedition.class.php',
             'lib_path'       => 'core/lib/expedition.lib.php',
         ];
@@ -736,6 +766,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'propallist',
             'create_url'     => 'comm/propal/card.php',
             'list_url'       => 'comm/propal/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'comm/propal/class/propal.class.php',
             'lib_path'       => 'core/lib/propal.lib.php',
         ];
@@ -759,6 +791,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'bomlist',
             'create_url'     => 'bom/bom_card.php',
             'list_url'       => 'bom/bom_list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'bom/class/bom.class.php',
             'lib_path'       => 'bom/lib/bom.lib.php',
         ];
@@ -780,6 +814,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'molist',
             'create_url'     => 'mrp/mo_card.php',
             'list_url'       => 'mrp/mo_list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'mrp/class/mo.class.php',
             'lib_path'       => 'mrp/lib/mrp_mo.lib.php',
         ];
@@ -803,6 +839,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'receptionlist',
             'create_url'     => 'reception/card.php',
             'list_url'       => 'reception/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'custom/saturne/class/dolibarrobjects/saturnereception.class.php',
             'lib_path'       => 'core/lib/reception.lib.php',
         ];
@@ -826,6 +864,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'interventionlist',
             'create_url'     => 'fichinter/card.php',
             'list_url'       => 'fichinter/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'fichinter/class/fichinter.class.php',
             'lib_path'       => 'core/lib/fichinter.lib.php',
         ];
@@ -849,6 +889,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'supplier_proposallist',
             'create_url'     => 'supplier_proposal/card.php',
             'list_url'       => 'supplier_proposal/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'custom/saturne/class/dolibarrobjects/saturnesupplierproposal.class.php',
             'lib_path'       => 'core/lib/supplier_proposal.lib.php',
         ];
@@ -872,6 +914,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'supplierorderlist',
             'create_url'     => 'fourn/commande/card.php',
             'list_url'       => 'fourn/commande/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'fourn/class/fournisseur.commande.class.php',
             'lib_path'       => 'core/lib/fourn.lib.php',
         ];
@@ -932,6 +976,8 @@ function saturne_get_objects_metadata(string $type = ''): array
                     'hook_name_document' => $objectMetadata['hook_name_document'] ?? '',
                     'create_url'         => $objectMetadata['create_url'] ?? '',
                     'list_url'           => $objectMetadata['list_url'] ?? '',
+                    'defaultsort'        => $objectMetadata['defaultsort'] ?? 't.ref',
+                    'defaultorder'       => $objectMetadata['defaultorder'] ?? 'ASC',
                     'class_path'         => $objectMetadata['class_path'] ?? '',
                     'lib_path'           => $objectMetadata['lib_path'] ?? '',
                     'object'             => $object

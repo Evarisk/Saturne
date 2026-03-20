@@ -48,6 +48,9 @@ if ($limit > 0 && $limit != $conf->liste_limit) {
 if ($optioncss != '') {
     $param .= '&optioncss=' . urlencode($optioncss);
 }
+if (!empty($objectType)) {
+    $param .= '&object_type=' . urlencode($objectType);
+}
 //if ($groupby != '') {
 //    $param .= '&groupby=' . urlencode($groupby);
 //}
@@ -112,6 +115,9 @@ print '<input type="hidden" name="page" value="' . $page . '">';
 print '<input type="hidden" name="contextpage" value="' . $contextpage . '">';
 print '<input type="hidden" name="page_y" value="">';
 print '<input type="hidden" name="mode" value="' . $mode . '">';
+if (!empty($objectType)) {
+    print '<input type="hidden" name="object_type" value="' . $objectType . '">';
+}
 //print '<input type="hidden" name="groupby" value="' . $groupby . '">';
 if (!empty($formMoreParams)) {
     foreach ($formMoreParams as $formMoreParamKey => $formMoreParamVal) {
