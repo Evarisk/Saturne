@@ -1,0 +1,54 @@
+name: Build assets (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      module:
+        description: 'Module name (e.g. reedcrm)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout calling module
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.sha }}
+
+      - name: Checkout Saturne
+        uses: actions/checkout@v4
+        with:
+          repository: Evarisk/Saturne
+          ref: main
+          path: .saturne
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Saturne dependencies
+        working-directory: .saturne
+        run: npm ci
+
+      - name: Build assets
+        run: |
+          MODULE_NAME=${{ inputs.module }} node .saturne/node_modules/gulp/bin/gulp.js \
+            --gulpfile .saturne/gulpfile-shared.js build
+
+      - name: Commit built assets if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add --force css/${{ inputs.module }}.min.css js/${{ inputs.module }}.min.js
+          if ! git diff --staged --quiet; then
+            git commit -m "ci: build assets"
+            git push
+          fi
