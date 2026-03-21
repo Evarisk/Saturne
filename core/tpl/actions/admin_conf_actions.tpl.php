@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -31,7 +32,6 @@
 if ($action == 'set_mod' && $permissiontoread) {
     $value      = GETPOST('value');
     $objectType = GETPOST('object_type');
-
     $confName = dol_strtoupper($moduleName . '_' . $objectType)  . '_ADDON';
     dolibarr_set_const($db, $confName, $value, 'chaine', 0, '', $conf->entity);
 }
@@ -39,7 +39,6 @@ if ($action == 'set_mod' && $permissiontoread) {
 if ($action == 'update_mask' && $permissiontoread) {
     $documentMaskConst = GETPOST('mask', 'alpha');
     $documentMask      = GETPOST('addon_value', 'alpha');
-
     if (dol_strlen($documentMask) < 1) {
         setEventMessages($langs->trans('ErrorSavedConfig'), [], 'errors');
     } else {

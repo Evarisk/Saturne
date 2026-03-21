@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -31,7 +32,6 @@
 
 $parameters = ['signatoryRole' => $signatoryRole, 'signatories' => $signatories];
 $resHook    = $hookmanager->executeHooks('saturneAddAttendantRow', $parameters);
-
 if (($object->status == $object::STATUS_DRAFT || ($object->status == $object::STATUS_VALIDATED && getDolGlobalInt('SATURNE_ATTENDANTS_ADD_STATUS_MANAGEMENT'))) && $permissiontoadd && empty($resHook)) {
     print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode . '">';
     print '<input type="hidden" name="token" value="' . newToken() . '">';
@@ -61,7 +61,7 @@ if (($object->status == $object::STATUS_DRAFT || ($object->status == $object::ST
     print '</td>';
     if ($attendantTableMode == 'simple') {
         print '<td class="center">';
-        print saturne_select_dictionary('attendant_role','c_' . $object->element . '_attendants_role', 'ref');
+        print saturne_select_dictionary('attendant_role', 'c_' . $object->element . '_attendants_role', 'ref');
         print '</td>';
     }
     print '<td colspan="' . ($conf->browser->layout != 'classic' ? 4 : 5) . '"></td>';

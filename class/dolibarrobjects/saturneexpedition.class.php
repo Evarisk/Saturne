@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2025 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,7 +24,6 @@
 
 // Load Dolibarr libraries
 require_once DOL_DOCUMENT_ROOT . '/expedition/class/expedition.class.php';
-
 /**
  * Class for SaturneExpedition
  */
