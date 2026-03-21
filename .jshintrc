@@ -2,7 +2,7 @@
   "bitwise": true,
   "curly": true,
   "eqeqeq": true,
-  "esversion": 9,
+  "esversion": 11,
   "forin": true,
   "freeze": true,
   "latedef": "nofunc",
@@ -16,11 +16,17 @@
   "browser": true,
   "jquery": true,
   "devel": true,
-  "strict": "global",
+  "strict": "implied",
   "globals": {
     "angular": false,
     "module": false,
     "require": false,
-    "URLSearchParams": true
+    "URLSearchParams": true,
+    "saturne": false,
+    "reedcrm": false,
+    "window": true,
+    "flatpickr": false,
+    "Hammer": false,
+    "SignaturePad": false
   }
 }

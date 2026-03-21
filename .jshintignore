@@ -1,0 +1,13 @@
+# Files pending JSHint compliance — tracked as GitHub issues
+js/modules/contentEditable.js
+js/modules/dragable.js
+js/modules/dropdown.js
+js/modules/emailTemplate.js
+js/modules/keyEvents.js
+js/modules/signature.js
+
+# mediaGallery.js uses inline /* jshint ignore:start/end */ blocks
+# tracked in Evarisk/Saturne#1311
+
+# Build artefacts
+js/*.min.js

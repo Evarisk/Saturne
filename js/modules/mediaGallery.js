@@ -1,3 +1,4 @@
+/* jshint ignore:start */
 /* Copyright (C) 2022-2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -863,3 +864,5 @@ window.saturne.mediaGallery.readFileAI = function(e) {
     }
   });
 };
+
+/* jshint ignore:end */

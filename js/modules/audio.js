@@ -22,7 +22,6 @@
  * \brief   JavaScript audio file for module Saturne
  */
 
-'use strict';
 
 /**
  * Init audio JS

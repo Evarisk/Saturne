@@ -20,7 +20,6 @@
  * \brief   JavaScript component file
  */
 
-'use strict';
 
 /**
  * Init component JS

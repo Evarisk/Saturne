@@ -22,7 +22,6 @@
  * \brief   JavaScript object file for module Saturne
  */
 
-'use strict';
 
 /**
  * Init object JS
