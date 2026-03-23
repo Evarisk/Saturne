@@ -226,7 +226,7 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
 
         $moreparam = array_merge($defaultMoreParams, $moreparam);
 
-        $moreparam['objectType']  = ($moreparam['parentType'] !== $objectType ? '&object_type=' . $moreparam['parentType'] : '');
+        $moreparam['objectType']  = ($moreparam['parentType'] !== $objectType ? '&object_type=' . $objectType : '');
         $moreparam['handlePhoto'] = ($moreparam['handlePhoto'] ? '&handle_photo=' . 1 : '');
         $moreparam['showNav']     = ($moreparam['showNav'] ? '&show_nav=' . 1 : '');
 
