@@ -24,5 +24,10 @@
     "gulp-uglify": "3.0.2",
     "jshint": "^2.13.6",
     "sass": "1.98.0"
+  },
+  "overrides": {
+    "chokidar": "^3.6.0",
+    "is-accessor-descriptor": "^1.0.1",
+    "is-data-descriptor": "^1.0.1"
   }
 }
