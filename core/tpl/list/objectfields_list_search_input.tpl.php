@@ -32,6 +32,11 @@
 
 // Fields title search
 // --------------------------------------------------------------------
+// When the side filter panel is active, inputs live inside the panel — skip the inline filter row.
+if (!empty($useSideFilterPanel)) {
+    return;
+}
+
 print '<tr class="liste_titre_filter">';
 
 // Action column
@@ -41,6 +46,12 @@ if (getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
     print $searchPicto;
     print '</td>';
 }
+
+$toggleTitleRaw = $langs->trans('ToggleIncludeExclude');
+if ($toggleTitleRaw == 'ToggleIncludeExclude') {
+    $toggleTitleRaw = 'Inverser le filtre (voir tout sauf la sélection)';
+}
+$toggleTitle = dol_escape_htmltag($toggleTitleRaw);
 
 foreach ($object->fields as $key => $val) {
     $cssForField = saturne_css_for_field($val, $key);
@@ -55,13 +66,34 @@ foreach ($object->fields as $key => $val) {
         }
 
         if (empty($val['disablesearch'])) {
+            $showModeToggle = false;
+            $fieldLabel     = $langs->trans($val['label'] ?? $key);
             if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) {
+                $showModeToggle = ($key !== 'status');
+                if ($showModeToggle) {
+                    $fieldMode = $search[$key . '_mode'] ?? GETPOST('search_' . $key . '_mode', 'alpha') ?: 'inc';
+                    $isExc     = ($fieldMode === 'exc');
+                    print '<span style="display:inline-flex;align-items:center;gap:2px">';
+                    print '<input type="hidden" id="search_' . $key . '_mode" name="search_' . $key . '_mode" value="' . ($isExc ? 'exc' : 'inc') . '">';
+                    $titleAttr = dol_escape_htmltag($fieldLabel) . ' - ' . $toggleTitle;
+                    print '<span id="search_mode_toggle_' . $key . '" title="' . $titleAttr . '" onclick="var i=document.getElementById(\'search_' . $key . '_mode\'),exc=i.value!==\'exc\';i.value=exc?\'exc\':\'inc\';this.innerHTML=exc?\'<span class=\\\'far fa-eye-slash\\\'></span>\':\'<span class=\\\'far fa-eye\\\'></span>\';this.style.color=exc?\'#c0392b\':\'#666\';" style="cursor:pointer;font-size:13px;padding:0 4px;user-select:none;color:' . ($isExc ? '#c0392b' : '#666') . '">' . ($isExc ? '<span class="far fa-eye-slash"></span>' : '<span class="far fa-eye"></span>') . '</span>';
+                }
                 if (empty($val['searchmulti'])) {
                     print $form->selectarray('search_' . $key, $val['arrayofkeyval'], $search[$key] ?? '', 1, 0, 0, '', 1, 0, 0, '', 'maxwidth125' . ($key == 'status' ? ' search_status onrightofpage' : ''));
                 } else {
                     print $form->multiselectarray('search_' . $key, $val['arrayofkeyval'], $search[$key] ?? '', 0, 0, 'maxwidth125' . ($key == 'status' ? ' search_status onrightofpage' : ''), 1, '100%');
                 }
+                if ($showModeToggle) {
+                    print '</span>';
+                }
             } elseif (isset($val['type']) && ((strpos($val['type'], 'integer:') === 0) || (strpos($val['type'], 'sellist:') === 0))) {
+                $showModeToggle = true;
+                $fieldMode = $search[$key . '_mode'] ?? GETPOST('search_' . $key . '_mode', 'alpha') ?: 'inc';
+                $isExc     = ($fieldMode === 'exc');
+                print '<span style="display:inline-flex;align-items:center;gap:2px">';
+                print '<input type="hidden" id="search_' . $key . '_mode" name="search_' . $key . '_mode" value="' . ($isExc ? 'exc' : 'inc') . '">';
+                $titleAttr = dol_escape_htmltag($fieldLabel) . ' - ' . $toggleTitle;
+                print '<span id="search_mode_toggle_' . $key . '" title="' . $titleAttr . '" onclick="var i=document.getElementById(\'search_' . $key . '_mode\'),exc=i.value!==\'exc\';i.value=exc?\'exc\':\'inc\';this.innerHTML=exc?\'<span class=\\\'far fa-eye-slash\\\'></span>\':\'<span class=\\\'far fa-eye\\\'></span>\';this.style.color=exc?\'#c0392b\':\'#666\';" style="cursor:pointer;font-size:13px;padding:0 4px;user-select:none;color:' . ($isExc ? '#c0392b' : '#666') . '">' . ($isExc ? '<span class="far fa-eye-slash"></span>' : '<span class="far fa-eye"></span>') . '</span>';
                 print $object->showInputField($val, $key, $search[$key] ?? '', '', '', 'search_', $cssForField . ' maxwidth250', 1);
             } elseif (isset($val['type']) && in_array($val['type'], ['date', 'datetime', 'timestamp'])) {
                 print '<div class="nowrap">';
@@ -83,6 +115,10 @@ foreach ($object->fields as $key => $val) {
                 print $formAdmin->select_language(($search[$key] ?? ''), 'search_lang', 0, [], 1, 0, 0, 'minwidth100imp maxwidth125', 2);
             } else {
                 print '<input type="text" class="flat maxwidth' . (isset($val['type']) && in_array($val['type'], ['integer', 'price']) ? '50' : '75') . '" name="search_' . $key . '" value="' . dol_escape_htmltag($search[$key] ?? '') . '">';
+            }
+
+            if (!empty($showModeToggle) && isset($val['type']) && ((strpos($val['type'], 'integer:') === 0) || (strpos($val['type'], 'sellist:') === 0))) {
+                print '</span>'; // close inline-flex wrapper for integer:/sellist: fields
             }
         }
 
