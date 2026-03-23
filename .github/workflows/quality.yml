@@ -128,7 +128,7 @@ jobs:
             - name: Run JSHint
               if: matrix.step == 'jshint'
               working-directory: htdocs/custom/saturne
-              run: npx jshint js/modules/*.js
+              run: node_modules/.bin/jshint js/modules/*.js
 
             # ── PHPStan ──────────────────────────────────────────────────────────
             - name: Create PHPStan tmp directory
