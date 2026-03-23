@@ -20,7 +20,6 @@
  * \brief   JavaScript file toolbox for module Saturne
  */
 
-'use strict';
 
 /**
  * Init toolbox JS
@@ -196,7 +195,7 @@ window.saturne.toolbox.isPhone = function() {
 window.saturne.toolbox.updateCounter = function(event) {
   var $input = $(event.target);
   var max = parseInt($input.attr('maxlength'));
-  if (!max) return;
+  if (!max) { return; }
   var remaining = max - $input.val().length;
 
   var $anchor = $input.closest('label').length ? $input.closest('label') : $input;

@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2021-2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -527,7 +528,7 @@ class SaturneSignature extends SaturneObject
                 }
             }
         }
-        if ($result > 0 ) {
+        if ($result > 0) {
             return 1;
         } else {
             return -1;
@@ -771,15 +772,15 @@ class SaturneSignature extends SaturneObject
      *  @param  int     $notooltip              1 = Disable tooltip
      *  @param  string  $morecss                Add more css on link
      *  @param  int     $save_lastsearch_value -1 = Auto, 0 = No save of lastsearch_values when clicking, 1 = Save lastsearch_values whenclicking
-     * 	@param	int     $addLabel               0 = Default, 1 = Add label into string, >1 = Add first chars into string
-     *  @return	string                          String with URL
+     *  @param  int     $addLabel               0 = Default, 1 = Add label into string, >1 = Add first chars into string
+     *  @return string                          String with URL
      */
     public function getNomUrl(int $withpicto = 0, string $option = '', int $notooltip = 0, string $morecss = '', int $save_lastsearch_value = -1, int $addLabel = 0): string
     {
         global $action, $conf, $hookmanager, $langs;
-
         if (!empty($conf->dol_no_mouse_hover)) {
-            $notooltip = 1; // Force disable tooltips
+            // Force disable tooltips
+            $notooltip = 1;
         }
 
         $result = '';
@@ -858,7 +859,7 @@ class SaturneSignature extends SaturneObject
             $result .= img_picto('', $picto) . ' ';
         } else {
             if (!empty($this->gender)) {
-                $picto = '<!-- picto photo user --><span class="nopadding userimg' . ($morecss ? ' '.$morecss : '') . '">' . Form::showphoto('userphoto', $this, 0, 0, 0, 'userphotosmall', 'mini', 0, 1) . '</span>';
+                $picto = '<!-- picto photo user --><span class="nopadding userimg' . ($morecss ? ' ' . $morecss : '') . '">' . Form::showphoto('userphoto', $this, 0, 0, 0, 'userphotosmall', 'mini', 0, 1) . '</span>';
                 $result .= $picto;
             } else {
                 $result .= img_picto('', $picto) . ' ';
@@ -877,7 +878,7 @@ class SaturneSignature extends SaturneObject
 
         $hookmanager->initHooks([$this->element . 'dao']);
         $parameters = ['id' => $this->id, 'getnomurl' => $result];
-        $reshook = $hookmanager->executeHooks('getNomUrl', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks.
+        $reshook = $hookmanager->executeHooks('getNomUrl', $parameters, $this, $action);
         if ($reshook > 0) {
             $result = $hookmanager->resPrint;
         } else {

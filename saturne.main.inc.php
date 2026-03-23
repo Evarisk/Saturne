@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,16 +17,16 @@
  */
 
 /**
- *	\file       saturne.main.inc.php
- *	\ingroup    saturne
- *	\brief      Saturne main file
+ *  \file       saturne.main.inc.php
+ *  \ingroup    saturne
+ *  \brief      Saturne main file
  */
 
 // Load Dolibarr environment
 // Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
 $res = 0;
 if (!empty($_SERVER['CONTEXT_DOCUMENT_ROOT'])) {
-    $res = @include $_SERVER['CONTEXT_DOCUMENT_ROOT']. '/main.inc.php';
+    $res = @include $_SERVER['CONTEXT_DOCUMENT_ROOT'] . '/main.inc.php';
 }
 // Try main.inc.php into web root detected using web root calculated from SCRIPT_FILENAME
 $tmp  = empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];
@@ -36,11 +37,11 @@ while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i] == $t
     $i--;
     $j--;
 }
-if (!$res && $i > 0 && file_exists(substr($tmp, 0, ($i + 1)). '/main.inc.php')) {
-    $res = @include substr($tmp, 0, ($i + 1)). '/main.inc.php';
+if (!$res && $i > 0 && file_exists(substr($tmp, 0, ($i + 1)) . '/main.inc.php')) {
+    $res = @include substr($tmp, 0, ($i + 1)) . '/main.inc.php';
 }
-if (!$res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i + 1))). '/main.inc.php')) {
-    $res = @include dirname(substr($tmp, 0, ($i + 1))). '/main.inc.php';
+if (!$res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i + 1))) . '/main.inc.php')) {
+    $res = @include dirname(substr($tmp, 0, ($i + 1))) . '/main.inc.php';
 }
 // Try main.inc.php using relative path
 if (!$res && file_exists('../main.inc.php')) {

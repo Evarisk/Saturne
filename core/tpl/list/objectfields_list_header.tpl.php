@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2025 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -47,6 +48,9 @@ if ($limit > 0 && $limit != $conf->liste_limit) {
 }
 if ($optioncss != '') {
     $param .= '&optioncss=' . urlencode($optioncss);
+}
+if (!empty($objectType)) {
+    $param .= '&object_type=' . urlencode($objectType);
 }
 //if ($groupby != '') {
 //    $param .= '&groupby=' . urlencode($groupby);
@@ -112,6 +116,9 @@ print '<input type="hidden" name="page" value="' . $page . '">';
 print '<input type="hidden" name="contextpage" value="' . $contextpage . '">';
 print '<input type="hidden" name="page_y" value="">';
 print '<input type="hidden" name="mode" value="' . $mode . '">';
+if (!empty($objectType)) {
+    print '<input type="hidden" name="object_type" value="' . $objectType . '">';
+}
 //print '<input type="hidden" name="groupby" value="' . $groupby . '">';
 if (!empty($formMoreParams)) {
     foreach ($formMoreParams as $formMoreParamKey => $formMoreParamVal) {
@@ -154,7 +161,7 @@ if (isModEnabled('categorie') && $user->hasRight('categorie', 'read') && isset($
 }
 
 $parameters = ['arrayfields' => &$arrayfields];
-$reshook    = $hookmanager->executeHooks('printFieldPreListTitle', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
+$reshook    = $hookmanager->executeHooks('printFieldPreListTitle', $parameters, $object, $action);
 if (empty($reshook)) {
     $moreForFilter .= $hookmanager->resPrint;
 } else {
@@ -176,6 +183,7 @@ if (!empty($arrayOfMassActions)) {
     $selectedFields .= $form->showCheckAddButtons('checkforselect', 1);
 }
 
-print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you don't need reserved height for your table
+// You can use div-table-responsive-no-min if you don't need reserved height for your table
+print '<div class="div-table-responsive">';
 print '<table class="tagtable nobottomiftotal noborder liste' . ($moreForFilter ? ' listwithfilterbefore' : '') . '">';
 print '<thead>';

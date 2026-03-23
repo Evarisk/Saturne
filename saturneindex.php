@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,16 +17,16 @@
  */
 
 /**
- *	\file       saturneindex.php
- *	\ingroup    saturne
- *	\brief      Home page of saturne top menu
+ *  \file       saturneindex.php
+ *  \ingroup    saturne
+ *  \brief      Home page of saturne top menu
  */
 
 // Load Saturne environment
 if (file_exists('saturne.main.inc.php')) {
-	require_once __DIR__ . '/saturne.main.inc.php';
+    require_once __DIR__ . '/saturne.main.inc.php';
 } elseif (file_exists('../saturne.main.inc.php')) {
-	require_once __DIR__ . '/../saturne.main.inc.php';
+    require_once __DIR__ . '/../saturne.main.inc.php';
 } else {
     die('Include of saturne main fails');
 }

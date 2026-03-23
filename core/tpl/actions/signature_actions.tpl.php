@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -37,10 +38,11 @@ if ($action == 'add_signature') {
     $signatory->signature_date = dol_now();
 
     $result = $signatory->update($user, true);
+    // Creation signature OK
     if ($result > 0) {
-        // Creation signature OK
         $signatory->setSigned($user, false, 'public');
-    } elseif (!empty($signatory->errors)) { // Creation signature KO
+        // Creation signature KO
+    } elseif (!empty($signatory->errors)) {
         setEventMessages('', $signatory->errors, 'errors');
     } else {
         setEventMessages($signatory->error, [], 'errors');
@@ -61,7 +63,7 @@ if ($action == 'builddoc') {
     }
 
     // To be sure vars is defined
-    if (empty($hideDetails)){
+    if (empty($hideDetails)) {
         $hideDetails = 0;
     }
     if (empty($hideDesc)) {
@@ -76,7 +78,7 @@ if ($action == 'builddoc') {
 
     $confName = strtoupper($moduleName) . '_' . strtoupper($documentType) . '_ADDON_ODT_PATH';
     $template = preg_replace('/DOL_DOCUMENT_ROOT/', DOL_DOCUMENT_ROOT, $conf->global->$confName);
-    $model    = strtolower($documentType) . '_odt:' . $template .'template_' . strtolower($documentType) . '.odt';
+    $model    = strtolower($documentType) . '_odt:' . $template . 'template_' . strtolower($documentType) . '.odt';
 
     $moreParams['object']     = $object;
     $moreParams['user']       = $user;
@@ -95,7 +97,8 @@ if ($action == 'builddoc') {
 
 // Action to remove all temp files
 if ($action == 'remove_file') {
-    $files = dol_dir_list(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/'); // get all file names
+    // get all file names
+    $files = dol_dir_list(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/');
     foreach ($files as $file) {
         if (is_file($file['fullname'])) {
             dol_delete_file($file['fullname']);

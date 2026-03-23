@@ -22,7 +22,6 @@
  * \brief   JavaScript media file for module Saturne
  */
 
-'use strict';
 
 /**
  * Init media JS

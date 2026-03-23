@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -31,50 +32,50 @@
  */
 function saturne_load_pagination(float $pagesCounter, ?array $pageArray, ?int $offset): array
 {
-	if (empty($pageArray)) {
-		$offset      = $offset ?: 1;
-		$pageArray[] = '<i class="fas fa-arrow-left"></i>';
+    if (empty($pageArray)) {
+        $offset      = $offset ?: 1;
+        $pageArray[] = '<i class="fas fa-arrow-left"></i>';
 
-		if ($pagesCounter > 4) {
-			if ($offset > 2) {
-				$pageArray[] = '...';
-			}
+        if ($pagesCounter > 4) {
+            if ($offset > 2) {
+                $pageArray[] = '...';
+            }
 
-			if ($offset == 1) {
-				$pageArray[] = $offset;
-				$pageArray[] = $offset + 1;
-				$pageArray[] = $offset + 2;
-				$pageArray[] = $offset + 3;
-			} elseif ($offset > 1 && $offset < $pagesCounter) {
-				if ($offset == $pagesCounter - 1) {
-					$pageArray[] = $offset - 2;
-				}
-				$pageArray[] = $offset - 1;
-				$pageArray[] = $offset;
-				$pageArray[] = $offset + 1;
-				if ($offset == 2) {
-					$pageArray[] = $offset + 2;
-				}
-			}  elseif ($offset == $pagesCounter) {
-				$pageArray[] = $offset - 3;
-				$pageArray[] = $offset - 2;
-				$pageArray[] = $offset - 1;
-				$pageArray[] = $offset;
-			}
+            if ($offset == 1) {
+                $pageArray[] = $offset;
+                $pageArray[] = $offset + 1;
+                $pageArray[] = $offset + 2;
+                $pageArray[] = $offset + 3;
+            } elseif ($offset > 1 && $offset < $pagesCounter) {
+                if ($offset == $pagesCounter - 1) {
+                    $pageArray[] = $offset - 2;
+                }
+                $pageArray[] = $offset - 1;
+                $pageArray[] = $offset;
+                $pageArray[] = $offset + 1;
+                if ($offset == 2) {
+                    $pageArray[] = $offset + 2;
+                }
+            } elseif ($offset == $pagesCounter) {
+                $pageArray[] = $offset - 3;
+                $pageArray[] = $offset - 2;
+                $pageArray[] = $offset - 1;
+                $pageArray[] = $offset;
+            }
 
-			if ($pagesCounter > 3 && $offset < $pagesCounter - 1) {
-				$pageArray[] = '...';
-			}
-		} else {
-			for ($i = 1; $i <= $pagesCounter; $i++) {
-				$pageArray[] = $i;
-			}
-		}
+            if ($pagesCounter > 3 && $offset < $pagesCounter - 1) {
+                $pageArray[] = '...';
+            }
+        } else {
+            for ($i = 1; $i <= $pagesCounter; $i++) {
+                $pageArray[] = $i;
+            }
+        }
 
-		$pageArray[] = '<i class="fas fa-arrow-right"></i>';
-	}
+        $pageArray[] = '<i class="fas fa-arrow-right"></i>';
+    }
 
-	return $pageArray;
+    return $pageArray;
 }
 
 /**
@@ -87,27 +88,27 @@ function saturne_load_pagination(float $pagesCounter, ?array $pageArray, ?int $o
  */
 function saturne_show_pagination(float $pagesCounter, ?array $pageArray, ?int $offset): string
 {
-	$offset = $offset ?: 1;
-	$return = '<ul class="wpeo-pagination">';
-	$return .= '<input hidden id="pagesCounter" value="'. ($pagesCounter) .'">';
-	$return .= '<input hidden id="containerToRefresh" value="media_gallery">';
-	$return .= '<input hidden id="currentOffset" value="'. ($offset ?: 1) .'">';
+    $offset = $offset ?: 1;
+    $return = '<ul class="wpeo-pagination">';
+    $return .= '<input hidden id="pagesCounter" value="' . ($pagesCounter) . '">';
+    $return .= '<input hidden id="containerToRefresh" value="media_gallery">';
+    $return .= '<input hidden id="currentOffset" value="' . ($offset ?: 1) . '">';
 
-	foreach ($pageArray as $pageNumber) {
-		$return .= '<li class="pagination-element ' . ($pageNumber == $offset ? 'pagination-current' : ($pageNumber == 1 && !$offset ? 'pagination-current' : '')) . '">';
-		if ($pageNumber == '...') {
-			$return .= '<span>'. $pageNumber .'</span>';
-		} elseif ($pageNumber == '<i class="fas fa-arrow-left"></i>') {
-			$return .= '<a class="select-page arrow arrow-left" value="' . max(($offset - 1), 1) . '"><i class="fas fa-arrow-left"></i></a>';
-		} elseif ($pageNumber == '<i class="fas fa-arrow-right"></i>') {
-			$return .= '<a class="select-page arrow arrow-right" value="' . min(($offset + 1), $pagesCounter) . '"><i class="fas fa-arrow-right"></i></a>';
-		} else {
-			$return .= '<a class="select-page" value="' . $pageNumber . '">' . $pageNumber . '</a>';
-		}
+    foreach ($pageArray as $pageNumber) {
+        $return .= '<li class="pagination-element ' . ($pageNumber == $offset ? 'pagination-current' : ($pageNumber == 1 && !$offset ? 'pagination-current' : '')) . '">';
+        if ($pageNumber == '...') {
+            $return .= '<span>' . $pageNumber . '</span>';
+        } elseif ($pageNumber == '<i class="fas fa-arrow-left"></i>') {
+            $return .= '<a class="select-page arrow arrow-left" value="' . max(($offset - 1), 1) . '"><i class="fas fa-arrow-left"></i></a>';
+        } elseif ($pageNumber == '<i class="fas fa-arrow-right"></i>') {
+            $return .= '<a class="select-page arrow arrow-right" value="' . min(($offset + 1), $pagesCounter) . '"><i class="fas fa-arrow-right"></i></a>';
+        } else {
+            $return .= '<a class="select-page" value="' . $pageNumber . '">' . $pageNumber . '</a>';
+        }
 
-		$return .= '</li>';
-	}
+        $return .= '</li>';
+    }
 
-	$return .= '</ul>';
-	return $return;
+    $return .= '</ul>';
+    return $return;
 }

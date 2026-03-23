@@ -160,7 +160,7 @@ window.saturne.dashboard.selectDashboardFilter = function(e) {
 
   let data = {
     graphFilters: values,
-  }
+  };
 
   window.saturne.dashboard.configureDashboard(data, $("#" + button.data('ref-id')), button.data('item-refresh'));
 };
@@ -271,5 +271,5 @@ window.saturne.dashboard.exportCSV = function(e) {
       window.saturne.loader.remove(button);
     },
     error: function() {}
-  })
-}
+  });
+};

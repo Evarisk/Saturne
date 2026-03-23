@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -38,7 +39,8 @@ $type2label    = [''];
 foreach ($tmptype2label as $key => $val) {
     $type2label[$key] = $langs->transnoentitiesnoconv($val);
 }
-$elementtype = $moduleNameLowerCase . '_' . $objectType; // Must be the $table_element of the class that manage extrafield.
+// Must be the $table_element of the class that manage extrafield.
+$elementtype = $moduleNameLowerCase . '_' . $objectType;
 
 /*
  * Actions

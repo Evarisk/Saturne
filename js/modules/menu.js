@@ -22,7 +22,6 @@
  * \brief   JavaScript menu file
  */
 
-'use strict';
 
 /**
  * Init menu JS
@@ -111,7 +110,7 @@ window.saturne.menu.setMenu = function setMenu() {
   }
 
   // Toggle au clic
-  minimizeElement.closest('.blockvmenulast').off('click').on('click', function () {
+  $('#id-left').off('click', '.blockvmenulast').on('click', '.blockvmenulast', function () {
     if (menuLeft.width() > 50) {
       minimizeMenu();
     } else {

@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -45,7 +46,7 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
     }
 
     // To be sure vars is defined.
-    if (empty($hideDetails)){
+    if (empty($hideDetails)) {
         $hideDetails = 0;
     }
     if (empty($hideDesc)) {
@@ -87,7 +88,7 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
 
     if (!empty($model)) {
         $parameters = ['model' => $model, 'outputlangs' => $outputLangs, 'hidedetails' => $hideDetails, 'hidedesc' => $hideDesc, 'hideref' => $hideRef, 'moreparams' => $moreParams];
-        $hookmanager->executeHooks('saturneBuildDoc', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+        $hookmanager->executeHooks('saturneBuildDoc', $parameters, $object, $action);
 
         $result = $document->generateDocument($model, $outputLangs, $hideDetails, $hideDesc, $hideRef, $moreParams);
         if ($result <= 0) {
@@ -101,8 +102,10 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
             setEventMessages($langs->trans('FileGenerated') . ' - ' . '<a href=' . DOL_URL_ROOT . '/document.php?modulepart=' . (!empty($moreParams['modulePart']) ? $moreParams['modulePart'] : $object->module) . '&file=' . urlencode((empty($moreParams['modulePart']) ? $document->element . '/' : '') . (dol_strlen($object->ref) > 0 ? $object->ref . '/' : '') . $document->last_main_doc) . '&entity=' . $conf->entity . '"' . '>' . $document->last_main_doc . '</a>', []);
             $urlToRedirect = $_SERVER['REQUEST_URI'];
             $urlToRedirect = preg_replace('/#builddoc$/', '', $urlToRedirect);
-            $urlToRedirect = preg_replace('/action=builddoc&?/', '', $urlToRedirect); // To avoid infinite loop.
-            $urlToRedirect = preg_replace('/forcebuilddoc=1&?/', '', $urlToRedirect); // To avoid infinite loop.
+            // To avoid infinite loop.
+            $urlToRedirect = preg_replace('/action=builddoc&?/', '', $urlToRedirect);
+            // To avoid infinite loop.
+            $urlToRedirect = preg_replace('/forcebuilddoc=1&?/', '', $urlToRedirect);
             if (!isset($shouldRedirect) || $shouldRedirect) {
                 header('Location: ' . $urlToRedirect);
                 exit;

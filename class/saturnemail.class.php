@@ -1,5 +1,6 @@
 <?php
-/* Copyright (C) 2024 EVARISK <technique@evarisk.com>
+
+/* Copyright (C) 2024-2026 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -185,7 +186,7 @@ class SaturneMail extends SaturneObject
      */
     public ?string $email_from = null;
 
-    /**
+     /**
      * @var string|null Email to
      */
     public ?string $email_to = null;

@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2024-2025 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -32,14 +33,15 @@
 // Loop on record
 // --------------------------------------------------------------------
 $i                     = 0;
-$savNbField            = $totalarray['nbfield']; // +1
+$savNbField            = $totalarray['nbfield'];
 $totalarray            = [];
 $totalarray['nbfield'] = 0;
 $iMaxInLoop            = ($limit ? min($num, $limit) : $num);
 while ($i < $iMaxInLoop) {
     $obj = $db->fetch_object($resql);
     if (empty($obj)) {
-        break; // Should not happen
+        // Should not happen
+        break;
     }
 
     // Store properties in $object
@@ -69,7 +71,8 @@ while ($i < $iMaxInLoop) {
         }
         // Output Kanban
         $selected = -1;
-        if ($massActionButton || $massaction) { // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
+        // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
+        if ($massActionButton || $massaction) {
             $selected = 0;
             if (in_array($object->id, $arrayofselected)) {
                 $selected = 1;
@@ -87,7 +90,8 @@ while ($i < $iMaxInLoop) {
         // Action column
         if (getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
             print '<td class="nowrap center">';
-            if ($massActionButton || $massaction) { // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
+            // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
+            if ($massActionButton || $massaction) {
                 $selected = 0;
                 if (in_array($object->id, $arrayofselected)) {
                     $selected = 1;
@@ -158,7 +162,7 @@ while ($i < $iMaxInLoop) {
                     if (!isset($totalarray['val'])) {
                         $totalarray['val'] = [];
                     }
-                    if (!isset($totalarray['val']['t.'.$key])) {
+                    if (!isset($totalarray['val']['t.' . $key])) {
                         $totalarray['val']['t.' . $key] = 0;
                     }
                     $totalarray['val']['t.' . $key] += $object->$key;
@@ -171,13 +175,14 @@ while ($i < $iMaxInLoop) {
 
         // Fields from hook
         $parameters = ['arrayfields' => $arrayfields, 'object' => $object, 'obj' => $obj, 'i' => $i, 'totalarray' => &$totalarray];
-        $hookmanager->executeHooks('printFieldListValue', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
+        $hookmanager->executeHooks('printFieldListValue', $parameters, $object, $action);
         print $hookmanager->resPrint;
 
         // Action column
         if (!getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
             print '<td class="nowrap center">';
-            if ($massActionButton || $massaction) { // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
+            // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
+            if ($massActionButton || $massaction) {
                 $selected = 0;
                 if (in_array($object->id, $arrayofselected)) {
                     $selected = 1;

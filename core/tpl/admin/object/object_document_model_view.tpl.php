@@ -1,4 +1,5 @@
 <?php
+
 // Select document models
 $def = [];
 $sql = 'SELECT nom';
@@ -77,7 +78,7 @@ if (is_array($filelist) && !empty($filelist)) {
                 if ($conf->global->$defaultModelConf == $name) {
                     print img_picto($langs->trans('Default'), 'on');
                 } else {
-                    print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setdoc&model_name=' . $name .'&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), 'off') . '</a>';
+                    print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setdoc&model_name=' . $name . '&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), 'off') . '</a>';
                 }
                 print '</td>';
 
@@ -126,7 +127,7 @@ if (is_array($filelist) && !empty($filelist)) {
                     if ($conf->global->$defaultModelConf == $customName) {
                         print img_picto($langs->trans('Default'), 'on');
                     } else {
-                        print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setdoc&model_name=' . $customName .'&const=' . $module->custom_scandir . '&label=' . urlencode($module->custom_name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), 'off') . '</a>';
+                        print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setdoc&model_name=' . $customName . '&const=' . $module->custom_scandir . '&label=' . urlencode($module->custom_name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), 'off') . '</a>';
                     }
                     print '</td><td colspan=2></td></tr>';
                 }

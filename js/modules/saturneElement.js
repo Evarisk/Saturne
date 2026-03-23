@@ -20,7 +20,6 @@
  * \brief   JavaScript saturneElement file
  */
 
-'use strict';
 
 /**
  * Init saturneElement JS
