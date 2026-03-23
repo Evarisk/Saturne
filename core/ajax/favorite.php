@@ -32,18 +32,24 @@ if (file_exists('../saturne.main.inc.php')) {
 }
 
 global $db, $user, $conf, $langs;
+
 require_once __DIR__ . '../../../lib/object.lib.php';
+
 $action = GETPOST('action', 'aZ09');
+
 if ($action == 'toggle_favorite') {
     $isFile = GETPOST('isFile', 'int');
     $fileId = GETPOST('fileId', 'int');
     $isFavorite = GETPOST('isFavorite', 'int');
+
     if ($isFile) {
         require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
+
         $file = new EcmFiles($db);
         $file->fetch($fileId);
     } else {
         require_once DOL_DOCUMENT_ROOT . '/core/class/link.class.php';
+
         $file = new Link($db);
         $file->fetch($fileId);
     }

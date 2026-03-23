@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<ruleset name="Saturne">
+    <description>PSR-12 for Saturne and modules</description>
+    <rule ref="PSR12"/>
+
+    <!-- Dolibarr does not use PHP namespaces — architectural constraint -->
+    <rule ref="PSR1.Classes.ClassDeclaration">
+        <severity>0</severity>
+    </rule>
+
+    <!-- Dolibarr ORM imposes non-camelCase method names (LibStatut, write_file, …) -->
+    <rule ref="PSR1.Methods.CamelCapsMethodName">
+        <severity>0</severity>
+    </rule>
+
+    <!-- Dolibarr module naming convention requires lowercase prefix (modSaturne, modDigirisk, …) -->
+    <rule ref="Squiz.Classes.ValidClassName">
+        <severity>0</severity>
+    </rule>
+
+    <!-- Dolibarr inherited method signatures may have optional args before required ones -->
+    <rule ref="PEAR.Functions.ValidDefaultValue">
+        <severity>0</severity>
+    </rule>
+
+    <!-- Line length: warn only, do not block CI -->
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="120"/>
+            <property name="absoluteLineLimit" value="0"/>
+        </properties>
+    </rule>
+
+    <file>.</file>
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/node_modules/*</exclude-pattern>
+    <exclude-pattern>*/css/*</exclude-pattern>
+    <exclude-pattern>*/js/*.min.js</exclude-pattern>
+</ruleset>

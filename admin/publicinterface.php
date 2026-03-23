@@ -1,5 +1,6 @@
 <?php
-/* Copyright (C) 2025 EVARISK <technique@evarisk.com>
+
+/* Copyright (C) 2025-2026 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,7 +60,7 @@ $action = GETPOST('action', 'aZ09');
 // Initialize view objects
 $form = new Form($db);
 
-$hookmanager->initHooks([$moduleNameLowerCase . 'publicinterfaceadmin']); // Note that conf->hooks_modules contains array
+$hookmanager->initHooks([$moduleNameLowerCase . 'publicinterfaceadmin']);
 
 // Permissions
 $permissionToRead = $user->hasRight($moduleNameLowerCase, 'adminpage', 'read');
@@ -73,7 +74,7 @@ saturne_check_access($permissionToRead);
 
 $object     = null;
 $parameters = [];
-$resHook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+$resHook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action);
 if ($resHook < 0) {
     setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 }
@@ -121,7 +122,7 @@ if (empty($resHook)) {
 $title   = $langs->trans('ModuleSetup', $moduleName);
 $helpUrl = 'FR:Module_' . $moduleName;
 
-saturne_header(0,'', $title, $helpUrl);
+saturne_header(0, '', $title, $helpUrl);
 
 // Subheader
 $linkBack = '<a href="' . DOL_URL_ROOT . '/admin/modules.php?restore_lastsearch_values=1' . '">' . $langs->trans('BackToModuleList') . '</a>';

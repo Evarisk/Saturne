@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2024-2025 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -94,7 +95,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_list_search_input.tpl.ph
 
 // Fields from hook
 $parameters = ['arrayfields' => $arrayfields];
-$hookmanager->executeHooks('printFieldListOption', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
+$hookmanager->executeHooks('printFieldListOption', $parameters, $object, $action);
 print $hookmanager->resPrint;
 
 // Action column

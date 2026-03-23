@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2025 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -46,7 +47,7 @@ if ($num == 0) {
 $db->free($resql);
 
 $parameters = ['arrayfields' => $arrayfields, 'sql' => $sql];
-$hookmanager->executeHooks('printFieldListFooter', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
+$hookmanager->executeHooks('printFieldListFooter', $parameters, $object, $action);
 print $hookmanager->resPrint;
 
 print '</table>';

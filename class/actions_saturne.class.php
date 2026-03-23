@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -96,7 +97,7 @@ class ActionsSaturne
             }
         }
 
-        return 0; // or return 1 to replace standard code
+        return 0;
     }
 
     /**
@@ -120,7 +121,7 @@ class ActionsSaturne
             }
         }
 
-        return 0; // or return 1 to replace standard code
+        return 0;
     }
 
     /**
@@ -155,7 +156,7 @@ class ActionsSaturne
             $this->resprints = $out;
         }
 
-        return 0; // or return 1 to replace standard code
+        return 0;
     }
 
     /**
@@ -176,11 +177,11 @@ class ActionsSaturne
 
             $redirections = $saturneRedirection->fetchAll();
             if (is_array($redirections) && !empty($redirections)) {
-                foreach($redirections as $redirection) {
+                foreach ($redirections as $redirection) {
                     //check redirection from url, if not beginning with a / add it
                     $urlToCheck = $redirection->from_url;
                     if (strpos($redirection->from_url, '/') !== 0) {
-                        $urlToCheck = '/' . $redirection->from_url;
+                            $urlToCheck = '/' . $redirection->from_url;
                     }
                     if ($urlToCheck == '/' . $originalUrl) {
                         header('Location: ' . $redirection->to_url);
@@ -190,7 +191,7 @@ class ActionsSaturne
             }
         }
 
-        return 0; // or return 1 to replace standard code
+        return 0;
     }
 
     /**
@@ -249,29 +250,27 @@ class ActionsSaturne
                         </div>
                     </div>
                 </div>
-            <?php }
+                    <?php
+            }
             $out .= '</div></div>'; ?>
 
             <script>
                 $('.user_extras_electronic_signature').html(<?php echo json_encode($out); ?>);
             </script>
-            <?php
-        } elseif (strpos($_SERVER['PHP_SELF'], '/document.php') !== false ||
-                    strpos($_SERVER['PHP_SELF'], '/saturne_document.php') !== false) {
-
+        <?php
+        } elseif (
+            strpos($_SERVER['PHP_SELF'], '/document.php') !== false ||
+                    strpos($_SERVER['PHP_SELF'], '/saturne_document.php') !== false
+        ) {
             require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
             require_once DOL_DOCUMENT_ROOT . '/core/class/link.class.php';
-
             $file    = new EcmFiles($db);
             $tmpFile = new EcmFiles($db);
             $file->fetchAll('', '', 0, 0, '(t.src_object_type:=:\'' . $object->table_element . '\') AND (t.src_object_id:=:' . $object->id . ')');
-
             $favoritesFiles = [];
             foreach ($file->lines as $singleFile) {
-
                 $tmpFile->id = $singleFile->id;
                 $tmpFile->fetch_optionals();
-
                 if (!empty($tmpFile->array_options['options_favorite'])) {
                     $favoritesFiles[] = (int) $tmpFile->id;
                 }
@@ -383,7 +382,7 @@ class ActionsSaturne
             <?php
         }
 
-        return 0; // or return 1 to replace standard code
+        return 0;
     }
 
     /**
@@ -420,7 +419,8 @@ class ActionsSaturne
                 // Creation signature OK
                 $signatory->setSigned($user, false);
                 exit;
-            } elseif (!empty($signatory->errors)) { // Creation signature KO
+            } elseif (!empty($signatory->errors)) {
+                // Creation signature KO
                 setEventMessages('', $signatory->errors, 'errors');
             } else {
                 setEventMessages($signatory->error, [], 'errors');
@@ -480,10 +480,11 @@ class ActionsSaturne
                 $extrafields = array_map(fn($s) => '__EXTRAFIELD_' . dol_strtoupper(preg_replace('/^options_/', '', $s)) . '__', $extrafields);
             }
 
-            print_r(json_encode($extrafields)); exit;
+            print_r(json_encode($extrafields));
+            exit;
         }
 
-        return 0; // or return 1 to replace standard code
+        return 0;
     }
 
     /**

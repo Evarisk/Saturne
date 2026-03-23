@@ -1,5 +1,6 @@
 <?php
-/* Copyright (C) 2025 EVARISK <technique@evarisk.com>
+
+/* Copyright (C) 2025-2026 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -191,6 +192,7 @@ class SaturneElement extends SaturneObject
      * @var int User ID
      */
     public $fk_user_creat;
+
     public $fk_element;
     public $fk_standard;
     public $position;

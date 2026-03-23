@@ -32,6 +32,7 @@
 
 $parameters = ['signatoryRole' => $signatoryRole, 'signatories' => $signatories];
 $resHook    = $hookmanager->executeHooks('saturneAddAttendantRow', $parameters);
+
 if (($object->status == $object::STATUS_DRAFT || ($object->status == $object::STATUS_VALIDATED && getDolGlobalInt('SATURNE_ATTENDANTS_ADD_STATUS_MANAGEMENT'))) && $permissiontoadd && empty($resHook)) {
     print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode . '">';
     print '<input type="hidden" name="token" value="' . newToken() . '">';

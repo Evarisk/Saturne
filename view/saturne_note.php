@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,9 +24,9 @@
 
 // Load Saturne environment
 if (file_exists('../saturne.main.inc.php')) {
-	require_once __DIR__ . '/../saturne.main.inc.php';
+    require_once __DIR__ . '/../saturne.main.inc.php';
 } elseif (file_exists('../../saturne.main.inc.php')) {
-	require_once __DIR__ . '/../../saturne.main.inc.php';
+    require_once __DIR__ . '/../../saturne.main.inc.php';
 } else {
     die('Include of saturne main fails');
 }
@@ -60,18 +61,21 @@ $className   = ucfirst($objectType);
 $object      = new $className($db);
 $extrafields = new ExtraFields($db);
 
-$hookmanager->initHooks([$objectType . 'note', $object->element . 'note', 'saturneglobal', 'globalcard']); // Note that conf->hooks_modules contains array
+$hookmanager->initHooks([$objectType . 'note', $object->element . 'note', 'saturneglobal', 'globalcard']);
 
 // Fetch optionals attributes and labels
 $extrafields->fetch_name_optionals_label($object->table_element);
 
 // Load object
-include DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php'; // Must be included, not include_once. Include fetch and fetch_thirdparty but not fetch_optionals
+// Must be included, not include_once. Include fetch and fetch_thirdparty but not fetch_optionals
+include DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php';
 
 // Security check - Protection if external user
 $permissiontoread = $user->rights->$moduleNameLowerCase->$objectType->read;
 $permissiontoadd  = (($object->status >= $object::STATUS_LOCKED) ? 0 : $user->rights->$moduleNameLowerCase->$objectType->write);
-$permissionnote   = $permissiontoadd; // Used by include of actions_setnotes.inc.php
+$permissionnote   = $permissiontoadd;
+
+// Used by include of actions_setnotes.inc.php
 saturne_check_access($permissiontoread);
 
 /*
@@ -79,20 +83,20 @@ saturne_check_access($permissiontoread);
 */
 
 $parameters = ['id' => $id];
-$resHook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+$resHook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action);
 if ($resHook < 0) {
     setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 }
 
 if (empty($resHook)) {
-    include DOL_DOCUMENT_ROOT.'/core/actions_setnotes.inc.php'; // Must be included, not include_once
+    include DOL_DOCUMENT_ROOT . '/core/actions_setnotes.inc.php';
 
     // Actions set_thirdparty, set_project
     require_once __DIR__ . '/../core/tpl/actions/banner_actions.tpl.php';
 }
 
 /*
-*	View
+*    View
 */
 
 $title    = $langs->trans('Note') . ' - ' . $langs->trans(ucfirst($object->element));

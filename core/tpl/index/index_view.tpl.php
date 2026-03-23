@@ -31,7 +31,7 @@ if (!isset($showDashboard) || $showDashboard === true) {
 
 $upload_dir = $conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1];
 
-$hookmanager->initHooks([$moduleNameLowerCase . 'index', 'globalcard']); // Note that conf->hooks_modules contains array.
+$hookmanager->initHooks([$moduleNameLowerCase . 'index', 'globalcard']);
 
 // Security check.
 $permissiontoread = $user->rights->$moduleNameLowerCase->read;

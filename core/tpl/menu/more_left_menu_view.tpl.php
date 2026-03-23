@@ -69,6 +69,7 @@
                                 ]
                             ]
                         ]);
+
                         echo saturne_get_button_component_html([
                             'className' => 'wpeo-button button-square-40 wpeo-tooltip-event',
                             'href'      => dol_buildpath('custom/' . $moreParams['moduleNameLowerCase'] . '/view/' . $moreParams['objectElement'] . '/' . $moreParams['objectElement'] . '_card.php?action=create&element_type=1', 1),

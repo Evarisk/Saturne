@@ -36,8 +36,10 @@
 function saturne_log(string $msg, int $level = LOG_ERR): void
 {
     $out = dol_strtoupper(__METHOD__) . ' ' . $msg . PHP_EOL;
+
     if ($level == LOG_ERR) {
         $backtrace = debug_backtrace();
+
         foreach ($backtrace as $trace) {
             $file     = $trace['file'];
             $line     = $trace['line'];

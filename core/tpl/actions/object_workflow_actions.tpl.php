@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -35,10 +36,12 @@ if ($action == 'confirm_lock' && $permissiontoadd) {
     if ($result > 0) {
         // Set locked OK.
         $urlToGo = str_replace('__ID__', $result, $backtopage);
-        $urlToGo = preg_replace('/--IDFORBACKTOPAGE--/', $id, $urlToGo); // New method to autoselect project after a New on another form object creation.
+        // New method to autoselect project after a New on another form object creation.
+        $urlToGo = preg_replace('/--IDFORBACKTOPAGE--/', $id, $urlToGo);
         header('Location: ' . $urlToGo);
         exit;
-    } elseif (!empty($object->errors)) { // Set locked KO.
+        // Set locked KO.
+    } elseif (!empty($object->errors)) {
         setEventMessages('', $object->errors, 'errors');
     } else {
         setEventMessages($object->error, [], 'errors');
@@ -68,10 +71,12 @@ if ($action == 'confirm_archive' && $permissiontoadd) {
 
         // Set Archived OK
         $urlToGo = str_replace('__ID__', $result, $backtopage);
-        $urlToGo = preg_replace('/--IDFORBACKTOPAGE--/', $id, $urlToGo); // New method to autoselect project after a New on another form object creation
+        // New method to autoselect project after a New on another form object creation
+        $urlToGo = preg_replace('/--IDFORBACKTOPAGE--/', $id, $urlToGo);
         header('Location: ' . $urlToGo);
         exit;
-    } elseif (!empty($object->errors)) { // Set Archived KO
+        // Set Archived KO
+    } elseif (!empty($object->errors)) {
         setEventMessages('', $object->errors, 'errors');
     } else {
         setEventMessages($object->error, [], 'errors');

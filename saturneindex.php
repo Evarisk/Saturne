@@ -33,4 +33,5 @@ if (file_exists('saturne.main.inc.php')) {
 
 $moduleName = 'Saturne';
 $moduleNameLowerCase = strtolower($moduleName);
+
 require_once __DIR__ . '/core/tpl/index/index_view.tpl.php';

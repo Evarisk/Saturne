@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2024-2025 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -56,7 +57,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_list_search_title.tpl.ph
 
 // Hook fields
 $parameters = ['arrayfields' => $arrayfields, 'param' => $param, 'sortfield' => $sortfield, 'sortorder' => $sortorder, 'totalarray' => &$totalarray];
-$hookmanager->executeHooks('printFieldListTitle', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
+$hookmanager->executeHooks('printFieldListTitle', $parameters, $object, $action);
 print $hookmanager->resPrint;
 
 // Action column
@@ -72,7 +73,8 @@ $needToFetchEachLine = 0;
 if (isset($extrafields->attributes[$object->table_element]['computed']) && is_array($extrafields->attributes[$object->table_element]['computed']) && count($extrafields->attributes[$object->table_element]['computed']) > 0) {
     foreach ($extrafields->attributes[$object->table_element]['computed'] as $key => $val) {
         if (!is_null($val) && preg_match('/\$object/', $val)) {
-            $needToFetchEachLine++; // There is at least one compute field that use $object
+            // There is at least one compute field that use $object
+            $needToFetchEachLine++;
         }
     }
 }

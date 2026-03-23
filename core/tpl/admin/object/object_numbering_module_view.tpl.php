@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2023-2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -79,8 +80,8 @@ if (is_dir($dir)) {
                         $classname = substr($file, 0, dol_strlen($file) - 4);
 
                         require_once $dir . '/' . $file;
-                        $module = new $classname($db);
 
+                        $module = new $classname($db);
                         if ($module->isEnabled()) {
                             print '<tr class="oddeven"><td>';
                             print $langs->trans($module->name);

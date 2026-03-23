@@ -35,6 +35,7 @@ function saturne_load_pagination(float $pagesCounter, ?array $pageArray, ?int $o
     if (empty($pageArray)) {
         $offset      = $offset ?: 1;
         $pageArray[] = '<i class="fas fa-arrow-left"></i>';
+
         if ($pagesCounter > 4) {
             if ($offset > 2) {
                 $pageArray[] = '...';
@@ -92,6 +93,7 @@ function saturne_show_pagination(float $pagesCounter, ?array $pageArray, ?int $o
     $return .= '<input hidden id="pagesCounter" value="' . ($pagesCounter) . '">';
     $return .= '<input hidden id="containerToRefresh" value="media_gallery">';
     $return .= '<input hidden id="currentOffset" value="' . ($offset ?: 1) . '">';
+
     foreach ($pageArray as $pageNumber) {
         $return .= '<li class="pagination-element ' . ($pageNumber == $offset ? 'pagination-current' : ($pageNumber == 1 && !$offset ? 'pagination-current' : '')) . '">';
         if ($pageNumber == '...') {

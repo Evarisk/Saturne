@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2025 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -43,11 +44,11 @@ if (!empty($extrafields->attributes[$object->table_element]['label'])) {
 
 // Add fields from hooks
 $parameters = [];
-$hookmanager->executeHooks('printFieldListSelect', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
+$hookmanager->executeHooks('printFieldListSelect', $parameters, $object, $action);
 $sql .= $hookmanager->resPrint;
 $sql  = preg_replace('/,\s*$/', '', $sql);
-
-$sqlFields = $sql; // $sql fields to remove for count total
+// $sql fields to remove for count total
+$sqlFields = $sql;
 
 $sql .= ' FROM ' . $db->prefix() . $object->table_element . ' as t';
 if (isset($extrafields->attributes[$object->table_element]['label']) && is_array($extrafields->attributes[$object->table_element]['label']) && count($extrafields->attributes[$object->table_element]['label'])) {
@@ -56,7 +57,7 @@ if (isset($extrafields->attributes[$object->table_element]['label']) && is_array
 
 // Add table from hooks
 $parameters = ['search' => $search];
-$hookmanager->executeHooks('printFieldListFrom', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
+$hookmanager->executeHooks('printFieldListFrom', $parameters, $object, $action);
 $sql .= $hookmanager->resPrint;
 if ($object->ismultientitymanaged == 1) {
     $sql .= ' WHERE t.entity IN (' . getEntity($object->element, (GETPOSTINT('search_current_entity') ? 0 : 1)) . ')';
@@ -85,7 +86,7 @@ foreach ($search as $key => $val) {
 
         // Add search from hooks
         $parameters = ['search' => $search, 'key' => $key, 'val' => $val];
-        $resHook    = $hookmanager->executeHooks('printFieldListSearch', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
+        $resHook    = $hookmanager->executeHooks('printFieldListSearch', $parameters, $object, $action);
         $sql       .= $hookmanager->resPrint;
         if (!empty($resHook)) {
             continue;
@@ -99,12 +100,12 @@ foreach ($search as $key => $val) {
             if (!empty($object->fields[$key]['arrayofkeyval'])) {
                 $keys = array_keys($object->fields[$key]['arrayofkeyval']);
                 $keysAreInt = count(array_filter($keys, 'is_int')) === count($keys);
-                if($keysAreInt){
+                if ($keysAreInt) {
                     $mode_search = 2;
-                }else{
+                } else {
                     $mode_search = 3;
                 }
-            } else  {
+            } else {
                 $mode_search = 2;
             }
         }
@@ -144,17 +145,17 @@ require_once DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_list_search_sql.tpl.php'
 
 // Add where from hooks
 $parameters = ['search' => $search];
-$hookmanager->executeHooks('printFieldListWhere', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
+$hookmanager->executeHooks('printFieldListWhere', $parameters, $object, $action);
 $sql .= $hookmanager->resPrint;
 
 // Add groupby from hooks
 $parameters = [];
-$hookmanager->executeHooks('printFieldListGroupBy', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
+$hookmanager->executeHooks('printFieldListGroupBy', $parameters, $object, $action);
 $sql .= $hookmanager->resPrint;
 
 // Add having from hooks
 $parameters = ['search' => $search];
-$hookmanager->executeHooks('printFieldListHaving', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
+$hookmanager->executeHooks('printFieldListHaving', $parameters, $object, $action);
 $sql .= $hookmanager->resPrint;
 
 // Count total nb of records
@@ -164,7 +165,6 @@ if (!getDolGlobalInt('MAIN_DISABLE_FULL_SCANLIST')) {
     $sqlForCount = preg_replace('/^' . preg_quote($sqlFields, '/') . '/', 'SELECT COUNT(*) as nbtotalofrecords', $sql);
     $sqlForCount = preg_replace('/\s+LEFT\s+JOIN\s+.*?\s+WHERE\s+/is', ' WHERE ', $sqlForCount);
     $sqlForCount = preg_replace('/GROUP BY .*$/', '', $sqlForCount);
-
     $resql = $db->query($sqlForCount);
     if ($resql) {
         $objForCount      = $db->fetch_object($resql);
@@ -173,7 +173,8 @@ if (!getDolGlobalInt('MAIN_DISABLE_FULL_SCANLIST')) {
         dol_print_error($db);
     }
 
-    if (($page * $limit) > $nbTotalOfRecords) {	// if total resultset is smaller than the paging size (filtering), goto and load page 0
+    // if total resultset is smaller than the paging size (filtering), goto and load page 0
+    if (($page * $limit) > $nbTotalOfRecords) {
         $page   = 0;
         $offset = 0;
     }
@@ -204,6 +205,7 @@ $num = $db->num_rows($resql);
 if ($num == 1 && getDolGlobalInt('MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE') && $searchAll && !$page) {
     $obj = $db->fetch_object($resql);
     $id = $obj->rowid;
-    header('Location: ' . dol_buildpath($object->module . '/view/' . $object->element . '/' . $object->element . '_card.php', 1) . '?id=' . $id); //@todo parameter
+    //@todo parameter
+    header('Location: ' . dol_buildpath($object->module . '/view/' . $object->element . '/' . $object->element . '_card.php', 1) . '?id=' . $id);
     exit;
 }

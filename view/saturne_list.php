@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2026 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -56,8 +57,10 @@ global $conf, $db, $hookmanager, $langs, $user;
 saturne_load_langs();
 
 // Get parameters
-$action     = GETPOSTISSET('action') ? GETPOST('action', 'aZ09') : 'view'; // The action 'add', 'create', 'edit', 'update', 'view', ...
-$massaction = GETPOST('massaction', 'alpha');                                // The bulk action (combo box choice into lists)
+// The action 'add', 'create', 'edit', 'update', 'view', ...
+$action     = GETPOSTISSET('action') ? GETPOST('action', 'aZ09') : 'view';
+// The bulk action (combo box choice into lists)
+$massaction = GETPOST('massaction', 'alpha');
 
 // Get list parameters
 $toselect                                   = [];
@@ -86,7 +89,7 @@ if (isModEnabled('categorie')) {
 // Initialize view objects
 $form = new Form($db);
 
-$hookmanager->initHooks([$contextpage, 'saturnelist']); // Note that conf->hooks_modules contains array
+$hookmanager->initHooks([$contextpage, 'saturnelist']);
 
 // Fetch optionals attributes and labels
 $extrafields->fetch_name_optionals_label($object->table_element);
@@ -104,9 +107,8 @@ if (!$sortorder) {
     $sortorder = $objectMetadata['defaultorder'];
 }
 
-$excludeFields = [];
-
 // Hook to add/override fields per object type
+$excludeFields = [];
 $parameters = ['objectType' => $objectType, 'excludeFields' => $excludeFields];
 $hookmanager->executeHooks('saturneListAddCustomFields', $parameters, $object);
 if (!empty($hookmanager->resArray['excludeFields'])) {
@@ -173,7 +175,7 @@ saturne_check_access($permissiontoread, $object);
  */
 
 $parameters = ['arrayfields' => &$arrayfields];
-$resHook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+$resHook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action);
 if ($resHook < 0) {
     setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 }
@@ -183,7 +185,8 @@ if (empty($resHook)) {
     require_once DOL_DOCUMENT_ROOT . '/core/actions_changeselectedfields.inc.php';
 
     // Purge search criteria
-    if (GETPOST('button_removefilter_x', 'alpha') || GETPOST('button_removefilter.x', 'alpha') || GETPOST('button_removefilter', 'alpha')) { // All tests are required to be compatible with all browsers
+    // All tests are required to be compatible with all browsers
+    if (GETPOST('button_removefilter_x', 'alpha') || GETPOST('button_removefilter.x', 'alpha') || GETPOST('button_removefilter', 'alpha')) {
         foreach ($object->fields as $key => $val) {
             $search[$key] = '';
             if (isset($val['type']) && in_array($val['type'], ['date', 'datetime', 'timestamp'])) {
@@ -196,9 +199,12 @@ if (empty($resHook)) {
         $search_array_options = [];
         $searchCategories     = [];
     }
-    if (GETPOST('button_removefilter_x', 'alpha') || GETPOST('button_removefilter.x', 'alpha') || GETPOST('button_removefilter', 'alpha')
-        || GETPOST('button_search_x', 'alpha') || GETPOST('button_search.x', 'alpha') || GETPOST('button_search', 'alpha')) {
-        $massaction = ''; // Protection to avoid mass action if we force a new search during a mass action confirmation
+    if (
+        GETPOST('button_removefilter_x', 'alpha') || GETPOST('button_removefilter.x', 'alpha') || GETPOST('button_removefilter', 'alpha')
+        || GETPOST('button_search_x', 'alpha') || GETPOST('button_search.x', 'alpha') || GETPOST('button_search', 'alpha')
+    ) {
+        // Protection to avoid mass action if we force a new search during a mass action confirmation
+        $massaction = '';
     }
 
     if (!GETPOST('confirmmassaction', 'alpha') && $massaction != 'presend' && $massaction != 'confirm_presend') {

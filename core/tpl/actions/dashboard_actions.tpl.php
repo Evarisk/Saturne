@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -29,7 +30,8 @@
  */
 
 // Load Dolibarr libraries
-require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php'; // use for dol_set_user_param
+// use for dol_set_user_param
+require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
 
 if ($action == 'adddashboardinfo' || $action == 'closedashboardinfo') {
     $data                = json_decode(file_get_contents('php://input'), true);
@@ -108,7 +110,7 @@ if ($action == 'generate_csv') {
         $labels  = $data['labels'];
         $dataset = $data['data'];
 
-        $mode = 0; // Two-dimension graph
+        // Two-dimension graph
         $line = 1;
 
         $fp = fopen($upload_dir . '/temp/' . $fileName, 'w');

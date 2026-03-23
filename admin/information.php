@@ -1,6 +1,6 @@
 <?php
 
-/* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2022-2026 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,34 +33,45 @@ if (file_exists('../saturne.main.inc.php')) {
 
 // Load Dolibarr libraries
 require_once DOL_DOCUMENT_ROOT . '/includes/parsedown/Parsedown.php';
+
 // Load Saturne libraries
 require_once __DIR__ . '/../lib/saturne.lib.php';
+
 // Global variables definitions
 global $db, $langs;
+
 // Load translation files required by the page
 saturne_load_langs(['admin']);
+
 // Get parameters
 $filename   = GETPOST('filename', 'alpha');
 $tabName    = GETPOST('tab_name', 'alpha');
 $backtopage = GETPOST('backtopage', 'alpha');
+
 // Initialize technical objects
 $parsedown = new Parsedown();
+
 /*
  * View
  */
 
 $title    = $langs->trans('ModuleSetup', 'Saturne');
 $help_url = 'FR:Module_Saturne';
+
 saturne_header(0, '', $title, $help_url);
+
 // Subheader
 $linkback = '<a href="' . ($backtopage ?: DOL_URL_ROOT . '/admin/modules.php?restore_lastsearch_values=1') . '">' . $langs->trans('BackToModuleList') . '</a>';
 print load_fiche_titre($title, $linkback, 'title_setup');
+
 // Configuration header
 $head = saturne_admin_prepare_head();
 print dol_get_fiche_head($head, $tabName, $title, -1, 'saturne_color@saturne');
+
 $filePath = dol_buildpath('saturne/' . $filename . '.md');
 $content  = file_get_contents($filePath);
 print $parsedown->text($content);
+
 // Page end
 print dol_get_fiche_end();
 llxFooter();

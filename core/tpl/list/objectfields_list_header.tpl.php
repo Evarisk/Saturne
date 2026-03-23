@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2025 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -160,7 +161,7 @@ if (isModEnabled('categorie') && $user->hasRight('categorie', 'read') && isset($
 }
 
 $parameters = ['arrayfields' => &$arrayfields];
-$reshook    = $hookmanager->executeHooks('printFieldPreListTitle', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
+$reshook    = $hookmanager->executeHooks('printFieldPreListTitle', $parameters, $object, $action);
 if (empty($reshook)) {
     $moreForFilter .= $hookmanager->resPrint;
 } else {
@@ -182,6 +183,7 @@ if (!empty($arrayOfMassActions)) {
     $selectedFields .= $form->showCheckAddButtons('checkforselect', 1);
 }
 
-print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you don't need reserved height for your table
+// You can use div-table-responsive-no-min if you don't need reserved height for your table
+print '<div class="div-table-responsive">';
 print '<table class="tagtable nobottomiftotal noborder liste' . ($moreForFilter ? ' listwithfilterbefore' : '') . '">';
 print '<thead>';

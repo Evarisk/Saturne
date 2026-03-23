@@ -32,13 +32,17 @@ if (file_exists('../saturne.main.inc.php')) {
 }
 
 global $conf, $db, $user, $langs;
+
 $action = GETPOST('action', 'aZ09');
+
 if ($action == 'update_field') {
     $field     = GETPOST('field', 'alpha', 2);
     $element   = GETPOST('element', 'alpha', 2);
     $fkElement = GETPOST('fk_element', 'alpha', 2);
     $type      = GETPOST('type', 'alpha', 2);
+
     $object = fetchObjectByElement($fkElement, $element);
+
     $format = '';
     $value  =  '';
     if ($type == 'datepicker') {

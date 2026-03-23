@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2021-2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -39,10 +40,8 @@ $objectType = GETPOST('object_type', 'alpha');
 if (empty($moduleName) && empty($objectType)) {
     $lastUrl      = $_SERVER['HTTP_REFERER'];
     $lastUrlArray = parse_url($lastUrl);
-
     if (is_array($lastUrlArray) && isset($lastUrlArray['query'])) {
         parse_str($lastUrlArray['query'], $lastUrlQuerys);
-
         if (isset($lastUrlQuerys['module_name']) && isset($lastUrlQuerys['object_type'])) {
             $moduleName = $lastUrlQuerys['module_name'];
             $objectType = $lastUrlQuerys['object_type'];
@@ -75,10 +74,11 @@ $object    = new $className($db);
 // Initialize view objects
 $form = new Form($db);
 
-$hookmanager->initHooks([$objectType . 'admin']); // Note that conf->hooks_modules contains array.
+$hookmanager->initHooks([$objectType . 'admin']);
 
 // Security check - Protection if external user
 $permissiontoread = $user->rights->$moduleNameLowerCase->adminpage->read;
+
 saturne_check_access($permissiontoread);
 
 /*
@@ -88,7 +88,7 @@ saturne_check_access($permissiontoread);
 $title    = $langs->trans('ModuleSetup', $moduleName);
 $help_url = 'FR:Module_' . $moduleName;
 
-saturne_header(0,'', $title, $help_url);
+saturne_header(0, '', $title, $help_url);
 
 // Subheader
 $linkback = '<a href="' . ($backtopage ?: DOL_URL_ROOT . '/admin/modules.php?restore_lastsearch_values=1') . '">' . $langs->trans('BackToModuleList') . '</a>';
@@ -100,7 +100,6 @@ $head = $preHead();
 print dol_get_fiche_head($head, $object->element, $title, -1, $moduleNameLowerCase . '_color@' . $moduleNameLowerCase);
 
 require_once __DIR__ . '/../core/tpl/admin/object/object_numbering_module_view.tpl.php';
-
 require_once __DIR__ . '/../core/tpl/admin/object/object_const_view.tpl.php';
 
 if ($object->isextrafieldmanaged > 0) {

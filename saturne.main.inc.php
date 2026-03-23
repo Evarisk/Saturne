@@ -61,4 +61,5 @@ if (!$res) {
 }
 
 require_once __DIR__ . '/lib/saturne_functions.lib.php';
+
 saturne_check_modules_enabled();
