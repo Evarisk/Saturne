@@ -1,0 +1,165 @@
+---
+name: Quality
+
+on:
+    push:
+        branches:
+            - main
+            - develop
+        paths:
+            - '**/*.php'
+            - 'js/modules/*.js'
+            - '.phpcs.xml'
+            - '.jshintrc'
+            - 'phpstan.neon'
+            - 'phpstan.baseline.neon'
+            - '.phan/config.php'
+            - 'tests/**'
+            - 'composer.json'
+            - 'composer.lock'
+    pull_request:
+        branches:
+            - main
+            - develop
+        paths:
+            - '**/*.php'
+            - 'js/modules/*.js'
+            - '.phpcs.xml'
+            - '.jshintrc'
+            - 'phpstan.neon'
+            - 'phpstan.baseline.neon'
+            - '.phan/config.php'
+            - 'tests/**'
+            - 'composer.json'
+            - 'composer.lock'
+    workflow_dispatch:
+
+concurrency:
+    group: quality-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    quality:
+        name: PHP ${{ matrix.php }} — ${{ matrix.step }}
+        runs-on: ubuntu-latest
+
+        strategy:
+            fail-fast: true
+            matrix:
+                php: ['8.1']
+                step: [phpcs, jshint, phpstan, phan, phpunit]
+
+        steps:
+            - name: Checkout Saturne
+              uses: actions/checkout@v4
+              with:
+                  path: htdocs/custom/saturne
+
+            # Dolibarr core is needed for class resolution (PHPStan scanDirectories,
+            # Phan directory_list, and PHPUnit require_once chains in lib files).
+            # Pinned to the latest stable release (23.0.0) for reproducibility.
+            - name: Checkout Dolibarr core (sparse — class + lib only)
+              uses: actions/checkout@v4
+              with:
+                  repository: Dolibarr/dolibarr
+                  ref: '23.0.0'
+                  path: dolibarr-core
+                  sparse-checkout: |
+                      htdocs/core/class
+                      htdocs/core/lib
+                  sparse-checkout-cone-mode: false
+
+            - name: Expose Dolibarr core at expected DOL_DOCUMENT_ROOT path
+              run: |
+                  mkdir -p htdocs/core
+                  cp -r dolibarr-core/htdocs/core/class htdocs/core/class
+                  cp -r dolibarr-core/htdocs/core/lib   htdocs/core/lib
+
+            - name: Set up PHP ${{ matrix.php }}
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: ${{ matrix.php }}
+                  extensions: mbstring, json, mysqli, ast
+                  tools: composer:v2
+                  coverage: none
+
+            - name: Set up Node 18
+              if: matrix.step == 'jshint'
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '18'
+                  cache: npm
+                  cache-dependency-path: htdocs/custom/saturne/package-lock.json
+
+            - name: Cache Composer packages
+              if: matrix.step == 'phpstan' || matrix.step == 'phan' || matrix.step == 'phpunit'
+              uses: actions/cache@v4
+              with:
+                  path: htdocs/custom/saturne/vendor
+                  key: composer-${{ hashFiles('htdocs/custom/saturne/composer.lock') }}
+                  restore-keys: composer-
+
+            - name: Install Composer dependencies
+              if: matrix.step == 'phpstan' || matrix.step == 'phan' || matrix.step == 'phpunit'
+              working-directory: htdocs/custom/saturne
+              run: composer install --no-interaction --no-progress --prefer-dist
+
+            # ── PHPCS ────────────────────────────────────────────────────────────
+            - name: Install PHPCS
+              if: matrix.step == 'phpcs'
+              run: composer global require squizlabs/php_codesniffer --no-interaction
+
+            - name: Run PHPCS
+              if: matrix.step == 'phpcs'
+              working-directory: htdocs/custom/saturne
+              run: |
+                  ~/.composer/vendor/bin/phpcs \
+                    --standard=.phpcs.xml \
+                    --extensions=php \
+                    --ignore=vendor,node_modules,css,js \
+                    .
+
+            # ── JSHint ───────────────────────────────────────────────────────────
+            - name: Install Node dependencies
+              if: matrix.step == 'jshint'
+              working-directory: htdocs/custom/saturne
+              run: npm ci
+
+            - name: Run JSHint
+              if: matrix.step == 'jshint'
+              working-directory: htdocs/custom/saturne
+              run: npx jshint js/modules/*.js
+
+            # ── PHPStan ──────────────────────────────────────────────────────────
+            - name: Create PHPStan tmp directory
+              if: matrix.step == 'phpstan'
+              working-directory: htdocs/custom/saturne
+              run: mkdir -p .github/tmp/phpstan
+
+            - name: Run PHPStan
+              if: matrix.step == 'phpstan'
+              working-directory: htdocs/custom/saturne
+              run: |
+                  vendor/bin/phpstan analyse \
+                    --memory-limit=512M \
+                    --no-progress \
+                    --error-format=github
+
+            # ── Phan ─────────────────────────────────────────────────────────────
+            - name: Run Phan
+              if: matrix.step == 'phan'
+              working-directory: htdocs/custom/saturne
+              run: |
+                  vendor/bin/phan \
+                    --config-file=.phan/config.php \
+                    --output-mode=github \
+                    --no-progress-bar
+
+            # ── PHPUnit ──────────────────────────────────────────────────────────
+            - name: Run PHPUnit
+              if: matrix.step == 'phpunit'
+              working-directory: htdocs/custom/saturne
+              run: |
+                  vendor/bin/phpunit \
+                    --configuration tests/phpunit/phpunittest.xml \
+                    --testdox

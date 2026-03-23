@@ -159,18 +159,58 @@ npm run build    # one-shot prod minification (if defined in module's package.js
 - `gulpfile.js` in saturne is the canonical build config; child modules reference `gulpfile-shared.js`
 - CI compiles and commits `.min.css` / `.min.js` automatically — **never commit them manually**
 - `.min` files are in `.gitignore`
+- Use `npm ci` in CI (reproducible installs from lock file), `npm install` locally
 
 ---
 
 ## 6. Quality Tooling
 
-| Tool | Purpose | Config file |
-|------|---------|-------------|
-| **PHPCS** | PHP style enforcement (PSR-12) | `.phpcs.xml` |
-| **JSHint** | JS validation | `.jshintrc` |
-| **EditorConfig** | Indentation, charset, line endings consistent across all editors | `.editorconfig` |
+| Tool | Purpose | Config file | Enforced in CI |
+|------|---------|-------------|----------------|
+| **PHPCS** | PHP style enforcement (PSR-12) | `.phpcs.xml` | ✓ (blocks build) |
+| **phpcbf** | Auto-fix PSR-12 violations | `.phpcs.xml` | — (local only) |
+| **JSHint** | JS validation | `.jshintrc` | ✓ (blocks build) |
+| **PHPStan** | Static analysis — max level | `phpstan.neon` | ✓ (quality job) |
+| **Phan** | Deep static analysis | `.phan/config.php` | ✓ (quality job) |
+| **PHPUnit** | Unit tests | `tests/phpunit/phpunittest.xml` | ✓ (quality job) |
+| **EditorConfig** | Indentation, charset, line endings consistent across all editors | `.editorconfig` | — (editor-side) |
 
-Run `phpcs --standard=PSR12 path/to/file.php` to check PHP. EditorConfig is picked up automatically by most editors (VSCode, PhpStorm, etc.) — install the plugin if prompted.
+PHPCS and JSHint run **before** compilation in CI (`build-assets-reusable.yml` — `lint` job must pass before `build` job starts).
+PHPStan, Phan, and PHPUnit run in a separate `quality.yml` workflow, triggered on push/PR to `main` and `develop`.
+
+**Indentation** — this project uses **spaces** (PSR-12, 4 spaces), unlike Dolibarr core which uses tabs. Never mix the two.
+
+Run locally:
+```bash
+# PHPCS — check
+~/.composer/vendor/bin/phpcs --standard=.phpcs.xml --extensions=php --ignore=vendor,node_modules,css,js .
+
+# phpcbf — auto-fix (run before committing)
+~/.composer/vendor/bin/phpcbf --standard=.phpcs.xml .
+
+# JSHint
+jshint js/modules/*.js
+
+# PHPStan (0 errors when baseline is current)
+vendor/bin/phpstan analyse --memory-limit=512M
+
+# PHPUnit
+vendor/bin/phpunit --configuration tests/phpunit/phpunittest.xml --testdox
+
+# Phan — requires php-ast; runs in CI (PHP 8.1) only
+# vendor/bin/phan --config-file=.phan/config.php
+```
+
+**PHPStan baseline** — `phpstan.baseline.neon` suppresses pre-existing errors.
+When you fix a baselined error, regenerate it:
+```bash
+vendor/bin/phpstan analyse --memory-limit=512M --generate-baseline phpstan.baseline.neon
+```
+
+**PHPUnit bootstrap** — `tests/phpunit/bootstrap.php` is stub-only (no Dolibarr DB).
+Tests that load `saturne_functions.lib.php` require `DOL_DOCUMENT_ROOT` to point to a Dolibarr `htdocs/` directory (available locally and in CI via sparse checkout).
+
+EditorConfig is picked up automatically by most editors (VSCode, PhpStorm, etc.) — install the plugin if prompted.
 
 ---
 
@@ -180,6 +220,8 @@ Run `phpcs --standard=PSR12 path/to/file.php` to check PHP. EditorConfig is pick
 → `fix/503-mail-eventpro`, `feat/478-menu-reorder`
 
 **Never commit directly to `main` or `develop`.** Dev branch: `develop`. PR required with ≥1 reviewer.
+
+**One issue = one branch = one PR.** Never mix multiple issues in a single branch or PR.
 
 **Commit format**: `#{issue} [{Scope}] {type}: {short description}`
 
@@ -199,9 +241,13 @@ Run `phpcs --standard=PSR12 path/to/file.php` to check PHP. EditorConfig is pick
 #1305 [JS] add: counter for all maxlength fields
 ```
 
+**Issue labels**:
+- **Story points** — add a Fibonacci label to every issue: `0`, `1`, `2`, `3`, `5`, `8`, `13`, `21`
+- **PWA** — add the `PWA` label to issues related to the Progressive Web App feature
+
 ---
 
-## 7. Reference Files
+## 8. Reference Files
 
 These files are the most complete and representative examples in the codebase. Use them as templates when creating new files of the same type.
 
@@ -349,7 +395,7 @@ Shows the modifier-class architecture used across all Saturne components:
 
 ---
 
-## 8. Pitfalls
+## 9. Pitfalls
 
 - **Zero files outside `htdocs/custom/{module}/`** — never touch Dolibarr core
 - **Don't copy `gulpfile.js`** into each module — use `gulpfile-shared.js`
