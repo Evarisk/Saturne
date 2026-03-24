@@ -72,7 +72,12 @@ jobs:
                       htdocs/compta/facture/class
                       htdocs/contact/class
                       htdocs/contrat/class
+                      htdocs/core/actions_changeselectedfields.inc.php
                       htdocs/core/actions_extrafields.inc.php
+                      htdocs/core/actions_fetchobject.inc.php
+                      htdocs/core/actions_linkedfiles.inc.php
+                      htdocs/core/actions_massactions.inc.php
+                      htdocs/core/actions_setnotes.inc.php
                       htdocs/core/class
                       htdocs/core/lib
                       htdocs/core/modules

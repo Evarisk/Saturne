@@ -230,14 +230,24 @@ return [
     // Exclude files whose class declarations would duplicate what Phan already
     // sees from core/class/ or from dev/phan/stubs.php.
     'exclude_file_list' => [
+        DOL_DOCUMENT_ROOT . '/core/actions_changeselectedfields.inc.php',
         DOL_DOCUMENT_ROOT . '/core/actions_extrafields.inc.php',
+        DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php',
+        DOL_DOCUMENT_ROOT . '/core/actions_linkedfiles.inc.php',
+        DOL_DOCUMENT_ROOT . '/core/actions_massactions.inc.php',
+        DOL_DOCUMENT_ROOT . '/core/actions_setnotes.inc.php',
         SAT_MODULE_ROOT . '/tests/phpunit/bootstrap.php',
         SAT_MODULE_ROOT . '/dev/phpstan/stubs.php',
     ],
 
     // File extensions to analyze.
     'file_list' => [
+        DOL_DOCUMENT_ROOT . '/core/actions_changeselectedfields.inc.php',
         DOL_DOCUMENT_ROOT . '/core/actions_extrafields.inc.php',
+        DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php',
+        DOL_DOCUMENT_ROOT . '/core/actions_linkedfiles.inc.php',
+        DOL_DOCUMENT_ROOT . '/core/actions_massactions.inc.php',
+        DOL_DOCUMENT_ROOT . '/core/actions_setnotes.inc.php',
     ],
 
     // Exclude compiled/generated assets.
