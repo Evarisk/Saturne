@@ -93,7 +93,7 @@ if (empty($resHook)) {
     }
 
     if ($action == 'remove') {
-        $saturneRedirection->fetch(GETPOST('id'));
+        $saturneRedirection->fetch(GETPOSTINT('id'));
 
         $result = $saturneRedirection->delete($user, true, false);
         if ($result > 0) {

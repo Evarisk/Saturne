@@ -78,7 +78,7 @@ function get_nom_url_user(User $object, $withpictoimg = 0, $option = '', $infolo
     // Add thirdparty for external users
     if (! empty($object->socid)) {
         $thirdpartystatic = new Societe($db);
-        $thirdpartystatic->fetch($object->socid);
+        $thirdpartystatic->fetch((int) $object->socid);
         // picto only of company
         if (empty($hidethirdpartylogo)) {
             $companylink = ' ' . $thirdpartystatic->getNomUrl(2, (($option == 'nolink') ? 'nolink' : ''));

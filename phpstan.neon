@@ -1,0 +1,61 @@
+includes:
+    - phpstan.baseline.neon
+
+parameters:
+    phpVersion: 80100 # PHP 8.1 (CI target)
+    level: max
+    tmpDir: .github/tmp/phpstan
+
+    bootstrapFiles:
+        - dev/phpstan/bootstrap.php
+
+    paths:
+        - .
+
+    excludePaths:
+        analyseAndScan:
+            - vendor/
+            - node_modules (?)
+            - css/
+            - js/
+            - documents/
+            - langs/
+        analyse:
+            - dev/phpstan/stubs.php
+
+    # Scan Dolibarr core for class resolution (not analysed, only scanned).
+    scanDirectories:
+        - ../../core/class/
+        - ../../core/lib/
+        - ../../core/tpl/
+
+    # Performance
+    parallel:
+        processTimeout: 300.0
+        maximumNumberOfProcesses: 2
+
+    # Inherited from Dolibarr config — reduces noise on dynamic Dolibarr patterns.
+    checkNullables: false
+    checkUnionTypes: false
+    polluteScopeWithLoopInitialAssignments: false
+    polluteScopeWithAlwaysIterableForeach: false
+    reportMaybes: false
+    reportMaybesInMethodSignatures: false
+    reportStaticMethodSignatures: false
+    reportMagicMethods: false
+    reportMagicProperties: false
+    treatPhpDocTypesAsCertain: false
+    reportUnmatchedIgnoredErrors: false
+
+    universalObjectCratesClasses:
+        - stdClass
+        - SimpleXMLElement
+
+    ignoreErrors:
+        - '#.*phan-var#'
+        - '#^Expression "''…" on a separate line does not do anything#'
+        - '#Empty array passed to foreach#'
+        - '#Unable to resolve the template type T#'
+        - '#in empty\(\) always exists and is always falsy#'
+        - '#in empty\(\) always exists and is not falsy#'
+        - '#in isset\(\) is not nullable#'

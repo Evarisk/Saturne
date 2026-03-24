@@ -36,7 +36,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
  * @param int    $maxWidth   Media max width
  * @param int    $offset     Media gallery offset page
  */
-function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', string $sdir = '',string $size = '', int $maxHeight = 80, int $maxWidth = 80, int $offset = 1)
+function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', string $sdir = '',string $size = '', int $maxHeight = 80, int $maxWidth = 80, int $offset = 1): void
 {
 	global $conf, $langs, $user, $moduleNameLowerCase;
 
@@ -373,10 +373,10 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
  *
  * @param  string $filename  File name
  * @param  string $thumbType Thumb type (small, mini, large, medium)
- * @return string            Thumb full name
+ * @return string|int        Returns the full thumb filename, or -1 on error
  *
  */
-function saturne_get_thumb_name(string $filename, string $thumbType = 'small', string $filePath = ''): string
+function saturne_get_thumb_name(string $filename, string $thumbType = 'small', string $filePath = '')
 {
     $fileName      = pathinfo($filename, PATHINFO_FILENAME);
     $fileExtension = pathinfo($filename, PATHINFO_EXTENSION);

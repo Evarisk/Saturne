@@ -1082,7 +1082,7 @@ function saturne_object_action_for_category(string $moduleNameLowerCase, string 
             } elseif ($action == 'unlink_object_from_category') {
                 $result = $object->del_type($newObject, $objectType);
                 if ($result < 0) {
-                    dol_print_error('', $object->error);
+                    dol_print_error(null, $object->error);
                 }
             }
             if ($result > 0) {

@@ -7,6 +7,10 @@
 # Composer managed dependencies
 /vendor
 /dev/bin
+# PHPStan cache
+/.github/tmp/phpstan
+# Phan cache
+/.phan/output
 # PHPdocumentor generated files
 /build/phpdoc
 /doc/code/phpdoc

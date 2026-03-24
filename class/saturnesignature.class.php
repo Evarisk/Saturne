@@ -196,9 +196,9 @@ class SaturneSignature extends SaturneObject
     public ?string $society_name = '';
 
     /**
-     * @var string Signature date
+     * @var int|string Signature date (unix timestamp or empty string)
      */
-    public string $signature_date = '';
+    public $signature_date = '';
 
     /**
      * @var string|null Signature location
@@ -246,9 +246,9 @@ class SaturneSignature extends SaturneObject
     public ?string $transaction_url = '';
 
     /**
-     * @var string Last email sent date
+     * @var int|string Last email sent date (unix timestamp or empty string)
      */
-    public string $last_email_sent_date = '';
+    public $last_email_sent_date = '';
 
     /**
      * @var int|null Attendance
@@ -386,11 +386,11 @@ class SaturneSignature extends SaturneObject
     /**
      * Set pending status
      *
-     * @param  User $user      Object user that modify
-     * @param  int  $notrigger 1 = Does not execute triggers, 0 = Execute triggers
-     * @return int             0 < if KO, > 0 if OK
+     * @param  User     $user      Object user that modify
+     * @param  int|bool $notrigger 1/true = Does not execute triggers, 0/false = Execute triggers
+     * @return int                 0 < if KO, > 0 if OK
      */
-    public function setPending(User $user, int $notrigger = 0): int
+    public function setPending(User $user, $notrigger = 0): int
     {
         return $this->setStatusCommon($user, self::STATUS_PENDING_SIGNATURE, $notrigger, 'SATURNE_SIGNATURE_PENDING_SIGNATURE');
     }
@@ -398,12 +398,12 @@ class SaturneSignature extends SaturneObject
     /**
      * Set signed status
      *
-     * @param  User   $user      Object user that modify
-     * @param  int    $notrigger 1 = Does not execute triggers, 0 = Execute triggers
-     * @param  string $zone      Zone (private or public)
-     * @return int               0 < if KO, > 0 if OK
+     * @param  User     $user      Object user that modify
+     * @param  int|bool $notrigger 1/true = Does not execute triggers, 0/false = Execute triggers
+     * @param  string   $zone      Zone (private or public)
+     * @return int                 0 < if KO, > 0 if OK
      */
-    public function setSigned(User $user, int $notrigger = 0, string $zone = 'private'): int
+    public function setSigned(User $user, $notrigger = 0, string $zone = 'private'): int
     {
         return $this->setStatusCommon($user, self::STATUS_SIGNED, $notrigger, 'SATURNE_SIGNATURE_SIGN' . (($zone == 'public') ? '_PUBLIC' : ''));
     }
@@ -453,7 +453,7 @@ class SaturneSignature extends SaturneObject
     /**
      * Create signatory in database
      *
-     * @param  int        $fk_object    ID of object linked
+     * @param  int|string $fk_object    ID of object linked
      * @param  string     $object_type  Type of object
      * @param  string     $element_type Type of resource
      * @param  array      $element_ids  ID of resource
@@ -462,7 +462,7 @@ class SaturneSignature extends SaturneObject
      * @return int
      * @throws Exception
      */
-    public function setSignatory(int $fk_object, string $object_type, string $element_type, array $element_ids, string $role = '', int $noupdate = 0): int
+    public function setSignatory($fk_object, string $object_type, string $element_type, array $element_ids, string $role = '', int $noupdate = 0): int
     {
         global $conf, $user;
 

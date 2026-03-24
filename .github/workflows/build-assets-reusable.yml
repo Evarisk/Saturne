@@ -2,6 +2,16 @@ name: Build assets (reusable)
 
 on:
   workflow_call:
+    # NOTE: workflow_call does not support `paths` filtering.
+    # To avoid running this workflow when no SCSS/JS files changed,
+    # add a `paths` filter in the *calling* workflow (e.g. build-assets.yml):
+    #
+    #   on:
+    #     push:
+    #       paths:
+    #         - 'css/scss/**'
+    #         - 'js/modules/**'
+    #         - 'gulpfile*.js'
     inputs:
       module:
         description: 'Module name (e.g. reedcrm)'
@@ -26,7 +36,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Evarisk/Saturne
-          ref: main
+          ref: develop
           path: .saturne
 
       - name: Setup Node.js

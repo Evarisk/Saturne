@@ -258,9 +258,9 @@ function saturne_recurse_tree($moreParams, ?int $parentID = null, int $depth = 0
 /**
  * Check user access on current page
  *
- * @param object|bool $permission        Permission to access to current page
- * @param object|null $object            Object in current page
- * @param bool        $allowExternalUser Allow external user to have access at current page
+ * @param object|bool|int $permission        Permission to access to current page
+ * @param object|null     $object            Object in current page
+ * @param bool            $allowExternalUser Allow external user to have access at current page
  */
 function saturne_check_access($permission, ?object $object = null, bool $allowExternalUser = false)
 {
@@ -324,7 +324,7 @@ function saturne_check_modules_enabled()
  * @param string       $tabactive Tab active in navbar
  * @param string       $title     Title navbar
  */
-function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', string $title = '')
+function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', string $title = ''): void
 {
     global $conf;
 
@@ -460,7 +460,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
                         $saturneMoreHtmlRef .= '<input type="submit" class="button valignmiddle" value="' . $langs->trans('Modify') . '">';
                         $saturneMoreHtmlRef .= '</form>';
                     } else {
-                        $BannerElementObject->fetch($object->$objectKey);
+                        $BannerElementObject->fetch((int) $object->$objectKey);
                         if ($bannerElement == 'societe') {
                             $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1) : img_picto($langs->trans('ThirdParty'), 'company');
                         } elseif ($bannerElement == 'project') {
@@ -473,7 +473,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
                         }
                     }
                 } else {
-                    $BannerElementObject->fetch($object->$objectKey);
+                    $BannerElementObject->fetch((int) $object->$objectKey);
                     if ($bannerElement == 'societe' || $bannerElement == ($moreParams['bannerElement'] ?? null)) {
                         $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1) : '';
                     } elseif ($bannerElement == 'project') {

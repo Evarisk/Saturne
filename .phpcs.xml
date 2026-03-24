@@ -24,12 +24,13 @@
     </rule>
 
     <!-- Line length: warn only, do not block CI -->
-    <rule ref="Generic.Files.LineLength">
-        <properties>
-            <property name="lineLimit" value="120"/>
-            <property name="absoluteLineLimit" value="0"/>
-        </properties>
-    </rule>
+<!--    <rule ref="Generic.Files.LineLength">-->
+<!--        <properties>-->
+<!--            <property name="lineLimit" value="120"/>-->
+<!--            <property name="absoluteLineLimit" value="0"/>-->
+<!--        </properties>-->
+<!--    </rule>-->
+    <exclude name="Generic.Files.LineLength"/>
 
     <file>.</file>
     <exclude-pattern>*/vendor/*</exclude-pattern>

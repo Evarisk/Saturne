@@ -192,9 +192,9 @@ if (empty($resHook)) {
                         setEventMessages($langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv('File')), null, 'errors');
                     }
                 }
-                if (pathinfo($_FILES['userfile']['name'], PATHINFO_EXTENSION) != 'odt') {
+                if (pathinfo((string) ($_FILES['userfile']['name'] ?? ''), PATHINFO_EXTENSION) != 'odt') {
                     $error++;
-                    setEventMessages($langs->trans('ErrorWrongFileNameExtension', $_FILES['userfile']['name']), [], 'errors');
+                    setEventMessages($langs->trans('ErrorWrongFileNameExtension', (string) ($_FILES['userfile']['name'] ?? '')), [], 'errors');
                 }
             }
 
@@ -342,7 +342,7 @@ print $langs->trans('MediaSizeDocument');
 print '</td><td>';
 print $langs->trans('MediaSizeDocumentDescription');
 print '<td class="center">';
-print $form::selectarray('vignette', $vignetteType, (!empty($conf->global->$vignetteConf) ? $conf->global->$vignetteConf : 'small'), 0, 0, 0, '', 1);
+print Form::selectarray('vignette', $vignetteType, (!empty($conf->global->$vignetteConf) ? $conf->global->$vignetteConf : 'small'), 0, 0, 0, '', 1);
 print '</td><td class="center">';
 print '<input type="submit" class="button" name="save" value="' . $langs->trans('Save') . '">';
 print '</td></tr>';

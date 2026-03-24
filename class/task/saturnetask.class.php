@@ -175,6 +175,7 @@ class SaturneTask extends Task
             case $progress:
                 return 'progress-green';
         }
+        return '';
     }
 
     /**
@@ -276,7 +277,7 @@ class SaturneTask extends Task
      * @param string       $morewherefilter Add more filter into where SQL request (must start with ' AND ...')
      * @param string       $sortorder       Sort Order
      * @param string       $sortfield       Sort field
-     * @param string       $sortedByTasks   Sort result array by tasks
+     * @param int          $sortedByTasks   Sort result array by tasks
      *
      * @return array|int                    0 < if KO, array of time spent if OK
      * @throws Exception

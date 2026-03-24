@@ -89,7 +89,7 @@ if (is_array($filelist) && !empty($filelist)) {
                 $htmlToolTip .= '<br><br><u>' . $langs->trans('FeaturesSupported') . ':</u>';
                 $htmlToolTip .= '<br>' . $langs->trans('Logo') . ': ' . yn($module->option_logo, 1, 1);
                 print '<td class="center">';
-                print $form->textwithpicto('', $htmlToolTip, -1, 0);
+                print $form->textwithpicto('', $htmlToolTip, -1, 'info');
                 print '</td>';
 
                 // Preview

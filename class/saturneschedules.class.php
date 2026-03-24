@@ -109,9 +109,9 @@ class SaturneSchedules extends SaturneObject
     public string $element_type;
 
     /**
-     * @var int Element object ID
+     * @var int|string Element object ID
      */
-    public int $element_id;
+    public $element_id;
 
     /**
      * @var string First day week
