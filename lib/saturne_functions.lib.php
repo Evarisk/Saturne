@@ -460,7 +460,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
                         $saturneMoreHtmlRef .= '<input type="submit" class="button valignmiddle" value="' . $langs->trans('Modify') . '">';
                         $saturneMoreHtmlRef .= '</form>';
                     } else {
-                        $BannerElementObject->fetch($object->$objectKey);
+                        $BannerElementObject->fetch((int) $object->$objectKey);
                         if ($bannerElement == 'societe') {
                             $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1) : img_picto($langs->trans('ThirdParty'), 'company');
                         } elseif ($bannerElement == 'project') {
@@ -473,7 +473,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
                         }
                     }
                 } else {
-                    $BannerElementObject->fetch($object->$objectKey);
+                    $BannerElementObject->fetch((int) $object->$objectKey);
                     if ($bannerElement == 'societe' || $bannerElement == ($moreParams['bannerElement'] ?? null)) {
                         $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1) : '';
                     } elseif ($bannerElement == 'project') {

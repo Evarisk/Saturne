@@ -127,7 +127,7 @@ class SaturneDashboard
         }
 
         print '<div class="add-widget-box" id="add-widget-box" style="' . (!empty((array)$disableWidgetList) ? '' : 'display:none') . '">';
-        print Form::selectarray('disabledWidget', $dashboardWidgetsArray, -1, $langs->trans('ChooseBoxToAddWidget'), 0, 0, 'data-item-type="widget" data-id-refresh="widget-dashboard" data-id-load="add-widget-box"', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint add-dashboard-widget', 0, 'hidden selected', 0, 1);
+        print Form::selectarray('disabledWidget', $dashboardWidgetsArray, -1, $langs->trans('ChooseBoxToAddWidget'), 0, 0, 'data-item-type="widget" data-id-refresh="widget-dashboard" data-id-load="add-widget-box"', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint add-dashboard-widget', 0, 'hidden selected');
         if (!empty($conf->use_javascript_ajax)) {
             include_once DOL_DOCUMENT_ROOT . '/core/lib/ajax.lib.php';
             print ajax_combobox('disabledWidget');
@@ -219,7 +219,7 @@ class SaturneDashboard
                 switch ($dashboardGraphFilter['type']) {
                     case 'selectarray':
                             print '<span class="marginrightonly">' . $dashboardGraphFilter['title'] . '</span>';
-                            print Form::selectarray($dashboardGraphFilter['filter'], $dashboardGraphFilter['values'], $dashboardGraphFilter['currentValue'], $dashboardGraphFilter['title'], 0, 0, '', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint', 0, 'hidden selected', 0, 1);
+                            print Form::selectarray($dashboardGraphFilter['filter'], $dashboardGraphFilter['values'], $dashboardGraphFilter['currentValue'], $dashboardGraphFilter['title'], 0, 0, '', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint', 0, 'hidden selected');
                             print '</div>';
                         break;
 
@@ -238,7 +238,7 @@ class SaturneDashboard
         }
 
         print '<div class="add-graph-box" id="add-graph-box" style="margin-top: 10px; ' . (!empty($dashboards['disabledGraphs']) ? '' : 'display:none') . '">';
-        print Form::selectarray('disabledGraph', $dashboards['disabledGraphs'], -1, $langs->trans('ChooseBoxToAddGraph'), 0, 0, 'data-item-type="graph" data-id-refresh="graph-dashboard" data-id-load="add-graph-box"', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint', 0, 'hidden selected', 0, 1);
+        print Form::selectarray('disabledGraph', $dashboards['disabledGraphs'], -1, $langs->trans('ChooseBoxToAddGraph'), 0, 0, 'data-item-type="graph" data-id-refresh="graph-dashboard" data-id-load="add-graph-box"', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint', 0, 'hidden selected');
         if (!empty($conf->use_javascript_ajax)) {
             include_once DOL_DOCUMENT_ROOT . '/core/lib/ajax.lib.php';
             print ajax_combobox('disabledGraph');

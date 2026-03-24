@@ -46,12 +46,12 @@ if ($action == 'toggle_favorite') {
         require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
 
         $file = new EcmFiles($db);
-        $file->fetch($fileId);
+        $file->fetch((int) $fileId);
     } else {
         require_once DOL_DOCUMENT_ROOT . '/core/class/link.class.php';
 
         $file = new Link($db);
-        $file->fetch($fileId);
+        $file->fetch((int) $fileId);
     }
     $file->array_options['favorite'] = $isFavorite;
     $result = $file->insertExtraFields();

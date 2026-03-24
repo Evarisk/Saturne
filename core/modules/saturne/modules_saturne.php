@@ -279,7 +279,7 @@ abstract class CustomModeleNumRefSaturne extends ModeleNumRefSaturne
         $nextValueNumber -= 1;
 
         $nextValueSuffixLength = dol_strlen($nextValueSuffix);
-        $nextValueNumberLength = dol_strlen($nextValueNumber);
+        $nextValueNumberLength = dol_strlen((string) $nextValueNumber);
 
         $zeroString = '';
         for ($i = 0; $i < ($nextValueSuffixLength - $nextValueNumberLength); $i++) {

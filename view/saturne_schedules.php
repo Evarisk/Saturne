@@ -195,7 +195,7 @@ if (!empty($objectLinked) && empty($action)) {
             if (!empty($objectLinked->fk_project)) {
                 $morehtmlref .= $langs->trans('Project') . ' : ';
                 $project = new Project($db);
-                $project->fetch($object->fk_project);
+                $project->fetch((int) $object->fk_project);
                 $morehtmlref .= $project->getNomUrl(1, '', 1);
                 $morehtmlref .= '<br>';
             }

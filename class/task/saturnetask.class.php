@@ -282,7 +282,7 @@ class SaturneTask extends Task
      * @return array|int                    0 < if KO, array of time spent if OK
      * @throws Exception
      */
-    public function fetchAllTimeSpentAllUsers($morewherefilter = '', $sortfield = '', $sortorder = '', $sortedByTasks = '')
+    public function fetchAllTimeSpentAllUsers($morewherefilter = '', $sortfield = '', $sortorder = '', $sortedByTasks = 0)
     {
         $versionEighteenOrMore = 0;
 

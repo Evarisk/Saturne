@@ -47,7 +47,7 @@ return [
         DOL_DOCUMENT_ROOT . '/compta/facture/class/',
         DOL_DOCUMENT_ROOT . '/contact/class/',
         DOL_DOCUMENT_ROOT . '/contrat/class/',
-        DOL_DOCUMENT_ROOT . '/core/actions_extrafields.inc.php/',
+        DOL_DOCUMENT_ROOT . '/core/actions_extrafields.inc.php',
         DOL_DOCUMENT_ROOT . '/core/class/',
         DOL_DOCUMENT_ROOT . '/core/lib/',
         DOL_DOCUMENT_ROOT . '/core/modules/',
@@ -83,7 +83,7 @@ return [
         DOL_DOCUMENT_ROOT . '/compta/facture/class/',
         DOL_DOCUMENT_ROOT . '/contact/class/',
         DOL_DOCUMENT_ROOT . '/contrat/class/',
-        DOL_DOCUMENT_ROOT . '/core/actions_extrafields.inc.php/',
+        DOL_DOCUMENT_ROOT . '/core/actions_extrafields.inc.php',
         DOL_DOCUMENT_ROOT . '/core/class/',
         DOL_DOCUMENT_ROOT . '/core/lib/',
         DOL_DOCUMENT_ROOT . '/core/modules/',
@@ -123,9 +123,7 @@ return [
     //
     // ACTIVE (real bugs worth fixing):
     //   PhanTypeMismatchArgument, PhanTypeMismatchReturn,
-    //   PhanTypeMismatchPropertyReal, PhanTypeExpectedObjectPropAccessButGotNull,
-    //   PhanNonClassMethodCall, PhanTypeInvalidLeftOperandOfNumericOp,
-    //   PhanTypeSuspiciousEcho, PhanParamSignatureMismatch,
+    //   PhanTypeMismatchPropertyReal, PhanParamSignatureMismatch,
     //   PhanTypeMismatchDefault, PhanPluginAlwaysReturnMethod
     'suppress_issue_types' => [
         // ── Pre-existing suppressions ─────────────────────────────────────
@@ -215,6 +213,20 @@ return [
         'PhanTypeInvalidPropertyName',
         // implode() false positive (Phan gets confused with the two-arg form).
         'PhanParamSpecial1',
+
+        // ── Signature mismatches (Dolibarr child overrides widen param types) ──
+        // Saturne overrides add type hints that parents lack; Phan flags this.
+        'PhanParamSignatureRealMismatchHasParamType',
+
+        // ── False positives on Dolibarr dynamic object patterns ───────────────
+        // Phan cannot resolve $object from generic fetch() chains.
+        'PhanTypeExpectedObjectPropAccessButGotNull',
+        // Phan cannot resolve method calls on variables typed as CommonObject subtypes.
+        'PhanNonClassMethodCall',
+        // Phan flags int arithmetic on variables that may be string after fetch().
+        'PhanTypeInvalidLeftOperandOfNumericOp',
+        // Phan flags echo/print of variables that may be non-string in Dolibarr patterns.
+        'PhanTypeSuspiciousEcho',
     ],
 
     // Exclude files whose class declarations would duplicate what Phan already

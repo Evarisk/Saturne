@@ -55,6 +55,15 @@ jobs:
                       echo "module=saturne" >> $GITHUB_OUTPUT
                   fi
 
+            - name: Check for release notes
+              id: notes
+              run: |
+                  if [ -f "RELEASE_NOTES.md" ]; then
+                      echo "exists=true" >> $GITHUB_OUTPUT
+                  else
+                      echo "exists=false" >> $GITHUB_OUTPUT
+                  fi
+
             - name: Build zip via git archive
               run: |
                   git archive \
@@ -70,7 +79,17 @@ jobs:
                   path: module_${{ steps.meta.outputs.module }}-${{ steps.meta.outputs.tag }}.zip
                   retention-days: 90
 
-            - name: Create GitHub Release
+            - name: Create GitHub Release (with release notes)
+              if: steps.notes.outputs.exists == 'true'
+              uses: softprops/action-gh-release@v2
+              with:
+                  tag_name: ${{ steps.meta.outputs.tag }}
+                  name: ${{ steps.meta.outputs.tag }}
+                  body_path: RELEASE_NOTES.md
+                  files: module_${{ steps.meta.outputs.module }}-${{ steps.meta.outputs.tag }}.zip
+
+            - name: Create GitHub Release (auto-generated notes)
+              if: steps.notes.outputs.exists == 'false'
               uses: softprops/action-gh-release@v2
               with:
                   tag_name: ${{ steps.meta.outputs.tag }}

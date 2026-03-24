@@ -41,7 +41,7 @@ if ($action == 'update_field') {
     $fkElement = GETPOST('fk_element', 'alpha', 2);
     $type      = GETPOST('type', 'alpha', 2);
 
-    $object = fetchObjectByElement($fkElement, $element);
+    $object = fetchObjectByElement((int) $fkElement, $element);
 
     $format = '';
     $value  =  '';
