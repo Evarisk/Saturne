@@ -38,6 +38,6 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add --force css/saturne.min.css js/saturne.min.js
           if ! git diff --staged --quiet; then
-            git commit -m "ci: build assets"
+            git commit -m "[CI] chore: build assets JS/CSS minified"
             git push
           fi
