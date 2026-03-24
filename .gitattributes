@@ -65,4 +65,5 @@ package.json              export-ignore
 package-lock.json         export-ignore
 phpstan.baseline.neon     export-ignore
 phpstan.neon              export-ignore
+RELEASE_NOTES.md          export-ignore
 RELEASE_NOTES_TEMPLATE.md export-ignore
