@@ -117,8 +117,8 @@ class CommonObject
     /** @var int */
     public $statut = 0;
 
-    /** @var string */
-    public $status = '';
+    /** @var int */
+    public $status = 0;
 
     /** @var DoliDB */
     protected $db;
