@@ -54,6 +54,13 @@ abstract class SaturneObject extends CommonObject
     public int $isCategoryManaged = 1;
 
     /**
+     * @var string Name of icon for saturne_object
+     * Must be a 'fa-xxx' fontawesome code (or 'fa-xxx_fa_color_size')
+     * or 'saturne_object@saturne' if picto is file 'img/object_saturne_object.png'
+     */
+    public string $picto = '';
+
+    /**
      * Constructor.
      *
      * @param DoliDb $db                  Database handler
