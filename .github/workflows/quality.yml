@@ -65,30 +65,29 @@ jobs:
                   ref: '23.0.0'
                   path: dolibarr-core
                   sparse-checkout: |
+                      htdocs/categories/class
+                      htdocs/comm/action/class
+                      htdocs/comm/propal/class
+                      htdocs/commande/class
+                      htdocs/compta/facture/class
+                      htdocs/contact/class
+                      htdocs/contrat/class
                       htdocs/core/class
                       htdocs/core/lib
-                      htdocs/comm/action/class
-                      htdocs/contact/class
-                      htdocs/projet/class
-                      htdocs/societe/class
-                      htdocs/categories/class
-                      htdocs/expedition/class
-                      htdocs/reception/class
-                      htdocs/fourn/class
-                      htdocs/compta/facture/class
-                      htdocs/commande/class
-                      htdocs/propal/class
-                      htdocs/contrat/class
-                      htdocs/ficheinter/class
-                      htdocs/stock/class
-                      htdocs/product/class
-                      htdocs/product/lot/class
-                      htdocs/product/inventory/class
-                      htdocs/mrp/class
-                      htdocs/ticket/class
-                      htdocs/ecm/class
-                      htdocs/user/class
                       htdocs/core/modules
+                      htdocs/ecm/class
+                      htdocs/expedition/class
+                      htdocs/fichinter/class
+                      htdocs/fourn/class
+                      htdocs/mrp/class
+                      htdocs/product/class
+                      htdocs/product/inventory/class
+                      htdocs/product/stock/class
+                      htdocs/projet/class
+                      htdocs/reception/class
+                      htdocs/societe/class
+                      htdocs/ticket/class
+                      htdocs/user/class
                   sparse-checkout-cone-mode: false
 
             - name: Expose Dolibarr core at expected DOL_DOCUMENT_ROOT path
