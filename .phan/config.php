@@ -41,6 +41,7 @@ return [
         DOL_DOCUMENT_ROOT . '/core/class/',
         DOL_DOCUMENT_ROOT . '/core/lib/',
         __DIR__ . '/stubs/',
+        SAT_MODULE_ROOT . '/dev/phan/',
     ],
 
     // Scan Dolibarr core and stubs but do not report errors in them.
@@ -50,6 +51,7 @@ return [
         __DIR__ . '/stubs/',
         SAT_MODULE_ROOT . '/vendor/',
         SAT_MODULE_ROOT . '/node_modules/',
+        SAT_MODULE_ROOT . '/dev/phan/',
     ],
 
     // Report only normal severity and above (no LOW).
@@ -72,10 +74,11 @@ return [
         'PhanUndeclaredVariable',
     ],
 
-    // Exclude bootstrap.php from Phan analysis to avoid duplicate class declarations
-    // already provided by dev/phpstan/stubs.php.
+    // Exclude files whose class declarations would duplicate what Phan already
+    // sees from core/class/ or from dev/phan/stubs.php.
     'exclude_file_list' => [
         SAT_MODULE_ROOT . '/tests/phpunit/bootstrap.php',
+        SAT_MODULE_ROOT . '/dev/phpstan/stubs.php',
     ],
 
     // File extensions to analyze.
