@@ -1,0 +1,79 @@
+---
+name: Release
+
+on:
+    push:
+        tags:
+            - '[0-9]*.*.*'
+    workflow_dispatch:
+        inputs:
+            tag:
+                description: 'Tag to release (e.g. 22.0.0)'
+                required: true
+    workflow_call:
+        inputs:
+            tag:
+                description: 'Tag to release (e.g. 22.0.0)'
+                required: true
+                type: string
+            module:
+                description: 'Module name (e.g. mymodule)'
+                required: true
+                type: string
+
+jobs:
+    release:
+        name: Build & publish release
+        runs-on: ubuntu-latest
+
+        permissions:
+            contents: write
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Check tag is on main
+              run: |
+                  git fetch origin main
+                  git merge-base --is-ancestor HEAD origin/main \
+                    || (echo "::error::Tag must be based on main" && exit 1)
+
+            - name: Resolve tag and module name
+              id: meta
+              run: |
+                  if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+                      echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+                      echo "module=saturne" >> $GITHUB_OUTPUT
+                  elif [ "${{ github.event_name }}" = "workflow_call" ]; then
+                      echo "tag=${{ inputs.tag }}" >> $GITHUB_OUTPUT
+                      echo "module=${{ inputs.module }}" >> $GITHUB_OUTPUT
+                  else
+                      echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+                      echo "module=saturne" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Build zip via git archive
+              run: |
+                  git archive \
+                    --format=zip \
+                    --prefix=${{ steps.meta.outputs.module }}/ \
+                    --output=module_${{ steps.meta.outputs.module }}-${{ steps.meta.outputs.tag }}.zip \
+                    HEAD
+
+            - name: Upload artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: module_${{ steps.meta.outputs.module }}-${{ steps.meta.outputs.tag }}
+                  path: module_${{ steps.meta.outputs.module }}-${{ steps.meta.outputs.tag }}.zip
+                  retention-days: 90
+
+            - name: Create GitHub Release
+              uses: softprops/action-gh-release@v2
+              with:
+                  tag_name: ${{ steps.meta.outputs.tag }}
+                  name: ${{ steps.meta.outputs.tag }}
+                  generate_release_notes: true
+                  files: module_${{ steps.meta.outputs.module }}-${{ steps.meta.outputs.tag }}.zip
