@@ -47,8 +47,10 @@
 
 # Export ignores to generate clean production tarballs
 /.github                  export-ignore
+/.tx                      export-ignore
 /.phan                    export-ignore
 /dev                      export-ignore
+/doc                      export-ignore
 /tests                    export-ignore
 .editorconfig             export-ignore
 .gitattributes            export-ignore
