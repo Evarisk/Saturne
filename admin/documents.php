@@ -192,9 +192,9 @@ if (empty($resHook)) {
                         setEventMessages($langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv('File')), null, 'errors');
                     }
                 }
-                if (pathinfo($_FILES['userfile']['name'], PATHINFO_EXTENSION) != 'odt') {
+                if (pathinfo((string) ($_FILES['userfile']['name'] ?? ''), PATHINFO_EXTENSION) != 'odt') {
                     $error++;
-                    setEventMessages($langs->trans('ErrorWrongFileNameExtension', $_FILES['userfile']['name']), [], 'errors');
+                    setEventMessages($langs->trans('ErrorWrongFileNameExtension', (string) ($_FILES['userfile']['name'] ?? '')), [], 'errors');
                 }
             }
 

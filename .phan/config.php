@@ -64,6 +64,7 @@ return [
         DOL_DOCUMENT_ROOT . '/ticket/class/',
         DOL_DOCUMENT_ROOT . '/ecm/class/',
         DOL_DOCUMENT_ROOT . '/user/class/',
+
         // Phan-specific stubs and third-party test framework
         __DIR__ . '/stubs/',
         SAT_MODULE_ROOT . '/dev/phan/',

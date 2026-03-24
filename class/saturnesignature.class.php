@@ -453,7 +453,7 @@ class SaturneSignature extends SaturneObject
     /**
      * Create signatory in database
      *
-     * @param  int        $fk_object    ID of object linked
+     * @param  int|string $fk_object    ID of object linked
      * @param  string     $object_type  Type of object
      * @param  string     $element_type Type of resource
      * @param  array      $element_ids  ID of resource
@@ -462,7 +462,7 @@ class SaturneSignature extends SaturneObject
      * @return int
      * @throws Exception
      */
-    public function setSignatory(int $fk_object, string $object_type, string $element_type, array $element_ids, string $role = '', int $noupdate = 0): int
+    public function setSignatory($fk_object, string $object_type, string $element_type, array $element_ids, string $role = '', int $noupdate = 0): int
     {
         global $conf, $user;
 

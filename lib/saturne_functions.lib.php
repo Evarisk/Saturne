@@ -324,7 +324,7 @@ function saturne_check_modules_enabled()
  * @param string       $tabactive Tab active in navbar
  * @param string       $title     Title navbar
  */
-function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', string $title = '')
+function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', string $title = ''): void
 {
     global $conf;
 

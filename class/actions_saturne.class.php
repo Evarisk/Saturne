@@ -453,7 +453,7 @@ class ActionsSaturne
                 } elseif (GETPOST('action') == 'delintocategory') {
                     $result = $object->del_type($newObject, $type);
                     if ($result < 0) {
-                        dol_print_error('', $object->error);
+                        dol_print_error(null, $object->error);
                     }
                 }
             }

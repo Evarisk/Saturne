@@ -75,6 +75,7 @@ jobs:
                       htdocs/core/class
                       htdocs/core/lib
                       htdocs/core/modules
+                      htdocs/core/tpl
                       htdocs/ecm/class
                       htdocs/expedition/class
                       htdocs/fichinter/class

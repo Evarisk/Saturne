@@ -27,6 +27,7 @@ parameters:
     scanDirectories:
         - ../../core/class/
         - ../../core/lib/
+        - ../../core/tpl/
 
     # Performance
     parallel:
