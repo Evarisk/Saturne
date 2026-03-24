@@ -47,7 +47,6 @@ return [
         DOL_DOCUMENT_ROOT . '/compta/facture/class/',
         DOL_DOCUMENT_ROOT . '/contact/class/',
         DOL_DOCUMENT_ROOT . '/contrat/class/',
-        DOL_DOCUMENT_ROOT . '/core/actions_extrafields.inc.php',
         DOL_DOCUMENT_ROOT . '/core/class/',
         DOL_DOCUMENT_ROOT . '/core/lib/',
         DOL_DOCUMENT_ROOT . '/core/modules/',
@@ -83,7 +82,6 @@ return [
         DOL_DOCUMENT_ROOT . '/compta/facture/class/',
         DOL_DOCUMENT_ROOT . '/contact/class/',
         DOL_DOCUMENT_ROOT . '/contrat/class/',
-        DOL_DOCUMENT_ROOT . '/core/actions_extrafields.inc.php',
         DOL_DOCUMENT_ROOT . '/core/class/',
         DOL_DOCUMENT_ROOT . '/core/lib/',
         DOL_DOCUMENT_ROOT . '/core/modules/',
@@ -232,12 +230,15 @@ return [
     // Exclude files whose class declarations would duplicate what Phan already
     // sees from core/class/ or from dev/phan/stubs.php.
     'exclude_file_list' => [
+        DOL_DOCUMENT_ROOT . '/core/actions_extrafields.inc.php',
         SAT_MODULE_ROOT . '/tests/phpunit/bootstrap.php',
         SAT_MODULE_ROOT . '/dev/phpstan/stubs.php',
     ],
 
     // File extensions to analyze.
-    'file_list' => [],
+    'file_list' => [
+        DOL_DOCUMENT_ROOT . '/core/actions_extrafields.inc.php',
+    ],
 
     // Exclude compiled/generated assets.
     'exclude_file_regex' => '@(vendor|node_modules|css|js|documents|langs)/.*@',
