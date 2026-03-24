@@ -402,3 +402,31 @@ Shows the modifier-class architecture used across all Saturne components:
 - **Test install/uninstall** on a clean Dolibarr instance before opening a PR
 - **`.min` files are auto-generated** — conflicts on them = recompile, don't hand-merge
 - `$moduleNameLowerCase` must be set before `saturne.main.inc.php` is required
+
+---
+
+## 10. Release Notes
+
+Use `RELEASE_NOTES_TEMPLATE.md` as the format reference for all release notes.
+
+### Générer les release notes
+
+Before tagging a release, run:
+```bash
+git describe --tags --abbrev=0 HEAD  # get previous tag
+git log --oneline PREV_TAG..HEAD     # list commits
+```
+
+Then generate `RELEASE_NOTES.md` following these rules:
+- Write everything in **French**
+- Title pattern: `[MODULE] [VERSION] - [Feature phare 1] - [Feature phare 2]`
+- Group by **functional category** deduced from commits (not by file or class name)
+- Bullet points oriented toward the **end user**, no technical jargon
+- Add `<!-- 📸 Ajouter une screenshot ici -->` only for genuinely visual features (new page, new button, new dashboard, new form)
+- The comparison section must list all commits and PRs with their GitHub links
+
+### Workflow release complet
+1. Generate `RELEASE_NOTES.md` — `Generate release notes for version X.X.X`
+2. Review and adjust — replace screenshot placeholders with real captures
+3. `git add RELEASE_NOTES.md && git commit -m "chore: release notes X.X.X"`
+4. `git tag X.X.X && git push && git push --tags`
