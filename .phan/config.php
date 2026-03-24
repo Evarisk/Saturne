@@ -42,9 +42,10 @@ return [
         DOL_DOCUMENT_ROOT . '/core/lib/',
         __DIR__ . '/stubs/',
         SAT_MODULE_ROOT . '/dev/phan/',
+        SAT_MODULE_ROOT . '/vendor/phpunit/',
     ],
 
-    // Scan Dolibarr core and stubs but do not report errors in them.
+    // Scan Dolibarr core, stubs and third-party dirs without reporting errors.
     'exclude_analysis_directory_list' => [
         DOL_DOCUMENT_ROOT . '/core/class/',
         DOL_DOCUMENT_ROOT . '/core/lib/',
@@ -52,6 +53,7 @@ return [
         SAT_MODULE_ROOT . '/vendor/',
         SAT_MODULE_ROOT . '/node_modules/',
         SAT_MODULE_ROOT . '/dev/phan/',
+        SAT_MODULE_ROOT . '/tests/',
     ],
 
     // Report only normal severity and above (no LOW).
@@ -72,6 +74,9 @@ return [
         'PhanUndeclaredGlobalVariable',
         // Template files (*.tpl.php) use extract() and globals heavily.
         'PhanUndeclaredVariable',
+        // CommonObject is redefined in dev/phan/stubs.php to add $photo and $picto
+        // which are absent from the real class in htdocs/core/class/.
+        'PhanRedefinedClassReference',
     ],
 
     // Exclude files whose class declarations would duplicate what Phan already
