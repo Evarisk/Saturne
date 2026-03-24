@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2021-2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -33,13 +34,15 @@ if (!defined('NOREQUIREMENU')) {
 if (!defined('NOREQUIREHTML')) {
     define('NOREQUIREHTML', '1');
 }
-if (!defined('NOLOGIN')) { // This means this output page does not require to be logged
+// This means this output page does not require to be logged
+if (!defined('NOLOGIN')) {
     define('NOLOGIN', '1');
 }
 if (!defined('NOCSRFCHECK')) {
     define('NOCSRFCHECK', '1');
 }
-if (!defined('NOIPCHECK')) { // Do not check IP defined into conf $dolibarr_main_restrict_ip
+// Do not check IP defined into conf $dolibarr_main_restrict_ip
+if (!defined('NOIPCHECK')) {
     define('NOIPCHECK', '1');
 }
 if (!defined('NOBROWSERNOTIF')) {
@@ -56,13 +59,14 @@ if (file_exists('../saturne.main.inc.php')) {
 }
 
 // Load Dolibarr libraries
-require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 
 // Global variables definitions
 global $conf, $db;
 
 // Get parameters
-$file       = GETPOST('file'); // Do not use urldecode here ($_GET are already decoded by PHP)
+$file       = GETPOST('file');
+// Do not use urldecode here ($_GET are already decoded by PHP)
 $modulepart = GETPOST('modulepart', 'alpha');
 $entity     = GETPOST('entity');
 
@@ -94,7 +98,8 @@ if (preg_match('/\.noexe$/i', $file)) {
 }
 
 // Security: Delete string ../ or ..\ into $file
-$file = preg_replace('/\.\.+/', '..', $file); // Replace '... or more' with '..'
+// Replace '... or more' with '..'
+$file = preg_replace('/\.\.+/', '..', $file);
 $file = str_replace('../', '/', $file);
 $file = str_replace('..\\', '/', $file);
 

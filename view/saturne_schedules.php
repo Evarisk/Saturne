@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,16 +17,16 @@
  */
 
 /**
- *   	\file       view/saturne_schedules.php
- *		\ingroup    saturne
- *		\brief      Page to view Saturne Schedules
+ *      \file       view/saturne_schedules.php
+ *      \ingroup    saturne
+ *      \brief      Page to view Saturne Schedules
  */
 
 // Load Saturne environment
 if (file_exists('../saturne.main.inc.php')) {
-	require_once __DIR__ . '/../saturne.main.inc.php';
+    require_once __DIR__ . '/../saturne.main.inc.php';
 } elseif (file_exists('../../saturne.main.inc.php')) {
-	require_once __DIR__ . '/../../saturne.main.inc.php';
+    require_once __DIR__ . '/../../saturne.main.inc.php';
 } else {
     die('Include of saturne main fails');
 }
@@ -86,7 +87,7 @@ if (isModEnabled($elementType) || is_file($customClassPath)) {
 // Initialize view objects
 $form = new Form($db);
 
-$hookmanager->initHooks([$elementType . 'schedules',  'saturneschedules', 'saturneglobal', 'globalcard']); // Note that conf->hooks_modules contains array of hook context
+$hookmanager->initHooks([$elementType . 'schedules',  'saturneschedules', 'saturneglobal', 'globalcard']);
 
 // Fetch current Schedules object
 if ($id > 0 && !empty($elementType)) {
@@ -105,7 +106,7 @@ saturne_check_access($permissiontoread);
  */
 
 $parameters = ['id' => $id];
-$resHook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+$resHook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action);
 if ($resHook < 0) {
     setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 }
@@ -174,7 +175,7 @@ if (!empty($objectLinked) && empty($action)) {
 
     // Object card
     // ------------------------------------------------------------
-    $linkback = '<a href="' . DOL_URL_ROOT . '/' . $elementType . '/list.php?restore_lastsearch_values=1' . (!empty($socid) ? '&socid='.$socid : '') . '">' . $langs->trans('BackToList') . '</a>';
+    $linkback = '<a href="' . DOL_URL_ROOT . '/' . $elementType . '/list.php?restore_lastsearch_values=1' . (!empty($socid) ? '&socid=' . $socid : '') . '">' . $langs->trans('BackToList') . '</a>';
 
     $morehtmlref = '<div class="refidno">';
 
@@ -194,7 +195,7 @@ if (!empty($objectLinked) && empty($action)) {
             if (!empty($objectLinked->fk_project)) {
                 $morehtmlref .= $langs->trans('Project') . ' : ';
                 $project = new Project($db);
-                $project->fetch($object->fk_project);
+                $project->fetch((int) $object->fk_project);
                 $morehtmlref .= $project->getNomUrl(1, '', 1);
                 $morehtmlref .= '<br>';
             }
@@ -232,7 +233,7 @@ if (!empty($objectLinked) && empty($action)) {
     print '</table>';
 
     $parameters = [];
-    $reshook = $hookmanager->executeHooks('saturneSchedules', $parameters, $objectLinked); // Note that $action and $object may have been modified by some hooks
+    $reshook = $hookmanager->executeHooks('saturneSchedules', $parameters, $objectLinked);
     if ($reshook < 0) {
         setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
     } elseif (empty($reshook)) {

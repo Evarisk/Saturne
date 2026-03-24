@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2024-2025 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -46,7 +47,7 @@ foreach ($object->fields as $key => $val) {
     $cssForField  = 'maxwidthsearch ';
     $cssForField .= saturne_css_for_field($val, $key);
     if (!empty($arrayfields['t.' . $key]['checked'])) {
-        print getTitleFieldOfList($arrayfields['t.' . $key]['label'], 0, $_SERVER['PHP_SELF'], 't.' . $key, '', $param, ($cssForField ? 'class="' . $cssForField . '"' : ''), $sortfield, $sortorder, ($cssForField ? $cssForField . ' ' : ''), (empty($val['disablesort']) ? '' : $val['disablesort']), (empty($val['helplist']) ? '' : $val['helplist']));
+        print saturne_get_title_field_of_list($arrayfields['t.' . $key]['label'], 0, $_SERVER['PHP_SELF'], ($val['otheralias'] ?? 't.') . $key, '', $param, ($cssForField ? 'class="' . $cssForField . '"' : ''), $sortfield, $sortorder, ($cssForField ? $cssForField . ' ' : ''), (empty($val['disablesort']) ? '' : $val['disablesort']), (empty($val['helplist']) ? '' : $val['helplist']));
         $totalarray['nbfield']++;
     }
 }
@@ -56,7 +57,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_list_search_title.tpl.ph
 
 // Hook fields
 $parameters = ['arrayfields' => $arrayfields, 'param' => $param, 'sortfield' => $sortfield, 'sortorder' => $sortorder, 'totalarray' => &$totalarray];
-$hookmanager->executeHooks('printFieldListTitle', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
+$hookmanager->executeHooks('printFieldListTitle', $parameters, $object, $action);
 print $hookmanager->resPrint;
 
 // Action column
@@ -72,7 +73,9 @@ $needToFetchEachLine = 0;
 if (isset($extrafields->attributes[$object->table_element]['computed']) && is_array($extrafields->attributes[$object->table_element]['computed']) && count($extrafields->attributes[$object->table_element]['computed']) > 0) {
     foreach ($extrafields->attributes[$object->table_element]['computed'] as $key => $val) {
         if (!is_null($val) && preg_match('/\$object/', $val)) {
-            $needToFetchEachLine++; // There is at least one compute field that use $object
+            // There is at least one compute field that use $object
+            $needToFetchEachLine++;
         }
     }
 }
+print '</thead>';

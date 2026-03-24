@@ -29,6 +29,7 @@ require_once __DIR__ . '/documents.lib.php';
 require_once __DIR__ . '/object.lib.php';
 require_once __DIR__ . '/debug.lib.php';
 require_once __DIR__ . '/component.lib.php';
+require_once __DIR__ . '/dolibarr.lib.php';
 
 /**
  * Print llxHeader with Saturne custom enhancements
@@ -68,7 +69,19 @@ function saturne_header(int $load_media_gallery = 0, string $head = '', string $
         $arrayofjs[] = '/' . $moduleNameLowerCase . '/js/' . $moduleNameLowerCase . '.min.js';
     }
 
+    $arrayofcss[]= 'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css';
+
+    $arrayofjs[] = 'https://cdn.jsdelivr.net/npm/flatpickr';
+    $arrayofjs[] = 'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js';
+
     llxHeader($head, $title, $help_url, $target, $disablejs, $disablehead, $arrayofjs, $arrayofcss, $morequerystring, $morecssonbody, $replacemainareaby, $disablenofollow, $disablenoindex);
+
+    ?>
+        <script>
+            window.saturne.config = window.saturne.config || {};
+            window.saturne.config.urlRoot = '<?php echo DOL_URL_ROOT; ?>';
+        </script>
+    <?php
 
     if ($load_media_gallery) {
         //Media gallery
@@ -245,9 +258,9 @@ function saturne_recurse_tree($moreParams, ?int $parentID = null, int $depth = 0
 /**
  * Check user access on current page
  *
- * @param object|bool $permission        Permission to access to current page
- * @param object|null $object            Object in current page
- * @param bool        $allowExternalUser Allow external user to have access at current page
+ * @param object|bool|int $permission        Permission to access to current page
+ * @param object|null     $object            Object in current page
+ * @param bool            $allowExternalUser Allow external user to have access at current page
  */
 function saturne_check_access($permission, ?object $object = null, bool $allowExternalUser = false)
 {
@@ -311,7 +324,7 @@ function saturne_check_modules_enabled()
  * @param string       $tabactive Tab active in navbar
  * @param string       $title     Title navbar
  */
-function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', string $title = '')
+function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', string $title = ''): void
 {
     global $conf;
 
@@ -447,7 +460,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
                         $saturneMoreHtmlRef .= '<input type="submit" class="button valignmiddle" value="' . $langs->trans('Modify') . '">';
                         $saturneMoreHtmlRef .= '</form>';
                     } else {
-                        $BannerElementObject->fetch($object->$objectKey);
+                        $BannerElementObject->fetch((int) $object->$objectKey);
                         if ($bannerElement == 'societe') {
                             $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1) : img_picto($langs->trans('ThirdParty'), 'company');
                         } elseif ($bannerElement == 'project') {
@@ -460,7 +473,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
                         }
                     }
                 } else {
-                    $BannerElementObject->fetch($object->$objectKey);
+                    $BannerElementObject->fetch((int) $object->$objectKey);
                     if ($bannerElement == 'societe' || $bannerElement == ($moreParams['bannerElement'] ?? null)) {
                         $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1) : '';
                     } elseif ($bannerElement == 'project') {
@@ -474,10 +487,11 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
     $saturneMoreHtmlRef .= '</div>';
 
     $moreParamsBannerTab = (!empty($moreParams['bannerTab']) ? $moreParams['bannerTab'] : '');
+    $moreParamsMoreHtml  = ((!empty($moreParams['moreHtml']) && $moreHtml != 'none' && $moreParams['moreHtml'] != 'none') ? $moreHtml : '');
 
     if (!$handlePhoto) {
         $moreParamsBannerTab = (empty($moreParamsBannerTab) ? '&module_name=' . $moduleName . '&object_type=' . $object->element : $moreParamsBannerTab);
-        dol_banner_tab($object, $paramId, (($moreHtml != 'none' && $moreParams['moreHtml'] != 'none') ? $moreHtml : ''), $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, $moreParamsBannerTab);
+        dol_banner_tab($object, $paramId, $moreParamsMoreHtml, $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, $moreParamsBannerTab);
     } else {
         global $conf, $form;
 
@@ -506,7 +520,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
         }
 
         $moreHtmlLeft = '<div class="floatleft inline-block valignmiddle divphotoref">' . saturne_show_medias_linked((dol_strlen($modulePart) > 0 ? $modulePart : $moduleNameLowerCase), $baseDir . '/' . $subDir, 'small', $photoLimit ?? 0, 0, 0, 0, 88, 88, 0, 0, 0, $subDir, $object, 'photo', 0, 0,0, 1) . '</div>';
-        print $form->showrefnav($object, $paramId, (($moreHtml != 'none' && $moreParams['moreHtml'] != 'none') ? $moreHtml : ''), $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, $moreParamsBannerTab, 0, $moreHtmlLeft, $object->getLibStatut(6));
+        print $form->showrefnav($object, $paramId, $moreParamsMoreHtml, $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, $moreParamsBannerTab, 0, $moreHtmlLeft, $object->getLibStatut(6));
         print '</div>';
     }
 

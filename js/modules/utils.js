@@ -98,10 +98,10 @@ window.saturne.utils.draganddrop = function() {
       $(this).css('cursor', 'default');
       let token = $('.fiche').find('input[name="token"]').val();
 
-      let separator = '&'
+      let separator = '&';
       if (document.URL.match(/action=/)) {
-        document.URL = document.URL.split(/\?/)[0]
-        separator = '?'
+        document.URL = document.URL.split(/\?/)[0];
+        separator = '?';
       }
       let lineOrder = [];
       $('.line-row').each(function(  ) {
@@ -359,7 +359,7 @@ window.saturne.utils.parseDateTime = function(str) {
   // Format attendu : dd/mm/yyyy hh:mm (secondes optionnelles)
   const regex = /^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?$/;
   const match = str.match(regex);
-  if (!match) return null;
+  if (!match) { return null; }
   const [, d, m, y, hh = '00', mm = '00', ss = '00'] = match;
   const date = new Date(`${y}-${m}-${d}T${hh}:${mm}:${ss}`);
   return isNaN(date.getTime()) ? null : date;

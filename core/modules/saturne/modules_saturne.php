@@ -102,7 +102,7 @@ abstract class ModeleNumRefSaturne
             $obj = $db->fetch_object($resql);
         } else {
             dol_syslog(get_class($this) . '::getLastValue', LOG_DEBUG);
-            return -1;
+            return '-1';
         }
         return $this->prefix . $obj->max;
     }
@@ -176,7 +176,7 @@ abstract class ModeleNumRefSaturne
             }
         } else {
             dol_syslog(get_class($this) . '::getNextValue', LOG_DEBUG);
-            return -1;
+            return '-1';
         }
 
         $date = !empty($object->date_creation) ? $object->date_creation : dol_now();
@@ -251,7 +251,7 @@ abstract class CustomModeleNumRefSaturne extends ModeleNumRefSaturne
 
         // Parametrage du prefix
         $texte .= '<tr><td>'.$langs->trans("Mask").':</td>';
-        $texte .= '<td class="right">'.$form->textwithpicto('<input type="text" class="flat minwidth175" name="addon_value" value="'.$conf->global->$confName.'">', $tooltip, 1, 1).'</td>';
+        $texte .= '<td class="right">'.$form->textwithpicto('<input type="text" class="flat minwidth175" name="addon_value" value="'.$conf->global->$confName.'">', $tooltip, 1, 'help').'</td>';
 
         $texte .= '<td class="left" rowspan="2">&nbsp; <input type="submit" class="button button-edit" name="Button"value="'.$langs->trans("Modify").'"></td>';
 
@@ -279,7 +279,7 @@ abstract class CustomModeleNumRefSaturne extends ModeleNumRefSaturne
         $nextValueNumber -= 1;
 
         $nextValueSuffixLength = dol_strlen($nextValueSuffix);
-        $nextValueNumberLength = dol_strlen($nextValueNumber);
+        $nextValueNumberLength = dol_strlen((string) $nextValueNumber);
 
         $zeroString = '';
         for ($i = 0; $i < ($nextValueSuffixLength - $nextValueNumberLength); $i++) {
@@ -324,7 +324,7 @@ abstract class CustomModeleNumRefSaturne extends ModeleNumRefSaturne
             }
         } else {
             dol_syslog(get_class($this) . '::getNextValue', LOG_DEBUG);
-            return -1;
+            return '-1';
         }
 
         $date = !empty($object->date_creation) ? $object->date_creation : dol_now();
@@ -475,7 +475,7 @@ class SaturneDocumentModel extends CommonDocGenerator
                 continue;
             }
             if (!is_dir($tmpDir)) {
-                $infoTitle .= img_warning($langs->trans('ErrorDirNotFound', $tmpDir), 0);
+                $infoTitle .= img_warning($langs->trans('ErrorDirNotFound', $tmpDir), '');
             }
             else {
                 $tmpFiles = dol_dir_list($tmpDir, 'files', 0, '\.(ods|odt)');
@@ -892,11 +892,12 @@ class SaturneDocumentModel extends CommonDocGenerator
         }
 
         // Define substitution array
-        $substitutionArray = getCommonSubstitutionArray($outputLangs, 0, null, $object);
-        $arraySoc = $this->get_substitutionarray_mysoc($mysoc, $outputLangs);
+        $substitutionArray          = getCommonSubstitutionArray($outputLangs, 0, null, $object);
+        $arrayObjectFromProperties  = $this->get_substitutionarray_each_var_object($object, $outputLangs);
+        $arraySoc                   = $this->get_substitutionarray_mysoc($mysoc, $outputLangs);
         $arraySoc['mycompany_logo'] = preg_replace('/_small/', '_mini', $arraySoc['mycompany_logo']);
 
-        $tmpArray = array_merge($substitutionArray, $arraySoc, $moreParam['tmparray']);
+        $tmpArray = array_merge($substitutionArray, $arrayObjectFromProperties, $arraySoc, $moreParam['tmparray']);
         if (isModEnabled('multicompany')) {
             $tmpArray['entity'] = $conf->entity;
         } else {

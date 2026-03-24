@@ -1,5 +1,6 @@
 <?php
-/* Copyright (C) 2022-2024 EVARISK <technique@evarisk.com>
+
+/* Copyright (C) 2022-2026 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,7 +54,7 @@ $action = GETPOST('action', 'alpha');
 // Initialize view objects
 $form = new Form($db);
 
-$hookmanager->initHooks([$moduleNameLowerCase . 'pwaadmin', 'saturneadmin']); // Note that conf->hooks_modules contains array
+$hookmanager->initHooks([$moduleNameLowerCase . 'pwaadmin', 'saturneadmin']);
 
 // Security check - Protection if external user
 $permissionToRead = $user->rights->$moduleNameLowerCase->adminpage->read;

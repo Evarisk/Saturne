@@ -1,5 +1,6 @@
 <?php
-/* Copyright (C) 2024 EVARISK <technique@evarisk.com>
+
+/* Copyright (C) 2024-2026 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,7 +59,7 @@ $saturneRedirection = new SaturneRedirection($db);
 // Initialize view objects
 $form = new Form($db);
 
-$hookmanager->initHooks([$moduleNameLowerCase . 'redirectionadmin', 'saturneadmin']); // Note that conf->hooks_modules contains array
+$hookmanager->initHooks([$moduleNameLowerCase . 'redirectionadmin', 'saturneadmin']);
 
 // Security check - Protection if external user
 $permissionToRead = $user->rights->$moduleNameLowerCase->adminpage->read;
@@ -69,7 +70,7 @@ saturne_check_access($permissionToRead);
  */
 
 $parameters = [];
-$resHook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+$resHook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action);
 if ($resHook < 0) {
     setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 }
@@ -92,7 +93,7 @@ if (empty($resHook)) {
     }
 
     if ($action == 'remove') {
-        $saturneRedirection->fetch(GETPOST('id'));
+        $saturneRedirection->fetch(GETPOSTINT('id'));
 
         $result = $saturneRedirection->delete($user, true, false);
         if ($result > 0) {
@@ -150,10 +151,10 @@ if (is_array($redirections) && !empty($redirections)) {
         print '</td><td>';
         print $redirection->to_url;
         print '</td><td class="center">';
-        print '<img src="' . $qrCodeBase64 . '" alt="'. $langs->trans('QRCode') .'" width="100" height="100">';
+        print '<img src="' . $qrCodeBase64 . '" alt="' . $langs->trans('QRCode') . '" width="100" height="100">';
         print '</td><td class="center">';
         print '<input type="hidden" name="id" value="' . $redirection->id . '">';
-        print '<button class="butAction">'. $langs->trans('Remove') . '</button>';
+        print '<button class="butAction">' . $langs->trans('Remove') . '</button>';
         print '</td></tr>';
         print '</form>';
     }
@@ -170,7 +171,7 @@ print '</td><td>';
 print '<input type="text" name="to_url" class="marginrightonly minwidth300 maxwidthonsmartphone" placeholder="' . $langs->trans('ToURL') . '"  value="' . $toUrl . '" required>';
 print $form->textwithpicto('', $langs->trans('ToUrlHelp'));
 print '</td><td class="center" colspan="2">';
-print '<button class="butAction">'. $langs->trans('Add') . '</button>';
+print '<button class="butAction">' . $langs->trans('Add') . '</button>';
 print '</td></tr>';
 
 print '</form>';

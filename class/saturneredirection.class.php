@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -154,8 +155,10 @@ class SaturneRedirection extends SaturneObject
         $redirectionLines .= "RewriteCond %{REQUEST_FILENAME} !-d" . PHP_EOL;
         $redirectionLines .= "RewriteRule ^(.*)$ $toUrl" . PHP_EOL;
 
-        if (file_exists(DOL_DOCUMENT_ROOT . '/../.htaccess')
-            && is_writable(DOL_DOCUMENT_ROOT . '/../.htaccess')) {
+        if (
+            file_exists(DOL_DOCUMENT_ROOT . '/../.htaccess')
+            && is_writable(DOL_DOCUMENT_ROOT . '/../.htaccess')
+        ) {
             $htaccessContent = file_get_contents(DOL_DOCUMENT_ROOT . '/../.htaccess');
 
             if (!strpos($htaccessContent, $redirectionLines)) {

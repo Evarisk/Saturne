@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2025 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -39,7 +40,7 @@
                     'title'     => $supplierData->name,  // Le nom du fournisseur/entité
                     'details'   => [$supplierData->ref], // La référence/ID
                 ]);
-            ?>
+                ?>
             <div class="modal-close"><i class="fas fa-2x fa-times"></i></div>
         </div>
         <!-- Modal-Content -->

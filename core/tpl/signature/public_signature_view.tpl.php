@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2021-2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,7 +31,8 @@
  */ ?>
 
 <div class="public-card__container" data-public-interface="true">
-    <?php if (getDolGlobalInt('SATURNE_ENABLE_PUBLIC_INTERFACE')) : ?>
+    <?php if (getDolGlobalInt('SATURNE_ENABLE_PUBLIC_INTERFACE')) :
+        ?>
         <input type="hidden" name="token" value="<?php echo newToken(); ?>">
 
         <div class="public-card__header wpeo-gridlayout grid-2 grid-gap-2">
@@ -43,7 +45,8 @@
                 <div class="information-user"><?php echo dol_strtoupper($signatory->lastname) . ' ' . ucfirst($signatory->firstname); ?></div>
             </div>
 
-            <?php if (!empty($object->id)) : ?>
+            <?php if (!empty($object->id)) :
+                ?>
             <div class="header-objet">
                 <div class="objet-container">
                     <div class="objet-info">
@@ -54,36 +57,48 @@
                         <?php $path = DOL_MAIN_URL_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/'; ?>
                         <input type="hidden" class="specimen-name" data-specimen-name="<?php echo $objectType . '_specimen_' . $trackID . '.odt'; ?>">
                         <input type="hidden" class="specimen-path" data-specimen-path="<?php echo $path; ?>">
-                        <?php if (GETPOSTISSET('document_type') && $fileExists) : ?>
+                        <?php if (GETPOSTISSET('document_type') && $fileExists) :
+                            ?>
                             <div class="wpeo-button button-square-40 button-rounded button-blue auto-download"><i class="fas fa-download"></i></div>
-                        <?php else : ?>
+                            <?php
+                        else :
+                            ?>
                             <div class="wpeo-button button-square-40 button-rounded button-grey"><i class="fas fa-download"></i></div>
-                        <?php endif; ?>
+                            <?php
+                        endif; ?>
                     </div>
                 </div>
             </div>
-            <?php endif; ?>
+                <?php
+            endif; ?>
         </div>
 
         <div class="public-card__content signature">
             <div class="signature-element">
-                <?php if (empty($signatory->signature) && ((defined(get_class($object) . '::STATUS_VALIDATED') && $object->status == $object::STATUS_VALIDATED) || $object->status == 1) && $signatory->attendance != SaturneSignature::ATTENDANCE_ABSENT) : ?>
+                <?php if (empty($signatory->signature) && ((defined(get_class($object) . '::STATUS_VALIDATED') && $object->status == $object::STATUS_VALIDATED) || $object->status == 1) && $signatory->attendance != SaturneSignature::ATTENDANCE_ABSENT) :
+                    ?>
                     <canvas class="canvas-container editable canvas-signature"></canvas>
                     <div class="signature-erase wpeo-button button-square-40 button-rounded button-grey"><span><i class="fas fa-eraser"></i></span></div>
-                <?php else : ?>
+                    <?php
+                else :
+                    ?>
                     <div class="canvas-container">
                         <img src='<?php echo $signatory->signature ?>' alt="">
                     </div>
-                <?php endif; ?>
+                    <?php
+                endif; ?>
             </div>
         </div>
 
         <div class="public-card__footer">
-            <?php if (empty($signatory->signature) && ((defined(get_class($object) . '::STATUS_VALIDATED') && $object->status == $object::STATUS_VALIDATED) || $object->status == 1) && $signatory->attendance != SaturneSignature::ATTENDANCE_ABSENT) : ?>
+            <?php if (empty($signatory->signature) && ((defined(get_class($object) . '::STATUS_VALIDATED') && $object->status == $object::STATUS_VALIDATED) || $object->status == 1) && $signatory->attendance != SaturneSignature::ATTENDANCE_ABSENT) :
+                ?>
                 <div class="signature-validate wpeo-button button-grey <?php echo $moreParams['moreCSS'] ?? ''; ?>"><i class="fas fa-save"></i> <?php echo $langs->trans('SignatureSaveButton'); ?></div>
-            <?php endif; ?>
+                <?php
+            endif; ?>
         </div>
-    <?php else :
+        <?php
+    else :
         print '<div class="center">' . $langs->trans('SignaturePublicInterfaceForbidden') . '</div>';
     endif; ?>
 </div>

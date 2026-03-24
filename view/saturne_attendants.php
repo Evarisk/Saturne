@@ -131,10 +131,10 @@ if (empty($resHook)) {
             // Creation attendant OK
             if ($attendantTypeUser > 0) {
                 $usertmp = $user;
-                $usertmp->fetch($attendantTypeUser);
+                $usertmp->fetch((int) $attendantTypeUser);
                 setEventMessages($langs->trans('AddAttendantMessage', $langs->transnoentities($attendantRole) . ' ' . $usertmp->getFullName($langs, 1)), []);
             } else {
-                $contact->fetch($attendantTypeContact);
+                $contact->fetch((int) $attendantTypeContact);
                 setEventMessages($langs->trans('AddAttendantMessage', $langs->transnoentities($attendantRole) . ' ' . $contact->getFullName($langs, 1)), []);
             }
             // Prevent form reloading page
@@ -156,7 +156,7 @@ if (empty($resHook)) {
         $signatoryID = $data['signatoryID'];
         $attendance  = $data['attendance'];
 
-        $signatory->fetch($signatoryID);
+        $signatory->fetch((int) $signatoryID);
 
         switch ($attendance) {
             case 1:
@@ -190,13 +190,13 @@ if (empty($resHook)) {
     // Action to send Email
     if ($action == 'send_email') {
         $signatoryID = GETPOST('signatoryID', 'int');
-        $signatory->fetch($signatoryID);
+        $signatory->fetch((int) $signatoryID);
 
         $langs->load('mails');
         if (!dol_strlen($signatory->email)) {
             if ($signatory->element_type == 'user') {
                 $usertmp = $user;
-                $usertmp->fetch($signatory->element_id);
+                $usertmp->fetch((int) $signatory->element_id);
                 if (dol_strlen($usertmp->email)) {
                     $signatory->email = $usertmp->email;
                     $signatory->update($user, true);
@@ -204,7 +204,7 @@ if (empty($resHook)) {
 					setEventMessage($langs->trans('NoEmailSet', $langs->transnoentities($signatory->role) . ' ' . strtoupper($signatory->lastname) . ' ' . $signatory->firstname), 'warnings');
 				}
             } elseif ($signatory->element_type == 'socpeople') {
-                $contact->fetch($signatory->element_id);
+                $contact->fetch((int) $signatory->element_id);
                 if (dol_strlen($contact->email)) {
                     $signatory->email = $contact->email;
                     $signatory->update($user, true);
@@ -276,7 +276,7 @@ if (empty($resHook)) {
     // Action to delete attendant
     if ($action == 'delete_attendant') {
         $signatoryToDeleteID = GETPOST('signatoryID', 'int');
-        $signatory->fetch($signatoryToDeleteID);
+        $signatory->fetch((int) $signatoryToDeleteID);
 
         $result = $signatory->setDeleted($user);
 
@@ -484,7 +484,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
             $tmpcompany = new Societe($db);
 
             foreach ($contactarr as $contact) {
-                $contactstatic->fetch($contact['id']);
+                $contactstatic->fetch((int) $contact['id']);
                 // Complete substitution array
                 $substitutionarray['__CONTACT_NAME_'.$contact['code'].'__'] = $contactstatic->getFullName($outputlangs, 1);
                 $substitutionarray['__CONTACT_LASTNAME_'.$contact['code'].'__'] = $contactstatic->lastname;
@@ -496,7 +496,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
                     $contacttoshow = '';
                     if (isset($object->thirdparty) && is_object($object->thirdparty)) {
                         if ($contactstatic->fk_soc != $object->thirdparty->id) {
-                            $tmpcompany->fetch($contactstatic->fk_soc);
+                            $tmpcompany->fetch((int) $contactstatic->fk_soc);
                             if ($tmpcompany->id > 0) {
                                 $contacttoshow .= $tmpcompany->name.': ';
                             }

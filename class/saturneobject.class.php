@@ -365,11 +365,11 @@ abstract class SaturneObject extends CommonObject
     /**
      * Set deleted status
      *
-     * @param  User $user      Object user that modify
-     * @param  int  $notrigger 1 = Does not execute triggers, 0 = Execute triggers
-     * @return int             0 < if KO, > 0 if OK
+     * @param  User     $user      Object user that modify
+     * @param  int|bool $notrigger 1/true = Does not execute triggers, 0/false = Execute triggers
+     * @return int                 0 < if KO, > 0 if OK
      */
-    public function setDeleted(User $user, int $notrigger = 0): int
+    public function setDeleted(User $user, $notrigger = 0): int
     {
         return $this->setStatusCommon($user, $this::STATUS_DELETED, $notrigger, strtoupper($this->element) . '_DELETE');
     }
@@ -532,11 +532,11 @@ abstract class SaturneObject extends CommonObject
     /**
      * Return the status
      *
-     * @param  int    $status ID status
-     * @param  int    $mode   0 = long label, 1 = short label, 2 = Picto + short label, 3 = Picto, 4 = Picto + long label, 5 = Short label + Picto, 6 = Long label + Picto
-     * @return string         Label of status
+     * @param  int|string $status ID status
+     * @param  int        $mode   0 = long label, 1 = short label, 2 = Picto + short label, 3 = Picto, 4 = Picto + long label, 5 = Short label + Picto, 6 = Long label + Picto
+     * @return string             Label of status
      */
-    public function LibStatut(int $status, int $mode = 0): string
+    public function LibStatut($status, int $mode = 0): string
     {
        return '';
     }
@@ -624,7 +624,7 @@ abstract class SaturneObject extends CommonObject
      * @param  int[]|int $categories Category or categories IDs
      * @return float|int
      */
-    public function setCategories($categories)
+    public function setCategories($categories): float|int
     {
         if ($this->isCategoryManaged == 1) {
             return parent::setCategoriesCommon($categories, $this->element);
@@ -813,7 +813,7 @@ abstract class SaturneObject extends CommonObject
      *
      * @param  string     $option     Where point the link (0=> main card, 1,2 => shipment, 'nolink' => No link)
      * @param  array|null $moreParams Parameters for load kanban view
-     * @return int|string -1 if $option is not a string or $out HTML Code for Kanban thumb
+     * @return string                 HTML code for Kanban thumb
      */
     public function getKanbanView($option = '', array $moreParams = null): string
     {
@@ -842,46 +842,46 @@ abstract class SaturneObject extends CommonObject
 
             return $out;
         } else {
-            return -1;
+            return '';
         }
     }
-    
+
     /**
-	 * Return validation test result for a field
-	 *
-	 * @param array<string,array{type:string,label:string,enabled:int<0,2>|string,position:int,notnull?:int,visible:int<-2,5>|string,alwayseditable?:int<0,1>,noteditable?:int<0,1>,default?:string,index?:int,foreignkey?:string,searchall?:int<0,1>,isameasure?:int<0,1>,css?:string,csslist?:string,help?:string,showoncombobox?:int<0,2>,disabled?:int<0,1>,arrayofkeyval?:array<int,string>,autofocusoncreate?:int<0,1>,comment?:string,copytoclipboard?:int<1,2>,validate?:int<0,1>,bounds?:array<min?:int|float,max?:int|float}>	$fields	Array of properties of field to show
-	 * @param  	string  $fieldKey           Key of attribute
-	 * @param	string  $fieldValue         Value of attribute
-	 * @return 	bool 						Return false if fail true on success, see $this->error for error message
-	 */
-	public function validateField($fields, $fieldKey, $fieldValue)
-	{
-		global $langs;
+     * Return validation test result for a field
+     *
+     * @param  array   $fields     Array of properties of field to show
+     * @param  string  $fieldKey   Key of attribute
+     * @param  string  $fieldValue Value of attribute
+     * @return bool                Return false if fail true on success, see $this->error for error message
+     */
+    public function validateField($fields, $fieldKey, $fieldValue): bool
+    {
+        global $langs;
 
-		$validationResult = true;
+        $validationResult = true;
 
-		$commonValidationResult = parent::validateField($fields, $fieldKey, $fieldValue);
+        $commonValidationResult = parent::validateField($fields, $fieldKey, $fieldValue);
 
-		if ($commonValidationResult) {
-			$field = $fields[$fieldKey] ?? null;
-			if (isset($field)) {
-				if (isset($field['bounds']['min'])) {
-					$min = $field['bounds']['min'];
-					if ($fieldValue < $min) {
-						$this->setFieldError($fieldKey, $langs->trans('FieldMinValue', strtolower(html_entity_decode($langs->trans($field['label']), ENT_COMPAT, 'UTF-8')), $min));
-						$validationResult = false;
-					}
-				}
-				if (isset($field['bounds']['max'])) {
-					$max = $field['bounds']['max'];
-					if ($fieldValue > $max) {
-						$this->setFieldError($fieldKey, $langs->trans('FieldMaxValue', strtolower(html_entity_decode($langs->trans($field['label']), ENT_COMPAT, 'UTF-8')), $max));
-						$validationResult = false;
-					}
-				}
-			}
-		}
+        if ($commonValidationResult) {
+            $field = $fields[$fieldKey] ?? null;
+            if (isset($field)) {
+                if (isset($field['bounds']['min'])) {
+                    $min = $field['bounds']['min'];
+                    if ($fieldValue < $min) {
+                        $this->setFieldError($fieldKey, $langs->trans('FieldMinValue', strtolower(html_entity_decode($langs->trans($field['label']), ENT_COMPAT, 'UTF-8')), $min));
+                        $validationResult = false;
+                    }
+                }
+                if (isset($field['bounds']['max'])) {
+                    $max = $field['bounds']['max'];
+                    if ($fieldValue > $max) {
+                        $this->setFieldError($fieldKey, $langs->trans('FieldMaxValue', strtolower(html_entity_decode($langs->trans($field['label']), ENT_COMPAT, 'UTF-8')), $max));
+                        $validationResult = false;
+                    }
+                }
+            }
+        }
 
-		return $commonValidationResult && $validationResult;
-	}
+        return $commonValidationResult && $validationResult;
+    }
 }

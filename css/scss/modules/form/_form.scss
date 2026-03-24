@@ -28,6 +28,11 @@
       box-shadow: none;
     }
   }
+  .form-field-text {
+    border: 1px solid rgba(0,0,0,.2);
+    padding: 8px;
+    box-sizing: border-box;
+  }
   .form-field {
     transition: all 0.2s ease-out;
     border-radius: 0;

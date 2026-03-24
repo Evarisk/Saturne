@@ -70,7 +70,7 @@ window.saturne.loader.event = function() {
  */
 window.saturne.loader.display = function( element ) {
 	if ( element.hasClass( 'button-progress' ) ) {
-		element.addClass( 'button-load' )
+		element.addClass( 'button-load' );
 	} else {
 		element.addClass( 'wpeo-loader' );
 		var el = $( '<span class="loader-spin"></span>' );

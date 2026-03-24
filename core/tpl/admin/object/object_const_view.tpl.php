@@ -1,6 +1,7 @@
 <?php
+
 $parameters = [];
-$reshook    = $hookmanager->executeHooks('saturneAdminObjectConst', $parameters); // Note that $action and $object may have been modified by some hooks
+$reshook    = $hookmanager->executeHooks('saturneAdminObjectConst', $parameters);
 if ($reshook > 0) {
     $constArray = $hookmanager->resArray;
 }
@@ -35,9 +36,9 @@ if (is_array($constArray) && !empty($constArray)) {
     print '<td class="center nowrap">';
     print $langs->transnoentities('Status') . '<br>';
     if ($user->admin) {
-        print '<a class="reposition commonlink" title="' . dol_escape_htmltag($langs->trans("All")) . '" href="' . $_SERVER["PHP_SELF"].'?action=add_all_conf&token=' . newToken() . '"> <u>' . $langs->trans("All") . "</u> </a>";
+        print '<a class="reposition commonlink" title="' . dol_escape_htmltag($langs->trans("All")) . '" href="' . $_SERVER["PHP_SELF"] . '?action=add_all_conf&token=' . newToken() . '"> <u>' . $langs->trans("All") . "</u> </a>";
         print ' / ';
-        print '<a class="reposition commonlink" title="' . dol_escape_htmltag($langs->trans("None")) . '" href="' . $_SERVER["PHP_SELF"] . '?&action=delete_all_conf&token=' . newToken() . '"> <u>' . $langs->trans("None")."</u> </a>";
+        print '<a class="reposition commonlink" title="' . dol_escape_htmltag($langs->trans("None")) . '" href="' . $_SERVER["PHP_SELF"] . '?&action=delete_all_conf&token=' . newToken() . '"> <u>' . $langs->trans("None") . "</u> </a>";
     }
     print '</td></tr>';
 
@@ -49,7 +50,7 @@ if (is_array($constArray) && !empty($constArray)) {
         print '</td>';
         print '<td class="center">';
         if ($user->admin && empty($const['disabled'])) {
-            print ajax_constantonoff($const['code'], [], null, 0, 0, 0, 2 , 0, 1);
+            print ajax_constantonoff($const['code'], [], null, 0, 0, 0, 2, 0, 1);
         }
         print '</td></tr>';
     }

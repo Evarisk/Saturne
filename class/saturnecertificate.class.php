@@ -1,5 +1,6 @@
 <?php
-/* Copyright (C) 2021-2023 EVARISK <technique@evarisk.com>
+
+/* Copyright (C) 2021-2026 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,41 +35,41 @@ class SaturneCertificate extends SaturneObject
      */
     public $db;
 
-	/**
-	 * @var string Module name.
-	 */
-	public $module = 'saturne';
+    /**
+     * @var string Module name.
+     */
+    public $module = 'saturne';
 
-	/**
-	 * @var string Element type of object.
-	 */
-	public $element = 'saturne_certificate';
+    /**
+     * @var string Element type of object.
+     */
+    public $element = 'saturne_certificate';
 
-	/**
-	 * @var string Name of table without prefix where object is stored. This is also the key used for extrafields management.
-	 */
-	public $table_element = 'saturne_object_certificate';
+    /**
+     * @var string Name of table without prefix where object is stored. This is also the key used for extrafields management.
+     */
+    public $table_element = 'saturne_object_certificate';
 
-	/**
-	 * @var int Does this object support multicompany module ?
-	 * 0 = No test on entity, 1 = Test with field entity, 'field@table' = Test with link by field@table.
-	 */
-	public $ismultientitymanaged = 1;
+    /**
+     * @var int Does this object support multicompany module ?
+     * 0 = No test on entity, 1 = Test with field entity, 'field@table' = Test with link by field@table.
+     */
+    public $ismultientitymanaged = 1;
 
-	/**
-	 * @var int Does object support extrafields ? 0 = No, 1 = Yes.
-	 */
-	public $isextrafieldmanaged = 1;
+    /**
+     * @var int Does object support extrafields ? 0 = No, 1 = Yes.
+     */
+    public $isextrafieldmanaged = 1;
 
     /**
      * @var string Last output from end job execution.
      */
     public $output = '';
 
-	/**
-	 * @var string Name of icon for certificate. Must be a 'fa-xxx' fontawesome code (or 'fa-xxx_fa_color_size') or 'certificate@saturne' if picto is file 'img/object_certificate.png'.
-	 */
-	public string $picto = 'fontawesome_fa-user-graduate_fas_#d35968';
+    /**
+     * @var string Name of icon for certificate. Must be a 'fa-xxx' fontawesome code (or 'fa-xxx_fa_color_size') or 'certificate@saturne' if picto is file 'img/object_certificate.png'.
+     */
+    public string $picto = 'fontawesome_fa-user-graduate_fas_#d35968';
 
     public const STATUS_DELETED   = -1;
     public const STATUS_DRAFT     = 0;
@@ -79,17 +80,17 @@ class SaturneCertificate extends SaturneObject
 
     /**
      *  'type' field format:
-     *  	'integer', 'integer:ObjectClass:PathToClass[:AddCreateButtonOrNot[:Filter[:Sortfield]]]',
-     *  	'select' (list of values are in 'options'),
-     *  	'sellist:TableName:LabelFieldName[:KeyFieldName[:KeyFieldParent[:Filter[:Sortfield]]]]',
-     *  	'chkbxlst:...',
-     *  	'varchar(x)',
-     *  	'text', 'text:none', 'html',
-     *   	'double(24,8)', 'real', 'price',
-     *  	'date', 'datetime', 'timestamp', 'duration',
-     *  	'boolean', 'checkbox', 'radio', 'array',
-     *  	'mail', 'phone', 'url', 'password', 'ip'
-     *		Note: Filter can be a string like "(t.ref:like:'SO-%') or (t.date_creation:<:'20160101') or (t.nature:is:NULL)"
+     *      'integer', 'integer:ObjectClass:PathToClass[:AddCreateButtonOrNot[:Filter[:Sortfield]]]',
+     *      'select' (list of values are in 'options'),
+     *      'sellist:TableName:LabelFieldName[:KeyFieldName[:KeyFieldParent[:Filter[:Sortfield]]]]',
+     *      'chkbxlst:...',
+     *      'varchar(x)',
+     *      'text', 'text:none', 'html',
+     *      'double(24,8)', 'real', 'price',
+     *      'date', 'datetime', 'timestamp', 'duration',
+     *      'boolean', 'checkbox', 'radio', 'array',
+     *      'mail', 'phone', 'url', 'password', 'ip'
+     *      Note: Filter can be a string like "(t.ref:like:'SO-%') or (t.date_creation:<:'20160101') or (t.nature:is:NULL)"
      *  'label' the translation key.
      *  'picto' is code of a picto to show before value in forms
      *  'enabled' is a condition when the field must be managed (Example: 1 or '$conf->global->MY_SETUP_PARAM' or '!empty($conf->multicurrency->enabled)' ...)
@@ -109,16 +110,16 @@ class SaturneCertificate extends SaturneObject
      *  'arrayofkeyval' to set a list of values if type is a list of predefined values. For example: array("0"=>"Draft","1"=>"Active","-1"=>"Cancel"). Note that type can be 'integer' or 'varchar'
      *  'autofocusoncreate' to have field having the focus on a create form. Only 1 field should have this property set to 1.
      *  'comment' is not used. You can store here any text of your choice. It is not used by application.
-     *	'validate' is 1 if you need to validate with $this->validateField()
+     *  'validate' is 1 if you need to validate with $this->validateField()
      *  'copytoclipboard' is 1 or 2 to allow to add a picto to copy value into clipboard (1=picto after label, 2=picto after value)
      *
      *  Note: To have value dynamic, you can set value to 0 in definition and edit the value on the fly into the constructor.
      */
 
-	/**
-	 * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
-	 */
-	public $fields = [
+    /**
+     * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
+     */
+    public $fields = [
         'rowid'             => ['type' => 'integer',      'label' => 'TechnicalID',      'enabled' => 1, 'position' => 1,   'notnull' => 1, 'visible' => 0, 'noteditable' => 1, 'index' => 1, 'comment' => 'Id'],
         'ref'               => ['type' => 'varchar(128)', 'label' => 'Ref',              'enabled' => 1, 'position' => 10,  'notnull' => 1, 'visible' => 4, 'noteditable' => 1, 'default' => '(PROV)', 'index' => 1, 'searchall' => 1, 'showoncombobox' => 1, 'validate' => 1, 'comment' => 'Reference of object'],
         'ref_ext'           => ['type' => 'varchar(128)', 'label' => 'RefExt',           'enabled' => 1, 'position' => 20,  'notnull' => 0, 'visible' => 0],
@@ -205,7 +206,7 @@ class SaturneCertificate extends SaturneObject
     /**
      * @var string Description.
      */
-	public string $description;
+    public string $description;
 
     /**
      * @var string Public note.
@@ -220,7 +221,7 @@ class SaturneCertificate extends SaturneObject
     /**
      * @var string Element type.
      */
-	public string $element_type;
+    public string $element_type;
 
     /**
      * @var string Type.
@@ -230,7 +231,7 @@ class SaturneCertificate extends SaturneObject
     /**
      * @var int|string Element ID.
      */
-	public $fk_element;
+    public $fk_element;
 
     /**
      * @var string Sha256.
@@ -256,7 +257,6 @@ class SaturneCertificate extends SaturneObject
      * @var int|null Status validation.
      */
     public ?int $status_validation;
-
 
     /**
      * @var int|string ThirdParty ID.
@@ -297,26 +297,26 @@ class SaturneCertificate extends SaturneObject
      * @param  int    $mode   0 = long label, 1 = short label, 2 = Picto + short label, 3 = Picto, 4 = Picto + long label, 5 = Short label + Picto, 6 = Long label + Picto.
      * @return string         Label of status.
      */
-	public function LibStatut(int $status, int $mode = 0): string
-	{
-		if (empty($this->labelStatus) || empty($this->labelStatusShort)) {
-			global $langs;
+    public function LibStatut(int $status, int $mode = 0): string
+    {
+        if (empty($this->labelStatus) || empty($this->labelStatusShort)) {
+            global $langs;
             $this->labelStatus[self::STATUS_DELETED]   = $langs->transnoentitiesnoconv('Deleted');
-			$this->labelStatus[self::STATUS_DRAFT]     = $langs->transnoentitiesnoconv('StatusDraft');
-			$this->labelStatus[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('ValidatePendingSignature');
+            $this->labelStatus[self::STATUS_DRAFT]     = $langs->transnoentitiesnoconv('StatusDraft');
+            $this->labelStatus[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('ValidatePendingSignature');
             $this->labelStatus[self::STATUS_LOCKED]    = $langs->transnoentitiesnoconv('Locked');
             $this->labelStatus[self::STATUS_ARCHIVED]  = $langs->transnoentitiesnoconv('Archived');
             $this->labelStatus[self::STATUS_EXPIRED]   = $langs->transnoentitiesnoconv('Expired');
 
             $this->labelStatusShort[self::STATUS_DELETED]   = $langs->transnoentitiesnoconv('Deleted');
-			$this->labelStatusShort[self::STATUS_DRAFT]     = $langs->transnoentitiesnoconv('StatusDraft');
-			$this->labelStatusShort[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('ValidatePendingSignature');
+            $this->labelStatusShort[self::STATUS_DRAFT]     = $langs->transnoentitiesnoconv('StatusDraft');
+            $this->labelStatusShort[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('ValidatePendingSignature');
             $this->labelStatusShort[self::STATUS_LOCKED]    = $langs->transnoentitiesnoconv('Locked');
             $this->labelStatusShort[self::STATUS_ARCHIVED]  = $langs->transnoentitiesnoconv('Archived');
             $this->labelStatusShort[self::STATUS_EXPIRED]   = $langs->transnoentitiesnoconv('Expired');
-		}
+        }
 
-		$statusType = 'status' . $status;
+        $statusType = 'status' . $status;
         if ($status == self::STATUS_DELETED) {
             $statusType = 'status0';
         }
@@ -327,8 +327,8 @@ class SaturneCertificate extends SaturneObject
             $statusType = 'status8';
         }
 
-		return dolGetStatus($this->labelStatus[$status], $this->labelStatusShort[$status], '', $statusType, $mode);
-	}
+        return dolGetStatus($this->labelStatus[$status], $this->labelStatusShort[$status], '', $statusType, $mode);
+    }
 
     /**
      * Sets object to supplied categories.
@@ -374,7 +374,7 @@ class SaturneCertificate extends SaturneObject
         global $langs, $user;
 
         $certificates = self::fetchAll('', '', 0, 0, ['customsql' => 't.status >= 0']);
-        if (is_array($certificates) && !empty($certificates)){
+        if (is_array($certificates) && !empty($certificates)) {
             $nbCertificate = 0;
             foreach ($certificates as $certificate) {
                 if ($certificate->date_end > 0 && $certificate->date_end < dol_now() && $certificate->status != self::STATUS_ARCHIVED) {

@@ -22,8 +22,6 @@
  * \brief   JavaScript notice file for module Saturne
  */
 
-"use strict"
-
 /**
  * Init notice JS
  *

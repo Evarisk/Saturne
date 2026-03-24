@@ -1,5 +1,6 @@
 <?php
-/* Copyright (C) 2022-2024 EVARISK <technique@evarisk.com>
+
+/* Copyright (C) 2022-2026 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +24,9 @@
 
 // Load Saturne environment
 if (file_exists('../saturne.main.inc.php')) {
-	require_once __DIR__ . '/../saturne.main.inc.php';
+    require_once __DIR__ . '/../saturne.main.inc.php';
 } elseif (file_exists('../../saturne.main.inc.php')) {
-	require_once __DIR__ . '/../../saturne.main.inc.php';
+    require_once __DIR__ . '/../../saturne.main.inc.php';
 } else {
     die('Include of saturne main fails');
 }
@@ -52,6 +53,7 @@ $backtopage = GETPOST('backtopage', 'alpha');
 
 // Security check - Protection if external user
 $permissiontoread = $user->rights->saturne->adminpage->read;
+
 saturne_check_access($permissiontoread);
 
 /*
@@ -69,7 +71,7 @@ if ($action == 'set_media_infos') {
     $mediasMax['SATURNE_MEDIA_MAX_HEIGHT_LARGE']       = GETPOST('MediaMaxHeightLarge', 'alpha');
     $mediasMax['SATURNE_DISPLAY_NUMBER_MEDIA_GALLERY'] = GETPOST('DisplayNumberMediaGallery', 'alpha');
 
-    foreach($mediasMax as $key => $valueMax) {
+    foreach ($mediasMax as $key => $valueMax) {
         dolibarr_set_const($db, $key, $valueMax, 'integer', 0, '', $conf->entity);
     }
 
@@ -96,7 +98,7 @@ if ($action == 'update_settings_config') {
 $title    = $langs->trans('ModuleSetup', 'Saturne');
 $help_url  = 'FR:Module_Saturne#Configuration';
 
-saturne_header(0,'', $title, $help_url);
+saturne_header(0, '', $title, $help_url);
 
 // Subheader
 $linkback = '<a href="' . ($backtopage ?: DOL_URL_ROOT . '/admin/modules.php?restore_lastsearch_values=1') . '">' . $langs->trans('BackToModuleList') . '</a>';
@@ -174,7 +176,6 @@ print '</td><td class="center">';
 print ajax_constantonoff('SATURNE_ATTENDANTS_ADD_STATUS_MANAGEMENT');
 print '</td></tr>';
 
-
 // Use fast upload improvement
 print '<tr class="oddeven"><td>';
 print  $langs->trans('UseFastUploadImprovement');
@@ -197,6 +198,15 @@ print '</td><td>';
 print $langs->transnoentities('ShowAllMediaInfosDescription');
 print '</td><td class="center">';
 print ajax_constantonoff('SATURNE_MEDIA_GALLERY_SHOW_ALL_MEDIA_INFOS');
+print '</td></tr>';
+
+// Show patch note from GitHub
+print '<tr class="oddeven"><td>';
+print  $langs->trans('ShowPatchNoteFromGitHub');
+print '</td><td>';
+print $langs->trans('ShowPatchNoteFromGitHubDescription');
+print '</td><td class="center">';
+print ajax_constantonoff('SATURNE_SHOW_PATCH_NOTE_FROM_GITHUB');
 print '</td></tr>';
 
 // End of the table

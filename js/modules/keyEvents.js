@@ -65,6 +65,12 @@ window.saturne.keyEvent.event = function() {
  * @return {void}
  */
 window.saturne.keyEvent.keyActions = function(event) {
+  // Ne pas intercepter les events clavier dans les champs contenteditable
+  // (gérés par contentEditable.js avec stopPropagation)
+  if ($(event.target).is('.contenteditable') || $(event.target).closest('.contenteditable-wrap').length) {
+    return;
+  }
+
   if ($(this).find('.modal-active').length > 0) {
     // Modal key events
     if ('Escape' === event.key) {

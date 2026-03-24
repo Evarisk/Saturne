@@ -1,5 +1,6 @@
 <?php
-/* Copyright (C) 2021-2024 EVARISK <technique@evarisk.com>
+
+/* Copyright (C) 2021-2026 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +16,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
+ /**
  * \file    class/saturnedashboard.class.php
  * \ingroup saturne
  * \brief   Class file for manage SaturneDashboard
@@ -104,11 +105,9 @@ class SaturneDashboard
 
         $width  = DolGraph::getDefaultGraphSizeForStats('width');
         $height = DolGraph::getDefaultGraphSizeForStats('height');
-
         $conf->global->MAIN_DISABLE_TRUNC = 1;
 
         $dashboards = $this->load_dashboard($moreParams);
-
         print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '" class="dashboard" id="dashBoardForm">';
         print '<input type="hidden" name="token" value="' . newToken() . '">';
         print '<input type="hidden" name="action" value="view">';
@@ -128,7 +127,7 @@ class SaturneDashboard
         }
 
         print '<div class="add-widget-box" id="add-widget-box" style="' . (!empty((array)$disableWidgetList) ? '' : 'display:none') . '">';
-        print Form::selectarray('disabledWidget', $dashboardWidgetsArray, -1, $langs->trans('ChooseBoxToAddWidget'), 0, 0, 'data-item-type="widget" data-id-refresh="widget-dashboard" data-id-load="add-widget-box"', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint add-dashboard-widget', 0, 'hidden selected', 0, 1);
+        print Form::selectarray('disabledWidget', $dashboardWidgetsArray, -1, $langs->trans('ChooseBoxToAddWidget'), 0, 0, 'data-item-type="widget" data-id-refresh="widget-dashboard" data-id-load="add-widget-box"', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint add-dashboard-widget', 0, 'hidden selected');
         if (!empty($conf->use_javascript_ajax)) {
             include_once DOL_DOCUMENT_ROOT . '/core/lib/ajax.lib.php';
             print ajax_combobox('disabledWidget');
@@ -140,91 +139,91 @@ class SaturneDashboard
             foreach ($dashboards['widgets'] as $dashboardWidgets) {
                 foreach ($dashboardWidgets as $key => $dashboardWidget) {
                     if (!isset($disableWidgetList->$key) && is_array($dashboardWidget) && !empty($dashboardWidget)) {
-
                         $widget .= '<div class="wpeo-infobox" id="widget-' . $key . '">';
-
-                            $widget .= '<div class="wpeo-infobox__header">';
-                                $widget .= '<div class="header__icon-container">';
-                                    $widget .= '<span class="header__icon-background" style="background: ' . ($dashboardWidget['pictoColor'] ?? '#0D8AFF') . ';"></span>';
-                                    $widget .= '<i class="header__icon ' . $dashboardWidget['picto'] . '" style="color: ' . ($dashboardWidget['pictoColor'] ?? '#0D8AFF') . ';"></i>';
-                                $widget .= '</div>';
-                                $widget .= '<div class="header__title">' . ($dashboardWidget['title'] ?? $langs->transnoentities('Title')) . '</div>';
-                                $widget .= '<i class="close-dashboard-widget header__close fas fa-times" data-item-type="widget" data-item-name="' . $key . '" data-item-suppress="widget-' . $key . '" data-item-refresh="add-widget-box" id="dashboard-close-item"></i>';
-                            $widget .= '</div>';
-
-                        $widget .= '<div class="wpeo-infobox__body">';
-                            $widget .= '<ul class="body__row-container">';
-                            for ($i = 0; $i < count($dashboardWidget['label']); $i++) {
-                                if (!empty($dashboardWidget['label'][$i])) {
-                                    $widget .= '<li class="body__row">';
-                                        $widget .= '<span class="row__libelle">';
-                                            $widget .= $dashboardWidget['label'][$i];
-                                            $widget .= (!empty($dashboardWidget['tooltip'][$i]) ? $form->textwithpicto('', $langs->transnoentities($dashboardWidget['tooltip'][$i])) : '');
-                                        $widget .= '</span>';
-                                        $widget .= '<span class="row__data-container">';
-                                            $widget .= '<span class="row__data">'; // @TODO Boucle ici pour avoir plusieurs badges
-                                                if (isset($dashboardWidget['content'][$i]) && $dashboardWidget['content'][$i] !== '') {
-                                                    $widget .= '<span class="row__data-libelle">' . $dashboardWidget['content'][$i] . '</span>';
-
-                                                    if (isset($dashboardWidget['moreContent'][$i]) && $dashboardWidget['moreContent'][$i] !== '') {
-                                                        $widget .= $dashboardWidget['moreContent'][$i];
-                                                    }
-                                                } elseif (isset($dashboardWidget['customContent'][$i]) && $dashboardWidget['customContent'][$i] !== '') {
-                                                    $widget .= $dashboardWidget['customContent'][$i];
-                                                }
-                                            $widget .= '</span>';
-                                        $widget .= '</span>';
-                                    $widget .= '</li>';
-                                }
-                            }
-                            $widget .= '</ul>';
-                            if (!empty($dashboardWidget['moreParams']) && is_array($dashboardWidget['moreParams'])) {
-                                $widget .= '<div class="body__content">';
-                                foreach ($dashboardWidget['moreParams'] as $dashboardWidgetMoreParamsKey => $dashboardWidgetMoreParams) {
-                                    switch ($dashboardWidgetMoreParamsKey) {
-                                        case 'links' :
-                                            if (is_array($dashboardWidget['moreParams']['links']) && (!empty($dashboardWidget['moreParams']['links']))) {
-                                                foreach ($dashboardWidget['moreParams']['links'] as $dashboardWidgetMoreParamsLink) {
-                                                    $widget .= '<a class="' . $dashboardWidgetMoreParamsLink['moreCSS'] . '" href="' . dol_buildpath($dashboardWidgetMoreParamsLink['url'], 1) . '" target="_blank">' . img_picto($langs->trans('Url'), 'globe', 'class="paddingrightonly"') . $langs->transnoentities($dashboardWidgetMoreParamsLink['linkName']) . '</a><br>';
-                                                }
-                                            }
-                                            break;
-                                        default :
-                                            $widget .= $dashboardWidgetMoreParams;
-                                            break;
-                                    }
-                                }
-                                $widget .= '</div>';
-                            }
+                        $widget .= '<div class="wpeo-infobox__header">';
+                        $widget .= '<div class="header__icon-container">';
+                        $widget .= '<span class="header__icon-background" style="background: ' . ($dashboardWidget['pictoColor'] ?? '#0D8AFF') . ';"></span>';
+                        $widget .= '<i class="header__icon ' . $dashboardWidget['picto'] . '" style="color: ' . ($dashboardWidget['pictoColor'] ?? '#0D8AFF') . ';"></i>';
                         $widget .= '</div>';
+                        $widget .= '<div class="header__title">' . ($dashboardWidget['title'] ?? $langs->transnoentities('Title')) . '</div>';
+                        $widget .= '<i class="close-dashboard-widget header__close fas fa-times" data-item-type="widget" data-item-name="' . $key . '" data-item-suppress="widget-' . $key . '" data-item-refresh="add-widget-box" id="dashboard-close-item"></i>';
+                        $widget .= '</div>';
+                        $widget .= '<div class="wpeo-infobox__body">';
+                        $widget .= '<ul class="body__row-container">';
 
+                        for ($i = 0; $i < count($dashboardWidget['label']); $i++) {
+                            if (!empty($dashboardWidget['label'][$i])) {
+                                $widget .= '<li class="body__row">';
+                                $widget .= '<span class="row__libelle">';
+                                $widget .= $dashboardWidget['label'][$i];
+                                $widget .= (!empty($dashboardWidget['tooltip'][$i]) ? $form->textwithpicto('', $langs->transnoentities($dashboardWidget['tooltip'][$i])) : '');
+                                $widget .= '</span>';
+                                $widget .= '<span class="row__data-container">';
+                                $widget .= '<span class="row__data">';
+
+                                // @TODO Boucle ici pour avoir plusieurs badges
+                                if (isset($dashboardWidget['content'][$i]) && $dashboardWidget['content'][$i] !== '') {
+                                    $widget .= '<span class="row__data-libelle">' . $dashboardWidget['content'][$i] . '</span>';
+                                    if (isset($dashboardWidget['moreContent'][$i]) && $dashboardWidget['moreContent'][$i] !== '') {
+                                        $widget .= $dashboardWidget['moreContent'][$i];
+                                    }
+                                } elseif (isset($dashboardWidget['customContent'][$i]) && $dashboardWidget['customContent'][$i] !== '') {
+                                    $widget .= $dashboardWidget['customContent'][$i];
+                                }
+
+                                $widget .= '</span>';
+                                $widget .= '</span>';
+                                $widget .= '</li>';
+                            }
+                        }
+                        $widget .= '</ul>';
+
+                        if (!empty($dashboardWidget['moreParams']) && is_array($dashboardWidget['moreParams'])) {
+                            $widget .= '<div class="body__content">';
+                            foreach ($dashboardWidget['moreParams'] as $dashboardWidgetMoreParamsKey => $dashboardWidgetMoreParams) {
+                                switch ($dashboardWidgetMoreParamsKey) {
+                                    case 'links':
+                                        if (is_array($dashboardWidget['moreParams']['links']) && (!empty($dashboardWidget['moreParams']['links']))) {
+                                            foreach ($dashboardWidget['moreParams']['links'] as $dashboardWidgetMoreParamsLink) {
+                                                $widget .= '<a class="' . $dashboardWidgetMoreParamsLink['moreCSS'] . '" href="' . dol_buildpath($dashboardWidgetMoreParamsLink['url'], 1) . '" target="_blank">' . img_picto($langs->trans('Url'), 'globe', 'class="paddingrightonly"') . $langs->transnoentities($dashboardWidgetMoreParamsLink['linkName']) . '</a><br>';
+                                            }
+                                        }
+                                        break;
+
+                                    default:
+                                        break;
+                                }
+                            }
+                            $widget .= '</div>';
+                        }
+
+                        $widget .= '</div>';
                         $widget .= '</div>';
                     }
                 }
             }
+
             print '<div class="opened-dash-board-wrap"><div class="wpeo-infobox-container box-flex-container" id="widget-dashboard">' . $widget . '</div></div>';
         }
 
         if (!empty($dashboards['graphsFilters']) && is_array($dashboards['graphsFilters'])) {
             print '<div class="graph-filter-container">';
-
             print '<button class="wpeo-button button-grey" type="button" id="dashboard-graph-filter" data-ref-id="graph-filters" >';
             print img_picto($langs->transnoentities('Filter'), 'fontawesome_filter_fas_grey_1em');
             print '<span class="marginleftonly">' . $langs->transnoentities('Filters') . '</span>';
             print '</button>';
-
             print '<div class="flex-row" id="graph-filters" style="display: none; margin-top: 1em;">';
-
             print '<div class="flex flex-col">';
+
             foreach ($dashboards['graphsFilters'] as $key => $dashboardGraphFilter) {
                 switch ($dashboardGraphFilter['type']) {
                     case 'selectarray':
-                        print '<div class="flex flex-row">';
-                        print '<span class="marginrightonly">' . $dashboardGraphFilter['title'] . '</span>';
-                        print Form::selectarray($dashboardGraphFilter['filter'], $dashboardGraphFilter['values'], $dashboardGraphFilter['currentValue'], $dashboardGraphFilter['title'], 0, 0, '', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint', 0, 'hidden selected', 0, 1);
-                        print '</div>';
+                            print '<span class="marginrightonly">' . $dashboardGraphFilter['title'] . '</span>';
+                            print Form::selectarray($dashboardGraphFilter['filter'], $dashboardGraphFilter['values'], $dashboardGraphFilter['currentValue'], $dashboardGraphFilter['title'], 0, 0, '', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint', 0, 'hidden selected');
+                            print '</div>';
                         break;
-                    default :
+
+                    default:
                         break;
                 }
             }
@@ -233,12 +232,13 @@ class SaturneDashboard
             print '<button class="marginleftonly button_search self-end" type="button" id="dashboard-graph-filter-submit" data-ref-id="graph-filters" data-item-refresh="graph-dashboard">';
             print img_picto($langs->transnoentities('Reload'), 'fontawesome_redo_fas_grey_1em');
             print '</button>';
+
             print '</div>';
             print '</div>';
         }
 
         print '<div class="add-graph-box" id="add-graph-box" style="margin-top: 10px; ' . (!empty($dashboards['disabledGraphs']) ? '' : 'display:none') . '">';
-        print Form::selectarray('disabledGraph', $dashboards['disabledGraphs'], -1, $langs->trans('ChooseBoxToAddGraph'), 0, 0, 'data-item-type="graph" data-id-refresh="graph-dashboard" data-id-load="add-graph-box"', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint', 0, 'hidden selected', 0, 1);
+        print Form::selectarray('disabledGraph', $dashboards['disabledGraphs'], -1, $langs->trans('ChooseBoxToAddGraph'), 0, 0, 'data-item-type="graph" data-id-refresh="graph-dashboard" data-id-load="add-graph-box"', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint', 0, 'hidden selected');
         if (!empty($conf->use_javascript_ajax)) {
             include_once DOL_DOCUMENT_ROOT . '/core/lib/ajax.lib.php';
             print ajax_combobox('disabledGraph');
@@ -268,6 +268,7 @@ class SaturneDashboard
                                     $nbDataset += $dashboardGraphDatasets;
                                 }
                             }
+
                             if ($nbDataset > 0) {
                                 if (is_array($dashboardGraph['labels']) && !empty($dashboardGraph['labels'])) {
                                     foreach ($dashboardGraph['labels'] as $key => $dashboardGraphLabel) {
@@ -276,9 +277,9 @@ class SaturneDashboard
                                             if (dol_strlen($dashboardGraphLabel['color']) > 0) {
                                                 $dashboardGraphColor[$uniqueKey][] = $dashboardGraphLabel['color'];
                                             } else {
-                                                // If only one color is defined in category, the others will be black
-                                                // If no color is defined, all the colors will be defined by global $theme_datacolor
-                                                // To avoid black color we better define a color instead of empty
+                                    // If only one color is defined in category, the others will be black
+                                    // If no color is defined, all the colors will be defined by global $theme_datacolor
+                                    // To avoid black color we better define a color instead of empty
                                                 $dashboardGraphColor[$uniqueKey][] = $this->getColorRange($key);
                                             }
                                         }
@@ -288,11 +289,11 @@ class SaturneDashboard
                                 $arrayKeys = array_keys($dashboardGraph['data']);
                                 foreach ($arrayKeys as $key) {
                                     if ($dashboardGraph['dataset'] >= 2) {
-                                        $graphData[$uniqueKey][] = $dashboardGraph['data'][$key];
+                                            $graphData[$uniqueKey][] = $dashboardGraph['data'][$key];
                                     } else {
                                         $graphData[$uniqueKey][] = [
-                                            0 => $dashboardGraph['labels'][$key]['label'],
-                                            1 => $dashboardGraph['data'][$key]
+                                        0 => $dashboardGraph['labels'][$key]['label'],
+                                        1 => $dashboardGraph['data'][$key]
                                         ];
                                     }
                                 }
@@ -301,8 +302,8 @@ class SaturneDashboard
                                 $fileUrl[$uniqueKey]  = DOL_URL_ROOT . '/viewimage.php?modulepart=' . $moduleNameLowerCase . '&file=' . $uniqueKey . '.png';
 
                                 $graph = new DolGraph();
-                                $graph->SetData($graphData[$uniqueKey]);
 
+                                $graph->SetData($graphData[$uniqueKey]);
                                 if ($dashboardGraph['dataset'] >= 2) {
                                     $graph->SetLegend($dashboardGraphLegend[$uniqueKey]);
                                 }
@@ -314,8 +315,8 @@ class SaturneDashboard
                                 $graph->SetHeight($dashboardGraph['height'] ?? $height);
                                 $graph->setShowLegend($dashboardGraph['showlegend'] ?? 2);
                                 $graph->draw($fileName[$uniqueKey], $fileUrl[$uniqueKey]);
-                                print '<div class="' . ($dashboardGraph['moreCSS'] ?? '') . '" id="graph-' . $dashboardGraph['name'] . '">';
 
+                                print '<div class="' . ($dashboardGraph['moreCSS'] ?? '') . '" id="graph-' . $dashboardGraph['name'] . '">';
                                 $downloadCSV  = '<div class="flex flex-row justify-end">';
                                 $downloadCSV .= '<input type="hidden" name="graph" value="' . dol_escape_htmltag(json_encode($dashboardGraph, JSON_UNESCAPED_UNICODE)) . '">';
                                 $downloadCSV .= '<button class="wpeo-button no-load button-grey" id="export-csv" data-graph-name="' . dol_sanitizeFileName(dol_strtolower($dashboardGraph['title'])) . '">';
@@ -327,10 +328,13 @@ class SaturneDashboard
                                     $downloadCSV .= '</button>';
                                 }
                                 $downloadCSV .= '</div>';
+
                                 $dashboardGraph['morehtmlright'] = ($dashboardGraph['morehtmlright'] ?? '') . $downloadCSV;
 
                                 print load_fiche_titre($dashboardGraph['title'], $dashboardGraph['morehtmlright'], $dashboardGraph['picto']);
+
                                 print $graph->show();
+
                                 print '</div>';
                             }
                         }
@@ -352,12 +356,15 @@ class SaturneDashboard
                         }
 
                         print load_fiche_titre($dashboardList['title'], $dashboardList['morehtmlright'], $dashboardList['picto']);
+
                         print '<table class="noborder centpercent">';
+
                         print '<tr class="liste_titre">';
                         foreach ($dashboardList['labels'] as $key => $dashboardListLabel) {
                             print '<td class="' . ($conf->browser->layout == 'classic' ? 'nowraponall tdoverflowmax200 ' : '') . (($key != 'Ref') ? 'center' : '') . '">' . $langs->transnoentities($dashboardListLabel) . '</td>';
                         }
                         print '</tr>';
+
                         foreach ($dashboardList['data'] as $dashboardListDatasets) {
                             print '<tr class="oddeven">';
                             foreach ($dashboardListDatasets as $key => $dashboardGraphDataset) {
@@ -365,13 +372,14 @@ class SaturneDashboard
                             }
                             print '</tr>';
                         }
+
                         print '</table></div>';
                     }
                 }
             }
         }
-        print '</div>';
 
+        print '</div>';
         print '</form>';
     }
 

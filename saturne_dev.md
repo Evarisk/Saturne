@@ -27,6 +27,18 @@ Pour faire un commit sur les repositories d'Evarisk il faut respecter la convent
 - Exemple 2 : #101 [Lib] fix: wrong method call
 # <img src="https://github.com/Evarisk/Saturne/blob/develop/img/example_of_commit.png?raw=true" width="1000"/>
 
+## Convention de contrôle pour du codage via IA
+
+- QUAL-CSS- Une propriété sur chaque ligne pas de style inline
+- QUAL-CSS- As tu bien vérifié de ne pas avoir du style inline dans les fichiers html et php
+- QUAL-CSS- As tu bien mis en place une structure des fichiers CSS
+
+- QUAL-PHP- Utilise les conventions de nommage PSR12
+- QUAL-PHP- Toutes les inclusions doivent être réalisées en début du fichier PHP
+- QUAL-PHP- As tu bien vérifier de ne pas avoir de double inclusion avec require_once
+- QUAL-PHP- As tu bien respecté le système de traduction de Dolibarr
+
+
 ## CSS OU JS
 
 Pour simplifier l'utilisation et la compréhension du CSS/JS, nous avons utilisé un minifier avec la librairie npm Gulpfile.

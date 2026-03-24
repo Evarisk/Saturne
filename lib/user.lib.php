@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -40,145 +41,183 @@
  */
 function get_nom_url_user(User $object, $withpictoimg = 0, $option = '', $infologin = 0, $notooltip = 0, $maxlen = 24, $hidethirdpartylogo = 0, $mode = '', $morecss = '', $save_lastsearch_value = -1, $display_initials = 1)
 {
-	global $langs, $conf, $db, $hookmanager, $dolibarr_main_demo;
-	global $menumanager;
+    global $langs, $conf, $db, $hookmanager, $dolibarr_main_demo;
+    global $menumanager;
+    if (! empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) && $withpictoimg) {
+        $withpictoimg = 0;
+    }
 
-	if ( ! empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) && $withpictoimg) $withpictoimg = 0;
+    $result = '';
+    $label = '';
+    if (! empty($object->photo)) {
+        $label .= '<div class="photointooltip">';
+        // Force height to 60 so we total height of tooltip can be calculated and collision can be managed
+        $label .= Form::showphoto('userphoto', $object, 0, 60, 0, 'photowithmargin photologintooltip', 'small', 0, 1);
+        $label .= '</div><div style="clear: both;"></div>';
+    }
 
-	$result = ''; $label = '';
+    // Info Login
+    $company = '';
+    $companylink = '';
+    $label                               .= '<div class="centpercent">';
+    $label                               .= '<u>' . $langs->trans("User") . '</u><br>';
+    $label                               .= '<b>' . $langs->trans('Name') . ':</b> ' . $object->getFullName($langs, '');
+    if (! empty($object->login)) {
+        $label .= '<br><b>' . $langs->trans('Login') . ':</b> ' . $object->login;
+    }
+    if (! empty($object->job)) {
+        $label   .= '<br><b>' . $langs->trans("Job") . ':</b> ' . $object->job;
+    }
+    $label                               .= '<br><b>' . $langs->trans("Email") . ':</b> ' . $object->email;
+    if (! empty($object->phone)) {
+        $label .= '<br><b>' . $langs->trans("Phone") . ':</b> ' . $object->phone;
+    }
+    if (! empty($object->admin)) {
+        $label                           .= '<br><b>' . $langs->trans("Administrator") . '</b>: ' . yn($object->admin);
+    }
+    // Add thirdparty for external users
+    if (! empty($object->socid)) {
+        $thirdpartystatic = new Societe($db);
+        $thirdpartystatic->fetch((int) $object->socid);
+        // picto only of company
+        if (empty($hidethirdpartylogo)) {
+            $companylink = ' ' . $thirdpartystatic->getNomUrl(2, (($option == 'nolink') ? 'nolink' : ''));
+        }
+        $company = ' (' . $langs->trans("Company") . ': ' . $thirdpartystatic->name . ')';
+    }
+    $type   = ($object->socid ? $langs->trans("External") . $company : $langs->trans("Internal"));
+    $label .= '<br><b>' . $langs->trans("Type") . ':</b> ' . $type;
+    $label .= '<br><b>' . $langs->trans("Status") . '</b>: ' . $object->getLibStatut(4);
+    $label .= '</div>';
+    if ($infologin > 0) {
+        $label                                                        .= '<br>';
+        $label                                                        .= '<br><u>' . $langs->trans("Session") . '</u>';
+        $label                                                        .= '<br><b>' . $langs->trans("IPAddress") . '</b>: ' . $_SERVER["REMOTE_ADDR"];
+        if (! empty($conf->global->MAIN_MODULE_MULTICOMPANY)) {
+            $label .= '<br><b>' . $langs->trans("ConnectedOnMultiCompany") . ':</b> ' . $conf->entity . ' (user entity ' . $object->entity . ')';
+        }
+        $label                                                        .= '<br><b>' . $langs->trans("AuthenticationMode") . ':</b> ' . $_SESSION["dol_authmode"] . (empty($dolibarr_main_demo) ? '' : ' (demo)');
+        $label                                                        .= '<br><b>' . $langs->trans("ConnectedSince") . ':</b> ' . dol_print_date($object->datelastlogin, "dayhour", 'tzuser');
+        $label                                                        .= '<br><b>' . $langs->trans("PreviousConnexion") . ':</b> ' . dol_print_date($object->datepreviouslogin, "dayhour", 'tzuser');
+        $label                                                        .= '<br><b>' . $langs->trans("CurrentTheme") . ':</b> ' . $conf->theme;
+        $label                                                        .= '<br><b>' . $langs->trans("CurrentMenuManager") . ':</b> ' . $menumanager->name;
+        $s                                                             = picto_from_langcode($langs->getDefaultLang());
+        $label                                                        .= '<br><b>' . $langs->trans("CurrentUserLanguage") . ':</b> ' . ($s ? $s . ' ' : '') . $langs->getDefaultLang();
+        $label                                                        .= '<br><b>' . $langs->trans("Browser") . ':</b> ' . $conf->browser->name . ($conf->browser->version ? ' ' . $conf->browser->version : '') . ' (' . $_SERVER['HTTP_USER_AGENT'] . ')';
+        $label                                                        .= '<br><b>' . $langs->trans("Layout") . ':</b> ' . $conf->browser->layout;
+        $label                                                        .= '<br><b>' . $langs->trans("Screen") . ':</b> ' . $_SESSION['dol_screenwidth'] . ' x ' . $_SESSION['dol_screenheight'];
+        if ($conf->browser->layout == 'phone') {
+            $label                 .= '<br><b>' . $langs->trans("Phone") . ':</b> ' . $langs->trans("Yes");
+        }
+        if (! empty($_SESSION["disablemodules"])) {
+            $label             .= '<br><b>' . $langs->trans("DisabledModules") . ':</b> <br>' . join(', ', explode(',', $_SESSION["disablemodules"]));
+        }
+    }
+    if ($infologin < 0) {
+        $label = '';
+    }
 
-	if ( ! empty($object->photo)) {
-		$label .= '<div class="photointooltip">';
-		$label .= Form::showphoto('userphoto', $object, 0, 60, 0, 'photowithmargin photologintooltip', 'small', 0, 1); // Force height to 60 so we total height of tooltip can be calculated and collision can be managed
-		$label .= '</div><div style="clear: both;"></div>';
-	}
+    $url                         = DOL_URL_ROOT . '/user/card.php?id=' . $object->id;
+    if ($option == 'leave') {
+        $url = DOL_URL_ROOT . '/holiday/list.php?id=' . $object->id;
+    }
 
-	// Info Login
-	$company = '';
-	$companylink = '';
-	$label                               .= '<div class="centpercent">';
-	$label                               .= '<u>' . $langs->trans("User") . '</u><br>';
-	$label                               .= '<b>' . $langs->trans('Name') . ':</b> ' . $object->getFullName($langs, '');
-	if ( ! empty($object->login)) $label .= '<br><b>' . $langs->trans('Login') . ':</b> ' . $object->login;
-	if ( ! empty($object->job)) $label   .= '<br><b>' . $langs->trans("Job") . ':</b> ' . $object->job;
-	$label                               .= '<br><b>' . $langs->trans("Email") . ':</b> ' . $object->email;
-	if ( ! empty($object->phone)) $label .= '<br><b>' . $langs->trans("Phone") . ':</b> ' . $object->phone;
-	if ( ! empty($object->admin))
-		$label                           .= '<br><b>' . $langs->trans("Administrator") . '</b>: ' . yn($object->admin);
-	if ( ! empty($object->socid)) {
-		// Add thirdparty for external users
-		$thirdpartystatic = new Societe($db);
-		$thirdpartystatic->fetch($object->socid);
-		if (empty($hidethirdpartylogo)) $companylink = ' ' . $thirdpartystatic->getNomUrl(2, (($option == 'nolink') ? 'nolink' : '')); // picto only of company
-		$company                                     = ' (' . $langs->trans("Company") . ': ' . $thirdpartystatic->name . ')';
-	}
-	$type   = ($object->socid ? $langs->trans("External") . $company : $langs->trans("Internal"));
-	$label .= '<br><b>' . $langs->trans("Type") . ':</b> ' . $type;
-	$label .= '<br><b>' . $langs->trans("Status") . '</b>: ' . $object->getLibStatut(4);
-	$label .= '</div>';
-	if ($infologin > 0) {
-		$label                                                        .= '<br>';
-		$label                                                        .= '<br><u>' . $langs->trans("Session") . '</u>';
-		$label                                                        .= '<br><b>' . $langs->trans("IPAddress") . '</b>: ' . $_SERVER["REMOTE_ADDR"];
-		if ( ! empty($conf->global->MAIN_MODULE_MULTICOMPANY)) $label .= '<br><b>' . $langs->trans("ConnectedOnMultiCompany") . ':</b> ' . $conf->entity . ' (user entity ' . $object->entity . ')';
-		$label                                                        .= '<br><b>' . $langs->trans("AuthenticationMode") . ':</b> ' . $_SESSION["dol_authmode"] . (empty($dolibarr_main_demo) ? '' : ' (demo)');
-		$label                                                        .= '<br><b>' . $langs->trans("ConnectedSince") . ':</b> ' . dol_print_date($object->datelastlogin, "dayhour", 'tzuser');
-		$label                                                        .= '<br><b>' . $langs->trans("PreviousConnexion") . ':</b> ' . dol_print_date($object->datepreviouslogin, "dayhour", 'tzuser');
-		$label                                                        .= '<br><b>' . $langs->trans("CurrentTheme") . ':</b> ' . $conf->theme;
-		$label                                                        .= '<br><b>' . $langs->trans("CurrentMenuManager") . ':</b> ' . $menumanager->name;
-		$s                                                             = picto_from_langcode($langs->getDefaultLang());
-		$label                                                        .= '<br><b>' . $langs->trans("CurrentUserLanguage") . ':</b> ' . ($s ? $s . ' ' : '') . $langs->getDefaultLang();
-		$label                                                        .= '<br><b>' . $langs->trans("Browser") . ':</b> ' . $conf->browser->name . ($conf->browser->version ? ' ' . $conf->browser->version : '') . ' (' . $_SERVER['HTTP_USER_AGENT'] . ')';
-		$label                                                        .= '<br><b>' . $langs->trans("Layout") . ':</b> ' . $conf->browser->layout;
-		$label                                                        .= '<br><b>' . $langs->trans("Screen") . ':</b> ' . $_SESSION['dol_screenwidth'] . ' x ' . $_SESSION['dol_screenheight'];
-		if ($conf->browser->layout == 'phone') $label                 .= '<br><b>' . $langs->trans("Phone") . ':</b> ' . $langs->trans("Yes");
-		if ( ! empty($_SESSION["disablemodules"])) $label             .= '<br><b>' . $langs->trans("DisabledModules") . ':</b> <br>' . join(', ', explode(',', $_SESSION["disablemodules"]));
-	}
-	if ($infologin < 0) $label = '';
+    // Add param to save lastsearch_values or not
+    if ($option != 'nolink') {
+        $add_save_lastsearch_values                                                                                      = ($save_lastsearch_value == 1 ? 1 : 0);
+        if ($save_lastsearch_value == -1 && preg_match('/list\.php/', $_SERVER["PHP_SELF"])) {
+            $add_save_lastsearch_values = 1;
+        }
+        if ($add_save_lastsearch_values) {
+            $url                                                                           .= '&save_lastsearch_values=1';
+        }
+    }
 
-	$url                         = DOL_URL_ROOT . '/user/card.php?id=' . $object->id;
-	if ($option == 'leave') $url = DOL_URL_ROOT . '/holiday/list.php?id=' . $object->id;
+    $linkclose = "";
+    if ($option == 'blank') {
+        $linkclose .= ' target=_blank';
+    }
+    $linkstart = '<a href="' . $url . '"';
+    if (empty($notooltip)) {
+        if (! empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
+            $langs->load("users");
+            $label      = $langs->trans("ShowUser");
+            $linkclose .= ' alt="' . dol_escape_htmltag($label, 1) . '"';
+        }
+        $linkclose .= ' title="' . dol_escape_htmltag($label, 1) . '"';
+        $linkclose .= ' class="classfortooltip' . ($morecss ? ' ' . $morecss : '') . '"';
+    /*
+      $hookmanager->initHooks(array('userdao'));
+         $parameters=array('id'=>$object->id);
+      $reshook=$hookmanager->executeHooks('getnomurltooltip',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hooks
+      if ($reshook > 0) $linkclose = $hookmanager->resPrint;
+         */
+    }
 
-	if ($option != 'nolink') {
-		// Add param to save lastsearch_values or not
-		$add_save_lastsearch_values                                                                                      = ($save_lastsearch_value == 1 ? 1 : 0);
-		if ($save_lastsearch_value == -1 && preg_match('/list\.php/', $_SERVER["PHP_SELF"])) $add_save_lastsearch_values = 1;
-		if ($add_save_lastsearch_values) $url                                                                           .= '&save_lastsearch_values=1';
-	}
+    $linkstart .= $linkclose . '>';
+    $linkend    = '</a>';
+    //if ($withpictoimg == -1) $result.='<div class="nowrap">';
+    $result .= (($option == 'nolink') ? '' : $linkstart);
+    if ($withpictoimg) {
+        $paddafterimage                              = '';
+        if (abs($withpictoimg) == 1) {
+            $paddafterimage = 'style="margin-' . ($langs->trans("DIRECTION") == 'rtl' ? 'left' : 'right') . ': 3px;"';
+        }
+        // Only picto
+        if ($withpictoimg > 0) {
+            $picto = '<!-- picto user --><span class="nopadding userimg' . ($morecss ? ' ' . $morecss : '') . '">' . img_object('', 'user', $paddafterimage . ' ' . ($notooltip ? '' : 'class="paddingright classfortooltip"'), 0, 0, $notooltip ? 0 : 1) . '</span>';
+        } else {
+            // Picto must be a photo
+            $picto = '<!-- picto photo user --><span class="nopadding userimg' . ($morecss ? ' ' . $morecss : '') . '"' . ($paddafterimage ? ' ' . $paddafterimage : '') . '>' . Form::showphoto('userphoto', $object, 0, 0, 0, 'userphoto' . ($withpictoimg == -3 ? 'small' : ''), 'mini', 0, 1) . '</span>';
+        }
+        $result    .= $picto;
+    }
 
-	$linkclose = "";
-	if ($option == 'blank') {
-		$linkclose .= ' target=_blank';
-	}
-	$linkstart = '<a href="' . $url . '"';
-	if (empty($notooltip)) {
-		if ( ! empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
-			$langs->load("users");
-			$label      = $langs->trans("ShowUser");
-			$linkclose .= ' alt="' . dol_escape_htmltag($label, 1) . '"';
-		}
-		$linkclose .= ' title="' . dol_escape_htmltag($label, 1) . '"';
-		$linkclose .= ' class="classfortooltip' . ($morecss ? ' ' . $morecss : '') . '"';
+    if ($withpictoimg > -2 && $withpictoimg != 2 && $display_initials) {
+        $initials = '';
+        if (dol_strlen($object->firstname)) {
+            $initials .= str_split($object->firstname, 1)[0];
+        }
+        if (dol_strlen($object->lastname)) {
+            $initials .= str_split($object->lastname, 1)[0];
+        }
+        if (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
+            $result .= '<span class=" nopadding usertext' . (( ! isset($object->statut) || $object->statut) ? '' : ' strikefordisabled') . ($morecss ? ' ' . $morecss : '') . '">';
+        }
+        if ($mode == 'login') {
+            $result                                  .= $initials;
+        } else {
+            $result                                                   .= $initials;
+        }
+        if (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
+            $result .= '</span>';
+        }
+    } elseif ($display_initials == 0) {
+        if (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
+            $result .= '<span class="nopadding usertext' . (( ! isset($object->statut) || $object->statut) ? '' : ' strikefordisabled') . ($morecss ? ' ' . $morecss : '') . '">';
+        }
+        if ($mode == 'login') {
+            $result .= dol_string_nohtmltag(dol_trunc($object->login, $maxlen));
+        } else {
+            $result .= dol_string_nohtmltag($object->getFullName($langs, '', ($mode == 'firstelselast' ? 3 : ($mode == 'firstname' ? 2 : -1)), $maxlen));
+        }
+        if (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
+            $result .= '</span>';
+        }
+    }
+    $result .= (($option == 'nolink') ? '' : $linkend);
+    //if ($withpictoimg == -1) $result.='</div>';
 
-		/*
-		 $hookmanager->initHooks(array('userdao'));
-		 $parameters=array('id'=>$object->id);
-		 $reshook=$hookmanager->executeHooks('getnomurltooltip',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hooks
-		 if ($reshook > 0) $linkclose = $hookmanager->resPrint;
-		 */
-	}
+    $result .= $companylink;
+    global $action;
+    $hookmanager->initHooks(array('userdao'));
+    $parameters               = array('id' => $object->id, 'getnomurluser' => $result);
+    $reshook                  = $hookmanager->executeHooks('getNomUrlUser', $parameters, $object, $action);
+    if ($reshook > 0) {
+        $result = $hookmanager->resPrint;
+    } else {
+        $result             .= $hookmanager->resPrint;
+    }
 
-	$linkstart .= $linkclose . '>';
-	$linkend    = '</a>';
-
-	//if ($withpictoimg == -1) $result.='<div class="nowrap">';
-	$result .= (($option == 'nolink') ? '' : $linkstart);
-	if ($withpictoimg) {
-		$paddafterimage                              = '';
-		if (abs($withpictoimg) == 1) $paddafterimage = 'style="margin-' . ($langs->trans("DIRECTION") == 'rtl' ? 'left' : 'right') . ': 3px;"';
-		// Only picto
-		if ($withpictoimg > 0) $picto = '<!-- picto user --><span class="nopadding userimg' . ($morecss ? ' ' . $morecss : '') . '">' . img_object('', 'user', $paddafterimage . ' ' . ($notooltip ? '' : 'class="paddingright classfortooltip"'), 0, 0, $notooltip ? 0 : 1) . '</span>';
-		// Picto must be a photo
-		else $picto = '<!-- picto photo user --><span class="nopadding userimg' . ($morecss ? ' ' . $morecss : '') . '"' . ($paddafterimage ? ' ' . $paddafterimage : '') . '>' . Form::showphoto('userphoto', $object, 0, 0, 0, 'userphoto' . ($withpictoimg == -3 ? 'small' : ''), 'mini', 0, 1) . '</span>';
-		$result    .= $picto;
-	}
-
-	if ($withpictoimg > -2 && $withpictoimg != 2 && $display_initials) {
-		$initials = '';
-		if (dol_strlen($object->firstname)) {
-			$initials .= str_split($object->firstname, 1)[0];
-		}
-		if (dol_strlen($object->lastname)) {
-			$initials .= str_split($object->lastname, 1)[0];
-		}
-		if (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) $result .= '<span class=" nopadding usertext' . (( ! isset($object->statut) || $object->statut) ? '' : ' strikefordisabled') . ($morecss ? ' ' . $morecss : '') . '">';
-		if ($mode == 'login') $result                                  .= $initials;
-		else $result                                                   .= $initials;
-		if (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) $result .= '</span>';
-	} elseif ($display_initials == 0) {
-		if (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
-			$result .= '<span class="nopadding usertext' . (( ! isset($object->statut) || $object->statut) ? '' : ' strikefordisabled') . ($morecss ? ' ' . $morecss : '') . '">';
-		}
-		if ($mode == 'login') {
-			$result .= dol_string_nohtmltag(dol_trunc($object->login, $maxlen));
-		} else {
-			$result .= dol_string_nohtmltag($object->getFullName($langs, '', ($mode == 'firstelselast' ? 3 : ($mode == 'firstname' ? 2 : -1)), $maxlen));
-		}
-		if (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
-			$result .= '</span>';
-		}
-	}
-	$result .= (($option == 'nolink') ? '' : $linkend);
-	//if ($withpictoimg == -1) $result.='</div>';
-
-	$result .= $companylink;
-
-	global $action;
-	$hookmanager->initHooks(array('userdao'));
-	$parameters               = array('id' => $object->id, 'getnomurluser' => $result);
-	$reshook                  = $hookmanager->executeHooks('getNomUrlUser', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
-	if ($reshook > 0) $result = $hookmanager->resPrint;
-	else $result             .= $hookmanager->resPrint;
-
-	return $result;
+    return $result;
 }

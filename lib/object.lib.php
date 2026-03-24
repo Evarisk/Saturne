@@ -214,8 +214,24 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
     }
 
     if ($user->rights->$moduleNameLowerCase->$objectType->read) {
-        $head[$h][0] = dol_buildpath('/' . $moduleNameLowerCase . '/view/' . (!empty($moreparam['parentType']) ? $moreparam['parentType'] : $objectType) . '/' . (!empty($moreparam['parentType']) ? $moreparam['parentType'] : $objectType) . '_card.php', 1) . '?id=' . $object->id . (!empty($moreparam['parentType']) ? '&object_type=' . $objectType : '');
-        $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-info-circle pictofixedwidth"></i>' . $langs->trans((!empty($moreparam['specialName']) ? ucfirst($moreparam['specialName']) : ucfirst($objectType))) : '<i class="fas fa-info-circle"></i>';
+        $defaultMoreParams = [
+            'parentType'         => $objectType, // Most of time, parentType is equal to objectType
+            'specialName'        => $objectType,
+            'documentType'       => '',
+            'attendantTableMode' => 'advanced',
+            'attendantTabName'   => 'Attendants',
+            'handlePhoto'        => false,
+            'showNav'            => 1,
+        ];
+
+        $moreparam = array_merge($defaultMoreParams, $moreparam);
+
+        $moreparam['objectType']  = ($moreparam['parentType'] !== $objectType ? '&object_type=' . $objectType : '');
+        $moreparam['handlePhoto'] = ($moreparam['handlePhoto'] ? '&handle_photo=' . 1 : '');
+        $moreparam['showNav']     = ($moreparam['showNav'] ? '&show_nav=' . 1 : '');
+
+        $head[$h][0] = dol_buildpath('/' . $moduleNameLowerCase . '/view/' . $moreparam['parentType'] . '/' . $moreparam['parentType'] . '_card.php', 1) . '?id=' . $object->id . $moreparam['objectType'];
+        $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-info-circle pictofixedwidth"></i>' . $langs->trans(dol_ucfirst($moreparam['specialName'])) : '<i class="fas fa-info-circle"></i>';
         $head[$h][2] = 'card';
         $h = $h + 10;
 
@@ -233,8 +249,8 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
                 $nbAttendants = 0;
             }
 
-            $head[$h][0] = dol_buildpath('/saturne/view/saturne_attendants.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType . '&document_type=' . (!empty($moreparam['documentType']) ? $moreparam['documentType'] : '') . '&attendant_table_mode=' . (empty($moreparam['attendantTableMode']) ? 'advanced' : $moreparam['attendantTableMode']);
-            $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-file-signature pictofixedwidth"></i>' . $langs->trans((empty($moreparam['attendantTabName']) ? 'Attendants' : $moreparam['attendantTabName'])) : '<i class="fas fa-file-signature"></i>';
+            $head[$h][0] = dol_buildpath('/saturne/view/saturne_attendants.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType . '&document_type=' . $moreparam['documentType'] . '&attendant_table_mode=' . $moreparam['attendantTableMode'];
+            $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-file-signature pictofixedwidth"></i>' . $langs->trans($moreparam['attendantTabName']) : '<i class="fas fa-file-signature"></i>';
             if ($nbAttendants > 0) {
                 $head[$h][1] .= '<span class="badge marginleftonlyshort">' . $nbAttendants . '</span>';
             }
@@ -250,7 +266,7 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
             if (!empty($object->note_public)) {
                 $nbNote++;
             }
-            $head[$h][0] = dol_buildpath('/saturne/view/saturne_note.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType . ((dol_strlen($moreparam['handlePhoto']) > 0) ? '&handle_photo=' . $moreparam['handlePhoto'] : false);
+            $head[$h][0] = dol_buildpath('/saturne/view/saturne_note.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType . $moreparam['handlePhoto'];
             $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-comment pictofixedwidth"></i>' . $langs->trans('Notes') : '<i class="fas fa-comment"></i>';
             if ($nbNote > 0) {
                 $head[$h][1] .= (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) ? '<span class="badge marginleftonlyshort">' . $nbNote . '</span>' : '');
@@ -265,7 +281,7 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
             $upload_dir = $conf->$moduleNameLowerCase->dir_output . '/' . $objectType . '/' . dol_sanitizeFileName($object->ref);
             $nbFiles = count(dol_dir_list($upload_dir, 'files', 0, '', '(\.meta|_preview.*\.png)$'));
             $nbLinks = Link::count($db, $objectType, $object->id);
-            $head[$h][0] = dol_buildpath('/saturne/view/saturne_document.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType . (($moreparam['showNav'] >= 0) ? '&show_nav=' . $moreparam['showNav'] : 1) . ((dol_strlen($moreparam['handlePhoto']) > 0) ? '&handle_photo=' . $moreparam['handlePhoto'] : false);
+            $head[$h][0] = dol_buildpath('/saturne/view/saturne_document.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType . $moreparam['showNav'] . $moreparam['handlePhoto'];
             $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-file-alt pictofixedwidth"></i>' . $langs->trans('Documents') : '<i class="fas fa-file-alt"></i>';
             if (($nbFiles + $nbLinks) > 0) {
                 $head[$h][1] .= '<span class="badge marginleftonlyshort">' . ($nbFiles + $nbLinks) . '</span>';
@@ -275,7 +291,7 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
         }
 
         if ($showAgendaTab) {
-            $head[$h][0] = dol_buildpath('/saturne/view/saturne_agenda.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType . (($moreparam['showNav'] >= 0) ? '&show_nav=' . $moreparam['showNav'] : 1) . ((dol_strlen($moreparam['handlePhoto']) > 0) ? '&handle_photo=' . $moreparam['handlePhoto'] : false);
+            $head[$h][0] = dol_buildpath('/saturne/view/saturne_agenda.php', 1) . '?id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . $objectType . $moreparam['showNav'] . $moreparam['handlePhoto'];
             $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-calendar-alt pictofixedwidth"></i>' . $langs->trans('Events') . '/' . $langs->trans('Agenda') : '<i class="fas fa-calendar-alt"></i>';
             if (isModEnabled('agenda') && (!empty($user->rights->agenda->myactions->read) || !empty($user->rights->agenda->allactions->read))) {
                 $nbEvent = 0;
@@ -376,6 +392,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'productservicelist',
             'create_url'     => 'product/card.php',
             'list_url'       => 'product/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'product/class/product.class.php',
             'lib_path'       => 'core/lib/product.lib.php',
         ];
@@ -401,6 +419,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'product_lotlist',
             'create_url'     => 'product/stock/productlot_card.php',
             'list_url'       => 'product/stock/productlot_list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'product/stock/class/productlot.class.php',
             'lib_path'       => 'core/lib/product.lib.php',
         ];
@@ -424,6 +444,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'userlist',
             'create_url'     => 'user/card.php',
             'list_url'       => 'user/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'user/class/user.class.php',
             'lib_path'       => 'core/lib/usergroups.lib.php',
         ];
@@ -447,6 +469,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'thirdpartylist',
             'create_url'     => 'societe/card.php',
             'list_url'       => 'societe/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'societe/class/societe.class.php',
             'lib_path'       => 'core/lib/company.lib.php',
         ];
@@ -469,6 +493,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'contactlist',
             'create_url'     => 'contact/card.php',
             'list_url'       => 'contact/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'contact/class/contact.class.php',
             'lib_path'       => 'core/lib/contact.lib.php',
         ];
@@ -494,6 +520,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_document' => 'projectcarddocument',
             'create_url'         => 'projet/card.php',
             'list_url'           => 'projet/list.php',
+            'defaultsort'        => 't.datec',
+            'defaultorder'       => 'DESC',
             'class_path'         => 'projet/class/project.class.php',
             'lib_path'           => 'core/lib/project.lib.php',
         ];
@@ -517,6 +545,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'tasklist',
             'create_url'     => 'projet/tasks.php',
             'list_url'       => 'projet/tasks/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'custom/saturne/class/task/saturnetask.class.php',
             'lib_path'       => 'core/lib/project.lib.php',
         ];
@@ -541,6 +571,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'invoicelist',
             'create_url'     => 'compta/facture/card.php',
             'list_url'       => 'compta/facture/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'compta/facture/class/facture.class.php',
             'lib_path'       => 'core/lib/invoice.lib.php',
         ];
@@ -564,6 +596,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'orderlist',
             'create_url'     => 'commande/card.php',
             'list_url'       => 'commande/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'commande/class/commande.class.php',
             'lib_path'       => 'core/lib/order.lib.php',
         ];
@@ -587,6 +621,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'contractlist',
             'create_url'     => 'contrat/card.php',
             'list_url'       => 'contrat/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'contrat/class/contrat.class.php',
             'lib_path'       => 'core/lib/contract.lib.php',
         ];
@@ -611,6 +647,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'ticketlist',
             'create_url'     => 'ticket/card.php',
             'list_url'       => 'ticket/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'ticket/class/ticket.class.php',
             'lib_path'       => 'core/lib/ticket.lib.php',
         ];
@@ -634,6 +672,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'stocklist',
             'create_url'     => 'product/stock/card.php',
             'list_url'       => 'product/stock/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'product/stock/class/entrepot.class.php',
             'lib_path'       => 'core/lib/stock.lib.php',
         ];
@@ -655,6 +695,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'inventorylist',
             'create_url'     => 'product/inventory/card.php',
             'list_url'       => 'product/inventory/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'product/inventory/class/inventory.class.php',
             'lib_path'       => 'product/inventory/lib/inventory.lib.php',
         ];
@@ -676,6 +718,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'movementlist',
             'create_url'     => '',
             'list_url'       => 'product/stock/movement_list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'product/stock/class/mouvementstock.class.php',
             'lib_path'       => '',
         ];
@@ -697,6 +741,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_card' => 'ordershipmentcard',
             'hook_name_list' => 'propallist',
             'list_url'       => 'expedition/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'custom/saturne/class/dolibarrobjects/saturneexpedition.class.php',
             'lib_path'       => 'core/lib/expedition.lib.php',
         ];
@@ -720,6 +766,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'propallist',
             'create_url'     => 'comm/propal/card.php',
             'list_url'       => 'comm/propal/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'comm/propal/class/propal.class.php',
             'lib_path'       => 'core/lib/propal.lib.php',
         ];
@@ -743,6 +791,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'bomlist',
             'create_url'     => 'bom/bom_card.php',
             'list_url'       => 'bom/bom_list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'bom/class/bom.class.php',
             'lib_path'       => 'bom/lib/bom.lib.php',
         ];
@@ -764,6 +814,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'molist',
             'create_url'     => 'mrp/mo_card.php',
             'list_url'       => 'mrp/mo_list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'mrp/class/mo.class.php',
             'lib_path'       => 'mrp/lib/mrp_mo.lib.php',
         ];
@@ -787,6 +839,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'receptionlist',
             'create_url'     => 'reception/card.php',
             'list_url'       => 'reception/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'custom/saturne/class/dolibarrobjects/saturnereception.class.php',
             'lib_path'       => 'core/lib/reception.lib.php',
         ];
@@ -810,6 +864,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'interventionlist',
             'create_url'     => 'fichinter/card.php',
             'list_url'       => 'fichinter/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'fichinter/class/fichinter.class.php',
             'lib_path'       => 'core/lib/fichinter.lib.php',
         ];
@@ -833,6 +889,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'supplier_proposallist',
             'create_url'     => 'supplier_proposal/card.php',
             'list_url'       => 'supplier_proposal/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'custom/saturne/class/dolibarrobjects/saturnesupplierproposal.class.php',
             'lib_path'       => 'core/lib/supplier_proposal.lib.php',
         ];
@@ -856,6 +914,8 @@ function saturne_get_objects_metadata(string $type = ''): array
             'hook_name_list' => 'supplierorderlist',
             'create_url'     => 'fourn/commande/card.php',
             'list_url'       => 'fourn/commande/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
             'class_path'     => 'fourn/class/fournisseur.commande.class.php',
             'lib_path'       => 'core/lib/fourn.lib.php',
         ];
@@ -916,6 +976,8 @@ function saturne_get_objects_metadata(string $type = ''): array
                     'hook_name_document' => $objectMetadata['hook_name_document'] ?? '',
                     'create_url'         => $objectMetadata['create_url'] ?? '',
                     'list_url'           => $objectMetadata['list_url'] ?? '',
+                    'defaultsort'        => $objectMetadata['defaultsort'] ?? 't.ref',
+                    'defaultorder'       => $objectMetadata['defaultorder'] ?? 'ASC',
                     'class_path'         => $objectMetadata['class_path'] ?? '',
                     'lib_path'           => $objectMetadata['lib_path'] ?? '',
                     'object'             => $object
@@ -1020,7 +1082,7 @@ function saturne_object_action_for_category(string $moduleNameLowerCase, string 
             } elseif ($action == 'unlink_object_from_category') {
                 $result = $object->del_type($newObject, $objectType);
                 if ($result < 0) {
-                    dol_print_error('', $object->error);
+                    dol_print_error(null, $object->error);
                 }
             }
             if ($result > 0) {

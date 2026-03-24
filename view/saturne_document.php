@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,9 +24,9 @@
 
 // Load Saturne environment
 if (file_exists('../saturne.main.inc.php')) {
-	require_once __DIR__ . '/../saturne.main.inc.php';
+    require_once __DIR__ . '/../saturne.main.inc.php';
 } elseif (file_exists('../../saturne.main.inc.php')) {
-	require_once __DIR__ . '/../../saturne.main.inc.php';
+    require_once __DIR__ . '/../../saturne.main.inc.php';
 } else {
     die('Include of saturne main fails');
 }
@@ -33,12 +34,11 @@ if (file_exists('../saturne.main.inc.php')) {
 // Get module parameters
 $moduleName = GETPOST('module_name', 'alpha');
 $objectType = GETPOST('object_type', 'alpha');
-
 $moduleNameLowerCase = strtolower($moduleName);
 
 // Libraries
-require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
-require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
+require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+require_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
 
 require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
 require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' . $objectType . '.lib.php';
@@ -66,7 +66,8 @@ $sortfield = GETPOST('sortfield', 'aZ09comma');
 $sortorder = GETPOST('sortorder', 'aZ09comma');
 $page      = GETPOSTISSET('pageplusone') ? (GETPOST('pageplusone') - 1) : GETPOST('page', 'int');
 
-if (empty($page) || $page == -1) { // If $page is not defined, or '' or -1
+// If $page is not defined, or '' or -1
+if (empty($page) || $page == -1) {
     $page = 0;
 }
 
@@ -86,13 +87,15 @@ $className   = ucfirst($objectType);
 $object      = new $className($db);
 $extrafields = new ExtraFields($db);
 
-$hookmanager->initHooks([$objectType . 'document', $object->element . 'document', 'saturneglobal', 'globalcard']); // Note that conf->hooks_modules contains array
+$hookmanager->initHooks([$objectType . 'document', $object->element . 'document', 'saturneglobal', 'globalcard']);
 
 // Fetch optionals attributes and labels
 $extrafields->fetch_name_optionals_label($object->table_element);
 
 // Load object
-include DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php'; // Must be included, not include_once. Include fetch and fetch_thirdparty but not fetch_optionals
+// Must be included, not include_once. Include fetch and fetch_thirdparty but not fetch_optionals
+include DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php';
+
 if ($id > 0 || !empty($ref)) {
     $upload_dir = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?: $conf->entity] . '/' . $object->element . '/' . get_exdir(0, 0, 0, 1, $object);
 }
@@ -108,31 +111,32 @@ saturne_check_access($permissiontoread, $object);
 */
 
 $parameters = ['id' => $id];
-$resHook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+$resHook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action);
 if ($resHook < 0) {
     setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 }
 
 if (empty($resHook)) {
-    include DOL_DOCUMENT_ROOT.'/core/actions_linkedfiles.inc.php'; // Must be included, not include_once
+    // Must be included, not include_once
+    include DOL_DOCUMENT_ROOT . '/core/actions_linkedfiles.inc.php';
 
     // Actions set_thirdparty, set_project
     require_once __DIR__ . '/../core/tpl/actions/banner_actions.tpl.php';
 }
 
 /*
-*	View
+* View
 */
 
 $title   = $langs->trans('Files') . ' - ' . $langs->trans(ucfirst($object->element));
 $helpUrl = 'FR:Module_' . $moduleName;
+$reshook  = $hookmanager->executeHooks('saturneCustomHeaderFunction', $parameters, $object, $action);
 
-$reshook  = $hookmanager->executeHooks('saturneCustomHeaderFunction', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
 if ($reshook > 0) {
     $customHeaderFunction = $hookmanager->resPrint;
     $customHeaderFunction($title, $helpUrl);
 } else {
-    saturne_header($hookmanager->resArray['loadMediaGallery'] ?? 0,'', $title, $helpUrl, '', 0, 0, [], [], '', 'mod-' . $object->module . '-' . $object->element . ' page-list bodyforlist ' . $hookmanager->resArray['moreCSSOnBody'] ?? '');
+    saturne_header($hookmanager->resArray['loadMediaGallery'] ?? 0, '', $title, $helpUrl, '', 0, 0, [], [], '', 'mod-' . $object->module . '-' . $object->element . ' page-list bodyforlist ' . $hookmanager->resArray['moreCSSOnBody'] ?? '');
 }
 
 if ($id > 0 || !empty($ref)) {
@@ -165,7 +169,7 @@ if ($id > 0 || !empty($ref)) {
 
     $relativepathwithnofile = $object->element . '/' . dol_sanitizeFileName($object->ref) . '/';
 
-    require_once DOL_DOCUMENT_ROOT.'/core/tpl/document_actions_post_headers.tpl.php';
+    require_once DOL_DOCUMENT_ROOT . '/core/tpl/document_actions_post_headers.tpl.php';
 }
 
 // End of page

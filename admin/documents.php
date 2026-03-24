@@ -1,5 +1,6 @@
 <?php
-/* Copyright (C) 2021-2025 EVARISK <technique@evarisk.com>
+
+/* Copyright (C) 2021-2026 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,6 +49,7 @@ $moduleLibPath = dol_buildpath($moduleNameLowerCase . '/lib/' . $moduleNameLower
 if (!(is_file($moduleLibPath) && is_readable($moduleLibPath))) {
     die('Failed to require ' . $moduleNameLowerCase . ' libraries: Files not found. Paths: ' . $moduleLibPath);
 }
+
 // Load Module Libraries
 require_once $moduleLibPath;
 
@@ -61,15 +63,16 @@ saturne_load_langs(['admin']);
 $form = new Form($db);
 
 // Get parameters
-$action     = GETPOST('action', 'alpha');
-$modelName  = GETPOST('model_name', 'alpha');
-$type       = GETPOST('type', 'alpha');
-$const      = GETPOST('const', 'alpha');
-$label      = GETPOST('label', 'alpha');
-$modulepart = GETPOST('modulepart', 'aZ09'); // Used by actions_setmoduleoptions.inc.php
-$pageY      = GETPOST('page_y', 'int');
+$action    = GETPOST('action', 'alpha');
+$modelName = GETPOST('model_name', 'alpha');
+$type      = GETPOST('type', 'alpha');
+$const     = GETPOST('const', 'alpha');
+$label     = GETPOST('label', 'alpha');
+$pageY     = GETPOST('page_y', 'int');
+// Used by actions_setmoduleoptions.inc.php
+$modulepart = GETPOST('modulepart', 'aZ09');
 
-$hookmanager->initHooks([$moduleNameLowerCase . 'admindocuments']); // Note that conf->hooks_modules contains array
+$hookmanager->initHooks([$moduleNameLowerCase . 'admindocuments']);
 
 // Permissions
 $permissionToRead = $user->hasRight($moduleNameLowerCase, 'adminpage', 'read');
@@ -83,7 +86,7 @@ saturne_check_access($permissionToRead);
 
 $object     = null;
 $parameters = [];
-$resHook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
+$resHook    = $hookmanager->executeHooks('doActions', $parameters, $object, $action);
 if ($resHook < 0) {
     setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 }
@@ -117,19 +120,23 @@ if (empty($resHook)) {
 
         $listofdir = explode(',', preg_replace('/[\r\n]+/', ',', trim(getDolGlobalString($keyforuploaddir))));
         foreach ($listofdir as $key => $tmpdir) {
-            $tmpdir = preg_replace('/DOL_DATA_ROOT\/*/', '', $tmpdir);    // Clean string if we found a hardcoded DOL_DATA_ROOT
+            // Clean string if we found a hardcoded DOL_DATA_ROOT
+            $tmpdir = preg_replace('/DOL_DATA_ROOT\/*/', '', $tmpdir);
             if (!$tmpdir) {
                 unset($listofdir[$key]);
                 continue;
             }
-            $tmpdir = DOL_DATA_ROOT . '/' . $tmpdir;    // Complete with DOL_DATA_ROOT. Only files into DOL_DATA_ROOT can be reach/set
+
+            // Complete with DOL_DATA_ROOT. Only files into DOL_DATA_ROOT can be reach/set
+            $tmpdir = DOL_DATA_ROOT . '/' . $tmpdir;
             if (!is_dir($tmpdir)) {
                 if (empty($nomessageinsetmoduleoptions)) {
                     setEventMessages($langs->trans('ErrorDirNotFound', $tmpdir), null, 'warnings');
                 }
             } else {
+                // So we take the first directory found into setup $conf->global->$keyforuploaddir
                 $upload_dir = $tmpdir;
-                break;    // So we take the first directory found into setup $conf->global->$keyforuploaddir
+                break;
             }
         }
 
@@ -145,23 +152,27 @@ if (empty($resHook)) {
     if ($action == 'setModuleOptions') {
         $error = 0;
         include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
-        $keyforuploaddir = GETPOST('keyforuploaddir', 'aZ09');
 
+        $keyforuploaddir = GETPOST('keyforuploaddir', 'aZ09');
         $listofdir = explode(',', preg_replace('/[\r\n]+/', ',', trim(getDolGlobalString($keyforuploaddir))));
         foreach ($listofdir as $key => $tmpdir) {
-            $tmpdir = preg_replace('/DOL_DATA_ROOT\/*/', '', $tmpdir);    // Clean string if we found a hardcoded DOL_DATA_ROOT
+            // Clean string if we found a hardcoded DOL_DATA_ROOT
+            $tmpdir = preg_replace('/DOL_DATA_ROOT\/*/', '', $tmpdir);
             if (!$tmpdir) {
                 unset($listofdir[$key]);
                 continue;
             }
-            $tmpdir = DOL_DATA_ROOT . '/' . $tmpdir;    // Complete with DOL_DATA_ROOT. Only files into DOL_DATA_ROOT can be reach/set
+
+            // Complete with DOL_DATA_ROOT. Only files into DOL_DATA_ROOT can be reach/set
+            $tmpdir = DOL_DATA_ROOT . '/' . $tmpdir;
             if (!is_dir($tmpdir)) {
                 if (empty($nomessageinsetmoduleoptions)) {
                     setEventMessages($langs->trans('ErrorDirNotFound', $tmpdir), null, 'warnings');
                 }
             } else {
+                // So we take the first directory found into setup $conf->global->$keyforuploaddir
                 $upload_dir = $tmpdir;
-                break;    // So we take the first directory found into setup $conf->global->$keyforuploaddir
+                break;
             }
         }
 
@@ -181,9 +192,9 @@ if (empty($resHook)) {
                         setEventMessages($langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv('File')), null, 'errors');
                     }
                 }
-                if (pathinfo($_FILES['userfile']['name'], PATHINFO_EXTENSION) != 'odt') {
+                if (pathinfo((string) ($_FILES['userfile']['name'] ?? ''), PATHINFO_EXTENSION) != 'odt') {
                     $error++;
-                    setEventMessages($langs->trans('ErrorWrongFileNameExtension', $_FILES['userfile']['name']), [], 'errors');
+                    setEventMessages($langs->trans('ErrorWrongFileNameExtension', (string) ($_FILES['userfile']['name'] ?? '')), [], 'errors');
                 }
             }
 
@@ -198,8 +209,8 @@ if (empty($resHook)) {
 
     if ($action == 'update_documents_config') {
         $vignette = GETPOST('vignette', 'alpha');
-        $result = dolibarr_set_const($db, strtoupper($moduleName) . '_DOCUMENT_MEDIA_VIGNETTE_USED', $vignette, 'chaine', 0, '', $conf->entity);
 
+        $result = dolibarr_set_const($db, strtoupper($moduleName) . '_DOCUMENT_MEDIA_VIGNETTE_USED', $vignette, 'chaine', 0, '', $conf->entity);
         if ($result > 0) {
             setEventMessage($langs->trans('SavedConfig'));
         } else {
@@ -262,7 +273,7 @@ saturne_header(0, '', $title, $helpUrl);
 <?php
 
 $parameters = [];
-$reshook    = $hookmanager->executeHooks('saturneAdminDocumentData', $parameters); // Note that $action and $object may have been modified by some hooks
+$reshook    = $hookmanager->executeHooks('saturneAdminDocumentData', $parameters);
 if (empty($reshook)) {
     $types = $hookmanager->resArray;
 }
@@ -279,8 +290,8 @@ print load_fiche_titre($title, $selectorAnchor, 'title_setup');
 // Configuration header
 $preHead = $moduleNameLowerCase . '_admin_prepare_head';
 $head    = $preHead();
-print dol_get_fiche_head($head, 'documents', $title, -1, $moduleNameLowerCase . '_color@' . $moduleNameLowerCase);
 
+print dol_get_fiche_head($head, 'documents', $title, -1, $moduleNameLowerCase . '_color@' . $moduleNameLowerCase);
 print load_fiche_titre($langs->trans('Configs', $langs->trans('DocumentsMin')), '', '');
 
 print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '" name="documents_form">';
@@ -331,17 +342,17 @@ print $langs->trans('MediaSizeDocument');
 print '</td><td>';
 print $langs->trans('MediaSizeDocumentDescription');
 print '<td class="center">';
-print $form::selectarray('vignette', $vignetteType, (!empty($conf->global->$vignetteConf) ? $conf->global->$vignetteConf : 'small'), 0, 0, 0, '', 1);
+print Form::selectarray('vignette', $vignetteType, (!empty($conf->global->$vignetteConf) ? $conf->global->$vignetteConf : 'small'), 0, 0, 0, '', 1);
 print '</td><td class="center">';
 print '<input type="submit" class="button" name="save" value="' . $langs->trans('Save') . '">';
 print '</td></tr>';
 
-$reshook = $hookmanager->executeHooks('saturneAdminAdditionalConfig', $parameters); // Note that $action and $object may have been modified by some hooks
+$reshook = $hookmanager->executeHooks('saturneAdminAdditionalConfig', $parameters);
 if (empty($reshook)) {
     $additionalConfig = $hookmanager->resArray;
 }
 if (is_array($additionalConfig) && !empty($additionalConfig)) {
-    foreach($additionalConfig as $configName => $configCode) {
+    foreach ($additionalConfig as $configName => $configCode) {
         print '<tr class="oddeven"><td>';
         print $langs->trans($configName);
         print '</td><td>';
@@ -370,15 +381,11 @@ foreach ($types as $type => $documentData) {
     require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . ($documentData['className'] ?? $documentData['documentType']) . '.class.php';
 
     $object = new $type($db);
-
     print load_fiche_titre($langs->trans($type), '', $documentData['picto'], 0, dol_strtolower($type));
 
     $documentPath = true;
-
     require __DIR__ . '/../core/tpl/admin/object/object_const_view.tpl.php';
-
     require __DIR__ . '/../core/tpl/admin/object/object_numbering_module_view.tpl.php';
-
     require __DIR__ . '/../core/tpl/admin/object/object_document_model_view.tpl.php';
 }
 

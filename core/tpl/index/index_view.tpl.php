@@ -31,7 +31,7 @@ if (!isset($showDashboard) || $showDashboard === true) {
 
 $upload_dir = $conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1];
 
-$hookmanager->initHooks([$moduleNameLowerCase . 'index', 'globalcard']); // Note that conf->hooks_modules contains array.
+$hookmanager->initHooks([$moduleNameLowerCase . 'index', 'globalcard']);
 
 // Security check.
 $permissiontoread = $user->rights->$moduleNameLowerCase->read;
@@ -91,11 +91,9 @@ if ($conf->global->$moduleJustUpdated == 1) : ?>
     <?php dolibarr_set_const($db, $moduleJustUpdated, 0, 'integer', 0, '', $conf->entity);
 endif;
 
-define('USE_GITHUB_UPDATES', false);
-
 $data = null;
 
-if ($conf->global->$moduleShowPatchNote > 0) : ?>
+if ($conf->global->$moduleShowPatchNote > 0 && getDolGlobalInt('SATURNE_SHOW_PATCH_NOTE_FROM_GITHUB')) : ?>
     <div class="wpeo-notice notice-info">
         <input type="hidden" name="token" value="<?php echo newToken(); ?>">
         <div class="notice-content">
@@ -118,29 +116,27 @@ if ($conf->global->$moduleShowPatchNote > 0) : ?>
             </div>
             <!-- Modal Content-->
             <div class="modal-content">
+                <?php
+                $ch = curl_init();
 
-                <?php if (USE_GITHUB_UPDATES) {
-                    $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, 'https://api.github.com/repos/' . strtolower($modModule->editor_name) . '/' . (!empty($moreParams['specialModuleNameLowerCase']) ? $moreParams['specialModuleNameLowerCase'] : $moduleNameLowerCase) . '/releases/tags/' . $modModule->version);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                curl_setopt($ch, CURLOPT_USERAGENT, $moduleName);
 
-                    curl_setopt($ch, CURLOPT_URL, 'https://api.github.com/repos/' . strtolower($modModule->editor_name) . '/' . (!empty($moreParams['specialModuleNameLowerCase']) ? $moreParams['specialModuleNameLowerCase'] : $moduleNameLowerCase) . '/releases/tags/' . $modModule->version);
-                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                    curl_setopt($ch, CURLOPT_USERAGENT, $moduleName);
+                curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+                curl_setopt($ch, CURLOPT_TIMEOUT, 10);
 
-                    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-                    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+                $output = curl_exec($ch);
 
-                    $output = curl_exec($ch);
-
-                    if (curl_errno($ch)) {
-                        // Gestion d'erreur : log et continuer
-                        error_log("Erreur curl GitHub : " . curl_error($ch));
-                    } else {
-                        $data = json_decode($output);
-                    }
-
-                    curl_close($ch);
+                if (curl_errno($ch)) {
+                    // Gestion d'erreur : log et continuer
+                    error_log("Erreur curl GitHub : " . curl_error($ch));
+                } else {
+                    $data = json_decode($output);
                 }
+
+                curl_close($ch);
 
                 $html = '';
                 if ($data && isset($data->body)) {

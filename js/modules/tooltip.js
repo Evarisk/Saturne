@@ -53,7 +53,7 @@ if ( ! window.saturne.tooltip ) {
 
 	window.saturne.tooltip.tabChanged = function() {
 		$( '.wpeo-tooltip' ).remove();
-	}
+	};
 
 	/**
 	 * [description]
@@ -67,11 +67,11 @@ if ( ! window.saturne.tooltip ) {
 		$( document ).on( 'mouseleave touchend', '.wpeo-tooltip-event:not([data-tooltip-persist="true"])', window.saturne.tooltip.onOut );
 	};
 
-	window.saturne.tooltip.onEnter = function( event ) {
+	window.saturne.tooltip.onEnter = function() {
 		window.saturne.tooltip.display( $( this ) );
 	};
 
-	window.saturne.tooltip.onOut = function( event ) {
+	window.saturne.tooltip.onOut = function() {
 		window.saturne.tooltip.remove( $( this ) );
 	};
 
@@ -86,7 +86,6 @@ if ( ! window.saturne.tooltip ) {
 	window.saturne.tooltip.display = function( element ) {
 		var direction = ( $( element ).data( 'direction' ) ) ? $( element ).data( 'direction' ) : 'top';
 		var el = $( '<span class="wpeo-tooltip tooltip-' + direction + '">' + $( element ).attr( 'aria-label' ) + '</span>' );
-		var pos = $( element ).position();
 		var offset = $( element ).offset();
 		$( element )[0].tooltipElement = el;
 		$( 'body' ).append( $( element )[0].tooltipElement );

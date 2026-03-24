@@ -1,0 +1,23 @@
+{
+    "name": "evarisk/saturne",
+    "description": "Saturne shared framework for Dolibarr ERP modules",
+    "type": "library",
+    "license": "GPL-3.0-or-later",
+    "require": {
+        "php": ">=7.4"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^2.0",
+        "phan/phan": "^5.0",
+        "phpunit/phpunit": "^9.6"
+    },
+    "config": {
+        "vendor-dir": "vendor",
+        "optimize-autoloader": true
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Saturne\\Tests\\Unit\\": "tests/phpunit/unit/"
+        }
+    }
+}

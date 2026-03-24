@@ -65,7 +65,7 @@ window.saturne.modal.event = function() {
  * @param  {MouseEvent} event Les attributs lors du clic.
  * @return {void}
  */
-window.saturne.modal.openModal = function ( event ) {
+window.saturne.modal.openModal = function () {
     let modalOptions = $(this).find('.modal-options');
 	let modalToOpen  = modalOptions.attr('data-modal-to-open');
 
@@ -99,7 +99,7 @@ window.saturne.modal.openModal = function ( event ) {
     if (typeof window.saturne.modal.addMoreOpenModalData === 'function') {
         window.saturne.modal.addMoreOpenModalData(modalToOpen, $(this));
     }
-  };
+  }
 
 	$('#'+modalToOpen).find('.wpeo-button').attr('value', fromId);
 	$('#'+modalToOpen).addClass('modal-active');
@@ -119,7 +119,7 @@ window.saturne.modal.openModal = function ( event ) {
 window.saturne.modal.closeModal = function ( event ) {
 	if ($('input:focus').length < 1 && ($('textarea:focus').length < 1)) {
 		if ($(event.target).hasClass('modal-active') || $(event.target).hasClass('modal-close') || $(event.target).parent().hasClass('modal-close')) {
-			$(this).closest('.modal-active').removeClass('modal-active')
+			$(this).closest('.modal-active').removeClass('modal-active');
 			$('.clicked-photo').attr('style', '');
 			$('.clicked-photo').removeClass('clicked-photo');
 			$('.notice').addClass('hidden');
@@ -136,7 +136,7 @@ window.saturne.modal.closeModal = function ( event ) {
  * @param  {MouseEvent} event Les attributs lors du clic.
  * @return {void}
  */
-window.saturne.modal.refreshModal = function ( event ) {
+window.saturne.modal.refreshModal = function () {
 	window.location.reload();
 };
 
@@ -164,4 +164,4 @@ window.saturne.modal.loadLazyImages = function () {
       $img.attr('data-loaded', 'true');
     }
   });
-}
+};

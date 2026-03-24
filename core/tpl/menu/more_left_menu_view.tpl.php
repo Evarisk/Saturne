@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2025 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -47,8 +48,9 @@
                             ]
                         ]
                     ]);
-                ?>
-                <?php if ($user->hasRight($moreParams['moduleNameLowerCase'], $moreParams['objectElement'], 'write')) : ?>
+                    ?>
+                <?php if ($user->hasRight($moreParams['moduleNameLowerCase'], $moreParams['objectElement'], 'write')) :
+                    ?>
                     <div class="add-container">
                         <?php
                         echo saturne_get_button_component_html([
@@ -86,13 +88,16 @@
                         ]);
                         ?>
                     </div>
-                <?php endif; ?>
+                    <?php
+                endif; ?>
             </div>
-            <?php if (!empty($objectElements)) : ?>
+            <?php if (!empty($objectElements)) :
+                ?>
                 <div class="sidebar-secondary__header-toolbar">
                     <div class="toggle-all toggle-minus" aria-label="<?php echo $langs->trans('WrapAll'); ?>"><span class="toggle-all-icon fas fa-caret-square-down"></span></div>
                 </div>
-            <?php endif; ?>
+                <?php
+            endif; ?>
         </div>
         <ul class="workunit-list">
             <?php saturne_display_recurse_tree($moreParams, $objectElementTree); ?>

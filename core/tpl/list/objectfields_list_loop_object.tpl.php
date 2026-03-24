@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2024-2025 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -32,14 +33,15 @@
 // Loop on record
 // --------------------------------------------------------------------
 $i                     = 0;
-$savNbField            = $totalarray['nbfield']; // +1
+$savNbField            = $totalarray['nbfield'];
 $totalarray            = [];
 $totalarray['nbfield'] = 0;
 $iMaxInLoop            = ($limit ? min($num, $limit) : $num);
 while ($i < $iMaxInLoop) {
     $obj = $db->fetch_object($resql);
     if (empty($obj)) {
-        break; // Should not happen
+        // Should not happen
+        break;
     }
 
     // Store properties in $object
@@ -69,7 +71,8 @@ while ($i < $iMaxInLoop) {
         }
         // Output Kanban
         $selected = -1;
-        if ($massActionButton || $massaction) { // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
+        // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
+        if ($massActionButton || $massaction) {
             $selected = 0;
             if (in_array($object->id, $arrayofselected)) {
                 $selected = 1;
@@ -87,7 +90,8 @@ while ($i < $iMaxInLoop) {
         // Action column
         if (getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
             print '<td class="nowrap center">';
-            if ($massActionButton || $massaction) { // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
+            // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
+            if ($massActionButton || $massaction) {
                 $selected = 0;
                 if (in_array($object->id, $arrayofselected)) {
                     $selected = 1;
@@ -123,11 +127,26 @@ while ($i < $iMaxInLoop) {
                     print $object->showOutputField($val, $key, $object->id);
                 } else {
                     if (!empty($val['contenteditable']) && $val['contenteditable'] == 1) {
-                        print '<div class="inline-block contenteditable" contenteditable="true" data-field="' . $key . '" data-id="' . $object->id . '">';
+                        $ceType   = !empty($val['type']) && in_array($val['type'], ['date', 'datetime']) ? 'datepicker' : 'text';
+                        $ceDataType = ' data-type="' . $ceType . '"';
+                        $ceElement = $object->element ?? 'unknown';
+                        $ceTable   = $object->table_element ?? 'unknown';
+                        $ceLabel   = !empty($val['label']) ? dol_escape_htmltag($val['label']) : dol_escape_htmltag($key);
+                        print '<div class="contenteditable-wrap"><div class="contenteditable" contenteditable="true" role="textbox" aria-label="' . $ceLabel . '" data-field="' . $key . '" data-id="' . $object->id . '" data-element="' . $ceElement . '" data-table="' . $ceTable . '"' . $ceDataType . ' data-success="Enregistré" data-error="Format invalide">';
                     }
                     print $object->showOutputField($val, $key, $object->$key);
                     if (!empty($val['contenteditable']) && $val['contenteditable'] == 1) {
-                        print '</div>';
+                        $isDateField = !empty($val['type']) && in_array($val['type'], ['date', 'datetime']);
+                        $calBtn = $isDateField ? '
+  <button class="contenteditable-cal-btn" type="button" title="Ouvrir le calendrier" aria-label="Ouvrir le calendrier">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+      <rect x="3" y="4" width="18" height="18" rx="2"/>
+      <line x1="16" y1="2" x2="16" y2="6"/>
+      <line x1="8"  y1="2" x2="8"  y2="6"/>
+      <line x1="3"  y1="10" x2="21" y2="10"/>
+    </svg>
+  </button>' : '';
+                        print '</div>' . $calBtn . '</div>';
                     }
                 }
                 print '</td>';
@@ -143,7 +162,7 @@ while ($i < $iMaxInLoop) {
                     if (!isset($totalarray['val'])) {
                         $totalarray['val'] = [];
                     }
-                    if (!isset($totalarray['val']['t.'.$key])) {
+                    if (!isset($totalarray['val']['t.' . $key])) {
                         $totalarray['val']['t.' . $key] = 0;
                     }
                     $totalarray['val']['t.' . $key] += $object->$key;
@@ -156,13 +175,14 @@ while ($i < $iMaxInLoop) {
 
         // Fields from hook
         $parameters = ['arrayfields' => $arrayfields, 'object' => $object, 'obj' => $obj, 'i' => $i, 'totalarray' => &$totalarray];
-        $hookmanager->executeHooks('printFieldListValue', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
+        $hookmanager->executeHooks('printFieldListValue', $parameters, $object, $action);
         print $hookmanager->resPrint;
 
         // Action column
         if (!getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
             print '<td class="nowrap center">';
-            if ($massActionButton || $massaction) { // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
+            // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
+            if ($massActionButton || $massaction) {
                 $selected = 0;
                 if (in_array($object->id, $arrayofselected)) {
                     $selected = 1;

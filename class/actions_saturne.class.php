@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -96,7 +97,7 @@ class ActionsSaturne
             }
         }
 
-        return 0; // or return 1 to replace standard code
+        return 0;
     }
 
     /**
@@ -120,7 +121,7 @@ class ActionsSaturne
             }
         }
 
-        return 0; // or return 1 to replace standard code
+        return 0;
     }
 
     /**
@@ -145,9 +146,17 @@ class ActionsSaturne
             $out .= '<script src="' . dol_buildpath($resourcesRequired['signature'], 1) . '"></script>';
 
             $this->resprints = $out;
+        } elseif (strpos($parameters['context'], 'emailtemplates')) {
+            $resourcesRequired = [
+                'js'        => '/custom/saturne/js/saturne.min.js',
+            ];
+
+            $out  = '<!-- Includes JS added by module saturne -->';
+            $out .= '<script src="' . dol_buildpath($resourcesRequired['js'], 1) . '"></script>';
+            $this->resprints = $out;
         }
 
-        return 0; // or return 1 to replace standard code
+        return 0;
     }
 
     /**
@@ -168,11 +177,11 @@ class ActionsSaturne
 
             $redirections = $saturneRedirection->fetchAll();
             if (is_array($redirections) && !empty($redirections)) {
-                foreach($redirections as $redirection) {
+                foreach ($redirections as $redirection) {
                     //check redirection from url, if not beginning with a / add it
                     $urlToCheck = $redirection->from_url;
                     if (strpos($redirection->from_url, '/') !== 0) {
-                        $urlToCheck = '/' . $redirection->from_url;
+                            $urlToCheck = '/' . $redirection->from_url;
                     }
                     if ($urlToCheck == '/' . $originalUrl) {
                         header('Location: ' . $redirection->to_url);
@@ -182,7 +191,7 @@ class ActionsSaturne
             }
         }
 
-        return 0; // or return 1 to replace standard code
+        return 0;
     }
 
     /**
@@ -195,6 +204,7 @@ class ActionsSaturne
     public function printCommonFooter(array $parameters): int
     {
         global $langs, $user, $object, $db;
+
 
         if (strpos($parameters['context'], 'usercard') !== false) {
             $id = GETPOST('id');
@@ -240,28 +250,27 @@ class ActionsSaturne
                         </div>
                     </div>
                 </div>
-            <?php }
+                    <?php
+            }
             $out .= '</div></div>'; ?>
 
             <script>
                 $('.user_extras_electronic_signature').html(<?php echo json_encode($out); ?>);
             </script>
-            <?php
-        } elseif (strpos($_SERVER['PHP_SELF'], '/document.php') !== false) {
-
+        <?php
+        } elseif (
+            strpos($_SERVER['PHP_SELF'], '/document.php') !== false ||
+                    strpos($_SERVER['PHP_SELF'], '/saturne_document.php') !== false
+        ) {
             require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
             require_once DOL_DOCUMENT_ROOT . '/core/class/link.class.php';
-
             $file    = new EcmFiles($db);
             $tmpFile = new EcmFiles($db);
             $file->fetchAll('', '', 0, 0, '(t.src_object_type:=:\'' . $object->table_element . '\') AND (t.src_object_id:=:' . $object->id . ')');
-
             $favoritesFiles = [];
             foreach ($file->lines as $singleFile) {
-
                 $tmpFile->id = $singleFile->id;
                 $tmpFile->fetch_optionals();
-
                 if (!empty($tmpFile->array_options['options_favorite'])) {
                     $favoritesFiles[] = (int) $tmpFile->id;
                 }
@@ -363,9 +372,17 @@ class ActionsSaturne
                 </script>
             ";
 
+        } elseif (strpos($parameters['context'], 'emailtemplates')) {
+            ?>
+            <script>
+                window.saturne.emailTemplate.updateSub.call($('#type_template'))
+                $('#type_template').on('change', window.saturne.emailTemplate.updateSub)
+            </script>
+
+            <?php
         }
 
-        return 0; // or return 1 to replace standard code
+        return 0;
     }
 
     /**
@@ -402,7 +419,8 @@ class ActionsSaturne
                 // Creation signature OK
                 $signatory->setSigned($user, false);
                 exit;
-            } elseif (!empty($signatory->errors)) { // Creation signature KO
+            } elseif (!empty($signatory->errors)) {
+                // Creation signature KO
                 setEventMessages('', $signatory->errors, 'errors');
             } else {
                 setEventMessages($signatory->error, [], 'errors');
@@ -435,13 +453,38 @@ class ActionsSaturne
                 } elseif (GETPOST('action') == 'delintocategory') {
                     $result = $object->del_type($newObject, $type);
                     if ($result < 0) {
-                        dol_print_error('', $object->error);
+                        dol_print_error(null, $object->error);
                     }
                 }
             }
+        } elseif (strpos($parameters['context'], 'emailtemplates') && $action == 'updateSub') {
+            $templateType = GETPOST('type_template');
+            if (str_ends_with($templateType, '_send')) {
+                $templateType = substr($templateType, 0, -5);
+            }
+
+            $objectMeta = saturne_get_objects_metadata();
+            $tmpObj = null;
+
+            foreach ($objectMeta as $key => $value) {
+                if (str_contains($key, $templateType) || $value['table_element'] == $templateType) {
+                    $tmpObj = $value['object'];
+                    break;
+                }
+            }
+
+            $extrafields = [];
+            if (!empty($tmpObj)) {
+                $tmpObj->fetch_optionals();
+                $extrafields = array_keys($tmpObj->array_options);
+                $extrafields = array_map(fn($s) => '__EXTRAFIELD_' . dol_strtoupper(preg_replace('/^options_/', '', $s)) . '__', $extrafields);
+            }
+
+            print_r(json_encode($extrafields));
+            exit;
         }
 
-        return 0; // or return 1 to replace standard code
+        return 0;
     }
 
     /**

@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -61,7 +62,7 @@ if (($object->status == $object::STATUS_DRAFT || ($object->status == $object::ST
     print '</td>';
     if ($attendantTableMode == 'simple') {
         print '<td class="center">';
-        print saturne_select_dictionary('attendant_role','c_' . $object->element . '_attendants_role', 'ref');
+        print saturne_select_dictionary('attendant_role', 'c_' . $object->element . '_attendants_role', 'ref');
         print '</td>';
     }
     print '<td colspan="' . ($conf->browser->layout != 'classic' ? 4 : 5) . '"></td>';
