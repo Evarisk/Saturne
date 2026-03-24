@@ -319,6 +319,14 @@ class OdfException extends Exception
 {
 }
 
+class OdfExceptionSegmentNotFound extends OdfException
+{
+}
+
+class SegmentException extends Exception
+{
+}
+
 class Segment
 {
     /** @return void */

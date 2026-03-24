@@ -258,9 +258,9 @@ function saturne_recurse_tree($moreParams, ?int $parentID = null, int $depth = 0
 /**
  * Check user access on current page
  *
- * @param object|bool $permission        Permission to access to current page
- * @param object|null $object            Object in current page
- * @param bool        $allowExternalUser Allow external user to have access at current page
+ * @param object|bool|int $permission        Permission to access to current page
+ * @param object|null     $object            Object in current page
+ * @param bool            $allowExternalUser Allow external user to have access at current page
  */
 function saturne_check_access($permission, ?object $object = null, bool $allowExternalUser = false)
 {

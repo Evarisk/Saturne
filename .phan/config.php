@@ -190,6 +190,24 @@ return [
         // ── Miscellaneous noise ───────────────────────────────────────────
         // __METHOD__ inside closures triggers this warning spuriously.
         'PhanSuspiciousMagicConstant',
+
+        // ── Additional suppressions ───────────────────────────────────────
+        // Dolibarr convention: '' is passed where int is expected (e.g. fetch(0,'') pattern).
+        'PhanTypeMismatchArgumentProbablyReal',
+        // False positive on $_FILES superglobal access.
+        'PhanTypeArraySuspiciousNull',
+        // False positive on $_FILES['file']['name'] and similar superglobal dims.
+        'PhanTypeInvalidDimOffset',
+        // False positive on pathinfo() return when 'extension' key may be absent.
+        'PhanTypePossiblyInvalidDimOffset',
+        // False positive on string interpolation with $_FILES values.
+        'PhanTypeSuspiciousStringExpression',
+        // Dolibarr pattern: ++ on variables that may be null/bool on first use.
+        'PhanTypeInvalidUnaryOperandIncOrDec',
+        // Dolibarr dynamic property access via $object->$propertyName pattern.
+        'PhanTypeInvalidPropertyName',
+        // implode() false positive (Phan gets confused with the two-arg form).
+        'PhanParamSpecial1',
     ],
 
     // Exclude files whose class declarations would duplicate what Phan already

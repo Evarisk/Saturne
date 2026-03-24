@@ -102,7 +102,7 @@ abstract class ModeleNumRefSaturne
             $obj = $db->fetch_object($resql);
         } else {
             dol_syslog(get_class($this) . '::getLastValue', LOG_DEBUG);
-            return -1;
+            return '-1';
         }
         return $this->prefix . $obj->max;
     }
@@ -176,7 +176,7 @@ abstract class ModeleNumRefSaturne
             }
         } else {
             dol_syslog(get_class($this) . '::getNextValue', LOG_DEBUG);
-            return -1;
+            return '-1';
         }
 
         $date = !empty($object->date_creation) ? $object->date_creation : dol_now();
@@ -324,7 +324,7 @@ abstract class CustomModeleNumRefSaturne extends ModeleNumRefSaturne
             }
         } else {
             dol_syslog(get_class($this) . '::getNextValue', LOG_DEBUG);
-            return -1;
+            return '-1';
         }
 
         $date = !empty($object->date_creation) ? $object->date_creation : dol_now();
