@@ -72,10 +72,12 @@ jobs:
                       htdocs/compta/facture/class
                       htdocs/contact/class
                       htdocs/contrat/class
+                      htdocs/core/actions_extrafields.inc.php
                       htdocs/core/class
                       htdocs/core/lib
                       htdocs/core/modules
                       htdocs/core/tpl
+                      htdocs/core/triggers
                       htdocs/ecm/class
                       htdocs/expedition/class
                       htdocs/fichinter/class
@@ -87,6 +89,7 @@ jobs:
                       htdocs/projet/class
                       htdocs/reception/class
                       htdocs/societe/class
+                      htdocs/supplier_proposal/class
                       htdocs/ticket/class
                       htdocs/user/class
                   sparse-checkout-cone-mode: false

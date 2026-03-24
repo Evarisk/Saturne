@@ -604,6 +604,119 @@ if (!function_exists('llxFooter')) {
     }
 }
 
+if (!class_exists('Parsedown')) {
+    class Parsedown
+    {
+        /** @return string */
+        public function text(string $text): string
+        {
+            return $text;
+        }
+    }
+}
+
+if (!class_exists('OdfException')) {
+    class OdfException extends Exception {}
+}
+
+if (!class_exists('OdfExceptionSegmentNotFound')) {
+    class OdfExceptionSegmentNotFound extends Exception {}
+}
+
+if (!class_exists('SegmentException')) {
+    class SegmentException extends Exception {}
+}
+
+if (!class_exists('Segment')) {
+    class Segment
+    {
+        /**
+         * @param mixed $value
+         * @return void
+         */
+        public function setVars(string $key, $value, bool $encode = true, string $charset = 'UTF-8'): void
+        {
+        }
+
+        /** @return void */
+        public function merge(): void
+        {
+        }
+    }
+}
+
+if (!class_exists('Odf')) {
+    class Odf
+    {
+        /** @param mixed[] $options */
+        public function __construct(string $filename, array $options = [])
+        {
+        }
+
+        /**
+         * @param mixed $value
+         * @return void
+         */
+        public function setVars(string $key, $value, bool $encode = true, string $charset = 'UTF-8'): void
+        {
+        }
+
+        /** @return void */
+        public function setImage(string $key, string $value): void
+        {
+        }
+
+        /** @return void */
+        public function merge(): void
+        {
+        }
+
+        /** @return Segment */
+        public function setSegment(string $segment): Segment
+        {
+            return new Segment();
+        }
+
+        /** @return void */
+        public function mergeSegment(Segment $segment): void
+        {
+        }
+
+        /** @return void */
+        public function exportAsAttachedPDF(string $file): void
+        {
+        }
+
+        /** @return void */
+        public function saveToDisk(string $file): void
+        {
+        }
+
+        /** @return void */
+        public function exportAsAttachedFile(): void
+        {
+        }
+    }
+}
+
+if (!class_exists('TCPDF2DBarcode')) {
+    class TCPDF2DBarcode
+    {
+        public function __construct(string $code, string $type)
+        {
+        }
+
+        /**
+         * @param int[]  $color
+         * @return string|false
+         */
+        public function getBarcodePngData(int $w = 3, int $h = 3, array $color = [0, 0, 0])
+        {
+            return false;
+        }
+    }
+}
+
 // Global variables expected by Dolibarr files.
 global $conf, $db, $hookmanager, $langs, $mysoc, $user;
 
