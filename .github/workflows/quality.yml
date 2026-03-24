@@ -77,6 +77,7 @@ jobs:
                       htdocs/core/actions_fetchobject.inc.php
                       htdocs/core/actions_linkedfiles.inc.php
                       htdocs/core/actions_massactions.inc.php
+                      htdocs/core/actions_sendmails.inc.php
                       htdocs/core/actions_setnotes.inc.php
                       htdocs/core/class
                       htdocs/core/lib

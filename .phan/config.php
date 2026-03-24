@@ -235,6 +235,7 @@ return [
         DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php',
         DOL_DOCUMENT_ROOT . '/core/actions_linkedfiles.inc.php',
         DOL_DOCUMENT_ROOT . '/core/actions_massactions.inc.php',
+        DOL_DOCUMENT_ROOT . '/core/actions_sendmails.inc.php',
         DOL_DOCUMENT_ROOT . '/core/actions_setnotes.inc.php',
         SAT_MODULE_ROOT . '/tests/phpunit/bootstrap.php',
         SAT_MODULE_ROOT . '/dev/phpstan/stubs.php',
@@ -247,6 +248,7 @@ return [
         DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php',
         DOL_DOCUMENT_ROOT . '/core/actions_linkedfiles.inc.php',
         DOL_DOCUMENT_ROOT . '/core/actions_massactions.inc.php',
+        DOL_DOCUMENT_ROOT . '/core/actions_sendmails.inc.php',
         DOL_DOCUMENT_ROOT . '/core/actions_setnotes.inc.php',
     ],
 
