@@ -624,7 +624,7 @@ abstract class SaturneObject extends CommonObject
      * @param  int[]|int $categories Category or categories IDs
      * @return float|int
      */
-    public function setCategories($categories): float|int
+    public function setCategories($categories)
     {
         if ($this->isCategoryManaged == 1) {
             return parent::setCategoriesCommon($categories, $this->element);

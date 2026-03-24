@@ -340,7 +340,7 @@ class SaturneCertificate extends SaturneObject
      * @param  int[]|int $categories Category or categories IDs.
      * @return float|int
      */
-    public function setCategories($categories): float|int
+    public function setCategories($categories)
     {
         return 0;
     }
