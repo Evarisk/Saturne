@@ -72,6 +72,12 @@ return [
         'PhanUndeclaredVariable',
     ],
 
+    // Exclude bootstrap.php from Phan analysis to avoid duplicate class declarations
+    // already provided by dev/phpstan/stubs.php.
+    'exclude_file_list' => [
+        SAT_MODULE_ROOT . '/tests/phpunit/bootstrap.php',
+    ],
+
     // File extensions to analyze.
     'file_list' => [],
 
