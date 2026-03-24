@@ -405,28 +405,11 @@ Shows the modifier-class architecture used across all Saturne components:
 
 ---
 
-## 10. Release Notes
+## 10. Release Process
 
-Use `RELEASE_NOTES_TEMPLATE.md` as the format reference for all release notes.
+See `docs/MEMO_RELEASE.md` for the full release workflow.
 
-### Générer les release notes
-
-Before tagging a release, run:
+Short prompt to generate release notes:
 ```bash
-git describe --tags --abbrev=0 HEAD  # get previous tag
-git log --oneline PREV_TAG..HEAD     # list commits
+claude "Generate release notes for version X.X.X based on git log since tag X.X.X. Use RELEASE_NOTES_TEMPLATE.md as format reference. Write in French, group by functional category, add screenshot placeholders for visual features. Save to RELEASE_NOTES.md"
 ```
-
-Then generate `RELEASE_NOTES.md` following these rules:
-- Write everything in **French**
-- Title pattern: `[MODULE] [VERSION] - [Feature phare 1] - [Feature phare 2]`
-- Group by **functional category** deduced from commits (not by file or class name)
-- Bullet points oriented toward the **end user**, no technical jargon
-- Add `<!-- 📸 Ajouter une screenshot ici -->` only for genuinely visual features (new page, new button, new dashboard, new form)
-- The comparison section must list all commits and PRs with their GitHub links
-
-### Workflow release complet
-1. Generate `RELEASE_NOTES.md` — `Generate release notes for version X.X.X`
-2. Review and adjust — replace screenshot placeholders with real captures
-3. `git add RELEASE_NOTES.md && git commit -m "chore: release notes X.X.X"`
-4. `git tag X.X.X && git push && git push --tags`
