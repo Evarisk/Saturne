@@ -779,14 +779,18 @@ abstract class SaturneObject extends CommonObject
 		$ret .= $langs->transnoentities('DateModification') . ' : ' . dol_print_date($object->tms ?: $now, 'dayhoursec', 'tzuser') . '<br>';
 
         if (!empty($object->fk_user_creat)) {
-			$user->fetch($object->fk_user_creat);
-			$ret .= $langs->transnoentities('CreatedByLogin') . ' : ' . ucfirst($user->firstname) . ' ' . dol_strtoupper($user->lastname) . '<br>';
-		}
+            $result = $user->fetch($object->fk_user_creat);
+            if ($result > 0) {
+                $ret .= $langs->transnoentities('CreatedByLogin') . ' : ' . ucfirst($user->firstname) . ' ' . dol_strtoupper($user->lastname) . '<br>';
+            }
+        }
 
 		if (!empty($object->fk_user_modif)) {
-			$user->fetch($object->fk_user_modif);
-			$ret .= $langs->transnoentities('ModifiedByLogin') . ' : ' . ucfirst($user->firstname) . ' ' . dol_strtoupper($user->lastname) . '<br>';
-		}
+            $result = $user->fetch($object->fk_user_modif);
+            if ($result > 0) {
+                $ret .= $langs->transnoentities('ModifiedByLogin') . ' : ' . ucfirst($user->firstname) . ' ' . dol_strtoupper($user->lastname) . '<br>';
+            }
+        }
 
 		$ret .= $langs->transnoentities('EntityNumber') . ' : ' . $conf->entity . '<br>';
 		$ret .= $langs->transnoentities('EntityName') . ' : ' . $mysoc->name . '<br>';

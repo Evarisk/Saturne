@@ -78,12 +78,14 @@ function get_nom_url_user(User $object, $withpictoimg = 0, $option = '', $infolo
     // Add thirdparty for external users
     if (! empty($object->socid)) {
         $thirdpartystatic = new Societe($db);
-        $thirdpartystatic->fetch((int) $object->socid);
-        // picto only of company
-        if (empty($hidethirdpartylogo)) {
-            $companylink = ' ' . $thirdpartystatic->getNomUrl(2, (($option == 'nolink') ? 'nolink' : ''));
+        $result = $thirdpartystatic->fetch((int) $object->socid);
+        if ($result > 0) {
+            // picto only of company
+            if (empty($hidethirdpartylogo)) {
+                $companylink = ' ' . $thirdpartystatic->getNomUrl(2, (($option == 'nolink') ? 'nolink' : ''));
+            }
+            $company = ' (' . $langs->trans("Company") . ': ' . $thirdpartystatic->name . ')';
         }
-        $company = ' (' . $langs->trans("Company") . ': ' . $thirdpartystatic->name . ')';
     }
     $type   = ($object->socid ? $langs->trans("External") . $company : $langs->trans("Internal"));
     $label .= '<br><b>' . $langs->trans("Type") . ':</b> ' . $type;

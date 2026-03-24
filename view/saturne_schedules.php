@@ -170,7 +170,7 @@ if (!empty($objectLinked) && empty($action)) {
 
     $objectLinked->fetch($id);
     if (!empty($prepareHead)) {
-        print saturne_get_fiche_head($objectLinked, 'schedules', $title);
+        saturne_get_fiche_head($objectLinked, 'schedules', $title);
     }
 
     // Object card

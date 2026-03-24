@@ -88,6 +88,7 @@ jobs:
                       htdocs/expedition/class
                       htdocs/fichinter/class
                       htdocs/fourn/class
+                      htdocs/includes/parsedown
                       htdocs/mrp/class
                       htdocs/product/class
                       htdocs/product/inventory/class

@@ -223,7 +223,8 @@ if (empty($resHook)) {
 
         require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . $documentType . '.class.php';
 
-        if (is_string($documentType) && class_exists($documentType)) {
+        if (class_exists($documentType)) {
+            /** @var SaturneDocumentModel $document */
             $document = new $documentType($db);
         }
 
