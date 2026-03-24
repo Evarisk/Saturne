@@ -17,23 +17,38 @@
  */
 
 /**
- * Phan-only stubs for Dolibarr classes not present in htdocs/core/class/.
+ * Phan-only stubs for classes/functions not covered by the sparse checkout.
  *
- * Phan reads real classes from htdocs/core/class/ (Conf, Translate, HookManager,
- * Form, …) so those are intentionally absent here.
+ * Classes whose real files are now in directory_list (via quality.yml sparse
+ * checkout) are intentionally absent — Phan reads them from htdocs/ directly:
+ *   Societe, Contact, Project, ActionComm, Expedition, Reception, Task,
+ *   Categorie, EcmFiles, BOM, Commande, CommandeFournisseur, Contrat, Entrepot,
+ *   Facture, Fichinter, Inventory, Mo, MouvementStock, Product, ProductLot,
+ *   Propal, Ticket, User.
  *
- * CommonObject IS redefined below to add $photo and $picto which the real class
- * does not declare — PhanRedefinedClassReference is suppressed in .phan/config.php.
+ * Remaining stubs cover:
+ *   - DoliDB        → htdocs/core/db/ (not in sparse checkout)
+ *   - CommonObject  → redeclared to add $photo / $picto absent from real class
+ *   - DolibarrModules / DolibarrTriggers → not in core/class/
+ *   - Third-party libs: Odf, OdfException, Segment, Parsedown, TCPDF2DBarcode
+ *   - Dolibarr helpers not resolvable from class dirs: Activity, EcmDirectory
+ *   - Global functions: llxHeader, llxFooter, top_httphead
+ *   - Constants:  MAIN_DB_PREFIX, DOL_MAIN_URL_ROOT, ODTPHP_PATH, TCPDF_PATH
  *
  * No class_exists() guards: Phan parses AST and does not execute PHP.
- * dev/phpstan/stubs.php is excluded from Phan via exclude_file_list.
+ * PhanRedefinedClassReference is suppressed in .phan/config.php for the
+ * CommonObject redeclaration.
  */
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 define('MAIN_DB_PREFIX', 'llx_');
+define('DOL_MAIN_URL_ROOT', '');
+define('ODTPHP_PATH', '');
+define('TCPDF_PATH', '');
 
 // ─── DoliDB ───────────────────────────────────────────────────────────────────
+// In htdocs/core/db/ — outside the sparse-checkout directories.
 
 abstract class DoliDB
 {
@@ -78,8 +93,9 @@ abstract class DoliDB
 }
 
 // ─── CommonObject (extended stub) ─────────────────────────────────────────────
-// Redeclared here only to add $photo and $picto which are absent from the real
-// class. PhanRedefinedClassReference is suppressed in .phan/config.php.
+// Redeclared solely to expose $photo and $picto, which are used throughout
+// SaturneObject but absent from the real htdocs/core/class/commonobject.class.php.
+// PhanRedefinedClassReference is suppressed globally in .phan/config.php.
 
 class CommonObject
 {
@@ -189,246 +205,97 @@ class CommonObject
     }
 }
 
-// ─── User ─────────────────────────────────────────────────────────────────────
+// ─── DolibarrModules ──────────────────────────────────────────────────────────
+// Abstract base for Dolibarr module descriptors. Defined in core/modules/ which
+// may not be fully parsed due to the volume of files in that directory.
 
-class User extends CommonObject
+abstract class DolibarrModules
 {
     /** @var int */
-    public $id = 0;
+    public $numero = 0;
 
     /** @var string */
-    public $login = '';
+    public $version = '';
 
     /** @var string */
-    public $email = '';
-
-    /** @var string */
-    public $job = '';
-
-    /** @var string */
-    public $phone = '';
-
-    /** @var string */
-    public $datelastlogin = '';
-
-    /** @var string */
-    public $datepreviouslogin = '';
-
-    /** @var int */
-    public $socid = 0;
-
-    /** @var mixed[] */
-    public $users = [];
-
-    /** @var string[] */
-    public $errors = [];
-
-    /** @var stdClass */
-    public $rights;
+    public $editor_name = '';
 
     public function __construct(DoliDB $db)
     {
-        parent::__construct($db);
-        $this->rights = new stdClass();
     }
 
-    /** @return bool */
-    public function hasRight(string $module, string $permlevel, string $permright = ''): bool
+    /** @return int */
+    public function init(string $options = ''): int
     {
-        return false;
-    }
-
-    /**
-     * @param string       $sortorder
-     * @param string       $sortfield
-     * @param int          $limit
-     * @param int          $offset
-     * @param string|array $filter
-     * @param string       $filtermode
-     * @param bool         $entityfilter
-     * @return int
-     */
-    public function fetchAll(
-        string $sortorder = '',
-        string $sortfield = '',
-        int $limit = 0,
-        int $offset = 0,
-        $filter = '',
-        string $filtermode = 'AND',
-        bool $entityfilter = false
-    ): int {
         return 1;
     }
-}
 
-// ─── Contact ──────────────────────────────────────────────────────────────────
-
-class Contact extends CommonObject
-{
-    /** @var string */
-    public $lastname = '';
-
-    /** @var string */
-    public $firstname = '';
-
-    /** @var string */
-    public $email = '';
-
-    /** @var int */
-    public $fk_soc = 0;
-
-    public function __construct(DoliDB $db)
-    {
-        parent::__construct($db);
-    }
-
-    /**
-     * @param int    $id
-     * @param string $ref
-     * @return int
-     */
-    public function fetch($id, string $ref = ''): int
+    /** @return int */
+    public function remove(string $options = ''): int
     {
         return 1;
     }
 
     /** @return string */
-    public function getFullName(Translate $langs): string
+    public function getDescLong(): string
     {
         return '';
+    }
+}
+
+// ─── DolibarrTriggers ─────────────────────────────────────────────────────────
+// Abstract base for Dolibarr event triggers. Not in htdocs/core/class/.
+
+abstract class DolibarrTriggers
+{
+    /** @var string */
+    public $version = '';
+
+    /** @var string */
+    public $picto = '';
+
+    public function __construct(DoliDB $db)
+    {
     }
 
     /** @return string */
-    public function getCivilityLabel(): string
-    {
-        return '';
-    }
+    abstract public function getName(): string;
+
+    /** @return string */
+    abstract public function getDesc(): string;
 
     /**
-     * @param mixed[] $filters
-     * @return mixed[]|int
+     * @param string       $action
+     * @param CommonObject $object
+     * @param User         $user
+     * @param Translate    $langs
+     * @param Conf         $conf
+     * @return int
      */
-    public function liste_contact(array $filters = [])
-    {
-        return [];
-    }
+    abstract public function runTrigger(string $action, $object, User $user, Translate $langs, Conf $conf): int;
 }
 
-// ─── Project ──────────────────────────────────────────────────────────────────
+// ─── Activity ─────────────────────────────────────────────────────────────────
+// Dolibarr activity/log helper not resolvable from the scanned class directories.
 
-class Project extends CommonObject
+class Activity extends CommonObject
 {
     public function __construct(DoliDB $db)
     {
         parent::__construct($db);
     }
-
-    /**
-     * @param int    $id
-     * @param string $ref
-     * @return int
-     */
-    public function fetch($id, string $ref = ''): int
-    {
-        return 1;
-    }
-
-    /**
-     * @param int    $withpicto
-     * @param string $option
-     * @param int    $notooltip
-     * @param string $morecss
-     * @param int    $save_lastsearch_value
-     * @return string
-     */
-    public function getNomUrl(
-        int $withpicto = 0,
-        string $option = '',
-        int $notooltip = 0,
-        string $morecss = '',
-        int $save_lastsearch_value = -1
-    ): string {
-        return '';
-    }
 }
 
-// ─── Societe ──────────────────────────────────────────────────────────────────
+// ─── EcmDirectory ─────────────────────────────────────────────────────────────
+// ECM directory helper. Kept as stub to avoid import-chain issues from ecm/class/.
 
-class Societe extends CommonObject
-{
-    /** @var string */
-    public $name = '';
-
-    /** @var int */
-    public $id = 0;
-
-    public function __construct(DoliDB $db)
-    {
-        parent::__construct($db);
-    }
-
-    /**
-     * @param int    $id
-     * @param string $ref
-     * @return int
-     */
-    public function fetch($id, string $ref = ''): int
-    {
-        return 1;
-    }
-
-    /**
-     * @param int    $withpicto
-     * @param string $option
-     * @param int    $notooltip
-     * @param string $morecss
-     * @param int    $save_lastsearch_value
-     * @return string
-     */
-    public function getNomUrl(
-        int $withpicto = 0,
-        string $option = '',
-        int $notooltip = 0,
-        string $morecss = '',
-        int $save_lastsearch_value = -1
-    ): string {
-        return '';
-    }
-}
-
-// ─── Categorie ────────────────────────────────────────────────────────────────
-
-class Categorie extends CommonObject
+class EcmDirectory extends CommonObject
 {
     /** @var string */
     public $label = '';
 
     /** @var string */
-    public $type = '';
-
-    /** @var int */
-    public $fk_parent = 0;
-
-    /** @var string */
-    public $color = '';
-
-    /** @var string */
-    public $description = '';
-
-    /** @var int */
-    public $visible = 0;
-
-    /** @var int */
-    public $imgWidth = 0;
-
-    /** @var int */
-    public $imgHeight = 0;
-
-    /** @var int */
-    public $entity = 1;
-
-    /** @var int */
-    public $id = 0;
+    public $relativepath = '';
 
     public function __construct(DoliDB $db)
     {
@@ -444,473 +311,112 @@ class Categorie extends CommonObject
     {
         return 1;
     }
+}
 
+// ─── Third-party: ODT (odtphp) ────────────────────────────────────────────────
+
+class OdfException extends Exception
+{
+}
+
+class Segment
+{
+    /** @return void */
+    public function setVars(string $key, string $value, bool $encode = true, string $charset = 'UTF-8'): void
+    {
+    }
+}
+
+class Odf
+{
     /**
-     * @param int    $withpicto
-     * @param string $option
-     * @param int    $notooltip
-     * @param string $morecss
-     * @param int    $save_lastsearch_value
-     * @return string
+     * @param string  $filename
+     * @param mixed[] $options
      */
-    public function getNomUrl(
-        int $withpicto = 0,
-        string $option = '',
-        int $notooltip = 0,
-        string $morecss = '',
-        int $save_lastsearch_value = -1
-    ): string {
-        return '';
+    public function __construct(string $filename, array $options = [])
+    {
+    }
+
+    /** @return Segment */
+    public function setSegment(string $segment): Segment
+    {
+        return new Segment();
+    }
+
+    /** @return void */
+    public function mergeSegment(Segment $segment): void
+    {
     }
 
     /**
-     * @param string $path
-     * @param int    $nbmax
-     * @return mixed[]
+     * @param string $key
+     * @param mixed  $value
+     * @return void
      */
-    public function liste_photos(string $path, int $nbmax = 0): array
+    public function setVars(string $key, $value, bool $encode = true, string $charset = 'UTF-8'): void
     {
-        return [];
     }
 
-    /**
-     * @param string $path
-     * @param string $file
-     * @return mixed[]
-     */
-    public function get_image_size(string $path, string $file = ''): array
+    /** @return void */
+    public function exportAsAttachedFile(string $name = ''): void
     {
-        return [];
     }
 
     /** @return string */
-    public function getFilterJoinQuery(string $type, string $alias): string
-    {
-        return '';
-    }
-
-    /** @return int */
-    public function create(User $user): int
-    {
-        return 1;
-    }
-}
-
-// ─── BOM ──────────────────────────────────────────────────────────────────────
-
-class BOM extends CommonObject
-{
-    public function __construct(DoliDB $db)
-    {
-        parent::__construct($db);
-    }
-
-    /**
-     * @param int    $id
-     * @param string $ref
-     * @return int
-     */
-    public function fetch($id, string $ref = ''): int
-    {
-        return 1;
-    }
-
-    /**
-     * @param int    $withpicto
-     * @param string $option
-     * @return string
-     */
-    public function getNomUrl(int $withpicto = 0, string $option = ''): string
+    public function exportAsString(): string
     {
         return '';
     }
 }
 
-// ─── Commande ─────────────────────────────────────────────────────────────────
+// ─── Third-party: Parsedown ───────────────────────────────────────────────────
 
-class Commande extends CommonObject
+class Parsedown
 {
-    public function __construct(DoliDB $db)
+    /** @return string */
+    public function text(string $text): string
     {
-        parent::__construct($db);
+        return $text;
     }
 
-    /**
-     * @param int    $id
-     * @param string $ref
-     * @return int
-     */
-    public function fetch($id, string $ref = ''): int
+    /** @return string */
+    public function line(string $text): string
     {
-        return 1;
-    }
-
-    /**
-     * @param int    $withpicto
-     * @param string $option
-     * @return string
-     */
-    public function getNomUrl(int $withpicto = 0, string $option = ''): string
-    {
-        return '';
+        return $text;
     }
 }
 
-// ─── CommandeFournisseur ──────────────────────────────────────────────────────
+// ─── Third-party: TCPDF2DBarcode ──────────────────────────────────────────────
 
-class CommandeFournisseur extends CommonObject
+class TCPDF2DBarcode
 {
-    public function __construct(DoliDB $db)
-    {
-        parent::__construct($db);
-    }
-
     /**
-     * @param int    $id
-     * @param string $ref
-     * @return int
+     * @param string $code
+     * @param string $type
      */
-    public function fetch($id, string $ref = ''): int
+    public function __construct(string $code, string $type)
     {
-        return 1;
     }
 
     /**
-     * @param int    $withpicto
-     * @param string $option
+     * @param int    $w
+     * @param int    $h
+     * @param string $color
      * @return string
      */
-    public function getNomUrl(int $withpicto = 0, string $option = ''): string
+    public function getBarcodeSVG(int $w = 3, int $h = 3, string $color = 'black'): string
     {
         return '';
     }
-}
-
-// ─── Contrat ──────────────────────────────────────────────────────────────────
-
-class Contrat extends CommonObject
-{
-    public function __construct(DoliDB $db)
-    {
-        parent::__construct($db);
-    }
 
     /**
-     * @param int    $id
-     * @param string $ref
-     * @return int
-     */
-    public function fetch($id, string $ref = ''): int
-    {
-        return 1;
-    }
-
-    /**
-     * @param int    $withpicto
-     * @param string $option
+     * @param int    $w
+     * @param int    $h
+     * @param string $type
+     * @param string $color
      * @return string
      */
-    public function getNomUrl(int $withpicto = 0, string $option = ''): string
-    {
-        return '';
-    }
-}
-
-// ─── Entrepot ─────────────────────────────────────────────────────────────────
-
-class Entrepot extends CommonObject
-{
-    public function __construct(DoliDB $db)
-    {
-        parent::__construct($db);
-    }
-
-    /**
-     * @param int    $id
-     * @param string $ref
-     * @return int
-     */
-    public function fetch($id, string $ref = ''): int
-    {
-        return 1;
-    }
-
-    /**
-     * @param int    $withpicto
-     * @param string $option
-     * @return string
-     */
-    public function getNomUrl(int $withpicto = 0, string $option = ''): string
-    {
-        return '';
-    }
-}
-
-// ─── Facture ──────────────────────────────────────────────────────────────────
-
-class Facture extends CommonObject
-{
-    public function __construct(DoliDB $db)
-    {
-        parent::__construct($db);
-    }
-
-    /**
-     * @param int    $id
-     * @param string $ref
-     * @return int
-     */
-    public function fetch($id, string $ref = ''): int
-    {
-        return 1;
-    }
-
-    /**
-     * @param int    $withpicto
-     * @param string $option
-     * @return string
-     */
-    public function getNomUrl(int $withpicto = 0, string $option = ''): string
-    {
-        return '';
-    }
-}
-
-// ─── Fichinter ────────────────────────────────────────────────────────────────
-
-class Fichinter extends CommonObject
-{
-    public function __construct(DoliDB $db)
-    {
-        parent::__construct($db);
-    }
-
-    /**
-     * @param int    $id
-     * @param string $ref
-     * @return int
-     */
-    public function fetch($id, string $ref = ''): int
-    {
-        return 1;
-    }
-
-    /**
-     * @param int    $withpicto
-     * @param string $option
-     * @return string
-     */
-    public function getNomUrl(int $withpicto = 0, string $option = ''): string
-    {
-        return '';
-    }
-}
-
-// ─── Inventory ────────────────────────────────────────────────────────────────
-
-class Inventory extends CommonObject
-{
-    public function __construct(DoliDB $db)
-    {
-        parent::__construct($db);
-    }
-
-    /**
-     * @param int    $id
-     * @param string $ref
-     * @return int
-     */
-    public function fetch($id, string $ref = ''): int
-    {
-        return 1;
-    }
-
-    /**
-     * @param int    $withpicto
-     * @param string $option
-     * @return string
-     */
-    public function getNomUrl(int $withpicto = 0, string $option = ''): string
-    {
-        return '';
-    }
-}
-
-// ─── Mo ───────────────────────────────────────────────────────────────────────
-
-class Mo extends CommonObject
-{
-    public function __construct(DoliDB $db)
-    {
-        parent::__construct($db);
-    }
-
-    /**
-     * @param int    $id
-     * @param string $ref
-     * @return int
-     */
-    public function fetch($id, string $ref = ''): int
-    {
-        return 1;
-    }
-
-    /**
-     * @param int    $withpicto
-     * @param string $option
-     * @return string
-     */
-    public function getNomUrl(int $withpicto = 0, string $option = ''): string
-    {
-        return '';
-    }
-}
-
-// ─── MouvementStock ───────────────────────────────────────────────────────────
-
-class MouvementStock extends CommonObject
-{
-    public function __construct(DoliDB $db)
-    {
-        parent::__construct($db);
-    }
-
-    /**
-     * @param int    $id
-     * @param string $ref
-     * @return int
-     */
-    public function fetch($id, string $ref = ''): int
-    {
-        return 1;
-    }
-
-    /**
-     * @param int    $withpicto
-     * @param string $option
-     * @return string
-     */
-    public function getNomUrl(int $withpicto = 0, string $option = ''): string
-    {
-        return '';
-    }
-}
-
-// ─── Product ──────────────────────────────────────────────────────────────────
-
-class Product extends CommonObject
-{
-    public function __construct(DoliDB $db)
-    {
-        parent::__construct($db);
-    }
-
-    /**
-     * @param int    $id
-     * @param string $ref
-     * @return int
-     */
-    public function fetch($id, string $ref = ''): int
-    {
-        return 1;
-    }
-
-    /**
-     * @param int    $withpicto
-     * @param string $option
-     * @return string
-     */
-    public function getNomUrl(int $withpicto = 0, string $option = ''): string
-    {
-        return '';
-    }
-}
-
-// ─── ProductLot ───────────────────────────────────────────────────────────────
-
-class ProductLot extends CommonObject
-{
-    public function __construct(DoliDB $db)
-    {
-        parent::__construct($db);
-    }
-
-    /**
-     * @param int    $id
-     * @param string $ref
-     * @return int
-     */
-    public function fetch($id, string $ref = ''): int
-    {
-        return 1;
-    }
-
-    /**
-     * @param int    $withpicto
-     * @param string $option
-     * @return string
-     */
-    public function getNomUrl(int $withpicto = 0, string $option = ''): string
-    {
-        return '';
-    }
-}
-
-// ─── Propal ───────────────────────────────────────────────────────────────────
-
-class Propal extends CommonObject
-{
-    public function __construct(DoliDB $db)
-    {
-        parent::__construct($db);
-    }
-
-    /**
-     * @param int    $id
-     * @param string $ref
-     * @return int
-     */
-    public function fetch($id, string $ref = ''): int
-    {
-        return 1;
-    }
-
-    /**
-     * @param int    $withpicto
-     * @param string $option
-     * @return string
-     */
-    public function getNomUrl(int $withpicto = 0, string $option = ''): string
-    {
-        return '';
-    }
-}
-
-// ─── Ticket ───────────────────────────────────────────────────────────────────
-
-class Ticket extends CommonObject
-{
-    public function __construct(DoliDB $db)
-    {
-        parent::__construct($db);
-    }
-
-    /**
-     * @param int    $id
-     * @param string $ref
-     * @return int
-     */
-    public function fetch($id, string $ref = ''): int
-    {
-        return 1;
-    }
-
-    /**
-     * @param int    $withpicto
-     * @param string $option
-     * @return string
-     */
-    public function getNomUrl(int $withpicto = 0, string $option = ''): string
+    public function getBarcodeHTML(int $w = 10, int $h = 10, string $type = 'SVG', string $color = 'black'): string
     {
         return '';
     }

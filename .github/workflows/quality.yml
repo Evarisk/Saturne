@@ -58,7 +58,7 @@ jobs:
             # Dolibarr core is needed for class resolution (PHPStan scanDirectories,
             # Phan directory_list, and PHPUnit require_once chains in lib files).
             # Pinned to the latest stable release (23.0.0) for reproducibility.
-            - name: Checkout Dolibarr core (sparse — class + lib only)
+            - name: Checkout Dolibarr core (sparse — all class directories needed by Phan)
               uses: actions/checkout@v4
               with:
                   repository: Dolibarr/dolibarr
@@ -67,13 +67,32 @@ jobs:
                   sparse-checkout: |
                       htdocs/core/class
                       htdocs/core/lib
+                      htdocs/comm/action/class
+                      htdocs/contact/class
+                      htdocs/projet/class
+                      htdocs/societe/class
+                      htdocs/categories/class
+                      htdocs/expedition/class
+                      htdocs/reception/class
+                      htdocs/fourn/class
+                      htdocs/compta/facture/class
+                      htdocs/commande/class
+                      htdocs/propal/class
+                      htdocs/contrat/class
+                      htdocs/ficheinter/class
+                      htdocs/stock/class
+                      htdocs/product/class
+                      htdocs/product/lot/class
+                      htdocs/product/inventory/class
+                      htdocs/mrp/class
+                      htdocs/ticket/class
+                      htdocs/ecm/class
+                      htdocs/user/class
+                      htdocs/core/modules
                   sparse-checkout-cone-mode: false
 
             - name: Expose Dolibarr core at expected DOL_DOCUMENT_ROOT path
-              run: |
-                  mkdir -p htdocs/core
-                  cp -r dolibarr-core/htdocs/core/class htdocs/core/class
-                  cp -r dolibarr-core/htdocs/core/lib   htdocs/core/lib
+              run: cp -r dolibarr-core/htdocs/. htdocs/
 
             - name: Set up PHP ${{ matrix.php }}
               uses: shivammathur/setup-php@v2
