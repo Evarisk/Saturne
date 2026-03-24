@@ -141,6 +141,17 @@ if (!class_exists('Translate')) {
         {
             return $key;
         }
+
+        /** @return string */
+        public function transnoentitiesnoconv(string $key): string
+        {
+            return $key;
+        }
+
+        /** @return void */
+        public function setDefaultLang(string $lang): void
+        {
+        }
     }
 }
 
@@ -153,6 +164,15 @@ if (!class_exists('User')) {
         /** @var stdClass */
         public $rights;
 
+        /** @var mixed[] */
+        public $users = [];
+
+        /** @var string[] */
+        public $errors = [];
+
+        /** @var int */
+        public $socid = 0;
+
         public function __construct()
         {
             $this->rights = new stdClass();
@@ -162,6 +182,12 @@ if (!class_exists('User')) {
         public function hasRight(string $module, string $permlevel, string $permright = '')
         {
             return false;
+        }
+
+        /** @return int */
+        public function fetchAll()
+        {
+            return 1;
         }
     }
 }
@@ -177,6 +203,9 @@ if (!class_exists('HookManager')) {
 
         /** @var string[] */
         public $errors = [];
+
+        /** @var mixed[] */
+        public $resArray = [];
 
         /** @var string[] */
         public $hooks_modules = [];
@@ -319,6 +348,34 @@ if (!class_exists('Form')) {
         public function buttonsSaveCancel(string $save = 'Save', string $cancel = 'Cancel', array $arrayofvalues = [])
         {
             return '';
+        }
+
+        /**
+         * @param mixed $value
+         * @param mixed $object
+         * @param mixed $perm
+         * @return string
+         */
+        public function editfieldkey(string $label, string $fieldname, $value, $object, $perm): string
+        {
+            return '';
+        }
+
+        /**
+         * @param mixed $value
+         * @param mixed $object
+         * @param mixed $perm
+         * @return string
+         */
+        public function editfieldval(string $label, string $fieldname, $value, $object, $perm): string
+        {
+            return '';
+        }
+
+        /** @return string */
+        public function textwithpicto(string $text, string $help): string
+        {
+            return $text;
         }
     }
 }
@@ -464,6 +521,86 @@ if (!class_exists('DolibarrTriggers')) {
         {
             return 0;
         }
+    }
+}
+
+if (!class_exists('Contact')) {
+    class Contact extends CommonObject
+    {
+        /** @var string */
+        public $lastname = '';
+
+        /** @var string */
+        public $firstname = '';
+
+        /** @var string */
+        public $email = '';
+
+        /** @var int */
+        public $fk_soc = 0;
+
+        public function __construct(DoliDB $db)
+        {
+            parent::__construct($db);
+        }
+
+        /** @return int */
+        public function fetch($id, string $ref = '')
+        {
+            return 1;
+        }
+
+        /** @return string */
+        public function getFullName(Translate $langs): string
+        {
+            return $this->firstname . ' ' . $this->lastname;
+        }
+
+        /** @return string */
+        public function getCivilityLabel(): string
+        {
+            return '';
+        }
+
+        /**
+         * @param mixed[] $filters
+         * @return mixed[]|int
+         */
+        public function liste_contact($filters = [])
+        {
+            return [];
+        }
+    }
+}
+
+if (!class_exists('Project')) {
+    class Project extends CommonObject
+    {
+        public function __construct(DoliDB $db)
+        {
+            parent::__construct($db);
+        }
+
+        /** @return int */
+        public function fetch($id, string $ref = '')
+        {
+            return 1;
+        }
+
+        /**
+         * @param int $withpicto
+         * @return string
+         */
+        public function getNomUrl(int $withpicto = 0, string $option = '', int $notooltip = 0, string $morecss = '', int $save_lastsearch_value = -1)
+        {
+            return '';
+        }
+    }
+}
+
+if (!function_exists('llxFooter')) {
+    function llxFooter(): void
+    {
     }
 }
 

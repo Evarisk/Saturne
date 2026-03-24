@@ -202,6 +202,17 @@ if (!class_exists('Translate')) {
         {
             return $key;
         }
+
+        /** @return string */
+        public function transnoentitiesnoconv(string $key): string
+        {
+            return $key;
+        }
+
+        /** @return void */
+        public function setDefaultLang(string $lang): void
+        {
+        }
     }
 }
 
@@ -214,9 +225,24 @@ if (!class_exists('User')) {
         /** @var stdClass */
         public $rights;
 
+        /** @var mixed[] */
+        public $users = [];
+
+        /** @var string[] */
+        public $errors = [];
+
+        /** @var int */
+        public $socid = 0;
+
         public function __construct()
         {
             $this->rights = new stdClass();
+        }
+
+        /** @return int */
+        public function fetchAll(): int
+        {
+            return 1;
         }
     }
 }
@@ -232,6 +258,9 @@ if (!class_exists('HookManager')) {
 
         /** @var string[] */
         public $errors = [];
+
+        /** @var mixed[] */
+        public $resArray = [];
 
         /** @param string[] $hooks */
         public function initHooks(array $hooks): void
