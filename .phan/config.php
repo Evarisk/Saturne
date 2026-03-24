@@ -109,8 +109,19 @@ return [
     // Analysis depth — 3 is a good trade-off for a module.
     'quick_mode' => false,
 
-    // Suppress issues common in Dolibarr-style code.
+    // ── Suppressed issues ────────────────────────────────────────────────────
+    // Issues marked "noise" are suppressed because they produce too many false
+    // positives in Dolibarr-style code and are better covered by PHPStan.
+    // Issues marked "real bugs" are kept active and intentionally absent here.
+    //
+    // ACTIVE (real bugs worth fixing):
+    //   PhanTypeMismatchArgument, PhanTypeMismatchReturn,
+    //   PhanTypeMismatchPropertyReal, PhanTypeExpectedObjectPropAccessButGotNull,
+    //   PhanNonClassMethodCall, PhanTypeInvalidLeftOperandOfNumericOp,
+    //   PhanTypeSuspiciousEcho, PhanParamSignatureMismatch,
+    //   PhanTypeMismatchDefault, PhanPluginAlwaysReturnMethod
     'suppress_issue_types' => [
+        // ── Pre-existing suppressions ─────────────────────────────────────
         'PhanDeprecatedProperty',
         'PhanDeprecatedImplicitNullableParam',
         'PhanCompatibleNegativeStringOffset',
@@ -121,9 +132,64 @@ return [
         'PhanUndeclaredGlobalVariable',
         // Template files (*.tpl.php) use extract() and globals heavily.
         'PhanUndeclaredVariable',
-        // CommonObject is redefined in dev/phan/stubs.php to add $photo and $picto
-        // which are absent from the real class in htdocs/core/class/.
+        // CommonObject is redefined in dev/phan/stubs.php to add $photo/$picto.
         'PhanRedefinedClassReference',
+
+        // ── Dynamic properties (Dolibarr relies on them heavily) ──────────
+        // Too many false positives; PHPStan is more reliable for this.
+        'PhanUndeclaredProperty',
+
+        // ── Undeclared methods / classes ──────────────────────────────────
+        // PHPStan covers these more reliably with full type inference.
+        'PhanUndeclaredMethod',
+        // Third-party or runtime-loaded classes not worth stubbing.
+        'PhanUndeclaredClass',
+        'PhanUndeclaredExtendedClass',
+        // Dolibarr uses static calls on string class names (legacy pattern).
+        'PhanUndeclaredStaticMethod',
+
+        // ── Dynamic constants ─────────────────────────────────────────────
+        // STATUS_* constants are declared dynamically per object type.
+        'PhanUndeclaredConstantOfClass',
+        // MAIN_DB_PREFIX and similar are defined at runtime by main.inc.php.
+        'PhanUndeclaredConstant',
+
+        // ── Runtime-defined global functions ─────────────────────────────
+        // llxHeader, llxFooter, etc. are defined by Dolibarr's include chain.
+        'PhanUndeclaredFunction',
+
+        // ── Stub / inheritance conflicts ──────────────────────────────────
+        // Caused by CommonObject / DolibarrModules stub redeclarations.
+        'PhanRedefinedExtendedClass',
+        // $picto property type differs between stub and real CommonObject.
+        'PhanIncompatibleRealPropertyType',
+
+        // ── Variable scope (Dolibarr global variable pattern) ─────────────
+        'PhanPossiblyUndeclaredGlobalVariable',
+        'PhanPossiblyUndeclaredVariable',
+
+        // ── Plugin noise ──────────────────────────────────────────────────
+        // RedundantAssignment fires on global-scope bootstrap assignments.
+        'PhanPluginRedundantAssignmentInGlobalScope',
+        // DuplicateArrayKey fires on modSaturne's $this->tabs array literal.
+        'PhanPluginDuplicateArrayKeyExpression',
+
+        // ── Dolibarr legacy patterns ──────────────────────────────────────
+        // Dolibarr core calls static methods on instances in several places.
+        'PhanStaticCallToNonStatic',
+
+        // ── Deprecated functions ──────────────────────────────────────────
+        // strftime() is used for date formatting, not worth fixing now.
+        'PhanDeprecatedFunction',
+        'PhanDeprecatedFunctionInternal',
+
+        // ── PHP version compatibility ─────────────────────────────────────
+        // CI targets PHP 8.1 only; PHP 7 compatibility is not a goal.
+        'PhanCompatiblePHP7',
+
+        // ── Miscellaneous noise ───────────────────────────────────────────
+        // __METHOD__ inside closures triggers this warning spuriously.
+        'PhanSuspiciousMagicConstant',
     ],
 
     // Exclude files whose class declarations would duplicate what Phan already
