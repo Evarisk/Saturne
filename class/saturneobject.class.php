@@ -365,11 +365,11 @@ abstract class SaturneObject extends CommonObject
     /**
      * Set deleted status
      *
-     * @param  User     $user      Object user that modify
-     * @param  int|bool $notrigger 1/true = Does not execute triggers, 0/false = Execute triggers
-     * @return int                 0 < if KO, > 0 if OK
+     * @param  User $user      Object user that modify
+     * @param  bool $notrigger false = launch triggers after, true = disable triggers
+     * @return int             0 < if KO, > 0 if OK
      */
-    public function setDeleted(User $user, $notrigger = 0): int
+    public function setDeleted(User $user, bool $notrigger = false): int
     {
         return $this->setStatusCommon($user, $this::STATUS_DELETED, $notrigger, strtoupper($this->element) . '_DELETE');
     }
@@ -532,11 +532,11 @@ abstract class SaturneObject extends CommonObject
     /**
      * Return the status
      *
-     * @param  int|string $status ID status
-     * @param  int        $mode   0 = long label, 1 = short label, 2 = Picto + short label, 3 = Picto, 4 = Picto + long label, 5 = Short label + Picto, 6 = Long label + Picto
-     * @return string             Label of status
+     * @param  int    $status ID status
+     * @param  int    $mode   0 = long label, 1 = short label, 2 = Picto + short label, 3 = Picto, 4 = Picto + long label, 5 = Short label + Picto, 6 = Long label + Picto
+     * @return string         Label of status
      */
-    public function LibStatut($status, int $mode = 0): string
+    public function LibStatut(int $status, int $mode = 0): string
     {
        return '';
     }

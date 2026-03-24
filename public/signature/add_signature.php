@@ -94,7 +94,7 @@ $source  = GETPOST('source', 'aZ09');
 // Initialize technical objects
 $classname = ucfirst($objectType);
 $object    = new $classname($db);
-if (GETPOSTISSET('document_type') && $fileExists) {
+if (GETPOSTISSET('document_type') && $fileExists && is_string($documentType) && class_exists($documentType)) {
     $document = new $documentType($db);
 }
 $signatory = new SaturneSignature($db, $moduleNameLowerCase, $objectType);

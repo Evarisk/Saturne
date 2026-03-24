@@ -454,7 +454,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
                                 foreach ($objectLists as $objectKeyList => $objectList) {
                                     $objectListArray[$objectKeyList] = $objectList->ref;
                                 }
-                                $saturneMoreHtmlRef .= img_picto($langs->trans($moreParams['title']), $moreParams['picto'], 'class="pictofixedwidth"') . $form::selectarray($objectKey, $objectListArray, $object->$objectKey, 1, 0, '', 1, 0, 0, '', 'maxwidth500 widthcentpercentminusx');
+                                $saturneMoreHtmlRef .= img_picto($langs->trans($moreParams['title']), $moreParams['picto'], 'class="pictofixedwidth"') . $form::selectarray($objectKey, $objectListArray, $object->$objectKey, 1, 0, '', '', 0, 0, '', 'maxwidth500 widthcentpercentminusx');
                             }
                         }
                         $saturneMoreHtmlRef .= '<input type="submit" class="button valignmiddle" value="' . $langs->trans('Modify') . '">';

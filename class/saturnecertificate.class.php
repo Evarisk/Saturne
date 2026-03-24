@@ -338,11 +338,11 @@ class SaturneCertificate extends SaturneObject
      * Existing categories are left untouched.
      *
      * @param  int[]|int $categories Category or categories IDs.
-     * @return string
+     * @return float|int
      */
-    public function setCategories($categories): string
+    public function setCategories($categories): float|int
     {
-        return '';
+        return 0;
     }
 
     /**
@@ -388,7 +388,7 @@ class SaturneCertificate extends SaturneObject
                     }
                 }
             }
-            $this->output = $langs->transnoentities('CertificateExpired', $nbCertificate);
+            $this->output = $langs->transnoentities('CertificateExpired', (string) $nbCertificate);
         } else {
             $this->output = $langs->transnoentities('NoCertificate');
         }

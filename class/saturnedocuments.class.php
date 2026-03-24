@@ -117,7 +117,7 @@ class SaturneDocuments extends SaturneObject
     /**
      * @var string Import key.
      */
-    public $import_key = 0;
+    public $import_key = '';
 
     /**
      * @var int Status.

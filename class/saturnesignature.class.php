@@ -409,18 +409,6 @@ class SaturneSignature extends SaturneObject
     }
 
     /**
-     * Set deleted status
-     *
-     * @param  User $user      Object user that modify
-     * @param  int  $notrigger 1 = Does not execute triggers, 0 = Execute triggers
-     * @return int             0 < if KO, > 0 if OK
-     */
-    public function setDeleted(User $user, int $notrigger = 0): int
-    {
-        return $this->setStatusCommon($user, self::STATUS_DELETED, $notrigger, 'SATURNE_SIGNATURE_DELETE');
-    }
-
-    /**
      * Return the status
      *
      * @param  int    $status Id status

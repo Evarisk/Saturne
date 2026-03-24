@@ -3223,12 +3223,6 @@ parameters:
 			path: class/saturneobject.class.php
 
 		-
-			message: '#^Parameter \#2 \$notrigger of method SaturneObject\:\:setDeleted\(\) expects int, bool given\.$#'
-			identifier: argument.type
-			count: 1
-			path: class/saturneobject.class.php
-
-		-
 			message: '#^Variable \$linksForObject might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -3728,12 +3722,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method initHooks\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: class/saturnesignature.class.php
-
-		-
-			message: '#^Cannot call method setDeleted\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: class/saturnesignature.class.php
