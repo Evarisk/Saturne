@@ -821,17 +821,17 @@ class SaturneDocumentModel extends CommonDocGenerator
     /**
      * Function to build a document on disk
      *
-     * @param  SaturneDocuments $objectDocument  Object source to build document
-     * @param  Translate        $outputLangs     Lang object to use for output
-     * @param  string           $srcTemplatePath Full path of source filename for generator using a template file
-     * @param  int              $hideDetails     Do not show line details
-     * @param  int              $hideDesc        Do not show desc
-     * @param  int              $hideRef         Do not show ref
-     * @param  array            $moreParam       More param (Object/user/etc)
-     * @return int                               1 if OK, <=0 if KO
+     * @param SaturneDocuments|null $objectDocument  Object source to build document
+     * @param Translate|null        $outputLangs     Lang object to use for output
+     * @param  string               $srcTemplatePath Full path of source filename for generator using a template file
+     * @param  int                  $hideDetails     Do not show line details
+     * @param  int                  $hideDesc        Do not show desc
+     * @param  int                  $hideRef         Do not show ref
+     * @param  array                $moreParam       More param (Object/user/etc)
+     * @return int                                   1 if OK, <=0 if KO
      * @throws Exception
      */
-    public function write_file(SaturneDocuments $objectDocument, Translate $outputLangs, string $srcTemplatePath, int $hideDetails = 0, int $hideDesc = 0, int $hideRef = 0, array $moreParam): int
+    public function write_file(?SaturneDocuments $objectDocument, ?Translate $outputLangs, string $srcTemplatePath = '', int $hideDetails = 0, int $hideDesc = 0, int $hideRef = 0, array $moreParam = []): int
     {
         global $action, $conf, $hookmanager, $langs, $moduleNameLowerCase, $mysoc;
 
