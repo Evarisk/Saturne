@@ -151,14 +151,44 @@ css/scss/page/_mypage.scss
 
 ## 5. Build Workflow
 
-```bash
-npm start        # gulp watch — SCSS + JS with sourcemaps (run inside module dir)
-npm run build    # one-shot prod minification (if defined in module's package.json)
+### Lancer gulp en local
+
+**Windows CMD :**
+```cmd
+set MODULE_NAME=saturne && node node_modules/gulp/bin/gulp.js --gulpfile gulpfile-shared.js
 ```
 
-- `gulpfile.js` in saturne is the canonical build config; child modules reference `gulpfile-shared.js`
-- CI compiles and commits `.min.css` / `.min.js` automatically — **never commit them manually**
-- `.min` files are in `.gitignore`
+**Linux / macOS / PowerShell :**
+```bash
+npm start   # équivalent, défini dans package.json via cross-env
+```
+
+**Tâches disponibles :**
+
+| Commande | Description |
+|----------|-------------|
+| `default` | Compile SCSS + JS puis lance le watch (dev) |
+| `build` | Compilation prod one-shot, minifiée, sans sourcemaps |
+| `scss_core` | SCSS dev uniquement (sourcemaps + minification) |
+| `js_backend` | JS concat + uglify uniquement |
+
+### Ce qui est compilé
+
+| Fichier | Local | CI/prod |
+|---------|-------|---------|
+| `css/saturne.min.css` | ✅ gulp (avec sourcemaps) | ✅ gulp `build` (sans sourcemaps) |
+| `js/saturne.min.js` | ✅ gulp | ✅ gulp `build` |
+| `css/saturne.min.css.map` | ✅ gulp (debug local) | ❌ jamais généré ni commité |
+
+### Git et assets compilés
+
+- La CI (`build-assets.yml`) compile et commite `.min.css` / `.min.js` automatiquement sur push vers `main` ou `develop` — **ne jamais les commiter manuellement**
+- Le sourcemap `.map` est dans `.gitignore` — uniquement utile en local pour le debug DevTools
+- En local, Git ignore les modifications sur les `.min` grâce à `assume-unchanged` :
+  ```bash
+  git update-index --assume-unchanged css/saturne.min.css
+  git update-index --assume-unchanged js/saturne.min.js
+  ```
 - Use `npm ci` in CI (reproducible installs from lock file), `npm install` locally
 
 ---
