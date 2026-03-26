@@ -220,7 +220,6 @@ class SaturneDashboard
                     case 'selectarray':
                             print '<span class="marginrightonly">' . $dashboardGraphFilter['title'] . '</span>';
                             print Form::selectarray($dashboardGraphFilter['filter'], $dashboardGraphFilter['values'], $dashboardGraphFilter['currentValue'], $dashboardGraphFilter['title'], 0, 0, '', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint', 0, 'hidden selected');
-                            print '</div>';
                         break;
 
                     default:
