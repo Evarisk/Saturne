@@ -1,3 +1,6 @@
+@use '../../variable/variable' as *;
+@use 'sass:color';
+
 /*--------------------------------------------------------------
 	Module : Loader
 	Version : 1.0.0
@@ -15,7 +18,7 @@
 	.loader-spin {
 		position: absolute;
 		border: 3px solid #a7a7a7;
-		border-top: 3px solid darken($color__primary, 40%);
+		border-top: 3px solid color.adjust($color__primary, $lightness: -40%);
 		border-radius: 50%;
 		width: 20px;
 		height: 20px;
