@@ -1,0 +1,176 @@
+/*--------------------------------------------------------------
+	Module : Filter Panel
+	Version : 1.0.0
+--------------------------------------------------------------*/
+
+#saturne-filter-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .35);
+  z-index: 10000;
+}
+
+#saturne-filter-panel {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 380px;
+  height: 100vh;
+  background: #fff;
+  box-shadow: -3px 0 24px rgba(0, 0, 0, .18);
+  z-index: 10001;
+  transition: right .28s cubic-bezier(.4, 0, .2, 1);
+  display: flex;
+  flex-direction: column;
+
+  .select2-container { width: 100% !important; }
+  .select2-container--open { z-index: 10002; }
+  .select2-dropdown { z-index: 10002 !important; }
+}
+
+.saturne-filter-select2-drop {
+  z-index: 10002 !important;
+}
+
+.saturne-filter-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid #e8e8e8;
+  background: #fafafa;
+  flex-shrink: 0;
+}
+
+.saturne-filter-panel-title {
+  font-size: 15px;
+  color: #333;
+
+  .fa-sliders-h {
+    margin-right: 8px;
+    color: #666;
+  }
+}
+
+.saturne-filter-btn-active .fa-sliders-h {
+  color: #3498db;
+}
+
+.saturne-filter-panel-close {
+  cursor: pointer;
+  font-size: 22px;
+  color: #999;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background .15s;
+
+  &:hover {
+    background: #eee;
+    color: #333;
+  }
+}
+
+.saturne-filter-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 20px 8px;
+}
+
+.saturne-filter-legend {
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  background: #f5f9f5;
+  border: 1px solid #d4edda;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #555;
+}
+
+.saturne-filter-legend-items {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.saturne-filter-legend-include,
+.saturne-filter-legend-exclude {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.saturne-filter-legend-include .far {
+  color: #27ae60;
+  font-size: 14px;
+}
+
+.saturne-filter-legend-exclude .far {
+  color: #c0392b;
+  font-size: 14px;
+}
+
+.saturne-filter-btn-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.saturne-filter-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #e74c3c;
+  color: #fff;
+  border-radius: 50%;
+  min-width: 18px;
+  height: 18px;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  padding: 0 3px;
+  line-height: 1;
+}
+
+.saturne-filter-mode-toggle {
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0 4px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.saturne-filter-mode-inc {
+  color: #27ae60;
+}
+
+.saturne-filter-mode-exc {
+  color: #c0392b;
+}
+
+.saturne-filter-panel-footer {
+  padding: 14px 20px;
+  border-top: 1px solid #e8e8e8;
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+  background: #fafafa;
+
+  .butAction,
+  .butActionDelete {
+    flex: 1;
+    padding: 10px 0;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  .butActionDelete {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

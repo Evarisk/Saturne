@@ -135,6 +135,20 @@ if (!empty($formMoreParams)) {
     }
 }
 
+// Remove disabled fields from $arrayfields before any loop — dropdown, panel, headers and loop all use this array
+foreach ($arrayfields as $afKey => $afField) {
+    if (empty($afField['enabled'])) {
+        unset($arrayfields[$afKey]);
+    }
+}
+
+// Apply user column preferences to $arrayfields now, so $panelFilterBody and all loops below use correct checked values
+$selectedFields = '';
+if ($mode != 'pwa' && $mode != 'kanban') {
+    $varPage        = $contextpage ?: $_SERVER['PHP_SELF'];
+    $selectedFields = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varPage, getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN'));
+}
+
 // Build side filter panel content
 // --------------------------------------------------------------------
 $panelFilterBody    = '';
@@ -217,7 +231,7 @@ if (isModEnabled('categorie') && $user->hasRight('categorie', 'read') && isset($
     $panelFilterBody .= '</select>';
 
     // Tag list
-    $panelFilterBody .= '<div id="cat_filter_tags_' . $elementId . '" style="display:flex;flex-wrap:wrap;gap:6px;min-height:4px">';
+    $panelFilterBody .= '<div id="cat_filter_tags_' . $elementId . '" class="saturne-cat-filter-tags" data-picker-id="cat_filter_picker_' . $elementId . '" data-cat-icon="' . dol_escape_htmltag($catIconJs) . '" data-cat-colors="' . dol_escape_htmltag($catColorsJs) . '">';
     foreach ($initialTags as $tag) {
         $isExcTag = $tag['mode'] === 'exc';
         $color    = $tag['color'];
@@ -227,13 +241,12 @@ if (isModEnabled('categorie') && $user->hasRight('categorie', 'read') && isset($
         $panelFilterBody .= ' data-catid="' . $tag['id'] . '" data-mode="' . $tag['mode'] . '" data-label="' . dol_escape_htmltag($tag['label']) . '" data-color="' . dol_escape_htmltag($color) . '">';
         $panelFilterBody .= '<span class="cat-sign" title="' . dol_escape_htmltag($langs->trans('ToggleIncludeExclude')) . '" style="display:flex;align-items:center;gap:3px;padding:4px 8px;background:' . $color . ';color:#fff;cursor:pointer;font-weight:bold">' . $catIcon . ' ' . $sign . '</span>';
         $panelFilterBody .= '<span style="display:flex;align-items:center;gap:6px;padding:4px 8px;background:#fff;color:#333"><span style="max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis' . ($isExcTag ? ';text-decoration:line-through' : '') . '">' . dol_escape_htmltag($tag['label']) . '</span>';
-        $panelFilterBody .= '<span class="cat-remove" title="' . dol_escape_htmltag($langs->trans('Remove')) . '" style="cursor:pointer;color:#aaa;font-size:14px;line-height:1;font-weight:bold" onmouseover="this.style.color=\'#333\'" onmouseout="this.style.color=\'#aaa\'">&times;</span></span>';
+        $panelFilterBody .= '<span class="cat-remove" title="' . dol_escape_htmltag($langs->trans('Remove')) . '" style="cursor:pointer;color:#aaa;font-size:14px;line-height:1;font-weight:bold">&times;</span></span>';
         $panelFilterBody .= '<input type="hidden" name="search_categories_filter[]" value="' . dol_escape_htmltag($tagVal) . '">';
         $panelFilterBody .= '</span>';
     }
     $panelFilterBody .= '</div>';
 
-    $panelFilterBody .= '<script>(function(){var picker=document.getElementById("cat_filter_picker_' . $elementId . '");var tags=document.getElementById("cat_filter_tags_' . $elementId . '");var catIcon=' . $catIconJs . ';var catColors=' . $catColorsJs . ';var FALLBACK="#95a5a6";function esc(s){return s.replace(/[<>&"]/g,function(c){return{"<":"&lt;",">":"&gt;","&":"&amp;","\"":"&quot;"}[c];});}function getColor(id){return catColors[id]||FALLBACK;}if(typeof jQuery!=="undefined"&&jQuery.fn.select2){jQuery(picker).select2({width:"100%",dropdownParent:jQuery("body"),templateResult:function(o){if(!o.id)return o.text;var c=jQuery(o.element).data("color")||FALLBACK;return jQuery("<span>").append(jQuery("<span>").css({display:"inline-block",width:"10px",height:"10px",borderRadius:"50%",background:c,marginRight:"6px",verticalAlign:"middle"}),document.createTextNode(o.text));},templateSelection:function(o){if(!o.id)return o.text;var c=jQuery(o.element).data("color")||FALLBACK;return jQuery("<span>").append(jQuery("<span>").css({display:"inline-block",width:"10px",height:"10px",borderRadius:"50%",background:c,marginRight:"6px",verticalAlign:"middle"}),document.createTextNode(o.text));}}).on("select2:select",function(e){var o=e.params.data;buildTag(o.id,o.text,"inc");jQuery(picker).val("").trigger("change.select2");});}else{picker.addEventListener("change",function(){var o=picker.options[picker.selectedIndex];if(!o.value)return;buildTag(o.value,o.text,"inc");picker.selectedIndex=0;});}function removePO(id){var o=picker.querySelector("option[value=\""+id+"\"]");if(o)o.remove();if(typeof jQuery!=="undefined"&&jQuery.fn.select2)jQuery(picker).trigger("change.select2");}function restorePO(id,lbl,col){if(picker.querySelector("option[value=\""+id+"\"]"))return;var o=document.createElement("option");o.value=id;o.text=lbl;o.dataset.color=col;picker.appendChild(o);if(typeof jQuery!=="undefined"&&jQuery.fn.select2)jQuery(picker).trigger("change.select2");}function renderTag(id,lbl,col,mode){var exc=mode==="exc";var sign=exc?"\u2212":"+";var ls="max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"+(exc?";text-decoration:line-through":"");return"<span class=\"cat-sign\" style=\"display:flex;align-items:center;gap:3px;padding:4px 8px;background:"+col+";color:#fff;cursor:pointer;font-weight:bold\">"+catIcon+" "+sign+"</span>"+"<span style=\"display:flex;align-items:center;gap:6px;padding:4px 8px;background:#fff;color:#333\">"+"<span style=\""+ls+"\">"+esc(lbl)+"</span>"+"<span class=\"cat-remove\" style=\"cursor:pointer;color:#aaa;font-size:14px;line-height:1;font-weight:bold\">\u00d7</span>"+"</span>"+"<input type=\"hidden\" name=\"search_categories_filter[]\" value=\""+(exc?"-":"+")+id+"\">";}function buildTag(id,lbl,mode){if(tags.querySelector("[data-catid=\""+id+"\"]"))return;var col=getColor(id);var s=document.createElement("span");s.dataset.catid=id;s.dataset.mode=mode;s.dataset.label=lbl;s.dataset.color=col;s.style.cssText="display:inline-flex;align-items:stretch;border-radius:20px;overflow:hidden;border:2px solid "+col+";box-shadow:0 1px 4px rgba(0,0,0,.15);cursor:default;user-select:none;font-size:12px;line-height:1";s.innerHTML=renderTag(id,lbl,col,mode);removePO(id);bindTag(s);tags.appendChild(s);}function bindTag(s){s.querySelector(".cat-sign").addEventListener("click",function(e){e.stopPropagation();var m=s.dataset.mode==="inc"?"exc":"inc";s.dataset.mode=m;s.innerHTML=renderTag(s.dataset.catid,s.dataset.label,s.dataset.color,m);bindTag(s);});var r=s.querySelector(".cat-remove");r.addEventListener("mouseover",function(){r.style.color="#333";});r.addEventListener("mouseout",function(){r.style.color="#aaa";});r.addEventListener("click",function(e){e.stopPropagation();restorePO(s.dataset.catid,s.dataset.label,s.dataset.color);s.remove();});}tags.querySelectorAll("[data-catid]").forEach(bindTag);}());</script>';
 
     $panelFilterBody .= '</div>';
 }
@@ -270,7 +283,7 @@ foreach ($object->fields as $key => $val) {
             $isExc  = ($fMode === 'exc');
             $tAttr  = dol_escape_htmltag($fieldLabelPanel) . ' - ' . $toggleTitlePanel;
             $panelFilterBody .= '<input type="hidden" id="search_' . $key . '_mode" name="search_' . $key . '_mode" value="' . ($isExc ? 'exc' : 'inc') . '">';
-            $panelFilterBody .= '<span id="search_mode_toggle_' . $key . '" title="' . $tAttr . '" onclick="var i=document.getElementById(\'search_' . $key . '_mode\'),exc=i.value!==\'exc\';i.value=exc?\'exc\':\'inc\';this.innerHTML=exc?\'<span class=\\\'far fa-eye-slash\\\'></span>\':\'<span class=\\\'far fa-eye\\\'></span>\';this.style.color=exc?\'#c0392b\':\'#666\';" style="cursor:pointer;font-size:13px;padding:0 4px;flex-shrink:0;user-select:none;color:' . ($isExc ? '#c0392b' : '#666') . '">' . ($isExc ? '<span class="far fa-eye-slash"></span>' : '<span class="far fa-eye"></span>') . '</span>';
+            $panelFilterBody .= '<span id="search_mode_toggle_' . $key . '" title="' . $tAttr . '" class="saturne-filter-mode-toggle ' . ($isExc ? 'saturne-filter-mode-exc' : 'saturne-filter-mode-inc') . '">' . ($isExc ? '<span class="far fa-eye-slash"></span>' : '<span class="far fa-eye"></span>') . '</span>';
         }
         if (empty($val['searchmulti'])) {
             $panelFilterBody .= $form->selectarray('search_' . $key, $val['arrayofkeyval'], $search[$key] ?? '', 1, 0, 0, '', 1, 0, 0, '', 'maxwidth200' . ($key == 'status' ? ' search_status onrightofpage' : ''), 0);
@@ -282,7 +295,7 @@ foreach ($object->fields as $key => $val) {
         $isExc = ($fMode === 'exc');
         $tAttr = dol_escape_htmltag($fieldLabelPanel) . ' - ' . $toggleTitlePanel;
         $panelFilterBody .= '<input type="hidden" id="search_' . $key . '_mode" name="search_' . $key . '_mode" value="' . ($isExc ? 'exc' : 'inc') . '">';
-        $panelFilterBody .= '<span id="search_mode_toggle_' . $key . '" title="' . $tAttr . '" onclick="var i=document.getElementById(\'search_' . $key . '_mode\'),exc=i.value!==\'exc\';i.value=exc?\'exc\':\'inc\';this.innerHTML=exc?\'<span class=\\\'far fa-eye-slash\\\'></span>\':\'<span class=\\\'far fa-eye\\\'></span>\';this.style.color=exc?\'#c0392b\':\'#666\';" style="cursor:pointer;font-size:13px;padding:0 4px;flex-shrink:0;user-select:none;color:' . ($isExc ? '#c0392b' : '#666') . '">' . ($isExc ? '<span class="far fa-eye-slash"></span>' : '<span class="far fa-eye"></span>') . '</span>';
+        $panelFilterBody .= '<span id="search_mode_toggle_' . $key . '" title="' . $tAttr . '" class="saturne-filter-mode-toggle ' . ($isExc ? 'saturne-filter-mode-exc' : 'saturne-filter-mode-inc') . '">' . ($isExc ? '<span class="far fa-eye-slash"></span>' : '<span class="far fa-eye"></span>') . '</span>';
         ob_start();
         $showInputHtml = $object->showInputField($val, $key, $search[$key] ?? '', '', '', 'search_', $cssForFieldPanel . ' maxwidth200 saturne-panel-select', 1);
         ob_end_clean(); // discard ajax_combobox JS printed directly — panel will init select2 on open
@@ -309,16 +322,20 @@ foreach ($object->fields as $key => $val) {
     $panelFilterBody .= '</div>';
 }
 
-// Count active filters for badge on the toggle button
+// Count active filters for badge — mirrors the panel field visibility rules
 $activeFilterCount = 0;
-foreach ($search as $key => $val) {
-    if (!array_key_exists($key, $object->fields)) {
+foreach ($object->fields as $key => $val) {
+    if (empty($arrayfields['t.' . $key]['checked'])) {
         continue;
     }
-    if ($key === 'status' && ($val == -1 || $val === '')) {
+    if (!empty($val['disablesearch'])) {
         continue;
     }
-    if (is_array($val) ? !empty($val) : $val !== '') {
+    if (isset($val['visible']) && (int) $val['visible'] === 0) {
+        continue;
+    }
+    $searchVal = $search[$key] ?? '';
+    if (is_array($searchVal) ? !empty($searchVal) : ($searchVal !== '' && $searchVal != -1)) {
         $activeFilterCount++;
     }
 }
@@ -331,7 +348,10 @@ $newCardButton .= dolGetButtonTitle($langs->trans('ViewPwa'), '', 'fa fa-mobile 
 $cardButton     = dolGetButtonTitle($langs->trans('New' . ucfirst($object->element)), $helpText ?? '', 'fa fa-plus-circle', ($createUrl ?? dol_buildpath('custom/' . $object->module . '/view/' . $object->element . '/' . $object->element . '_card.php', 1) . '?action=create' . ($moreUrlParameters ?? '')), '', $permissiontoadd);
 
 // Filter panel toggle button — left side, in the title area
-$filterButton = dolGetButtonTitle($filterBtnLabel, '', 'fas fa-sliders-h', '#', 'saturne-filter-toggle', $activeFilterCount > 0 ? 2 : 1, ['morecss' => 'reposition', 'attr' => ['onclick' => 'saturneOpenFilter(); return false;']]);
+$filterButton = dolGetButtonTitle($filterBtnLabel, '', 'fas fa-sliders-h', '#', 'saturne-filter-toggle', $activeFilterCount > 0 ? 2 : 1, ['morecss' => 'reposition']);
+if ($activeFilterCount > 0) {
+    $filterButton = '<span class="saturne-filter-btn-wrapper">' . $filterButton . '<span class="saturne-filter-badge">' . $activeFilterCount . '</span></span>';
+}
 $listTitle    = (($conf->browser->layout == 'classic' && $mode != 'pwa') ? $title : '') . ' ' . $cardButton . ' ' . $filterButton;
 print_barre_liste($listTitle, $page, $_SERVER['PHP_SELF'], $param, $sortfield, $sortorder, $massActionButton, $num, $nbTotalOfRecords, $object->picto, 0, $newCardButton, '', $limit, 0, 0, 1);
 
@@ -356,19 +376,8 @@ if ($searchAll) {
 
 // Hook: extra content above the list (moreForFilter)
 $moreForFilter = '';
-<<<<<<< Updated upstream
-if (isModEnabled('categorie') && $user->hasRight('categorie', 'read') && isset($categorie->MAP_OBJ_CLASS[$object->element])) {
-    require_once DOL_DOCUMENT_ROOT . '/core/class/html.formcategory.class.php';
-    $formCategory   = new FormCategory($db);
-    $moreForFilter .= $formCategory->getFilterBox($object->element, $searchCategories);
-}
-
 $parameters = ['arrayfields' => &$arrayfields];
-$reshook    = $hookmanager->executeHooks('printFieldPreListTitle', $parameters, $object, $action);
-=======
-$parameters    = ['arrayfields' => &$arrayfields];
-$reshook       = $hookmanager->executeHooks('printFieldPreListTitle', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
->>>>>>> Stashed changes
+$reshook    = $hookmanager->executeHooks('printFieldPreListTitle', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
 if (empty($reshook)) {
     $moreForFilter .= $hookmanager->resPrint;
 } else {
@@ -380,81 +389,43 @@ if (!empty($moreForFilter)) {
     print '</div>';
 }
 
-$selectedFields = '';
-if ($mode != 'pwa' && $mode != 'kanban') {
-    $varPage        = $contextpage ?: $_SERVER['PHP_SELF'];
-    $selectedFields = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varPage, getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN'));
-}
 if (!empty($arrayOfMassActions)) {
     $selectedFields .= $form->showCheckAddButtons('checkforselect', 1);
 }
 
-<<<<<<< Updated upstream
-// You can use div-table-responsive-no-min if you don't need reserved height for your table
-print '<div class="div-table-responsive">';
-=======
 // Side filter panel (fixed overlay, inside the form)
 // --------------------------------------------------------------------
-print '<style>
-#saturne-filter-panel .select2-container { width: 100% !important; }
-#saturne-filter-panel .select2-container--open { z-index: 10002; }
-#saturne-filter-panel .select2-dropdown { z-index: 10002 !important; }
-.saturne-filter-select2-drop { z-index: 10002 !important; }
-.saturne-filter-btn-active .fa-sliders-h { color: #3498db; }
-</style>';
-print '<div id="saturne-filter-backdrop" onclick="saturneCloseFilter()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:10000"></div>';
-print '<div id="saturne-filter-panel" style="position:fixed;top:0;right:-400px;width:380px;height:100vh;background:#fff;box-shadow:-3px 0 24px rgba(0,0,0,.18);z-index:10001;transition:right .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column">';
+print '<div id="saturne-filter-backdrop"></div>';
+print '<div id="saturne-filter-panel">';
 
 // Panel header
-print '<div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid #e8e8e8;background:#fafafa;flex-shrink:0">';
-print '<strong style="font-size:15px;color:#333"><span class="fa fa-sliders-h" style="margin-right:8px;color:#666"></span>' . dol_escape_htmltag($filterBtnLabel) . '</strong>';
-print '<span onclick="saturneCloseFilter()" style="cursor:pointer;font-size:22px;color:#999;line-height:1;padding:2px 6px;border-radius:4px;transition:background .15s" onmouseover="this.style.background=\'#eee\';this.style.color=\'#333\'" onmouseout="this.style.background=\'transparent\';this.style.color=\'#999\'">&times;</span>';
+print '<div class="saturne-filter-panel-header">';
+print '<strong class="saturne-filter-panel-title"><span class="fa fa-sliders-h"></span>' . dol_escape_htmltag($filterBtnLabel) . '</strong>';
+print '<span class="saturne-filter-panel-close">&times;</span>';
 print '</div>';
 
 // Panel body
-print '<div style="flex:1;overflow-y:auto;padding:20px 20px 8px">';
+print '<div class="saturne-filter-panel-body">';
+
+// Legend notice explaining the eye/eye-slash toggle icons
+print '<div class="saturne-filter-legend">';
+print '<div class="saturne-filter-legend-items">';
+print '<span class="saturne-filter-legend-include"><span class="far fa-eye"></span> Inclure</span>';
+print '<span class="saturne-filter-legend-exclude"><span class="far fa-eye-slash"></span> Exclure</span>';
+print '</div>';
+print '</div>';
+
 print $panelFilterBody;
 print '</div>';
 
 // Panel footer
-print '<div style="padding:14px 20px;border-top:1px solid #e8e8e8;display:flex;gap:10px;flex-shrink:0;background:#fafafa">';
-print '<button type="submit" class="butAction" style="flex:1;padding:10px 0;font-size:14px">' . dol_escape_htmltag($applyBtnLabel) . '</button>';
-print '<a href="' . dol_escape_htmltag($_SERVER['PHP_SELF']) . '" class="butActionDelete" style="flex:1;padding:10px 0;font-size:14px;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center">' . dol_escape_htmltag($resetBtnLabel) . '</a>';
+print '<div class="saturne-filter-panel-footer">';
+print '<button type="submit" class="butAction">' . dol_escape_htmltag($applyBtnLabel) . '</button>';
+print '<a href="' . dol_escape_htmltag($_SERVER['PHP_SELF']) . '" class="butActionDelete">' . dol_escape_htmltag($resetBtnLabel) . '</a>';
 print '</div>';
 
 print '</div>'; // end #saturne-filter-panel
 
-print '<script>
-function saturneOpenFilter() {
-    document.getElementById("saturne-filter-backdrop").style.display = "block";
-    document.getElementById("saturne-filter-panel").style.right = "0";
-    document.body.style.overflow = "hidden";
-    // Re-init select2 after panel is visible to fix 0-width and z-index issues
-    if (typeof jQuery !== "undefined" && jQuery.fn.select2) {
-        setTimeout(function() {
-            jQuery("#saturne-filter-panel select").each(function() {
-                var jq = jQuery(this);
-                if (jq.data("select2")) {
-                    jq.select2("destroy");
-                }
-                jq.select2({
-                    width: "100%",
-                    dropdownParent: jQuery("body"),
-                    dropdownCssClass: "saturne-filter-select2-drop"
-                });
-            });
-        }, 50);
-    }
-}
-function saturneCloseFilter() {
-    document.getElementById("saturne-filter-backdrop").style.display = "none";
-    document.getElementById("saturne-filter-panel").style.right = "-400px";
-    document.body.style.overflow = "";
-}
-document.addEventListener("keydown", function(e) { if (e.key === "Escape") saturneCloseFilter(); });
-</script>';
-
 print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you don't need reserved height for your table
->>>>>>> Stashed changes
 print '<table class="tagtable nobottomiftotal noborder liste' . ($moreForFilter ? ' listwithfilterbefore' : '') . '">';
 print '<thead>';

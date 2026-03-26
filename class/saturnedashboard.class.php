@@ -219,8 +219,7 @@ class SaturneDashboard
                 switch ($dashboardGraphFilter['type']) {
                     case 'selectarray':
                             print '<span class="marginrightonly">' . $dashboardGraphFilter['title'] . '</span>';
-                            print Form::selectarray($dashboardGraphFilter['filter'], $dashboardGraphFilter['values'], $dashboardGraphFilter['currentValue'], $dashboardGraphFilter['title'], 0, 0, '', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint', 0, 'hidden selected');
-                            print '</div>';
+                            print Form::selectarray($dashboardGraphFilter['filter'], $dashboardGraphFilter['values'], $dashboardGraphFilter['currentValue'], $dashboardGraphFilter['title'], 0, 0, '', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint', 0, 'hidden selected', 0, 1);
                         break;
 
                     default:
@@ -245,7 +244,7 @@ class SaturneDashboard
         }
         print '</div>';
 
-        print '<div class="graph-dashboard wpeo-grid grid-2" id="graph-dashboard">';
+        print '<div class="graph-dashboard wpeo-grid grid-4" id="graph-dashboard">';
 
         if (!empty($dashboards['graphs']) && is_array($dashboards['graphs'])) {
             foreach ($dashboards['graphs'] as $dashboardGraphs) {

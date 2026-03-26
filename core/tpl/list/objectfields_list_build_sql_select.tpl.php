@@ -30,8 +30,6 @@
  * Variables  : $arrayfields, $excludeFields (optional), $fieldsToSearchAll, $offset, $search, $search_array_options (extrafields_list_search_sql.tpl), $searchCategories
  */
 
-<<<<<<< Updated upstream
-=======
 /** @var DoliDB $db */
 /** @var CommonObject $object */
 // Pre-compute LEFT JOINs + searchable columns for integer:/sellist: FK fields used in search_all
@@ -102,7 +100,7 @@ if (!empty($searchAll)) {
             $saFields   = !empty($saTmpObj->fields) ? $saTmpObj->fields : [];
             $saCols     = [];
 
-            // 2. Fields with searchall=>1 on the referenced object (text cols only)
+            // Fields with searchall=>1 on the referenced object (text cols only)
             foreach ($saFields as $srKey => $srDef) {
                 if (empty($srDef['searchall'])) {
                     continue;
@@ -117,7 +115,7 @@ if (!empty($searchAll)) {
                 }
             }
 
-            // 3. Fallback: common label candidates validated against $saFields
+            // Fallback: common label candidates validated against $saFields
             if (empty($saCols)) {
                 foreach (['ref', 'label', 'nom', 'name', 'title', 'libelle', 'code', 'login', 'batch', 'lastname', 'firstname'] as $candidate) {
                     if (isset($saFields[$candidate])) {
@@ -129,7 +127,7 @@ if (!empty($searchAll)) {
                 }
             }
 
-            // 4. Last resort: first varchar/text field in the referenced object's fields
+            // Last resort: first varchar/text field in the referenced object's fields
             if (empty($saCols) && !empty($saFields)) {
                 foreach ($saFields as $frKey => $frDef) {
                     $frType = isset($frDef['type']) ? $frDef['type'] : '';
@@ -152,7 +150,6 @@ if (!empty($searchAll)) {
     }
 }
 
->>>>>>> Stashed changes
 // Build and execute select
 // --------------------------------------------------------------------
 $sql  = 'SELECT';
@@ -273,118 +270,6 @@ foreach ($search as $key => $val) {
         }
     }
 }
-if ($searchAll && false) { // legacy subquery code — replaced by JOIN approach above
-    $orClauses       = [];
-    $fkKeysProcessed = [];
-    $resolveRefField = function ($key, $ftype) use ($db, $searchAll, &$fkKeysProcessed) {
-        if (in_array($key, $fkKeysProcessed)) {
-            return null;
-        }
-        $fkKeysProcessed[] = $key;
-        $safeKey           = $db->sanitize($key);
-        $escaped           = $db->escape($searchAll);
-
-        if (strpos($ftype, 'sellist:') === 0) {
-            $parts = explode(':', $ftype);
-            if (count($parts) < 3) {
-                return null;
-            }
-            $refTable = $db->prefix() . $db->sanitize($parts[1]);
-            $labelCol = $db->sanitize($parts[2]);
-            $idCol    = !empty($parts[3]) ? $db->sanitize($parts[3]) : 'rowid';
-            // EXISTS correlated subquery — avoids MySQL/MariaDB optimizer bug with IN(SELECT)
-            return "EXISTS (SELECT 1 FROM " . $refTable . " WHERE " . $idCol . " = t." . $safeKey . " AND " . $labelCol . " LIKE '%" . $escaped . "%')";
-        }
-
-        if (strpos($ftype, 'integer:') === 0) {
-            $parts     = explode(':', $ftype);
-            $className = !empty($parts[1]) ? $parts[1] : '';
-            $classFile = !empty($parts[2]) ? DOL_DOCUMENT_ROOT . '/' . $parts[2] : '';
-            if (!$className || !$classFile || !file_exists($classFile)) {
-                return null;
-            }
-            if (!class_exists($className)) {
-                require_once $classFile;
-            }
-            if (!class_exists($className)) {
-                return null;
-            }
-            $tmpObj   = new $className($db);
-            $refTable = $db->prefix() . $tmpObj->table_element;
-            $idCol    = !empty($parts[3]) ? $db->sanitize($parts[3]) : 'rowid';
-
-            // Explicit label col from type definition
-            $labelCols = [];
-            if (!empty($parts[4])) {
-                $labelCols[] = $db->sanitize($parts[4]);
-            }
-            // All searchall text fields of the referenced object
-            if (!empty($tmpObj->fields)) {
-                foreach ($tmpObj->fields as $rKey => $rDef) {
-                    if (empty($rDef['searchall'])) {
-                        continue;
-                    }
-                    $rType = isset($rDef['type']) ? $rDef['type'] : '';
-                    if (strpos($rType, 'integer:') === 0 || strpos($rType, 'sellist:') === 0) {
-                        continue;
-                    }
-                    $s = $db->sanitize($rKey);
-                    if (!in_array($s, $labelCols)) {
-                        $labelCols[] = $s;
-                    }
-                }
-            }
-            // Fallback
-            if (empty($labelCols)) {
-                $labelCols = ['ref', 'label'];
-            }
-
-            $innerParts = [];
-            foreach ($labelCols as $lc) {
-                $innerParts[] = $lc . " LIKE '%" . $escaped . "%'";
-            }
-            // EXISTS correlated subquery — avoids MySQL/MariaDB optimizer bug with IN(SELECT)
-            return "EXISTS (SELECT 1 FROM " . $refTable . " WHERE " . $idCol . " = t." . $safeKey . " AND (" . implode(' OR ', $innerParts) . "))";
-        }
-
-        return null;
-    };
-
-    // Pass 1 — fields explicitly listed in $fieldsToSearchAll
-    foreach (array_keys($fieldsToSearchAll) as $sqlField) {
-        $key   = preg_replace('/^[a-zA-Z]+\./', '', $sqlField);
-        $ftype = isset($object->fields[$key]['type']) ? $object->fields[$key]['type'] : '';
-
-        if (strpos($ftype, 'sellist:') === 0 || strpos($ftype, 'integer:') === 0) {
-            $clause = $resolveRefField($key, $ftype);
-            if ($clause !== null) {
-                $orClauses[] = $clause;
-            }
-        } else {
-            $orClauses[] = $sqlField . " LIKE '%" . $db->escape($searchAll) . "%'";
-        }
-    }
-
-    // Pass 2 — ALL integer:/sellist: fields in $object->fields not already handled
-    // This catches FK fields that don't have searchall=>1 but are still useful for label search
-    foreach ($object->fields as $key => $def) {
-        if (empty($arrayfields['t.' . $key]['checked'])) {
-            continue; // only visible columns
-        }
-        $ftype = isset($def['type']) ? $def['type'] : '';
-        if (strpos($ftype, 'integer:') !== 0 && strpos($ftype, 'sellist:') !== 0) {
-            continue;
-        }
-        $clause = $resolveRefField($key, $ftype);
-        if ($clause !== null) {
-            $orClauses[] = $clause;
-        }
-    }
-
-    if (!empty($orClauses)) {
-        $sql .= ' AND (' . implode(' OR ', $orClauses) . ')';
-    }
-}
 
 if ($searchAll) {
     $orClauses = [];
@@ -456,12 +341,6 @@ if (!getDolGlobalInt('MAIN_DISABLE_FULL_SCANLIST')) {
 
 // Complete request and execute it with limit
 $sql .= $db->order($sortfield, $sortorder);
-//if (array_key_exists($sortfield, $elementElementFields)) {
-//$sql .= $db->order($elementElementFields[$sortfield] . '.fk_source ', $sortorder);
-//}
-//if ($sortfield == 'days_remaining_before_next_control') {
-//    $sql .= $db->order('next_control_date', $sortorder);
-//}
 if ($limit) {
     $sql .= $db->plimit($limit + 1, $offset);
 }
