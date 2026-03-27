@@ -38,6 +38,11 @@ $searchAllLinkedFields = [];
 
 if ($searchAll) {
     foreach ($object->fields as $key => $field) {
+        // Skip fields explicitly excluded (virtual/computed fields not in the DB table)
+        if (!empty($excludeFields) && in_array($key, $excludeFields)) {
+            continue;
+        }
+
         $isCheckedInArrayFields = !empty($arrayfields['t.' . $key]['checked']);
 
         // Include field if it has searchall OR if it is checked in the visible fields list
@@ -52,8 +57,6 @@ if ($searchAll) {
             $res = dol_include_once($linkedClassPath);
 
             if ($res) {
-                require_once $fullClassPath;
-
                 if (class_exists($linkedClassName)) {
                     $linkedObject = new $linkedClassName($db);
 

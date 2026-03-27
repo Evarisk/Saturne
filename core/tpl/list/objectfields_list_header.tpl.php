@@ -401,7 +401,7 @@ print '</div>';
 // Panel footer
 print '<div class="saturne-filter-panel-footer">';
 print '<button type="submit" class="butAction">' . dol_escape_htmltag($applyBtnLabel) . '</button>';
-print '<a href="' . dol_escape_htmltag($_SERVER['PHP_SELF']) . '" class="butActionDelete">' . dol_escape_htmltag($resetBtnLabel) . '</a>';
+print '<button type="submit" class="liste_titre button_removefilter reposition" name="button_removefilter_x" value="x"><span class="fas fa-times"></span> ' . dol_escape_htmltag($resetBtnLabel) . '</button>';
 print '</div>';
 
 print '</div>'; // end #saturne-filter-panel
