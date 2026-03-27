@@ -332,7 +332,7 @@ $cardButton     = dolGetButtonTitle($langs->trans('New' . ucfirst($object->eleme
 // Filter panel toggle button — left side, in the title area
 $filterButton = dolGetButtonTitle($filterBtnLabel, '', 'fas fa-sliders-h', '#', 'saturne-filter-toggle', $activeFilterCount > 0 ? 2 : 1, ['morecss' => 'reposition']);
 if ($activeFilterCount > 0) {
-    $filterButton = '<span class="saturne-filter-btn-wrapper">' . $filterButton . '<span class="saturne-filter-badge">' . $activeFilterCount . '</span></span>';
+    $filterButton = '<span class="saturne-filter-btn-wrapper">' . $filterButton . dolGetBadge((string) $activeFilterCount, '', 'secondary') . '</span>';
 }
 $listTitle    = (($conf->browser->layout == 'classic' && $mode != 'pwa') ? $title : '') . ' ' . $cardButton . ' ' . $filterButton;
 print_barre_liste($listTitle, $page, $_SERVER['PHP_SELF'], $param, $sortfield, $sortorder, $massActionButton, $num, $nbTotalOfRecords, $object->picto, 0, $newCardButton, '', $limit, 0, 0, 1);
