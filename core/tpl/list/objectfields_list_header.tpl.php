@@ -149,24 +149,12 @@ $useSideFilterPanel = true;
 
 // Panel i18n labels
 $filterBtnLabel = $langs->trans('Filters');
-if ($filterBtnLabel === 'Filters') {
-    $filterBtnLabel = 'Filtres';
-}
-$applyBtnLabel = $langs->trans('Apply');
-if ($applyBtnLabel === 'Apply') {
-    $applyBtnLabel = 'Appliquer';
-}
-$resetBtnLabel = $langs->trans('Reset');
-if ($resetBtnLabel === 'Reset') {
-    $resetBtnLabel = 'Réinitialiser';
-}
+$applyBtnLabel  = $langs->trans('Apply');
+$resetBtnLabel  = $langs->trans('ResetFilters');
 
 // 0. Global search_all field (if used by calling page)
 if (!empty($fieldsToSearchAll)) {
-    $searchAllPlaceholder = $langs->trans('Search');
-    if ($searchAllPlaceholder === 'Search') {
-        $searchAllPlaceholder = 'Rechercher dans tous les champs…';
-    }
+    $searchAllPlaceholder = $langs->trans('SearchInAllFields');
     $panelFilterBody .= '<div class="saturne-filter-search-all-wrapper">';
     $panelFilterBody .= '<input type="text" class="flat saturne-filter-search-all-input" name="search_all" id="panel_search_all" placeholder="' . dol_escape_htmltag($searchAllPlaceholder) . '" value="' . dol_escape_htmltag($searchAll ?? '') . '">';
     $panelFilterBody .= '</div>';
@@ -269,6 +257,7 @@ foreach ($object->fields as $key => $val) {
     $panelFilterBody .= '<div class="saturne-filter-field-label">' . dol_escape_htmltag($fieldLabelPanel) . '</div>';
     $panelFilterBody .= '<div class="saturne-filter-field-input">';
 
+    // @Todo use showinputfield for all types to benefit from all field definition options (like arrayofkeyval, type=integer:sellist, etc.) instead of only relying on type for field rendering and losing some options in the process (like searchmulti for arrayofkeyval)
     if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) {
         $showToggle = ($key !== 'status');
         if ($showToggle) {
@@ -284,15 +273,13 @@ foreach ($object->fields as $key => $val) {
             $panelFilterBody .= $form->multiselectarray('search_' . $key, $val['arrayofkeyval'], $search[$key] ?? '', 0, 0, 'maxwidth200' . ($key == 'status' ? ' search_status onrightofpage' : ''), 1, '100%', '', 0);
         }
     } elseif (isset($val['type']) && ((strpos($val['type'], 'integer:') === 0) || (strpos($val['type'], 'sellist:') === 0))) {
+        $object->fields[$key]['visible'] = 1; // With visible = 2 the content is hidden
         $fMode = GETPOST('search_' . $key . '_mode', 'alpha') ?: 'inc';
         $isExc = ($fMode === 'exc');
         $tAttr = dol_escape_htmltag($fieldLabelPanel) . ' - ' . $toggleTitlePanel;
         $panelFilterBody .= '<input type="hidden" id="search_' . $key . '_mode" name="search_' . $key . '_mode" value="' . ($isExc ? 'exc' : 'inc') . '">';
         $panelFilterBody .= '<span id="search_mode_toggle_' . $key . '" title="' . $tAttr . '" class="saturne-filter-mode-toggle ' . ($isExc ? 'saturne-filter-mode-exc' : 'saturne-filter-mode-inc') . '">' . ($isExc ? '<span class="far fa-eye-slash"></span>' : '<span class="far fa-eye"></span>') . '</span>';
-        ob_start();
-        $showInputHtml = $object->showInputField($val, $key, $search[$key] ?? '', '', '', 'search_', $cssForFieldPanel . ' maxwidth200 saturne-panel-select', 1);
-        ob_end_clean(); // discard ajax_combobox JS printed directly — panel will init select2 on open
-        $panelFilterBody .= $showInputHtml;
+        $panelFilterBody .= $object->showInputField($val, $key, $search[$key] ?? '', '', '', 'search_', $cssForFieldPanel . ' maxwidth200 saturne-panel-select', 1);
     } elseif (isset($val['type']) && in_array($val['type'], ['date', 'datetime', 'timestamp'])) {
         $panelFilterBody .= '<div class="saturne-filter-date-wrapper">'
             . '<div class="nowrap">' . $form->selectDate($search[$key . '_dtstart'] ?? '', 'search_' . $key . '_dtstart', 0, 0, 1, '', 1, 0, 0, '', '', '', '', 1, '', $langs->trans('From')) . '</div>'

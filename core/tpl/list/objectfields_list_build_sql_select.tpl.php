@@ -38,7 +38,10 @@ $searchAllLinkedFields = [];
 
 if ($searchAll) {
     foreach ($object->fields as $key => $field) {
-        if (empty($field['searchall'])) {
+        $isCheckedInArrayFields = !empty($arrayfields['t.' . $key]['checked']);
+
+        // Include field if it has searchall OR if it is checked in the visible fields list
+        if (empty($field['searchall']) && !$isCheckedInArrayFields) {
             continue;
         }
 
@@ -46,12 +49,9 @@ if ($searchAll) {
             $typeParts       = explode(':', $field['type']);
             $linkedClassName = $typeParts[1];
             $linkedClassPath = $typeParts[2];
-            $fullClassPath = DOL_DOCUMENT_ROOT . '/' . $linkedClassPath;
-            if (!file_exists($fullClassPath)) {
-                $fullClassPath = DOL_DOCUMENT_ROOT . '/custom/' . $linkedClassPath;
-            }
+            $res = dol_include_once($linkedClassPath);
 
-            if (file_exists($fullClassPath)) {
+            if ($res) {
                 require_once $fullClassPath;
 
                 if (class_exists($linkedClassName)) {
