@@ -1,3 +1,5 @@
+@use '../../variable/variable' as *;
+
 /** Reset des champs de base */
 .wpeo-form {
   input, textarea, select {

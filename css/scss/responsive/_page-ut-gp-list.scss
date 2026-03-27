@@ -1,3 +1,6 @@
+@use '../variable/variable' as *;
+@use 'sass:color';
+
 @media ( max-width: $media__large ) {
   #id-container.page-ut-gp-list .side-nav {
     display: inline-block;
@@ -22,7 +25,7 @@
 
       &:hover {
         cursor: pointer;
-        background: lighten( $color__secondary, 20% );
+        background: color.adjust($color__secondary, $lightness: 20%);
       }
     }
     #id-left {

@@ -1,3 +1,5 @@
+@use '../../variable/variable' as *;
+
 #recording-indicator {
   display: none;
   color: $color__red;

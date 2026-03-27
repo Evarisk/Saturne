@@ -1,3 +1,6 @@
+@use '../../variable/variable' as *;
+@use 'modal-flex';
+
 /*--------------------------------------------------------------
 	Module : Modal
 	Version : 1.0.0
@@ -143,4 +146,3 @@
   }
 }
 
-@import "modal-flex";

@@ -1,8 +1,8 @@
-@import "variable/variable";
-@import "components/components";
-@import "element/element";
-@import "modules/modules";
-@import "page/page";
+@use "variable/variable";
+@use "components/components";
+@use "element/element";
+@use "modules/modules";
+@use "page/page";
 
 .ui-dialog.ui-corner-all.ui-widget.ui-widget-content.ui-front.ui-draggable.ui-resizable.preview-photo {
   z-index: 2100 !important;

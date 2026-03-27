@@ -1,3 +1,7 @@
+@use '../../variable/variable' as *;
+@use 'sass:color';
+@use 'sass:list';
+
 /*--------------------------------------------------------------
   Module : Notice Status
   Version : 2.0.0
@@ -30,7 +34,7 @@
     margin: 0.25em 1em;
 
     &:hover {
-      color: darken($color, 10%);
+      color: color.adjust($color, $lightness: -10%);
       text-decoration: underline;
     }
   }
@@ -52,8 +56,8 @@ $notice-status: (
 --------------------------------------------------------------*/
 .wpeo-notice {
   @each $status, $values in $notice-status {
-    $color: nth($values, 1);
-    $icon: nth($values, 2);
+    $color: list.nth($values, 1);
+    $icon: list.nth($values, 2);
 
     &.notice-#{$status} {
       @include notice-status($color, $icon);
