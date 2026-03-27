@@ -24,11 +24,12 @@ const paths = {
     js_backend: [modulePrefix + 'js/' + moduleName + '.js', modulePrefix + 'js/modules/*.js']
 };
 
-/** SCSS — dev : sourcemaps inline, pas de minification */
+/** SCSS — dev : sourcemaps inline, minifié */
 gulp.task('scss_core', function() {
     return gulp.src(paths.scss_core[0])
         .pipe(sourcemaps.init())
         .pipe(sass().on('error', sass.logError))
+        .pipe(cleanCSS())
         .pipe(rename('./' + moduleName + '.min.css'))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(paths.scss_core[1]));
