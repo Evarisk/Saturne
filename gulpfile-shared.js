@@ -17,9 +17,11 @@ if (!moduleName) {
     );
 }
 
+const modulePrefix = (moduleName === 'saturne') ? '' : '../' + moduleName + '/';
+
 const paths = {
-    scss_core:  ['css/scss/**/*.scss', 'css/'],
-    js_backend: ['js/' + moduleName + '.js', 'js/modules/*.js']
+    scss_core:  [modulePrefix + 'css/scss/**/*.scss', modulePrefix + 'css/'],
+    js_backend: [modulePrefix + 'js/' + moduleName + '.js', modulePrefix + 'js/modules/*.js']
 };
 
 /** SCSS — dev : sourcemaps inline, pas de minification */
@@ -46,7 +48,7 @@ gulp.task('js_backend', function() {
     return gulp.src(paths.js_backend)
         .pipe(concat(moduleName + '.min.js'))
         .pipe(uglify())
-        .pipe(gulp.dest('./js/'));
+        .pipe(gulp.dest(modulePrefix + 'js/'));
 });
 
 /** Build prod — one-shot, minifié, sans sourcemaps */
