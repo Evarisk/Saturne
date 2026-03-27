@@ -244,7 +244,7 @@ class SaturneDashboard
         }
         print '</div>';
 
-        print '<div class="graph-dashboard wpeo-grid grid-4" id="graph-dashboard">';
+        print '<div class="graph-dashboard wpeo-grid grid-2" id="graph-dashboard">';
 
         if (!empty($dashboards['graphs']) && is_array($dashboards['graphs'])) {
             foreach ($dashboards['graphs'] as $dashboardGraphs) {
