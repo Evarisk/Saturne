@@ -1,5 +1,7 @@
 'use strict';
 
+const path       = require('path');
+const fs         = require('fs');
 const gulp       = require('gulp');
 const sass       = require('gulp-sass')(require('sass'));
 const rename     = require('gulp-rename');
@@ -17,11 +19,28 @@ if (!moduleName) {
     );
 }
 
-const modulePrefix = (moduleName === 'saturne') ? '' : '../' + moduleName + '/';
+// Resolve the module root as an absolute path so the same gulpfile works in
+// both layouts without depending on cwd:
+//
+//   Sibling layout (local dev):
+//     __dirname = .../custom/saturne
+//     module    = .../custom/{moduleName}   ← exists one level up
+//
+//   Subfolder layout (CI — saturne checked out as .saturne inside the module):
+//     __dirname = .../custom/{moduleName}/.saturne
+//     module    = .../custom/{moduleName}   ← parent of __dirname
+//
+let moduleRoot;
+if (moduleName === 'saturne') {
+    moduleRoot = __dirname;
+} else {
+    const siblingPath = path.join(__dirname, '..', moduleName);
+    moduleRoot = fs.existsSync(siblingPath) ? siblingPath : path.join(__dirname, '..');
+}
 
 const paths = {
-    scss_core:  [modulePrefix + 'css/scss/**/*.scss', modulePrefix + 'css/'],
-    js_backend: [modulePrefix + 'js/' + moduleName + '.js', modulePrefix + 'js/modules/*.js']
+    scss_core:  [path.join(moduleRoot, 'css/scss/**/*.scss'), path.join(moduleRoot, 'css/')],
+    js_backend: [path.join(moduleRoot, 'js/' + moduleName + '.js'), path.join(moduleRoot, 'js/modules/*.js')]
 };
 
 /** SCSS — dev : sourcemaps inline, minifié */
@@ -49,7 +68,7 @@ gulp.task('js_backend', function() {
     return gulp.src(paths.js_backend)
         .pipe(concat(moduleName + '.min.js'))
         .pipe(uglify())
-        .pipe(gulp.dest(modulePrefix + 'js/'));
+        .pipe(gulp.dest(path.join(moduleRoot, 'js/')));
 });
 
 /** Build prod — one-shot, minifié, sans sourcemaps */
