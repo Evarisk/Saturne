@@ -135,13 +135,6 @@ if (!empty($formMoreParams)) {
     }
 }
 
-// Remove disabled fields from $arrayfields before any loop — dropdown, panel, headers and loop all use this array
-foreach ($arrayfields as $afKey => $afField) {
-    if (empty($afField['enabled'])) {
-        unset($arrayfields[$afKey]);
-    }
-}
-
 // Apply user column preferences to $arrayfields now, so $panelFilterBody and all loops below use correct checked values
 $selectedFields = '';
 if ($mode != 'pwa' && $mode != 'kanban') {
