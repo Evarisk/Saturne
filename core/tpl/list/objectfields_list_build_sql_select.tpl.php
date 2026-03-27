@@ -46,7 +46,7 @@ if ($searchAll) {
         $isCheckedInArrayFields = !empty($arrayfields['t.' . $key]['checked']);
 
         // Include field if it has searchall OR if it is checked in the visible fields list
-        if (empty($field['searchall']) && !$isCheckedInArrayFields) {
+        if (empty($field['searchall']) || !$isCheckedInArrayFields) {
             continue;
         }
 
