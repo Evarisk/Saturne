@@ -40,7 +40,7 @@ print '<tr class="liste_titre">';
 // Action column
 if (getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
     $removeFilterBtn = !empty($useSideFilterPanel) ? '<button type="submit" class="liste_titre button_removefilter reposition" name="button_removefilter_x" value="x"><span class="fas fa-times"></span></button>' : '';
-    print getTitleFieldOfList($selectedFields . $removeFilterBtn, 0, $_SERVER['PHP_SELF'], '', '', '', '', $sortfield, $sortorder, 'center ');
+    print getTitleFieldOfList($selectedFields . $removeFilterBtn, 0, $_SERVER['PHP_SELF'], '', '', '', '', $sortfield, $sortorder, 'center maxwidthsearch ');
     $totalarray['nbfield']++;
 }
 
@@ -63,7 +63,7 @@ print $hookmanager->resPrint;
 // Action column
 if (!getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
     $removeFilterBtn = !empty($useSideFilterPanel) ? '<button type="submit" class="liste_titre button_removefilter reposition" name="button_removefilter_x" value="x"><span class="fas fa-times"></span></button>' : '';
-    print getTitleFieldOfList($selectedFields . $removeFilterBtn, 0, $_SERVER['PHP_SELF'], '', '', '', '', $sortfield, $sortorder, 'center ');
+    print getTitleFieldOfList($selectedFields . $removeFilterBtn, 0, $_SERVER['PHP_SELF'], '', '', '', '', $sortfield, $sortorder, 'center maxwidthsearch ');
     $totalarray['nbfield']++;
 }
 
