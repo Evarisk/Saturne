@@ -8,7 +8,7 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, .35);
-  z-index: 10000;
+  z-index: 1000;
 }
 
 #saturne-filter-panel {
@@ -19,18 +19,24 @@
   height: 100vh;
   background: #fff;
   box-shadow: -3px 0 24px rgba(0, 0, 0, .18);
-  z-index: 10001;
+  z-index: 1001;
   transition: right .28s cubic-bezier(.4, 0, .2, 1);
   display: flex;
   flex-direction: column;
 
   .select2-container { width: 100% !important; }
-  .select2-container--open { z-index: 10002; }
-  .select2-dropdown { z-index: 10002 !important; }
+  .select2-container--open { z-index: 1002; }
+  .select2-dropdown { z-index: 1002 !important; }
 }
 
 .saturne-filter-select2-drop {
-  z-index: 10002 !important;
+  z-index: 1002 !important;
+}
+
+// jQuery UI datepicker is appended to <body>, so it must be scoped globally here
+// to ensure it appears above the filter panel (z-index: 1001)
+.ui-datepicker {
+  z-index: 1003 !important;
 }
 
 .saturne-filter-panel-header {
