@@ -55,24 +55,32 @@ function saturne_header(int $load_media_gallery = 0, string $head = '', string $
     global $moduleNameLowerCase;
 
     //CSS
-    $arrayofcss[] = '/saturne/css/saturne.min.css';
-    if (file_exists(__DIR__ . '/../../' . $moduleNameLowerCase . '/css/' . $moduleNameLowerCase . '.min.css')) {
-        $arrayofcss[] = '/' . $moduleNameLowerCase . '/css/' . $moduleNameLowerCase . '.min.css';
+    $cssList[]       = '/saturne/css/saturne.min.css';
+    $relativeCssPath = $moduleNameLowerCase . '/css/' . $moduleNameLowerCase . '.min.css';
+    $absoluteCssPath = __DIR__ . '/../../' . $relativeCssPath;
+    if (file_exists($absoluteCssPath)) {
+        $cssList[] = '/' . $relativeCssPath;
     }
+    $cssList[] = 'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css';
+
+    $arrayofcss = array_unique(array_merge($arrayofcss ?? [], $cssList));
 
     //JS
-    $arrayofjs[] = '/saturne/js/saturne.min.js';
-    if ($load_media_gallery) {
-        $arrayofjs[] = '/saturne/js/includes/signature-pad.min.js';
-    }
-    if (file_exists(__DIR__ . '/../../' . $moduleNameLowerCase . '/js/' . $moduleNameLowerCase . '.min.js')) {
-        $arrayofjs[] = '/' . $moduleNameLowerCase . '/js/' . $moduleNameLowerCase . '.min.js';
+    $jsList[] = '/saturne/js/saturne.min.js';
+
+    if (!empty($load_media_gallery)) {
+        $jsList[] = '/saturne/js/includes/signature-pad.min.js';
     }
 
-    $arrayofcss[]= 'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css';
+    $relativeJsPath = $moduleNameLowerCase . '/js/' . $moduleNameLowerCase . '.min.js';
+    $absoluteJsPath = __DIR__ . '/../../' . $relativeJsPath;
+    if (file_exists($absoluteJsPath)) {
+        $jsList[] = '/' . $relativeJsPath;
+    }
+    $jsList[] = 'https://cdn.jsdelivr.net/npm/flatpickr';
+    $jsList[] = 'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js';
 
-    $arrayofjs[] = 'https://cdn.jsdelivr.net/npm/flatpickr';
-    $arrayofjs[] = 'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js';
+    $arrayofjs = array_unique(array_merge($arrayofjs ?? [], $jsList));
 
     llxHeader($head, $title, $help_url, $target, $disablejs, $disablehead, $arrayofjs, $arrayofcss, $morequerystring, $morecssonbody, $replacemainareaby, $disablenofollow, $disablenoindex);
 
