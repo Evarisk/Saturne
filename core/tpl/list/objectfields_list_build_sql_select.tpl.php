@@ -27,8 +27,59 @@
  * Globals    : $conf (extrafields_list_search_sql.tpl), $db, $hookmanager
  * Parameters : $action, $limit, $searchAll, $sortfield, $sortorder, $page
  * Objects    : $extrafields, $object
- * Variables  : $arrayfields, $excludeFields (optional), $fieldsToSearchAll, $offset, $search, $search_array_options (extrafields_list_search_sql.tpl), $searchCategories
+ * Variables  : $arrayfields, $excludeFields (optional), $offset, $search, $search_array_options (extrafields_list_search_sql.tpl), $searchCategories
  */
+
+// Pre-calculate searchAll fields and LEFT JOINs for integer: type fields
+// --------------------------------------------------------------------
+$searchAllSimpleFields = [];
+$searchAllJoins        = [];
+$searchAllLinkedFields = [];
+
+if ($searchAll) {
+    foreach ($object->fields as $key => $field) {
+        if (empty($field['searchall'])) {
+            continue;
+        }
+
+        if (isset($field['type']) && strpos($field['type'], 'integer:') === 0) {
+            $typeParts       = explode(':', $field['type']);
+            $linkedClassName = $typeParts[1];
+            $linkedClassPath = $typeParts[2];
+            $fullClassPath = DOL_DOCUMENT_ROOT . '/' . $linkedClassPath;
+            if (!file_exists($fullClassPath)) {
+                $fullClassPath = DOL_DOCUMENT_ROOT . '/custom/' . $linkedClassPath;
+            }
+
+            if (file_exists($fullClassPath)) {
+                require_once $fullClassPath;
+
+                if (class_exists($linkedClassName)) {
+                    $linkedObject = new $linkedClassName($db);
+
+                    if (!($linkedObject instanceof CommonObject)) {
+                        continue;
+                    }
+
+                    $linkedTableAlias = 'lnk_' . $key;
+
+                    $searchAllJoins[$key] = ' LEFT JOIN ' . $db->prefix() . $linkedObject->table_element
+                        . ' AS ' . $linkedTableAlias . ' ON (t.' . $key . ' = ' . $linkedTableAlias . '.rowid)';
+
+                    if (isset($linkedObject->fields) && is_array($linkedObject->fields)) {
+                        foreach ($linkedObject->fields as $linkedKey => $linkedField) {
+                            if (!empty($linkedField['searchall'])) {
+                                $searchAllLinkedFields[] = $linkedTableAlias . '.' . $linkedKey;
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            $searchAllSimpleFields[] = 't.' . $key;
+        }
+    }
+}
 
 // Build and execute select
 // --------------------------------------------------------------------
@@ -53,6 +104,11 @@ $sqlFields = $sql;
 $sql .= ' FROM ' . $db->prefix() . $object->table_element . ' as t';
 if (isset($extrafields->attributes[$object->table_element]['label']) && is_array($extrafields->attributes[$object->table_element]['label']) && count($extrafields->attributes[$object->table_element]['label'])) {
     $sql .= ' LEFT JOIN ' . $db->prefix() . $object->table_element . '_extrafields as ef ON (t.rowid = ef.fk_object)';
+}
+
+// Add LEFT JOINs for searchAll on integer: type fields
+foreach ($searchAllJoins as $join) {
+    $sql .= $join;
 }
 
 // Add table from hooks
@@ -123,7 +179,6 @@ foreach ($search as $key => $val) {
                         $sql .= ' AND t.' . $db->escape($key) . ' != ' . (int) $val;
                     }
                 } else {
-                    echo '<pre>'; print_r($db->escape($key)); echo '</pre>';
                     $sql .= natural_search('t.' . $db->escape($key), $val, (($key == 'status') ? 2 : $mode_search));
                 }
             }
@@ -157,7 +212,10 @@ foreach ($search as $key => $val) {
     }
 }
 if ($searchAll) {
-    $sql .= natural_search(array_keys($fieldsToSearchAll), $searchAll);
+    $allSearchFields = array_merge($searchAllSimpleFields, $searchAllLinkedFields);
+    if (!empty($allSearchFields)) {
+        $sql .= natural_search($allSearchFields, $searchAll);
+    }
 }
 
 // Add where from extra fields
@@ -183,7 +241,8 @@ $nbTotalOfRecords = '';
 if (!getDolGlobalInt('MAIN_DISABLE_FULL_SCANLIST')) {
     /* The fast and low memory method to get and count full list converts the sql into a sql count */
     $sqlForCount = preg_replace('/^' . preg_quote($sqlFields, '/') . '/', 'SELECT COUNT(*) as nbtotalofrecords', $sql);
-    $sqlForCount = preg_replace('/\s+LEFT\s+JOIN\s+.*?\s+WHERE\s+/is', ' WHERE ', $sqlForCount);
+    // Only strip the extrafields LEFT JOIN (not searchAll joins which are referenced in WHERE)
+    $sqlForCount = preg_replace('/ LEFT JOIN \S+_extrafields\s+as\s+ef\s+ON\s+\([^)]+\)/', '', $sqlForCount);
     $sqlForCount = preg_replace('/GROUP BY .*$/', '', $sqlForCount);
     $resql = $db->query($sqlForCount);
     if ($resql) {
