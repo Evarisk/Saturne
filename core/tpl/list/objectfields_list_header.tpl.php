@@ -193,7 +193,6 @@ if (isModEnabled('categorie') && $user->hasRight('categorie', 'read') && isset($
     $elementId   = dol_escape_htmltag($object->element);
     $catColorsJs = json_encode(array_map(fn($v) => $v['color'], $categoryMap));
     $catIcon     = img_picto('', 'category', 'class="saturne-cat-icon"');
-    $catIconJs   = json_encode($catIcon);
 
     $panelFilterBody .= '<div class="saturne-filter-section">';
     $panelFilterBody .= '<div class="saturne-filter-section-title">'
@@ -212,7 +211,7 @@ if (isModEnabled('categorie') && $user->hasRight('categorie', 'read') && isset($
     $panelFilterBody .= '</select>';
 
     // Tag list
-    $panelFilterBody .= '<div id="cat_filter_tags_' . $elementId . '" class="saturne-cat-filter-tags" data-picker-id="cat_filter_picker_' . $elementId . '" data-cat-icon="' . dol_escape_htmltag($catIconJs) . '" data-cat-colors="' . dol_escape_htmltag($catColorsJs) . '">';
+    $panelFilterBody .= '<div id="cat_filter_tags_' . $elementId . '" class="saturne-cat-filter-tags" data-picker-id="cat_filter_picker_' . $elementId . '" data-cat-icon="' . dol_escape_htmltag($catIcon) . '" data-cat-colors="' . dol_escape_htmltag($catColorsJs) . '">';
     foreach ($initialTags as $tag) {
         $isExcTag = $tag['mode'] === 'exc';
         $color    = $tag['color'];
