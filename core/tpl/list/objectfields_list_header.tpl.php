@@ -320,6 +320,9 @@ foreach ($object->fields as $key => $val) {
     }
 }
 $activeFilterCount += count($searchCategoriesFilter ?? []);
+if (!empty($searchAll)) {
+    $activeFilterCount++;
+}
 
 $newCardButton  = ($newCardButton ?? '');
 $newCardButton .= dolGetButtonTitle($langs->trans('ViewList'), '', 'fa fa-bars imgforviewmode', $_SERVER['PHP_SELF'] . '?mode=common' . preg_replace('/([&?])*mode=[^&]+/', '', $param), '', ((empty($mode) || $mode == 'common') ? 2 : 1), ['morecss' => 'reposition']);
