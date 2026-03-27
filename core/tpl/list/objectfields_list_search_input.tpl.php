@@ -73,10 +73,10 @@ foreach ($object->fields as $key => $val) {
                 if ($showModeToggle) {
                     $fieldMode = $search[$key . '_mode'] ?? GETPOST('search_' . $key . '_mode', 'alpha') ?: 'inc';
                     $isExc     = ($fieldMode === 'exc');
-                    print '<span style="display:inline-flex;align-items:center;gap:2px">';
+                    print '<span class="saturne-filter-inline-wrapper">';
                     print '<input type="hidden" id="search_' . $key . '_mode" name="search_' . $key . '_mode" value="' . ($isExc ? 'exc' : 'inc') . '">';
                     $titleAttr = dol_escape_htmltag($fieldLabel) . ' - ' . $toggleTitle;
-                    print '<span id="search_mode_toggle_' . $key . '" title="' . $titleAttr . '" onclick="var i=document.getElementById(\'search_' . $key . '_mode\'),exc=i.value!==\'exc\';i.value=exc?\'exc\':\'inc\';this.innerHTML=exc?\'<span class=\\\'far fa-eye-slash\\\'></span>\':\'<span class=\\\'far fa-eye\\\'></span>\';this.style.color=exc?\'#c0392b\':\'#666\';" style="cursor:pointer;font-size:13px;padding:0 4px;user-select:none;color:' . ($isExc ? '#c0392b' : '#666') . '">' . ($isExc ? '<span class="far fa-eye-slash"></span>' : '<span class="far fa-eye"></span>') . '</span>';
+                    print '<span id="search_mode_toggle_' . $key . '" title="' . $titleAttr . '" class="saturne-filter-mode-toggle ' . ($isExc ? 'saturne-filter-mode-exc' : 'saturne-filter-mode-inc') . '">' . ($isExc ? '<span class="far fa-eye-slash"></span>' : '<span class="far fa-eye"></span>') . '</span>';
                 }
                 if (empty($val['searchmulti'])) {
                     print $form->selectarray('search_' . $key, $val['arrayofkeyval'], $search[$key] ?? '', 1, 0, 0, '', 1, 0, 0, '', 'maxwidth125' . ($key == 'status' ? ' search_status onrightofpage' : ''));
@@ -90,10 +90,10 @@ foreach ($object->fields as $key => $val) {
                 $showModeToggle = true;
                 $fieldMode = $search[$key . '_mode'] ?? GETPOST('search_' . $key . '_mode', 'alpha') ?: 'inc';
                 $isExc     = ($fieldMode === 'exc');
-                print '<span style="display:inline-flex;align-items:center;gap:2px">';
+                print '<span class="saturne-filter-inline-wrapper">';
                 print '<input type="hidden" id="search_' . $key . '_mode" name="search_' . $key . '_mode" value="' . ($isExc ? 'exc' : 'inc') . '">';
                 $titleAttr = dol_escape_htmltag($fieldLabel) . ' - ' . $toggleTitle;
-                print '<span id="search_mode_toggle_' . $key . '" title="' . $titleAttr . '" onclick="var i=document.getElementById(\'search_' . $key . '_mode\'),exc=i.value!==\'exc\';i.value=exc?\'exc\':\'inc\';this.innerHTML=exc?\'<span class=\\\'far fa-eye-slash\\\'></span>\':\'<span class=\\\'far fa-eye\\\'></span>\';this.style.color=exc?\'#c0392b\':\'#666\';" style="cursor:pointer;font-size:13px;padding:0 4px;user-select:none;color:' . ($isExc ? '#c0392b' : '#666') . '">' . ($isExc ? '<span class="far fa-eye-slash"></span>' : '<span class="far fa-eye"></span>') . '</span>';
+                print '<span id="search_mode_toggle_' . $key . '" title="' . $titleAttr . '" class="saturne-filter-mode-toggle ' . ($isExc ? 'saturne-filter-mode-exc' : 'saturne-filter-mode-inc') . '">' . ($isExc ? '<span class="far fa-eye-slash"></span>' : '<span class="far fa-eye"></span>') . '</span>';
                 print $object->showInputField($val, $key, $search[$key] ?? '', '', '', 'search_', $cssForField . ' maxwidth250', 1);
             } elseif (isset($val['type']) && in_array($val['type'], ['date', 'datetime', 'timestamp'])) {
                 print '<div class="nowrap">';

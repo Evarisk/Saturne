@@ -174,8 +174,8 @@ if (!empty($fieldsToSearchAll)) {
     if ($searchAllPlaceholder === 'Search') {
         $searchAllPlaceholder = 'Rechercher dans tous les champs…';
     }
-    $panelFilterBody .= '<div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid #f0f0f0">';
-    $panelFilterBody .= '<input type="text" class="flat" name="search_all" id="panel_search_all" placeholder="' . dol_escape_htmltag($searchAllPlaceholder) . '" value="' . dol_escape_htmltag($searchAll ?? '') . '" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px">';
+    $panelFilterBody .= '<div class="saturne-filter-search-all-wrapper">';
+    $panelFilterBody .= '<input type="text" class="flat saturne-filter-search-all-input" name="search_all" id="panel_search_all" placeholder="' . dol_escape_htmltag($searchAllPlaceholder) . '" value="' . dol_escape_htmltag($searchAll ?? '') . '">';
     $panelFilterBody .= '</div>';
 }
 
@@ -211,16 +211,16 @@ if (isModEnabled('categorie') && $user->hasRight('categorie', 'read') && isset($
 
     $elementId   = dol_escape_htmltag($object->element);
     $catColorsJs = json_encode(array_map(fn($v) => $v['color'], $categoryMap));
-    $catIcon     = img_picto('', 'category', 'style="width:12px;height:12px;vertical-align:middle;color:inherit;filter:brightness(10)"');
+    $catIcon     = img_picto('', 'category', 'class="saturne-cat-icon"');
     $catIconJs   = json_encode($catIcon);
 
-    $panelFilterBody .= '<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #f0f0f0">';
-    $panelFilterBody .= '<div style="font-size:11px;text-transform:uppercase;color:#888;font-weight:600;letter-spacing:.5px;margin-bottom:10px">'
+    $panelFilterBody .= '<div class="saturne-filter-section">';
+    $panelFilterBody .= '<div class="saturne-filter-section-title">'
         . img_picto($langs->trans('Categories'), 'category', 'class="pictofixedwidth"')
         . ' ' . $langs->trans('Categories') . '</div>';
 
     // Picker (full-width inside panel)
-    $panelFilterBody .= '<select id="cat_filter_picker_' . $elementId . '" class="flat" style="width:100%;margin-bottom:8px" title="' . dol_escape_htmltag($langs->trans('AddCategory')) . '">';
+    $panelFilterBody .= '<select id="cat_filter_picker_' . $elementId . '" class="flat saturne-filter-cat-picker" title="' . dol_escape_htmltag($langs->trans('AddCategory')) . '">';
     $panelFilterBody .= '<option value="">&nbsp;</option>';
     foreach ($categoryMap as $catId => $catData) {
         if (in_array($catId, $initialTagCatIds)) {
@@ -237,11 +237,11 @@ if (isModEnabled('categorie') && $user->hasRight('categorie', 'read') && isset($
         $color    = $tag['color'];
         $sign     = $isExcTag ? '&minus;' : '+';
         $tagVal   = ($isExcTag ? '-' : '+') . $tag['id'];
-        $panelFilterBody .= '<span style="display:inline-flex;align-items:stretch;border-radius:20px;overflow:hidden;border:2px solid ' . $color . ';box-shadow:0 1px 4px rgba(0,0,0,.15);cursor:default;user-select:none;font-size:12px;line-height:1"';
+        $panelFilterBody .= '<span class="saturne-cat-tag" style="border-color:' . $color . '"';
         $panelFilterBody .= ' data-catid="' . $tag['id'] . '" data-mode="' . $tag['mode'] . '" data-label="' . dol_escape_htmltag($tag['label']) . '" data-color="' . dol_escape_htmltag($color) . '">';
-        $panelFilterBody .= '<span class="cat-sign" title="' . dol_escape_htmltag($langs->trans('ToggleIncludeExclude')) . '" style="display:flex;align-items:center;gap:3px;padding:4px 8px;background:' . $color . ';color:#fff;cursor:pointer;font-weight:bold">' . $catIcon . ' ' . $sign . '</span>';
-        $panelFilterBody .= '<span style="display:flex;align-items:center;gap:6px;padding:4px 8px;background:#fff;color:#333"><span style="max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis' . ($isExcTag ? ';text-decoration:line-through' : '') . '">' . dol_escape_htmltag($tag['label']) . '</span>';
-        $panelFilterBody .= '<span class="cat-remove" title="' . dol_escape_htmltag($langs->trans('Remove')) . '" style="cursor:pointer;color:#aaa;font-size:14px;line-height:1;font-weight:bold">&times;</span></span>';
+        $panelFilterBody .= '<span class="cat-sign saturne-cat-tag-sign" title="' . dol_escape_htmltag($langs->trans('ToggleIncludeExclude')) . '" style="background:' . $color . '">' . $catIcon . ' ' . $sign . '</span>';
+        $panelFilterBody .= '<span class="saturne-cat-tag-body"><span class="saturne-cat-tag-label' . ($isExcTag ? ' is-exc' : '') . '">' . dol_escape_htmltag($tag['label']) . '</span>';
+        $panelFilterBody .= '<span class="cat-remove saturne-cat-tag-remove" title="' . dol_escape_htmltag($langs->trans('Remove')) . '">&times;</span></span>';
         $panelFilterBody .= '<input type="hidden" name="search_categories_filter[]" value="' . dol_escape_htmltag($tagVal) . '">';
         $panelFilterBody .= '</span>';
     }
@@ -272,9 +272,9 @@ foreach ($object->fields as $key => $val) {
     $fieldLabelPanel = $langs->trans($val['label'] ?? $key);
     $cssForFieldPanel = saturne_css_for_field($val, $key);
 
-    $panelFilterBody .= '<div style="margin-bottom:16px">';
-    $panelFilterBody .= '<div style="font-size:12px;color:#555;font-weight:500;margin-bottom:5px">' . dol_escape_htmltag($fieldLabelPanel) . '</div>';
-    $panelFilterBody .= '<div style="display:flex;align-items:center;gap:4px;width:100%">';
+    $panelFilterBody .= '<div class="saturne-filter-field-row">';
+    $panelFilterBody .= '<div class="saturne-filter-field-label">' . dol_escape_htmltag($fieldLabelPanel) . '</div>';
+    $panelFilterBody .= '<div class="saturne-filter-field-input">';
 
     if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) {
         $showToggle = ($key !== 'status');
@@ -301,12 +301,12 @@ foreach ($object->fields as $key => $val) {
         ob_end_clean(); // discard ajax_combobox JS printed directly — panel will init select2 on open
         $panelFilterBody .= $showInputHtml;
     } elseif (isset($val['type']) && in_array($val['type'], ['date', 'datetime', 'timestamp'])) {
-        $panelFilterBody .= '<div style="flex:1">'
+        $panelFilterBody .= '<div class="saturne-filter-date-wrapper">'
             . '<div class="nowrap">' . $form->selectDate($search[$key . '_dtstart'] ?? '', 'search_' . $key . '_dtstart', 0, 0, 1, '', 1, 0, 0, '', '', '', '', 1, '', $langs->trans('From')) . '</div>'
             . '<div class="nowrap">' . $form->selectDate($search[$key . '_dtend'] ?? '', 'search_' . $key . '_dtend', 0, 0, 1, '', 1, 0, 0, '', '', '', '', 1, '', $langs->trans('to')) . '</div>'
             . '</div>';
     } elseif (isset($val['type']) && $val['type'] == 'duration') {
-        $panelFilterBody .= '<div style="flex:1">'
+        $panelFilterBody .= '<div class="saturne-filter-date-wrapper">'
             . '<div class="nowrap">' . $form->select_duration('search_' . $key . '_dtstart', $search[$key . '_dtstart'] ?? '', 0, 'text', 0, 1) . '</div>'
             . '<div class="nowrap">' . $form->select_duration('search_' . $key . '_dtend', $search[$key . '_dtend'] ?? '', 0, 'text', 0, 1) . '</div>'
             . '</div>';
@@ -315,7 +315,7 @@ foreach ($object->fields as $key => $val) {
         $formAdmin        = new FormAdmin($db);
         $panelFilterBody .= $formAdmin->select_language(($search[$key] ?? ''), 'search_lang', 0, [], 1, 0, 0, 'minwidth100imp maxwidth200', 2);
     } else {
-        $panelFilterBody .= '<input type="text" class="flat" style="flex:1;min-width:0" name="search_' . $key . '" value="' . dol_escape_htmltag($search[$key] ?? '') . '">';
+        $panelFilterBody .= '<input type="text" class="flat saturne-filter-text-input" name="search_' . $key . '" value="' . dol_escape_htmltag($search[$key] ?? '') . '">';
     }
 
     $panelFilterBody .= '</div>';

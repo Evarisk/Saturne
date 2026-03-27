@@ -151,6 +151,145 @@
   color: #c0392b;
 }
 
+// Inline search row wrapper (table filter row)
+.saturne-filter-inline-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+// Search-all block at the top of the panel
+.saturne-filter-search-all-wrapper {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.saturne-filter-search-all-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+// Generic panel section (categories, etc.)
+.saturne-filter-section {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.saturne-filter-section-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #888;
+  font-weight: 600;
+  letter-spacing: .5px;
+  margin-bottom: 10px;
+}
+
+// Category picker select inside the panel
+.saturne-filter-cat-picker {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+// Category icon (small, white-tinted)
+.saturne-cat-icon {
+  width: 12px;
+  height: 12px;
+  vertical-align: middle;
+  color: inherit;
+  filter: brightness(10);
+}
+
+// Category tag pill
+.saturne-cat-tag {
+  display: inline-flex;
+  align-items: stretch;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 2px solid transparent; // color set inline (dynamic per category)
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .15);
+  cursor: default;
+  user-select: none;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.saturne-cat-tag-sign {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 8px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  // background set inline (dynamic per category)
+}
+
+.saturne-cat-tag-body {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: #fff;
+  color: #333;
+}
+
+.saturne-cat-tag-label {
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &.is-exc {
+    text-decoration: line-through;
+  }
+}
+
+.saturne-cat-tag-remove {
+  cursor: pointer;
+  color: #aaa;
+  font-size: 14px;
+  line-height: 1;
+  font-weight: bold;
+
+  &:hover {
+    color: #333;
+  }
+}
+
+// Panel field rows
+.saturne-filter-field-row {
+  margin-bottom: 16px;
+}
+
+.saturne-filter-field-label {
+  font-size: 12px;
+  color: #555;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.saturne-filter-field-input {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.saturne-filter-date-wrapper {
+  flex: 1;
+}
+
+.saturne-filter-text-input {
+  flex: 1;
+  min-width: 0;
+}
+
 .saturne-filter-panel-footer {
   padding: 14px 20px;
   border-top: 1px solid #e8e8e8;

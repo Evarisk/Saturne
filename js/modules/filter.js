@@ -223,11 +223,10 @@ window.saturne.filter.initCategoryPicker = function(tagsEl) {
     function renderTag(id, lbl, col, mode) {
         var exc  = mode === 'exc';
         var sign = exc ? '\u2212' : '+';
-        var ls   = 'max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis' + (exc ? ';text-decoration:line-through' : '');
-        return '<span class="cat-sign" style="display:flex;align-items:center;gap:3px;padding:4px 8px;background:' + col + ';color:#fff;cursor:pointer;font-weight:bold">' + catIcon + ' ' + sign + '</span>'
-            + '<span style="display:flex;align-items:center;gap:6px;padding:4px 8px;background:#fff;color:#333">'
-            + '<span style="' + ls + '">' + esc(lbl) + '</span>'
-            + '<span class="cat-remove" style="cursor:pointer;color:#aaa;font-size:14px;line-height:1;font-weight:bold">\u00d7</span>'
+        return '<span class="cat-sign saturne-cat-tag-sign" style="background:' + col + '">' + catIcon + ' ' + sign + '</span>'
+            + '<span class="saturne-cat-tag-body">'
+            + '<span class="saturne-cat-tag-label' + (exc ? ' is-exc' : '') + '">' + esc(lbl) + '</span>'
+            + '<span class="cat-remove saturne-cat-tag-remove">\u00d7</span>'
             + '</span>'
             + '<input type="hidden" name="search_categories_filter[]" value="' + (exc ? '-' : '+') + id + '">';
     }
@@ -235,15 +234,12 @@ window.saturne.filter.initCategoryPicker = function(tagsEl) {
     function bindTag(s) {
         s.querySelector('.cat-sign').addEventListener('click', function(e) {
             e.stopPropagation();
-            var m       = s.dataset.mode === 'inc' ? 'exc' : 'inc';
+            var m      = s.dataset.mode === 'inc' ? 'exc' : 'inc';
             s.dataset.mode = m;
-            s.innerHTML = renderTag(s.dataset.catid, s.dataset.label, s.dataset.color, m);
+            s.innerHTML    = renderTag(s.dataset.catid, s.dataset.label, s.dataset.color, m);
             bindTag(s);
         });
-        var r = s.querySelector('.cat-remove');
-        r.addEventListener('mouseover', function() { r.style.color = '#333'; });
-        r.addEventListener('mouseout',  function() { r.style.color = '#aaa'; });
-        r.addEventListener('click', function(e) {
+        s.querySelector('.cat-remove').addEventListener('click', function(e) {
             e.stopPropagation();
             restorePO(s.dataset.catid, s.dataset.label, s.dataset.color);
             s.remove();
@@ -260,7 +256,8 @@ window.saturne.filter.initCategoryPicker = function(tagsEl) {
         s.dataset.mode   = mode;
         s.dataset.label  = lbl;
         s.dataset.color  = col;
-        s.style.cssText  = 'display:inline-flex;align-items:stretch;border-radius:20px;overflow:hidden;border:2px solid ' + col + ';box-shadow:0 1px 4px rgba(0,0,0,.15);cursor:default;user-select:none;font-size:12px;line-height:1';
+        s.className      = 'saturne-cat-tag';
+        s.style.borderColor = col;
         s.innerHTML      = renderTag(id, lbl, col, mode);
         removePO(id);
         bindTag(s);
