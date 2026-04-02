@@ -89,7 +89,7 @@ if (isModEnabled('categorie')) {
 // Initialize view objects
 $form = new Form($db);
 
-$hookmanager->initHooks([$contextpage, 'saturnelist']);
+$hookmanager->initHooks([$contextpage, $object->element . 'saturnelist', 'saturnelist']);
 
 // Fetch optionals attributes and labels
 $extrafields->fetch_name_optionals_label($object->table_element);
