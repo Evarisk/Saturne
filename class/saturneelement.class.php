@@ -217,11 +217,11 @@ class SaturneElement extends SaturneObject
     /**
      * Create object into database
      *
-     * @param  User $user      User that creates
-     * @param  bool $notrigger false = launch triggers after, true = disable triggers
-     * @return int             0 < if KO, ID of created object if OK
+     * @param  User        $user      User that creates
+     * @param  int<0,1>    $noTrigger 0 = launch triggers after, 1 = disable triggers
+     * @return int<-1,max>            Return integer 0 < if KO, ID of created object if OK
      */
-    public function create(User $user, bool $notrigger = false): int
+    public function create(User $user, int $noTrigger = 0): int
     {
         if ($this->element_type == 0) {
             $this->element_type = $this::ELEMENT_TYPE_0;
@@ -234,7 +234,7 @@ class SaturneElement extends SaturneObject
         $this->status      = self::STATUS_VALIDATED;
         $this->fk_standard = $this->fk_standard ?? getDolGlobalInt(dol_strtoupper($this->module) . '_ACTIVE_STANDARD');
 
-        return parent::create($user, $notrigger);
+        return parent::create($user, $noTrigger);
     }
 
     /**

@@ -104,14 +104,14 @@ abstract class SaturneObject extends CommonObject
     /**
      * Create object into database
      *
-     * @param  User $user      User that creates
-     * @param  bool $notrigger false = launch triggers after, true = disable triggers
-     * @return int             0 < if KO, ID of created object if OK
+     * @param  User        $user      User that creates
+     * @param  int<0,1>    $noTrigger 0 = launch triggers after, 1 = disable triggers
+     * @return int<-1,max>            Return integer 0 < if KO, ID of created object if OK
      */
-	public function create(User $user, bool $notrigger = false): int
+    public function create(User $user, int $noTrigger = 0): int
     {
-        return $this->createCommon($user, $notrigger);
-	}
+        return $this->createCommon($user, $noTrigger);
+    }
 
     /**
      * Load object in memory from the database

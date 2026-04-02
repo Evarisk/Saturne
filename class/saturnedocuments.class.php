@@ -185,11 +185,11 @@ class SaturneDocuments extends SaturneObject
      * Create object into database
      *
      * @param  User        $user         User that creates
-     * @param  bool        $notrigger    false=launch triggers after, true=disable triggers
+     * @param  int<0,1>    $noTrigger    0 = launch triggers after, 1 = disable triggers
      * @param  object|null $parentObject Current object
-     * @return int                       0 < if KO, ID of created object if OK
+     * @return int<-1,max>               Return integer 0 < if KO, ID of created object if OK
      */
-    public function create(User $user, bool $notrigger = false, object $parentObject = null): int
+    public function create(User $user, int $noTrigger = 0, ?object $parentObject = null): int
     {
         $now = dol_now();
 
@@ -206,7 +206,7 @@ class SaturneDocuments extends SaturneObject
         $this->fk_user_creat = $user->id ?: 1;
 
         //$this->DocumentFillJSON($this);
-        return $this->createCommon($user, $notrigger);
+        return $this->createCommon($user, $noTrigger);
     }
 
 //  /**
