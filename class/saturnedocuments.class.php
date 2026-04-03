@@ -223,17 +223,6 @@ class SaturneDocuments extends SaturneObject
 //  }
 
     /**
-     * Initialise object with example values.
-     * ID must be 0 if object instance is a specimen.
-     *
-     * @return void
-     */
-    public function initAsSpecimen()
-    {
-        $this->initAsSpecimenCommon();
-    }
-
-    /**
      * Create a document onto disk according to template module.
      *
      * @param  string     $modele      Force template to use ('' to not force).

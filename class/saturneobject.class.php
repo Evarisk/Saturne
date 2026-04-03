@@ -1,5 +1,6 @@
 <?php
-/* Copyright (C) 2021-2024 EVARISK <technique@evarisk.com>
+
+/* Copyright (C) 2021-2026 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,73 +34,69 @@ require_once __DIR__ . '/../lib/object.lib.php';
 abstract class SaturneObject extends CommonObject
 {
     /**
-     * @var DoliDB Database handler
-     */
-    public $db;
-
-    /**
-     * @var int Does this object support multicompany module ?
-     * 0 = No test on entity, 1 = Test with field entity, 'field@table' = Test with link by field@table.
+     * @var int<0,1>|string Does this object support multicompany module ?
+     *                      0 = No test on entity, 1 = Test with field entity,
+     *                     'field@table' = Test with link by field@table
      */
     public $ismultientitymanaged = 1;
 
     /**
-     * @var int Does object support extrafields ? 0 = No, 1 = Yes
+     * @var int<0,1> Does object support extrafields ? 0 = No, 1 = Yes
      */
     public $isextrafieldmanaged = 1;
 
     /**
-     * @var int Does object support category module ? 0 = No, 1 = Yes
+     * @var int<0,1> Does object support category module ? 0 = No, 1 = Yes
      */
     public int $isCategoryManaged = 1;
 
     /**
      * @var string Name of icon for saturne_object
-     * Must be a 'fa-xxx' fontawesome code (or 'fa-xxx_fa_color_size')
-     * or 'saturne_object@saturne' if picto is file 'img/object_saturne_object.png'
+     *             Must be a 'fa-xxx' fontawesome code (or 'fa-xxx_fa_color_size')
+     *             or 'saturne_object@saturne' if picto is file 'img/object_saturne_object.png'
      */
     public string $picto = '';
 
     /**
-     * Constructor.
+     * Constructor
      *
-     * @param DoliDb $db                  Database handler
+     * @param DoliDB $db                  Database handler
      * @param string $moduleNameLowerCase Module name
      * @param string $objectType          Object element type
      */
     public function __construct(DoliDB $db, string $moduleNameLowerCase = 'saturne', string $objectType = 'saturne_object')
-	{
-		global $conf, $langs;
+    {
+        global $langs;
 
-		$this->db = $db;
+        $this->db      = $db;
         $this->module  = $moduleNameLowerCase;
         $this->element = $objectType;
 
-		if (empty($conf->global->MAIN_SHOW_TECHNICAL_ID) && isset($this->fields['rowid'])) {
-			$this->fields['rowid']['visible'] = 0;
-		}
-		if (!isModEnabled('multicompany') && isset($this->fields['entity'])) {
-			$this->fields['entity']['enabled'] = 0;
-		}
+        if (!getDolGlobalInt('MAIN_SHOW_TECHNICAL_ID') && isset($this->fields['rowid'])) {
+            $this->fields['rowid']['visible'] = 0;
+        }
+        if (!isModEnabled('multicompany') && isset($this->fields['entity'])) {
+            $this->fields['entity']['enabled'] = 0;
+        }
 
-		// Unset fields that are disabled
-		foreach ($this->fields as $key => $val) {
-			if (isset($val['enabled']) && empty($val['enabled'])) {
-				unset($this->fields[$key]);
-			}
-		}
+        // Unset fields that are disabled
+        foreach ($this->fields as $key => $val) {
+            if (isset($val['enabled']) && empty($val['enabled'])) {
+                unset($this->fields[$key]);
+            }
+        }
 
-		// Translate some data of arrayofkeyval
-		if (is_object($langs)) {
-			foreach ($this->fields as $key => $val) {
-				if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) {
-					foreach ($val['arrayofkeyval'] as $key2 => $val2) {
-						$this->fields[$key]['arrayofkeyval'][$key2] = $langs->trans($val2);
-					}
-				}
-			}
-		}
-	}
+        // Translate some data of arrayofkeyval
+        if (is_object($langs)) {
+            foreach ($this->fields as $key => $val) {
+                if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) {
+                    foreach ($val['arrayofkeyval'] as $key2 => $val2) {
+                        $this->fields[$key]['arrayofkeyval'][$key2] = $langs->trans($val2);
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * Create object into database
@@ -116,14 +113,14 @@ abstract class SaturneObject extends CommonObject
     /**
      * Load object in memory from the database
      *
-     * @param  int|string  $id            ID object
+     * @param  int         $id            ID object
      * @param  string|null $ref           Ref
      * @param  string      $moreWhere     More SQL filters (' AND ...')
      * @param  int<0,1>    $noExtraFields 0 = Default to load extrafields, 1 = No extrafields
      * @param  int<0,1>    $noLines       0 = Default to load lines, 1 = No lines
-     * @return int                        0 < if KO, 0 if not found, > 0 if OK
+     * @return int<-4,1>                  Return integer 0 < if KO, 0 if not found, > 0 if OK
      */
-    public function fetch($id, ?string $ref = '', string $moreWhere = '', int $noExtraFields = 0, int $noLines = 0): int
+    public function fetch(int $id, ?string $ref = '', string $moreWhere = '', int $noExtraFields = 0, int $noLines = 0): int
     {
         $result = $this->fetchCommon($id, $ref, $moreWhere, $noExtraFields);
         if ($result > 0 && !empty($this->table_element_line) && empty($noLines)) {
@@ -136,393 +133,457 @@ abstract class SaturneObject extends CommonObject
      * Load object lines in memory from the database
      *
      * @param  string    $morewhere     More SQL filters (' AND ...')
-     * @param  int<0,1>  $noextrafields 0 = Default to load extrafields, 1 = No extrafields
-     * @return int<-1,1>                Return integer 0 < if KO, 0 if not found, > 0 if OK
+     * @param  int<0,1>  $noExtraFields 0 = Default to load extrafields, 1 = No extrafields
+     * @return int<-1,1>                Return integer 0 < if KO, > 0 if OK
      */
-    public function fetchLines(string $morewhere = '', int $noextrafields = 0): int
+    public function fetchLines(string $morewhere = '', int $noExtraFields = 0): int
     {
         $this->lines = [];
-        return $this->fetchLinesCommon($morewhere, $noextrafields);
+        return $this->fetchLinesCommon($morewhere, $noExtraFields);
     }
 
-	/**
-	 * Load list of objects in memory from the database
-	 *
-	 * @param  string     $sortorder  Sort Order
-	 * @param  string     $sortfield  Sort field
-	 * @param  int        $limit      Limit
-	 * @param  int        $offset     Offset
-	 * @param  array      $filter     Filter array. Example array('field'=>'valueforlike', 'customurl'=>...)
-	 * @param  string     $filtermode Filter mode (AND/OR)
-	 * @return array|int              Int <0 if KO, array of pages if OK
+    /**
+     * Load list of objects in memory from the database
+     * Using a fetchAll() with limit = 0 is a very bad practice
+     * Instead, try to forge yourself an optimized SQL request with
+     * your own loop with start and stop pagination
+     *
+     * @param  string     $sortorder      Sort Order
+     * @param  string     $sortfield      Sort field
+     * @param  int        $limit          Limit the number of lines returned
+     * @param  int        $offset         Offset
+     * @param  array      $filter         Filter as a Universal Search string*
+     *                                    Example: '((client:=:1) OR ((client:>=:2)
+     *                                           AND (client:<=:3))) AND (client:!=:8) AND (nom:like:'a%')'
+     * @param  string     $filtermode     No longer used
+     * @return array<int,self>|int<-1,-1> Return integer < 0 if KO, array of pages if OK
      * @throws Exception
-	 */
-	public function fetchAll(string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = [], string $filtermode = 'AND')
-	{
-		dol_syslog(__METHOD__, LOG_DEBUG);
+     */
+    public function fetchAll(string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = [], string $filtermode = 'AND')
+    {
+        dol_syslog(__METHOD__, LOG_DEBUG);
 
-		$records = [];
+        $records = [];
 
-		$sql = 'SELECT ';
-		$sql .= $this->getFieldList('t');
-		$sql .= ' FROM ' . MAIN_DB_PREFIX . $this->table_element . ' as t';
-		if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 1) {
-			$sql .= ' WHERE t.entity IN (' . getEntity($this->element) . ')';
-		} else {
-			$sql .= ' WHERE 1 = 1';
-		}
-		// Manage filter
-		$sqlwhere = [];
-		if (count($filter) > 0) {
-			foreach ($filter as $key => $value) {
-				if ($key == 't.rowid') {
-					$sqlwhere[] = $key . ' = ' . ((int) $value);
-				} elseif (isset($this->fields[$key]['type']) && in_array($this->fields[$key]['type'], ['date', 'datetime', 'timestamp'])) {
-					$sqlwhere[] = $key . " = '" . $this->db->idate($value) . "'";
-				} elseif ($key == 'customsql') {
-					$sqlwhere[] = $value;
-				} elseif (strpos($value, '%') === false) {
-					$sqlwhere[] = $key . ' IN (' . $this->db->sanitize($this->db->escape($value)) . ')';
-				} else {
-					$sqlwhere[] = $key . " LIKE '%" . $this->db->escape($value) . "%'";
-				}
-			}
-		}
-		if (count($sqlwhere) > 0) {
-			$sql .= ' AND (' . implode(' ' . $filtermode . ' ', $sqlwhere) . ')';
-		}
+        $sql = 'SELECT ';
+        $sql .= $this->getFieldList('t');
+        $sql .= ' FROM ' . $this->db->prefix() . $this->table_element . ' as t';
+        if (!empty($this->isextrafieldmanaged) && $this->isextrafieldmanaged == 1) {
+            $sql .= ' LEFT JOIN ' . $this->db->prefix() . $this->table_element . '_extrafields as te ON te.fk_object = t.rowid';
+        }
+        if (isset($this->ismultientitymanaged) && (int) $this->ismultientitymanaged == 1) {
+            $sql .= ' WHERE t.entity IN (' . getEntity($this->element) . ')';
+        } elseif (preg_match('/^\w+@\w+$/', (string) $this->ismultientitymanaged)) {
+            $tmpArray = explode('@', (string) $this->ismultientitymanaged);
+            $sql .= ' LEFT JOIN ' . $this->db->prefix() . $tmpArray[1] . ' as pt ON t.' . $this->db->sanitize($tmpArray[0]) . ' = pt.rowid';
+            $sql .= ' WHERE pt.entity IN (' . getEntity($this->element) . ')';
+        } else {
+            $sql .= ' WHERE 1 = 1';
+        }
 
-		if (!empty($sortfield)) {
-			$sql .= $this->db->order($sortfield, $sortorder);
-		}
-		if (!empty($limit)) {
-			$sql .= $this->db->plimit($limit, $offset);
-		}
+        // Manage filter
+        $sqlwhere = [];
+        if (count($filter) > 0) {
+            foreach ($filter as $key => $value) {
+                if ($key == 't.rowid') {
+                    $sqlwhere[] = $key . ' = ' . ((int) $value);
+                } elseif (isset($this->fields[$key]['type']) && in_array($this->fields[$key]['type'], ['date', 'datetime', 'timestamp'])) {
+                    $sqlwhere[] = $key . " = '" . $this->db->idate($value) . "'";
+                } elseif ($key == 'customsql') {
+                    $sqlwhere[] = $value;
+                } elseif (strpos($value, '%') === false) {
+                    $sqlwhere[] = $key . ' IN (' . $this->db->sanitize($this->db->escape($value)) . ')';
+                } else {
+                    $sqlwhere[] = $key . " LIKE '%" . $this->db->escape($value) . "%'";
+                }
+            }
+        }
+        if (count($sqlwhere) > 0) {
+            $sql .= ' AND (' . implode(' ' . $filtermode . ' ', $sqlwhere) . ')';
+        }
 
-		$resql = $this->db->query($sql);
-		if ($resql) {
-			$num = $this->db->num_rows($resql);
-			$i = 0;
-			while ($i < ($limit ? min($limit, $num) : $num)) {
-				$obj = $this->db->fetch_object($resql);
+        if (!empty($sortfield)) {
+            $sql .= $this->db->order($sortfield, $sortorder);
+        }
+        if (!empty($limit)) {
+            $sql .= $this->db->plimit($limit, $offset);
+        }
 
-				$record = new $this($this->db);
-				$record->setVarsFromFetchObj($obj);
+        $resql = $this->db->query($sql);
+        if ($resql) {
+            $num = $this->db->num_rows($resql);
+            $i = 0;
+            while ($i < ($limit ? min($limit, $num) : $num)) {
+                $obj = $this->db->fetch_object($resql);
 
-				$records[$record->id] = $record;
+                $record = new static($this->db);
+                $record->setVarsFromFetchObj($obj);
 
-				$i++;
-			}
-			$this->db->free($resql);
+                if (!empty($record->isextrafieldmanaged)) {
+                    $record->fetch_optionals();
+                }
 
-			return $records;
-		} else {
-			$this->errors[] = 'Error ' . $this->db->lasterror();
-			dol_syslog(__METHOD__ . ' ' . join(',', $this->errors), LOG_ERR);
+                $records[$record->id] = $record;
 
-			return -1;
-		}
-	}
+                $i++;
+            }
+            $this->db->free($resql);
+
+            return $records;
+        } else {
+            $this->errors[] = 'Error ' . $this->db->lasterror();
+            dol_syslog(__METHOD__ . ' ' . implode(',', $this->errors), LOG_ERR);
+
+            return -1;
+        }
+    }
 
     /**
      * Update object into database
      *
-     * @param  User $user      User that modifies
-     * @param  bool $notrigger false = launch triggers after, true = disable triggers
-     * @return int             0 < if KO, > 0 if OK
+     * @param  User       $user      User that modifies
+     * @param  int<0,1>   $noTrigger 0 = launch triggers after, 1 = disable triggers
+     * @return int<-1,1>             Return integer 0 < if KO, > 0 if OK
      */
-    public function update(User $user, bool $notrigger = false): int
+    public function update(User $user, int $noTrigger = 0): int
     {
-        return $this->updateCommon($user, $notrigger);
+        return $this->updateCommon($user, $noTrigger);
     }
 
     /**
      * Delete object in database
      *
-     * @param  User $user       User that deletes
-     * @param  bool $notrigger  false = launch triggers after, true = disable triggers
-     * @param  bool $softDelete Don't delete object
-     * @return int              0 < if KO, > 0 if OK
+     * @param  User        $user       User that deletes
+     * @param  int<0,1>    $noTrigger  0 = launch triggers after, 1 = disable triggers
+     * @param  bool        $softDelete Don't delete object
+     * @return int<-1,1>               Return integer 0 < if KO, > 0 if OK
      */
-    public function delete(User $user, bool $notrigger = false, bool $softDelete = true): int
+    public function delete(User $user, int $noTrigger = 0, bool $softDelete = true): int
     {
-        if ($softDelete) {
-            $result = $this->setDeleted($user, $notrigger);
-        } else {
-            $result = $this->deleteCommon($user, $notrigger);
-        }
-        return $result;
+        return $softDelete
+            ? $this->setDeleted($user, $noTrigger)
+            : $this->deleteCommon($user, $noTrigger);
     }
 
     /**
      * Validate object
      *
      * @param  User      $user      User making status change
-     * @param  int       $notrigger 1 = Does not execute triggers, 0 = execute triggers
-     * @return int                  0 < if OK, 0=Nothing done, > 0 if KO
+     * @param  int<0,1>  $noTrigger 0 = launch triggers after, 1 = disable triggers
+     * @return int<-1,1>            Return integer 0 < if OK, 0 = Nothing done, > 0 if KO
      * @throws Exception
      */
-	public function validate(User $user, int $notrigger = 0): int
-	{
-		global $conf;
+    public function validate(User $user, int $noTrigger = 0): int
+    {
+        global $conf;
 
-		require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+        $error = 0;
 
-		$error               = 0;
-        $moduleNameLowerCase = $this->module;
-        $objectType          = $this->element;
+        // Protection
+        if ($this->status == static::STATUS_VALIDATED) {
+            dol_syslog(get_class($this) . '::validate action abandonned: already validated', LOG_WARNING);
+            return 0;
+        }
 
-		// Protection
-		if ($this->status == $this::STATUS_VALIDATED) {
-			dol_syslog(get_class($this) . '::validate action abandonned: already validated', LOG_WARNING);
-			return 0;
-		}
+        $this->db->begin();
 
-		$this->db->begin();
+        // Define new ref
+        if ((preg_match('/^\(?PROV/i', $this->ref) || empty($this->ref))) {
+            $num = $this->getNextNumRef();
+        } else {
+            $num = $this->ref;
+        }
+        $this->newref = $num;
 
-		// Define new ref
-		if ((preg_match('/^\(?PROV/i', $this->ref) || empty($this->ref))) { // empty should not happen, but when it occurs, the test save life.
-            $oldRef = $this->ref;
-			$num    = $this->getNextNumRef();
-		} else {
-            $oldRef = $this->ref;
-			$num    = $this->ref;
-		}
-		$this->newref = $num;
+        if (!empty($num)) {
+            // Validate
+            $sql  = 'UPDATE ' . $this->db->prefix() . $this->table_element;
+            $sql .= " SET ";
+            if (!empty($this->fields['ref'])) {
+                $sql .= " ref = '" . $this->db->escape($num) . "',";
+            }
+            $sql .= ' status = ' . static::STATUS_VALIDATED;
+            $sql .= ' WHERE rowid = ' . ($this->id);
 
-		if (!empty($num)) {
-			// Validate
-			$sql = 'UPDATE ' . MAIN_DB_PREFIX . $this->table_element;
-			$sql .= " SET ref = '" . $this->db->escape($num) . "',";
-			$sql .= ' status = ' . $this::STATUS_VALIDATED;
-			$sql .= ' WHERE rowid = ' . ($this->id);
+            dol_syslog(get_class($this) . '::validate()', LOG_DEBUG);
+            $resql = $this->db->query($sql);
+            if (!$resql) {
+                dol_print_error($this->db);
+                $this->error = $this->db->lasterror();
+                $error++;
+            }
 
-			dol_syslog(get_class($this) . '::validate()', LOG_DEBUG);
-			$resql = $this->db->query($sql);
-			if (!$resql) {
-				dol_print_error($this->db);
-				$this->error = $this->db->lasterror();
-				$error++;
-			}
+            if (!$error && !$noTrigger) {
+                // Call trigger
+                $result = $this->call_trigger(dol_strtoupper($this->element) . '_VALIDATE', $user);
+                if ($result < 0) {
+                    $error++;
+                }
+                // End call triggers
+            }
+        }
 
-			if (!$error && !$notrigger) {
-				// Call trigger
-				$result = $this->call_trigger(strtoupper($this->element) . '_VALIDATE', $user);
-				if ($result < 0) {
-					$error++;
-				}
-				// End call triggers
-			}
-		}
+        if (!$error) {
+            $this->oldref = $this->ref;
 
-		if (!$error) {
-			// Rename directory if dir was a temporary ref
-			if (preg_match('/^\(?PROV/i', $oldRef)) {
+            // Rename directory if dir was a temporary ref
+            if (preg_match('/^\(?PROV/i', $this->ref)) {
+                // Now we rename also files into index
+                $sql  = 'UPDATE ' . $this->db->prefix() . 'ecm_files';
+                $sql .= " SET filename = CONCAT('" . $this->db->escape($this->newref) . "', SUBSTR(filename, " . (strlen($this->ref) + 1) . ')),';
+                $sql .= " filepath = '" . $this->db->escape($this->element . '/' . $this->newref) . "'";
+                $sql .= " WHERE filename LIKE '" . $this->db->escape($this->ref) . "%' AND filepath = '" . $this->db->escape($this->element . '/' . $this->ref) . "' AND entity = " . $conf->entity;
 
-				// Now we rename also files into index
-				$sql = 'UPDATE ' . MAIN_DB_PREFIX . 'ecm_files';
-				$sql .= " SET filename = CONCAT('" . $this->db->escape($this->newref) . "', SUBSTR(filename, " . (strlen($oldRef) + 1) . ')),';
-				$sql .= " filepath = '" . $this->db->escape($objectType . '/' . $oldRef) . "'";
-				$sql .= " WHERE filename LIKE '" . $this->db->escape($oldRef) . "%' AND filepath = '" . $this->db->escape($objectType . '/' . $oldRef) . "' AND entity = " . $conf->entity;
-				$resql = $this->db->query($sql);
-				if (!$resql) {
-					$error++; $this->error = $this->db->lasterror();
-				}
+                $resql = $this->db->query($sql);
+                if (!$resql) {
+                    $error++;
+                    $this->error = $this->db->lasterror();
+                }
 
-				// We rename directory ($oldRef = old ref, $num = new ref) in order not to lose the attachments
-				$oldRef    = dol_sanitizeFileName($oldRef);
-				$newRef    = dol_sanitizeFileName($num);
-				$dirSource = $conf->$moduleNameLowerCase->dir_output . '/' . $objectType . '/' . $oldRef;
-				$dirDest   = $conf->$moduleNameLowerCase->dir_output . '/' . $objectType . '/' . $newRef;
+                $sql  = 'UPDATE ' . $this->db->prefix() . "ecm_files set filepath = '" . $this->db->escape($this->element . '/' . $this->newref) . "'";
+                $sql .= " WHERE filepath = '" . $this->db->escape($this->element . '/' . $this->ref) . "' and entity = " . $conf->entity;
 
-				if (!$error && file_exists($dirSource)) {
-					dol_syslog(get_class($this) . '::validate() rename dir ' . $dirSource . ' into ' . $dirDest);
+                $resql = $this->db->query($sql);
+                if (!$resql) {
+                    $error++;
+                    $this->error = $this->db->lasterror();
+                }
 
-					if (@rename($dirSource, $dirDest)) {
-						dol_syslog('Rename ok');
-						// Rename docs starting with $oldRef with $newRef
-                        $listOfFiles = dol_dir_list($conf->$moduleNameLowerCase->dir_output . '/' . $objectType . '/' . $newRef, 'files', 1, '^' . preg_quote($oldRef, '/'));
-						foreach ($listOfFiles as $fileEntry) {
-							$dirSource = $fileEntry['name'];
-							$dirDest   = preg_replace('/^' . preg_quote($oldRef, '/') . '/', $newRef, $dirSource);
-							$dirSource = $fileEntry['path'] . '/' . $dirSource;
-							$dirDest   = $fileEntry['path'] . '/' . $dirDest;
-							@rename($dirSource, $dirDest);
-						}
-					}
-				}
-			}
-		}
+                // We rename directory ($oldRef = old ref, $num = new ref) in order not to lose the attachments
+                $oldRef    = dol_sanitizeFileName($this->ref);
+                $newRef    = dol_sanitizeFileName($num);
+                $dirSource = getMultidirOutput($this) . '/' . $this->element . '/' . $oldRef;
+                $dirDest   = getMultidirOutput($this) . '/' . $this->element . '/' . $newRef;
+                if (!$error && file_exists($dirSource)) {
+                    dol_syslog(get_class($this) . '::validate() rename dir ' . $dirSource . ' into ' . $dirDest);
 
-		// Set new ref and current status
-		if (!$error) {
-			$this->ref    = $num;
-			$this->status = $this::STATUS_VALIDATED;
-		}
+                    if (@rename($dirSource, $dirDest)) {
+                        require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 
-		if (!$error) {
-			$this->db->commit();
-			return 1;
-		} else {
-			$this->db->rollback();
-			return -1;
-		}
-	}
+                        dol_syslog('Rename ok');
+
+                        // Rename docs starting with $oldRef with $newRef
+                        $listOfFiles = dol_dir_list($dirDest, 'files', 1, '^' . preg_quote($oldRef, '/'));
+                        foreach ($listOfFiles as $fileEntry) {
+                            $dirSource = $fileEntry['name'];
+                            $dirDest   = preg_replace('/^' . preg_quote($oldRef, '/') . '/', $newRef, $dirSource);
+                            $dirSource = $fileEntry['path'] . '/' . $dirSource;
+                            $dirDest   = $fileEntry['path'] . '/' . $dirDest;
+                            @rename($dirSource, $dirDest);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Set new ref and current status
+        if (!$error) {
+            $this->ref    = $num;
+            $this->status = static::STATUS_VALIDATED;
+        }
+
+        if (!$error) {
+            $this->db->commit();
+            return 1;
+        } else {
+            $this->db->rollback();
+            return -1;
+        }
+    }
 
     /**
      * Set deleted status
      *
-     * @param  User $user      Object user that modify
-     * @param  bool $notrigger false = launch triggers after, true = disable triggers
-     * @return int             0 < if KO, > 0 if OK
+     * @param  User      $user      Object user that modify
+     * @param  int<0,1>  $noTrigger 0 = launch triggers after, 1 = disable triggers
+     * @return int<-1,1>            Return integer 0 < if KO, > 0 if OK
      */
-    public function setDeleted(User $user, bool $notrigger = false): int
+    public function setDeleted(User $user, int $noTrigger = 0): int
     {
-        return $this->setStatusCommon($user, $this::STATUS_DELETED, $notrigger, strtoupper($this->element) . '_DELETE');
+        return $this->setStatusCommon($user, static::STATUS_DELETED, $noTrigger, strtoupper($this->element) . '_DELETE');
     }
 
     /**
      * Set draft status
      *
-     * @param  User $user      Object user that modify
-     * @param  int  $notrigger 1 = Does not execute triggers, 0 = Execute triggers
-     * @return int             0 < if KO, > 0 if OK
+     * @param  User      $user      Object user that modify
+     * @param  int<0,1>  $noTrigger 0 = launch triggers after, 1 = disable triggers
+     * @return int<-1,1>            Return integer 0 < if KO, > 0 if OK
      */
-	public function setDraft(User $user, int $notrigger = 0): int
-	{
-		// Protection
-		if ($this->status <= $this::STATUS_DRAFT) {
-			return 0;
-		}
+    public function setDraft(User $user, int $noTrigger = 0): int
+    {
+        // Protection
+        if ($this->status <= static::STATUS_DRAFT) {
+            return 0;
+        }
 
-		return $this->setStatusCommon($user, $this::STATUS_DRAFT, $notrigger, strtoupper($this->element) . '_UNVALIDATE');
-	}
+        return $this->setStatusCommon($user, static::STATUS_DRAFT, $noTrigger, strtoupper($this->element) . '_UNVALIDATE');
+    }
 
     /**
      * Set locked status
      *
-     * @param  User $user      Object user that modify
-     * @param  int  $notrigger 1 = Does not execute triggers, 0 = Execute triggers
-     * @return int             0 < if KO, > 0 if OK
+     * @param  User      $user      Object user that modify
+     * @param  int<0,1>  $noTrigger 0 = launch triggers after, 1 = disable triggers
+     * @return int<-1,1>            Return integer 0 < if KO, > 0 if OK
      */
-    public function setLocked(User $user, int $notrigger = 0): int
+    public function setLocked(User $user, int $noTrigger = 0): int
     {
-        return $this->setStatusCommon($user, $this::STATUS_LOCKED, $notrigger, strtoupper($this->element) . '_LOCK');
+        return $this->setStatusCommon($user, static::STATUS_LOCKED, $noTrigger, strtoupper($this->element) . '_LOCK');
     }
 
     /**
      * Set archived status
      *
-     * @param  User $user      Object user that modify
-     * @param  int  $notrigger 1 = Does not execute triggers, 0 = Execute triggers
-     * @return int             0 < if KO, > 0 if OK
+     * @param  User      $user      Object user that modify
+     * @param  int<0,1>  $noTrigger 0 = launch triggers after, 1 = disable triggers
+     * @return int<-1,1>            Return integer 0 < if KO, > 0 if OK
      */
-    public function setArchived(User $user, int $notrigger = 0): int
+    public function setArchived(User $user, int $noTrigger = 0): int
     {
-        return $this->setStatusCommon($user, $this::STATUS_ARCHIVED, $notrigger, strtoupper($this->element) . '_ARCHIVE');
+        return $this->setStatusCommon($user, static::STATUS_ARCHIVED, $noTrigger, strtoupper($this->element) . '_ARCHIVE');
     }
 
     /**
-     *  Return a link to the object card (with optionaly the picto)
+     * Return array of data to show into a tooltip
+     * This method must be implemented in each object class
      *
-     *  @param  int     $withpicto              Include picto in link (0 = No picto, 1 = Include picto into link, 2 = Only picto)
-     *  @param  string  $option                 On what the link point to ('nolink', ...)
-     *  @param  int     $notooltip              1 = Disable tooltip
-     *  @param  string  $morecss                Add more css on link
-     *  @param  int     $save_lastsearch_value -1 = Auto, 0 = No save of lastsearch_values when clicking, 1 = Save lastsearch_values whenclicking
-     * 	@param	int     $addLabel               0 = Default, 1 = Add label into string, >1 = Add first chars into string
-     *  @return	string                          String with URL
+     * @param  array<string,mixed>   $params params to construct tooltip data
+     * @return array<string,string>         Data to show in tooltip
      */
-	public function getNomUrl(int $withpicto = 0, string $option = '', int $notooltip = 0, string $morecss = '', int $save_lastsearch_value = -1, int $addLabel = 0): string
-	{
-		global $action, $conf, $hookmanager, $langs;
+    public function getTooltipContentArray($params): array
+    {
+        global $langs;
 
-		if (!empty($conf->dol_no_mouse_hover)) {
-			$notooltip = 1; // Force disable tooltips
-		}
+        $datas = [];
 
-		$result = '';
-
-		$label = img_picto('', $this->picto) . ' <u>' . $langs->trans(ucfirst($this->element)) . '</u>';
-		if (isset($this->status)) {
-			$label .= ' ' . $this->getLibStatut(5);
-		}
-		$label .= '<br>';
-		$label .= '<b>' . $langs->trans('Ref') . ' : </b> ' . $this->ref;
+        if (getDolGlobalInt('MAIN_OPTIMIZEFORTEXTBROWSER')) {
+            return ['optimize' => $langs->trans('Show' . dol_ucfirst($this->element))];
+        }
+        $datas['picto'] = img_picto('', $this->picto) . ' <u>' . $langs->trans(dol_ucfirst($this->element)) . '</u>';
+        if (isset($this->status)) {
+            $datas['picto'] .= ' ' . $this->getLibStatut(5);
+        }
+        if (property_exists($this, 'ref')) {
+            $datas['ref'] = '<br><b>' . $langs->trans('Ref') . ' : </b> ' . $this->ref;
+        }
         if (property_exists($this, 'label')) {
-            $label .= '<br><b>' . $langs->transnoentities('Label') . ' : </b> ' . $this->label;
+            $datas['label'] = '<br><b>' . $langs->trans('Label') . ' : </b> ' . $this->label;
         }
 
-		$url = dol_buildpath('/' . $this->module . '/view/' . $this->element . '/' . $this->element . '_card.php', 1) . '?id=' . $this->id;
+        return $datas;
+    }
 
-		if ($option != 'nolink') {
-			// Add param to save lastsearch_values or not
-			$add_save_lastsearch_values = ($save_lastsearch_value == 1 ? 1 : 0);
-			if ($save_lastsearch_value == -1 && preg_match('/list\.php/', $_SERVER['PHP_SELF'])) {
-				$add_save_lastsearch_values = 1;
-			}
-			if ($add_save_lastsearch_values) {
-				$url .= '&save_lastsearch_values=1';
-			}
-		}
+    /**
+     * Return a link to the object card (with optionaly the picto)
+     *
+     * @param  int     $withPicto           Include picto in link (0 = No picto, 1 = Include picto into link, 2 = Only picto)
+     * @param  string  $option              On what the link point to ('nolink', ...)
+     * @param  int     $noToolTip           1 = Disable tooltip
+     * @param  string  $moreCSS             Add more css on link
+     * @param  int     $saveLastSearchValue -1 = Auto, 0 = No save of lastsearch_values when clicking, 1 = Save lastsearch_values whenclicking
+     * @param  int     $addLabel            0 = Default, 1 = Add label into string, >1 = Add first chars into string
+     * @return string                       String with URL
+     */
+    public function getNomUrl(int $withPicto = 0, string $option = '', int $noToolTip = 0, string $moreCSS = '', int $saveLastSearchValue = -1, int $addLabel = 0): string
+    {
+        global $action, $conf, $hookmanager, $langs;
 
-		$linkclose = '';
-		if (empty($notooltip)) {
-			if (!empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
-				$label = $langs->trans('Show' . ucfirst($this->element));
-				$linkclose .= ' alt="' . dol_escape_htmltag($label, 1) . '"';
-			}
-			$linkclose .= ' title="' . dol_escape_htmltag($label, 1) . '"';
-			$linkclose .= ' class="classfortooltip' . ($morecss ? ' ' . $morecss : '') . '"';
-		} else {
-			$linkclose = ($morecss ? ' class="' . $morecss . '"' : '');
-		}
+        if (!empty($conf->dol_no_mouse_hover)) {
+            // Force disable tooltips
+            $noToolTip = 1;
+        }
 
-		if ($option == 'nolink') {
-			$linkstart = '<span';
-		} else {
-			$linkstart = '<a href="' . $url . '"';
-		}
+        $result = '';
+        $params = [
+            'id'         => $this->id,
+            'objecttype' => $this->element . ($this->module ? '@' . $this->module : ''),
+            'option'     => $option,
+        ];
+        $classForTooltip = 'classfortooltip';
+        $dataParams      = '';
+        if (getDolGlobalInt('MAIN_ENABLE_AJAX_TOOLTIP')) {
+            $classForTooltip = 'classforajaxtooltip';
+            $dataParams      = ' data-params="' . dol_escape_htmltag(json_encode($params)) . '"';
+            $label           = '';
+        } else {
+            $label = implode($this->getTooltipContentArray($params));
+        }
+
+        $baseurl = dol_buildpath('/' . $this->module . '/view/' . $this->element . '/' . $this->element . '_card.php', 1);
+        $query   = ['id' => $this->id];
+        if ($option !== 'nolink') {
+            // Add param to save lastsearch_values or not
+            $addSaveLastSearchValues = ($saveLastSearchValue == 1 ? 1 : 0);
+            if ($saveLastSearchValue == -1 && isset($_SERVER['PHP_SELF']) && preg_match('/list\.php/', $_SERVER['PHP_SELF'])) {
+                $addSaveLastSearchValues = 1;
+            }
+            if ($addSaveLastSearchValues) {
+                $query = array_merge($query, ['save_lastsearch_values' => 1]);
+            }
+        }
+        $url = dolBuildUrl($baseurl, $query);
+
+        $linkclose = '';
+        if (empty($noToolTip)) {
+            if (getDolGlobalInt('MAIN_OPTIMIZEFORTEXTBROWSER')) {
+                $label      = $langs->trans('Show' . dol_ucfirst($this->element));
+                $linkclose .= ' alt="' . dolPrintHTMLForAttribute($label) . '"';
+            }
+            $linkclose .= ($label ? ' title="' . dolPrintHTMLForAttribute($label) . '"' : ' title="tocomplete"');
+            $linkclose .= $dataParams . ' class="' . $classForTooltip . ($moreCSS ? ' ' . $moreCSS : '') . '"';
+        } else {
+            $linkclose = ($moreCSS ? ' class="' . $moreCSS . '"' : '');
+        }
+
+        if ($option == 'nolink') {
+            $linkstart = '<span';
+        } else {
+            $linkstart = '<a href="' . $url . '"';
+        }
         if ($option == 'blank') {
-            $linkstart .= 'target=_blank';
+            $linkstart .= ' target=_blank';
         }
-		$linkstart .= $linkclose . '>';
-		if ($option == 'nolink' || empty($url)) {
-			$linkend = '</span>';
-		} else {
-			$linkend = '</a>';
-		}
+        $linkstart .= $linkclose . '>';
+        if ($option == 'nolink') {
+            $linkend = '</span>';
+        } else {
+            $linkend = '</a>';
+        }
 
         $result .= $linkstart;
 
-        if ($withpicto > 0) {
-            $result .= img_picto('', $this->picto) . ' ';
+        if (empty($this->showphoto_on_popup)) {
+            if ($withPicto) {
+                $result .= img_object(($noToolTip ? '' : $label), ($this->picto ?: 'generic'), (($withPicto != 2) ? 'class="paddingright"' : ''), 0, 0, $noToolTip ? 0 : 1);
+            }
+            //@todo gérer le else
         }
 
-        if ($withpicto != 2) {
-			$result .= $this->ref;
-		}
+        if ($withPicto != 2) {
+            $result .= $this->ref;
+        }
 
-		$result .= $linkend;
+        $result .= $linkend;
 
-        if ($withpicto != 2) {
-            if ($withpicto == 3) {
+        if ($withPicto != 2) {
+            if ($withPicto == 3) {
                 $addLabel = 1;
             }
             $result .= (($addLabel && property_exists($this, 'label')) ? '<span class="opacitymedium"> - <span contenteditable="true" data-field="label">' . dol_trunc($this->label, ($addLabel > 1 ? $addLabel : 0)) . '</span></span>' : '');
         }
 
-		$hookmanager->initHooks([$this->element . 'dao']);
-		$parameters = ['id' => $this->id, 'getnomurl' => $result];
-		$reshook = $hookmanager->executeHooks('getNomUrl', $parameters, $this, $action); // Note that $action and $object may have been modified by some hooks.
-		if ($reshook > 0) {
-			$result = $hookmanager->resPrint;
-		} else {
-			$result .= $hookmanager->resPrint;
-		}
+        $hookmanager->initHooks([$this->element . 'dao']);
+        $parameters = ['id' => $this->id, 'getnomurl' => &$result];
+        $resHook    = $hookmanager->executeHooks('getNomUrl', $parameters, $this, $action);
+        if ($resHook > 0) {
+            $result = $hookmanager->resPrint;
+        } else {
+            $result .= $hookmanager->resPrint;
+        }
 
-		return $result;
-	}
+        return $result;
+    }
 
     /**
      * Return the label of the status
@@ -535,7 +596,6 @@ abstract class SaturneObject extends CommonObject
         return $this->LibStatut($this->status, $mode);
     }
 
-
     /**
      * Return the status
      *
@@ -545,38 +605,58 @@ abstract class SaturneObject extends CommonObject
      */
     public function LibStatut(int $status, int $mode = 0): string
     {
-       return '';
+        return '';
     }
+
     /**
-     *	Load the info information in the object
+     * Load the info information in the object
      *
-     *	@param  int   $id ID of object
-     *	@return	void
+     * @param  int  $id ID of object
+     * @return void
      */
-	public function info(int $id)
-	{
-        $sql = 'SELECT t.rowid, t.date_creation as datec, t.tms as datem,';
-        $sql .= ' t.fk_user_creat, t.fk_user_modif';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . $this->table_element . ' as t';
+    public function info(int $id): void
+    {
+        $sql = 'SELECT t.rowid, t.date_creation as datec';
+        if (!empty($this->isextrafieldmanaged) && $this->isextrafieldmanaged == 1) {
+            $sql .= ', GREATEST(t.tms, te.tms) as datem';
+        } else {
+            $sql .= ', t.tms as datem';
+        }
+        if (!empty($this->fields['fk_user_creat'])) {
+            $sql .= ', t.fk_user_creat';
+        }
+        if (!empty($this->fields['fk_user_modif'])) {
+            $sql .= ', t.fk_user_modif';
+        }
+        $sql .= ' FROM ' . $this->db->prefix() . $this->table_element . ' as t';
+        if (!empty($this->isextrafieldmanaged) && $this->isextrafieldmanaged == 1) {
+            $sql .= ' LEFT JOIN ' . $this->db->prefix() . $this->table_element . '_extrafields as te ON te.fk_object = t.rowid';
+        }
         $sql .= ' WHERE t.rowid = ' . $id;
 
-		$result = $this->db->query($sql);
-		if ($result) {
-			if ($this->db->num_rows($result)) {
-				$obj = $this->db->fetch_object($result);
-				$this->id = $obj->rowid;
+        $result = $this->db->query($sql);
+        if ($result) {
+            if ($this->db->num_rows($result)) {
+                $obj = $this->db->fetch_object($result);
 
-                $this->user_creation_id     = $obj->fk_user_creat;
-                $this->user_modification_id = $obj->fk_user_modif;
-                $this->date_creation        = $this->db->jdate($obj->datec);
-                $this->date_modification    = empty($obj->datem) ? '' : $this->db->jdate($obj->datem);
-			}
+                $this->id = $obj->rowid;
 
-			$this->db->free($result);
-		} else {
-			dol_print_error($this->db);
-		}
-	}
+                if (!empty($this->fields['fk_user_creat'])) {
+                    $this->user_creation_id = $obj->fk_user_creat;
+                }
+                if (!empty($this->fields['fk_user_modif'])) {
+                    $this->user_modification_id = $obj->fk_user_modif;
+                }
+
+                $this->date_creation     = $this->db->jdate($obj->datec);
+                $this->date_modification = empty($obj->datem) ? '' : $this->db->jdate($obj->datem);
+            }
+
+            $this->db->free($result);
+        } else {
+            dol_print_error($this->db);
+        }
+    }
 
     /**
      * Initialise object with example values
@@ -584,10 +664,10 @@ abstract class SaturneObject extends CommonObject
      *
      * @return void
      */
-	public function initAsSpecimen()
-	{
-		$this->initAsSpecimenCommon();
-	}
+    public function initAsSpecimen(): void
+    {
+        $this->initAsSpecimenCommon();
+    }
 
     /**
      * Returns the reference to the following non-used object depending on the active numbering module
@@ -598,7 +678,7 @@ abstract class SaturneObject extends CommonObject
      */
     public function getNextNumRef(string $objectType = ''): string
     {
-        global $langs, $conf;
+        global $langs;
 
         $moduleNameUpperCase      = dol_strtoupper($this->module);
         $element                  = $objectType ?: $this->element;
@@ -616,254 +696,238 @@ abstract class SaturneObject extends CommonObject
                 return '';
             }
         } else {
-            print $langs->trans('Error') . ' ' . $langs->trans('ClassNotFound') . ' ' . $conf->global->$moduleNameUpperCase;
+            print $langs->trans('Error') . ' ' . $langs->trans('ClassNotFound') . ' ' . getDolGlobalString($moduleNameUpperCase);
             return '';
         }
     }
 
     /**
-     * Sets object to supplied categories
+     * Sets object to given categories
      *
-     * Deletes object from existing categories not supplied
-     * Adds it to non-existing supplied categories
-     * Existing categories are left untouched
+     * Assign the object to all categories not yet assigned
+     * Unassign object from existing categories not supplied in $categories (if $removeExisting==true)
+     * If $removeExisting is false, existing categories are left untouched
      *
-     * @param  int[]|int $categories Category or categories IDs
-     * @return float|int
-     */
-    public function setCategories($categories)
+     * @param  int[]|int $categories     Category ID or array of Categories IDs
+     * @param  string    $typeCateg      Category type ('customer', 'supplier', 'website_page', ...)
+     *                                   defined into const class Categorie type
+     * @param  boolean   $removeExisting True : Remove existing categories from Object if not supplies by $categories,
+     *                                   False : Let them
+     * @return int                       Return integer <0 if KO, >0 if OK
+    */
+    public function setCategories($categories, string $typeCateg = '', bool $removeExisting = false): int
     {
         if ($this->isCategoryManaged == 1) {
-            return parent::setCategoriesCommon($categories, $this->element);
+            $typeCateg = $typeCateg ?: $this->element;
+            return parent::setCategoriesCommon($categories, $typeCateg, $removeExisting);
+        }
+        return 0;
+    }
+
+    /**
+     * Delete all links between an object $this
+     *
+     * @param  int|null  $sourceid   Object source id
+     * @param  string    $sourcetype Object source type
+     * @param  int|null  $targetid   Object target id
+     * @param  string    $targettype Object target type
+     * @param  int       $rowid      Row id of line to delete. If defined, other parameters are not used.
+     * @param  User|null $f_user     User that create
+     * @param  int<0,1>  $notrigger  1 = Does not execute triggers, 0 = execute triggers
+     * @return int                   > 0 if OK, <0 if KO
+     * @see add_object_linked(), updateObjectLinked(), fetchObjectLinked()
+     */
+    public function deleteObjectLinked($sourceid = null, $sourcetype = '', $targetid = null, $targettype = '', $rowid = 0, $f_user = null, $notrigger = 0)
+    {
+        global $user;
+
+        $deletesource = false;
+        $deletetarget = false;
+        $f_user       = isset($f_user) ? $f_user : $user;
+
+        if (!empty($sourceid) && !empty($sourcetype) && !empty($targetid) && !empty($targettype)) {
+            $deletesource = true;
+            $deletetarget = true;
+        } elseif (!empty($sourceid) && !empty($sourcetype) && empty($targetid) && empty($targettype)) {
+            $deletesource = true;
+        } elseif (empty($sourceid) && empty($sourcetype) && !empty($targetid) && !empty($targettype)) {
+            $deletetarget = true;
+        }
+
+        $sourceid   = (!empty($sourceid) ? $sourceid : $this->id);
+        $sourcetype = (!empty($sourcetype) ? $sourcetype : $this->element);
+        $targetid   = (!empty($targetid) ? $targetid : $this->id);
+        $targettype = (!empty($targettype) ? $targettype : $this->element);
+        $this->db->begin();
+        $error = 0;
+
+        if (!$notrigger) {
+            // Call trigger
+            $this->context['link_id']          = $rowid;
+            $this->context['link_source_id']   = $sourceid;
+            $this->context['link_source_type'] = $sourcetype;
+            $this->context['link_target_id']   = $targetid;
+            $this->context['link_target_type'] = $targettype;
+
+            $result = $this->call_trigger('OBJECT_LINK_DELETE', $f_user);
+            if ($result < 0) {
+                $error++;
+            }
+            // End call triggers
+        }
+
+        if (!$error) {
+            $sql  = 'DELETE FROM ' . $this->db->prefix() . 'element_element';
+            $sql .= ' WHERE';
+            if ($rowid > 0) {
+                $sql .= ' rowid = ' . ((int) $rowid);
+            } else {
+                if ($deletesource && $deletetarget) {
+                    $sql .= ' (fk_source = ' . ((int) $sourceid) . " AND sourcetype = '" . $this->db->escape($sourcetype) . "')";
+                    $sql .= ' AND';
+                    $sql .= ' (fk_target = ' . ((int) $targetid) . " AND targettype = '" . $this->db->escape($targettype) . "')";
+                } elseif ($deletesource) {
+                    $sql .= ' fk_source = ' . ((int) $sourceid) . " AND sourcetype = '" . $this->db->escape($sourcetype) . "'";
+                    $sql .= ' AND fk_target = ' . ((int) $sourceid) . " AND targettype = '" . $this->db->escape($targettype) . "'";
+                } elseif ($deletetarget) {
+                    $sql .= ' fk_target = ' . ((int) $targetid) . " AND targettype = '" . $this->db->escape($targettype) . "'";
+                    $sql .= ' AND fk_source = ' . ((int) $targetid) . " AND sourcetype = '" . $this->db->escape($targettype) . "'";
+                } else {
+                    $sql .= ' (fk_source = ' . ((int) $sourceid) . " AND sourcetype = '" . $this->db->escape($sourcetype) . "')";
+                    $sql .= ' OR';
+                    $sql .= ' (fk_target = ' . ((int) $targetid) . " AND targettype = '" . $this->db->escape($targettype) . "')";
+                }
+            }
+
+            dol_syslog(get_class($this) . "::deleteObjectLinked", LOG_DEBUG);
+            if (!$this->db->query($sql)) {
+                $this->error = $this->db->lasterror();
+                $this->errors[] = $this->error;
+                $error++;
+            }
+        }
+
+        if (!$error) {
+            $this->db->commit();
+            return 1;
         } else {
+            $this->db->rollback();
             return 0;
         }
     }
 
-	/**
-	 *	Fetch array of objects linked to current object type (object of enabled modules only)
-	 */
-	public function fetchAllLinksForObjectType()
-	{
-		$targettype = $this->table_element;
+    /**
+     * Write generic information of trigger description
+     *
+     * @param  SaturneObject $object Object calling the trigger
+     * @return string                Description to display in actioncomm->note_private
+     */
+    public function getTriggerDescription(SaturneObject $object): string
+    {
+        global $conf, $db, $langs, $mysoc;
 
-		// Links between objects are stored in table element_element
-		$sql = "SELECT rowid, fk_source, sourcetype, fk_target, targettype";
-		$sql .= " FROM ".$this->db->prefix()."element_element";
-		$sql .= " WHERE targettype = '" . $targettype . "'";
+        $ret = $langs->transnoentities('TechnicalID') . ' : ' . $object->id . '<br>';
+        if (property_exists($object, 'ref') && !empty($object->ref)) {
+            $ret .= $langs->transnoentities('Ref') . ' : ' . $object->ref . '<br>';
+        }
+        if (property_exists($object, 'label') && !empty($object->label)) {
+            $ret .= $langs->transnoentities('Label') . ' : ' . $object->label . '<br>';
+        }
+        if (property_exists($object, 'description') && !empty($object->description)) {
+            $ret .= $langs->transnoentities('Description') . ' : ' . $object->description . '<br>';
+        }
 
-		dol_syslog(get_class($this)."::fetchObjectLink", LOG_DEBUG);
-		$resql = $this->db->query($sql);
+        $ret .= $langs->transnoentities('DateCreation') . ' : ' . dol_print_date($object->date_creation, 'dayhoursec', 'tzuserrel') . '<br>';
+        $ret .= $langs->transnoentities('DateModification') . ' : ' . dol_print_date($object->date_modification, 'dayhoursec', 'tzuserrel') . '<br>';
 
-		if ($resql) {
-			$num = $this->db->num_rows($resql);
-			$i = 0;
-			while ($i < $num) {
-				$obj = $this->db->fetch_object($resql);
-				$linksForObject[$obj->fk_target][$obj->sourcetype] = $obj->fk_source;
-				$i++;
-			}
-
-			return $linksForObject;
-		} else {
-			dol_print_error($this->db);
-			return -1;
-		}
-	}
-
-	/**
-	 *	Delete all links between an object $this
-	 *
-	 *	@param	?int	$sourceid		Object source id
-	 *	@param  string	$sourcetype		Object source type
-	 *	@param  ?int	$targetid		Object target id
-	 *	@param  string	$targettype		Object target type
-	 *  @param	int		$rowid			Row id of line to delete. If defined, other parameters are not used.
-	 * 	@param	?User	$f_user			User that create
-	 * 	@param	int<0,1>	$notrigger		1=Does not execute triggers, 0= execute triggers
-	 *	@return     					int	>0 if OK, <0 if KO
-	 *	@see	add_object_linked(), updateObjectLinked(), fetchObjectLinked()
-	 */
-	public function deleteObjectLinked($sourceid = null, $sourcetype = '', $targetid = null, $targettype = '', $rowid = 0, $f_user = null, $notrigger = 0)
-	{
-		global $user;
-		$deletesource = false;
-		$deletetarget = false;
-		$f_user = isset($f_user) ? $f_user : $user;
-
-        if (!empty($sourceid) && !empty($sourcetype) && !empty($targetid) && !empty($targettype)) {
-            $deletesource = true;
-			$deletetarget = true;
-        } else if (!empty($sourceid) && !empty($sourcetype) && empty($targetid) && empty($targettype)) {
-			$deletesource = true;
-		} elseif (empty($sourceid) && empty($sourcetype) && !empty($targetid) && !empty($targettype)) {
-			$deletetarget = true;
-		}
-
-		$sourceid = (!empty($sourceid) ? $sourceid : $this->id);
-		$sourcetype = (!empty($sourcetype) ? $sourcetype : $this->element);
-		$targetid = (!empty($targetid) ? $targetid : $this->id);
-		$targettype = (!empty($targettype) ? $targettype : $this->element);
-		$this->db->begin();
-		$error = 0;
-
-		if (!$notrigger) {
-			// Call trigger
-			$this->context['link_id'] = $rowid;
-			$this->context['link_source_id'] = $sourceid;
-			$this->context['link_source_type'] = $sourcetype;
-			$this->context['link_target_id'] = $targetid;
-			$this->context['link_target_type'] = $targettype;
-			$result = $this->call_trigger('OBJECT_LINK_DELETE', $f_user);
-			if ($result < 0) {
-				$error++;
-			}
-			// End call triggers
-		}
-
-		if (!$error) {
-			$sql = "DELETE FROM " . $this->db->prefix() . "element_element";
-			$sql .= " WHERE";
-			if ($rowid > 0) {
-				$sql .= " rowid = " . ((int) $rowid);
-			} else {
-                if ($deletesource && $deletetarget) {
-                    $sql .= " (fk_source = " . ((int) $sourceid) . " AND sourcetype = '" . $this->db->escape($sourcetype) . "')";
-					$sql .= " AND";
-					$sql .= " (fk_target = " . ((int) $targetid) . " AND targettype = '" . $this->db->escape($targettype) . "')";
-                }else if ($deletesource) {
-					$sql .= " fk_source = " . ((int) $sourceid) . " AND sourcetype = '" . $this->db->escape($sourcetype) . "'";
-					$sql .= " AND fk_target = " . ((int) $sourceid) . " AND targettype = '" . $this->db->escape($targettype) . "'";
-				} elseif ($deletetarget) {
-					$sql .= " fk_target = " . ((int) $targetid) . " AND targettype = '" . $this->db->escape($targettype) . "'";
-					$sql .= " AND fk_source = " . ((int) $targetid) . " AND sourcetype = '" . $this->db->escape($targettype) . "'";
-				} else {
-					$sql .= " (fk_source = " . ((int) $sourceid) . " AND sourcetype = '" . $this->db->escape($sourcetype) . "')";
-					$sql .= " OR";
-					$sql .= " (fk_target = " . ((int) $targetid) . " AND targettype = '" . $this->db->escape($targettype) . "')";
-				}
-			}
-
-			dol_syslog(get_class($this) . "::deleteObjectLinked", LOG_DEBUG);
-			if (!$this->db->query($sql)) {
-				$this->error = $this->db->lasterror();
-				$this->errors[] = $this->error;
-				$error++;
-			}
-		}
-
-		if (!$error) {
-			$this->db->commit();
-			return 1;
-		} else {
-			$this->db->rollback();
-			return 0;
-		}
-	}
-
-	/**
-	 * Write generic information of trigger description
-	 *
-	 * @param  SaturneObject $object Object calling the trigger
-	 * @return string                Description to display in actioncomm->note_private
-	 */
-	public function getTriggerDescription(SaturneObject $object): string
-	{
-		global $conf, $db, $langs, $mysoc;
-
-        saturne_load_langs(['other', 'companies']);
-
-		$user = new User($db);
-		$now  = dol_now();
-
-        $ret  = $langs->trans('TechnicalID') . ' : ' . $object->id . '<br>';
-		$ret .= $langs->trans('Ref') . ' : ' . $object->ref . '<br>';
-        $ret .= (isset($object->label) && !empty($object->label) ? $langs->transnoentities('Label') . ' : ' . $object->label . '<br>' : '');
-		$ret .= (isset($object->description) && !empty($object->description) ? $langs->transnoentities('Description') . ' : ' . $object->description . '<br>' : '');
-		$ret .= (isset($object->type) && !empty($object->type) ? $langs->transnoentities('Type') . ' : ' .  $langs->transnoentities($object->type) . '<br>' : '');
-		$ret .= (isset($object->value) && !empty($object->value) ? $langs->transnoentities('Value') . ' : ' . $object->value . '<br>' : '');
-		$ret .= $langs->transnoentities('DateCreation') . ' : ' . dol_print_date($object->date_creation ?: $now, 'dayhoursec', 'tzuser') . '<br>';
-		$ret .= $langs->transnoentities('DateModification') . ' : ' . dol_print_date($object->tms ?: $now, 'dayhoursec', 'tzuser') . '<br>';
-
-        if (!empty($object->fk_user_creat)) {
-            $result = $user->fetch($object->fk_user_creat);
+        if (property_exists($object, 'fk_user_creat') &&  !empty($object->fk_user_creat)) {
+            $userTmp = new User($db);
+            $result  = $userTmp->fetch($object->fk_user_creat);
             if ($result > 0) {
-                $ret .= $langs->transnoentities('CreatedByLogin') . ' : ' . ucfirst($user->firstname) . ' ' . dol_strtoupper($user->lastname) . '<br>';
+                $ret .= $langs->transnoentities('CreatedByLogin') . ' : ' . $userTmp->getFullName($langs) . '<br>';
+            }
+        }
+        if (property_exists($object, 'fk_user_modif') && !empty($object->fk_user_modif)) {
+            $userTmp = $userTmp ?? new User($db);
+            $result  = $userTmp->fetch($object->fk_user_modif);
+            if ($result > 0) {
+                $ret .= $langs->transnoentities('ModifiedByLogin') . ' : ' . $userTmp->getFullName($langs) . '<br>';
             }
         }
 
-		if (!empty($object->fk_user_modif)) {
-            $result = $user->fetch($object->fk_user_modif);
-            if ($result > 0) {
-                $ret .= $langs->transnoentities('ModifiedByLogin') . ' : ' . ucfirst($user->firstname) . ' ' . dol_strtoupper($user->lastname) . '<br>';
+        $ret .= $langs->transnoentities('EntityNumber') . ' : ' . $conf->entity . '<br>';
+        $ret .= $langs->transnoentities('EntityName') . ' : ' . $mysoc->name . '<br>';
+
+        if (property_exists($object, 'fk_soc') && isModEnabled('societe')) {
+            $result = $object->fetch_thirdparty();
+            if ($result > 0 && is_object($object->thirdparty)) {
+                $ret .= $langs->transnoentities('ThirdParty') . ' : ' . (dol_strlen($object->thirdparty->name) > 0 ? $object->thirdparty->name : $langs->transnoentities('NoData')) . '<br>';
+            }
+        }
+        if (property_exists($object, 'fk_project') && isModEnabled('project')) {
+            $result = $object->fetchProject();
+            if ($result > 0 && is_object($object->project)) {
+                $ret .= $langs->transnoentities('Project') . ' : ' . $object->project->ref . ' ' . $object->project->title . '<br>';
             }
         }
 
-		$ret .= $langs->transnoentities('EntityNumber') . ' : ' . $conf->entity . '<br>';
-		$ret .= $langs->transnoentities('EntityName') . ' : ' . $mysoc->name . '<br>';
-		if (array_key_exists('fk_soc', $object->fields) && isModEnabled('societe')) {
-            require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
-			$societe = new Societe($db);
-			$societe->fetch($object->fk_soc);
-			$ret .= $langs->transnoentities('ThirdParty') . ' : ' . (dol_strlen($societe->name) > 0 ? $societe->name : $langs->transnoentities('NoData')) . '<br>';
-		}
-		if (array_key_exists('fk_project', $object->fields) && isModEnabled('project')) {
-            require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
-			$project = new Project($db);
-			$project->fetch($object->fk_project);
-			$ret .= $langs->transnoentities('Project') . ' : ' . $project->ref . ' ' . $project->title . '<br>';
-		}
-        $ret .= (isset($object->note_public) && dol_strlen($object->note_public) > 0 ? $langs->transnoentities('NotePublic') . ' : ' . $object->note_public . '<br>' : '');
-        $ret .= (isset($object->note_private) && dol_strlen($object->note_private) > 0 ? $langs->transnoentities('NotePrivate') . ' : ' . $object->note_private . '<br>' : '');
-        $ret .= (isset($object->status) && isset($object->fields['status']['arrayofkeyval'][$object->status]) ? $langs->transnoentities('Status') . ' : ' . $langs->transnoentities($object->fields['status']['arrayofkeyval'][$object->status]) . '<br>' : '');
-		return $ret;
-	}
+        if (property_exists($object, 'note_public') && !empty($object->note_public)) {
+            $ret .= $langs->transnoentities('NotePublic') . ' : ' . $object->note_public . '<br>';
+        }
+        if (property_exists($object, 'note_private') && !empty($object->note_private)) {
+            $ret .= $langs->transnoentities('NotePrivate') . ' : ' . $object->note_private . '<br>';
+        }
+        if (property_exists($object, 'status') && !empty($object->status) && isset($object->fields['status']['arrayofkeyval'][$object->status])) {
+            $ret .= $langs->transnoentities('Status') . ' : ' . $langs->transnoentities($object->fields['status']['arrayofkeyval'][$object->status]) . '<br>';
+        }
+
+        return $ret;
+    }
 
     /**
      * Return a thumb for kanban views
      *
-     * @param  string     $option     Where point the link (0=> main card, 1,2 => shipment, 'nolink' => No link)
-     * @param  array|null $moreParams Parameters for load kanban view
-     * @return string                 HTML code for Kanban thumb
+     * @param  string                   $option     Where point the link (0 => main card, 1,2 => shipment, 'nolink' => No link)
+     * @param  array<string,mixed>|null $moreParams Parameters for load kanban view
+     * @return string                               HTML code for Kanban thumb
      */
-    public function getKanbanView($option = '', array $moreParams = null): string
+    public function getKanbanView(string $option = '', ?array $moreParams = null): string
     {
-        if (is_string($option)) {
-            $selected = (empty($moreParams['selected']) ? 0 : $moreParams['selected']);
+        $selected = (empty($moreParams['selected']) ? 0 : $moreParams['selected']);
 
-            $out = '<div class="box-flex-item box-flex-grow-zero">';
-            $out .= '<div class="info-box info-box-sm">';
-            $out .= '<span class="info-box-icon bg-infobox-action">';
-            $out .= img_picto('', $this->picto);
-            $out .= '</span>';
-            $out .= '<div class="info-box-content">';
-            $out .= '<span class="info-box-ref inline-block tdoverflowmax150 valignmiddle">' . (method_exists($this, 'getNomUrl') ? $this->getNomUrl() : $this->ref) . '</span>';
-            if ($selected >= 0) {
-                $out .= '<input id="cb' . $this->id . '" class="flat checkforselect fright" type="checkbox" name="toselect[]" value="' . $this->id . '"' . ($selected ? ' checked="checked"' : '') . '>';
-            }
-            if (property_exists($this, 'label')) {
-                $out .= '<div class="inline-block opacitymedium valignmiddle tdoverflowmax100">' . $this->label . '</div>';
-            }
-            if (method_exists($this, 'getLibStatut')) {
-                $out .= '<br><div class="info-box-status margintoponly">' . $this->getLibStatut(3) . '</div>';
-            }
-            $out .= '</div>';
-            $out .= '</div>';
-            $out .= '</div>';
-
-            return $out;
-        } else {
-            return '';
+        $out  = '<div class="box-flex-item box-flex-grow-zero">';
+        $out .= '<div class="info-box info-box-sm">';
+        $out .= '<span class="info-box-icon bg-infobox-action">';
+        $out .= img_picto('', $this->picto);
+        $out .= '</span>';
+        $out .= '<div class="info-box-content">';
+        $out .= '<span class="info-box-ref inline-block tdoverflowmax150 valignmiddle">' . (method_exists($this, 'getNomUrl') ? $this->getNomUrl() : $this->ref) . '</span>';
+        if ($selected >= 0) {
+            $out .= '<input id="cb' . $this->id . '" class="flat checkforselect fright" type="checkbox" name="toselect[]" value="' . $this->id . '"' . ($selected ? ' checked="checked"' : '') . '>';
         }
+        if (property_exists($this, 'label')) {
+            $out .= '<div class="inline-block opacitymedium valignmiddle tdoverflowmax100">' . $this->label . '</div>';
+        }
+        if (property_exists($this, 'thirdparty') && is_object($this->thirdparty)) {
+            $out .= '<br><div class="info-box-ref tdoverflowmax150">' . $this->thirdparty->getNomUrl(1) . '</div>';
+        }
+        if (method_exists($this, 'getLibStatut')) {
+            $out .= '<br><div class="info-box-status">' . $this->getLibStatut(3) . '</div>';
+        }
+        $out .= '</div>';
+        $out .= '</div>';
+        $out .= '</div>';
+
+        return $out;
     }
 
     /**
      * Return validation test result for a field
      *
-     * @param  array   $fields     Array of properties of field to show
-     * @param  string  $fieldKey   Key of attribute
-     * @param  string  $fieldValue Value of attribute
-     * @return bool                Return false if fail true on success, see $this->error for error message
+     * @param  array  $fields     Array of properties of field to show
+     * @param  string $fieldKey   Key of attribute
+     * @param  string $fieldValue Value of attribute
+     * @return bool               Return false if fail true on success, see $this->error for error message
      */
     public function validateField($fields, $fieldKey, $fieldValue): bool
     {
@@ -879,14 +943,14 @@ abstract class SaturneObject extends CommonObject
                 if (isset($field['bounds']['min'])) {
                     $min = $field['bounds']['min'];
                     if ($fieldValue < $min) {
-                        $this->setFieldError($fieldKey, $langs->trans('FieldMinValue', strtolower(html_entity_decode($langs->trans($field['label']), ENT_COMPAT, 'UTF-8')), $min));
+                        $this->setFieldError($fieldKey, $langs->trans('FieldMinValue', dol_strtolower(html_entity_decode($langs->trans($field['label']), ENT_COMPAT, 'UTF-8')), $min));
                         $validationResult = false;
                     }
                 }
                 if (isset($field['bounds']['max'])) {
                     $max = $field['bounds']['max'];
                     if ($fieldValue > $max) {
-                        $this->setFieldError($fieldKey, $langs->trans('FieldMaxValue', strtolower(html_entity_decode($langs->trans($field['label']), ENT_COMPAT, 'UTF-8')), $max));
+                        $this->setFieldError($fieldKey, $langs->trans('FieldMaxValue', dol_strtolower(html_entity_decode($langs->trans($field['label']), ENT_COMPAT, 'UTF-8')), $max));
                         $validationResult = false;
                     }
                 }
