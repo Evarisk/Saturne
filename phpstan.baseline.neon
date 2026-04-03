@@ -1495,7 +1495,7 @@ parameters:
 			path: class/saturnecertificate.class.php
 
 		-
-			message: '#^Class DoliDB referenced with incorrect case\: DoliDb\.$#'
+			message: '#^Class DoliDB referenced with incorrect case\: DoliDB\.$#'
 			identifier: class.nameCase
 			count: 1
 			path: class/saturnecertificate.class.php
@@ -1951,7 +1951,7 @@ parameters:
 			path: class/saturnedocuments.class.php
 
 		-
-			message: '#^Class DoliDB referenced with incorrect case\: DoliDb\.$#'
+			message: '#^Class DoliDB referenced with incorrect case\: DoliDB\.$#'
 			identifier: class.nameCase
 			count: 1
 			path: class/saturnedocuments.class.php
@@ -2035,7 +2035,7 @@ parameters:
 			path: class/saturneelement.class.php
 
 		-
-			message: '#^Class DoliDB referenced with incorrect case\: DoliDb\.$#'
+			message: '#^Class DoliDB referenced with incorrect case\: DoliDB\.$#'
 			identifier: class.nameCase
 			count: 1
 			path: class/saturneelement.class.php
@@ -2377,7 +2377,7 @@ parameters:
 			path: class/saturneform.class.php
 
 		-
-			message: '#^Class DoliDB referenced with incorrect case\: DoliDb\.$#'
+			message: '#^Class DoliDB referenced with incorrect case\: DoliDB\.$#'
 			identifier: class.nameCase
 			count: 1
 			path: class/saturnemail.class.php
@@ -2971,7 +2971,7 @@ parameters:
 			path: class/saturneobject.class.php
 
 		-
-			message: '#^Class DoliDB referenced with incorrect case\: DoliDb\.$#'
+			message: '#^Class DoliDB referenced with incorrect case\: DoliDB\.$#'
 			identifier: class.nameCase
 			count: 1
 			path: class/saturneobject.class.php
@@ -3031,7 +3031,7 @@ parameters:
 			path: class/saturneobject.class.php
 
 		-
-			message: '#^Class DoliDB referenced with incorrect case\: DoliDb\.$#'
+			message: '#^Class DoliDB referenced with incorrect case\: DoliDB\.$#'
 			identifier: class.nameCase
 			count: 1
 			path: class/saturneredirection.class.php
@@ -3055,7 +3055,7 @@ parameters:
 			path: class/saturneredirection.class.php
 
 		-
-			message: '#^Class DoliDB referenced with incorrect case\: DoliDb\.$#'
+			message: '#^Class DoliDB referenced with incorrect case\: DoliDB\.$#'
 			identifier: class.nameCase
 			count: 1
 			path: class/saturneschedules.class.php
@@ -3463,7 +3463,7 @@ parameters:
 			path: class/saturnesignature.class.php
 
 		-
-			message: '#^Class DoliDB referenced with incorrect case\: DoliDb\.$#'
+			message: '#^Class DoliDB referenced with incorrect case\: DoliDB\.$#'
 			identifier: class.nameCase
 			count: 1
 			path: class/saturnesignature.class.php
@@ -3541,7 +3541,7 @@ parameters:
 			path: class/saturnesignature.class.php
 
 		-
-			message: '#^Class DoliDB referenced with incorrect case\: DoliDb\.$#'
+			message: '#^Class DoliDB referenced with incorrect case\: DoliDB\.$#'
 			identifier: class.nameCase
 			count: 1
 			path: class/saturnestandard.class.php
@@ -4789,7 +4789,7 @@ parameters:
 			path: core/modules/saturne/modules_saturne.php
 
 		-
-			message: '#^Class DoliDB referenced with incorrect case\: DoliDb\.$#'
+			message: '#^Class DoliDB referenced with incorrect case\: DoliDB\.$#'
 			identifier: class.nameCase
 			count: 1
 			path: core/modules/saturne/modules_saturne.php

@@ -1,6 +1,6 @@
 <?php
 
-/* Copyright (C) 2021-2023 EVARISK <technique@evarisk.com>
+/* Copyright (C) 2021-2026 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,50 +19,36 @@
 /**
  * \file    class/saturnedocuments.class.php
  * \ingroup saturne
- * \brief   This file is a CRUD class file for SaturneDocuments (Create/Read/Update/Delete).
+ * \brief   This file is a CRUD class file for SaturneDocuments (Create/Read/Update/Delete)
  */
 
-// Load Saturne libraries.
+// Load Saturne libraries
 require_once __DIR__ . '/saturneobject.class.php';
 
 /**
- * Class for SaturneDocuments.
+ * Class for SaturneDocuments
  */
-class SaturneDocuments extends SaturneObject
+abstract class SaturneDocuments extends SaturneObject
 {
     /**
-     * @var DoliDB Database handler.
-     */
-    public $db;
-
-    /**
-     * @var string Module name.
+     * @var string Module name
      */
     public $module = 'saturne';
 
     /**
-     * @var string Element type of object.
+     * @var string Element type of object
      */
     public $element = 'saturne_documents';
 
     /**
-     * @var string Name of table without prefix where object is stored. This is also the key used for extrafields management.
+     * @var string Name of table without prefix where object is stored
+     *             This is also the key used for extrafields management
      */
     public $table_element = 'saturne_object_documents';
 
     /**
-     * @var int Does this object support multicompany module ?
-     * 0=No test on entity, 1=Test with field entity, 'field@table'=Test with link by field@table
-     */
-    public $ismultientitymanaged = 1;
-
-    /**
-     * @var int Does object support extrafields ? 0=No, 1=Yes
-     */
-    public $isextrafieldmanaged = 1;
-
-    /**
-     * @var array Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
+     * @var array Array with all fields and their property
+     *            Do not use it as a static var. It may be modified by constructor
      */
     public $fields = [
         'rowid'         => ['type' => 'integer',      'label' => 'TechnicalID',      'enabled' => 1, 'position' => 1,   'notnull' => 1, 'visible' => 0, 'noteditable' => 1, 'index' => 1, 'comment' => 'Id'],
@@ -85,46 +71,6 @@ class SaturneDocuments extends SaturneObject
     ];
 
     /**
-     * @var int ID.
-     */
-    public int $rowid;
-
-    /**
-     * @var string Ref.
-     */
-    public $ref;
-
-    /**
-     * @var string Ref ext.
-     */
-    public $ref_ext;
-
-    /**
-     * @var int Entity.
-     */
-    public $entity;
-
-    /**
-     * @var int|string Creation date.
-     */
-    public $date_creation;
-
-    /**
-     * @var int|string Timestamp.
-     */
-    public $tms;
-
-    /**
-     * @var string Import key.
-     */
-    public $import_key = '';
-
-    /**
-     * @var int Status.
-     */
-    public $status;
-
-    /**
      * @var string Type.
      */
     public string $type = '';
@@ -140,19 +86,9 @@ class SaturneDocuments extends SaturneObject
     public ?string $json = null;
 
     /**
-     * @var string Pdf model name.
-     */
-    public $model_pdf;
-
-    /**
      * @var string|null ODT model name.
      */
     public ?string $model_odt = null;
-
-    /**
-     * @var string Last document name.
-     */
-    public $last_main_doc;
 
     /**
      * @var string Object parent type.
@@ -165,16 +101,11 @@ class SaturneDocuments extends SaturneObject
     public int $parent_id;
 
     /**
-     * @var int User ID.
-     */
-    public $fk_user_creat;
-
-    /**
-     * Constructor.
+     * Constructor
      *
-     * @param DoliDb $db                  Database handler.
-     * @param string $moduleNameLowerCase Module name.
-     * @param string $objectType          Object element type.
+     * @param DoliDB $db                  Database handler
+     * @param string $moduleNameLowerCase Module name
+     * @param string $objectType          Object element type
      */
     public function __construct(DoliDB $db, string $moduleNameLowerCase = 'saturne', string $objectType = 'saturne_documents')
     {
