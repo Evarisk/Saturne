@@ -39,6 +39,10 @@ require_once __DIR__ . '/../lib/saturne.lib.php';
 
 // Global variables definitions
 global $conf, $db, $langs, $user;
+/** @var \Conf $conf */
+/** @var \DoliDB $db */
+/** @var \Translate $langs */
+/** @var \User $user */
 
 // Load translation files required by the page
 saturne_load_langs(['admin', 'saturne@saturne']);
