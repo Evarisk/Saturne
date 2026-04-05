@@ -67,6 +67,16 @@ function saturne_admin_prepare_head(): array
     $head[$h][0] = dol_buildpath('/saturne/admin/information.php', 1) . '?filename=eoxia_modules&tab_name=eoxiaModule';
     $head[$h][1] = '<i class="fas fa-cogs pictofixedwidth"></i>' . $langs->trans('SaturneModule', 'Eoxia');
     $head[$h][2] = 'eoxiaModule';
+
+    $h++;
+    $head[$h][0] = dol_buildpath('/saturne/admin/mediastest.php', 1);
+    $head[$h][1] = '<i class="fas fa-camera pictofixedwidth"></i>' . $langs->trans('Test Medias');
+    $head[$h][2] = 'mediastest';
+
+    $h++;
+    $head[$h][0] = dol_buildpath('/saturne/admin/tools.php', 1);
+    $head[$h][1] = '<i class="fas fa-wrench pictofixedwidth"></i>' . $langs->trans('Outils');
+    $head[$h][2] = 'tools';
     $h++;
 
     complete_head_from_modules($conf, $langs, null, $head, $h, 'saturne@saturne');
