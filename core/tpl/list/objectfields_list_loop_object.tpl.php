@@ -124,7 +124,7 @@ while ($i < $iMaxInLoop) {
                 if ($key == 'status') {
                     print $object->getLibStatut($statusMode ?? 5);
                 } elseif ($key == 'rowid') {
-                    print $object->showOutputField($val, $key, $object->id);
+                    print $object->showOutputField($val, $key, (string) $object->id);
                 } else {
                     if (!empty($val['contenteditable']) && $val['contenteditable'] == 1) {
                         $ceType   = !empty($val['type']) && in_array($val['type'], ['date', 'datetime']) ? 'datepicker' : 'text';
@@ -134,7 +134,7 @@ while ($i < $iMaxInLoop) {
                         $ceLabel   = !empty($val['label']) ? dol_escape_htmltag($val['label']) : dol_escape_htmltag($key);
                         print '<div class="contenteditable-wrap"><div class="contenteditable" contenteditable="true" role="textbox" aria-label="' . $ceLabel . '" data-field="' . $key . '" data-id="' . $object->id . '" data-element="' . $ceElement . '" data-table="' . $ceTable . '"' . $ceDataType . ' data-success="Enregistré" data-error="Format invalide">';
                     }
-                    print $object->showOutputField($val, $key, $object->$key);
+                    print $object->showOutputField($val, $key, (string) $object->$key);
                     if (!empty($val['contenteditable']) && $val['contenteditable'] == 1) {
                         $isDateField = !empty($val['type']) && in_array($val['type'], ['date', 'datetime']);
                         $calBtn = $isDateField ? '
