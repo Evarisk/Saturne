@@ -48,25 +48,25 @@ window.saturne.media.queueDb = {
             // IndexDB Unavailable Fallback -> Direct network execution!
             console.warn("Saturne Media: IndexedDB unavailable. Attempting direct sync payload.");
             // Mock the interface so it still uploads directly without crashing
-            const pseudoDb = { db: null }; 
+            
             window.saturne.media.syncPendingUploadsSingleFallback(item, callback);
             return;
         }
         const tx = this.db.transaction(['pending_uploads'], 'readwrite');
         tx.objectStore('pending_uploads').put(item);
-        tx.oncomplete = () => { if (callback) callback(); };
+        tx.oncomplete = () => { if (callback) { callback(); } };
     },
     getAll: function(callback) {
-        if (!this.db) return;
+        if (!this.db) { return; }
         const tx = this.db.transaction(['pending_uploads'], 'readonly');
         const req = tx.objectStore('pending_uploads').getAll();
-        req.onsuccess = () => { if (callback) callback(req.result); };
+        req.onsuccess = () => { if (callback) { callback(req.result); } };
     },
     remove: function(id, callback) {
-        if (!this.db) return;
+        if (!this.db) { return; }
         const tx = this.db.transaction(['pending_uploads'], 'readwrite');
         tx.objectStore('pending_uploads').delete(id);
-        tx.oncomplete = () => { if (callback) callback(); };
+        tx.oncomplete = () => { if (callback) { callback(); } };
     }
 };
 
@@ -75,12 +75,12 @@ window.saturne.media.init = function() {
     window.saturne.media.event();
     window.saturne.media.updatePhotoResolutionDisplay();
     window.addEventListener('online', window.saturne.media.syncPendingUploads);
-};
+                };;
 
 window.saturne.media.renderPendingQueue = function() {
     window.saturne.media.queueDb.getAll(items => {
         $('.saturne-offline-queue').remove();
-        if (!items || items.length === 0) return;
+        if (!items || items.length === 0) { return; }
 
         let queueHtml = '<div class="saturne-offline-queue" style="margin-top: 15px; padding: 10px; border: 1px solid #f39c12; border-radius: 8px; background: #fffdf5;">';
         queueHtml += '<strong style="color: #d35400;"><i class="fas fa-wifi" style="text-decoration: line-through;"></i> Médias en attente de synchronisation (' + items.length + ')</strong>';
@@ -135,14 +135,14 @@ window.saturne.media.event = function() {
     $(document).off('click', '.open-media-editor-as-gallery').on('click', '.open-media-editor-as-gallery', function(e) {
         e.preventDefault();
         const urls = JSON.parse($(this).attr('data-json') || '[]');
-        if (urls.length === 0) return;
+        if (urls.length === 0) { return; }
         
         window.saturne.media.photoFilesArray = [];
         urls.forEach(url => {
             let actualFilename = url;
             if (url.indexOf('file=') !== -1) {
                  let fileParam = url.split('file=')[1];
-                 if (fileParam.indexOf('&') !== -1) fileParam = fileParam.split('&')[0];
+                 if (fileParam.indexOf('&') !== -1) { fileParam = fileParam.split('&')[0]; }
                  actualFilename = decodeURIComponent(fileParam).split('/').pop();
             } else {
                  actualFilename = decodeURIComponent(url.split('/').pop());
@@ -169,30 +169,30 @@ window.saturne.media.event = function() {
         if (mode === 'rotate') { window.saturne.media.rotateCanvas(); return; }
 
         $('.doli-tool-btn').each(function() {
-            if ($(this).parent().attr('id') === 'pencil-tool-container') $(this).parent().css('background-color', '#34495e');
-            else if ($(this).attr('data-mode') !== 'rotate') $(this).css('background-color', '#34495e');
+            if ($(this).parent().attr('id') === 'pencil-tool-container') { $(this).parent().css('background-color', '#34495e'); }
+            else if ($(this).attr('data-mode') !== 'rotate') { $(this).css('background-color', '#34495e'); }
         });
         
-        if (btn.parent().attr('id') === 'pencil-tool-container') btn.parent().css('background-color', '#3498db');
-        else btn.css('background-color', '#3498db');
+        if (btn.parent().attr('id') === 'pencil-tool-container') { btn.parent().css('background-color', '#3498db'); }
+        else { btn.css('background-color', '#3498db'); }
 
         window.saturne.media.currentMode = mode;
         const canvasObj = window.saturne.media.canvas || $('.photo-editor-canvas')[0];
-        if (canvasObj) canvasObj.style.cursor = (mode === 'text') ? 'text' : 'crosshair';
-        if (mode === 'sequence') window.saturne.media.sequenceCounter = 1;
+        if (canvasObj) { canvasObj.style.cursor = (mode === 'text') ? 'text' : 'crosshair'; }
+        if (mode === 'sequence') { window.saturne.media.sequenceCounter = 1; }
     });
 
     $(document).off('mousedown touchstart', '.photo-editor-canvas').on('mousedown touchstart', '.photo-editor-canvas', function(e) {
-        if (e.target.id === 'doli-floating-text-input') return;
+        if (e.target.id === 'doli-floating-text-input') { return; }
         console.log("Saturne Media: Canvas mousedown event fired!");
         window.saturne.media.onMouseDown(e.originalEvent || e);
     });
     $(document).on('mousemove touchmove', function(e) {
-        if (!window.saturne.media.isDrawing) return;
+        if (!window.saturne.media.isDrawing) { return; }
         window.saturne.media.onMouseMove(e.originalEvent || e);
     });
     $(document).on('mouseup touchend', function(e) {
-        if (!window.saturne.media.isDrawing) return;
+        if (!window.saturne.media.isDrawing) { return; }
         window.saturne.media.onMouseUp(e.originalEvent || e);
     });
 };
@@ -255,7 +255,7 @@ window.saturne.media.renderThumbnails = function(inputElem) {
 };
 
 window.saturne.media.openEditor = function() {
-    if (window.saturne.media.photoFilesArray.length === 0) return;
+    if (window.saturne.media.photoFilesArray.length === 0) { return; }
     const item = window.saturne.media.photoFilesArray[window.saturne.media.currentIndex];
     
     const activeModal = $(document).find('.wpeo-modal.modal-upload-image').last();
@@ -293,11 +293,11 @@ window.saturne.media.openEditor = function() {
         activeModal.find('#photo-size-select').parent().hide(); // Hide the triple dots 
         
         // Show/hide arrows based on index
-        if (window.saturne.media.currentIndex > 0) activeModal.find('#doli-editor-arrow-left').css('display', 'flex');
-        else activeModal.find('#doli-editor-arrow-left').hide();
+        if (window.saturne.media.currentIndex > 0) { activeModal.find('#doli-editor-arrow-left').css('display', 'flex'); }
+        else { activeModal.find('#doli-editor-arrow-left').hide(); }
         
-        if (window.saturne.media.currentIndex < total - 1) activeModal.find('#doli-editor-arrow-right').css('display', 'flex');
-        else activeModal.find('#doli-editor-arrow-right').hide();
+        if (window.saturne.media.currentIndex < total - 1) { activeModal.find('#doli-editor-arrow-right').css('display', 'flex'); }
+        else { activeModal.find('#doli-editor-arrow-right').hide(); }
     } else {
         activeModal.find('.photo-editor-pagination').hide();
         activeModal.find('#photo-size-select').parent().show();
@@ -315,8 +315,8 @@ window.saturne.media.openEditor = function() {
     img.onload = function() {
         const sizeSelect = activeModal.find('#photo-size-select')[0];
         let maxDim = 4000;
-        if (sizeSelect && sizeSelect.value === 'fullhd') maxDim = 1920;
-        if (sizeSelect && sizeSelect.value === 'hd') maxDim = 1280;
+        if (sizeSelect && sizeSelect.value === 'fullhd') { maxDim = 1920; }
+        if (sizeSelect && sizeSelect.value === 'hd') { maxDim = 1280; }
         
         let ratio = 1;
         if (img.width > maxDim || img.height > maxDim) {
@@ -384,10 +384,10 @@ window.saturne.media.validateAndQueue = function() {
                 reader.onloadend = function() {
                     dbItem.imgData = reader.result;
                     window.saturne.media.queueDb.add(dbItem, window.saturne.media.syncPendingUploads);
-                }
+                };
             } else {
                 window.saturne.media.queueDb.add(dbItem, window.saturne.media.syncPendingUploads);
-            }
+                };
         }
     });
 
@@ -398,10 +398,10 @@ window.saturne.media.validateAndQueue = function() {
 
 window.saturne.media.syncPendingUploads = function() {
     window.saturne.media.renderPendingQueue();
-    if (!navigator.onLine) return;
+    if (!navigator.onLine) { return; }
 
     window.saturne.media.queueDb.getAll(items => {
-        if (!items || items.length === 0) return;
+        if (!items || items.length === 0) { return; }
         
         items.forEach(dbItem => {
             if (dbItem.status === 'pending') { // Only sync pending items
@@ -415,7 +415,7 @@ window.saturne.media.syncPendingUploads = function() {
                 let mimeString = dbItem.imgData.split(',')[0].split(':')[1].split(';')[0];
                 let ab = new ArrayBuffer(byteString.length);
                 let ia = new Uint8Array(ab);
-                for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+                for (let i = 0; i < byteString.length; i++) { ia[i] = byteString.charCodeAt(i); }
                 
                 formData.append('img', new Blob([ab], {type: mimeString}), 'image.jpg');
                 formData.append('objectType', dbItem.objectType || '');
@@ -473,7 +473,7 @@ window.saturne.media.syncPendingUploadsSingleFallback = function(dbItem, callbac
     let mimeString = dbItem.imgData.split(',')[0].split(':')[1].split(';')[0];
     let ab = new ArrayBuffer(byteString.length);
     let ia = new Uint8Array(ab);
-    for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+    for (let i = 0; i < byteString.length; i++) { ia[i] = byteString.charCodeAt(i); }
     
     formData.append('img', new Blob([ab], {type: mimeString}), 'image.jpg');
     formData.append('objectType', dbItem.objectType || '');
@@ -499,7 +499,7 @@ window.saturne.media.syncPendingUploadsSingleFallback = function(dbItem, callbac
                     window.saturne.showError(e, $('.linked-medias.' + dbItem.objectSubType)[0], true);
                 }
             }
-            if (callback) callback();
+            if (callback) { callback(); }
         },
         error: function(jqXHR, textStatus, errorThrown) {
             if (window.saturne.SaturneError) {
@@ -515,7 +515,7 @@ window.saturne.media.cancelEditor = function() {
     
     // Auto trigger the page's file input to "Reprendre" or take a new photo!
     const externalInput = $('#label-upload-media .fast-upload-improvement');
-    if (externalInput.length > 0) externalInput.click();
+    if (externalInput.length > 0) { externalInput.click(); }
 };
 
 // Canvas drawing functions ...
@@ -535,7 +535,7 @@ window.saturne.media.getMousePos = function(e) {
 
 window.saturne.media.saveState = function() {
     window.saturne.media.historyStack.push(window.saturne.media.ctx.getImageData(0, 0, window.saturne.media.canvas.width, window.saturne.media.canvas.height));
-    if (window.saturne.media.historyStack.length > 20) window.saturne.media.historyStack.shift();
+    if (window.saturne.media.historyStack.length > 20) { window.saturne.media.historyStack.shift(); }
     
     // Light up the save diskette because modification is active!
     $('.image-save-diskette').css({'background-color': '#2ecc71', 'cursor': 'pointer'});
@@ -560,7 +560,7 @@ window.saturne.media.onMouseDown = function(e) {
     const color = $('#draw-color-picker').val();
 
     if (mode === 'text') {
-        if(e.preventDefault) e.preventDefault();
+        if (e.preventDefault) { e.preventDefault(); }
         const pos = window.saturne.media.getMousePos(e);
         window.saturne.media.addTextInput(pos.x, pos.y, pos.clientX, pos.clientY);
         return;
@@ -590,7 +590,7 @@ window.saturne.media.onMouseDown = function(e) {
 };
 
 window.saturne.media.onMouseMove = function(e) {
-    if (e.preventDefault) e.preventDefault();
+    if (e.preventDefault) { e.preventDefault(); }
     const pos = window.saturne.media.getMousePos(e);
     const ctx = window.saturne.media.ctx;
     const mode = window.saturne.media.currentMode;
@@ -603,11 +603,11 @@ window.saturne.media.onMouseMove = function(e) {
         window.saturne.media.startX = pos.x; window.saturne.media.startY = pos.y;
     } else if (['arrow', 'rect', 'blur', 'sequence'].includes(mode)) {
         ctx.putImageData(window.saturne.media.snapshot, 0, 0);
-        if (mode === 'arrow') window.saturne.media.drawArrow(ctx, startX, startY, pos.x, pos.y, color);
-        if (mode === 'rect') window.saturne.media.drawRect(ctx, startX, startY, pos.x, pos.y, color);
+        if (mode === 'arrow') { window.saturne.media.drawArrow(ctx, startX, startY, pos.x, pos.y, color); }
+        if (mode === 'rect') { window.saturne.media.drawRect(ctx, startX, startY, pos.x, pos.y, color); }
         if (mode === 'blur') { ctx.fillStyle = 'rgba(100, 100, 100, 0.5)'; ctx.fillRect(startX, startY, pos.x - startX, pos.y - startY); }
         if (mode === 'sequence') {
-            if (Math.hypot(pos.x - startX, pos.y - startY) > 20) window.saturne.media.drawArrow(ctx, startX, startY, pos.x, pos.y, color);
+            if (Math.hypot(pos.x - startX, pos.y - startY) > 20) { window.saturne.media.drawArrow(ctx, startX, startY, pos.x, pos.y, color); }
             window.saturne.media.drawSequenceCircle(ctx, startX, startY, window.saturne.media.sequenceCounter, color);
         }
     } else if (mode === 'crop') {
@@ -639,14 +639,14 @@ window.saturne.media.onMouseUp = function(e) {
         ctx.closePath();
     } else if (['arrow', 'rect', 'blur', 'sequence'].includes(mode)) {
         ctx.putImageData(window.saturne.media.snapshot, 0, 0);
-        if (mode === 'arrow') window.saturne.media.drawArrow(ctx, startX, startY, pos.x, pos.y, color);
-        if (mode === 'rect') window.saturne.media.drawRect(ctx, startX, startY, pos.x, pos.y, color);
+        if (mode === 'arrow') { window.saturne.media.drawArrow(ctx, startX, startY, pos.x, pos.y, color); }
+        if (mode === 'rect') { window.saturne.media.drawRect(ctx, startX, startY, pos.x, pos.y, color); }
         if (mode === 'blur') {
-            if (Math.abs(pos.x - startX) > 5 && Math.abs(pos.y - startY) > 5) window.saturne.media.applyAreaBlur(ctx, startX, startY, pos.x - startX, pos.y - startY, 10);
-            else window.saturne.media.historyStack.pop();
+            if (Math.abs(pos.x - startX) > 5 && Math.abs(pos.y - startY) > 5) { window.saturne.media.applyAreaBlur(ctx, startX, startY, pos.x - startX, pos.y - startY, 10); }
+            else { window.saturne.media.historyStack.pop(); }
         }
         if (mode === 'sequence') {
-            if (Math.hypot(pos.x - startX, pos.y - startY) > 20) window.saturne.media.drawArrow(ctx, startX, startY, pos.x, pos.y, color);
+            if (Math.hypot(pos.x - startX, pos.y - startY) > 20) { window.saturne.media.drawArrow(ctx, startX, startY, pos.x, pos.y, color); }
             window.saturne.media.drawSequenceCircle(ctx, startX, startY, window.saturne.media.sequenceCounter, color);
             window.saturne.media.sequenceCounter++;
         }
@@ -656,8 +656,8 @@ window.saturne.media.onMouseUp = function(e) {
         const cx = Math.max(0, Math.min(pos.x, canvas.width)); const cy = Math.max(0, Math.min(pos.y, canvas.height));
         const sx = Math.max(0, Math.min(startX, canvas.width)); const sy = Math.max(0, Math.min(startY, canvas.height));
         
-        if (Math.abs(cx - sx) > 20 && Math.abs(cy - sy) > 20) window.saturne.media.applyCrop(Math.min(cx, sx), Math.min(cy, sy), Math.abs(cx - sx), Math.abs(cy - sy));
-        else window.saturne.media.historyStack.pop();
+        if (Math.abs(cx - sx) > 20 && Math.abs(cy - sy) > 20) { window.saturne.media.applyCrop(Math.min(cx, sx), Math.min(cy, sy), Math.abs(cx - sx), Math.abs(cy - sy)); }
+        else { window.saturne.media.historyStack.pop(); }
     }
 };
 
@@ -713,7 +713,7 @@ window.saturne.media.rotateCanvas = function() {
 
 window.saturne.media.addTextInput = function(canvasX, canvasY, clientX, clientY) {
     const existing = document.getElementById('doli-floating-text-input');
-    if (existing) existing.blur();
+    if (existing) { existing.blur(); }
 
     const canvas = window.saturne.media.canvas;
     const ctx = window.saturne.media.ctx;
@@ -750,8 +750,8 @@ window.saturne.media.addTextInput = function(canvasX, canvasY, clientX, clientY)
             let currentY = canvasY;
             lines.forEach(line => { ctx.fillText(line, canvasX, currentY); currentY += fontSize * 1.2; });
             ctx.shadowColor = 'transparent';
-        } else window.saturne.media.historyStack.pop();
-        if(input.parentNode) input.parentNode.removeChild(input);
+        } else { window.saturne.media.historyStack.pop(); }
+        if (input.parentNode) { input.parentNode.removeChild(input); }
     });
 };
 
@@ -773,7 +773,7 @@ window.saturne.media.saveToServer = function(e) {
                  rootUrl = dolibarr_main_url_root;
              } else {
                  const path = window.location.pathname;
-                 if (path.indexOf('/custom/') !== -1) rootUrl = path.substring(0, path.indexOf('/custom/'));
+                 if (path.indexOf('/custom/') !== -1) { rootUrl = path.substring(0, path.indexOf('/custom/')); }
              }
              
              $.ajax({
@@ -787,15 +787,15 @@ window.saturne.media.saveToServer = function(e) {
                          console.log("Saturne Media: Saved to server successfully.");
                      } else {
                          const detail = response && response.msg ? response.msg : "Inconnu";
-                         if (window.saturne.showError) window.saturne.showError('Saturne-1004', ': ' + detail);
+                         if (window.saturne.showError) { window.saturne.showError('Saturne-1004', ': ' + detail); }
                      }
                  },
                  error: function(xhr, status, error) {
                      icon.removeClass('fa-spinner fa-spin').addClass('fa-save');
                      if (xhr.status === 413 || (xhr.responseText && xhr.responseText.includes('exceeds'))) {
-                         if (window.saturne.showError) window.saturne.showError('Saturne-1002');
+                         if (window.saturne.showError) { window.saturne.showError('Saturne-1002'); }
                      } else {
-                         if (window.saturne.showError) window.saturne.showError('Saturne-1003', error);
+                         if (window.saturne.showError) { window.saturne.showError('Saturne-1003', error); }
                      }
                  }
              });
