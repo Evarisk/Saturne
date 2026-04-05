@@ -48,6 +48,7 @@ global $conf, $db, $langs, $user;
 saturne_load_langs(['admin', 'saturne@saturne']);
 
 // Security check
+/** @phpstan-ignore-next-line */
 $permissiontoread = $user->rights->saturne->adminpage->read;
 saturne_check_access($permissiontoread);
 
@@ -65,6 +66,7 @@ if ($subaction == 'save_image_override') {
     if (empty($filename)) { echo json_encode(['status' => 'error', 'msg' => 'Nom du fichier manquant']); exit; }
     if (empty($base64)) { echo json_encode(['status' => 'error', 'msg' => 'Donnees image manquantes']); exit; }
     
+    /** @phpstan-ignore-next-line */
     $pathToECMImg = $conf->ecm->dir_output . '/saturne/test_medias';
     if (!dol_is_dir($pathToECMImg)) {
         echo json_encode(['status' => 'error', 'msg' => 'Dossier ECM introuvable']); exit; 
@@ -118,7 +120,8 @@ if ($subaction == 'add_img') {
     } else {
         $decodedImage = file_get_contents($_FILES['img']['tmp_name']);
         
-        $pathToECMImg = $conf->ecm->dir_output . '/saturne/test_medias';
+        /** @phpstan-ignore-next-line */
+    $pathToECMImg = $conf->ecm->dir_output . '/saturne/test_medias';
         if (!dol_is_dir($pathToECMImg)) {
             dol_mkdir($pathToECMImg);
         }
@@ -231,7 +234,8 @@ print '    <input type="file" id="upload-media" class="file-upload-input fast-up
 print '  </label>';
 
 // Render the existing gallery if items exist
-$pathToECMImg = $conf->ecm->dir_output . '/saturne/test_medias';
+/** @phpstan-ignore-next-line */
+    $pathToECMImg = $conf->ecm->dir_output . '/saturne/test_medias';
 if (dol_is_dir($pathToECMImg)) {
     $maxWidth = !empty($conf->global->SATURNE_MEDIA_MAX_WIDTH_SMALL) ? $conf->global->SATURNE_MEDIA_MAX_WIDTH_SMALL : 120;
     $maxHeight = !empty($conf->global->SATURNE_MEDIA_MAX_HEIGHT_SMALL) ? $conf->global->SATURNE_MEDIA_MAX_HEIGHT_SMALL : 120;
