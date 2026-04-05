@@ -1,4 +1,4 @@
-/* Copyright (C) 2024-2026 EVARISK <technique@evarisk.com>
+/* global document, window, navigator, URL, indexedDB, FormData, FileReader, $, dolibarr, dolibarr_main_url_root, atob */\n/* jshint maxcomplexity: 50, expr: true */\n/* Copyright (C) 2024-2026 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

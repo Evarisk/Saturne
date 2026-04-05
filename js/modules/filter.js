@@ -223,12 +223,12 @@ window.saturne.filter.initCategoryPicker = function(tagsEl) {
     function renderTag(id, lbl, col, mode) {
         var exc  = mode === 'exc';
         var sign = exc ? '\u2212' : '+';
-        return '<span class="cat-sign saturne-cat-tag-sign" style="background:' + col + '">' + catIcon + ' ' + sign + '</span>'
-            + '<span class="saturne-cat-tag-body">'
-            + '<span class="saturne-cat-tag-label' + (exc ? ' is-exc' : '') + '">' + esc(lbl) + '</span>'
-            + '<span class="cat-remove saturne-cat-tag-remove">\u00d7</span>'
-            + '</span>'
-            + '<input type="hidden" name="search_categories_filter[]" value="' + (exc ? '-' : '+') + id + '">';
+        return '<span class="cat-sign saturne-cat-tag-sign" style="background:' + col + '">' + catIcon + ' ' + sign + '</span>' +
+            '<span class="saturne-cat-tag-body">' +
+            '<span class="saturne-cat-tag-label' + (exc ? ' is-exc' : '') + '">' + esc(lbl) + '</span>' +
+            '<span class="cat-remove saturne-cat-tag-remove">\u00d7</span>' +
+            '</span>' +
+            '<input type="hidden" name="search_categories_filter[]" value="' + (exc ? '-' : '+') + id + '">';
     }
 
     function bindTag(s) {

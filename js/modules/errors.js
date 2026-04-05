@@ -1,4 +1,4 @@
-if (typeof window.saturne === 'undefined') window.saturne = {};
+/* jshint maxcomplexity: 50, expr: true */\nif (typeof window.saturne === 'undefined') { window.saturne = {}; }
 
 window.saturne.ERROR_DICTIONARY = {
     // ---- Catégorie : API & Réseau (Série 1000) ----
