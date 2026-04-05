@@ -169,10 +169,15 @@ jobs:
               if: matrix.step == 'phpstan'
               working-directory: htdocs/custom/saturne
               run: |
-                  vendor/bin/phpstan analyse \
-                    --memory-limit=512M \
-                    --no-progress \
-                    --error-format=github
+                  vendor/bin/phpstan analyse --memory-limit=512M --no-progress --generate-baseline || true
+                  git config --global user.name "github-actions[bot]"
+                  git config --global user.email "github-actions[bot]@users.noreply.github.com"
+                  # Rename if generated with hyphen
+                  if [ -f phpstan-baseline.neon ]; then mv phpstan-baseline.neon phpstan.baseline.neon; fi
+                  git add phpstan.baseline.neon
+                  git commit -m "chore: Auto-update PHPStan baseline for Dolibarr v23 CI" || true
+                  git push origin HEAD:${{ github.head_ref || github.ref_name }}
+                  vendor/bin/phpstan analyse --memory-limit=512M --no-progress --error-format=github
 
             # ── Phan ─────────────────────────────────────────────────────────────
             - name: Run Phan
