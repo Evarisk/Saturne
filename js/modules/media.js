@@ -75,7 +75,7 @@ window.saturne.media.init = function() {
     window.saturne.media.event();
     window.saturne.media.updatePhotoResolutionDisplay();
     window.addEventListener('online', window.saturne.media.syncPendingUploads);
-                };;
+};
 
 window.saturne.media.renderPendingQueue = function() {
     window.saturne.media.queueDb.getAll(items => {
@@ -387,7 +387,7 @@ window.saturne.media.validateAndQueue = function() {
                 };
             } else {
                 window.saturne.media.queueDb.add(dbItem, window.saturne.media.syncPendingUploads);
-                };
+            }
         }
     });
 
