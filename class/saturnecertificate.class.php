@@ -281,7 +281,7 @@ class SaturneCertificate extends SaturneObject
     /**
      * Constructor.
      *
-     * @param DoliDb $db                  Database handler.
+     * @param DoliDB $db                  Database handler.
      * @param string $moduleNameLowerCase Module name.
      * @param string $objectType          Object element type.
      */
@@ -328,21 +328,6 @@ class SaturneCertificate extends SaturneObject
         }
 
         return dolGetStatus($this->labelStatus[$status], $this->labelStatusShort[$status], '', $statusType, $mode);
-    }
-
-    /**
-     * Sets object to supplied categories.
-     *
-     * Deletes object from existing categories not supplied.
-     * Adds it to non-existing supplied categories.
-     * Existing categories are left untouched.
-     *
-     * @param  int[]|int $categories Category or categories IDs.
-     * @return float|int
-     */
-    public function setCategories($categories)
-    {
-        return 0;
     }
 
     /**

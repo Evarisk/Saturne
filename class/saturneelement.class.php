@@ -205,7 +205,7 @@ class SaturneElement extends SaturneObject
     /**
      * Constructor
      *
-     * @param DoliDb $db                  Database handler
+     * @param DoliDB $db                  Database handler
      * @param string $moduleNameLowerCase Module name
      * @param string $objectType          Object element type
      */
@@ -217,11 +217,11 @@ class SaturneElement extends SaturneObject
     /**
      * Create object into database
      *
-     * @param  User $user      User that creates
-     * @param  bool $notrigger false = launch triggers after, true = disable triggers
-     * @return int             0 < if KO, ID of created object if OK
+     * @param  User        $user      User that creates
+     * @param  int<0,1>    $noTrigger 0 = launch triggers after, 1 = disable triggers
+     * @return int<-1,max>            Return integer 0 < if KO, ID of created object if OK
      */
-    public function create(User $user, bool $notrigger = false): int
+    public function create(User $user, int $noTrigger = 0): int
     {
         if ($this->element_type == 0) {
             $this->element_type = $this::ELEMENT_TYPE_0;
@@ -234,18 +234,18 @@ class SaturneElement extends SaturneObject
         $this->status      = self::STATUS_VALIDATED;
         $this->fk_standard = $this->fk_standard ?? getDolGlobalInt(dol_strtoupper($this->module) . '_ACTIVE_STANDARD');
 
-        return parent::create($user, $notrigger);
+        return parent::create($user, $noTrigger);
     }
 
     /**
      * Delete object in database
      *
-     * @param  User $user       User that deletes
-     * @param  bool $notrigger  false = launch triggers after, true = disable triggers
-     * @param  bool $softDelete Don't delete object
-     * @return int              0 < if KO, > 0 if OK
+     * @param  User        $user       User that deletes
+     * @param  int<0,1>    $noTrigger  0 = launch triggers after, 1 = disable triggers
+     * @param  bool        $softDelete Don't delete object
+     * @return int<-1,1>               Return integer 0 < if KO, > 0 if OK
      */
-    public function delete(User $user, bool $notrigger = false, bool $softDelete = true): int
+    public function delete(User $user, int $noTrigger = 0, bool $softDelete = true): int
     {
         $this->status     = self::STATUS_TRASHED;
         $this->fk_element = getDolGlobalInt(dol_strtoupper($this->module) . '_' . dol_strtoupper($this->element) . '_TRASH');

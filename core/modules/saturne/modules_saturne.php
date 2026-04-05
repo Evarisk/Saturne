@@ -391,7 +391,7 @@ class SaturneDocumentModel extends CommonDocGenerator
     /**
      * Constructor.
      *
-     * @param  DoliDb $db                  Database handler.
+     * @param  DoliDB $db                  Database handler.
      * @param  string $moduleNameLowerCase Module name.
      * @param  string $objectDocumentType  Object document type.
      */
