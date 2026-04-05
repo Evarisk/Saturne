@@ -1,0 +1,74 @@
+/* Styles appliqués spécifiquement à la modale de l'éditeur d'images pour éviter les scrollbars de wpeo-modal */
+
+.modal-upload-image.wpeo-modal .modal-container {
+    max-width: 900px !important;
+    width: 95% !important;
+    padding: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.modal-upload-image.wpeo-modal .modal-content.photo-editor-modal-content {
+    padding: 20px !important;
+    max-height: 95vh !important;
+    background: #ffffff !important;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    overflow: hidden !important; /* Forces scrollbar elimination */
+}
+
+.modal-upload-image.wpeo-modal #doli-editor-canvas-container {
+    flex: 1 1 0px !important;
+    overflow: hidden !important;
+    position: relative;
+    background: transparent;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 0 !important; /* Vital constraint */
+}
+
+.modal-upload-image.wpeo-modal canvas {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+    touch-action: none;
+    cursor: crosshair;
+}
+
+.photo-editor-toolbar {
+    margin-top: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    padding-bottom: 5px;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+    .modal-upload-image.wpeo-modal .modal-content.photo-editor-modal-content {
+        height: 98vh;
+        max-height: 98vh !important;
+    }
+    .photo-editor-toolbar .doli-tool-btn,
+    .photo-editor-toolbar .btn-cancel-photo,
+    .photo-editor-toolbar .image-validate,
+    .photo-editor-toolbar .image-undo {
+        width: 35px !important;
+        height: 35px !important;
+    }
+    #pencil-tool-container {
+        height: 35px !important;
+    }
+    .photo-editor-toolbar {
+        gap: 4px;
+        margin-top: 10px;
+    }
+}
