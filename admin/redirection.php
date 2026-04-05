@@ -54,6 +54,7 @@ $fromUrl = GETPOST('from_url', 'alpha');
 $toUrl   = GETPOST('to_url', 'alpha');
 
 // Initialize technical objects
+/** @var SaturneRedirection $saturneRedirection */
 $saturneRedirection = new SaturneRedirection($db);
 
 // Initialize view objects
@@ -80,7 +81,7 @@ if (empty($resHook)) {
         $saturneRedirection->from_url = $fromUrl;
         $saturneRedirection->to_url   = $toUrl;
 
-        $result = $saturneRedirection->create($user, true);
+        $result = $saturneRedirection->create($user, 1);
         if ($result > 0) {
             setEventMessage($langs->trans('ObjectCreated', 'redirection'));
             header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
@@ -97,7 +98,7 @@ if (empty($resHook)) {
         if ($result <= 0) {
             setEventMessages($saturneRedirection->error ?: $langs->trans('ErrorObjectNotFound'), [], 'errors');
         } else {
-            $result = $saturneRedirection->delete($user, true, false);
+            $result = $saturneRedirection->delete($user, 1, false);
             if ($result > 0) {
                 setEventMessage($langs->trans('ObjectDeleted', 'redirection'));
                 header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
@@ -142,6 +143,7 @@ print '</tr>';
 $redirections = $saturneRedirection->fetchAll();
 if (is_array($redirections) && !empty($redirections)) {
     foreach ($redirections as $redirection) {
+        /** @var SaturneRedirection $redirection */
         $barcodeObject = new TCPDF2DBarcode($redirection->from_url, 'QRCODE,H');
         $qrCodePng     = $barcodeObject->getBarcodePngData(6, 6);
         $qrCodeBase64  = 'data:image/png;base64,' . base64_encode($qrCodePng);
@@ -183,4 +185,6 @@ print '</table>';
 // Page end
 print dol_get_fiche_end();
 llxFooter();
-$db->close();
+if (method_exists($db, 'close')) {
+    $db->close();
+}

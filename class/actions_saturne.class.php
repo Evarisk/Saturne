@@ -417,7 +417,7 @@ class ActionsSaturne
             $signatory->signature      = $data['signature'];
             $signatory->signature_date = dol_now();
 
-            $result = $signatory->update($user, true);
+            $result = $signatory->update($user, 1);
             if ($result > 0) {
                 // Creation signature OK
                 $signatory->setSigned($user, false);

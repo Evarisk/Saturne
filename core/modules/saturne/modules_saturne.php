@@ -766,7 +766,7 @@ class SaturneDocumentModel extends CommonDocGenerator
         $objectDocument->ref  = $objectDocumentRef;
         $objectDocumentRef    = dol_sanitizeFileName($objectDocumentRef);
         $objectDocument->type = $this->document_type;
-        $objectDocumentID     = $objectDocument->create($moreParam['user'], true, $object);
+        $objectDocumentID     = $objectDocument->create($moreParam['user'], 1, $object);
         if ($objectDocumentID < 0) {
             setEventMessages($langs->trans('ErrorCreateObject'), [], 'errors');
             return -1;
