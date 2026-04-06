@@ -34,6 +34,70 @@ window.saturne.ERROR_DICTIONARY = {
         file: 'media.js',
         line: 777,
         contextKey: 'ajax_success_parser_error'
+    },
+    'Saturne-1005': {
+        category: 'Rendu UI',
+        title: 'Erreur DOM (Réponse invalide)',
+        userMessage: 'Image enregistrée sur le serveur, mais l\'interface graphique n\'a pas pu être rafraîchie. Veuillez recharger la page manuellement.',
+        file: 'media.js',
+        line: 504,
+        contextKey: 'dom_injection_error'
+    },
+    'Saturne-1006': {
+        category: 'Permissions',
+        title: 'Erreur Serveur (Création Dossier)',
+        userMessage: 'Échec de création du répertoire de stockage sur le serveur (droits insuffisants ?).',
+        file: 'medias.php',
+        line: 50,
+        contextKey: 'mkdir_error'
+    },
+    'Saturne-1007': {
+        category: 'Permissions',
+        title: 'Erreur Serveur (Écriture Fichier)',
+        userMessage: 'Droits d\'écriture bloqués ou dossier introuvable sur le serveur pour sauvegarder l\'image.',
+        file: 'medias.php',
+        line: 110,
+        contextKey: 'file_put_contents_error'
+    },
+    'Saturne-1008': {
+        category: 'Traitement',
+        title: 'Erreur Serveur (Miniature)',
+        userMessage: 'L\'image a été sauvegardée mais le serveur n\'a pas pu générer la miniature (Erreur de librairie GD PHP ?).',
+        file: 'medias.php',
+        line: 130,
+        contextKey: 'vignette_generation_error'
+    },
+    'Saturne-1009': {
+        category: 'Réseau',
+        title: 'Fichier Inaccessible (404)',
+        userMessage: 'L\'image est introuvable à l\'URL demandée. Le chemin de téléchargement est invalide ou le fichier a été supprimé.',
+        file: 'saturne.lib.php',
+        line: 153,
+        contextKey: 'image_404_error'
+    },
+    'Saturne-1500': {
+        category: 'Interne',
+        title: 'Erreur Fatale Upload',
+        userMessage: 'Le serveur a renvoyé une erreur majeure (HTTP 500) lors de la réception de la photo.',
+        file: 'media.js',
+        line: 512,
+        contextKey: 'fatal_upload_error'
+    },
+    'Saturne-1501': {
+        category: 'Sécurité',
+        title: 'Trajet Invalide',
+        userMessage: 'Le nom du fichier est invalide ou présente un risque de sécurité.',
+        file: 'medias.php',
+        line: 170,
+        contextKey: 'invalid_filename_path_traversal'
+    },
+    'Saturne-1502': {
+        category: 'Fichier',
+        title: 'Défaut de Fichier',
+        userMessage: 'Impossible de localiser le fichier physique pour procéder à la suppression.',
+        file: 'medias.php',
+        line: 194,
+        contextKey: 'file_target_missing'
     }
 };
 

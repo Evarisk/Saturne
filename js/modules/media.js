@@ -117,7 +117,31 @@ window.saturne.media.event = function() {
     $(document).off('click', '.doli-btn-retry-sync').on('click', '.doli-btn-retry-sync', function() {
         const btn = $(this);
         btn.find('i').addClass('fa-spin');
-        window.saturne.media.syncPendingUploads();
+        
+        // Reset purely 'error' items back to 'pending' to allow re-processing
+        window.saturne.media.queueDb.getAll(items => {
+            if (!items || items.length === 0) {
+                window.saturne.media.syncPendingUploads();
+                return;
+            }
+            
+            let itemsToReset = items.filter(item => item.status === 'error');
+            if (itemsToReset.length === 0) {
+                window.saturne.media.syncPendingUploads();
+                return;
+            }
+            
+            let processed = 0;
+            itemsToReset.forEach(item => {
+                const pendingItem = {...item, status: 'pending'};
+                window.saturne.media.queueDb.add(pendingItem, () => {
+                    processed++;
+                    if (processed === itemsToReset.length) {
+                        window.saturne.media.syncPendingUploads();
+                    }
+                });
+            });
+        });
     });
 
     // Slider Arrows
@@ -134,6 +158,16 @@ window.saturne.media.event = function() {
     // Gallery Mode Interceptor
     $(document).off('click', '.open-media-editor-as-gallery').on('click', '.open-media-editor-as-gallery', function(e) {
         e.preventDefault();
+        
+        const fastUploadOptions = $(this).closest('.linked-medias').find('.fast-upload-options');
+        window.saturne.media.uploadTargetOptions = {
+            objectType: fastUploadOptions.attr('data-from-type'),
+            objectSubType: fastUploadOptions.attr('data-from-subtype'),
+            objectSubdir: fastUploadOptions.attr('data-from-subdir'),
+            prefix: fastUploadOptions.attr('data-prefix'),
+            rights: fastUploadOptions.attr('data-rights')
+        };
+        
         const urls = JSON.parse($(this).attr('data-json') || '[]');
         if (urls.length === 0) { return; }
         
@@ -211,7 +245,9 @@ window.saturne.media.onFileInputChange = function() {
     window.saturne.media.uploadTargetOptions = {
         objectType: fastUploadOptions.attr('data-from-type'),
         objectSubType: fastUploadOptions.attr('data-from-subtype'),
-        objectSubdir: fastUploadOptions.attr('data-from-subdir')
+        objectSubdir: fastUploadOptions.attr('data-from-subdir'),
+        prefix: fastUploadOptions.attr('data-prefix'),
+        rights: fastUploadOptions.attr('data-rights')
     };
 
     if (this.files && this.files.length > 0) {
@@ -374,6 +410,8 @@ window.saturne.media.validateAndQueue = function() {
                 objectType: window.saturne.media.uploadTargetOptions.objectType,
                 objectSubType: window.saturne.media.uploadTargetOptions.objectSubType,
                 objectSubdir: window.saturne.media.uploadTargetOptions.objectSubdir,
+                objectPrefix: window.saturne.media.uploadTargetOptions.prefix,
+                objectRights: window.saturne.media.uploadTargetOptions.rights,
                 status: 'pending' // pending, error
             };
             
@@ -405,52 +443,89 @@ window.saturne.media.syncPendingUploads = function() {
         
         items.forEach(dbItem => {
             if (dbItem.status === 'pending') { // Only sync pending items
-                const token = window.saturne.toolbox.getToken();
+                const token = (window.saturne.toolbox && typeof window.saturne.toolbox.getToken === 'function') ? window.saturne.toolbox.getToken() : $('input[name="token"]').val();
                 
-                let baseUrl = window.location.origin + window.location.pathname + window.location.search;
-                let querySeparator = baseUrl.indexOf('?') !== -1 ? '&' : '?';
+                let oldBaseUrl = window.location.origin + window.location.pathname + window.location.search;
+                let querySeparator = oldBaseUrl.indexOf('?') !== -1 ? '&' : '?';
                 
                 let formData = new FormData();
-                let byteString = atob(dbItem.imgData.split(',')[1]);
-                let mimeString = dbItem.imgData.split(',')[0].split(':')[1].split(';')[0];
-                let ab = new ArrayBuffer(byteString.length);
-                let ia = new Uint8Array(ab);
-                for (let i = 0; i < byteString.length; i++) { ia[i] = byteString.charCodeAt(i); }
+                try {
+                    let byteString = atob(dbItem.imgData.split(',')[1]);
+                    let mimeString = dbItem.imgData.split(',')[0].split(':')[1].split(';')[0];
+                    let ab = new ArrayBuffer(byteString.length);
+                    let ia = new Uint8Array(ab);
+                    for (let i = 0; i < byteString.length; i++) { ia[i] = byteString.charCodeAt(i); }
+                    
+                    formData.append('img', new Blob([ab], {type: mimeString}), 'image.jpg');
+                } catch (err) {
+                    console.error("Saturne Media: Corrupted imgData in queueDb. Deleting entry.", err);
+                    window.saturne.media.queueDb.remove(dbItem.id, window.saturne.media.renderPendingQueue);
+                    return; // Skip this iteration completely
+                }
                 
-                formData.append('img', new Blob([ab], {type: mimeString}), 'image.jpg');
                 formData.append('objectType', dbItem.objectType || '');
                 formData.append('objectSubType', dbItem.objectSubType || '');
                 formData.append('objectSubdir', dbItem.objectSubdir || '');
+                
+                // New params
+                formData.append('module', dbItem.objectType || 'saturne');
+                formData.append('subdir', dbItem.objectSubdir || '');
+                formData.append('prefix', dbItem.objectPrefix || '');
+                formData.append('rights', dbItem.objectRights || '');
+
+                let apiBaseUrl = '';
+                if (typeof dolibarr !== 'undefined' && dolibarr.url && dolibarr.url.root) { apiBaseUrl = dolibarr.url.root; }
+                else if (typeof dolibarr_main_url_root !== 'undefined') { apiBaseUrl = dolibarr_main_url_root; }
+                else {
+                    const path = window.location.pathname;
+                    if (path.indexOf('/custom/') !== -1) { apiBaseUrl = path.substring(0, path.indexOf('/custom/')); }
+                }
 
                 $.ajax({
-                    url: baseUrl + querySeparator + 'subaction=add_img&token=' + token,
+                    url: apiBaseUrl + '/custom/saturne/core/ajax/medias.php?subaction=add_img&token=' + token,
                     type: 'POST',
                     processData: false,
                     contentType: false,
                     data: formData,
+                    dataType: 'html', // Explicitly prevent jQuery from guessing and evaluating JSON/script
                     success: function(resp) {
                         window.saturne.media.queueDb.remove(dbItem.id, window.saturne.media.renderPendingQueue);
                         
-                        if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
-                            $('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'));
+                        // Parse HTML safely via DOMParser to prevent CSP "unsafe-eval" blocking
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(resp, 'text/html');
+                        
+                        // Vanilla JS replacement to bypass jQuery's internal eval() of script tags
+                        const refPhotoTarget = document.querySelector('.floatleft.inline-block.valignmiddle.divphotoref');
+                        const refPhotoSource = doc.querySelector('.floatleft.inline-block.valignmiddle.divphotoref');
+                        if (refPhotoTarget && refPhotoSource) {
+                            refPhotoTarget.outerHTML = refPhotoSource.outerHTML;
                         }
                         
-                        const newContent = $(resp).find('.linked-medias.' + dbItem.objectSubType).children();
-                        if (newContent.length > 0) {
-                            $('.linked-medias.' + dbItem.objectSubType).html(newContent);
+                        const containerTarget = document.querySelector('.linked-medias.' + dbItem.objectSubType);
+                        const containerSource = doc.querySelector('.linked-medias.' + dbItem.objectSubType);
+                        
+                        if (containerTarget && containerSource && containerSource.children.length > 0) {
+                            // Validate that the server actually included the gallery container in its response after upload
+                            if (!containerSource.querySelector('.open-media-editor-as-gallery') && window.saturne && window.saturne.showError) {
+                                window.saturne.showError('Saturne-1005', "Le composant galerie est absent de la réponse du serveur.");
+                            }
+                            containerTarget.innerHTML = containerSource.innerHTML;
                         } else {
-                            if (window.saturne.SaturneError) {
-                                let e = new window.saturne.SaturneError('Saturne-1005', "Le conteneur .linked-medias est vide ou non renvoyé par le serveur.");
-                                window.saturne.showError(e, $('.linked-medias.' + dbItem.objectSubType)[0], true);
+                            if (window.saturne && window.saturne.showError) {
+                                let rawSnippet = resp ? resp.substring(0, 250) : 'EMPTY_RESPONSE';
+                                window.saturne.showError('Saturne-1005', "Le conteneur .linked-medias." + dbItem.objectSubType + " est introuvable. Code HTML reçu: " + rawSnippet);
                             }
                         }
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
                         const failedItem = {...dbItem, status: 'error'};
                         window.saturne.media.queueDb.add(failedItem, window.saturne.media.renderPendingQueue);
-                        if (window.saturne.SaturneError) {
-                            let e = new window.saturne.SaturneError('Saturne-1500', errorThrown || textStatus, { status: jqXHR ? jqXHR.status : 'N/A' });
-                            window.saturne.showError(e, $('.linked-medias.' + dbItem.objectSubType)[0], true);
+                        if (window.saturne && window.saturne.showError) {
+                            let respText = jqXHR.responseText || '';
+                            let code = respText.trim().match(/^Saturne-\d+$/) ? respText.trim() : 'Saturne-1500';
+                            let extra = code === 'Saturne-1500' ? (errorThrown || textStatus) : '';
+                            window.saturne.showError(code, extra);
                         }
                     }
                 });
@@ -465,8 +540,8 @@ window.saturne.media.syncPendingUploadsSingleFallback = function(dbItem, callbac
         return;
     }
     const token = window.saturne.toolbox ? window.saturne.toolbox.getToken() : $('input[name="token"]').val();
-    let baseUrl = window.location.origin + window.location.pathname + window.location.search;
-    let querySeparator = baseUrl.indexOf('?') !== -1 ? '&' : '?';
+    let oldBaseUrl = window.location.origin + window.location.pathname + window.location.search;
+    let querySeparator = oldBaseUrl.indexOf('?') !== -1 ? '&' : '?';
     
     let formData = new FormData();
     let byteString = atob(dbItem.imgData.split(',')[1]);
@@ -480,31 +555,55 @@ window.saturne.media.syncPendingUploadsSingleFallback = function(dbItem, callbac
     formData.append('objectSubType', dbItem.objectSubType || '');
     formData.append('objectSubdir', dbItem.objectSubdir || '');
     
+    // New params
+    formData.append('module', dbItem.objectType || 'saturne');
+    formData.append('subdir', dbItem.objectSubdir || '');
+    formData.append('prefix', dbItem.objectPrefix || '');
+    formData.append('rights', dbItem.objectRights || '');
+    
+    let apiBaseUrl = '';
+    if (typeof dolibarr !== 'undefined' && dolibarr.url && dolibarr.url.root) { apiBaseUrl = dolibarr.url.root; }
+    else if (typeof dolibarr_main_url_root !== 'undefined') { apiBaseUrl = dolibarr_main_url_root; }
+    else {
+        const path = window.location.pathname;
+        if (path.indexOf('/custom/') !== -1) { apiBaseUrl = path.substring(0, path.indexOf('/custom/')); }
+    }
+
     $.ajax({
-        url: baseUrl + querySeparator + 'subaction=add_img&token=' + token,
+        url: apiBaseUrl + '/custom/saturne/core/ajax/medias.php?subaction=add_img&token=' + token,
         type: 'POST',
         processData: false,
         contentType: false,
         data: formData,
+        dataType: 'html',
         success: function(resp) {
-            if ($('.floatleft.inline-block.valignmiddle.divphotoref').length > 0) {
-                $('.floatleft.inline-block.valignmiddle.divphotoref').replaceWith($(resp).find('.floatleft.inline-block.valignmiddle.divphotoref'));
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(resp, 'text/html');
+            
+            const refPhotoTarget = document.querySelector('.floatleft.inline-block.valignmiddle.divphotoref');
+            const refPhotoSource = doc.querySelector('.floatleft.inline-block.valignmiddle.divphotoref');
+            if (refPhotoTarget && refPhotoSource) {
+                refPhotoTarget.outerHTML = refPhotoSource.outerHTML;
             }
-            const newContent = $(resp).find('.linked-medias.' + dbItem.objectSubType).children();
-            if (newContent.length > 0) {
-                $('.linked-medias.' + dbItem.objectSubType).html(newContent);
+            
+            const containerTarget = document.querySelector('.linked-medias.' + dbItem.objectSubType);
+            const containerSource = doc.querySelector('.linked-medias.' + dbItem.objectSubType);
+            
+            if (containerTarget && containerSource && containerSource.children.length > 0) {
+                if (!containerSource.querySelector('.open-media-editor-as-gallery') && window.saturne && window.saturne.showError) {
+                    window.saturne.showError('Saturne-1005', "Le composant galerie est absent de la réponse du serveur.");
+                }
+                containerTarget.innerHTML = containerSource.innerHTML;
             } else {
-                if (window.saturne.SaturneError) {
-                    let e = new window.saturne.SaturneError('Saturne-1005', "Rendu vide : Le conteneur .linked-medias est vide.");
-                    window.saturne.showError(e, $('.linked-medias.' + dbItem.objectSubType)[0], true);
+                if (window.saturne && window.saturne.showError) {
+                    window.saturne.showError('Saturne-1005', "Le conteneur .linked-medias est vide ou non renvoyé.");
                 }
             }
             if (callback) { callback(); }
         },
         error: function(jqXHR, textStatus, errorThrown) {
-            if (window.saturne.SaturneError) {
-                let e = new window.saturne.SaturneError('Saturne-1500', errorThrown || textStatus, { status: jqXHR ? jqXHR.status : 'N/A' });
-                window.saturne.showError(e, $('.linked-medias.' + dbItem.objectSubType)[0], true);
+            if (window.saturne && window.saturne.showError) {
+                window.saturne.showError('Saturne-1500', errorThrown || textStatus);
             }
         }
     });
@@ -777,9 +876,9 @@ window.saturne.media.saveToServer = function(e) {
              }
              
              $.ajax({
-                 url: rootUrl + '/custom/saturne/admin/mediastest.php',
+                 url: rootUrl + '/custom/saturne/core/ajax/medias.php',
                  method: 'POST',
-                 data: { token: $('input[name="token"]').val(), subaction: 'save_image_override', action: 'save_image_override', filename: item.file.name, base64: item.editedDataUrl },
+                 data: { token: $('input[name="token"]').val(), subaction: 'save_image_override', action: 'save_image_override', filename: item.file.name, base64: item.editedDataUrl, module: window.saturne.media.uploadTargetOptions.objectType || 'saturne', subdir: window.saturne.media.uploadTargetOptions.objectSubdir || '', rights: window.saturne.media.uploadTargetOptions.rights || '' },
                  dataType: 'json',
                  success: function(response) {
                      icon.removeClass('fa-spinner fa-spin').addClass('fa-save');
