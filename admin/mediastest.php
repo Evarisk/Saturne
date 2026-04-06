@@ -57,142 +57,6 @@ saturne_check_access($permissiontoread);
  */
 $subaction = GETPOST('subaction');
 
-if ($subaction == 'save_image_override') {
-    $filename = isset($_POST['filename']) ? $_POST['filename'] : '';
-    $base64 = isset($_POST['base64']) ? $_POST['base64'] : '';
-    
-    header('Content-Type: application/json');
-    
-    if (empty($filename)) { echo json_encode(['status' => 'error', 'msg' => 'Nom du fichier manquant']); exit; }
-    if (empty($base64)) { echo json_encode(['status' => 'error', 'msg' => 'Donnees image manquantes']); exit; }
-    
-    /** @phpstan-ignore-next-line */
-    $pathToECMImg = $conf->ecm->dir_output . '/saturne/test_medias';
-    if (!dol_is_dir($pathToECMImg)) {
-        echo json_encode(['status' => 'error', 'msg' => 'Dossier ECM introuvable']); exit; 
-    }
-    
-    if (preg_match('/^data:image\/(\w+);base64,/', $base64, $type)) {
-        $data = substr($base64, strpos($base64, ',') + 1);
-        $data = base64_decode($data);
-        if ($data !== false) {
-             $bytes = file_put_contents($pathToECMImg . '/' . $filename, $data);
-             if ($bytes === false) {
-                 echo json_encode(['status' => 'error', 'msg' => 'Echec ecriture fichier sur disque']); exit;
-             }
-             // regenerate thumb visually
-             $confWidthSmall  = !empty($conf->global->SATURNE_MEDIA_MAX_WIDTH_SMALL) ? $conf->global->SATURNE_MEDIA_MAX_WIDTH_SMALL : 120;
-             $confHeightSmall = !empty($conf->global->SATURNE_MEDIA_MAX_HEIGHT_SMALL) ? $conf->global->SATURNE_MEDIA_MAX_HEIGHT_SMALL : 120;
-             saturne_vignette($pathToECMImg . '/' . $filename, $confWidthSmall, $confHeightSmall, '_small');
-             echo json_encode(['status' => 'ok']);
-             exit;
-        } else {
-            echo json_encode(['status' => 'error', 'msg' => 'Echec decryptage base64']); exit;
-        }
-    } else {
-        echo json_encode(['status' => 'error', 'msg' => 'Format base64 non reconnu ou entete manque']); exit;
-    }
-}
-
-if ($subaction == 'add_img') {
-    $objectSubType = GETPOST('objectSubType');
-    if (empty($objectSubType)) $objectSubType = 'test'; // Fallback
-    
-    // Always render the container so the UI doesn't disappear
-    print '<div class="linked-medias ' . $objectSubType . '">';
-    print '  <div class="fast-upload-options" data-from-type="saturne" data-from-subtype="test" data-from-subdir="test"></div>';
-    
-    if (!empty($_FILES['img']['error']) || empty($_FILES['img']['tmp_name'])) {
-        $errCode = isset($_FILES['img']['error']) ? $_FILES['img']['error'] : 'MISSING';
-        $errMsg = 'Erreur inconnue';
-        switch ($errCode) {
-            case UPLOAD_ERR_INI_SIZE:   $errMsg = 'Le fichier dépasse la limite upload_max_filesize de votre serveur (' . ini_get('upload_max_filesize') . ').'; break;
-            case UPLOAD_ERR_FORM_SIZE:  $errMsg = 'Le fichier dépasse la contrainte de taille côté client.'; break;
-            case UPLOAD_ERR_PARTIAL:    $errMsg = 'Le fichier n\'a été que partiellement téléchargé.'; break;
-            case UPLOAD_ERR_NO_FILE:    $errMsg = 'Aucun fichier n\'a été téléchargé.'; break;
-            case UPLOAD_ERR_NO_TMP_DIR: $errMsg = 'Dossier temporaire manquant sur votre serveur.'; break;
-            case UPLOAD_ERR_CANT_WRITE: $errMsg = 'Échec de l\'écriture du fichier sur le disque du serveur.'; break;
-            case UPLOAD_ERR_EXTENSION:  $errMsg = 'Une extension PHP a stoppé l\'upload du fichier.'; break;
-            case 'MISSING':             $errMsg = 'Le fichier (tmp_name) est bloqué et absent, potentiellement dû à une limite post_max_size atteinte (' . ini_get('post_max_size') . ') !'; break;
-        }
-        
-        print '  <p style="margin-top: 10px; color: #e74c3c; font-weight: bold;"><i class="fas fa-exclamation-triangle"></i> Échec de l\'upload PHP. Code: ' . $errCode . ' <br><span style="font-size:12px; font-weight:normal;">' . $errMsg . '</span></p>';
-    } else {
-        $decodedImage = file_get_contents($_FILES['img']['tmp_name']);
-        
-        /** @phpstan-ignore-next-line */
-    $pathToECMImg = $conf->ecm->dir_output . '/saturne/test_medias';
-        if (!dol_is_dir($pathToECMImg)) {
-            dol_mkdir($pathToECMImg);
-        }
-        
-        $fileName = dol_print_date(dol_now(), 'dayhourlog') . '_' . rand(1, 9999) . '_test.jpeg';
-        file_put_contents($pathToECMImg . '/' . $fileName, $decodedImage);
-        
-        // Generate thumbnail for the gallery
-        require_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
-        if (!dol_is_dir($pathToECMImg . '/thumbs')) {
-            dol_mkdir($pathToECMImg . '/thumbs');
-        }
-        // Assuming global conf sizes or standard ones
-        $maxWidth = !empty($conf->global->SATURNE_MEDIA_MAX_WIDTH_SMALL) ? $conf->global->SATURNE_MEDIA_MAX_WIDTH_SMALL : 120;
-        $maxHeight = !empty($conf->global->SATURNE_MEDIA_MAX_HEIGHT_SMALL) ? $conf->global->SATURNE_MEDIA_MAX_HEIGHT_SMALL : 120;
-        vignette($pathToECMImg . '/' . $fileName, $maxWidth, $maxHeight, '_small', 50, 'thumbs');
-        
-        // Call Saturne's native library handler to render the standard linked-medias HTML!
-        // Includes the new thumbnail.
-        $dummyObj = new stdClass();
-        $dummyObj->id = 999;
-        $dummyObj->element = 'test';
-        $dummyObj->photo = ''; // no specific favorite
-        print '<div class="linked-medias test">';
-        print '<div style="display: flex; align-items: center; gap: 12px; margin-top: 10px; background: transparent; padding: 0;">';
-        
-        // The camera button (Orange #f39c12)
-        print '  <label for="upload-media" id="label-upload-media" style="cursor:pointer; display:flex; flex-shrink: 0; justify-content:center; align-items:center; width: 50px; min-width: 50px; height: 50px; min-height: 50px; background-color: #f39c12; color: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 0; padding: 0; box-sizing: border-box;">';
-        print '    <i class="fas fa-camera" style="font-size: 20px;"></i>';
-        print '    <input type="file" id="upload-media" class="file-upload-input fast-upload-improvement" accept="image/*" style="display: none;">';
-        print '  </label>';
-
-        // The single badged photo
-        if (dol_is_dir($pathToECMImg)) {
-            $filearray = dol_dir_list($pathToECMImg, 'files', 0, '', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC);
-            $totalPhotos = count($filearray);
-            
-            if ($totalPhotos > 0) {
-                $urls = [];
-                foreach ($filearray as $file) {
-                    $urls[] = DOL_URL_ROOT . '/document.php?modulepart=ecm&entity=1&file=' . urlencode('saturne/test_medias/' . $file['name']);
-                }
-                $urlsJson = htmlspecialchars(json_encode($urls), ENT_QUOTES, 'UTF-8');
-                
-                // Generate raw html thumb, stripping buttons and links
-                $thumbHtml = saturne_show_medias_linked('ecm', $pathToECMImg, 'small', 1, -1, 0, 0, 50, 50, 1, 1, 0, 'saturne/test_medias', $dummyObj, 'photo', 0, 0, 1, 0, '', 0);
-                if (!empty($thumbHtml)) {
-                    // Extract just the img tag so we completely avoid table wrappers and bad classes
-                    preg_match('/<img[^>]+>/i', $thumbHtml, $matches);
-                    if (!empty($matches[0])) {
-                        $imgTag = $matches[0];
-                        $imgTag = str_replace('photowithmargin', '', $imgTag);
-                        $imgTag = preg_replace('/style="([^"]*)"/', 'style="$1 width:100% !important; height:100% !important; object-fit:cover !important; display:block !important; border-radius:12px !important; margin:0 !important; padding:0 !important; box-sizing:border-box !important;"', $imgTag);
-                        if (strpos($imgTag, 'style=') === false) {
-                            $imgTag = str_replace('<img ', '<img style="width:100% !important; height:100% !important; object-fit:cover !important; display:block !important; border-radius:12px !important; margin:0 !important; padding:0 !important; box-sizing:border-box !important;" ', $imgTag);
-                        }
-                        
-                        print '<div class="open-media-editor-as-gallery" data-json="' . $urlsJson . '" style="position: relative; flex-shrink: 0; width: 50px; min-width: 50px; height: 50px; min-height: 50px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); cursor: pointer; display: block; padding: 0; margin: 0; background: #fff; box-sizing: border-box;">';
-                        print $imgTag;
-                        print '<span style="position:absolute; top:-6px; right:-6px; background:#8f9ba8; color:white; border-radius:12px; height:18px; min-width:18px; padding: 0 4px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); box-sizing:border-box;">' . $totalPhotos . '</span>';
-                        print '</div>';
-                    }
-                }
-            }
-        }
-        print '</div>';
-        print '</div>';
-        exit;
-    }
-}
-
 /*
  * View
  */
@@ -217,64 +81,52 @@ $serverLimit = str_ireplace('m', ' Mo', $serverLimit);
 $serverLimit = str_ireplace('g', ' Go', $serverLimit);
 $maxFiles = ini_get('max_file_uploads') . ' fichiers';
 
+$nbFilesPhotos = 0;
+$nbFilesAudio = 0;
+
+$targetModule = 'saturne';
+$targetSubDir = 'test_medias';
+$pathToECMImgSetupRaw = (empty($conf->$targetModule->dir_output) ? $conf->ecm->dir_output . '/' . $targetModule : $conf->$targetModule->dir_output);
+if (!empty($targetSubDir)) $pathToECMImgSetupRaw .= '/' . $targetSubDir;
+
+// Health Checks
+$dirExists = dol_is_dir($pathToECMImgSetupRaw);
+$dirIsWritable = $dirExists ? is_writable(dol_osencode($pathToECMImgSetupRaw)) : false;
+
+$pathToECMImgSetup = str_replace('/', DIRECTORY_SEPARATOR, $pathToECMImgSetupRaw);
+
+if ($dirExists) {
+    $filesArrPhotos = dol_dir_list($pathToECMImgSetupRaw, 'files', 0, '\.(png|jpg|jpeg|gif|webp|PNG|JPG|JPEG|GIF|WEBP)$', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC);
+    $nbFilesPhotos = is_array($filesArrPhotos) ? count($filesArrPhotos) : 0;
+    
+    $filesArrAudio = dol_dir_list($pathToECMImgSetupRaw, 'files', 0, '\.(wav|mp3|ogg|m4a|WAV|MP3|OGG|M4A)$', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC);
+    $nbFilesAudio = is_array($filesArrAudio) ? count($filesArrAudio) : 0;
+}
+
+// Health status HTML generator for the UI tables
+function getSaturneFolderHealthStatus($nbFiles, $dirExists, $dirIsWritable) {
+    if (!$dirExists) {
+        return '<br><span style="color: #e74c3c; font-weight: 600; font-size: 0.95em;"><i class="fas fa-exclamation-triangle"></i> Erreur : Le répertoire est introuvable ou n\'a pas encore été créé.</span>';
+    }
+    if (!$dirIsWritable) {
+        return '<br><span style="color: #e74c3c; font-weight: 600; font-size: 0.95em;"><i class="fas fa-lock"></i> Erreur : Le répertoire existe mais vous n\'avez pas les droits d\'écriture (Vérifiez les permissions OS ' . (empty($_SERVER['WINDIR']) ? '- chmod/chown' : '- Propriétés Windows') . ').</span>';
+    }
+    return ' <span style="color: #2ecc71; font-weight: 600; font-size: 0.95em; margin-left: 6px;">(' . $nbFiles . ' Fichiers | <i class="fas fa-check-circle"></i> Accès OK)</span>';
+}
+
 // Wrapper container with dynamic border color matching the theme
 print '<div id="saturne-config-wrapper" style="border-width: 1px; border-style: solid; border-color: transparent; padding: 20px; border-radius: 8px; margin-bottom: 30px;">';
 
 print load_fiche_titre('<span class="saturne-dynamic-title"><i class="fas fa-camera-retro paddingright"></i> Test Upload Média Canvas</span>', '', '');
 
-print '<div class="linked-medias medias test" id="master-media-row-container" style="padding: 10px 0;">';
-print '  <div class="fast-upload-options" data-from-type="saturne" data-from-subtype="test" data-from-subdir="test_medias"></div>';
-
-print '<div style="display: flex; align-items: center; gap: 12px; margin-top: 10px; background: transparent; padding: 0;">';
-        
-// The camera button
-print '  <label for="upload-media" id="label-upload-media" style="cursor:pointer; display:flex; flex-shrink: 0; justify-content:center; align-items:center; width: 50px; min-width: 50px; height: 50px; min-height: 50px; background-color: #f39c12; color: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 0; padding: 0; box-sizing: border-box;">';
-print '    <i class="fas fa-camera" style="font-size: 20px;"></i>';
-print '    <input type="file" id="upload-media" class="file-upload-input fast-upload-improvement" accept="image/*" style="display: none;">';
-print '  </label>';
-
-// Render the existing gallery if items exist
-/** @phpstan-ignore-next-line */
-    $pathToECMImg = $conf->ecm->dir_output . '/saturne/test_medias';
-if (dol_is_dir($pathToECMImg)) {
-    $maxWidth = !empty($conf->global->SATURNE_MEDIA_MAX_WIDTH_SMALL) ? $conf->global->SATURNE_MEDIA_MAX_WIDTH_SMALL : 120;
-    $maxHeight = !empty($conf->global->SATURNE_MEDIA_MAX_HEIGHT_SMALL) ? $conf->global->SATURNE_MEDIA_MAX_HEIGHT_SMALL : 120;
-
-    $dummyObj = new stdClass();
-    $dummyObj->id = 999;
-    $dummyObj->element = 'test';
-    
-    $filearray = dol_dir_list($pathToECMImg, 'files', 0, '', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC);
-    $totalPhotos = count($filearray);
-    
-    if ($totalPhotos > 0) {
-        $urls = [];
-        foreach ($filearray as $file) {
-            $urls[] = DOL_URL_ROOT . '/document.php?modulepart=ecm&entity=1&file=' . urlencode('saturne/test_medias/' . $file['name']);
-        }
-        $urlsJson = htmlspecialchars(json_encode($urls), ENT_QUOTES, 'UTF-8');
-        
-        $thumbHtml = saturne_show_medias_linked('ecm', $pathToECMImg, 'small', 1, -1, 0, 0, 50, 50, 1, 1, 0, 'saturne/test_medias', $dummyObj, 'photo', 0, 0, 1, 0, '', 0);
-        if (!empty($thumbHtml)) {
-            preg_match('/<img[^>]+>/i', $thumbHtml, $matches);
-            if (!empty($matches[0])) {
-                $imgTag = $matches[0];
-                $imgTag = str_replace('photowithmargin', '', $imgTag);
-                $imgTag = preg_replace('/style="([^"]*)"/', 'style="$1 width:100% !important; height:100% !important; object-fit:cover !important; display:block !important; border-radius:12px !important; margin:0 !important; padding:0 !important; box-sizing:border-box !important;"', $imgTag);
-                if (strpos($imgTag, 'style=') === false) {
-                    $imgTag = str_replace('<img ', '<img style="width:100% !important; height:100% !important; object-fit:cover !important; display:block !important; border-radius:12px !important; margin:0 !important; padding:0 !important; box-sizing:border-box !important;" ', $imgTag);
-                }
-                
-                print '<div class="open-media-editor-as-gallery" data-json="' . $urlsJson . '" style="position: relative; flex-shrink: 0; width: 50px; min-width: 50px; height: 50px; min-height: 50px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); cursor: pointer; display: block; padding: 0; margin: 0; background: #fff; box-sizing: border-box;">';
-                print $imgTag;
-                print '<span style="position:absolute; top:-6px; right:-6px; background:#8f9ba8; color:white; border-radius:12px; height:18px; min-width:18px; padding: 0 4px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; border: 2px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); box-sizing:border-box;">' . $totalPhotos . '</span>';
-                print '</div>';
-            }
-        }
-    }
-}
+print '<div class="info" style="margin-bottom: 20px; padding: 15px; background: #e8f4f8; border-left: 4px solid #3498db; border-radius: 4px;">';
+print '  <h4 style="margin-top: 0; color: #2980b9;"><i class="fas fa-lightbulb"></i> Brique Photo Dynamique (Pour Développeurs)</h4>';
+print '  <p style="margin-bottom:8px;">Pour intégrer cette brique dans votre module (comme ce "Test Médias" du module Saturne) :</p>';
+print '  <pre style="background: #2c3e50; color: #ecf0f1; padding: 10px; border-radius: 4px; overflow-x: auto;">print saturne_render_media_block(\'saturne\', \'test_medias\', \'TEST_\', \'\', [\'show_photo\'=>true, \'show_audio\'=>false]);</pre>';
+print '  <p style="margin-bottom: 0; font-size: 0.9em; color: #7f8c8d;"><i>Cette méthode gère le formulaire, la miniature, et limite l\'écriture dynamiquement.</i></p>';
 print '</div>';
-print '</div>';
+
+print saturne_render_media_block('saturne', 'test_medias', '', '', ['show_photo' => true, 'show_audio' => false]);
 
 print '<br>';
 print load_fiche_titre('<i class="fas fa-tools paddingright"></i> Configuration', '', '');
@@ -301,10 +153,74 @@ print '    Nombre maximum de fichiers joints dans un formulaire <span style="col
 print '  </td>';
 print '</tr>';
 
+print '<tr class="oddeven">';
+print '  <td>Chemins de stockage des données</td>';
+print '  <td><span style="font-weight: 600;">' . $pathToECMImgSetup . '</span>' . getSaturneFolderHealthStatus($nbFilesPhotos, $dirExists, $dirIsWritable) . '</td>';
+print '</tr>';
+
+print '<tr class="oddeven">';
+print '  <td>Types de fichiers autorisés (Photos)</td>';
+print '  <td><span style="color: #2ecc71; font-weight: 600; font-size: 0.95em;">.jpg, .jpeg, .png, .gif, .webp</span></td>';
+print '</tr>';
+
 print '</tbody>';
 print '</table>';
 
-// End Wrapper Container
+// End Wrapper Container Photo
+print '</div>';
+
+// Wrapper container for Audio
+print '<div id="saturne-config-wrapper-audio" style="border-width: 1px; border-style: solid; border-color: transparent; padding: 20px; border-radius: 8px; margin-bottom: 30px;">';
+
+print load_fiche_titre('<span class="saturne-dynamic-title"><i class="fas fa-microphone-alt paddingright"></i> Test ajout médias audio</span>', '', '');
+
+print '<div class="info" style="margin-bottom: 20px; padding: 15px; background: #fdf3e7; border-left: 4px solid #e67e22; border-radius: 4px;">';
+print '  <h4 style="margin-top: 0; color: #d35400;"><i class="fas fa-lightbulb"></i> Brique Audio Dynamique (Pour Développeurs)</h4>';
+print '  <p style="margin-bottom:8px;">Pour l\'enregistreur vocal (avec animations et pré-écoute) :</p>';
+print '  <pre style="background: #2c3e50; color: #ecf0f1; padding: 10px; border-radius: 4px; overflow-x: auto;">print saturne_render_media_block(\'saturne\', \'test_medias\', \'\', \'\', [\'show_photo\'=>false, \'show_audio\'=>true]);</pre>';
+print '</div>';
+
+print saturne_render_media_block('saturne', 'test_medias', '', '', ['show_photo' => false, 'show_audio' => true, 'show_gallery' => false]);
+
+print '<br>';
+print load_fiche_titre('<i class="fas fa-tools paddingright"></i> Configuration', '', '');
+
+print '<table class="noborder centpercent" style="margin-bottom: 0;">';
+print '<tbody>';
+print '<tr class="liste_titre">';
+print '  <td width="35%">Paramètres</td>';
+print '  <td>Valeurs</td>';
+print '</tr>';
+
+print '<tr class="oddeven">';
+print '  <td>Fichiers (Envoyer fichier | Téléchargement) <a href="'.DOL_URL_ROOT.'/admin/security_other.php" target="_blank" title="Aller aux réglages natifs Dolibarr"><i class="fas fa-external-link-square-alt" style="color: #b0b0b0; font-size: 14px; margin-left: 6px;"></i></a></td>';
+print '  <td>';
+print '    Taille maximum des fichiers envoyés (0 pour interdire l\'envoi). <span style="color: #e74c3c; font-weight: 600; margin-left: 5px;">' . $dolibarrLimit . '</span><br>';
+print '    <span class="opacitymedium" style="font-size: 0.95em;">Remarque: La configuration de votre PHP limite la taille des envois à : <span style="color: #e74c3c; font-weight: 600;">' . $serverLimit . '</span>, quelle que soit la valeur de ce paramètre.</span>';
+print '  </td>';
+print '</tr>';
+
+print '<tr class="oddeven">';
+print '  <td>Divers <a href="'.DOL_URL_ROOT.'/admin/limits.php" target="_blank" title="Aller aux réglages natifs Dolibarr"><i class="fas fa-external-link-square-alt" style="color: #b0b0b0; font-size: 14px; margin-left: 6px;"></i></a></td>';
+print '  <td>';
+print '    Nombre maximum de fichiers joints dans un formulaire <span style="color: #e74c3c; font-weight: 600; margin-left: 5px;">' . $maxFiles . '</span>';
+print '  </td>';
+print '</tr>';
+
+print '<tr class="oddeven">';
+print '  <td>Chemins de stockage des données</td>';
+print '  <td><span style="font-weight: 600;">' . $pathToECMImgSetup . '</span>' . getSaturneFolderHealthStatus($nbFilesAudio, $dirExists, $dirIsWritable) . '</td>';
+print '</tr>';
+
+print '<tr class="oddeven">';
+print '  <td>Types de fichiers autorisés (Audio)</td>';
+print '  <td><span style="color: #8e44ad; font-weight: 600; font-size: 0.95em;">.wav, .mp3, .ogg, .m4a</span></td>';
+print '</tr>';
+
+print '</tbody>';
+print '</table>';
+
+// End Wrapper Container Audio
 print '</div>';
 
 // Match the border color to the native title color dynamically
@@ -313,14 +229,48 @@ document.addEventListener("DOMContentLoaded", function() {
     var titleElem = document.querySelector(".saturne-dynamic-title");
     if(titleElem) {
         var themeColor = window.getComputedStyle(titleElem).color;
-        document.getElementById("saturne-config-wrapper").style.borderColor = themeColor;
+        var wrapperPhoto = document.getElementById("saturne-config-wrapper");
+        if(wrapperPhoto) wrapperPhoto.style.borderColor = themeColor;
+        var wrapperAudio = document.getElementById("saturne-config-wrapper-audio");
+        if(wrapperAudio) wrapperAudio.style.borderColor = themeColor;
     }
 });
 </script>';
 
+print '
+
+<style>
+@keyframes recordingPulseAnim {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); background-color: #e74c3c; color: white; }
+    50% { transform: scale(1.1); box-shadow: 0 0 0 12px rgba(231, 76, 60, 0); background-color: #c0392b; color: white; }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); background-color: #e74c3c; color: white; }
+}
+.recording-pulse-active {
+    animation: recordingPulseAnim 1.5s infinite !important;
+    background-color: #e74c3c !important;
+    color: white !important;
+}
+
+@keyframes playingPulseAnim {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(123, 104, 238, 0.7); background-color: #7b68ee; color: white; }
+    50% { transform: scale(1.1); box-shadow: 0 0 0 12px rgba(123, 104, 238, 0); background-color: #6a5acd; color: white; }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(123, 104, 238, 0); background-color: #7b68ee; color: white; }
+}
+.playing-pulse-active {
+    animation: playingPulseAnim 1.5s infinite !important;
+    background-color: #7b68ee !important;
+    color: white !important;
+}
+</style>
+
+';
+
 include dol_buildpath('/saturne/core/tpl/medias/media_editor_modal.tpl.php');
 
 print '<script src="'.dol_buildpath('/saturne/js/modules/errors.js', 1).'?v='.time().'"></script>';
+print '<script src="'.dol_buildpath('/saturne/js/modules/toolbox.js', 1).'?v='.time().'"></script>';
+print '<script src="'.dol_buildpath('/saturne/js/modules/notice.js', 1).'?v='.time().'"></script>';
+print '<script src="'.dol_buildpath('/saturne/js/modules/audio.js', 1).'?v='.time().'"></script>';
 print '<script src="'.dol_buildpath('/saturne/js/modules/media.js', 1).'?v='.time().'"></script>';
 print '<script>console.log("Saturne MEDIA module cache busted and forced to reload"); </script>';
 
@@ -328,3 +278,4 @@ print dol_get_fiche_end();
 
 llxFooter();
 $db->close();
+
