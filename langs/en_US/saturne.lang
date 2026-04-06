@@ -18,16 +18,16 @@
 #
 
 # Data
-ModuleSaturneName   = Saturne
-ModuleSaturneDesc   = Evarisk framework and library of objects and functions
-ModuleConfig        = Configuration %s
+ModuleSaturneName = Saturne
+ModuleSaturneDesc = Evarisk framework and library of objects and functions
+ModuleConfig = Configuration %s
 ModuleConfigSaturne = Configuration Saturne
-MinimizeMenu        = Minimize the menu
+MinimizeMenu = Minimize the menu
 
 # Right
-LireModule                  = Read %s
-ReadModule                  = Read %s (read)
-ReadAdminPage               = Access the module configuration %s
+LireModule = Read %s
+ReadModule = Read %s (read)
+ReadAdminPage = Access the module configuration %s
 YouDontHaveTheRightOnObject = You don't have the rights on %s
 
 
@@ -37,68 +37,68 @@ YouDontHaveTheRightOnObject = You don't have the rights on %s
 #
 
 # Data
-ModuleSettings                           = Settings
-ModuleSetup                              = Module configuration %s
-Contributing                             = Contributing
-SaturneModule                            = %s module
-GeneralConfig                            = General configuration
-ConfigData                               = Configurable data from %s
-Configs                                  = Configurable % data
-ConfigDatas                              = Configurations
-ModuleMediaGallery                       = Configuration of %s media
-SavedMediaData                           = Recording of media data
-EnablePublicInterface                    = Public interface
-EnablePublicInterfaceDescription         = Activation of public interfaces
-ShowCompanyLogo                          = Display the company logo
-ShowCompanyLogoDescription               = Enable this option to hide the company logo in the public interface pages
-UseCaptcha                               = Graphic code (CAPTCHA)
-UseCaptchaDescription                    = Use of graphic code (CAPTCHA) on public interface pages
-UseAllEmailMode                          = Use of all email configuration modes
-UseAllEmailModeDescription               = Allow the use of all email configuration modes by default, only SMTP mode is allowed
-AttendantsAddStatusManagement            = Manage the addition of participants on the status Validated (awaiting signature)
+ModuleSettings = Settings
+ModuleSetup = Module configuration %s
+Contributing = Contributing
+SaturneModule = %s module
+GeneralConfig = General configuration
+ConfigData = Configurable data from %s
+Configs = Configurable % data
+ConfigDatas = Configurations
+ModuleMediaGallery = Configuration of %s media
+SavedMediaData = Recording of media data
+EnablePublicInterface = Public interface
+EnablePublicInterfaceDescription = Activation of public interfaces
+ShowCompanyLogo = Display the company logo
+ShowCompanyLogoDescription = Enable this option to hide the company logo in the public interface pages
+UseCaptcha = Graphic code (CAPTCHA)
+UseCaptchaDescription = Use of graphic code (CAPTCHA) on public interface pages
+UseAllEmailMode = Use of all email configuration modes
+UseAllEmailModeDescription = Allow the use of all email configuration modes by default, only SMTP mode is allowed
+AttendantsAddStatusManagement = Manage the addition of participants on the status Validated (awaiting signature)
 AttendantsAddStatusManagementDescription = Activate this option to add participants to the Validated (awaiting signature) status
-UseFastUploadImprovement                 = Improved fast image loading
-UseFastUploadImprovementDescription      = Activate this option to improve image loading speed <br> Option available : <ul><li>Image rotation</li><li>Drawing on the image</li><li>Saving the image on a reduced format</li></ul>
-MediaResolutionDescription          = Selecting image resolution
-SignaturePublicInterfaceForbidden        = No access to the public signature interface
-ShowSpecimen                             = See signatures on specimen documents
-ShowSpecimenDescription                  = Allows viewing of signatures on specimen documents
-ShowPatchNoteFromGitHub                  = View release notes from GitHub
-ShowPatchNoteFromGitHubDescription       = Enable this option to display update notes from GitHub <br> (Internet access is required for this option to work)
-ObjectVisibleDescription                 = Display the %s field
-SavedConfig                              = Saved configuration
-ErrorSavedConfig                         = An error occurred during the configuration
-Config                                   = Configuration
-Extrafields                              = Extra attributes
-ClickHereToGoToTheConfigPage             = Click here to go to the configuration page
+UseFastUploadImprovement = Improved fast image loading
+UseFastUploadImprovementDescription = Activate this option to improve image loading speed <br> Option available : <ul><li>Image rotation</li><li>Drawing on the image</li><li>Saving the image on a reduced format</li></ul>
+MediaResolutionDescription = Selecting image resolution
+SignaturePublicInterfaceForbidden = No access to the public signature interface
+ShowSpecimen = See signatures on specimen documents
+ShowSpecimenDescription = Allows viewing of signatures on specimen documents
+ShowPatchNoteFromGitHub = View release notes from GitHub
+ShowPatchNoteFromGitHubDescription = Enable this option to display update notes from GitHub <br> (Internet access is required for this option to work)
+ObjectVisibleDescription = Display the %s field
+SavedConfig = Saved configuration
+ErrorSavedConfig = An error occurred during the configuration
+Config = Configuration
+Extrafields = Extra attributes
+ClickHereToGoToTheConfigPage = Click here to go to the configuration page
 
 # Redirections
 Redirections = Redirections
-FromURL      = From URL
-ToURL        = To URL
-FromUrlHelp  = Enter the starting URL. For example, to redirect from https://www.evarisk.com/depuis/la/page, enter “/from/the/page”.
-ToUrlHelp    = Enter the destination URL. For example, to redirect to https://www.evarisk.com/vers/la/page, enter “/to/the/page”.
+FromURL = From URL
+ToURL = To URL
+FromUrlHelp = Enter the starting URL. For example, to redirect from https://www.evarisk.com/depuis/la/page, enter “/from/the/page”.
+ToUrlHelp = Enter the destination URL. For example, to redirect to https://www.evarisk.com/vers/la/page, enter “/to/the/page”.
 
 
 
 # Mod Numbering
 NumberingModule = Numbering model
 NumberingModuleDet = Numbering model lines
-StandardModel   = Returns the number in the form %syymm-nnnn where yy is the year, mm is the month and nnnn is a sequential counter without break and without reset.
+StandardModel = Returns the number in the form %syymm-nnnn where yy is the year, mm is the month and nnnn is a sequential counter without break and without reset.
 
 # ODT Template
-YourDocuments               = Documents
-DocumentTemplate            = Model documents
-ODTDefaultTemplateName      = Default ODT of documents
-ErrorFileNotFound           = File not found
-ErrorNoSocietyLogo          = No company logo found
-CustomODT                   = Custom ODT of documents
+YourDocuments = Documents
+DocumentTemplate = Model documents
+ODTDefaultTemplateName = Default ODT of documents
+ErrorFileNotFound = File not found
+ErrorNoSocietyLogo = No company logo found
+CustomODT = Custom ODT of documents
 ErrorWrongFileNameExtension = Error: wrong file extension %s
 
 # Trigger
-ConfTrigger                 = Event configuration
-ConfEventAuto               = Automatic event configuration
-AdvancedTriggers            = Advanced trigger content
+ConfTrigger = Event configuration
+ConfEventAuto = Automatic event configuration
+AdvancedTriggers = Advanced trigger content
 AdvancedTriggersDescription = Enable a detailed description of %s trigger
 
 
@@ -108,7 +108,7 @@ AdvancedTriggersDescription = Enable a detailed description of %s trigger
 #
 
 # Data
-About       = About
+About = About
 ModuleAbout = About %s
 
 
@@ -119,7 +119,7 @@ ModuleAbout = About %s
 
 # Data
 ChangeEntityRedirection = You have been redirected because you have changed entity
-EnableSaturne           = Please activate the Saturn module to access this page
+EnableSaturne = Please activate the Saturn module to access this page
 
 
 
@@ -128,11 +128,11 @@ EnableSaturne           = Please activate the Saturn module to access this page
 #
 
 # Data - Donnée
-PublicInterfaceObject                  = Public interface %s
+PublicInterfaceObject = Public interface %s
 PublicInterfaceUseSignatoryDescription = Using the signature on the public interface
-PublicInterfaceUser                    = Default user
-PublicInterfaceUserDescription         = User used on the public interface
-PublicInterfaceForbidden               = No access to public interface %s
+PublicInterfaceUser = Default user
+PublicInterfaceUserDescription = User used on the public interface
+PublicInterfaceForbidden = No access to public interface %s
 
 
 #
@@ -140,10 +140,10 @@ PublicInterfaceForbidden               = No access to public interface %s
 #
 
 # Data - Donnée
-PWA                           = Progressive Web App
+PWA = Progressive Web App
 PWAQRCodeGenerationManagement = Managing the generation of PWA QRCodes
-GeneratePWAQRCode             = PWA QRCode generation
-GeneratePWAQRCodeDescription  = This option generates the QRCode for the progressive web application
+GeneratePWAQRCode = PWA QRCode generation
+GeneratePWAQRCodeDescription = This option generates the QRCode for the progressive web application
 
 
 
@@ -152,17 +152,17 @@ GeneratePWAQRCodeDescription  = This option generates the QRCode for the progres
 #
 
 # Data
-ModuleArea                 = Welcome to %s
-ModuleUpdate               = Update of %s :
-ModuleHasBeenUpdatedTo     = %s has been updated to %s
-ModulePatchNote            = Update note %s %s
-ShowPatchNote              = See the update note
-DontShowPatchNote          = No longer display the update note
-ChooseBoxToAddWidget       = Add a widget to the dashboard
-ChooseBoxToAddGraph        = Add a graph to the dashboard
+ModuleArea = Welcome to %s
+ModuleUpdate = Update of %s :
+ModuleHasBeenUpdatedTo = %s has been updated to %s
+ModulePatchNote = Update note %s %s
+ShowPatchNote = See the update note
+DontShowPatchNote = No longer display the update note
+ChooseBoxToAddWidget = Add a widget to the dashboard
+ChooseBoxToAddGraph = Add a graph to the dashboard
 SetupDefaultDataNotCreated = You have not created default data for %s
-HowToSetupDefaultData      = To set up %s default data, please click on this link :
-ConfigDefaultData          = Configure %s default data
+HowToSetupDefaultData = To set up %s default data, please click on this link :
+ConfigDefaultData = Configure %s default data
 
 
 
@@ -171,7 +171,7 @@ ConfigDefaultData          = Configure %s default data
 #
 
 # Data
-Schedules      = Schedules
+Schedules = Schedules
 SchedulesSaved = The timetables have been properly recorded
 
 
@@ -181,18 +181,18 @@ SchedulesSaved = The timetables have been properly recorded
 #
 
 # Data
-DocumentsMin                            = documents
-AutomaticPdfGeneration                  = Automatic generation of PDFs
-AutomaticPdfGenerationDescription       = Automatically creates the document as a PDF when it is generated
-ManualPdfGeneration                     = Manual generation of PDFs
-ManualPdfGenerationDescription          = Added a button to create an ODT document in PDF
-UseCreateDocumentOnArchive              = Document generation during archiving
-UseCreateDocumentOnArchiveDescription   = Automatic creation of the document during archiving
-FileCouldNotBeGeneratedInPDF            = The file could not be generated in PDF
+DocumentsMin = documents
+AutomaticPdfGeneration = Automatic generation of PDFs
+AutomaticPdfGenerationDescription = Automatically creates the document as a PDF when it is generated
+ManualPdfGeneration = Manual generation of PDFs
+ManualPdfGenerationDescription = Added a button to create an ODT document in PDF
+UseCreateDocumentOnArchive = Document generation during archiving
+UseCreateDocumentOnArchiveDescription = Automatic creation of the document during archiving
+FileCouldNotBeGeneratedInPDF = The file could not be generated in PDF
 CheckDocumentationToEnablePDFGeneration = Please refer to the documentation for the PDF generation : <a target="_blank" href="https://wiki.dolibarr.org/index.php?title=Module_Digirisk#Impression_du_Document_Unique_au_format_pdf_-_.28.2A.pdf.29">Documentation</a>
-PDFGenerationTooltip                    = Appuyez sur ce bouton pour générer le document ODT en PDF
-PDFGeneration                           = Generating the PDF document
-NoData                                  = N/A
+PDFGenerationTooltip = Appuyez sur ce bouton pour générer le document ODT en PDF
+PDFGeneration = Generating the PDF document
+NoData = N/A
 
 
 
@@ -202,9 +202,9 @@ NoData                                  = N/A
 
 # Data
 SendMailSubject = Email
-QHSEService     = QHSE Service
+QHSEService = QHSE Service
 WithKindRegards = With kind regards
-ConfigEmail     = Click on this link to go to the email configuration
+ConfigEmail = Click on this link to go to the email configuration
 
 
 
@@ -222,11 +222,11 @@ CloseModal = Close
 #
 
 # Data
-FkElement              = Linked element
-ElementType            = Element type
-CertificateExpired     = There are %s expired certificate(s)
-NoCertificate          = No certificate
-checkDateEndJob        = Checking certificate expiry dates
+FkElement = Linked element
+ElementType = Element type
+CertificateExpired = There are %s expired certificate(s)
+NoCertificate = No certificate
+checkDateEndJob = Checking certificate expiry dates
 checkDateEndJobComment = Checking and updating the status of expired certificates by end date
 
 
@@ -237,7 +237,7 @@ checkDateEndJobComment = Checking and updating the status of expired certificate
 
 # Data
 EntityNumber = Entity number
-EntityName   = Entity name
+EntityName = Entity name
 
 
 
@@ -246,7 +246,7 @@ EntityName   = Entity name
 #
 
 # Data
-Tools      = Tools
+Tools = Tools
 ExportData = Export my data
 
 
@@ -256,10 +256,10 @@ ExportData = Export my data
 #
 
 # Data
-SocietyAttendants   = Third party external attendants
-Back                = Back
-DeleteFiles         = Are you sure that you want to delete <span class="filesLinked"></span> selected files ?
+SocietyAttendants = Third party external attendants
+Back = Back
+DeleteFiles = Are you sure that you want to delete <span class="filesLinked"></span> selected files ?
 RecordingInProgress = Recording in progress...
-ExportGraphCSV       = Export the graph in CSV format
-ResetFilters         = Reset filters
-SearchInAllFields    = Search in all fields…
+ExportGraphCSV = Export the graph in CSV format
+ResetFilters = Reset filters
+SearchInAllFields = Search in all fields…
