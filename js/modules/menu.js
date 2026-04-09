@@ -75,11 +75,62 @@ window.saturne.menu.setMenu = function setMenu() {
 
   minimizeElement.closest('.blockvmenulast').css('cursor', 'pointer');
 
+  // Mapping: text pattern → FontAwesome class(es), applied only when no icon already exists
+  // Patterns require "liste" to avoid injecting icons in unexpected places
+  var menuIconMap = [
+    { pattern: /liste.*opp\./i,   icon: 'fas fa-dollar-sign'      },
+    { pattern: /liste.*projet/i,  icon: 'fas fa-project-diagram'  }
+  ];
+
+  /**
+   * Returns a FA icon class for a menu item text, or empty string if none matched.
+   * If the element already has an icon and a projet icon is present, returns empty
+   * string so the existing icon is preserved.
+   *
+   * @param {jQuery} $el   - The menu anchor/span element
+   * @param {string} text  - The visible text of the element
+   * @returns {string}
+   */
+  var resolveMissingIcon = function($el, text) {
+    if ($el.find('i, img').length > 0) {
+      return '';
+    }
+
+    for (var i = 0; i < menuIconMap.length; i++) {
+      if (menuIconMap[i].pattern.test(text)) {
+        return menuIconMap[i].icon;
+      }
+    }
+
+    return '';
+  };
+
   const minimizeMenu = () => {
     menuElement.each(function () {
-      $(this).contents().filter(function() {
+      var $el      = $(this);
+      var fullText = $el.text().trim();
+
+      // Save tooltip
+      if (fullText && !$el.attr('data-menu-original-title')) {
+        $el.attr('data-menu-original-title', $el.attr('title') || '');
+        $el.attr('title', fullText);
+      }
+
+      // Hide text nodes inside the anchor
+      $el.contents().filter(function() {
         return this.nodeType === 3;
       }).wrap('<span class="hidden-text" style="display:none"></span>');
+
+      // Inject mapped icon for items without any existing icon
+      var iconClass = resolveMissingIcon($el, fullText);
+      if (iconClass) {
+        // Also hide whitespace text nodes in parent div (tabstring indentation)
+        $el.closest('.menu_titre, .menu_contenu').contents().filter(function() {
+          return this.nodeType === 3;
+        }).wrap('<span class="hidden-whitespace" style="display:none"></span>');
+
+        $el.prepend('<i class="' + iconClass + ' pictofixedwidth saturne-menu-injected-icon"></i>');
+      }
     });
 
     searchBox.slideUp(200);
@@ -93,7 +144,21 @@ window.saturne.menu.setMenu = function setMenu() {
 
   const maximizeMenu = () => {
     menuElement.each(function () {
-      $(this).find('span.hidden-text').contents().unwrap();
+      var $el = $(this);
+
+      // Remove injected icons and restore parent whitespace
+      if ($el.find('i.saturne-menu-injected-icon').length > 0) {
+        $el.find('i.saturne-menu-injected-icon').remove();
+        $el.closest('.menu_titre, .menu_contenu').find('span.hidden-whitespace').contents().unwrap();
+      }
+
+      // Restore original tooltip
+      if ($el.attr('data-menu-original-title') !== undefined) {
+        $el.attr('title', $el.attr('data-menu-original-title'));
+        $el.removeAttr('data-menu-original-title');
+      }
+
+      $el.find('span.hidden-text').contents().unwrap();
     });
 
     searchBox.slideDown(200);
