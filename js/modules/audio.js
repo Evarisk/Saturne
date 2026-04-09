@@ -127,7 +127,6 @@ window.saturne.audio.startRecording = async function(e) {
   window.saturne.mediaRecoder.start();
   let $container = $btn.closest('.linked-medias');
   
-  $btn.find('i').removeClass('fa-microphone').addClass('fa-stop');
   $btn.addClass('recording-pulse-active');
   $("#play-recording").prop("disabled", true).css({"background-color": "#cbd5e1", "cursor": "not-allowed"});
   $("#delete-recording").css("display", "none");
@@ -193,7 +192,6 @@ window.saturne.audio.stopRecording = async function(e) {
     window.saturne.mediaRecoder.stream.getTracks().forEach(track => track.stop());
     
     let $btn = (e && e.currentTarget) ? $(e.currentTarget) : $('#stop-recording');
-    $btn.find('i').removeClass('fa-stop').addClass('fa-microphone');
     $btn.removeClass('recording-pulse-active');
     $btn.attr('id', 'start-recording');
   }
@@ -308,8 +306,7 @@ window.saturne.audio.playRecording = function(e) {
   if (window.saturne.audio.player && !window.saturne.audio.player.paused) {
       window.saturne.audio.player.pause();
       window.saturne.audio.player.currentTime = 0;
-      btn.removeClass("playing-pulse-active");
-      btn.find("i").removeClass("fa-stop").addClass("fa-play");
+      btn.removeClass("playing-pulse-active").removeClass("is-playing");
       return;
   }
   
@@ -328,12 +325,10 @@ window.saturne.audio.playRecording = function(e) {
   if (targetAudioUrl) {
       window.saturne.audio.player = new Audio(targetAudioUrl);
       
-      btn.addClass("playing-pulse-active");
-      btn.find("i").removeClass("fa-play").addClass("fa-stop");
-      
+      btn.addClass("playing-pulse-active").addClass("is-playing");
+
       window.saturne.audio.player.onended = function() {
-          btn.removeClass("playing-pulse-active");
-          btn.find("i").removeClass("fa-stop").addClass("fa-play");
+          btn.removeClass("playing-pulse-active").removeClass("is-playing");
       };
       
       window.saturne.audio.player.play();
@@ -351,8 +346,7 @@ window.saturne.audio.deleteLocalRecording = function(e) {
   window.saturne.audio.player = null;
   
   let $playBtn = $("#play-recording");
-  $playBtn.removeClass("playing-pulse-active");
-  $playBtn.find("i").removeClass("fa-stop").addClass("fa-play");
+  $playBtn.removeClass("playing-pulse-active").removeClass("is-playing");
   
   $(e.currentTarget).css("display", "none");
   

@@ -16,3 +16,14 @@
   50% { opacity: 0; }
   100% { opacity: 1; }
 }
+
+// Override icon content via CSS to avoid triggering Font Awesome's mutation observer.
+// The record button switches id from "start-recording" to "stop-recording" when active.
+// The play button gains the "is-playing" class when active.
+#stop-recording i::before {
+  content: "\f04d";
+}
+
+#play-recording.is-playing i::before {
+  content: "\f04d";
+}
