@@ -528,7 +528,8 @@ abstract class SaturneObject extends CommonObject
                 $query = array_merge($query, ['save_lastsearch_values' => 1]);
             }
         }
-        $url = dolBuildUrl($baseurl, $query);
+        // TODO: replace with dolBuildUrl($baseurl, $query) once Dolibarr 22 support is dropped (function introduced in Dolibarr 24)
+        $url = $baseurl . '?' . http_build_query($query);
 
         $linkclose = '';
         if (empty($noToolTip)) {
