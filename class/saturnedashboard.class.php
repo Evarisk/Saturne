@@ -142,8 +142,8 @@ class SaturneDashboard
                         $widget .= '<div class="wpeo-infobox" id="widget-' . $key . '">';
                         $widget .= '<div class="wpeo-infobox__header">';
                         $widget .= '<div class="header__icon-container">';
-                        $widget .= '<span class="header__icon-background" style="background: ' . ($dashboardWidget['pictoColor'] ?? '#0D8AFF') . ';"></span>';
-                        $widget .= '<i class="header__icon ' . $dashboardWidget['picto'] . '" style="color: ' . ($dashboardWidget['pictoColor'] ?? '#0D8AFF') . ';"></i>';
+                        $widget .= '<span class="header__icon-background" style="background: ' . ($dashboardWidget['pictoColor'] ?? '#A8D4FF') . ';"></span>';
+                        $widget .= '<i class="header__icon ' . $dashboardWidget['picto'] . '" style="color: ' . ($dashboardWidget['pictoColor'] ?? '#A8D4FF') . ';"></i>';
                         $widget .= '</div>';
                         $widget .= '<div class="header__title">' . ($dashboardWidget['title'] ?? $langs->transnoentities('Title')) . '</div>';
                         $widget .= '<i class="close-dashboard-widget header__close fas fa-times" data-item-type="widget" data-item-name="' . $key . '" data-item-suppress="widget-' . $key . '" data-item-refresh="add-widget-box" id="dashboard-close-item"></i>';
