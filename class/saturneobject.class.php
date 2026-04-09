@@ -57,6 +57,12 @@ abstract class SaturneObject extends CommonObject
      */
     public string $picto = '';
 
+    public const STATUS_DELETED   = -1;
+    public const STATUS_DRAFT     = 0;
+    public const STATUS_VALIDATED = 1;
+    public const STATUS_LOCKED    = 2;
+    public const STATUS_ARCHIVED  = 3;
+
     /**
      * Constructor
      *
@@ -522,7 +528,8 @@ abstract class SaturneObject extends CommonObject
                 $query = array_merge($query, ['save_lastsearch_values' => 1]);
             }
         }
-        $url = dolBuildUrl($baseurl, $query);
+        // TODO: replace with dolBuildUrl($baseurl, $query) once Dolibarr 22 support is dropped (function introduced in Dolibarr 24)
+        $url = $baseurl . '?' . http_build_query($query);
 
         $linkclose = '';
         if (empty($noToolTip)) {
@@ -586,14 +593,48 @@ abstract class SaturneObject extends CommonObject
     }
 
     /**
-     * Return the label of the status
+     * Initialize status labels
      *
-     * @param  int    $mode 0 = long label, 1 = short label, 2 = Picto + short label, 3 = Picto, 4 = Picto + long label, 5 = Short label + Picto, 6 = Long label + Picto
-     * @return string       Label of status
+     * @return void
      */
-    public function getLibStatut(int $mode = 0): string
+    protected function initStatutLabels(): void
     {
-        return $this->LibStatut($this->status, $mode);
+        global $langs;
+
+        $this->labelStatus[static::STATUS_DELETED]      = $langs->transnoentitiesnoconv('Deleted');
+        $this->labelStatus[static::STATUS_DRAFT]        = $langs->transnoentitiesnoconv('StatusDraft');
+        $this->labelStatus[self::STATUS_VALIDATED]      = $langs->transnoentitiesnoconv('Validated');
+        $this->labelStatus[self::STATUS_LOCKED]         = $langs->transnoentitiesnoconv('Locked');
+        $this->labelStatus[self::STATUS_ARCHIVED]       = $langs->transnoentitiesnoconv('Archived');
+
+        $this->labelStatusShort[static::STATUS_DELETED] = $langs->transnoentitiesnoconv('Deleted');
+        $this->labelStatusShort[static::STATUS_DRAFT]   = $langs->transnoentitiesnoconv('StatusDraft');
+        $this->labelStatusShort[self::STATUS_VALIDATED] = $langs->transnoentitiesnoconv('Validated');
+        $this->labelStatusShort[self::STATUS_LOCKED]    = $langs->transnoentitiesnoconv('Locked');
+        $this->labelStatusShort[self::STATUS_ARCHIVED]  = $langs->transnoentitiesnoconv('Archived');
+    }
+
+    /**
+     * Return the status type for dolGetStatus
+     *
+     * @param  int    $status ID status
+     * @return string         Status type
+     */
+    protected function getStatusType(int $status): string
+    {
+        // TODO: PHP8+ replace switch with match()
+        switch ($status) {
+            case self::STATUS_VALIDATED:
+                return 'status4';
+            case self::STATUS_LOCKED:
+                return 'status6';
+            case self::STATUS_ARCHIVED:
+                return 'status8';
+            case self::STATUS_DELETED:
+                return 'status9';
+            default:
+                return 'status' . $status;
+        }
     }
 
     /**
@@ -605,7 +646,22 @@ abstract class SaturneObject extends CommonObject
      */
     public function LibStatut(int $status, int $mode = 0): string
     {
-        return '';
+        if (empty($this->labelStatus) || empty($this->labelStatusShort)) {
+            $this->initStatutLabels();
+        }
+
+        return dolGetStatus($this->labelStatus[$status], $this->labelStatusShort[$status], '', $this->getStatusType($status), $mode);
+    }
+
+    /**
+     * Return the label of the status
+     *
+     * @param  int    $mode 0 = long label, 1 = short label, 2 = Picto + short label, 3 = Picto, 4 = Picto + long label, 5 = Short label + Picto, 6 = Long label + Picto
+     * @return string       Label of status
+     */
+    public function getLibStatut(int $mode = 0): string
+    {
+        return $this->LibStatut($this->status, $mode);
     }
 
     /**
@@ -819,37 +875,36 @@ abstract class SaturneObject extends CommonObject
     /**
      * Write generic information of trigger description
      *
-     * @param  SaturneObject $object Object calling the trigger
-     * @return string                Description to display in actioncomm->note_private
+     * @return string Description to display in actioncomm->note_private
      */
-    public function getTriggerDescription(SaturneObject $object): string
+    public function getTriggerDescription(): string
     {
         global $conf, $db, $langs, $mysoc;
 
-        $ret = $langs->transnoentities('TechnicalID') . ' : ' . $object->id . '<br>';
-        if (property_exists($object, 'ref') && !empty($object->ref)) {
-            $ret .= $langs->transnoentities('Ref') . ' : ' . $object->ref . '<br>';
+        $ret = $langs->transnoentities('TechnicalID') . ' : ' . $this->id . '<br>';
+        if (property_exists($this, 'ref') && !empty($this->ref)) {
+            $ret .= $langs->transnoentities('Ref') . ' : ' . $this->ref . '<br>';
         }
-        if (property_exists($object, 'label') && !empty($object->label)) {
-            $ret .= $langs->transnoentities('Label') . ' : ' . $object->label . '<br>';
+        if (property_exists($this, 'label') && !empty($this->label)) {
+            $ret .= $langs->transnoentities('Label') . ' : ' . $this->label . '<br>';
         }
-        if (property_exists($object, 'description') && !empty($object->description)) {
-            $ret .= $langs->transnoentities('Description') . ' : ' . $object->description . '<br>';
+        if (property_exists($this, 'description') && !empty($this->description)) {
+            $ret .= $langs->transnoentities('Description') . ' : ' . $this->description . '<br>';
         }
 
-        $ret .= $langs->transnoentities('DateCreation') . ' : ' . dol_print_date($object->date_creation, 'dayhoursec', 'tzuserrel') . '<br>';
-        $ret .= $langs->transnoentities('DateModification') . ' : ' . dol_print_date($object->date_modification, 'dayhoursec', 'tzuserrel') . '<br>';
+        $ret .= $langs->transnoentities('DateCreation') . ' : ' . dol_print_date($this->date_creation, 'dayhoursec', 'tzuserrel') . '<br>';
+        $ret .= $langs->transnoentities('DateModification') . ' : ' . dol_print_date($this->date_modification, 'dayhoursec', 'tzuserrel') . '<br>';
 
-        if (property_exists($object, 'fk_user_creat') &&  !empty($object->fk_user_creat)) {
+        if (property_exists($this, 'fk_user_creat') &&  !empty($this->fk_user_creat)) {
             $userTmp = new User($db);
-            $result  = $userTmp->fetch($object->fk_user_creat);
+            $result  = $userTmp->fetch($this->fk_user_creat);
             if ($result > 0) {
                 $ret .= $langs->transnoentities('CreatedByLogin') . ' : ' . $userTmp->getFullName($langs) . '<br>';
             }
         }
-        if (property_exists($object, 'fk_user_modif') && !empty($object->fk_user_modif)) {
+        if (property_exists($this, 'fk_user_modif') && !empty($this->fk_user_modif)) {
             $userTmp = $userTmp ?? new User($db);
-            $result  = $userTmp->fetch($object->fk_user_modif);
+            $result  = $userTmp->fetch($this->fk_user_modif);
             if ($result > 0) {
                 $ret .= $langs->transnoentities('ModifiedByLogin') . ' : ' . $userTmp->getFullName($langs) . '<br>';
             }
@@ -858,27 +913,27 @@ abstract class SaturneObject extends CommonObject
         $ret .= $langs->transnoentities('EntityNumber') . ' : ' . $conf->entity . '<br>';
         $ret .= $langs->transnoentities('EntityName') . ' : ' . $mysoc->name . '<br>';
 
-        if (property_exists($object, 'fk_soc') && isModEnabled('societe')) {
-            $result = $object->fetch_thirdparty();
-            if ($result > 0 && is_object($object->thirdparty)) {
-                $ret .= $langs->transnoentities('ThirdParty') . ' : ' . (dol_strlen($object->thirdparty->name) > 0 ? $object->thirdparty->name : $langs->transnoentities('NoData')) . '<br>';
+        if (property_exists($this, 'fk_soc') && isModEnabled('societe')) {
+            $result = $this->fetch_thirdparty();
+            if ($result > 0 && is_object($this->thirdparty)) {
+                $ret .= $langs->transnoentities('ThirdParty') . ' : ' . (dol_strlen($this->thirdparty->name) > 0 ? $this->thirdparty->name : $langs->transnoentities('NoData')) . '<br>';
             }
         }
-        if (property_exists($object, 'fk_project') && isModEnabled('project')) {
-            $result = $object->fetchProject();
-            if ($result > 0 && is_object($object->project)) {
-                $ret .= $langs->transnoentities('Project') . ' : ' . $object->project->ref . ' ' . $object->project->title . '<br>';
+        if (property_exists($this, 'fk_project') && isModEnabled('project')) {
+            $result = $this->fetchProject();
+            if ($result > 0 && is_object($this->project)) {
+                $ret .= $langs->transnoentities('Project') . ' : ' . $this->project->ref . ' ' . $this->project->title . '<br>';
             }
         }
 
-        if (property_exists($object, 'note_public') && !empty($object->note_public)) {
-            $ret .= $langs->transnoentities('NotePublic') . ' : ' . $object->note_public . '<br>';
+        if (property_exists($this, 'note_public') && !empty($this->note_public)) {
+            $ret .= $langs->transnoentities('NotePublic') . ' : ' . $this->note_public . '<br>';
         }
-        if (property_exists($object, 'note_private') && !empty($object->note_private)) {
-            $ret .= $langs->transnoentities('NotePrivate') . ' : ' . $object->note_private . '<br>';
+        if (property_exists($this, 'note_private') && !empty($this->note_private)) {
+            $ret .= $langs->transnoentities('NotePrivate') . ' : ' . $this->note_private . '<br>';
         }
-        if (property_exists($object, 'status') && !empty($object->status) && isset($object->fields['status']['arrayofkeyval'][$object->status])) {
-            $ret .= $langs->transnoentities('Status') . ' : ' . $langs->transnoentities($object->fields['status']['arrayofkeyval'][$object->status]) . '<br>';
+        if (property_exists($this, 'status') && !empty($this->status) && isset($this->fields['status']['arrayofkeyval'][$this->status])) {
+            $ret .= $langs->transnoentities('Status') . ' : ' . $langs->transnoentities($this->fields['status']['arrayofkeyval'][$this->status]) . '<br>';
         }
 
         return $ret;
