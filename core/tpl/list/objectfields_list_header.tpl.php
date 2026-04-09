@@ -408,6 +408,13 @@ print '</div>';
 
 print '</div>'; // end #saturne-filter-panel
 
+// Preserve non-visible search parameters as hidden inputs so they survive form submissions
+foreach ($search as $key => $val) {
+    if (array_key_exists($key, $object->fields) && empty($arrayfields['t.' . $key]['checked']) && $val !== '' && !is_array($val)) {
+        print '<input type="hidden" name="search_' . $key . '" value="' . dol_escape_htmltag($val) . '">';
+    }
+}
+
 print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you don't need reserved height for your table
 print '<table class="tagtable nobottomiftotal noborder liste' . ($moreForFilter ? ' listwithfilterbefore' : '') . '">';
 print '<thead>';
