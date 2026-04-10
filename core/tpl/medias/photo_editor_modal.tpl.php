@@ -95,7 +95,7 @@
             <button type="button" id="saturne-btn-validate-photo" title="<?php echo $langs->trans('Save'); ?>" style="flex-shrink:0; background-color:#2ecc71; color:white; border:none; width:40px; height:40px; border-radius:4px; cursor:pointer; display:flex; justify-content:center; align-items:center;"><i class="fas fa-save"></i></button>
 
             <!-- OK (closes modal) -->
-            <button type="button" id="saturne-btn-ok-photo" title="OK" style="flex-shrink:0; background-color:#3498db; color:white; border:none; width:40px; height:40px; border-radius:4px; cursor:pointer; display:flex; justify-content:center; align-items:center; font-weight:700; font-size:13px;">OK</button>
+            <button type="button" id="saturne-btn-ok-photo" title="OK" style="flex-shrink:0; background-color:#2ecc71; color:white; border:none; width:40px; height:40px; border-radius:4px; cursor:pointer; display:flex; justify-content:center; align-items:center;"><i class="fas fa-check" style="font-size:1.2em;"></i></button>
         </div>
 
     </div>

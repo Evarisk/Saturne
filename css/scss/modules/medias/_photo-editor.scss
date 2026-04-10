@@ -37,9 +37,9 @@
 .saturne-photo-editor-toolbar {
     margin-top: 15px;
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
     padding-bottom: 5px;
-    justify-content: center;
     align-items: center;
     gap: 6px;
 }
