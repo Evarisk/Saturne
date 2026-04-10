@@ -291,7 +291,6 @@ window.saturne.audio.startRecording = async function() {
   window.saturne.mediaRecoder.start();
 
   btn.find('i').removeClass('fa-microphone').addClass('fa-stop');
-  btn.css('background-color', '#e74c3c');
   btn.removeClass('saturne-start-recording').addClass('saturne-stop-recording');
 
   var recordingLabel = block.find('.saturne-recording-indicator').data('label-recording');
@@ -319,7 +318,6 @@ window.saturne.audio.stopRecording = function() {
   var block = btn.closest('.linked-medias');
 
   btn.find('i').removeClass('fa-stop').addClass('fa-microphone');
-  btn.css('background-color', '#8e44ad');
   btn.removeClass('saturne-stop-recording').addClass('saturne-start-recording');
   block.find('.saturne-recording-indicator').hide();
 
