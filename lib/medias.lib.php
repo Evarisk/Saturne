@@ -504,20 +504,17 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
     if ($showPhoto) {
         $out .= '<div class="saturne-media-block saturne-media-block-photo">';
 
-        $out .= '<form method="POST" action="' . dol_escape_htmltag($_SERVER['PHP_SELF']) . '" enctype="multipart/form-data">';
-        $out .= '<input type="hidden" name="token" value="' . newToken() . '">';
-        $out .= '<input type="hidden" name="action" value="uploadPhoto">';
-        $out .= '<input type="hidden" name="module_name" value="' . dol_escape_htmltag($moduleName) . '">';
-        $out .= '<input type="hidden" name="sub_dir" value="' . dol_escape_htmltag($subDir) . '">';
-
-        $out .= '<div class="media-upload-zone">';
-        $out .= '<label class="media-upload-label butAction">';
-        $out .= '<i class="fas fa-camera paddingright"></i>' . $langs->trans('AddPhotoFromComputer');
-        $out .= '<input type="file" name="userfile[]" accept=".jpg,.jpeg,.png,.gif,.webp" multiple hidden>';
+        $out .= '<div class="add-medias saturne-media-upload-block"';
+        $out .= ' data-module="' . dol_escape_htmltag($moduleNameLowerCase) . '"';
+        $out .= ' data-subdir="' . dol_escape_htmltag($subDir) . '">';
+        $out .= '<label>';
+        $out .= '<button class="wpeo-button button-square-40" type="button">';
+        $out .= '<span class="fas fa-camera" aria-hidden="true"></span>';
+        $out .= '<span class="button-add fas fa-plus-circle" aria-hidden="true"></span>';
+        $out .= '</button>';
+        $out .= '<input type="file" class="saturne-media-block-upload" name="userfile[]" accept=".jpg,.jpeg,.png,.gif,.webp" multiple hidden>';
         $out .= '</label>';
-        $out .= '<input type="submit" class="butAction" value="' . dol_escape_htmltag($langs->trans('Send')) . '">';
         $out .= '</div>';
-        $out .= '</form>';
 
         if ($showGallery) {
             $photoFiles = dol_dir_list($uploadDir, 'files', 0, '\.(png|jpg|jpeg|gif|webp|PNG|JPG|JPEG|GIF|WEBP)$', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC);
