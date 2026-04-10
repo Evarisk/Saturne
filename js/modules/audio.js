@@ -178,13 +178,23 @@ window.saturne.audio.onUploadComplete = function(resp) {
   window.saturne.audio._context = null;
 
   if (blockId) {
-    var doc     = new DOMParser().parseFromString(resp.responseText, 'text/html');
+    var doc = new DOMParser().parseFromString(resp.responseText, 'text/html');
+
+    // Refresh the audio block (play button, badge)
     var el      = doc.getElementById(blockId);
     var updated = el ? $(el) : $();
     if (updated.length && block && block.length) {
       block.replaceWith(updated);
-      return;
     }
+
+    // Refresh the library modal (updated audio list)
+    var modalId      = blockId.replace('master-media-row-container-audio', 'audio-library-modal');
+    var updatedModal = doc.getElementById(modalId);
+    if (updatedModal && $('#' + modalId).length) {
+      $('#' + modalId).replaceWith($(updatedModal));
+    }
+
+    return;
   }
 
   if (block) {
