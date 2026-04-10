@@ -642,6 +642,164 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
     return $out;
 }
 
+/**
+ * Get or create a session-scoped upload token for a given context.
+ *
+ * The token is unique per (user session × context) and survives page refreshes.
+ * It is used as a subdirectory suffix to isolate each user's temporary uploads.
+ *
+ * Usage example:
+ *   $token  = saturne_get_upload_token('inspection_42_medias');
+ *   $subDir = 'medias/' . $token;
+ *   // pass $subDir to saturne_render_media_block() and saturne_get_media_files()
+ *
+ * @param  string $context Unique identifier for the upload context (e.g. 'objecttype_id_fieldname')
+ * @return string          64-char hex token, stable for the lifetime of the session
+ */
+function saturne_get_upload_token(string $context): string
+{
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    if (empty($_SESSION['saturne_upload_tokens'][$context])) {
+        $_SESSION['saturne_upload_tokens'][$context] = bin2hex(random_bytes(32));
+    }
+
+    return $_SESSION['saturne_upload_tokens'][$context];
+}
+
+/**
+ * Invalidate and remove a session upload token and its associated directory.
+ *
+ * Call this after the uploaded files have been linked to their final object,
+ * so the temporary directory is cleaned up and the token cannot be reused.
+ *
+ * @param  string $context      Same context string used in saturne_get_upload_token()
+ * @param  string $moduleName   Module name, used to resolve the upload base directory
+ * @param  string $subDirPrefix Prefix part of the subdir (before the token), e.g. 'medias'
+ * @return void
+ */
+function saturne_invalidate_upload_token(string $context, string $moduleName = '', string $subDirPrefix = ''): void
+{
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    if (empty($_SESSION['saturne_upload_tokens'][$context])) {
+        return;
+    }
+
+    $token = $_SESSION['saturne_upload_tokens'][$context];
+
+    if (!empty($moduleName) && !empty($subDirPrefix)) {
+        global $conf;
+
+        $moduleNameLowerCase = dol_strtolower($moduleName);
+        $uploadBase          = !empty($conf->$moduleNameLowerCase->dir_output)
+            ? $conf->$moduleNameLowerCase->dir_output
+            : $conf->ecm->dir_output . '/' . $moduleNameLowerCase;
+
+        $tokenDir = $uploadBase . '/' . $subDirPrefix . '/' . $token;
+        if (dol_is_dir($tokenDir)) {
+            dol_delete_dir_recursive($tokenDir);
+        }
+    }
+
+    unset($_SESSION['saturne_upload_tokens'][$context]);
+}
+
+/**
+ * Retrieve uploaded media files (images and/or audios) for backend use.
+ *
+ * Mirrors the signature of saturne_render_media_block() so both functions
+ * can be called with the same arguments. Filtering options are passed via $options.
+ *
+ * Returns an array of file descriptors without any HTML rendering.
+ * Each entry contains: name, fullname, path, url, date, size, type ('image'|'audio').
+ *
+ * Usage example:
+ *   $files = saturne_get_media_files('saturne', 'test_medias');
+ *   $files = saturne_get_media_files('saturne', 'test_medias', '', '', ['type' => 'image']);
+ *   $files = saturne_get_media_files('saturne', 'test_medias', '', '', ['type' => 'audio', 'sort_order' => 'asc']);
+ *
+ * @param  string $moduleName   Module name (e.g. 'saturne', 'digiquali')
+ * @param  string $subDir       Sub-directory under module dir_output (e.g. 'photos', 'test_medias')
+ * @param  string $prefix       Unused — kept for signature parity with saturne_render_media_block()
+ * @param  string $rightString  Unused — kept for signature parity with saturne_render_media_block()
+ * @param  array  $options      Retrieval options:
+ *                                - type        (string, default '')      Filter: 'image', 'audio', or '' for both
+ *                                - sort_field  (string, default 'date')  Sort field among dol_dir_list keys
+ *                                - sort_order  (string, default 'desc')  'asc' or 'desc'
+ * @return array<int, array{name: string, fullname: string, path: string, url: string, date: int, size: int, type: string}>
+ */
+function saturne_get_media_files(string $moduleName, string $subDir = '', string $prefix = '', string $rightString = '', array $options = []): array
+{
+    global $conf;
+
+    // Kept for signature parity with saturne_render_media_block(), not used here.
+    unset($prefix, $rightString);
+
+    $type      = $options['type']       ?? '';
+    $sortField = $options['sort_field'] ?? 'date';
+    $sortOrder = $options['sort_order'] ?? 'desc';
+
+    $moduleNameLowerCase = dol_strtolower($moduleName);
+
+    $uploadDir = !empty($conf->$moduleNameLowerCase->dir_output)
+        ? $conf->$moduleNameLowerCase->dir_output
+        : $conf->ecm->dir_output . '/' . $moduleNameLowerCase;
+
+    if (!empty($subDir)) {
+        $uploadDir .= '/' . $subDir;
+    }
+
+    if (!dol_is_dir($uploadDir)) {
+        return [];
+    }
+
+    $rawFiles = dol_dir_list($uploadDir, 'files', 0, '', '(\.meta|_preview.*\.png)$', $sortField, (strtolower($sortOrder) == 'desc' ? SORT_DESC : SORT_ASC));
+
+    $result = [];
+
+    foreach ($rawFiles as $file) {
+        $fileName  = $file['name'];
+        $mediaType = '';
+
+        if (image_format_supported($fileName) >= 0) {
+            $mediaType = 'image';
+        } elseif (preg_match('/\.(wav|mp3|ogg|m4a)$/i', $fileName)) {
+            $mediaType = 'audio';
+        }
+
+        if (empty($mediaType)) {
+            continue;
+        }
+
+        if (!empty($type) && $mediaType !== $type) {
+            continue;
+        }
+
+        if (!empty($conf->$moduleNameLowerCase->dir_output)) {
+            $url = DOL_URL_ROOT . '/document.php?modulepart=' . urlencode($moduleNameLowerCase) . '&entity=' . $conf->entity . '&file=' . urlencode($subDir . '/' . $fileName);
+        } else {
+            $url = DOL_URL_ROOT . '/document.php?modulepart=ecm&entity=' . $conf->entity . '&file=' . urlencode($moduleNameLowerCase . '/' . $subDir . '/' . $fileName);
+        }
+
+        $result[] = [
+            'name'     => $fileName,
+            'fullname' => $file['fullname'],
+            'path'     => $file['path'],
+            'url'      => $url,
+            'date'     => (int) $file['date'],
+            'size'     => (int) $file['size'],
+            'type'     => $mediaType,
+        ];
+    }
+
+    return $result;
+}
+
 function saturne_show_media_buttons(): string
 {
     global $object, $onPhone;
