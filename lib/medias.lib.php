@@ -454,31 +454,32 @@ function saturne_get_media_linked_elements(string $moduleName, string $fileName)
 }
 
 /**
- * Render a reusable media upload block (photo and/or audio) for a given module/directory.
+ * Render the Saturne Media Block (Photo + Audio) for external modules.
  *
  * Usage example:
  *   print saturne_render_media_block('saturne', 'test_medias', '', '', ['show_photo' => true, 'show_audio' => false]);
  *   print saturne_render_media_block('saturne', 'test_medias', '', '', ['show_photo' => false, 'show_audio' => true]);
  *
- * @param  string $moduleName Module name (e.g. 'saturne', 'digiquali')
- * @param  string $subDir     Sub-directory under module dir_output (e.g. 'photos', 'test_medias')
- * @param  string $prefix     Optional prefix for form field names and HTML element ids
- * @param  string $extraDir   Optional additional sub-directory appended to the path
- * @param  array  $options    Rendering options:
- *                              - show_photo   (bool, default true)  Show photo upload section
- *                              - show_audio   (bool, default false) Show audio recording section
- *                              - show_gallery (bool, default true)  Show gallery of existing files
- * @return string             HTML output
+ * @param  string $moduleName  Module name (e.g. 'saturne', 'digiquali')
+ * @param  string $subDir      Sub-directory under module dir_output (e.g. 'photos', 'test_medias')
+ * @param  string $prefix      Optional prefix for file names and HTML element ids
+ * @param  string $rightString The rights to check on API side (e.g. 'fraispro,creer')
+ * @param  array  $options     Rendering options:
+ *                               - show_photo   (bool, default true)  Show photo upload section
+ *                               - show_audio   (bool, default true)  Show audio recording section
+ *                               - show_gallery (bool, default true)  Show gallery of existing files
+ * @return string              HTML block string
  */
-function saturne_render_media_block(string $moduleName, string $subDir = '', string $prefix = '', string $extraDir = '', array $options = []): string
+function saturne_render_media_block(string $moduleName, string $subDir = '', string $prefix = '', string $rightString = '', array $options = []): string
 {
     global $conf, $langs;
 
-    $showPhoto   = (bool) ($options['show_photo']   ?? true);
-    $showAudio   = (bool) ($options['show_audio']   ?? false);
-    $showGallery = (bool) ($options['show_gallery'] ?? true);
+    $showPhoto   = isset($options['show_photo'])   ? $options['show_photo']   : true;
+    $showAudio   = isset($options['show_audio'])   ? $options['show_audio']   : true;
+    $showGallery = isset($options['show_gallery']) ? $options['show_gallery'] : true;
 
     $moduleNameLowerCase = dol_strtolower($moduleName);
+    $containerClass      = !empty($subDir) ? $subDir : 'media_dyn';
 
     // Compute the storage directory path.
     $uploadDir = !empty($conf->$moduleNameLowerCase->dir_output)
@@ -487,95 +488,131 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
     if (!empty($subDir)) {
         $uploadDir .= '/' . $subDir;
     }
-    if (!empty($extraDir)) {
-        $uploadDir .= '/' . $extraDir;
-    }
 
     if (!dol_is_dir($uploadDir)) {
         dol_mkdir($uploadDir);
     }
 
-    // ECM-relative path used by document.php for serving files.
-    $ecmRelativeBase = $moduleNameLowerCase . ($subDir ? '/' . $subDir : '') . ($extraDir ? '/' . $extraDir : '');
-
     $idPrefix = $prefix ? dol_escape_htmltag($prefix) . '-' : '';
     $out      = '';
 
     if ($showPhoto) {
-        $out .= '<div class="saturne-media-block saturne-media-block-photo">';
+        $out .= '<div class="linked-medias medias ' . dol_escape_htmltag($containerClass) . '" id="' . $idPrefix . 'master-media-row-container-photo" style="display:flex; flex-direction:column; gap:8px;">';
+        $out .= '  <div class="fast-upload-options" data-from-type="' . dol_escape_htmltag($moduleNameLowerCase) . '" data-from-subtype="' . dol_escape_htmltag($containerClass) . '" data-from-subdir="' . dol_escape_htmltag($subDir) . '" data-prefix="' . dol_escape_htmltag($prefix) . '" data-rights="' . dol_escape_htmltag($rightString) . '"></div>';
+        $out .= '  <div class="saturne-media-upload-block" data-module="' . dol_escape_htmltag($moduleNameLowerCase) . '" data-subdir="' . dol_escape_htmltag($subDir) . '" style="display: flex; align-items: center; gap: 12px; margin-top: 10px; background: transparent; padding: 0;">';
 
-        $out .= '<div class="add-medias saturne-media-upload-block"';
-        $out .= ' data-module="' . dol_escape_htmltag($moduleNameLowerCase) . '"';
-        $out .= ' data-subdir="' . dol_escape_htmltag($subDir) . '">';
-        $out .= '<label>';
-        $out .= '<button class="wpeo-button button-square-40" type="button">';
-        $out .= '<span class="fas fa-camera" aria-hidden="true"></span>';
-        $out .= '<span class="button-add fas fa-plus-circle" aria-hidden="true"></span>';
-        $out .= '</button>';
-        $out .= '<input type="file" class="saturne-media-block-upload" name="userfile[]" accept=".jpg,.jpeg,.png,.gif,.webp" multiple hidden>';
-        $out .= '</label>';
-        $out .= '</div>';
+        $out .= '    <label for="' . $idPrefix . 'upload-media" style="cursor:pointer; display:flex; flex-shrink:0; justify-content:center; align-items:center; width:50px; min-width:50px; height:50px; min-height:50px; background-color:#f39c12; color:white; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,0.05); margin-bottom:0; padding:0; box-sizing:border-box;">';
+        $out .= '      <i class="fas fa-camera" style="font-size:20px;"></i>';
+        $out .= '      <input type="file" id="' . $idPrefix . 'upload-media" class="saturne-media-block-upload" name="userfile[]" accept="image/*" style="display:none;" multiple>';
+        $out .= '    </label>';
 
         if ($showGallery) {
-            $photoFiles = dol_dir_list($uploadDir, 'files', 0, '\.(png|jpg|jpeg|gif|webp|PNG|JPG|JPEG|GIF|WEBP)$', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC);
-            $nbPhotos   = is_array($photoFiles) ? count($photoFiles) : 0;
-
-            $out .= '<div class="saturne-media-gallery">';
-            if ($nbPhotos > 0) {
-                $out .= '<div class="wpeo-gridlayout grid-5 grid-gap-3">';
-                foreach ($photoFiles as $file) {
-                    $fileName  = $file['name'];
-                    $fileInfo  = pathinfo($fileName);
-                    $thumbName = $fileInfo['filename'] . '_small.' . $fileInfo['extension'];
-                    $thumbPath = $uploadDir . '/thumbs/' . $thumbName;
-                    $imgSrc    = dol_is_file($thumbPath)
-                        ? DOL_URL_ROOT . '/document.php?modulepart=ecm&attachment=0&file=' . urlencode($ecmRelativeBase . '/thumbs/' . $thumbName) . '&entity=' . $conf->entity
-                        : DOL_URL_ROOT . '/public/theme/common/nophoto.png';
-
-                    $out .= '<div class="center">';
-                    $out .= '<img src="' . $imgSrc . '" width="80" height="80" class="photo photowithmargin" title="' . dol_escape_htmltag($fileName) . '">';
-                    $out .= '<div class="title">' . dol_escape_htmltag($fileName) . '</div>';
-                    $out .= '</div>';
+            $photoFiles = dol_dir_list($uploadDir, 'files', 0, '', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC);
+            $imageFiles = [];
+            foreach ($photoFiles as $file) {
+                if (image_format_supported($file['name']) >= 0) {
+                    $imageFiles[] = $file;
                 }
-                $out .= '</div>';
-            } else {
-                $out .= '<p class="opacitymedium">' . $langs->trans('EmptyMediaGallery') . '</p>';
             }
-            $out .= '</div>';
+            $totalPhotos = count($imageFiles);
+
+            if ($totalPhotos > 0) {
+                $urls = [];
+                foreach ($imageFiles as $file) {
+                    if (!empty($conf->$moduleNameLowerCase->dir_output)) {
+                        $urls[] = DOL_URL_ROOT . '/document.php?modulepart=' . urlencode($moduleNameLowerCase) . '&entity=' . $conf->entity . '&file=' . urlencode($subDir . '/' . $file['name']);
+                    } else {
+                        $urls[] = DOL_URL_ROOT . '/document.php?modulepart=ecm&entity=' . $conf->entity . '&file=' . urlencode($moduleNameLowerCase . '/' . $subDir . '/' . $file['name']);
+                    }
+                }
+                $urlsJson  = htmlspecialchars(json_encode($urls), ENT_QUOTES, 'UTF-8');
+                $firstImg  = dol_escape_htmltag($urls[0]);
+
+                $out .= '    <div class="open-media-editor-as-gallery" data-json="' . $urlsJson . '" style="position:relative; flex-shrink:0; width:50px; min-width:50px; height:50px; min-height:50px; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,0.05); cursor:pointer; display:block; padding:0; margin:0; background:#fff; box-sizing:border-box;">';
+                $out .= '      <img src="' . $firstImg . '" style="width:100% !important; height:100% !important; object-fit:cover !important; display:block !important; border-radius:12px !important; margin:0 !important; padding:0 !important; box-sizing:border-box !important;" />';
+                $out .= '      <span style="position:absolute; top:-6px; right:-6px; background:#8f9ba8; color:white; border-radius:12px; height:18px; min-width:18px; padding:0 4px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; border:2px solid #fff; box-shadow:0 2px 4px rgba(0,0,0,0.1); box-sizing:border-box;">' . $totalPhotos . '</span>';
+                $out .= '    </div>';
+            }
         }
 
+        $out .= '  </div>';
         $out .= '</div>';
     }
 
     if ($showAudio) {
-        $out .= '<div class="saturne-media-block saturne-media-block-audio">';
+        $audioContainerClass = $containerClass . '_audio';
 
-        $out .= '<div class="audio-recorder">';
-        $out .= '<button id="' . $idPrefix . 'start-recording" class="wpeo-button button-blue">';
-        $out .= '<span class="fas fa-circle paddingright"></span>' . $langs->trans('StartRecording');
-        $out .= '</button>';
-        $out .= '<div id="' . $idPrefix . 'recording-indicator" class="audio-recorder-indicator opacitymedium" data-label-upload="' . dol_escape_htmltag($langs->trans('UploadInProgress')) . '">';
-        $out .= '<i class="fas fa-spinner fa-spin paddingright"></i>' . $langs->trans('Recording');
-        $out .= '</div>';
-        $out .= '</div>';
-
-        if ($showGallery) {
-            $audioFiles = dol_dir_list($uploadDir, 'files', 0, '\.(wav|mp3|ogg|m4a|WAV|MP3|OGG|M4A)$', '(\.meta)$', 'date', SORT_DESC);
-            $nbAudio    = is_array($audioFiles) ? count($audioFiles) : 0;
-
-            $out .= '<div class="saturne-audio-gallery">';
-            if ($nbAudio > 0) {
-                foreach ($audioFiles as $audioFile) {
-                    $fileName = $audioFile['name'];
-                    $fileUrl  = DOL_URL_ROOT . '/document.php?modulepart=ecm&attachment=0&file=' . urlencode($ecmRelativeBase . '/' . $fileName) . '&entity=' . $conf->entity;
-                    $out .= '<div>';
-                    $out .= '<audio controls src="' . dol_escape_htmltag($fileUrl) . '"></audio>';
-                    $out .= '<div class="opacitymedium audio-file-name">' . dol_escape_htmltag($fileName) . '</div>';
-                    $out .= '</div>';
+        $audioFiles = [];
+        if (dol_is_dir($uploadDir)) {
+            $filearray = dol_dir_list($uploadDir, 'files', 0, '', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC);
+            foreach ($filearray as $file) {
+                if (preg_match('/\.(wav|mp3|ogg|m4a)$/i', $file['name'])) {
+                    $audioFiles[] = $file;
                 }
-            } else {
-                $out .= '<p class="opacitymedium">' . $langs->trans('NoAudioYet') . '</p>';
             }
+        }
+
+        $hasAudio      = count($audioFiles) > 0;
+        $latestUrlHtml = '';
+        if ($hasAudio) {
+            $latestFile = $audioFiles[0];
+            if (!empty($conf->$moduleNameLowerCase->dir_output)) {
+                $latestUrlHtml = dol_escape_htmltag(DOL_URL_ROOT . '/document.php?modulepart=' . urlencode($moduleNameLowerCase) . '&entity=' . $conf->entity . '&file=' . urlencode($subDir . '/' . $latestFile['name']));
+            } else {
+                $latestUrlHtml = dol_escape_htmltag(DOL_URL_ROOT . '/document.php?modulepart=ecm&entity=' . $conf->entity . '&file=' . urlencode($moduleNameLowerCase . '/' . $subDir . '/' . $latestFile['name']));
+            }
+        }
+
+        $out .= '<div class="linked-medias medias ' . dol_escape_htmltag($audioContainerClass) . '" id="' . $idPrefix . 'master-media-row-container-audio" style="padding:10px 0;">';
+        $out .= '  <div class="fast-upload-options" data-from-type="' . dol_escape_htmltag($moduleNameLowerCase) . '" data-from-subtype="' . dol_escape_htmltag($audioContainerClass) . '" data-from-subdir="' . dol_escape_htmltag($subDir) . '" data-prefix="' . dol_escape_htmltag($prefix) . '" data-rights="' . dol_escape_htmltag($rightString) . '"></div>';
+        $out .= '  <div style="display:flex; align-items:center; gap:12px; margin-top:10px; background:transparent; padding:0;">';
+
+        $out .= '    <button type="button" id="' . $idPrefix . 'start-recording" style="border:none; cursor:pointer; margin:0; box-shadow:0 4px 6px rgba(0,0,0,0.05); border-radius:12px; width:50px; min-width:50px; height:50px; min-height:50px; padding:0; display:flex; justify-content:center; align-items:center; background-color:#8e44ad;">';
+        $out .= '      <i class="fas fa-microphone" style="font-size:20px; color:#fff;"></i>';
+        $out .= '    </button>';
+
+        $playBg     = $hasAudio ? '#7b68ee' : '#cbd5e1';
+        $playCursor = $hasAudio ? 'pointer' : 'not-allowed';
+        $disabled   = $hasAudio ? '' : ' disabled';
+
+        $out .= '    <div style="position:relative; z-index:10;">';
+        $out .= '      <button type="button" id="' . $idPrefix . 'play-recording" data-url="' . $latestUrlHtml . '"' . $disabled . ' style="border:none; cursor:' . $playCursor . '; margin:0; box-shadow:0 4px 6px rgba(0,0,0,0.05); border-radius:12px; width:50px; min-width:50px; height:50px; min-height:50px; padding:0; display:flex; justify-content:center; align-items:center; background-color:' . $playBg . '; position:relative; z-index:5;">';
+        $out .= '        <i class="fas fa-play" style="font-size:20px; color:#fff;"></i>';
+        $out .= '      </button>';
+        if ($hasAudio) {
+            $out .= '      <span class="saturne-audio-badge saturne-open-audio-library" style="position:absolute; top:-6px; right:-6px; background:#e74c3c; color:white; border-radius:12px; height:18px; min-width:18px; padding:0 4px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; border:2px solid #fff; box-shadow:0 2px 4px rgba(0,0,0,0.1); box-sizing:border-box; cursor:pointer; z-index:30;">' . count($audioFiles) . '</span>';
+        }
+        $out .= '      <button type="button" id="' . $idPrefix . 'delete-recording" style="display:none; position:absolute; top:-6px; right:-6px; width:22px; height:22px; border-radius:50%; background-color:#e74c3c; color:white; border:none; font-size:12px; cursor:pointer; justify-content:center; align-items:center; z-index:20; padding:0; line-height:1;">';
+        $out .= '        <i class="fas fa-times"></i>';
+        $out .= '      </button>';
+        $out .= '    </div>';
+
+        $out .= '    <div id="' . $idPrefix . 'recording-indicator" class="blinking recording-indicator" data-label-upload="' . dol_escape_htmltag($langs->trans('UploadInProgress')) . '" style="display:none; font-size:11px; margin-left:5px; color:#e74c3c;">' . $langs->trans('Recording') . '</div>';
+
+        $out .= '  </div>';
+
+        if ($showGallery && $hasAudio) {
+            $out .= '<div class="saturne-audio-library-container" style="display:none;">';
+            $out .= '  <div class="saturne-audio-library-content" style="display:flex; flex-direction:column; gap:8px; width:100%; min-width:350px;">';
+            foreach ($audioFiles as $file) {
+                if (!empty($conf->$moduleNameLowerCase->dir_output)) {
+                    $fUrl = DOL_URL_ROOT . '/document.php?modulepart=' . urlencode($moduleNameLowerCase) . '&entity=' . $conf->entity . '&file=' . urlencode($subDir . '/' . $file['name']);
+                } else {
+                    $fUrl = DOL_URL_ROOT . '/document.php?modulepart=ecm&entity=' . $conf->entity . '&file=' . urlencode($moduleNameLowerCase . '/' . $subDir . '/' . $file['name']);
+                }
+                $fNameHtml  = dol_escape_htmltag($file['name']);
+                $fUrlHtml   = dol_escape_htmltag($fUrl);
+                $fileDate   = dol_print_date($file['date'], 'dayhour');
+
+                $out .= '<div class="saturne-audio-item" style="display:flex; align-items:center; gap:10px; background:#f8fafc; padding:6px 12px; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">';
+                $out .= '  <div style="flex-grow:1; max-width:300px;">';
+                $out .= '    <audio controls src="' . $fUrlHtml . '" style="height:35px; width:100%; outline:none;"></audio>';
+                $out .= '  </div>';
+                $out .= '  <div style="font-size:11px; color:#64748b; margin-right:auto; max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="' . $fNameHtml . '">' . $fileDate . '</div>';
+                $out .= '  <button type="button" class="saturne-delete-media-icon" data-filename="' . $fNameHtml . '" style="background:none; border:none; color:#e74c3c; cursor:pointer; padding:6px; border-radius:4px;"><i class="fas fa-trash-alt"></i></button>';
+                $out .= '</div>';
+            }
+            $out .= '  </div>';
             $out .= '</div>';
         }
 
