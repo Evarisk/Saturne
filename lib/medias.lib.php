@@ -643,18 +643,32 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
 }
 
 /**
- * Get or create a session-scoped upload token for a given context.
+ * Token d'upload isolé par utilisateur et par contexte (Pour Développeurs)
  *
- * The token is unique per (user session × context) and survives page refreshes.
- * It is used as a subdirectory suffix to isolate each user's temporary uploads.
+ * Génère ou récupère un token unique lié à la session PHP et à un contexte
+ * métier. Ce token sert de sous-dossier d'upload pour isoler les fichiers
+ * de chaque utilisateur — même si plusieurs personnes ouvrent la même page
+ * simultanément, leurs uploads ne se mélangent pas. Le token survit au F5.
  *
- * Usage example:
- *   $token  = saturne_get_upload_token('inspection_42_medias');
- *   $subDir = 'medias/' . $token;
- *   // pass $subDir to saturne_render_media_block() and saturne_get_media_files()
+ * Structure des dossiers générée :
+ *   uploads/medias/{token}/   ← propre à l'utilisateur + contexte
  *
- * @param  string $context Unique identifier for the upload context (e.g. 'objecttype_id_fieldname')
- * @return string          64-char hex token, stable for the lifetime of the session
+ * Usage complet (formulaire → sauvegarde) :
+ *   // 1. Dans la vue — générer le token et passer le sous-dossier au bloc média
+ *   $context = $object->element . '_' . $object->id . '_photos';
+ *   $subDir  = 'photos/' . saturne_get_upload_token($context);
+ *   print saturne_render_media_block('mymodule', $subDir, '', 'mymodule,write');
+ *
+ *   // 2. Après F5 — le même token est retrouvé automatiquement depuis $_SESSION
+ *
+ *   // 3. À la sauvegarde — lire les fichiers puis invalider le token
+ *   foreach (saturne_get_media_files('mymodule', $subDir) as $file) {
+ *       dol_move($file['fullname'], $finalDir . '/' . $file['name']);
+ *   }
+ *   saturne_invalidate_upload_token($context, 'mymodule', 'photos');
+ *
+ * @param  string $context Identifiant unique du contexte d'upload, ex: 'inspection_42_photos'
+ * @return string          Token hexadécimal de 64 caractères, stable pour la durée de la session
  */
 function saturne_get_upload_token(string $context): string
 {
@@ -670,14 +684,22 @@ function saturne_get_upload_token(string $context): string
 }
 
 /**
- * Invalidate and remove a session upload token and its associated directory.
+ * Suppression du token d'upload et nettoyage du dossier temporaire (Pour Développeurs)
  *
- * Call this after the uploaded files have been linked to their final object,
- * so the temporary directory is cleaned up and the token cannot be reused.
+ * À appeler après avoir déplacé les fichiers uploadés vers leur emplacement
+ * définitif. Supprime le token de la session et efface le dossier temporaire
+ * associé pour éviter l'accumulation de fichiers orphelins sur le serveur.
  *
- * @param  string $context      Same context string used in saturne_get_upload_token()
- * @param  string $moduleName   Module name, used to resolve the upload base directory
- * @param  string $subDirPrefix Prefix part of the subdir (before the token), e.g. 'medias'
+ * Usage exemple :
+ *   // Après sauvegarde de l'objet, nettoyer le token et le dossier temporaire
+ *   saturne_invalidate_upload_token('inspection_42_photos', 'mymodule', 'photos');
+ *
+ *   // Sans suppression de dossier (token seul) :
+ *   saturne_invalidate_upload_token('inspection_42_photos');
+ *
+ * @param  string $context      Même identifiant de contexte que celui passé à saturne_get_upload_token()
+ * @param  string $moduleName   Nom du module, utilisé pour résoudre le chemin de base des uploads
+ * @param  string $subDirPrefix Préfixe du sous-dossier avant le token, ex: 'photos', 'medias'
  * @return void
  */
 function saturne_invalidate_upload_token(string $context, string $moduleName = '', string $subDirPrefix = ''): void
@@ -710,18 +732,22 @@ function saturne_invalidate_upload_token(string $context, string $moduleName = '
 }
 
 /**
- * Retrieve uploaded media files (images and/or audios) for backend use.
+ * Récupération backend des fichiers uploadés — images et/ou audios (Pour Développeurs)
  *
- * Mirrors the signature of saturne_render_media_block() so both functions
- * can be called with the same arguments. Filtering options are passed via $options.
+ * Retourne la liste des fichiers présents dans un dossier d'upload sans aucun
+ * rendu HTML. Partage la même signature que saturne_render_media_block() pour
+ * pouvoir être appelé avec les mêmes arguments. Chaque entrée du tableau retourné
+ * contient : name, fullname, path, url, date, size, type ('image'|'audio').
  *
- * Returns an array of file descriptors without any HTML rendering.
- * Each entry contains: name, fullname, path, url, date, size, type ('image'|'audio').
+ * Usage exemple :
+ *   // Récupérer tous les médias (images + audios)
+ *   $files = saturne_get_media_files('mymodule', 'photos');
  *
- * Usage example:
- *   $files = saturne_get_media_files('saturne', 'test_medias');
- *   $files = saturne_get_media_files('saturne', 'test_medias', '', '', ['type' => 'image']);
- *   $files = saturne_get_media_files('saturne', 'test_medias', '', '', ['type' => 'audio', 'sort_order' => 'asc']);
+ *   // Images uniquement
+ *   $files = saturne_get_media_files('mymodule', 'photos', '', '', ['type' => 'image']);
+ *
+ *   // Audios uniquement, du plus ancien au plus récent
+ *   $files = saturne_get_media_files('mymodule', 'photos', '', '', ['type' => 'audio', 'sort_order' => 'asc']);
  *
  * @param  string $moduleName   Module name (e.g. 'saturne', 'digiquali')
  * @param  string $subDir       Sub-directory under module dir_output (e.g. 'photos', 'test_medias')
