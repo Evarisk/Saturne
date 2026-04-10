@@ -91,7 +91,7 @@
             <!-- Undo & validate -->
             <div style="display:flex; gap:6px; margin-left:auto; flex-shrink:0;">
                 <button type="button" id="saturne-btn-undo-photo" title="<?php echo $langs->trans('Undo'); ?>" style="flex-shrink:0; background-color:#7f8c8d; color:white; border:none; width:40px; height:40px; border-radius:4px; cursor:pointer; display:flex; justify-content:center; align-items:center;"><i class="fas fa-reply"></i></button>
-                <button type="button" id="saturne-btn-validate-photo" title="<?php echo $langs->trans('Validate'); ?>" style="flex-shrink:0; background-color:#2ecc71; color:white; border:none; width:40px; height:40px; border-radius:4px; cursor:pointer; display:flex; justify-content:center; align-items:center;"><i class="fas fa-check" style="font-size:1.2em;"></i></button>
+                <button type="button" id="saturne-btn-validate-photo" title="<?php echo $langs->trans('Save'); ?>" style="flex-shrink:0; background-color:#2ecc71; color:white; border:none; height:40px; padding:0 14px; border-radius:4px; cursor:pointer; display:flex; justify-content:center; align-items:center; gap:6px; font-weight:600; font-size:13px;"><i class="fas fa-save"></i> <?php echo $langs->trans('Save'); ?></button>
             </div>
         </div>
 
