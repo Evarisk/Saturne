@@ -55,12 +55,13 @@
         <div style="flex:1; display:flex; justify-content:center; align-items:center; overflow:hidden; background:#1e293b; border-radius:8px; position:relative; min-height:150px; width:100%; height:100%;" id="saturne-editor-canvas-container">
             <canvas id="saturne-photo-editor-canvas" style="max-width:100%; max-height:100%; object-fit:contain; touch-action:none; cursor:crosshair;"></canvas>
             <div id="saturne-crop-selection" style="display:none; position:absolute; border:2px dashed #fff; background:rgba(255,255,255,0.2); pointer-events:none;"></div>
+            <div id="saturne-photo-index-badge" style="display:none; position:absolute; top:8px; right:8px; background:rgba(0,0,0,0.55); color:#fff; border-radius:10px; padding:2px 10px; font-size:12px; font-weight:600; pointer-events:none; backdrop-filter:blur(4px);"></div>
         </div>
 
         <!-- Gallery navigation (visible only when multiple images) -->
         <div id="saturne-photo-nav" style="display:none; justify-content:center; align-items:center; gap:12px; padding:6px 0; color:#fff; font-size:13px;">
             <button type="button" id="saturne-btn-prev-photo" style="background:#34495e; color:white; border:none; width:32px; height:32px; border-radius:50%; cursor:pointer; display:flex; justify-content:center; align-items:center;"><i class="fas fa-chevron-left"></i></button>
-            <span id="saturne-photo-nav-label"></span>
+            <span id="saturne-photo-nav-label" style="font-size:14px; font-weight:600; color:#1e293b; min-width:50px; text-align:center;"></span>
             <button type="button" id="saturne-btn-next-photo" style="background:#34495e; color:white; border:none; width:32px; height:32px; border-radius:50%; cursor:pointer; display:flex; justify-content:center; align-items:center;"><i class="fas fa-chevron-right"></i></button>
         </div>
 

@@ -75,7 +75,8 @@ if ($action == 'uploadPhoto' && !empty($moduleName) && !empty($conf->global->MAI
         dol_mkdir($uploadDir);
     }
 
-    $res = dol_add_file_process($uploadDir, 0, 1, 'userfile', '', null, '', 1);
+    $allowOverwrite = GETPOSTINT('overwrite') ? 1 : 0;
+    $res = dol_add_file_process($uploadDir, $allowOverwrite, 1, 'userfile', '', null, '', 1);
     if ($res > 0) {
         setEventMessages($langs->trans('PhotoWellSent'), null, 'mesgs');
     } else {

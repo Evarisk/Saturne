@@ -113,34 +113,45 @@ window.saturne.mediaBlock.onGalleryClick = function() {
   }
 
   window.saturne.photoEditor.open(urls, function(blob) {
-    window.saturne.mediaBlock.uploadBlob(blob, module, subdir, block);
+    var currentIndex     = window.saturne.photoEditor._currentIndex;
+    var originalUrl      = urls[currentIndex] || '';
+    // Extract the filename from the Dolibarr document.php URL (?file=subdir%2Fname.jpg)
+    var urlParams        = new URLSearchParams(originalUrl.split('?')[1] || '');
+    var filePath         = decodeURIComponent(urlParams.get('file') || '');
+    var originalFilename = filePath.split('/').pop() || null;
+    window.saturne.mediaBlock.uploadBlob(blob, module, subdir, block, originalFilename);
   }, 0);
 };
 
 /**
  * Upload a Blob to the server via AJAX and refresh the gallery section.
+ * When `originalFilename` is provided the server will overwrite that file
+ * instead of creating a new one.
  *
  * @memberof Saturne_MediaBlock
  *
  * @since   1.0.0
  * @version 1.0.0
  *
- * @param   {Blob}   blob   Image blob to upload
- * @param   {string} module Module name
- * @param   {string} subdir Sub-directory
- * @param   {jQuery} block  The .linked-medias block element
+ * @param   {Blob}        blob             Image blob to upload
+ * @param   {string}      module           Module name
+ * @param   {string}      subdir           Sub-directory
+ * @param   {jQuery}      block            The .linked-medias block element
+ * @param   {string|null} originalFilename Filename to overwrite (null = new file)
  * @returns {void}
  */
-window.saturne.mediaBlock.uploadBlob = function(blob, module, subdir, block) {
+window.saturne.mediaBlock.uploadBlob = function(blob, module, subdir, block, originalFilename) {
   var token          = window.saturne.toolbox.getToken();
   var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
-  var filename       = 'photo_' + new Date().getTime() + '.jpg';
+  var filename       = originalFilename || ('photo_' + new Date().getTime() + '.jpg');
+  var overwrite      = originalFilename ? '1' : '0';
   var file           = new File([blob], filename, { type: 'image/jpeg', lastModified: Date.now() });
   var formData       = new FormData();
 
   formData.append('userfile[]', file, filename);
   formData.append('module_name', module);
   formData.append('sub_dir', subdir);
+  formData.append('overwrite', overwrite);
 
   $.ajax({
     url         : document.URL + querySeparator + 'action=uploadPhoto&token=' + token,
