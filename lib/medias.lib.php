@@ -505,7 +505,7 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
 
         $out .= '    <label for="' . $idPrefix . 'upload-media" style="cursor:pointer; display:flex; flex-shrink:0; justify-content:center; align-items:center; width:50px; min-width:50px; height:50px; min-height:50px; background-color:#f39c12; color:white; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,0.05); margin-bottom:0; padding:0; box-sizing:border-box;">';
         $out .= '      <i class="fas fa-camera" style="font-size:20px;"></i>';
-        $out .= '      <input type="file" id="' . $idPrefix . 'upload-media" class="saturne-photo-upload" name="userfile[]" accept="image/*" style="display:none;" multiple>';
+        $out .= '      <input type="file" id="' . $idPrefix . 'upload-media" class="saturne-photo-upload" name="userfile[]" accept="image/*" data-error-not-image="' . dol_escape_htmltag($langs->trans('ErrorFileNotAnImage')) . '" style="display:none;" multiple>';
         $out .= '    </label>';
 
         $out .= '    <div class="saturne-media-gallery">';

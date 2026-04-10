@@ -85,7 +85,8 @@ window.saturne.mediaBlock.onPhotoSelected = function() {
 
   for (var i = 0; i < files.length; i++) {
     if (!files[i].type || files[i].type.indexOf('image/') !== 0) {
-      window.saturne.notice.showNotice('notice-infos', 'Error', files[i].name + ' : ' + (window.saturne.langs && window.saturne.langs.ErrorFileNotAnImage ? window.saturne.langs.ErrorFileNotAnImage : 'Not a valid image'), 'error');
+      var errorMsg = input.data('error-not-image') || files[i].name;
+      $.jnotify(errorMsg, {color: 'red'});
       input.val('');
       return;
     }
@@ -168,16 +169,7 @@ window.saturne.mediaBlock.uploadBlob = function(blob, module, subdir, block, ori
     processData : false,
     contentType : false,
     complete    : function(resp) {
-      var doc = new DOMParser().parseFromString(resp.responseText, 'text/html');
-
-      // Re-run any jnotify calls embedded in the response (Dolibarr setEventMessages)
-      $(doc).find('script').each(function() {
-        var src = $(this).text();
-        if (src.indexOf('jnotify') !== -1) {
-          try { $.globalEval(src); } catch(e) {}
-        }
-      });
-
+      var doc            = new DOMParser().parseFromString(resp.responseText, 'text/html');
       var updatedGallery = $(doc).find('.saturne-media-gallery');
       if (updatedGallery.length && block && block.length) {
         block.find('.saturne-media-gallery').replaceWith(updatedGallery);
