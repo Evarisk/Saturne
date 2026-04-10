@@ -86,7 +86,7 @@ window.saturne.mediaBlock.onPhotoSelected = function() {
   for (var i = 0; i < files.length; i++) {
     if (!files[i].type || files[i].type.indexOf('image/') !== 0) {
       var errorMsg = input.data('error-not-image') || files[i].name;
-      $.jnotify(errorMsg, 'error', true, {remove: function() {}});
+      $.jnotify(errorMsg, 'error', true);
       input.val('');
       return;
     }
