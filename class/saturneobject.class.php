@@ -43,7 +43,7 @@ abstract class SaturneObject extends CommonObject
     /**
      * @var int<0,1> Does object support extrafields ? 0 = No, 1 = Yes
      */
-    public $isextrafieldmanaged = 1;
+    public $isextrafieldmanaged = 0;
 
     /**
      * @var int<0,1> Does object support category module ? 0 = No, 1 = Yes
