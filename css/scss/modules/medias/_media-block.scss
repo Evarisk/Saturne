@@ -5,6 +5,13 @@
 
   .media-upload-zone {
     margin-bottom: 1em;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+
+  .media-upload-label {
+    cursor: pointer;
   }
 
   .saturne-media-gallery {

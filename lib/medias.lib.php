@@ -511,13 +511,11 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
         $out .= '<input type="hidden" name="sub_dir" value="' . dol_escape_htmltag($subDir) . '">';
 
         $out .= '<div class="media-upload-zone">';
-        $out .= '<label class="wpeo-button button-blue">';
+        $out .= '<label class="media-upload-label butAction">';
         $out .= '<i class="fas fa-camera paddingright"></i>' . $langs->trans('AddPhotoFromComputer');
         $out .= '<input type="file" name="userfile[]" accept=".jpg,.jpeg,.png,.gif,.webp" multiple hidden>';
         $out .= '</label>';
-        $out .= '<button type="submit" class="wpeo-button button-blue">';
-        $out .= '<i class="fas fa-upload paddingright"></i>' . $langs->trans('Send');
-        $out .= '</button>';
+        $out .= '<input type="submit" class="butAction" value="' . dol_escape_htmltag($langs->trans('Send')) . '">';
         $out .= '</div>';
         $out .= '</form>';
 
