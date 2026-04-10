@@ -168,7 +168,17 @@ window.saturne.mediaBlock.uploadBlob = function(blob, module, subdir, block, ori
     processData : false,
     contentType : false,
     complete    : function(resp) {
-      var updatedGallery = $(resp.responseText).find('.saturne-media-gallery');
+      var doc = new DOMParser().parseFromString(resp.responseText, 'text/html');
+
+      // Re-run any jnotify calls embedded in the response (Dolibarr setEventMessages)
+      $(doc).find('script').each(function() {
+        var src = $(this).text();
+        if (src.indexOf('jnotify') !== -1) {
+          try { $.globalEval(src); } catch(e) {}
+        }
+      });
+
+      var updatedGallery = $(doc).find('.saturne-media-gallery');
       if (updatedGallery.length && block && block.length) {
         block.find('.saturne-media-gallery').replaceWith(updatedGallery);
       }
