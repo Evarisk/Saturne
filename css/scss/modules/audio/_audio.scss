@@ -16,3 +16,27 @@
   50% { opacity: 0; }
   100% { opacity: 1; }
 }
+
+@keyframes recording-pulse {
+  0%   { transform: scale(1);   box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);  background-color: $color__red; color: #fff; }
+  50%  { transform: scale(1.1); box-shadow: 0 0 0 12px rgba(231, 76, 60, 0); background-color: darken($color__red, 10%); color: #fff; }
+  100% { transform: scale(1);   box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);    background-color: $color__red; color: #fff; }
+}
+
+@keyframes playing-pulse {
+  0%   { transform: scale(1);   box-shadow: 0 0 0 0 rgba(123, 104, 238, 0.7);  background-color: #7b68ee; color: #fff; }
+  50%  { transform: scale(1.1); box-shadow: 0 0 0 12px rgba(123, 104, 238, 0); background-color: #6a5acd;  color: #fff; }
+  100% { transform: scale(1);   box-shadow: 0 0 0 0 rgba(123, 104, 238, 0);    background-color: #7b68ee; color: #fff; }
+}
+
+.recording-pulse-active {
+  animation: recording-pulse 1.5s infinite !important;
+  background-color: $color__red !important;
+  color: #fff !important;
+}
+
+.playing-pulse-active {
+  animation: playing-pulse 1.5s infinite !important;
+  background-color: #7b68ee !important;
+  color: #fff !important;
+}

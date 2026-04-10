@@ -71,6 +71,7 @@ MediaMaxFilesInForm       = Nombre maximum de fichiers joints dans un formulaire
 StartRecording            = Démarrer l'enregistrement
 Recording                 = Enregistrement en cours...
 NoAudioYet                = Aucun enregistrement audio pour le moment
+UploadInProgress          = Téléchargement en cours
 
 # Analyse AI
 AIAnalyseImage	= Analyse de l'image: %s

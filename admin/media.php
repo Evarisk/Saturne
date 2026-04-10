@@ -83,6 +83,26 @@ if ($action == 'uploadPhoto' && !empty($moduleName) && !empty($conf->global->MAI
     }
 }
 
+if ($action == 'add_audio' && !empty($_FILES['audio']['tmp_name'])) {
+    $uploadDir = !empty($conf->saturne->dir_output)
+        ? $conf->saturne->dir_output
+        : $conf->ecm->dir_output . '/saturne';
+    $uploadDir .= '/test_medias';
+
+    if (!dol_is_dir($uploadDir)) {
+        dol_mkdir($uploadDir);
+    }
+
+    $fileName = dol_print_date(dol_now(), 'dayhourlog') . '_audio.wav';
+    $destFile = $uploadDir . '/' . dol_sanitize_filename($fileName);
+
+    if (move_uploaded_file($_FILES['audio']['tmp_name'], $destFile)) {
+        setEventMessages($langs->trans('PhotoWellSent'), null, 'mesgs');
+    } else {
+        setEventMessages($langs->trans('PhotoNotSent'), null, 'errors');
+    }
+}
+
 /*
  * View
  */

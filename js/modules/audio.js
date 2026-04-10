@@ -138,8 +138,9 @@ window.saturne.audio.startRecording = async function() {
       xhr: function() {
         let xhr = new XMLHttpRequest();
         xhr.upload.onprogress = function(event) {
-          let percent = Math.round((event.loaded / event.total) * 100);
-          $('#recording-indicator').text('Téléchargement en cours : ' + percent + ' %');
+          let percent     = Math.round((event.loaded / event.total) * 100);
+          let uploadLabel = $('#recording-indicator').data('label-upload') || 'Upload';
+          $('#recording-indicator').text(uploadLabel + ' : ' + percent + ' %');
         };
 
         return xhr;

@@ -67,5 +67,6 @@ MediaMaxFilesInForm       = Maximum number of attached files in a form
 StartRecording            = Start recording
 Recording                 = Recording in progress...
 NoAudioYet                = No audio recording yet
+UploadInProgress          = Upload in progress
 
 AIAnalyseImage	= Image analysis: %s

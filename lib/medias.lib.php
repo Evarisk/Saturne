@@ -511,7 +511,7 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
         $out .= '<input type="hidden" name="sub_dir" value="' . dol_escape_htmltag($subDir) . '">';
 
         $out .= '<div class="media-upload-zone">';
-        $out .= '<label class="wpeo-button button-blue" style="cursor: pointer; margin-right: 8px;">';
+        $out .= '<label class="wpeo-button button-blue">';
         $out .= '<i class="fas fa-camera paddingright"></i>' . $langs->trans('AddPhotoFromComputer');
         $out .= '<input type="file" name="userfile[]" accept=".jpg,.jpeg,.png,.gif,.webp" multiple hidden>';
         $out .= '</label>';
@@ -539,7 +539,7 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
 
                     $out .= '<div class="center">';
                     $out .= '<img src="' . $imgSrc . '" width="80" height="80" class="photo photowithmargin" title="' . dol_escape_htmltag($fileName) . '">';
-                    $out .= '<div class="title" style="font-size: 0.85em; word-break: break-all;">' . dol_escape_htmltag($fileName) . '</div>';
+                    $out .= '<div class="title">' . dol_escape_htmltag($fileName) . '</div>';
                     $out .= '</div>';
                 }
                 $out .= '</div>';
@@ -559,7 +559,7 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
         $out .= '<button id="' . $idPrefix . 'start-recording" class="wpeo-button button-blue">';
         $out .= '<span class="fas fa-circle paddingright"></span>' . $langs->trans('StartRecording');
         $out .= '</button>';
-        $out .= '<div id="' . $idPrefix . 'recording-indicator" class="opacitymedium" style="display: none; margin-top: 8px;">';
+        $out .= '<div id="' . $idPrefix . 'recording-indicator" class="audio-recorder-indicator opacitymedium" data-label-upload="' . dol_escape_htmltag($langs->trans('UploadInProgress')) . '">';
         $out .= '<i class="fas fa-spinner fa-spin paddingright"></i>' . $langs->trans('Recording');
         $out .= '</div>';
         $out .= '</div>';
@@ -568,14 +568,14 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
             $audioFiles = dol_dir_list($uploadDir, 'files', 0, '\.(wav|mp3|ogg|m4a|WAV|MP3|OGG|M4A)$', '(\.meta)$', 'date', SORT_DESC);
             $nbAudio    = is_array($audioFiles) ? count($audioFiles) : 0;
 
-            $out .= '<div class="saturne-audio-gallery" style="margin-top: 12px;">';
+            $out .= '<div class="saturne-audio-gallery">';
             if ($nbAudio > 0) {
                 foreach ($audioFiles as $audioFile) {
                     $fileName = $audioFile['name'];
                     $fileUrl  = DOL_URL_ROOT . '/document.php?modulepart=ecm&attachment=0&file=' . urlencode($ecmRelativeBase . '/' . $fileName) . '&entity=' . $conf->entity;
-                    $out .= '<div style="margin-bottom: 8px;">';
-                    $out .= '<audio controls src="' . dol_escape_htmltag($fileUrl) . '" style="max-width: 100%;"></audio>';
-                    $out .= '<div class="opacitymedium" style="font-size: 0.85em;">' . dol_escape_htmltag($fileName) . '</div>';
+                    $out .= '<div>';
+                    $out .= '<audio controls src="' . dol_escape_htmltag($fileUrl) . '"></audio>';
+                    $out .= '<div class="opacitymedium audio-file-name">' . dol_escape_htmltag($fileName) . '</div>';
                     $out .= '</div>';
                 }
             } else {

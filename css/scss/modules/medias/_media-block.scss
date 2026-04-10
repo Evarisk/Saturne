@@ -1,0 +1,40 @@
+@use '../../variable/variable' as *;
+
+.saturne-media-block {
+  margin-bottom: 1em;
+
+  .media-upload-zone {
+    margin-bottom: 1em;
+  }
+
+  .saturne-media-gallery {
+    margin-top: 0.5em;
+
+    .wpeo-gridlayout {
+      margin-top: 0.5em;
+    }
+  }
+}
+
+.saturne-media-block-audio {
+  .audio-recorder {
+    margin-bottom: 1em;
+  }
+
+  .audio-recorder-indicator {
+    margin-top: 0.5em;
+  }
+
+  .saturne-audio-gallery {
+    margin-top: 0.75em;
+
+    audio {
+      max-width: 100%;
+    }
+
+    .audio-file-name {
+      font-size: 0.85em;
+      margin-top: 0.2em;
+    }
+  }
+}
