@@ -88,11 +88,14 @@
             <button type="button" class="saturne-tool-btn" data-mode="blur"     title="<?php echo $langs->trans('Blur'); ?>"   style="flex-shrink:0; background-color:#34495e; color:white; border:none; width:40px; height:40px; border-radius:4px; cursor:pointer; display:flex; justify-content:center; align-items:center;"><i class="fas fa-eye-slash"></i></button>
             <button type="button" class="saturne-tool-btn" data-mode="sequence" title="<?php echo $langs->trans('Sequence'); ?>" style="flex-shrink:0; background-color:#34495e; color:white; border:none; width:40px; height:40px; border-radius:4px; cursor:pointer; display:flex; justify-content:center; align-items:center; font-weight:bold;"><i class="fas fa-list-ol"></i></button>
 
-            <!-- Undo & validate -->
-            <div style="display:flex; gap:6px; margin-left:auto; flex-shrink:0;">
-                <button type="button" id="saturne-btn-undo-photo" title="<?php echo $langs->trans('Undo'); ?>" style="flex-shrink:0; background-color:#7f8c8d; color:white; border:none; width:40px; height:40px; border-radius:4px; cursor:pointer; display:flex; justify-content:center; align-items:center;"><i class="fas fa-reply"></i></button>
-                <button type="button" id="saturne-btn-validate-photo" title="<?php echo $langs->trans('Save'); ?>" style="flex-shrink:0; background-color:#2ecc71; color:white; border:none; height:40px; padding:0 14px; border-radius:4px; cursor:pointer; display:flex; justify-content:center; align-items:center; gap:6px; font-weight:600; font-size:13px;"><i class="fas fa-save"></i> <?php echo $langs->trans('Save'); ?></button>
-            </div>
+            <!-- Undo -->
+            <button type="button" id="saturne-btn-undo-photo" title="<?php echo $langs->trans('Undo'); ?>" style="flex-shrink:0; background-color:#7f8c8d; color:white; border:none; width:40px; height:40px; border-radius:4px; cursor:pointer; display:flex; justify-content:center; align-items:center;"><i class="fas fa-reply"></i></button>
+
+            <!-- Save (uploads, keeps modal open) -->
+            <button type="button" id="saturne-btn-validate-photo" title="<?php echo $langs->trans('Save'); ?>" style="flex-shrink:0; background-color:#2ecc71; color:white; border:none; width:40px; height:40px; border-radius:4px; cursor:pointer; display:flex; justify-content:center; align-items:center;"><i class="fas fa-save"></i></button>
+
+            <!-- OK (closes modal) -->
+            <button type="button" id="saturne-btn-ok-photo" title="OK" style="flex-shrink:0; background-color:#3498db; color:white; border:none; width:40px; height:40px; border-radius:4px; cursor:pointer; display:flex; justify-content:center; align-items:center; font-weight:700; font-size:13px;">OK</button>
         </div>
 
     </div>

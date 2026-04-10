@@ -185,8 +185,14 @@ window.saturne.photoEditor.event = function() {
   window.addEventListener('touchmove',  window.saturne.photoEditor._onMouseMove, { passive: false });
   window.addEventListener('touchend',   window.saturne.photoEditor._onMouseUp);
 
-  // Cancel
+  // Cancel — discard and close
   btnCancel.addEventListener('click', function() {
+    window.saturne.photoEditor._close();
+  });
+
+  // OK — close without triggering another save
+  var btnOk = document.getElementById('saturne-btn-ok-photo');
+  btnOk.addEventListener('click', function() {
     window.saturne.photoEditor._close();
   });
 
@@ -204,19 +210,18 @@ window.saturne.photoEditor.event = function() {
     }
   });
 
-  // Save / validate
+  // Save — upload to server, keep modal open
   btnValidate.addEventListener('click', function() {
     var activeText = document.getElementById('saturne-floating-text-input');
     if (activeText) {
       activeText.blur();
     }
-    // Capture _onSave BEFORE _close() nulls it out
     var onSave = window.saturne.photoEditor._onSave;
+    if (typeof onSave !== 'function') {
+      return;
+    }
     canvas.toBlob(function(blob) {
-      window.saturne.photoEditor._close();
-      if (typeof onSave === 'function') {
-        onSave(blob);
-      }
+      onSave(blob);
     }, 'image/jpeg', 0.85);
   });
 };
