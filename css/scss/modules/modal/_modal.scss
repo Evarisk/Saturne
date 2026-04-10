@@ -146,3 +146,8 @@
   }
 }
 
+// Media editor modal sits above the media gallery modal
+#modal-upload-image {
+  z-index: 1010;
+}
+

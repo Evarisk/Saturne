@@ -309,6 +309,9 @@ if (!empty($submitFileErrorText) && is_array($submitFileErrorText)) {
 	print '<input class="error-medias" value="'. htmlspecialchars(json_encode($submitFileErrorText)) .'">';
 }
 
+$mediaResolutionParts = explode('-', getDolGlobalString('SATURNE_MEDIA_RESOLUTION_USED'));
+$mediaResolution      = explode('x', $mediaResolutionParts[1] ?? '1920x1080');
+
 require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
 
 <!-- START MEDIA GALLERY MODAL -->

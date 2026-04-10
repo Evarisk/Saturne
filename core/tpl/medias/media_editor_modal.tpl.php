@@ -23,38 +23,37 @@
  */
 
 /**
- * The following vars must be defined :
- * Global : $langs
+ * The following vars must be defined before including this template:
+ * Global  : $langs
+ * Array   : $mediaResolution — [0] => width (int), [1] => height (int)
+ *           Prepared from getDolGlobalString('SATURNE_MEDIA_RESOLUTION_USED') by the calling page.
  */
 
 ?>
 
-<!-- File start-->
+<!-- media_editor_modal start -->
 <div class="modal-upload-image">
     <input type="hidden" name="token" value="<?php echo newToken(); ?>">
-    <div class="wpeo-modal modal-upload-image modal-close-only-with-button" id="modal-upload-image" style="z-index: 1010;">
-        <?php $mediaResolution = explode('-', getDolGlobalString('SATURNE_MEDIA_RESOLUTION_USED'));
-        $mediaResolution = explode('x', $mediaResolution[1]); ?>
-        <input type="hidden" class="fast-upload-options" data-image-resolution-width="<?php echo $mediaResolution[0]; ?>" data-image-resolution-height="<?php echo $mediaResolution[1]; ?>">
+    <div class="wpeo-modal modal-upload-image modal-close-only-with-button" id="modal-upload-image">
+        <input type="hidden" class="fast-upload-options" data-image-resolution-width="<?php echo (int) ($mediaResolution[0] ?? 0); ?>" data-image-resolution-height="<?php echo (int) ($mediaResolution[1] ?? 0); ?>">
         <div class="modal-container wpeo-modal-event">
-            <!-- Modal-Header-->
+            <!-- Modal-Header -->
             <div class="modal-header">
                 <h2 class="modal-title"><?php echo $langs->trans('Image'); ?></h2>
                 <div class="modal-close"><i class="fas fa-2x fa-times"></i></div>
             </div>
-            <!-- Modal-ADD Image Content-->
+            <!-- Modal-Content -->
             <div class="modal-content" id="#modalContent">
                 <div class="canvas-container">
                     <canvas id="canvas" style="border: #0b419b solid 2px;"></canvas>
                 </div>
             </div>
-            <!-- Modal-Footer-->
+            <!-- Modal-Footer -->
             <div class="modal-footer">
                 <div class="wpeo-grid grid-6" style="gap: 0.5em; justify-content: flex-end;">
                     <div class="image-move butAction butActionDelete button-square">
                         <span><i class="fas fa-arrows-alt"></i></span>
                     </div>
-                    <!-- Button to start drawing -->
                     <div class="image-drawing butAction butActionDelete button-square">
                         <span><i class="fas fa-pen"></i></span>
                     </div>
@@ -64,9 +63,6 @@
                     <div class="image-rotate-right butAction button-square">
                         <span><i class="fas fa-redo-alt"></i></span>
                     </div>
-    <!--                <div class="image-undo butAction button-square">-->
-    <!--                    <span><i class="fas fa-undo-alt"></i></span>-->
-    <!--                </div>-->
                     <div class="image-erase butAction button-square">
                         <span><i class="fas fa-eraser"></i></span>
                     </div>
