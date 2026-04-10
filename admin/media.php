@@ -204,7 +204,7 @@ if ($dirExists) {
  * Photo block
  */
 
-$titleColorRgb = getDolGlobalString('THEME_ELDY_TEXTTITLE') ?: '40,40,60';
+$titleColorRgb = getDolGlobalString('THEME_ELDY_TEXTTITLENOTAB') ?: '0,135,160';
 print '<div class="saturne-media-test-block" style="--media-test-border-color: rgb(' . dol_escape_htmltag($titleColorRgb) . ');">';
 print load_fiche_titre('<i class="fas fa-camera-retro paddingright"></i>' . $langs->trans('MediaTestUploadCanvas'), '', '');
 
