@@ -204,6 +204,8 @@ if ($dirExists) {
  * Photo block
  */
 
+$titleColorRgb = getDolGlobalString('THEME_ELDY_TEXTTITLE') ?: '40,40,60';
+print '<div class="saturne-media-test-block" style="--media-test-border-color: rgb(' . dol_escape_htmltag($titleColorRgb) . ');">';
 print load_fiche_titre('<i class="fas fa-camera-retro paddingright"></i>' . $langs->trans('MediaTestUploadCanvas'), '', '');
 
 print '<div class="info" style="margin-bottom: 20px;">';
@@ -257,12 +259,14 @@ print '</tr>';
 
 print '</tbody>';
 print '</table>';
+print '</div>';
 
 /*
  * Audio block
  */
 
 print '<br>';
+print '<div class="saturne-media-test-block" style="--media-test-border-color: rgb(' . dol_escape_htmltag($titleColorRgb) . ');">';
 print load_fiche_titre('<i class="fas fa-microphone-alt paddingright"></i>' . $langs->trans('MediaTestAudio'), '', '');
 
 print '<div class="info" style="margin-bottom: 20px;">';
@@ -316,6 +320,7 @@ print '</tr>';
 
 print '</tbody>';
 print '</table>';
+print '</div>';
 
 include dol_buildpath('/saturne/core/tpl/medias/photo_editor_modal.tpl.php');
 

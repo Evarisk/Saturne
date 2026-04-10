@@ -47,6 +47,13 @@
   gap: 8px;
 }
 
+.saturne-media-test-block {
+  border: 2px solid var(--media-test-border-color, #{$color__dolibarr});
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+}
+
 .saturne-media-upload-block {
   display: flex;
   align-items: center;
