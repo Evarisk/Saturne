@@ -506,6 +506,8 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
         $out .= '      <input type="file" id="' . $idPrefix . 'upload-media" class="saturne-media-block-upload" name="userfile[]" accept="image/*" style="display:none;" multiple>';
         $out .= '    </label>';
 
+        $out .= '    <div class="saturne-media-gallery">';
+
         if ($showGallery) {
             $photoFiles = dol_dir_list($uploadDir, 'files', 0, '', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC);
             $imageFiles = [];
@@ -525,16 +527,17 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
                         $urls[] = DOL_URL_ROOT . '/document.php?modulepart=ecm&entity=' . $conf->entity . '&file=' . urlencode($moduleNameLowerCase . '/' . $subDir . '/' . $file['name']);
                     }
                 }
-                $urlsJson  = htmlspecialchars(json_encode($urls), ENT_QUOTES, 'UTF-8');
-                $firstImg  = dol_escape_htmltag($urls[0]);
+                $urlsJson = htmlspecialchars(json_encode($urls), ENT_QUOTES, 'UTF-8');
+                $firstImg = dol_escape_htmltag($urls[0]);
 
-                $out .= '    <div class="open-media-editor-as-gallery" data-json="' . $urlsJson . '" style="position:relative; flex-shrink:0; width:50px; min-width:50px; height:50px; min-height:50px; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,0.05); cursor:pointer; display:block; padding:0; margin:0; background:#fff; box-sizing:border-box;">';
-                $out .= '      <img src="' . $firstImg . '" style="width:100% !important; height:100% !important; object-fit:cover !important; display:block !important; border-radius:12px !important; margin:0 !important; padding:0 !important; box-sizing:border-box !important;" />';
-                $out .= '      <span style="position:absolute; top:-6px; right:-6px; background:#8f9ba8; color:white; border-radius:12px; height:18px; min-width:18px; padding:0 4px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; border:2px solid #fff; box-shadow:0 2px 4px rgba(0,0,0,0.1); box-sizing:border-box;">' . $totalPhotos . '</span>';
-                $out .= '    </div>';
+                $out .= '<div class="open-media-editor-as-gallery" data-json="' . $urlsJson . '" style="position:relative; flex-shrink:0; width:50px; min-width:50px; height:50px; min-height:50px; border-radius:12px; box-shadow:0 4px 6px rgba(0,0,0,0.05); cursor:pointer; display:block; padding:0; margin:0; background:#fff; box-sizing:border-box;">';
+                $out .= '  <img src="' . $firstImg . '" style="width:100% !important; height:100% !important; object-fit:cover !important; display:block !important; border-radius:12px !important; margin:0 !important; padding:0 !important; box-sizing:border-box !important;" />';
+                $out .= '  <span style="position:absolute; top:-6px; right:-6px; background:#8f9ba8; color:white; border-radius:12px; height:18px; min-width:18px; padding:0 4px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; border:2px solid #fff; box-shadow:0 2px 4px rgba(0,0,0,0.1); box-sizing:border-box;">' . $totalPhotos . '</span>';
+                $out .= '</div>';
             }
         }
 
+        $out .= '    </div>';
         $out .= '  </div>';
         $out .= '</div>';
     }
