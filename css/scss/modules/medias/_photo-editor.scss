@@ -45,17 +45,17 @@
 
     // Force all toolbar buttons to a compact size so everything fits on one line
     button {
-        width: 34px !important;
-        height: 34px !important;
-        min-width: 34px;
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px;
         flex-shrink: 0;
     }
 
     #saturne-pencil-tool-container {
-        height: 34px !important;
+        height: 36px !important;
 
         button {
-            width: 34px !important;
+            width: 36px !important;
             height: 100% !important;
         }
     }

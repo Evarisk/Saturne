@@ -92,6 +92,7 @@ window.saturne.photoEditor.event = function() {
   var sizeSelect   = document.getElementById('saturne-photo-size-select');
   var colorPicker  = document.getElementById('saturne-draw-color-picker');
   var cropDiv      = document.getElementById('saturne-crop-selection');
+  var btnCancel    = document.getElementById('saturne-btn-cancel-photo');
   var btnValidate  = document.getElementById('saturne-btn-validate-photo');
   var btnUndo      = document.getElementById('saturne-btn-undo-photo');
   var resDisplay   = document.getElementById('saturne-photo-resolution-display');
@@ -183,6 +184,11 @@ window.saturne.photoEditor.event = function() {
   canvas.addEventListener('touchstart', window.saturne.photoEditor._onMouseDown, { passive: false });
   window.addEventListener('touchmove',  window.saturne.photoEditor._onMouseMove, { passive: false });
   window.addEventListener('touchend',   window.saturne.photoEditor._onMouseUp);
+
+  // Cancel — discard and close
+  btnCancel.addEventListener('click', function() {
+    window.saturne.photoEditor._close();
+  });
 
   // OK — close without triggering another save
   var btnOk = document.getElementById('saturne-btn-ok-photo');
