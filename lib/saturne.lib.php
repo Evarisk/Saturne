@@ -69,6 +69,11 @@ function saturne_admin_prepare_head(): array
     $head[$h][2] = 'eoxiaModule';
     $h++;
 
+    $head[$h][0] = dol_buildpath('/saturne/admin/media.php', 1);
+    $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-photo-video pictofixedwidth"></i>' . $langs->trans('MediaLib') : '<i class="fas fa-photo-video"></i>';
+    $head[$h][2] = 'media';
+    $h++;
+
     complete_head_from_modules($conf, $langs, null, $head, $h, 'saturne@saturne');
 
     complete_head_from_modules($conf, $langs, null, $head, $h, 'saturne@saturne', 'remove');

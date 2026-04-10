@@ -52,4 +52,20 @@ DisplayNumberMediaGalleryDescription = Displays 8 media (default) per page in th
 MediaSizeDocument                    = Media size
 MediaSizeDocumentDescription         = Selection of media size in documents
 
+# Media lib admin page
+MediaLib                  = Media Library
+MediaTestUploadCanvas     = Upload Media Test (Canvas)
+MediaTestAudio            = Upload Audio Test
+MediaPhotoBrick           = Dynamic Photo Block (For Developers)
+MediaAudioBrick           = Dynamic Audio Block (For Developers)
+MediaStoragePath          = Data storage path
+MediaAllowedTypesPhoto    = Allowed file types (Photos)
+MediaAllowedTypesAudio    = Allowed file types (Audio)
+MediaFilesUploadDownload  = Files (Upload | Download)
+MediaMaxUploadSizeNote    = PHP configuration limits upload size to %s, regardless of the Dolibarr setting.
+MediaMaxFilesInForm       = Maximum number of attached files in a form
+StartRecording            = Start recording
+Recording                 = Recording in progress...
+NoAudioYet                = No audio recording yet
+
 AIAnalyseImage	= Image analysis: %s

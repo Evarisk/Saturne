@@ -56,5 +56,21 @@ ShowOnlyMediasAddedToday             = N'afficher que les médias ajoutés aujou
 ShowOnlyUnlinkedMedias               = N'afficher que les médias liés à aucun objet
 UnlinkedMedias                       = Médias non liés
 
+# Media lib admin page
+MediaLib                  = Bibliothèque médias
+MediaTestUploadCanvas     = Test Upload Média Canvas
+MediaTestAudio            = Test Upload Audio
+MediaPhotoBrick           = Brique Photo Dynamique (Pour Développeurs)
+MediaAudioBrick           = Brique Audio Dynamique (Pour Développeurs)
+MediaStoragePath          = Chemin de stockage des données
+MediaAllowedTypesPhoto    = Types de fichiers autorisés (Photos)
+MediaAllowedTypesAudio    = Types de fichiers autorisés (Audio)
+MediaFilesUploadDownload  = Fichiers (Envoi | Téléchargement)
+MediaMaxUploadSizeNote    = La configuration PHP limite la taille des envois à %s, quelle que soit la valeur Dolibarr.
+MediaMaxFilesInForm       = Nombre maximum de fichiers joints dans un formulaire
+StartRecording            = Démarrer l'enregistrement
+Recording                 = Enregistrement en cours...
+NoAudioYet                = Aucun enregistrement audio pour le moment
+
 # Analyse AI
 AIAnalyseImage	= Analyse de l'image: %s
