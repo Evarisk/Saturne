@@ -597,7 +597,12 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
         $out .= '</div>';
 
         if ($showGallery) {
-            $out .= '<div class="wpeo-modal modal-close-only-with-button" id="' . $idPrefix . 'audio-library-modal">';
+            $blockId = $idPrefix . 'master-media-row-container-audio';
+            $out .= '<div class="wpeo-modal modal-close-only-with-button saturne-audio-library-modal" id="' . $idPrefix . 'audio-library-modal"'
+                . ' data-block-id="' . dol_escape_htmltag($blockId) . '"'
+                . ' data-module="' . dol_escape_htmltag($moduleNameLowerCase) . '"'
+                . ' data-subdir="' . dol_escape_htmltag($subDir) . '"'
+                . '>';
             $out .= '  <div class="modal-container modal-flex">';
             $out .= '    <div class="modal-header">';
             $out .= '      <span class="modal-title">' . $langs->trans('AudioLibrary') . '</span>';

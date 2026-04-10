@@ -380,7 +380,7 @@ window.saturne.audio.openLibrary = function() {
 };
 
 /**
- * Delete an audio file via AJAX and refresh the audio block
+ * Delete an audio file via AJAX and refresh both the audio block and the library modal
  *
  * @memberof Saturne_Audio
  *
@@ -391,11 +391,12 @@ window.saturne.audio.openLibrary = function() {
  */
 window.saturne.audio.deleteAudio = function() {
   var btn      = $(this);
-  var block    = btn.closest('.linked-medias');
+  var modal    = btn.closest('.saturne-audio-library-modal');
   var filename = btn.data('filename');
-  var module   = block.find('.fast-upload-options').data('from-type') || '';
-  var subDir   = block.find('.fast-upload-options').data('from-subdir') || '';
-  var blockId  = block.attr('id');
+  var module   = modal.data('module') || '';
+  var subDir   = modal.data('subdir') || '';
+  var blockId  = modal.data('block-id') || '';
+  var modalId  = modal.attr('id');
 
   var formData = new FormData();
   formData.append('filename', filename);
@@ -412,11 +413,26 @@ window.saturne.audio.deleteAudio = function() {
     processData : false,
     contentType : false,
     complete    : function(resp) {
-      var doc     = new DOMParser().parseFromString(resp.responseText, 'text/html');
-      var el      = doc.getElementById(blockId);
-      var updated = el ? $(el) : $();
-      if (updated.length && block.length) {
-        block.replaceWith(updated);
+      var doc = new DOMParser().parseFromString(resp.responseText, 'text/html');
+
+      // Refresh the audio block (play button, badge count)
+      if (blockId) {
+        var updatedBlock = doc.getElementById(blockId);
+        if (updatedBlock && $('#' + blockId).length) {
+          $('#' + blockId).replaceWith($(updatedBlock));
+        }
+      }
+
+      // Refresh the modal content (keep it open, update the list)
+      if (modalId) {
+        var updatedModal = doc.getElementById(modalId);
+        if (updatedModal && modal.length) {
+          var wasActive = modal.hasClass('modal-active');
+          modal.replaceWith($(updatedModal));
+          if (wasActive) {
+            $('#' + modalId).addClass('modal-active');
+          }
+        }
       }
     },
   });
