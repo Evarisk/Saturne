@@ -68,11 +68,6 @@
         <!-- Toolbar -->
         <div class="saturne-photo-editor-toolbar">
 
-            <!-- Cancel / retake -->
-            <button type="button" id="saturne-btn-cancel-photo" title="<?php echo $langs->trans('Cancel'); ?>" style="flex-shrink:0; background-color:#f39c12; color:white; border:none; width:40px; height:40px; border-radius:4px; cursor:pointer; display:flex; justify-content:center; align-items:center;">
-                <i class="fas fa-times"></i>
-            </button>
-
             <!-- Drawing tools -->
             <button type="button" class="saturne-tool-btn" data-mode="crop"     title="<?php echo $langs->trans('Crop'); ?>"    style="flex-shrink:0; background-color:#34495e; color:white; border:none; width:40px; height:40px; border-radius:4px; cursor:pointer; display:flex; justify-content:center; align-items:center;"><i class="fas fa-crop"></i></button>
             <button type="button" class="saturne-tool-btn" data-mode="rotate"   title="<?php echo $langs->trans('Rotate'); ?>"  style="flex-shrink:0; background-color:#34495e; color:white; border:none; width:40px; height:40px; border-radius:4px; cursor:pointer; display:flex; justify-content:center; align-items:center;"><i class="fas fa-redo"></i></button>

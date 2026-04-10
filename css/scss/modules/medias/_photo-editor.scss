@@ -41,7 +41,24 @@
     overflow-x: auto;
     padding-bottom: 5px;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
+
+    // Force all toolbar buttons to a compact size so everything fits on one line
+    button {
+        width: 34px !important;
+        height: 34px !important;
+        min-width: 34px;
+        flex-shrink: 0;
+    }
+
+    #saturne-pencil-tool-container {
+        height: 34px !important;
+
+        button {
+            width: 34px !important;
+            height: 100% !important;
+        }
+    }
 }
 
 @media (max-width: 600px) {
