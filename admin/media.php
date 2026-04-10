@@ -84,18 +84,43 @@ if ($action == 'uploadPhoto' && !empty($moduleName) && !empty($conf->global->MAI
     }
 }
 
+if ($action == 'delete_audio') {
+    $audioModule    = GETPOST('module_name', 'alpha');
+    $audioSubDir    = GETPOST('sub_dir', 'alpha');
+    $audioFilename  = GETPOST('filename', 'alpha');
+    $audioModLower  = !empty($audioModule) ? dol_strtolower($audioModule) : 'saturne';
+    $audioSubDirRes = !empty($audioSubDir) ? $audioSubDir : 'test_medias';
+
+    $uploadDir = !empty($conf->$audioModLower->dir_output)
+        ? $conf->$audioModLower->dir_output
+        : $conf->ecm->dir_output . '/' . $audioModLower;
+    $uploadDir .= '/' . $audioSubDirRes;
+
+    $filePath = $uploadDir . '/' . basename($audioFilename);
+    if (!empty($audioFilename) && file_exists($filePath) && dol_delete_file($filePath)) {
+        setEventMessages($langs->trans('FileDeleted'), null, 'mesgs');
+    } else {
+        setEventMessages($langs->trans('ErrorFileNotDeleted'), null, 'errors');
+    }
+}
+
 if ($action == 'add_audio' && !empty($_FILES['audio']['tmp_name'])) {
-    $uploadDir = !empty($conf->saturne->dir_output)
-        ? $conf->saturne->dir_output
-        : $conf->ecm->dir_output . '/saturne';
-    $uploadDir .= '/test_medias';
+    $audioModule    = GETPOST('module_name', 'alpha');
+    $audioSubDir    = GETPOST('sub_dir', 'alpha');
+    $audioModLower  = !empty($audioModule) ? dol_strtolower($audioModule) : 'saturne';
+    $audioSubDirRes = !empty($audioSubDir) ? $audioSubDir : 'test_medias';
+
+    $uploadDir = !empty($conf->$audioModLower->dir_output)
+        ? $conf->$audioModLower->dir_output
+        : $conf->ecm->dir_output . '/' . $audioModLower;
+    $uploadDir .= '/' . $audioSubDirRes;
 
     if (!dol_is_dir($uploadDir)) {
         dol_mkdir($uploadDir);
     }
 
     $fileName = dol_print_date(dol_now(), 'dayhourlog') . '_audio.wav';
-    $destFile = $uploadDir . '/' . dol_sanitize_filename($fileName);
+    $destFile = $uploadDir . '/' . $fileName;
 
     if (move_uploaded_file($_FILES['audio']['tmp_name'], $destFile)) {
         setEventMessages($langs->trans('PhotoWellSent'), null, 'mesgs');
@@ -222,7 +247,7 @@ print '  <strong><i class="fas fa-lightbulb"></i> ' . $langs->trans('MediaAudioB
 print '  <code>print saturne_render_media_block(\'saturne\', \'test_medias\', \'\', \'\', [\'show_photo\' => false, \'show_audio\' => true]);</code>';
 print '</div>';
 
-print saturne_render_media_block('saturne', 'test_medias', '', '', ['show_photo' => false, 'show_audio' => true, 'show_gallery' => false]);
+print saturne_render_media_block('saturne', 'test_medias', '', '', ['show_photo' => false, 'show_audio' => true, 'show_gallery' => true]);
 
 print '<br>';
 print load_fiche_titre('<i class="fas fa-tools paddingright"></i>' . $langs->trans('Configuration'), '', '');

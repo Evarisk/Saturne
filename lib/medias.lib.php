@@ -570,7 +570,7 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
         $out .= '  <div class="fast-upload-options" data-from-type="' . dol_escape_htmltag($moduleNameLowerCase) . '" data-from-subtype="' . dol_escape_htmltag($audioContainerClass) . '" data-from-subdir="' . dol_escape_htmltag($subDir) . '" data-prefix="' . dol_escape_htmltag($prefix) . '" data-rights="' . dol_escape_htmltag($rightString) . '"></div>';
         $out .= '  <div style="display:flex; align-items:center; gap:12px; margin-top:10px; background:transparent; padding:0;">';
 
-        $out .= '    <button type="button" id="' . $idPrefix . 'start-recording" style="border:none; cursor:pointer; margin:0; box-shadow:0 4px 6px rgba(0,0,0,0.05); border-radius:12px; width:50px; min-width:50px; height:50px; min-height:50px; padding:0; display:flex; justify-content:center; align-items:center; background-color:#8e44ad;">';
+        $out .= '    <button type="button" class="saturne-start-recording" id="' . $idPrefix . 'start-recording" style="border:none; cursor:pointer; margin:0; box-shadow:0 4px 6px rgba(0,0,0,0.05); border-radius:12px; width:50px; min-width:50px; height:50px; min-height:50px; padding:0; display:flex; justify-content:center; align-items:center; background-color:#8e44ad;">';
         $out .= '      <i class="fas fa-microphone" style="font-size:20px; color:#fff;"></i>';
         $out .= '    </button>';
 
@@ -579,7 +579,7 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
         $disabled   = $hasAudio ? '' : ' disabled';
 
         $out .= '    <div style="position:relative; z-index:10;">';
-        $out .= '      <button type="button" id="' . $idPrefix . 'play-recording" data-url="' . $latestUrlHtml . '"' . $disabled . ' style="border:none; cursor:' . $playCursor . '; margin:0; box-shadow:0 4px 6px rgba(0,0,0,0.05); border-radius:12px; width:50px; min-width:50px; height:50px; min-height:50px; padding:0; display:flex; justify-content:center; align-items:center; background-color:' . $playBg . '; position:relative; z-index:5;">';
+        $out .= '      <button type="button" class="saturne-play-recording" id="' . $idPrefix . 'play-recording" data-url="' . $latestUrlHtml . '"' . $disabled . ' style="border:none; cursor:' . $playCursor . '; margin:0; box-shadow:0 4px 6px rgba(0,0,0,0.05); border-radius:12px; width:50px; min-width:50px; height:50px; min-height:50px; padding:0; display:flex; justify-content:center; align-items:center; background-color:' . $playBg . '; position:relative; z-index:5;">';
         $out .= '        <i class="fas fa-play" style="font-size:20px; color:#fff;"></i>';
         $out .= '      </button>';
         if ($hasAudio) {
@@ -590,36 +590,48 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
         $out .= '      </button>';
         $out .= '    </div>';
 
-        $out .= '    <div id="' . $idPrefix . 'recording-indicator" class="blinking recording-indicator" data-label-upload="' . dol_escape_htmltag($langs->trans('UploadInProgress')) . '" style="display:none; font-size:11px; margin-left:5px; color:#e74c3c;">' . $langs->trans('Recording') . '</div>';
+        $out .= '    <div id="' . $idPrefix . 'recording-indicator" class="blinking recording-indicator saturne-recording-indicator" data-label-upload="' . dol_escape_htmltag($langs->trans('UploadInProgress')) . '" data-label-recording="' . dol_escape_htmltag($langs->trans('Recording')) . '" style="display:none; font-size:11px; margin-left:5px; color:#e74c3c;">' . $langs->trans('Recording') . '</div>';
 
         $out .= '  </div>';
 
-        if ($showGallery && $hasAudio) {
-            $out .= '<div class="saturne-audio-library-container" style="display:none;">';
-            $out .= '  <div class="saturne-audio-library-content" style="display:flex; flex-direction:column; gap:8px; width:100%; min-width:350px;">';
-            foreach ($audioFiles as $file) {
-                if (!empty($conf->$moduleNameLowerCase->dir_output)) {
-                    $fUrl = DOL_URL_ROOT . '/document.php?modulepart=' . urlencode($moduleNameLowerCase) . '&entity=' . $conf->entity . '&file=' . urlencode($subDir . '/' . $file['name']);
-                } else {
-                    $fUrl = DOL_URL_ROOT . '/document.php?modulepart=ecm&entity=' . $conf->entity . '&file=' . urlencode($moduleNameLowerCase . '/' . $subDir . '/' . $file['name']);
-                }
-                $fNameHtml  = dol_escape_htmltag($file['name']);
-                $fUrlHtml   = dol_escape_htmltag($fUrl);
-                $fileDate   = dol_print_date($file['date'], 'dayhour');
+        $out .= '</div>';
 
-                $out .= '<div class="saturne-audio-item" style="display:flex; align-items:center; gap:10px; background:#f8fafc; padding:6px 12px; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">';
-                $out .= '  <div style="flex-grow:1; max-width:300px;">';
-                $out .= '    <audio controls src="' . $fUrlHtml . '" style="height:35px; width:100%; outline:none;"></audio>';
-                $out .= '  </div>';
-                $out .= '  <div style="font-size:11px; color:#64748b; margin-right:auto; max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="' . $fNameHtml . '">' . $fileDate . '</div>';
-                $out .= '  <button type="button" class="saturne-delete-media-icon" data-filename="' . $fNameHtml . '" style="background:none; border:none; color:#e74c3c; cursor:pointer; padding:6px; border-radius:4px;"><i class="fas fa-trash-alt"></i></button>';
+        if ($showGallery) {
+            $out .= '<div class="wpeo-modal modal-close-only-with-button" id="' . $idPrefix . 'audio-library-modal">';
+            $out .= '  <div class="modal-container modal-flex">';
+            $out .= '    <div class="modal-header">';
+            $out .= '      <span class="modal-title">' . $langs->trans('AudioLibrary') . '</span>';
+            $out .= '      <span class="modal-close"><i class="fas fa-times"></i></span>';
+            $out .= '    </div>';
+            $out .= '    <div class="modal-content">';
+
+            if ($hasAudio) {
+                $out .= '<div class="saturne-audio-library-content" style="display:flex; flex-direction:column; gap:10px; padding:8px 0;">';
+                foreach ($audioFiles as $file) {
+                    if (!empty($conf->$moduleNameLowerCase->dir_output)) {
+                        $fUrl = DOL_URL_ROOT . '/document.php?modulepart=' . urlencode($moduleNameLowerCase) . '&entity=' . $conf->entity . '&file=' . urlencode($subDir . '/' . $file['name']);
+                    } else {
+                        $fUrl = DOL_URL_ROOT . '/document.php?modulepart=ecm&entity=' . $conf->entity . '&file=' . urlencode($moduleNameLowerCase . '/' . $subDir . '/' . $file['name']);
+                    }
+                    $fNameHtml = dol_escape_htmltag($file['name']);
+                    $fUrlHtml  = dol_escape_htmltag($fUrl);
+                    $fileDate  = dol_print_date($file['date'], 'dayhour');
+
+                    $out .= '<div class="saturne-audio-item" style="display:flex; align-items:center; gap:12px; background:#f8fafc; padding:10px 14px; border-radius:10px; box-shadow:0 1px 3px rgba(0,0,0,0.07);">';
+                    $out .= '  <audio controls src="' . $fUrlHtml . '" style="flex:1; height:36px; outline:none;"></audio>';
+                    $out .= '  <span style="font-size:11px; color:#64748b; white-space:nowrap;" title="' . $fNameHtml . '">' . $fileDate . '</span>';
+                    $out .= '  <button type="button" class="saturne-delete-media-icon" data-filename="' . $fNameHtml . '" style="background:none; border:none; color:#e74c3c; cursor:pointer; padding:6px; border-radius:4px; flex-shrink:0;"><i class="fas fa-trash-alt"></i></button>';
+                    $out .= '</div>';
+                }
                 $out .= '</div>';
+            } else {
+                $out .= '<p style="color:#94a3b8; text-align:center; margin-top:40px;">' . $langs->trans('NoAudioRecording') . '</p>';
             }
+
+            $out .= '    </div>';
             $out .= '  </div>';
             $out .= '</div>';
         }
-
-        $out .= '</div>';
     }
 
     return $out;
