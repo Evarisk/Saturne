@@ -93,8 +93,7 @@ window.saturne.media.isMoving = true;
  */
 window.saturne.media.init = function() {
   window.saturne.media.event();
-  const scriptElement = document.querySelector('script[src*="hammer.min.js"]');
-  if (scriptElement) {
+  if ($('script[src*="hammer.min.js"]').length) {
     window.saturne.media.initPan();
   }
 };
@@ -133,7 +132,7 @@ window.saturne.media.event = function() {
  * @returns {void}
  */
 window.saturne.media.initPan = function() {
-  const modalContent = document.querySelector('.modal-content');
+  const modalContent = $('.modal-content')[0];
   const hammer = new Hammer(modalContent, {
     touchAction: 'auto', // Configure touch action behavior
     recognizers: [
@@ -250,7 +249,7 @@ window.saturne.media.startMoving = function() {
 window.saturne.media.startDrawing = function() {
   window.saturne.media.isMoving = false; // Disable pan mode
 
-  const canvas = document.querySelector('#canvas');
+  const canvas = $('#canvas')[0];
   if (canvas) {
     if (!window.saturne.media.signaturePad) {
       // Initialise SignaturePad if you have not already done so
@@ -278,7 +277,7 @@ window.saturne.media.startDrawing = function() {
  * @return {void}
  */
 window.saturne.media.clearCanvas = function() {
-  const canvas = document.querySelector('#canvas');
+  const canvas = $('#canvas')[0];
   if (canvas && window.saturne.media.signaturePad) {
     window.saturne.media.signaturePad.clear();
     window.saturne.media.drawImageOnCanvas(window.saturne.media.img);
@@ -295,7 +294,7 @@ window.saturne.media.clearCanvas = function() {
  * @return {void}
  */
 window.saturne.media.drawImageOnCanvas = function(event) {
-  window.saturne.media.canvas = document.querySelector('#modal-upload-image canvas');
+  window.saturne.media.canvas = $('#modal-upload-image canvas')[0];
   if (window.saturne.media.canvas) {
     const context = window.saturne.media.canvas.getContext('2d');
 

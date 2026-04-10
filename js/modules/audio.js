@@ -22,7 +22,6 @@
  * \brief   JavaScript audio file for module Saturne
  */
 
-
 /**
  * Init audio JS
  *
@@ -36,7 +35,7 @@
 window.saturne.audio = {};
 
 /**
- * Init media recoder
+ * MediaRecorder instance
  *
  * @memberof Saturne_Audio
  *
@@ -46,6 +45,18 @@ window.saturne.audio = {};
  * @type {Object}
  */
 window.saturne.mediaRecoder = {};
+
+/**
+ * Accumulated audio chunks during recording
+ *
+ * @memberof Saturne_Audio
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @type {Array}
+ */
+window.saturne.audio.audioChunks = [];
 
 /**
  * Audio init
@@ -62,7 +73,7 @@ window.saturne.audio.init = function() {
 };
 
 /**
- * Audio event
+ * Audio event bindings
  *
  * @memberof Saturne_Audio
  *
@@ -77,14 +88,14 @@ window.saturne.audio.event = function() {
 };
 
 /**
- * Audio event
+ * Request microphone access and return the media stream
  *
  * @memberof Saturne_Audio
  *
  * @since   1.7.0
  * @version 1.7.0
  *
- * @returns {void}
+ * @returns {Promise<MediaStream>}
  */
 window.saturne.audio.getMediaStream = async function() {
   try {
@@ -94,6 +105,99 @@ window.saturne.audio.getMediaStream = async function() {
     window.saturne.notice.showNotice('notice-infos', 'Error', name + ': ' + message, 'error');
     throw err;
   }
+};
+
+/**
+ * Accumulate audio data chunks during recording
+ *
+ * @memberof Saturne_Audio
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param   {BlobEvent} event MediaRecorder dataavailable event
+ * @returns {void}
+ */
+window.saturne.audio.onDataAvailable = function(event) {
+  window.saturne.audio.audioChunks.push(event.data);
+};
+
+/**
+ * Update the recording indicator with upload progress
+ *
+ * @memberof Saturne_Audio
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param   {ProgressEvent} event XHR upload progress event
+ * @returns {void}
+ */
+window.saturne.audio.onUploadProgress = function(event) {
+  let percent     = Math.round((event.loaded / event.total) * 100);
+  let uploadLabel = $('#recording-indicator').data('label-upload') || 'Upload';
+  $('#recording-indicator').text(uploadLabel + ' : ' + percent + ' %');
+};
+
+/**
+ * Re-enable page footer buttons and refresh the recording indicator after upload
+ *
+ * @memberof Saturne_Audio
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param   {jqXHR} resp jQuery XHR response
+ * @returns {void}
+ */
+window.saturne.audio.onUploadComplete = function(resp) {
+  $('.page-footer button').prop('disabled', false);
+  $('#recording-indicator').replaceWith($(resp.responseText).find('#recording-indicator'));
+};
+
+/**
+ * Build and return an XHR object wired to the upload progress handler
+ *
+ * @memberof Saturne_Audio
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @returns {XMLHttpRequest}
+ */
+window.saturne.audio.buildXhr = function() {
+  let xhr               = new XMLHttpRequest();
+  xhr.upload.onprogress = window.saturne.audio.onUploadProgress;
+  return xhr;
+};
+
+/**
+ * Upload the recorded audio blob to the server
+ *
+ * @memberof Saturne_Audio
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @returns {void}
+ */
+window.saturne.audio.onRecordingStop = function() {
+  const audioBlob = new Blob(window.saturne.audio.audioChunks, {type: 'audio/wav'});
+  const formData  = new FormData();
+  formData.append('audio', audioBlob, 'recording.wav');
+
+  let token          = window.saturne.toolbox.getToken();
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+
+  $.ajax({
+    url         : document.URL + querySeparator + 'action=add_audio&token=' + token,
+    type        : 'POST',
+    data        : formData,
+    processData : false,
+    contentType : false,
+    xhr         : window.saturne.audio.buildXhr,
+    complete    : window.saturne.audio.onUploadComplete,
+  });
 };
 
 /**
@@ -107,50 +211,20 @@ window.saturne.audio.getMediaStream = async function() {
  * @returns {void}
  */
 window.saturne.audio.startRecording = async function() {
-  const stream                = await window.saturne.audio.getMediaStream();
-  window.saturne.mediaRecoder = new MediaRecorder(stream);
-  let audioChunks             = [];
+  const stream = await window.saturne.audio.getMediaStream();
 
-  window.saturne.mediaRecoder.ondataavailable = function(event) {
-    audioChunks.push(event.data);
-  };
+  window.saturne.audio.audioChunks = [];
+  window.saturne.mediaRecoder      = new MediaRecorder(stream);
+
+  window.saturne.mediaRecoder.ondataavailable = window.saturne.audio.onDataAvailable;
+  window.saturne.mediaRecoder.onstop          = window.saturne.audio.onRecordingStop;
 
   window.saturne.mediaRecoder.start();
+
   $('#recording-indicator').show();
   $('#start-recording span').toggleClass('fa-circle fa-square');
   $('#start-recording').attr('id', 'stop-recording');
   $('.page-footer button').prop('disabled', true);
-
-  window.saturne.mediaRecoder.onstop = function() {
-    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-    const formData  = new FormData();
-    formData.append('audio', audioBlob, 'recording.wav');
-
-    let token          = window.saturne.toolbox.getToken();
-    let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
-
-    $.ajax({
-      url: document.URL + querySeparator + 'action=add_audio&token=' + token,
-      type: 'POST',
-      data: formData,
-      processData: false,
-      contentType: false,
-      xhr: function() {
-        let xhr = new XMLHttpRequest();
-        xhr.upload.onprogress = function(event) {
-          let percent     = Math.round((event.loaded / event.total) * 100);
-          let uploadLabel = $('#recording-indicator').data('label-upload') || 'Upload';
-          $('#recording-indicator').text(uploadLabel + ' : ' + percent + ' %');
-        };
-
-        return xhr;
-      },
-      complete: function(resp) {
-        $('.page-footer button').prop('disabled', false);
-        $('#recording-indicator').replaceWith($(resp.responseText).find('#recording-indicator'));
-      },
-    });
-  };
 };
 
 /**
