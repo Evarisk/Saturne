@@ -268,10 +268,7 @@ print '</tr>';
 print '</tbody>';
 print '</table>';
 
-$mediaResolutionParts = explode('-', getDolGlobalString('SATURNE_MEDIA_RESOLUTION_USED'));
-$mediaResolution      = explode('x', $mediaResolutionParts[1] ?? '1920x1080');
-
-include dol_buildpath('/saturne/core/tpl/medias/media_editor_modal.tpl.php');
+include dol_buildpath('/saturne/core/tpl/medias/photo_editor_modal.tpl.php');
 
 print dol_get_fiche_end();
 

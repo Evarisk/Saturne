@@ -57,11 +57,13 @@ window.saturne.mediaBlock.init = function() {
  * @returns {void}
  */
 window.saturne.mediaBlock.event = function() {
-  $(document).on('change', '.saturne-media-block-upload', window.saturne.mediaBlock.uploadPhoto);
+  $(document).on('change', '.saturne-photo-upload', window.saturne.mediaBlock.onPhotoSelected);
+  $(document).on('click', '.saturne-media-gallery .open-media-editor-as-gallery', window.saturne.mediaBlock.onGalleryClick);
 };
 
 /**
- * Upload selected photo files via AJAX and refresh the gallery
+ * Triggered when a new photo file is selected via the camera button.
+ * Opens the photo editor so the user can annotate before uploading.
  *
  * @memberof Saturne_MediaBlock
  *
@@ -70,22 +72,75 @@ window.saturne.mediaBlock.event = function() {
  *
  * @returns {void}
  */
-window.saturne.mediaBlock.uploadPhoto = function() {
-  var input          = $(this);
-  var block          = input.closest('.saturne-media-upload-block');
-  var files          = input.prop('files');
-  var token          = window.saturne.toolbox.getToken();
-  var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
-  var formData       = new FormData();
+window.saturne.mediaBlock.onPhotoSelected = function() {
+  var input  = $(this);
+  var block  = input.closest('.linked-medias');
+  var module = block.find('.fast-upload-options').data('from-type');
+  var subdir = block.find('.fast-upload-options').data('from-subdir');
+  var files  = input.prop('files');
 
-  $.each(files, function(index, file) {
-    formData.append('userfile[]', file);
+  if (!files || !files.length) {
+    return;
+  }
+
+  window.saturne.photoEditor.openFile(files[0], function(blob) {
+    window.saturne.mediaBlock.uploadBlob(blob, module, subdir, block);
   });
 
-  formData.append('module_name', block.data('module'));
-  formData.append('sub_dir', block.data('subdir'));
+  // Reset input so the same file can be re-selected if needed
+  input.val('');
+};
 
-  window.saturne.loader.display(block);
+/**
+ * Triggered when the user clicks the gallery thumbnail.
+ * Opens the photo editor with the first image from the gallery.
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @returns {void}
+ */
+window.saturne.mediaBlock.onGalleryClick = function() {
+  var urls   = $(this).data('json');
+  var block  = $(this).closest('.linked-medias');
+  var module = block.find('.fast-upload-options').data('from-type');
+  var subdir = block.find('.fast-upload-options').data('from-subdir');
+
+  if (!urls || !urls.length) {
+    return;
+  }
+
+  window.saturne.photoEditor.open(urls[0], function(blob) {
+    window.saturne.mediaBlock.uploadBlob(blob, module, subdir, block);
+  });
+};
+
+/**
+ * Upload a Blob to the server via AJAX and refresh the gallery section.
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param   {Blob}   blob   Image blob to upload
+ * @param   {string} module Module name
+ * @param   {string} subdir Sub-directory
+ * @param   {jQuery} block  The .linked-medias block element
+ * @returns {void}
+ */
+window.saturne.mediaBlock.uploadBlob = function(blob, module, subdir, block) {
+  var token          = window.saturne.toolbox.getToken();
+  var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+  var filename       = 'photo_' + new Date().getTime() + '.jpg';
+  var file           = new File([blob], filename, { type: 'image/jpeg', lastModified: Date.now() });
+  var formData       = new FormData();
+
+  formData.append('userfile[]', file, filename);
+  formData.append('module_name', module);
+  formData.append('sub_dir', subdir);
 
   $.ajax({
     url         : document.URL + querySeparator + 'action=uploadPhoto&token=' + token,
@@ -93,27 +148,11 @@ window.saturne.mediaBlock.uploadPhoto = function() {
     data        : formData,
     processData : false,
     contentType : false,
-    complete    : window.saturne.mediaBlock.onUploadComplete,
-  });
-};
-
-/**
- * On upload complete: remove loader and refresh the gallery section from response
- *
- * @memberof Saturne_MediaBlock
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @param   {jqXHR} resp jQuery XHR response
- * @returns {void}
- */
-window.saturne.mediaBlock.onUploadComplete = function(resp) {
-  var updatedGallery = $(resp.responseText).find('.saturne-media-gallery');
-  if (updatedGallery.length) {
-    $('.saturne-media-gallery').replaceWith(updatedGallery);
-  }
-  $('.saturne-media-upload-block').each(function() {
-    window.saturne.loader.remove($(this));
+    complete    : function(resp) {
+      var updatedGallery = $(resp.responseText).find('.saturne-media-gallery');
+      if (updatedGallery.length && block && block.length) {
+        block.find('.saturne-media-gallery').replaceWith(updatedGallery);
+      }
+    }
   });
 };
