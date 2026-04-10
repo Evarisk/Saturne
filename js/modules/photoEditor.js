@@ -137,20 +137,16 @@ window.saturne.photoEditor.event = function() {
   });
 
   // Gallery navigation
-  var btnPrev  = document.getElementById('saturne-btn-prev-photo');
-  var btnNext  = document.getElementById('saturne-btn-next-photo');
-  var navLabel = document.getElementById('saturne-photo-nav-label');
-  var navBar   = document.getElementById('saturne-photo-nav');
+  var btnPrev = document.getElementById('saturne-btn-prev-photo');
+  var btnNext = document.getElementById('saturne-btn-next-photo');
 
   btnPrev.addEventListener('click', function() {
     var pe = window.saturne.photoEditor;
     if (pe._urls.length < 2) return;
     pe._currentIndex = (pe._currentIndex - 1 + pe._urls.length) % pe._urls.length;
     pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
-      var label            = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
-      navLabel.textContent = label;
-      var badge            = document.getElementById('saturne-photo-index-badge');
-      if (badge) badge.textContent = label;
+      var badge = document.getElementById('saturne-photo-index-badge');
+      if (badge) badge.textContent = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
     });
   });
 
@@ -159,10 +155,8 @@ window.saturne.photoEditor.event = function() {
     if (pe._urls.length < 2) return;
     pe._currentIndex = (pe._currentIndex + 1) % pe._urls.length;
     pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
-      var label            = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
-      navLabel.textContent = label;
-      var badge            = document.getElementById('saturne-photo-index-badge');
-      if (badge) badge.textContent = label;
+      var badge = document.getElementById('saturne-photo-index-badge');
+      if (badge) badge.textContent = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
     });
   });
 
@@ -250,22 +244,21 @@ window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex) {
   pe._urls           = Array.isArray(urlOrUrls) ? urlOrUrls : [urlOrUrls];
   pe._currentIndex   = (typeof startIndex === 'number') ? startIndex : 0;
 
-  var navBar   = document.getElementById('saturne-photo-nav');
-  var navLabel = document.getElementById('saturne-photo-nav-label');
-  var badge    = document.getElementById('saturne-photo-index-badge');
+  var btnPrevEl = document.getElementById('saturne-btn-prev-photo');
+  var btnNextEl = document.getElementById('saturne-btn-next-photo');
+  var badge     = document.getElementById('saturne-photo-index-badge');
   if (pe._urls.length > 1) {
-    var label              = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
-    navBar.style.display   = 'flex';
-    navLabel.textContent   = label;
+    var label = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
+    if (btnPrevEl) btnPrevEl.style.display = 'flex';
+    if (btnNextEl) btnNextEl.style.display = 'flex';
     if (badge) {
       badge.textContent   = label;
       badge.style.display = 'block';
     }
   } else {
-    navBar.style.display   = 'none';
-    if (badge) {
-      badge.style.display = 'none';
-    }
+    if (btnPrevEl) btnPrevEl.style.display = 'none';
+    if (btnNextEl) btnNextEl.style.display = 'none';
+    if (badge) badge.style.display = 'none';
   }
 
   pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {

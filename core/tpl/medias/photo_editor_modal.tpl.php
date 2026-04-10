@@ -56,13 +56,9 @@
             <canvas id="saturne-photo-editor-canvas" style="max-width:100%; max-height:100%; object-fit:contain; touch-action:none; cursor:crosshair;"></canvas>
             <div id="saturne-crop-selection" style="display:none; position:absolute; border:2px dashed #fff; background:rgba(255,255,255,0.2); pointer-events:none;"></div>
             <div id="saturne-photo-index-badge" style="display:none; position:absolute; top:8px; right:8px; background:rgba(0,0,0,0.55); color:#fff; border-radius:10px; padding:2px 10px; font-size:12px; font-weight:600; pointer-events:none; backdrop-filter:blur(4px);"></div>
-        </div>
-
-        <!-- Gallery navigation (visible only when multiple images) -->
-        <div id="saturne-photo-nav" style="display:none; justify-content:center; align-items:center; gap:12px; padding:6px 0; color:#fff; font-size:13px;">
-            <button type="button" id="saturne-btn-prev-photo" style="background:#34495e; color:white; border:none; width:32px; height:32px; border-radius:50%; cursor:pointer; display:flex; justify-content:center; align-items:center;"><i class="fas fa-chevron-left"></i></button>
-            <span id="saturne-photo-nav-label" style="font-size:14px; font-weight:600; color:#1e293b; min-width:50px; text-align:center;"></span>
-            <button type="button" id="saturne-btn-next-photo" style="background:#34495e; color:white; border:none; width:32px; height:32px; border-radius:50%; cursor:pointer; display:flex; justify-content:center; align-items:center;"><i class="fas fa-chevron-right"></i></button>
+            <!-- Navigation arrows overlaid on the canvas -->
+            <button type="button" id="saturne-btn-prev-photo" style="display:none; position:absolute; left:8px; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.45); color:white; border:none; width:36px; height:36px; border-radius:50%; cursor:pointer; justify-content:center; align-items:center; backdrop-filter:blur(4px);"><i class="fas fa-chevron-left"></i></button>
+            <button type="button" id="saturne-btn-next-photo" style="display:none; position:absolute; right:8px; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.45); color:white; border:none; width:36px; height:36px; border-radius:50%; cursor:pointer; justify-content:center; align-items:center; backdrop-filter:blur(4px);"><i class="fas fa-chevron-right"></i></button>
         </div>
 
         <!-- Toolbar -->
