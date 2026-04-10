@@ -49,6 +49,9 @@
         height: 36px !important;
         min-width: 36px;
         flex-shrink: 0;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
     }
 
     #saturne-pencil-tool-container {
