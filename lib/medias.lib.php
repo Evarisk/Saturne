@@ -474,6 +474,8 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
 {
     global $conf, $langs;
 
+    $langs->load('medias@saturne');
+
     $showPhoto   = isset($options['show_photo'])   ? $options['show_photo']   : true;
     $showAudio   = isset($options['show_audio'])   ? $options['show_audio']   : true;
     $showGallery = isset($options['show_gallery']) ? $options['show_gallery'] : true;

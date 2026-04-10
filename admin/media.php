@@ -46,7 +46,7 @@ global $conf, $db, $langs, $user;
 /** @var \User $user */
 
 // Load translation files required by the page
-saturne_load_langs(['admin', 'saturne@saturne']);
+saturne_load_langs(['admin', 'saturne@saturne', 'medias@saturne']);
 
 // Security check
 /** @phpstan-ignore-next-line */

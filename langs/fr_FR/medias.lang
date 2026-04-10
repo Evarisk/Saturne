@@ -72,6 +72,10 @@ StartRecording            = Démarrer l'enregistrement
 Recording                 = Enregistrement en cours...
 NoAudioYet                = Aucun enregistrement audio pour le moment
 UploadInProgress          = Téléchargement en cours
+AudioLibrary              = Bibliothèque audio
+NoAudioRecording          = Aucun enregistrement audio
+FileDeleted               = Le fichier a été supprimé
+ErrorFileNotDeleted       = Le fichier n'a pas pu être supprimé
 
 # Analyse AI
 AIAnalyseImage	= Analyse de l'image: %s
