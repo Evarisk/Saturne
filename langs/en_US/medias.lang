@@ -68,6 +68,7 @@ StartRecording            = Start recording
 Recording                 = Recording in progress...
 NoAudioYet                = No audio recording yet
 UploadInProgress          = Upload in progress
+ErrorFileNotAnImage       = The uploaded file is not a valid image
 AudioLibrary              = Audio library
 NoAudioRecording          = No audio recording
 FileDeleted               = The file has been deleted

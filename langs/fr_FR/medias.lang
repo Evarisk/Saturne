@@ -72,6 +72,7 @@ StartRecording            = Démarrer l'enregistrement
 Recording                 = Enregistrement en cours...
 NoAudioYet                = Aucun enregistrement audio pour le moment
 UploadInProgress          = Téléchargement en cours
+ErrorFileNotAnImage       = Le fichier envoyé n'est pas une image valide
 AudioLibrary              = Bibliothèque audio
 NoAudioRecording          = Aucun enregistrement audio
 FileDeleted               = Le fichier a été supprimé

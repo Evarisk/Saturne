@@ -75,12 +75,34 @@ if ($action == 'uploadPhoto' && !empty($moduleName) && !empty($conf->global->MAI
         dol_mkdir($uploadDir);
     }
 
-    $allowOverwrite = GETPOSTINT('overwrite') ? 1 : 0;
-    $res = dol_add_file_process($uploadDir, $allowOverwrite, 1, 'userfile', '', null, '', 1);
-    if ($res > 0) {
-        setEventMessages($langs->trans('PhotoWellSent'), null, 'mesgs');
+    // Validate that every uploaded file is a real image via MIME type
+    $uploadedFiles = isset($_FILES['userfile']) ? $_FILES['userfile'] : [];
+    $invalidFile   = false;
+    if (!empty($uploadedFiles['tmp_name'])) {
+        $tmpNames = is_array($uploadedFiles['tmp_name']) ? $uploadedFiles['tmp_name'] : [$uploadedFiles['tmp_name']];
+        foreach ($tmpNames as $tmpName) {
+            if (empty($tmpName)) {
+                continue;
+            }
+            $finfo    = new finfo(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo->file($tmpName);
+            if (strpos($mimeType, 'image/') !== 0) {
+                $invalidFile = true;
+                break;
+            }
+        }
+    }
+
+    if ($invalidFile) {
+        setEventMessages($langs->trans('ErrorFileNotAnImage'), null, 'errors');
     } else {
-        setEventMessages($langs->trans('PhotoNotSent'), null, 'errors');
+        $allowOverwrite = GETPOSTINT('overwrite') ? 1 : 0;
+        $res = dol_add_file_process($uploadDir, $allowOverwrite, 1, 'userfile', '', null, '', 1);
+        if ($res > 0) {
+            setEventMessages($langs->trans('PhotoWellSent'), null, 'mesgs');
+        } else {
+            setEventMessages($langs->trans('PhotoNotSent'), null, 'errors');
+        }
     }
 }
 
@@ -148,10 +170,11 @@ $head = saturne_admin_prepare_head();
 print dol_get_fiche_head($head, 'media', $title, -1, 'saturne_color@saturne');
 
 // Build configuration values
-$dolibarrLimit = !empty($conf->global->MAIN_UPLOAD_DOC) ? ($conf->global->MAIN_UPLOAD_DOC / 1024) . ' Mo' : $langs->trans('NotDefined');
-$serverLimit   = ini_get('upload_max_filesize');
-$serverLimit   = str_ireplace('m', ' Mo', $serverLimit);
-$serverLimit   = str_ireplace('g', ' Go', $serverLimit);
+$dolibarrLimit = !empty($conf->global->MAIN_UPLOAD_DOC) ? $conf->global->MAIN_UPLOAD_DOC . ' Ko' : $langs->trans('NotDefined');
+$serverLimit = ini_get('upload_max_filesize');
+$serverLimit = preg_replace('/^\s*(\d+)\s*k$/i', '$1 Ko', $serverLimit);
+$serverLimit = preg_replace('/^\s*(\d+)\s*m$/i', '$1 Mo', $serverLimit);
+$serverLimit = preg_replace('/^\s*(\d+)\s*g$/i', '$1 Go', $serverLimit);
 $maxFiles      = ini_get('max_file_uploads');
 
 $targetModule    = 'saturne';

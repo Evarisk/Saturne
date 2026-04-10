@@ -83,6 +83,14 @@ window.saturne.mediaBlock.onPhotoSelected = function() {
     return;
   }
 
+  for (var i = 0; i < files.length; i++) {
+    if (!files[i].type || files[i].type.indexOf('image/') !== 0) {
+      window.saturne.notice.showNotice('notice-infos', 'Error', files[i].name + ' : ' + (window.saturne.langs && window.saturne.langs.ErrorFileNotAnImage ? window.saturne.langs.ErrorFileNotAnImage : 'Not a valid image'), 'error');
+      input.val('');
+      return;
+    }
+  }
+
   window.saturne.photoEditor.openFile(files[0], function(blob) {
     window.saturne.mediaBlock.uploadBlob(blob, module, subdir, block);
   });
