@@ -51,6 +51,8 @@ window.saturne.photoEditor._startCX      = 0;
 window.saturne.photoEditor._startCY      = 0;
 window.saturne.photoEditor._seqCounter   = 1;
 window.saturne.photoEditor._onSave       = null;
+window.saturne.photoEditor._urls         = [];
+window.saturne.photoEditor._currentIndex = 0;
 
 /**
  * Photo editor init
@@ -134,6 +136,30 @@ window.saturne.photoEditor.event = function() {
     });
   });
 
+  // Gallery navigation
+  var btnPrev  = document.getElementById('saturne-btn-prev-photo');
+  var btnNext  = document.getElementById('saturne-btn-next-photo');
+  var navLabel = document.getElementById('saturne-photo-nav-label');
+  var navBar   = document.getElementById('saturne-photo-nav');
+
+  btnPrev.addEventListener('click', function() {
+    var pe = window.saturne.photoEditor;
+    if (pe._urls.length < 2) return;
+    pe._currentIndex = (pe._currentIndex - 1 + pe._urls.length) % pe._urls.length;
+    pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
+      navLabel.textContent = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
+    });
+  });
+
+  btnNext.addEventListener('click', function() {
+    var pe = window.saturne.photoEditor;
+    if (pe._urls.length < 2) return;
+    pe._currentIndex = (pe._currentIndex + 1) % pe._urls.length;
+    pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
+      navLabel.textContent = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
+    });
+  });
+
   // Undo
   btnUndo.addEventListener('click', function() {
     var stack = window.saturne.photoEditor._historyStack;
@@ -199,20 +225,41 @@ window.saturne.photoEditor.event = function() {
  * @param   {Function} onSave Callback receiving a Blob on validate
  * @returns {void}
  */
-window.saturne.photoEditor.open = function(url, onSave) {
+window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex) {
   var modal = window.saturne.photoEditor._modal;
   if (!modal) {
     return;
   }
-  window.saturne.photoEditor._onSave       = onSave || null;
-  window.saturne.photoEditor._historyStack = [];
 
-  var canvas      = window.saturne.photoEditor._canvas;
-  var ctx         = window.saturne.photoEditor._ctx;
-  var sizeSelect  = document.getElementById('saturne-photo-size-select');
-  var isFullHD    = sizeSelect && sizeSelect.value === 'fullhd';
-  var maxDim      = isFullHD ? 1920 : 1280;
+  var pe             = window.saturne.photoEditor;
+  pe._onSave         = onSave || null;
+  pe._historyStack   = [];
+  pe._urls           = Array.isArray(urlOrUrls) ? urlOrUrls : [urlOrUrls];
+  pe._currentIndex   = (typeof startIndex === 'number') ? startIndex : 0;
 
+  var navBar   = document.getElementById('saturne-photo-nav');
+  var navLabel = document.getElementById('saturne-photo-nav-label');
+  if (pe._urls.length > 1) {
+    navBar.style.display   = 'flex';
+    navLabel.textContent   = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
+  } else {
+    navBar.style.display   = 'none';
+  }
+
+  pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
+    modal.style.display = 'flex';
+  });
+};
+
+window.saturne.photoEditor._loadUrlIntoCanvas = function(url, callback) {
+  var pe        = window.saturne.photoEditor;
+  var canvas    = pe._canvas;
+  var ctx       = pe._ctx;
+  var sizeSelect = document.getElementById('saturne-photo-size-select');
+  var isFullHD  = sizeSelect && sizeSelect.value === 'fullhd';
+  var maxDim    = isFullHD ? 1920 : 1280;
+
+  pe._historyStack = [];
   var img      = new Image();
   img.crossOrigin = 'Anonymous';
   img.onload   = function() {
@@ -224,7 +271,7 @@ window.saturne.photoEditor.open = function(url, onSave) {
     canvas.height = img.height * ratio;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    modal.style.display = 'flex';
+    if (typeof callback === 'function') callback();
   };
   img.src = url;
 };

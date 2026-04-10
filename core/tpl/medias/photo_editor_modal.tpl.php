@@ -57,6 +57,13 @@
             <div id="saturne-crop-selection" style="display:none; position:absolute; border:2px dashed #fff; background:rgba(255,255,255,0.2); pointer-events:none;"></div>
         </div>
 
+        <!-- Gallery navigation (visible only when multiple images) -->
+        <div id="saturne-photo-nav" style="display:none; justify-content:center; align-items:center; gap:12px; padding:6px 0; color:#fff; font-size:13px;">
+            <button type="button" id="saturne-btn-prev-photo" style="background:#34495e; color:white; border:none; width:32px; height:32px; border-radius:50%; cursor:pointer; display:flex; justify-content:center; align-items:center;"><i class="fas fa-chevron-left"></i></button>
+            <span id="saturne-photo-nav-label"></span>
+            <button type="button" id="saturne-btn-next-photo" style="background:#34495e; color:white; border:none; width:32px; height:32px; border-radius:50%; cursor:pointer; display:flex; justify-content:center; align-items:center;"><i class="fas fa-chevron-right"></i></button>
+        </div>
+
         <!-- Toolbar -->
         <div class="saturne-photo-editor-toolbar">
 

@@ -112,9 +112,9 @@ window.saturne.mediaBlock.onGalleryClick = function() {
     return;
   }
 
-  window.saturne.photoEditor.open(urls[0], function(blob) {
+  window.saturne.photoEditor.open(urls, function(blob) {
     window.saturne.mediaBlock.uploadBlob(blob, module, subdir, block);
-  });
+  }, 0);
 };
 
 /**
