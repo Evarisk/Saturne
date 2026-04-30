@@ -197,7 +197,12 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
                 } else {
                     $actioncomm->fk_user_action = $object->element_id;
                 }
-                $actioncomm->fk_element = $object->fk_object;
+                $actioncomm->fk_element   = $object->fk_object;
+                $actioncomm->email_msgid  = $object->context['email_msgid'] ?? '';
+                $actioncomm->email_from   = $object->context['email_from'] ?? '';
+                $actioncomm->email_to     = $object->context['email_to'] ?? '';
+                $actioncomm->email_subject = $object->context['email_subject'] ?? '';
+                $actioncomm->note_private  = $object->context['email_body'] ?? '';
                 $actioncomm->create($user);
                 break;
 
