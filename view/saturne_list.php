@@ -240,6 +240,10 @@ saturne_header(0, '', $title, '', '', 0, 0, [], [], '', 'mod-' . $object->elemen
     </script>
 <?php
 
+if (!empty($objectMetadata['create_url'])) {
+    $createUrl = dol_buildpath('/' . $objectMetadata['create_url'], 1) . '?action=create';
+}
+
 require_once __DIR__ . '/../core/tpl/list/objectfields_list_build_sql_select.tpl.php';
 require_once __DIR__ . '/../core/tpl/list/objectfields_list_header.tpl.php';
 require_once __DIR__ . '/../core/tpl/list/objectfields_list_search_input.tpl.php';
