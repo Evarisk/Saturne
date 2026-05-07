@@ -44,15 +44,17 @@ jobs:
             - name: Resolve tag and module name
               id: meta
               run: |
-                  if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-                      echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
-                      echo "module=${{ inputs.module }}" >> $GITHUB_OUTPUT
-                  elif [ "${{ github.event_name }}" = "workflow_call" ]; then
+                  if [ "${{ github.event_name }}" = "workflow_call" ]; then
                       echo "tag=${{ inputs.tag }}" >> $GITHUB_OUTPUT
                       echo "module=${{ inputs.module }}" >> $GITHUB_OUTPUT
                   else
-                      echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-                      echo "module=${{ inputs.module }}" >> $GITHUB_OUTPUT
+                      if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+                          echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+                      else
+                          echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+                      fi
+                      repo="${GITHUB_REPOSITORY##*/}"
+                      echo "module=${repo,,}" >> $GITHUB_OUTPUT
                   fi
 
             - name: Check for release notes
