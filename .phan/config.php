@@ -47,7 +47,6 @@ return [
         DOL_DOCUMENT_ROOT . '/compta/facture/class/',
         DOL_DOCUMENT_ROOT . '/contact/class/',
         DOL_DOCUMENT_ROOT . '/contrat/class/',
-        DOL_DOCUMENT_ROOT . '/core/actions_extrafields.inc.php',
         DOL_DOCUMENT_ROOT . '/core/class/',
         DOL_DOCUMENT_ROOT . '/core/lib/',
         DOL_DOCUMENT_ROOT . '/core/modules/',
@@ -57,6 +56,7 @@ return [
         DOL_DOCUMENT_ROOT . '/expedition/class/',
         DOL_DOCUMENT_ROOT . '/fichinter/class/',
         DOL_DOCUMENT_ROOT . '/fourn/class/',
+        DOL_DOCUMENT_ROOT . '/includes/parsedown/',
         DOL_DOCUMENT_ROOT . '/mrp/class/',
         DOL_DOCUMENT_ROOT . '/product/class/',
         DOL_DOCUMENT_ROOT . '/product/inventory/class/',
@@ -83,7 +83,6 @@ return [
         DOL_DOCUMENT_ROOT . '/compta/facture/class/',
         DOL_DOCUMENT_ROOT . '/contact/class/',
         DOL_DOCUMENT_ROOT . '/contrat/class/',
-        DOL_DOCUMENT_ROOT . '/core/actions_extrafields.inc.php',
         DOL_DOCUMENT_ROOT . '/core/class/',
         DOL_DOCUMENT_ROOT . '/core/lib/',
         DOL_DOCUMENT_ROOT . '/core/modules/',
@@ -93,6 +92,7 @@ return [
         DOL_DOCUMENT_ROOT . '/expedition/class/',
         DOL_DOCUMENT_ROOT . '/fichinter/class/',
         DOL_DOCUMENT_ROOT . '/fourn/class/',
+        DOL_DOCUMENT_ROOT . '/includes/parsedown/',
         DOL_DOCUMENT_ROOT . '/mrp/class/',
         DOL_DOCUMENT_ROOT . '/product/class/',
         DOL_DOCUMENT_ROOT . '/product/inventory/class/',
@@ -232,12 +232,27 @@ return [
     // Exclude files whose class declarations would duplicate what Phan already
     // sees from core/class/ or from dev/phan/stubs.php.
     'exclude_file_list' => [
+        DOL_DOCUMENT_ROOT . '/core/actions_changeselectedfields.inc.php',
+        DOL_DOCUMENT_ROOT . '/core/actions_extrafields.inc.php',
+        DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php',
+        DOL_DOCUMENT_ROOT . '/core/actions_linkedfiles.inc.php',
+        DOL_DOCUMENT_ROOT . '/core/actions_massactions.inc.php',
+        DOL_DOCUMENT_ROOT . '/core/actions_sendmails.inc.php',
+        DOL_DOCUMENT_ROOT . '/core/actions_setnotes.inc.php',
         SAT_MODULE_ROOT . '/tests/phpunit/bootstrap.php',
         SAT_MODULE_ROOT . '/dev/phpstan/stubs.php',
     ],
 
     // File extensions to analyze.
-    'file_list' => [],
+    'file_list' => [
+        DOL_DOCUMENT_ROOT . '/core/actions_changeselectedfields.inc.php',
+        DOL_DOCUMENT_ROOT . '/core/actions_extrafields.inc.php',
+        DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php',
+        DOL_DOCUMENT_ROOT . '/core/actions_linkedfiles.inc.php',
+        DOL_DOCUMENT_ROOT . '/core/actions_massactions.inc.php',
+        DOL_DOCUMENT_ROOT . '/core/actions_sendmails.inc.php',
+        DOL_DOCUMENT_ROOT . '/core/actions_setnotes.inc.php',
+    ],
 
     // Exclude compiled/generated assets.
     'exclude_file_regex' => '@(vendor|node_modules|css|js|documents|langs)/.*@',

@@ -55,11 +55,11 @@ if (!(isset($error) && $error) && $subaction == 'uploadPhoto' && ! empty($conf->
 		if (empty($_FILES['userfile']['tmp_name'][$key])) {
 			$error++;
 			if ($_FILES['userfile']['error'][$key] == 1 || $_FILES['userfile']['error'][$key] == 2) {
-				setEventMessages($langs->transnoentitiesnoconv('ErrorThisFileSizeTooLarge', $_FILES['userfile']['name'][$key]), null, 'errors');
-				$submitFileErrorText = array('message' => $langs->transnoentitiesnoconv('ErrorThisFileSizeTooLarge', $_FILES['userfile']['name'][$key]), 'code' => '1337');
+				setEventMessages($langs->transnoentitiesnoconv('ErrorThisFileSizeTooLarge', (string) ($_FILES['userfile']['name'][$key] ?? '')), null, 'errors');
+				$submitFileErrorText = array('message' => $langs->transnoentitiesnoconv('ErrorThisFileSizeTooLarge', (string) ($_FILES['userfile']['name'][$key] ?? '')), 'code' => '1337');
 			} else {
-				setEventMessages($langs->transnoentitiesnoconv("ErrorThisFileSizeTooLarge", $_FILES['userfile']['name'][$key], $langs->transnoentitiesnoconv("File")), null, 'errors');
-				$submitFileErrorText = array('message' => $langs->transnoentitiesnoconv('ErrorThisFileSizeTooLarge', $_FILES['userfile']['name'][$key]), 'code' => '1337');
+				setEventMessages($langs->transnoentitiesnoconv("ErrorThisFileSizeTooLarge", (string) ($_FILES['userfile']['name'][$key] ?? ''), $langs->transnoentitiesnoconv("File")), null, 'errors');
+				$submitFileErrorText = array('message' => $langs->transnoentitiesnoconv('ErrorThisFileSizeTooLarge', (string) ($_FILES['userfile']['name'][$key] ?? '')), 'code' => '1337');
 			}
 		}
 
@@ -77,8 +77,8 @@ if (!(isset($error) && $error) && $subaction == 'uploadPhoto' && ! empty($conf->
 				$imgThumbMedium = saturne_vignette($uploadDir . '/' . $_FILES['userfile']['name'][$key], $conf->global->$confWidthMedium, $conf->global->$confHeightMedium, '_medium');
 				$result         = $ecmdir->changeNbOfFiles('+');
 			} else {
-				setEventMessages($langs->transnoentitiesnoconv("ErrorThisFileExists", $_FILES['userfile']['name'][$key], $langs->transnoentitiesnoconv("File")), null, 'errors');
-				$submitFileErrorText = array('message' => $langs->transnoentities('ErrorThisFileExists', $_FILES['userfile']['name'][$key]), 'code' => '1337');
+				setEventMessages($langs->transnoentitiesnoconv("ErrorThisFileExists", (string) ($_FILES['userfile']['name'][$key] ?? ''), $langs->transnoentitiesnoconv("File")), null, 'errors');
+				$submitFileErrorText = array('message' => $langs->transnoentities('ErrorThisFileExists', (string) ($_FILES['userfile']['name'][$key] ?? '')), 'code' => '1337');
 			}
 		}
 	}
@@ -308,6 +308,9 @@ if (!(isset($error) && $error) && $subaction == 'regenerate_thumbs') {
 if (!empty($submitFileErrorText) && is_array($submitFileErrorText)) {
 	print '<input class="error-medias" value="'. htmlspecialchars(json_encode($submitFileErrorText)) .'">';
 }
+
+$mediaResolutionParts = explode('-', getDolGlobalString('SATURNE_MEDIA_RESOLUTION_USED'));
+$mediaResolution      = explode('x', $mediaResolutionParts[1] ?? '1920x1080');
 
 require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
 

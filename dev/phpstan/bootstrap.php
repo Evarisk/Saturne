@@ -52,3 +52,11 @@ define('DOL_VERSION', '0.0.0');
 define('GETPOST_ALLOWHTML', 1);
 
 include_once __DIR__ . '/stubs.php';
+
+// tcpdf is delivered via composer — load the barcodes file so PHPStan can
+// resolve TCPDF_BARCODES_2D and related classes (vendor/ is excluded from
+// scanDirectories by excludePaths.analyseAndScan, so bootstrap is the only path).
+$tcpdfBarcodesFile = __DIR__ . '/../../vendor/tecnickcom/tcpdf/tcpdf_barcodes_2d.php';
+if (file_exists($tcpdfBarcodesFile)) {
+    require_once $tcpdfBarcodesFile;
+}

@@ -93,17 +93,20 @@ if (empty($resHook)) {
     }
 
     if ($action == 'remove') {
-        $saturneRedirection->fetch(GETPOSTINT('id'));
-
-        $result = $saturneRedirection->delete($user, true, false);
-        if ($result > 0) {
-            setEventMessage($langs->trans('ObjectDeleted', 'redirection'));
-            header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
-            exit;
-        } elseif (!empty($saturneRedirection->errors)) {
-            setEventMessages($langs->trans('ErrorDeleteObject', 'redirection'), $saturneRedirection->errors, 'errors');
+        $result = $saturneRedirection->fetch(GETPOSTINT('id'));
+        if ($result <= 0) {
+            setEventMessages($saturneRedirection->error ?: $langs->trans('ErrorObjectNotFound'), [], 'errors');
         } else {
-            setEventMessages($saturneRedirection->error, [], 'errors');
+            $result = $saturneRedirection->delete($user, true, false);
+            if ($result > 0) {
+                setEventMessage($langs->trans('ObjectDeleted', 'redirection'));
+                header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
+                exit;
+            } elseif (!empty($saturneRedirection->errors)) {
+                setEventMessages($langs->trans('ErrorDeleteObject', 'redirection'), $saturneRedirection->errors, 'errors');
+            } else {
+                setEventMessages($saturneRedirection->error, [], 'errors');
+            }
         }
     }
 }

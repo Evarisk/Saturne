@@ -222,7 +222,7 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
         if (!$active) {
             $htmltooltip = $tooltiptext;
             $out .= '<span class="center">';
-            $out .= $form->textwithpicto($langs->trans('Help'), $htmltooltip, 1, 0);
+            $out .= $form->textwithpicto($langs->trans('Help'), $htmltooltip, 1, 'info');
             $out .= '</span>';
         }
 		$out .= '</th>';

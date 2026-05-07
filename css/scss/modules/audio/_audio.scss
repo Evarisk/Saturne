@@ -1,16 +1,194 @@
-#recording-indicator {
-  display: none;
-  color: $color__red;
-  font-size: 18px;
-  font-weight: bold;
+@use '../../variable/variable' as *;
+
+// saturne_render_media_block — audio block
+[id$="master-media-row-container-audio"] {
+  padding: 10px 0;
 }
 
+.saturne-audio-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  padding: 0;
+  background: transparent;
+}
+
+.saturne-media-btn {
+  border: none;
+  cursor: pointer;
+  margin: 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  width: 50px;
+  min-width: 50px;
+  height: 50px;
+  min-height: 50px;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  i {
+    font-size: 20px;
+    color: #fff;
+  }
+}
+
+.saturne-start-recording {
+  background-color: #8e44ad;
+}
+
+.saturne-stop-recording {
+  background-color: $color__red;
+}
+
+.saturne-play-recording-wrapper {
+  position: relative;
+  z-index: 10;
+}
+
+.saturne-play-recording {
+  background-color: #cbd5e1;
+  position: relative;
+  z-index: 5;
+
+  &:not(:disabled) {
+    background-color: #7b68ee;
+    cursor: pointer;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.saturne-audio-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: $color__red;
+  color: #fff;
+  border-radius: 12px;
+  height: 18px;
+  min-width: 18px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  cursor: pointer;
+  z-index: 30;
+}
+
+.saturne-delete-recording {
+  display: none;
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: $color__red;
+  color: #fff;
+  border: none;
+  font-size: 12px;
+  cursor: pointer;
+  justify-content: center;
+  align-items: center;
+  z-index: 20;
+  padding: 0;
+  line-height: 1;
+}
+
+.saturne-recording-indicator {
+  display: none;
+  font-size: 11px;
+  margin-left: 5px;
+  color: $color__red;
+}
+
+// Audio library modal content
+.saturne-audio-library-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.saturne-audio-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8fafc;
+  padding: 10px 14px;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+
+  audio {
+    flex: 1;
+    height: 36px;
+    outline: none;
+  }
+
+  .saturne-audio-date {
+    font-size: 11px;
+    color: #64748b;
+    white-space: nowrap;
+  }
+}
+
+.saturne-delete-media-icon {
+  background: none;
+  border: none;
+  color: $color__red;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.saturne-no-audio {
+  color: #94a3b8;
+  text-align: center;
+  margin-top: 40px;
+}
+
+// Keyframes & animations
 .blinking {
   animation: blink 1s infinite;
 }
 
 @keyframes blink {
-  0% { opacity: 1; }
-  50% { opacity: 0; }
+  0%   { opacity: 1; }
+  50%  { opacity: 0; }
   100% { opacity: 1; }
+}
+
+@keyframes recording-pulse {
+  0%   { transform: scale(1);   box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);  background-color: $color__red; color: #fff; }
+  50%  { transform: scale(1.1); box-shadow: 0 0 0 12px rgba(231, 76, 60, 0); background-color: darken($color__red, 10%); color: #fff; }
+  100% { transform: scale(1);   box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);    background-color: $color__red; color: #fff; }
+}
+
+@keyframes playing-pulse {
+  0%   { transform: scale(1);   box-shadow: 0 0 0 0 rgba(123, 104, 238, 0.7);  background-color: #7b68ee; color: #fff; }
+  50%  { transform: scale(1.1); box-shadow: 0 0 0 12px rgba(123, 104, 238, 0); background-color: #6a5acd;  color: #fff; }
+  100% { transform: scale(1);   box-shadow: 0 0 0 0 rgba(123, 104, 238, 0);    background-color: #7b68ee; color: #fff; }
+}
+
+.recording-pulse-active {
+  animation: recording-pulse 1.5s infinite !important;
+  background-color: $color__red !important;
+  color: #fff !important;
+}
+
+.playing-pulse-active {
+  animation: playing-pulse 1.5s infinite !important;
+  background-color: #7b68ee !important;
+  color: #fff !important;
 }

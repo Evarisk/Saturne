@@ -273,102 +273,13 @@ class SaturneSignature extends SaturneObject
     /**
      * Constructor.
      *
-     * @param DoliDb $db                  Database handler.
+     * @param DoliDB $db                  Database handler.
      * @param string $moduleNameLowerCase Module name.
      * @param string $objectType          Object element type.
      */
     public function __construct(DoliDB $db, string $moduleNameLowerCase = 'saturne', string $objectType = 'saturne_signature')
     {
         parent::__construct($db, $moduleNameLowerCase, $objectType);
-    }
-
-    /**
-     * Load list of objects in memory from the database.
-     *
-     * @param  string      $sortorder         Sort Order
-     * @param  string      $sortfield         Sort field
-     * @param  int         $limit             Limit
-     * @param  int         $offset            Offset
-     * @param  array       $filter            Filter array. Example array('field'=>'value', 'customurl'=>...)
-     * @param  string      $filtermode        Filter mode (AND/OR)
-     * @param  string      $old_table_element backward compatibility
-     * @return int|array                      0 < if KO, array of pages if OK
-     * @throws Exception
-     */
-    public function fetchAll(string $sortorder = '', string $sortfield = '', int $limit = 0, int $offset = 0, array $filter = [], string $filtermode = 'AND', string $old_table_element = '')
-    {
-        dol_syslog(__METHOD__, LOG_DEBUG);
-
-        $records = [];
-
-        $sql = 'SELECT ';
-        if (dol_strlen($old_table_element) > 0) {
-            unset($this->fields['signature_location']);
-            unset($this->fields['object_type']);
-        }
-        $sql .= $this->getFieldList();
-
-        if (dol_strlen($old_table_element)) {
-            $sql .= ' FROM ' . MAIN_DB_PREFIX . $old_table_element . ' as t';
-        } else {
-            $sql .= ' FROM ' . MAIN_DB_PREFIX . $this->table_element . ' as t';
-        }
-        if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 1) {
-            $sql .= ' WHERE t.entity IN (' . getEntity($this->table_element) . ')';
-        } else {
-            $sql .= ' WHERE 1 = 1';
-        }
-        // Manage filter
-        $sqlwhere = [];
-        if (count($filter) > 0) {
-            foreach ($filter as $key => $value) {
-                if ($key == 't.rowid') {
-                    $sqlwhere[] = $key . '=' . $value;
-                } elseif (isset($this->fields[$key]['type']) && in_array($this->fields[$key]['type'], ['date', 'datetime', 'timestamp'])) {
-                    $sqlwhere[] = $key . ' = \'' . $this->db->idate($value) . '\'';
-                } elseif ($key == 'customsql') {
-                    $sqlwhere[] = $value;
-                } elseif (strpos($value, '%') === false) {
-                    $sqlwhere[] = $key . ' IN (' . $this->db->sanitize($this->db->escape($value)) . ')';
-                } else {
-                    $sqlwhere[] = $key . ' LIKE \'%' . $this->db->escape($value) . '%\'';
-                }
-            }
-        }
-        if (count($sqlwhere) > 0) {
-            $sql .= ' AND (' . implode(' ' . $filtermode . ' ', $sqlwhere) . ')';
-        }
-
-        if (!empty($sortfield)) {
-            $sql .= $this->db->order($sortfield, $sortorder);
-        }
-        if (!empty($limit)) {
-            $sql .= ' ' . $this->db->plimit($limit, $offset);
-        }
-        $resql = $this->db->query($sql);
-
-        if ($resql) {
-            $num = $this->db->num_rows($resql);
-            $i   = 0;
-            while ($i < ($limit ? min($limit, $num) : $num)) {
-                $obj = $this->db->fetch_object($resql);
-
-                $record = new self($this->db);
-                $record->setVarsFromFetchObj($obj);
-
-                $records[$record->id] = $record;
-
-                $i++;
-            }
-            $this->db->free($resql);
-
-            return $records;
-        } else {
-            $this->errors[] = 'Error ' . $this->db->lasterror();
-            dol_syslog(__METHOD__ . ' ' . join(',', $this->errors), LOG_ERR);
-
-            return -1;
-        }
     }
 
     /**
@@ -409,22 +320,10 @@ class SaturneSignature extends SaturneObject
     }
 
     /**
-     * Set deleted status
-     *
-     * @param  User $user      Object user that modify
-     * @param  int  $notrigger 1 = Does not execute triggers, 0 = Execute triggers
-     * @return int             0 < if KO, > 0 if OK
-     */
-    public function setDeleted(User $user, int $notrigger = 0): int
-    {
-        return $this->setStatusCommon($user, self::STATUS_DELETED, $notrigger, 'SATURNE_SIGNATURE_DELETE');
-    }
-
-    /**
      * Return the status
      *
-     * @param  int    $status Id status
-     * @param  int    $mode   0=long label, 1=short label, 2=Picto + short label, 3=Picto, 4=Picto + long label, 5=Short label + Picto, 6=Long label + Picto
+     * @param  int    $status ID status
+     * @param  int    $mode   0 = long label, 1 = short label, 2 = Picto + short label, 3 = Picto, 4 = Picto + long label, 5 = Short label + Picto, 6 = Long label + Picto
      * @return string         Label of status
      */
     public function LibStatut(int $status, int $mode = 0): string

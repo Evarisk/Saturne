@@ -48,13 +48,13 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
 
 	$filearray = dol_dir_list($dir, 'files', 0, '', '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_DESC : SORT_ASC));
 
-    if ($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS == 1) {
+    if (!empty($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS)) {
         $yesterdayTimeStamp = dol_time_plus_duree(dol_now(), -1, 'd');
         $filearray = array_filter($filearray, function($file) use ($yesterdayTimeStamp) {
             return $file['date'] > $yesterdayTimeStamp;
         });
     }
-    if (getDolGlobalInt('SATURNE_MEDIA_GALLERY_SHOW_ALL_MEDIA_INFOS') && $user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS == 1) {
+    if (getDolGlobalInt('SATURNE_MEDIA_GALLERY_SHOW_ALL_MEDIA_INFOS') && !empty($user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS)) {
         $moduleObjectMedias = dol_dir_list($conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1], 'files', 1, '', '.odt|.pdf|barcode|_mini|_medium|_small|_large');
         $filearray          = array_filter($filearray, function($file) use ($conf, $moduleNameLowerCase, $moduleObjectMedias) {
             $fileExists = array_search($file['name'], array_column($moduleObjectMedias, 'name'));
@@ -451,6 +451,379 @@ function saturne_get_media_linked_elements(string $moduleName, string $fileName)
     $output .= '</div>';
 
     return $output;
+}
+
+/**
+ * Render the Saturne Media Block (Photo + Audio) for external modules.
+ *
+ * Usage example:
+ *   print saturne_render_media_block('saturne', 'test_medias', '', '', ['show_photo' => true, 'show_audio' => false]);
+ *   print saturne_render_media_block('saturne', 'test_medias', '', '', ['show_photo' => false, 'show_audio' => true]);
+ *
+ * @param  string $moduleName  Module name (e.g. 'saturne', 'digiquali')
+ * @param  string $subDir      Sub-directory under module dir_output (e.g. 'photos', 'test_medias')
+ * @param  string $prefix      Optional prefix for file names and HTML element ids
+ * @param  string $rightString The rights to check on API side (e.g. 'fraispro,creer')
+ * @param  array  $options     Rendering options:
+ *                               - show_photo   (bool, default true)  Show photo upload section
+ *                               - show_audio   (bool, default true)  Show audio recording section
+ *                               - show_gallery (bool, default true)  Show gallery of existing files
+ * @return string              HTML block string
+ */
+function saturne_render_media_block(string $moduleName, string $subDir = '', string $prefix = '', string $rightString = '', array $options = []): string
+{
+    global $conf, $langs;
+
+    $langs->load('medias@saturne');
+
+    $showPhoto   = isset($options['show_photo'])   ? $options['show_photo']   : true;
+    $showAudio   = isset($options['show_audio'])   ? $options['show_audio']   : true;
+    $showGallery = isset($options['show_gallery']) ? $options['show_gallery'] : true;
+
+    $moduleNameLowerCase = dol_strtolower($moduleName);
+    $containerClass      = !empty($subDir) ? $subDir : 'media_dyn';
+
+    // Compute the storage directory path.
+    $uploadDir = !empty($conf->$moduleNameLowerCase->dir_output)
+        ? $conf->$moduleNameLowerCase->dir_output
+        : $conf->ecm->dir_output . '/' . $moduleNameLowerCase;
+    if (!empty($subDir)) {
+        $uploadDir .= '/' . $subDir;
+    }
+
+    if (!dol_is_dir($uploadDir)) {
+        dol_mkdir($uploadDir);
+    }
+
+    $idPrefix = $prefix ? dol_escape_htmltag($prefix) . '-' : '';
+    $out      = '';
+
+    if ($showPhoto) {
+        $out .= '<div class="linked-medias medias ' . dol_escape_htmltag($containerClass) . '" id="' . $idPrefix . 'master-media-row-container-photo">';
+        $out .= '  <div class="fast-upload-options" data-from-type="' . dol_escape_htmltag($moduleNameLowerCase) . '" data-from-subtype="' . dol_escape_htmltag($containerClass) . '" data-from-subdir="' . dol_escape_htmltag($subDir) . '" data-prefix="' . dol_escape_htmltag($prefix) . '" data-rights="' . dol_escape_htmltag($rightString) . '"></div>';
+        $out .= '  <div class="saturne-media-upload-block" data-module="' . dol_escape_htmltag($moduleNameLowerCase) . '" data-subdir="' . dol_escape_htmltag($subDir) . '">';
+
+        $out .= '    <label for="' . $idPrefix . 'upload-media" class="saturne-upload-label">';
+        $out .= '      <i class="fas fa-camera"></i>';
+        $out .= '      <input type="file" id="' . $idPrefix . 'upload-media" class="saturne-photo-upload" name="userfile[]" accept="image/*" data-error-not-image="' . dol_escape_htmltag($langs->trans('ErrorFileNotAnImage')) . '" multiple>';
+        $out .= '    </label>';
+
+        $out .= '    <div class="saturne-media-gallery">';
+
+        if ($showGallery) {
+            $photoFiles = dol_dir_list($uploadDir, 'files', 0, '', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC);
+            $imageFiles = [];
+            foreach ($photoFiles as $file) {
+                if (image_format_supported($file['name']) >= 0) {
+                    $imageFiles[] = $file;
+                }
+            }
+            $totalPhotos = count($imageFiles);
+
+            if ($totalPhotos > 0) {
+                $urls = [];
+                foreach ($imageFiles as $file) {
+                    if (!empty($conf->$moduleNameLowerCase->dir_output)) {
+                        $urls[] = DOL_URL_ROOT . '/document.php?modulepart=' . urlencode($moduleNameLowerCase) . '&entity=' . $conf->entity . '&file=' . urlencode($subDir . '/' . $file['name']);
+                    } else {
+                        $urls[] = DOL_URL_ROOT . '/document.php?modulepart=ecm&entity=' . $conf->entity . '&file=' . urlencode($moduleNameLowerCase . '/' . $subDir . '/' . $file['name']);
+                    }
+                }
+                $urlsJson = htmlspecialchars(json_encode($urls), ENT_QUOTES, 'UTF-8');
+                $firstImg = dol_escape_htmltag($urls[0]);
+
+                $out .= '<div class="open-media-editor-as-gallery" data-json="' . $urlsJson . '">';
+                $out .= '  <img src="' . $firstImg . '" />';
+                $out .= '  <span class="saturne-media-count-badge">' . $totalPhotos . '</span>';
+                $out .= '</div>';
+            }
+        }
+
+        $out .= '    </div>';
+        $out .= '  </div>';
+        $out .= '</div>';
+    }
+
+    if ($showAudio) {
+        $audioContainerClass = $containerClass . '_audio';
+
+        $audioFiles = [];
+        if (dol_is_dir($uploadDir)) {
+            $filearray = dol_dir_list($uploadDir, 'files', 0, '', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC);
+            foreach ($filearray as $file) {
+                if (preg_match('/\.(wav|mp3|ogg|m4a)$/i', $file['name'])) {
+                    $audioFiles[] = $file;
+                }
+            }
+        }
+
+        $hasAudio      = count($audioFiles) > 0;
+        $latestUrlHtml = '';
+        if ($hasAudio) {
+            $latestFile = $audioFiles[0];
+            if (!empty($conf->$moduleNameLowerCase->dir_output)) {
+                $latestUrlHtml = dol_escape_htmltag(DOL_URL_ROOT . '/document.php?modulepart=' . urlencode($moduleNameLowerCase) . '&entity=' . $conf->entity . '&file=' . urlencode($subDir . '/' . $latestFile['name']));
+            } else {
+                $latestUrlHtml = dol_escape_htmltag(DOL_URL_ROOT . '/document.php?modulepart=ecm&entity=' . $conf->entity . '&file=' . urlencode($moduleNameLowerCase . '/' . $subDir . '/' . $latestFile['name']));
+            }
+        }
+
+        $disabled = $hasAudio ? '' : ' disabled';
+
+        $out .= '<div class="linked-medias medias ' . dol_escape_htmltag($audioContainerClass) . '" id="' . $idPrefix . 'master-media-row-container-audio">';
+        $out .= '  <div class="fast-upload-options" data-from-type="' . dol_escape_htmltag($moduleNameLowerCase) . '" data-from-subtype="' . dol_escape_htmltag($audioContainerClass) . '" data-from-subdir="' . dol_escape_htmltag($subDir) . '" data-prefix="' . dol_escape_htmltag($prefix) . '" data-rights="' . dol_escape_htmltag($rightString) . '"></div>';
+        $out .= '  <div class="saturne-audio-controls">';
+
+        $out .= '    <button type="button" class="saturne-media-btn saturne-start-recording" id="' . $idPrefix . 'start-recording">';
+        $out .= '      <i class="fas fa-microphone"></i>';
+        $out .= '    </button>';
+
+        $out .= '    <div class="saturne-play-recording-wrapper">';
+        $out .= '      <button type="button" class="saturne-media-btn saturne-play-recording" id="' . $idPrefix . 'play-recording" data-url="' . $latestUrlHtml . '"' . $disabled . '>';
+        $out .= '        <i class="fas fa-play"></i>';
+        $out .= '      </button>';
+        if ($hasAudio) {
+            $out .= '      <span class="saturne-audio-badge saturne-open-audio-library">' . count($audioFiles) . '</span>';
+        }
+        $out .= '      <button type="button" class="saturne-delete-recording" id="' . $idPrefix . 'delete-recording">';
+        $out .= '        <i class="fas fa-times"></i>';
+        $out .= '      </button>';
+        $out .= '    </div>';
+
+        $out .= '    <div id="' . $idPrefix . 'recording-indicator" class="blinking recording-indicator saturne-recording-indicator" data-label-upload="' . dol_escape_htmltag($langs->trans('UploadInProgress')) . '" data-label-recording="' . dol_escape_htmltag($langs->trans('Recording')) . '">' . $langs->trans('Recording') . '</div>';
+
+        $out .= '  </div>';
+
+        $out .= '</div>';
+
+        if ($showGallery) {
+            $blockId = $idPrefix . 'master-media-row-container-audio';
+            $out .= '<div class="wpeo-modal saturne-audio-library-modal" id="' . $idPrefix . 'audio-library-modal"'
+                . ' data-block-id="' . dol_escape_htmltag($blockId) . '"'
+                . ' data-module="' . dol_escape_htmltag($moduleNameLowerCase) . '"'
+                . ' data-subdir="' . dol_escape_htmltag($subDir) . '"'
+                . '>';
+            $out .= '  <div class="modal-container modal-flex">';
+            $out .= '    <div class="modal-header">';
+            $out .= '      <span class="modal-title">' . $langs->trans('AudioLibrary') . '</span>';
+            $out .= '      <span class="modal-close"><i class="fas fa-times"></i></span>';
+            $out .= '    </div>';
+            $out .= '    <div class="modal-content">';
+
+            if ($hasAudio) {
+                $out .= '<div class="saturne-audio-library-content">';
+                foreach ($audioFiles as $file) {
+                    if (!empty($conf->$moduleNameLowerCase->dir_output)) {
+                        $fUrl = DOL_URL_ROOT . '/document.php?modulepart=' . urlencode($moduleNameLowerCase) . '&entity=' . $conf->entity . '&file=' . urlencode($subDir . '/' . $file['name']);
+                    } else {
+                        $fUrl = DOL_URL_ROOT . '/document.php?modulepart=ecm&entity=' . $conf->entity . '&file=' . urlencode($moduleNameLowerCase . '/' . $subDir . '/' . $file['name']);
+                    }
+                    $fNameHtml = dol_escape_htmltag($file['name']);
+                    $fUrlHtml  = dol_escape_htmltag($fUrl);
+                    $fileDate  = dol_print_date($file['date'], 'dayhour');
+
+                    $out .= '<div class="saturne-audio-item">';
+                    $out .= '  <audio controls src="' . $fUrlHtml . '"></audio>';
+                    $out .= '  <span class="saturne-audio-date" title="' . $fNameHtml . '">' . $fileDate . '</span>';
+                    $out .= '  <button type="button" class="saturne-delete-media-icon" data-filename="' . $fNameHtml . '"><i class="fas fa-trash-alt"></i></button>';
+                    $out .= '</div>';
+                }
+                $out .= '</div>';
+            } else {
+                $out .= '<p class="saturne-no-audio">' . $langs->trans('NoAudioRecording') . '</p>';
+            }
+
+            $out .= '    </div>';
+            $out .= '  </div>';
+            $out .= '</div>';
+        }
+    }
+
+    return $out;
+}
+
+/**
+ * Token d'upload isolé par utilisateur et par contexte (Pour Développeurs)
+ *
+ * Génère ou récupère un token unique lié à la session PHP et à un contexte
+ * métier. Ce token sert de sous-dossier d'upload pour isoler les fichiers
+ * de chaque utilisateur — même si plusieurs personnes ouvrent la même page
+ * simultanément, leurs uploads ne se mélangent pas. Le token survit au F5.
+ *
+ * Structure des dossiers générée :
+ *   uploads/medias/{token}/   ← propre à l'utilisateur + contexte
+ *
+ * Usage complet (formulaire → sauvegarde) :
+ *   // 1. Dans la vue — générer le token et passer le sous-dossier au bloc média
+ *   $context = $object->element . '_' . $object->id . '_photos';
+ *   $subDir  = 'photos/' . saturne_get_upload_token($context);
+ *   print saturne_render_media_block('mymodule', $subDir, '', 'mymodule,write');
+ *
+ *   // 2. Après F5 — le même token est retrouvé automatiquement depuis $_SESSION
+ *
+ *   // 3. À la sauvegarde — lire les fichiers puis invalider le token
+ *   foreach (saturne_get_media_files('mymodule', $subDir) as $file) {
+ *       dol_move($file['fullname'], $finalDir . '/' . $file['name']);
+ *   }
+ *   saturne_invalidate_upload_token($context, 'mymodule', 'photos');
+ *
+ * @param  string $context Identifiant unique du contexte d'upload, ex: 'inspection_42_photos'
+ * @return string          Token hexadécimal de 64 caractères, stable pour la durée de la session
+ */
+function saturne_get_upload_token(string $context): string
+{
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    if (empty($_SESSION['saturne_upload_tokens'][$context])) {
+        $_SESSION['saturne_upload_tokens'][$context] = bin2hex(random_bytes(32));
+    }
+
+    return $_SESSION['saturne_upload_tokens'][$context];
+}
+
+/**
+ * Suppression du token d'upload et nettoyage du dossier temporaire (Pour Développeurs)
+ *
+ * À appeler après avoir déplacé les fichiers uploadés vers leur emplacement
+ * définitif. Supprime le token de la session et efface le dossier temporaire
+ * associé pour éviter l'accumulation de fichiers orphelins sur le serveur.
+ *
+ * Usage exemple :
+ *   // Après sauvegarde de l'objet, nettoyer le token et le dossier temporaire
+ *   saturne_invalidate_upload_token('inspection_42_photos', 'mymodule', 'photos');
+ *
+ *   // Sans suppression de dossier (token seul) :
+ *   saturne_invalidate_upload_token('inspection_42_photos');
+ *
+ * @param  string $context      Même identifiant de contexte que celui passé à saturne_get_upload_token()
+ * @param  string $moduleName   Nom du module, utilisé pour résoudre le chemin de base des uploads
+ * @param  string $subDirPrefix Préfixe du sous-dossier avant le token, ex: 'photos', 'medias'
+ * @return void
+ */
+function saturne_invalidate_upload_token(string $context, string $moduleName = '', string $subDirPrefix = ''): void
+{
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    if (empty($_SESSION['saturne_upload_tokens'][$context])) {
+        return;
+    }
+
+    $token = $_SESSION['saturne_upload_tokens'][$context];
+
+    if (!empty($moduleName) && !empty($subDirPrefix)) {
+        global $conf;
+
+        $moduleNameLowerCase = dol_strtolower($moduleName);
+        $uploadBase          = !empty($conf->$moduleNameLowerCase->dir_output)
+            ? $conf->$moduleNameLowerCase->dir_output
+            : $conf->ecm->dir_output . '/' . $moduleNameLowerCase;
+
+        $tokenDir = $uploadBase . '/' . $subDirPrefix . '/' . $token;
+        if (dol_is_dir($tokenDir)) {
+            dol_delete_dir_recursive($tokenDir);
+        }
+    }
+
+    unset($_SESSION['saturne_upload_tokens'][$context]);
+}
+
+/**
+ * Récupération backend des fichiers uploadés — images et/ou audios (Pour Développeurs)
+ *
+ * Retourne la liste des fichiers présents dans un dossier d'upload sans aucun
+ * rendu HTML. Partage la même signature que saturne_render_media_block() pour
+ * pouvoir être appelé avec les mêmes arguments. Chaque entrée du tableau retourné
+ * contient : name, fullname, path, url, date, size, type ('image'|'audio').
+ *
+ * Usage exemple :
+ *   // Récupérer tous les médias (images + audios)
+ *   $files = saturne_get_media_files('mymodule', 'photos');
+ *
+ *   // Images uniquement
+ *   $files = saturne_get_media_files('mymodule', 'photos', '', '', ['type' => 'image']);
+ *
+ *   // Audios uniquement, du plus ancien au plus récent
+ *   $files = saturne_get_media_files('mymodule', 'photos', '', '', ['type' => 'audio', 'sort_order' => 'asc']);
+ *
+ * @param  string $moduleName   Module name (e.g. 'saturne', 'digiquali')
+ * @param  string $subDir       Sub-directory under module dir_output (e.g. 'photos', 'test_medias')
+ * @param  string $prefix       Unused — kept for signature parity with saturne_render_media_block()
+ * @param  string $rightString  Unused — kept for signature parity with saturne_render_media_block()
+ * @param  array  $options      Retrieval options:
+ *                                - type        (string, default '')      Filter: 'image', 'audio', or '' for both
+ *                                - sort_field  (string, default 'date')  Sort field among dol_dir_list keys
+ *                                - sort_order  (string, default 'desc')  'asc' or 'desc'
+ * @return array<int, array{name: string, fullname: string, path: string, url: string, date: int, size: int, type: string}>
+ */
+function saturne_get_media_files(string $moduleName, string $subDir = '', string $prefix = '', string $rightString = '', array $options = []): array
+{
+    global $conf;
+
+    // Kept for signature parity with saturne_render_media_block(), not used here.
+    unset($prefix, $rightString);
+
+    $type      = $options['type']       ?? '';
+    $sortField = $options['sort_field'] ?? 'date';
+    $sortOrder = $options['sort_order'] ?? 'desc';
+
+    $moduleNameLowerCase = dol_strtolower($moduleName);
+
+    $uploadDir = !empty($conf->$moduleNameLowerCase->dir_output)
+        ? $conf->$moduleNameLowerCase->dir_output
+        : $conf->ecm->dir_output . '/' . $moduleNameLowerCase;
+
+    if (!empty($subDir)) {
+        $uploadDir .= '/' . $subDir;
+    }
+
+    if (!dol_is_dir($uploadDir)) {
+        return [];
+    }
+
+    $rawFiles = dol_dir_list($uploadDir, 'files', 0, '', '(\.meta|_preview.*\.png)$', $sortField, (strtolower($sortOrder) == 'desc' ? SORT_DESC : SORT_ASC));
+
+    $result = [];
+
+    foreach ($rawFiles as $file) {
+        $fileName  = $file['name'];
+        $mediaType = '';
+
+        if (image_format_supported($fileName) >= 0) {
+            $mediaType = 'image';
+        } elseif (preg_match('/\.(wav|mp3|ogg|m4a)$/i', $fileName)) {
+            $mediaType = 'audio';
+        }
+
+        if (empty($mediaType)) {
+            continue;
+        }
+
+        if (!empty($type) && $mediaType !== $type) {
+            continue;
+        }
+
+        if (!empty($conf->$moduleNameLowerCase->dir_output)) {
+            $url = DOL_URL_ROOT . '/document.php?modulepart=' . urlencode($moduleNameLowerCase) . '&entity=' . $conf->entity . '&file=' . urlencode($subDir . '/' . $fileName);
+        } else {
+            $url = DOL_URL_ROOT . '/document.php?modulepart=ecm&entity=' . $conf->entity . '&file=' . urlencode($moduleNameLowerCase . '/' . $subDir . '/' . $fileName);
+        }
+
+        $result[] = [
+            'name'     => $fileName,
+            'fullname' => $file['fullname'],
+            'path'     => $file['path'],
+            'url'      => $url,
+            'date'     => (int) $file['date'],
+            'size'     => (int) $file['size'],
+            'type'     => $mediaType,
+        ];
+    }
+
+    return $result;
 }
 
 function saturne_show_media_buttons(): string

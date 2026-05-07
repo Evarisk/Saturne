@@ -223,7 +223,10 @@ if (empty($resHook)) {
 
         require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . $documentType . '.class.php';
 
-        $document = new $documentType($db);
+        if (class_exists($documentType)) {
+            /** @var SaturneDocumentModel $document */
+            $document = new $documentType($db);
+        }
 
         // Search template files
         $dir = __DIR__ . '/../../' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $documentType . '/';
@@ -380,13 +383,15 @@ foreach ($types as $type => $documentData) {
 
     require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . ($documentData['className'] ?? $documentData['documentType']) . '.class.php';
 
-    $object = new $type($db);
-    print load_fiche_titre($langs->trans($type), '', $documentData['picto'], 0, dol_strtolower($type));
+    if (is_string($type) && class_exists($type)) {
+        $object = new $type($db);
+        print load_fiche_titre($langs->trans($type), '', $documentData['picto'], 0, dol_strtolower($type));
 
-    $documentPath = true;
-    require __DIR__ . '/../core/tpl/admin/object/object_const_view.tpl.php';
-    require __DIR__ . '/../core/tpl/admin/object/object_numbering_module_view.tpl.php';
-    require __DIR__ . '/../core/tpl/admin/object/object_document_model_view.tpl.php';
+        $documentPath = true;
+        require __DIR__ . '/../core/tpl/admin/object/object_const_view.tpl.php';
+        require __DIR__ . '/../core/tpl/admin/object/object_numbering_module_view.tpl.php';
+        require __DIR__ . '/../core/tpl/admin/object/object_document_model_view.tpl.php';
+    }
 }
 
 // Page end

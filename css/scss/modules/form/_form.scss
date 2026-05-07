@@ -1,11 +1,13 @@
+@use '../../variable/variable' as *;
+@use 'sass:color';
+@use 'input';
+@use 'radio';
+@use 'checkbox';
+
 /*--------------------------------------------------------------
 	Module : Form
 	Version : 1.0.0
 	--------------------------------------------------------------*/
-
-@import "input";
-@import "radio";
-@import "checkbox";
 
 /** Formulaire design */
 .wpeo-form .form-element {
@@ -68,11 +70,11 @@
       background: $color__grey;
     }
     &:hover .form-field, &:hover [class*="form-field-icon"] {
-      background: darken($color__grey, 5%);
+      background: color.adjust($color__grey, $lightness: -5%);
     }
   }
   [class*="form-field-label"] {
-    background: darken($color__grey, 5%);
+    background: color.adjust($color__grey, $lightness: -5%);
   }
 }
 .wpeo-form.form-light .form-element {

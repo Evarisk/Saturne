@@ -1,3 +1,7 @@
+@use '../../variable/variable' as *;
+@use 'colors';
+@use 'button-add';
+
 /*--------------------------------------------------------------
 	Module : Button
 	Version : 1.2.0
@@ -67,10 +71,6 @@
     outline: none;
   }
 }
-
-/** Colors */
-@import "colors";
-@import "button-add";
 
 // Icon
 .wpeo-button {

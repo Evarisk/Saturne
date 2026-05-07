@@ -72,7 +72,13 @@ jobs:
                       htdocs/compta/facture/class
                       htdocs/contact/class
                       htdocs/contrat/class
+                      htdocs/core/actions_changeselectedfields.inc.php
                       htdocs/core/actions_extrafields.inc.php
+                      htdocs/core/actions_fetchobject.inc.php
+                      htdocs/core/actions_linkedfiles.inc.php
+                      htdocs/core/actions_massactions.inc.php
+                      htdocs/core/actions_sendmails.inc.php
+                      htdocs/core/actions_setnotes.inc.php
                       htdocs/core/class
                       htdocs/core/lib
                       htdocs/core/modules
@@ -82,6 +88,7 @@ jobs:
                       htdocs/expedition/class
                       htdocs/fichinter/class
                       htdocs/fourn/class
+                      htdocs/includes/parsedown
                       htdocs/mrp/class
                       htdocs/product/class
                       htdocs/product/inventory/class

@@ -39,13 +39,13 @@ print '<tr class="liste_titre">';
 
 // Action column
 if (getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
-    print getTitleFieldOfList($selectedFields, 0, $_SERVER['PHP_SELF'], '', '', '', '', $sortfield, $sortorder, 'center maxwidthsearch');
+    $removeFilterBtn = !empty($useSideFilterPanel) ? '<button type="submit" class="liste_titre button_removefilter reposition" name="button_removefilter_x" value="x"><span class="fas fa-times"></span></button>' : '';
+    print getTitleFieldOfList($selectedFields . $removeFilterBtn, 0, $_SERVER['PHP_SELF'], '', '', '', '', $sortfield, $sortorder, 'center maxwidthsearch ');
     $totalarray['nbfield']++;
 }
 
 foreach ($object->fields as $key => $val) {
-    $cssForField  = 'maxwidthsearch ';
-    $cssForField .= saturne_css_for_field($val, $key);
+    $cssForField = saturne_css_for_field($val, $key);
     if (!empty($arrayfields['t.' . $key]['checked'])) {
         print saturne_get_title_field_of_list($arrayfields['t.' . $key]['label'], 0, $_SERVER['PHP_SELF'], ($val['otheralias'] ?? 't.') . $key, '', $param, ($cssForField ? 'class="' . $cssForField . '"' : ''), $sortfield, $sortorder, ($cssForField ? $cssForField . ' ' : ''), (empty($val['disablesort']) ? '' : $val['disablesort']), (empty($val['helplist']) ? '' : $val['helplist']));
         $totalarray['nbfield']++;
@@ -62,7 +62,8 @@ print $hookmanager->resPrint;
 
 // Action column
 if (!getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
-    print getTitleFieldOfList($selectedFields, 0, $_SERVER['PHP_SELF'], '', '', '', '', $sortfield, $sortorder, 'center maxwidthsearch');
+    $removeFilterBtn = !empty($useSideFilterPanel) ? '<button type="submit" class="liste_titre button_removefilter reposition" name="button_removefilter_x" value="x"><span class="fas fa-times"></span></button>' : '';
+    print getTitleFieldOfList($selectedFields . $removeFilterBtn, 0, $_SERVER['PHP_SELF'], '', '', '', '', $sortfield, $sortorder, 'center maxwidthsearch ');
     $totalarray['nbfield']++;
 }
 

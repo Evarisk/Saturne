@@ -66,7 +66,7 @@ $massaction = GETPOST('massaction', 'alpha');
 $toselect                                   = [];
 [$confirm, $contextpage, $optioncss, $mode] = ['', '', '', ''];
 $listParameters                             = saturne_load_list_parameters(basename(dirname(__FILE__)));
-$listParameters['contextpage']              = GETPOSTISSET('contextpage') ? GETPOST('contextpage', 'aZ') : $objectMetadata['hook_name_list'];
+$listParameters['contextpage']              = GETPOSTISSET('contextpage') ? GETPOST('contextpage', 'aZ') : $objectMetadata['hook_name_list'] . '_saturne';
 foreach ($listParameters as $listParameterKey => $listParameter) {
     $$listParameterKey = $listParameter;
 }
@@ -89,7 +89,7 @@ if (isModEnabled('categorie')) {
 // Initialize view objects
 $form = new Form($db);
 
-$hookmanager->initHooks([$contextpage, 'saturnelist']);
+$hookmanager->initHooks([$contextpage, $objectMetadata['hook_name_list'] . '_saturne', 'saturnelist']);
 
 // Fetch optionals attributes and labels
 $extrafields->fetch_name_optionals_label($object->table_element);

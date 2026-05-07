@@ -1,3 +1,6 @@
+@use '../../variable/variable' as *;
+@use 'modal-flex';
+
 /*--------------------------------------------------------------
 	Module : Modal
 	Version : 1.0.0
@@ -143,4 +146,8 @@
   }
 }
 
-@import "modal-flex";
+// Media editor modal sits above the media gallery modal
+#modal-upload-image {
+  z-index: 1010;
+}
+

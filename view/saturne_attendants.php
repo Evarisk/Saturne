@@ -240,7 +240,12 @@ if (empty($resHook)) {
             } elseif (!empty($conf->global->MAIN_MAIL_SMTPS_ID) || $conf->global->SATURNE_USE_ALL_EMAIL_MODE > 0) {
                 $result = $mailfile->sendfile();
                 if ($result) {
-                    $signatory->last_email_sent_date = dol_now();
+                    $signatory->last_email_sent_date      = dol_now();
+                    $signatory->context['email_msgid']    = $mailfile->msgid;
+                    $signatory->context['email_from']     = $from;
+                    $signatory->context['email_to']       = $sendto;
+                    $signatory->context['email_subject']  = $subject;
+                    $signatory->context['email_body']     = $message;
                     $signatory->update($user, true);
                     $signatory->setPending($user, false);
                     setEventMessages($langs->trans('SendEmailAt', $signatory->email), []);

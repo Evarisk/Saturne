@@ -1,3 +1,6 @@
+@use '../../variable/variable' as *;
+@use 'status';
+
 /*--------------------------------------------------------------
 	Module : Notice
 	Version : 1.0.0
@@ -52,5 +55,3 @@
   }
 }
 
-/** Status */
-@import "status";

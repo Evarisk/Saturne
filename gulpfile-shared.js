@@ -1,5 +1,7 @@
 'use strict';
 
+const path       = require('path');
+const fs         = require('fs');
 const gulp       = require('gulp');
 const sass       = require('gulp-sass')(require('sass'));
 const rename     = require('gulp-rename');
@@ -17,16 +19,36 @@ if (!moduleName) {
     );
 }
 
+// Resolve the module root as an absolute path so the same gulpfile works in
+// both layouts without depending on cwd:
+//
+//   Sibling layout (local dev):
+//     __dirname = .../custom/saturne
+//     module    = .../custom/{moduleName}   ← exists one level up
+//
+//   Subfolder layout (CI — saturne checked out as .saturne inside the module):
+//     __dirname = .../custom/{moduleName}/.saturne
+//     module    = .../custom/{moduleName}   ← parent of __dirname
+//
+let moduleRoot;
+if (moduleName === 'saturne') {
+    moduleRoot = __dirname;
+} else {
+    const siblingPath = path.join(__dirname, '..', moduleName);
+    moduleRoot = fs.existsSync(siblingPath) ? siblingPath : path.join(__dirname, '..');
+}
+
 const paths = {
-    scss_core:  ['css/scss/**/*.scss', 'css/'],
-    js_backend: ['js/' + moduleName + '.js', 'js/modules/*.js']
+    scss_core:  [path.join(moduleRoot, 'css/scss/**/*.scss'), path.join(moduleRoot, 'css/')],
+    js_backend: [path.join(moduleRoot, 'js/' + moduleName + '.js'), path.join(moduleRoot, 'js/modules/*.js')]
 };
 
-/** SCSS — dev : sourcemaps inline, pas de minification */
+/** SCSS — dev : sourcemaps inline, minifié */
 gulp.task('scss_core', function() {
     return gulp.src(paths.scss_core[0])
         .pipe(sourcemaps.init())
         .pipe(sass().on('error', sass.logError))
+        .pipe(cleanCSS())
         .pipe(rename('./' + moduleName + '.min.css'))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(paths.scss_core[1]));
@@ -46,7 +68,7 @@ gulp.task('js_backend', function() {
     return gulp.src(paths.js_backend)
         .pipe(concat(moduleName + '.min.js'))
         .pipe(uglify())
-        .pipe(gulp.dest('./js/'));
+        .pipe(gulp.dest(path.join(moduleRoot, 'js/')));
 });
 
 /** Build prod — one-shot, minifié, sans sourcemaps */

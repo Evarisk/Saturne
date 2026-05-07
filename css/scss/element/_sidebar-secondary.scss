@@ -1,3 +1,5 @@
+@use '../variable/variable' as *;
+
 /** Paramètres des containers autour de la secondary nav */
 body.sidebar-secondary-opened {
   .fiche {

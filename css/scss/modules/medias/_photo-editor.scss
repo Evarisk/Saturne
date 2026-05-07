@@ -1,0 +1,281 @@
+/* Copyright (C) 2024-2026 EVARISK <technique@evarisk.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+/**
+ * \file    css/scss/modules/medias/_photo-editor.scss
+ * \ingroup saturne
+ * \brief   Styles for the reusable photo editor canvas modal
+ */
+
+/* ── Overlay ──────────────────────────────────────────────────────────────── */
+
+#saturne-photo-editor-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+/* ── Card ─────────────────────────────────────────────────────────────────── */
+
+.saturne-photo-editor-content {
+    width: 100%;
+    max-width: 600px;
+    max-height: 95vh;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+
+.saturne-photo-editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #3498db;
+    width: 100%;
+
+    &__left {
+        display: flex;
+        align-items: center;
+    }
+
+    &__icon {
+        color: #f39c12;
+        margin-right: 8px;
+        font-size: 1.2em;
+    }
+
+    &__title {
+        margin: 0;
+        font-size: 1.1em;
+        color: #333;
+        font-weight: 600;
+
+        #saturne-photo-resolution-display {
+            color: #e74c3c;
+            font-weight: normal;
+            margin-left: 5px;
+            font-size: 10px;
+        }
+    }
+
+    &__settings {
+        position: relative;
+        color: #94a3b8;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 0 5px;
+
+        #saturne-photo-size-select {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 30px;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+    }
+}
+
+/* ── Canvas container ─────────────────────────────────────────────────────── */
+
+#saturne-editor-canvas-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background: #1e293b;
+    border-radius: 8px;
+    position: relative;
+    min-height: 150px;
+    width: 100%;
+    height: 100%;
+}
+
+#saturne-photo-editor-canvas {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    touch-action: none;
+    cursor: crosshair;
+}
+
+#saturne-crop-selection {
+    display: none;
+    position: absolute;
+    border: 2px dashed #fff;
+    background: rgba(255, 255, 255, 0.2);
+    pointer-events: none;
+}
+
+#saturne-photo-index-badge {
+    display: none;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    border-radius: 10px;
+    padding: 2px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    pointer-events: none;
+    backdrop-filter: blur(4px);
+}
+
+/* ── Canvas nav arrows ────────────────────────────────────────────────────── */
+
+#saturne-btn-prev-photo,
+#saturne-btn-next-photo {
+    display: none;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.45);
+    color: #fff;
+    cursor: pointer;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(4px);
+}
+
+#saturne-btn-prev-photo { left: 8px; }
+#saturne-btn-next-photo { right: 8px; }
+
+/* ── Toolbar ──────────────────────────────────────────────────────────────── */
+
+.saturne-photo-editor-toolbar {
+    margin-top: 15px;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 5px;
+    align-items: center;
+    gap: 4px;
+}
+
+/* ── Base editor button ───────────────────────────────────────────────────── */
+
+.saturne-editor-btn {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+
+    &--cancel   { background-color: #f39c12; }
+    &--tool     { background-color: #34495e; }
+    &--undo     { background-color: #7f8c8d; }
+    &--save     { background-color: #2ecc71; }
+    &--ok       { background-color: #2ecc71; font-size: 1.1em; }
+
+    &.active,
+    &--tool.active { background-color: #3498db; }
+}
+
+/* ── Pencil tool container ────────────────────────────────────────────────── */
+
+#saturne-pencil-tool-container {
+    flex-shrink: 0;
+    display: flex;
+    background-color: #3498db;
+    border-radius: 4px;
+    overflow: hidden;
+    height: 36px;
+
+    .saturne-tool-btn {
+        background-color: transparent;
+        color: #fff;
+        border: none;
+        width: 36px;
+        height: 100%;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+}
+
+.saturne-pencil-color-wrapper {
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.1);
+
+    #saturne-draw-color-picker {
+        width: 24px;
+        height: 24px;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+    }
+}
+
+/* ── Arrow icon rotation ──────────────────────────────────────────────────── */
+
+.saturne-icon-arrow {
+    transform: rotate(-45deg);
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+    .saturne-photo-editor-content {
+        padding: 10px;
+        border-radius: 8px;
+        max-height: 98vh;
+    }
+
+    .saturne-photo-editor-toolbar {
+        gap: 3px;
+        margin-top: 10px;
+    }
+
+    .saturne-editor-btn,
+    #saturne-pencil-tool-container,
+    #saturne-pencil-tool-container .saturne-tool-btn {
+        width: 32px !important;
+        height: 32px !important;
+    }
+}

@@ -1,2 +1,4 @@
-@import "actions";
-@import "photo";
+@forward "actions";
+@forward "photo";
+@forward "media-block";
+@forward "photo-editor";

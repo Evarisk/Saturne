@@ -43,12 +43,6 @@ parameters:
 			path: admin/about.php
 
 		-
-			message: '#^Function llxFooter not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: admin/about.php
-
-		-
 			message: '#^Parameter mixed of print cannot be converted to string\.$#'
 			identifier: print.nonString
 			count: 1
@@ -213,19 +207,25 @@ parameters:
 		-
 			message: '#^Cannot access property \$error on mixed\.$#'
 			identifier: property.nonObject
-			count: 1
+			count: 2
 			path: admin/documents.php
 
 		-
 			message: '#^Cannot access property \$errors on mixed\.$#'
 			identifier: property.nonObject
-			count: 1
+			count: 2
 			path: admin/documents.php
 
 		-
 			message: '#^Cannot access property \$global on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
+			path: admin/documents.php
+
+		-
+			message: '#^Cannot access property \$last_main_doc on mixed\.$#'
+			identifier: property.nonObject
+			count: 2
 			path: admin/documents.php
 
 		-
@@ -244,6 +244,12 @@ parameters:
 			message: '#^Cannot call method executeHooks\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 3
+			path: admin/documents.php
+
+		-
+			message: '#^Cannot call method generateDocument\(\) on mixed\.$#'
+			identifier: method.nonObject
+			count: 1
 			path: admin/documents.php
 
 		-
@@ -271,9 +277,9 @@ parameters:
 			path: admin/documents.php
 
 		-
-			message: '#^Function llxFooter not found\.$#'
-			identifier: function.notFound
-			count: 1
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 2
 			path: admin/documents.php
 
 		-
@@ -292,6 +298,12 @@ parameters:
 			message: '#^Variable \$additionalConfig might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
+			path: admin/documents.php
+
+		-
+			message: '#^Variable \$document might not be defined\.$#'
+			identifier: variable.undefined
+			count: 5
 			path: admin/documents.php
 
 		-
@@ -325,12 +337,6 @@ parameters:
 			path: admin/information.php
 
 		-
-			message: '#^Call to method text\(\) on an unknown class Parsedown\.$#'
-			identifier: class.notFound
-			count: 1
-			path: admin/information.php
-
-		-
 			message: '#^Cannot call method close\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -340,24 +346,6 @@ parameters:
 			message: '#^Cannot call method trans\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 2
-			path: admin/information.php
-
-		-
-			message: '#^Function llxFooter not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: admin/information.php
-
-		-
-			message: '#^Instantiated class Parsedown not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: admin/information.php
-
-		-
-			message: '#^Parameter mixed of print cannot be converted to string\.$#'
-			identifier: print.nonString
-			count: 1
 			path: admin/information.php
 
 		-
@@ -418,12 +406,6 @@ parameters:
 			message: '#^Cannot call method trans\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 2
-			path: admin/object.php
-
-		-
-			message: '#^Function llxFooter not found\.$#'
-			identifier: function.notFound
-			count: 1
 			path: admin/object.php
 
 		-
@@ -607,12 +589,6 @@ parameters:
 			path: admin/publicinterface.php
 
 		-
-			message: '#^Function llxFooter not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: admin/publicinterface.php
-
-		-
 			message: '#^Parameter mixed of print cannot be converted to string\.$#'
 			identifier: print.nonString
 			count: 2
@@ -679,20 +655,14 @@ parameters:
 			path: admin/pwa.php
 
 		-
-			message: '#^Binary operation "\." between mixed and ''tcpdf_barcodes_2d…'' results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: admin/pwa.php
-
-		-
 			message: '#^Binary operation "\." between non\-falsy\-string and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 4
 			path: admin/pwa.php
 
 		-
-			message: '#^Call to method getBarcodePngData\(\) on an unknown class TCPDF2DBarcode\.$#'
-			identifier: class.notFound
+			message: '#^Call to an undefined method TCPDF2DBarcode\:\:getBarcodePngData\(\)\.$#'
+			identifier: method.notFound
 			count: 1
 			path: admin/pwa.php
 
@@ -769,26 +739,14 @@ parameters:
 			path: admin/pwa.php
 
 		-
-			message: '#^Constant TCPDF_PATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: admin/pwa.php
-
-		-
-			message: '#^Function llxFooter not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: admin/pwa.php
-
-		-
-			message: '#^Instantiated class TCPDF2DBarcode not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: admin/pwa.php
-
-		-
 			message: '#^Parameter mixed of print cannot be converted to string\.$#'
 			identifier: print.nonString
+			count: 1
+			path: admin/pwa.php
+
+		-
+			message: '#^Path in require_once\(\) "tcpdf_barcodes_2d\.php" is not a file or it does not exist\.$#'
+			identifier: requireOnce.fileNotFound
 			count: 1
 			path: admin/pwa.php
 
@@ -847,26 +805,14 @@ parameters:
 			path: admin/redirection.php
 
 		-
-			message: '#^Binary operation "\." between mixed and ''tcpdf_barcodes_2d…'' results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: admin/redirection.php
-
-		-
 			message: '#^Binary operation "\." between non\-falsy\-string and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 7
 			path: admin/redirection.php
 
 		-
-			message: '#^Call to an undefined method Form\:\:textwithpicto\(\)\.$#'
+			message: '#^Call to an undefined method TCPDF2DBarcode\:\:getBarcodePngData\(\)\.$#'
 			identifier: method.notFound
-			count: 2
-			path: admin/redirection.php
-
-		-
-			message: '#^Call to method getBarcodePngData\(\) on an unknown class TCPDF2DBarcode\.$#'
-			identifier: class.notFound
 			count: 1
 			path: admin/redirection.php
 
@@ -939,31 +885,19 @@ parameters:
 		-
 			message: '#^Cannot call method trans\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 19
-			path: admin/redirection.php
-
-		-
-			message: '#^Constant TCPDF_PATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: admin/redirection.php
-
-		-
-			message: '#^Function llxFooter not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: admin/redirection.php
-
-		-
-			message: '#^Instantiated class TCPDF2DBarcode not found\.$#'
-			identifier: class.notFound
-			count: 1
+			count: 20
 			path: admin/redirection.php
 
 		-
 			message: '#^Parameter mixed of print cannot be converted to string\.$#'
 			identifier: print.nonString
-			count: 4
+			count: 2
+			path: admin/redirection.php
+
+		-
+			message: '#^Path in require_once\(\) "tcpdf_barcodes_2d\.php" is not a file or it does not exist\.$#'
+			identifier: requireOnce.fileNotFound
+			count: 1
 			path: admin/redirection.php
 
 		-
@@ -1132,12 +1066,6 @@ parameters:
 			message: '#^Cannot call method transnoentities\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 3
-			path: admin/setup.php
-
-		-
-			message: '#^Function llxFooter not found\.$#'
-			identifier: function.notFound
-			count: 1
 			path: admin/setup.php
 
 		-
@@ -1423,20 +1351,8 @@ parameters:
 			path: class/actions_saturne.class.php
 
 		-
-			message: '#^Parameter \#1 \$db of function dol_print_error expects DoliDB\|null, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: class/actions_saturne.class.php
-
-		-
 			message: '#^Parameter \#1 \(mixed\) of echo cannot be converted to string\.$#'
 			identifier: echo.nonString
-			count: 1
-			path: class/actions_saturne.class.php
-
-		-
-			message: '#^Parameter \#2 \$notrigger of method SaturneSignature\:\:setSigned\(\) expects int, false given\.$#'
-			identifier: argument.type
 			count: 1
 			path: class/actions_saturne.class.php
 
@@ -1449,12 +1365,6 @@ parameters:
 		-
 			message: '#^Property ActionsSaturne\:\:\$results type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: class/actions_saturne.class.php
-
-		-
-			message: '#^Property SaturneSignature\:\:\$signature_date \(string\) does not accept int\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: class/actions_saturne.class.php
 
@@ -1537,7 +1447,7 @@ parameters:
 			path: class/saturnecertificate.class.php
 
 		-
-			message: '#^Cannot access offset int on mixed\.$#'
+			message: '#^Cannot access offset int\|string on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 2
 			path: class/saturnecertificate.class.php
@@ -1585,7 +1495,7 @@ parameters:
 			path: class/saturnecertificate.class.php
 
 		-
-			message: '#^Class DoliDB referenced with incorrect case\: DoliDb\.$#'
+			message: '#^Class DoliDB referenced with incorrect case\: DoliDB\.$#'
 			identifier: class.nameCase
 			count: 1
 			path: class/saturnecertificate.class.php
@@ -1599,12 +1509,6 @@ parameters:
 		-
 			message: '#^Property SaturneCertificate\:\:\$fields type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: class/saturnecertificate.class.php
-
-		-
-			message: '#^Return type \(string\) of method SaturneCertificate\:\:setCategories\(\) should be compatible with return type \(float\|int\) of method SaturneObject\:\:setCategories\(\)$#'
-			identifier: method.childReturnType
 			count: 1
 			path: class/saturnecertificate.class.php
 
@@ -1975,7 +1879,7 @@ parameters:
 			path: class/saturnedashboard.class.php
 
 		-
-			message: '#^Static method Form\:\:selectarray\(\) invoked with 16 parameters, 2\-5 required\.$#'
+			message: '#^Static method Form\:\:selectarray\(\) invoked with 14 parameters, 2\-5 required\.$#'
 			identifier: arguments.count
 			count: 3
 			path: class/saturnedashboard.class.php
@@ -2047,7 +1951,7 @@ parameters:
 			path: class/saturnedocuments.class.php
 
 		-
-			message: '#^Class DoliDB referenced with incorrect case\: DoliDb\.$#'
+			message: '#^Class DoliDB referenced with incorrect case\: DoliDB\.$#'
 			identifier: class.nameCase
 			count: 1
 			path: class/saturnedocuments.class.php
@@ -2079,12 +1983,6 @@ parameters:
 		-
 			message: '#^Property SaturneDocuments\:\:\$fields type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: class/saturnedocuments.class.php
-
-		-
-			message: '#^Property SaturneDocuments\:\:\$import_key \(string\) does not accept default value of type int\.$#'
-			identifier: property.defaultValue
 			count: 1
 			path: class/saturnedocuments.class.php
 
@@ -2125,7 +2023,7 @@ parameters:
 			path: class/saturneelement.class.php
 
 		-
-			message: '#^Cannot access offset int on mixed\.$#'
+			message: '#^Cannot access offset int\|string on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 2
 			path: class/saturneelement.class.php
@@ -2137,7 +2035,7 @@ parameters:
 			path: class/saturneelement.class.php
 
 		-
-			message: '#^Class DoliDB referenced with incorrect case\: DoliDb\.$#'
+			message: '#^Class DoliDB referenced with incorrect case\: DoliDB\.$#'
 			identifier: class.nameCase
 			count: 1
 			path: class/saturneelement.class.php
@@ -2180,12 +2078,6 @@ parameters:
 
 		-
 			message: '#^Property SaturneElement\:\:\$label has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: class/saturneelement.class.php
-
-		-
-			message: '#^Property SaturneElement\:\:\$photo has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
 			path: class/saturneelement.class.php
@@ -2485,7 +2377,7 @@ parameters:
 			path: class/saturneform.class.php
 
 		-
-			message: '#^Class DoliDB referenced with incorrect case\: DoliDb\.$#'
+			message: '#^Class DoliDB referenced with incorrect case\: DoliDB\.$#'
 			identifier: class.nameCase
 			count: 1
 			path: class/saturnemail.class.php
@@ -2495,6 +2387,12 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: class/saturnemail.class.php
+
+		-
+			message: '#^Access to an undefined property Project\:\:\$title\.$#'
+			identifier: property.notFound
+			count: 1
+			path: class/saturneobject.class.php
 
 		-
 			message: '#^Access to an undefined property SaturneObject\:\:\$context\.$#'
@@ -2539,12 +2437,6 @@ parameters:
 			path: class/saturneobject.class.php
 
 		-
-			message: '#^Access to an undefined property SaturneObject\:\:\$picto\.$#'
-			identifier: property.notFound
-			count: 3
-			path: class/saturneobject.class.php
-
-		-
 			message: '#^Access to an undefined property SaturneObject\:\:\$tms\.$#'
 			identifier: property.notFound
 			count: 1
@@ -2572,18 +2464,6 @@ parameters:
 			message: '#^Access to an undefined property User\:\:\$lastname\.$#'
 			identifier: property.notFound
 			count: 2
-			path: class/saturneobject.class.php
-
-		-
-			message: '#^Access to property \$ref on an unknown class Project\.$#'
-			identifier: class.notFound
-			count: 1
-			path: class/saturneobject.class.php
-
-		-
-			message: '#^Access to property \$title on an unknown class Project\.$#'
-			identifier: class.notFound
-			count: 1
 			path: class/saturneobject.class.php
 
 		-
@@ -2625,7 +2505,7 @@ parameters:
 		-
 			message: '#^Binary operation "\." between '' FROM '' and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
-			count: 3
+			count: 1
 			path: class/saturneobject.class.php
 
 		-
@@ -2659,18 +2539,6 @@ parameters:
 			path: class/saturneobject.class.php
 
 		-
-			message: '#^Binary operation "\." between ''Error '' and mixed results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: class/saturneobject.class.php
-
-		-
-			message: '#^Binary operation "\." between ''UPDATE '' and mixed results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 2
-			path: class/saturneobject.class.php
-
-		-
 			message: '#^Binary operation "\." between mixed and '' '' results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
@@ -2691,7 +2559,7 @@ parameters:
 		-
 			message: '#^Binary operation "\." between non\-falsy\-string and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
-			count: 19
+			count: 18
 			path: class/saturneobject.class.php
 
 		-
@@ -2719,12 +2587,6 @@ parameters:
 			path: class/saturneobject.class.php
 
 		-
-			message: '#^Call to an undefined method DoliDB\:\:fetch_object\(\)\.$#'
-			identifier: method.notFound
-			count: 3
-			path: class/saturneobject.class.php
-
-		-
 			message: '#^Call to an undefined method DoliDB\:\:free\(\)\.$#'
 			identifier: method.notFound
 			count: 2
@@ -2743,18 +2605,6 @@ parameters:
 			path: class/saturneobject.class.php
 
 		-
-			message: '#^Call to an undefined method DoliDB\:\:lasterror\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: class/saturneobject.class.php
-
-		-
-			message: '#^Call to an undefined method DoliDB\:\:num_rows\(\)\.$#'
-			identifier: method.notFound
-			count: 3
-			path: class/saturneobject.class.php
-
-		-
 			message: '#^Call to an undefined method DoliDB\:\:order\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -2770,12 +2620,6 @@ parameters:
 			message: '#^Call to an undefined method DoliDB\:\:prefix\(\)\.$#'
 			identifier: method.notFound
 			count: 2
-			path: class/saturneobject.class.php
-
-		-
-			message: '#^Call to an undefined method DoliDB\:\:query\(\)\.$#'
-			identifier: method.notFound
-			count: 6
 			path: class/saturneobject.class.php
 
 		-
@@ -2887,8 +2731,8 @@ parameters:
 			path: class/saturneobject.class.php
 
 		-
-			message: '#^Call to method fetch\(\) on an unknown class Project\.$#'
-			identifier: class.notFound
+			message: '#^Call to method CommonObject\:\:fetch\(\) on a separate line has no effect\.$#'
+			identifier: method.resultUnused
 			count: 1
 			path: class/saturneobject.class.php
 
@@ -3003,7 +2847,7 @@ parameters:
 		-
 			message: '#^Cannot access offset string on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
+			count: 1
 			path: class/saturneobject.class.php
 
 		-
@@ -3019,13 +2863,7 @@ parameters:
 			path: class/saturneobject.class.php
 
 		-
-			message: '#^Cannot access property \$datec on mixed\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: class/saturneobject.class.php
-
-		-
-			message: '#^Cannot access property \$datem on mixed\.$#'
+			message: '#^Cannot access property \$datec on object\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: class/saturneobject.class.php
@@ -3049,25 +2887,25 @@ parameters:
 			path: class/saturneobject.class.php
 
 		-
-			message: '#^Cannot access property \$fk_source on mixed\.$#'
+			message: '#^Cannot access property \$fk_source on object\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: class/saturneobject.class.php
 
 		-
-			message: '#^Cannot access property \$fk_target on mixed\.$#'
+			message: '#^Cannot access property \$fk_target on object\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: class/saturneobject.class.php
 
 		-
-			message: '#^Cannot access property \$fk_user_creat on mixed\.$#'
+			message: '#^Cannot access property \$fk_user_creat on object\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: class/saturneobject.class.php
 
 		-
-			message: '#^Cannot access property \$fk_user_modif on mixed\.$#'
+			message: '#^Cannot access property \$fk_user_modif on object\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: class/saturneobject.class.php
@@ -3091,13 +2929,13 @@ parameters:
 			path: class/saturneobject.class.php
 
 		-
-			message: '#^Cannot access property \$rowid on mixed\.$#'
+			message: '#^Cannot access property \$rowid on object\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: class/saturneobject.class.php
 
 		-
-			message: '#^Cannot access property \$sourcetype on mixed\.$#'
+			message: '#^Cannot access property \$sourcetype on object\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: class/saturneobject.class.php
@@ -3133,7 +2971,7 @@ parameters:
 			path: class/saturneobject.class.php
 
 		-
-			message: '#^Class DoliDB referenced with incorrect case\: DoliDb\.$#'
+			message: '#^Class DoliDB referenced with incorrect case\: DoliDB\.$#'
 			identifier: class.nameCase
 			count: 1
 			path: class/saturneobject.class.php
@@ -3145,21 +2983,9 @@ parameters:
 			path: class/saturneobject.class.php
 
 		-
-			message: '#^Constant MAIN_DB_PREFIX not found\.$#'
-			identifier: constant.notFound
-			count: 4
-			path: class/saturneobject.class.php
-
-		-
 			message: '#^Function dol_escape_htmltag invoked with 2 parameters, 1 required\.$#'
 			identifier: arguments.count
 			count: 2
-			path: class/saturneobject.class.php
-
-		-
-			message: '#^Instantiated class Project not found\.$#'
-			identifier: class.notFound
-			count: 1
 			path: class/saturneobject.class.php
 
 		-
@@ -3187,43 +3013,13 @@ parameters:
 			path: class/saturneobject.class.php
 
 		-
-			message: '#^Method SaturneObject\:\:getKanbanView\(\) should return string but returns int\.$#'
-			identifier: return.type
-			count: 1
-			path: class/saturneobject.class.php
-
-		-
-			message: '#^Method SaturneObject\:\:validateField\(\) has parameter \$fields with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: class/saturneobject.class.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(array\<string,array\{type\:string,label\:string,enabled\:int\<0,2\>\|string,position\:int,notnull\?\:int,visible\:int\<\-2,5\>\|string,alwayseditable\?\:int\<0,1\>,noteditable\?\:int\<0,1\>,default\?\:string,index\?\:int,foreignkey\?\:string,searchall\?\:int\<0,1\>,isameasure\?\:int\<0,1\>,css\?\:string,csslist\?\:string,help\?\:string,showoncombobox\?\:int\<0,2\>,disabled\?\:int\<0,1\>,arrayofkeyval\?\:array\<int,string\>,autofocusoncreate\?\:int\<0,1\>,comment\?\:string,copytoclipboard\?\:int\<1,2\>,validate\?\:int\<0,1\>,bounds\?\:array\<min\?\:int\|float,max\?\:int\|float\}\>	\$fields	Array of properties of field to show\)\: Unexpected token "\?", expected ''\}'' at offset 534 on line 4$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: class/saturneobject.class.php
-
-		-
-			message: '#^PHPDoc tag @return with type int\|string is not subtype of native type string\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: class/saturneobject.class.php
-
-		-
-			message: '#^Parameter \#1 \$status of method SaturneObject\:\:LibStatut\(\) expects int, string given\.$#'
-			identifier: argument.type
+			message: '#^Method SaturneObject\:\:validateField\(\) has parameter \$fields with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: class/saturneobject.class.php
 
 		-
 			message: '#^Parameter \#2 \$array of function implode expects array\<string\>, list given\.$#'
-			identifier: argument.type
-			count: 1
-			path: class/saturneobject.class.php
-
-		-
-			message: '#^Parameter \#2 \$notrigger of method SaturneObject\:\:setDeleted\(\) expects int, bool given\.$#'
 			identifier: argument.type
 			count: 1
 			path: class/saturneobject.class.php
@@ -3235,20 +3031,8 @@ parameters:
 			path: class/saturneobject.class.php
 
 		-
-			message: '#^Binary operation "\." between mixed and ''/index\.php\?original…'' results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: class/saturneredirection.class.php
-
-		-
-			message: '#^Class DoliDB referenced with incorrect case\: DoliDb\.$#'
+			message: '#^Class DoliDB referenced with incorrect case\: DoliDB\.$#'
 			identifier: class.nameCase
-			count: 1
-			path: class/saturneredirection.class.php
-
-		-
-			message: '#^Constant DOL_MAIN_URL_ROOT not found\.$#'
-			identifier: constant.notFound
 			count: 1
 			path: class/saturneredirection.class.php
 
@@ -3271,7 +3055,7 @@ parameters:
 			path: class/saturneredirection.class.php
 
 		-
-			message: '#^Class DoliDB referenced with incorrect case\: DoliDb\.$#'
+			message: '#^Class DoliDB referenced with incorrect case\: DoliDB\.$#'
 			identifier: class.nameCase
 			count: 1
 			path: class/saturneschedules.class.php
@@ -3343,61 +3127,7 @@ parameters:
 			path: class/saturnesignature.class.php
 
 		-
-			message: '#^Access to an undefined property User\:\:\$socid\.$#'
-			identifier: property.notFound
-			count: 1
-			path: class/saturnesignature.class.php
-
-		-
-			message: '#^Access to property \$address on an unknown class Contact\.$#'
-			identifier: class.notFound
-			count: 2
-			path: class/saturnesignature.class.php
-
-		-
-			message: '#^Access to property \$phone_mobile on an unknown class Contact\.$#'
-			identifier: class.notFound
-			count: 2
-			path: class/saturnesignature.class.php
-
-		-
-			message: '#^Access to property \$phone_perso on an unknown class Contact\.$#'
-			identifier: class.notFound
-			count: 1
-			path: class/saturnesignature.class.php
-
-		-
-			message: '#^Access to property \$phone_pro on an unknown class Contact\.$#'
-			identifier: class.notFound
-			count: 2
-			path: class/saturnesignature.class.php
-
-		-
-			message: '#^Access to property \$poste on an unknown class Contact\.$#'
-			identifier: class.notFound
-			count: 1
-			path: class/saturnesignature.class.php
-
-		-
-			message: '#^Access to property \$socid on an unknown class Contact\.$#'
-			identifier: class.notFound
-			count: 1
-			path: class/saturnesignature.class.php
-
-		-
 			message: '#^Binary operation "\." between '' '' and mixed results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: class/saturnesignature.class.php
-
-		-
-			message: '#^Binary operation "\." between '' FROM '' and mixed results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 3
-			path: class/saturnesignature.class.php
-
-		-
-			message: '#^Binary operation "\." between '' LEFT JOIN '' and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
 			path: class/saturnesignature.class.php
@@ -3412,12 +3142,6 @@ parameters:
 			message: '#^Binary operation "\." between ''\<br\>\<b\>'' and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 8
-			path: class/saturnesignature.class.php
-
-		-
-			message: '#^Binary operation "\." between ''Error '' and mixed results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
 			path: class/saturnesignature.class.php
 
 		-
@@ -3457,12 +3181,6 @@ parameters:
 			path: class/saturnesignature.class.php
 
 		-
-			message: '#^Call to an undefined method DoliDB\:\:fetch_object\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: class/saturnesignature.class.php
-
-		-
 			message: '#^Call to an undefined method DoliDB\:\:free\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -3470,18 +3188,6 @@ parameters:
 
 		-
 			message: '#^Call to an undefined method DoliDB\:\:idate\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: class/saturnesignature.class.php
-
-		-
-			message: '#^Call to an undefined method DoliDB\:\:lasterror\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: class/saturnesignature.class.php
-
-		-
-			message: '#^Call to an undefined method DoliDB\:\:num_rows\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: class/saturnesignature.class.php
@@ -3496,12 +3202,6 @@ parameters:
 			message: '#^Call to an undefined method DoliDB\:\:plimit\(\)\.$#'
 			identifier: method.notFound
 			count: 1
-			path: class/saturnesignature.class.php
-
-		-
-			message: '#^Call to an undefined method DoliDB\:\:query\(\)\.$#'
-			identifier: method.notFound
-			count: 2
 			path: class/saturnesignature.class.php
 
 		-
@@ -3543,7 +3243,7 @@ parameters:
 		-
 			message: '#^Call to an undefined method SaturneSignature\:\:setStatusCommon\(\)\.$#'
 			identifier: method.notFound
-			count: 4
+			count: 3
 			path: class/saturnesignature.class.php
 
 		-
@@ -3607,8 +3307,8 @@ parameters:
 			path: class/saturnesignature.class.php
 
 		-
-			message: '#^Call to method fetch\(\) on an unknown class Contact\.$#'
-			identifier: class.notFound
+			message: '#^Call to method CommonObject\:\:fetch\(\) on a separate line has no effect\.$#'
+			identifier: method.resultUnused
 			count: 2
 			path: class/saturnesignature.class.php
 
@@ -3649,7 +3349,7 @@ parameters:
 			path: class/saturnesignature.class.php
 
 		-
-			message: '#^Cannot access offset int on mixed\.$#'
+			message: '#^Cannot access offset int\|string on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 2
 			path: class/saturnesignature.class.php
@@ -3763,7 +3463,7 @@ parameters:
 			path: class/saturnesignature.class.php
 
 		-
-			message: '#^Class DoliDB referenced with incorrect case\: DoliDb\.$#'
+			message: '#^Class DoliDB referenced with incorrect case\: DoliDB\.$#'
 			identifier: class.nameCase
 			count: 1
 			path: class/saturnesignature.class.php
@@ -3781,20 +3481,8 @@ parameters:
 			path: class/saturnesignature.class.php
 
 		-
-			message: '#^Constant MAIN_DB_PREFIX not found\.$#'
-			identifier: constant.notFound
-			count: 4
-			path: class/saturnesignature.class.php
-
-		-
 			message: '#^Function dol_escape_htmltag invoked with 2 parameters, 1 required\.$#'
 			identifier: arguments.count
-			count: 2
-			path: class/saturnesignature.class.php
-
-		-
-			message: '#^Instantiated class Contact not found\.$#'
-			identifier: class.notFound
 			count: 2
 			path: class/saturnesignature.class.php
 
@@ -3853,7 +3541,7 @@ parameters:
 			path: class/saturnesignature.class.php
 
 		-
-			message: '#^Class DoliDB referenced with incorrect case\: DoliDb\.$#'
+			message: '#^Class DoliDB referenced with incorrect case\: DoliDB\.$#'
 			identifier: class.nameCase
 			count: 1
 			path: class/saturnestandard.class.php
@@ -3889,27 +3577,9 @@ parameters:
 			path: class/task/saturnetask.class.php
 
 		-
-			message: '#^Access to an undefined property SaturneTask\:\:\$picto\.$#'
-			identifier: property.notFound
-			count: 2
-			path: class/task/saturnetask.class.php
-
-		-
 			message: '#^Binary operation "\+" between mixed and 1 results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 3
-			path: class/task/saturnetask.class.php
-
-		-
-			message: '#^Binary operation "\." between '' FROM '' and mixed results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: class/task/saturnetask.class.php
-
-		-
-			message: '#^Binary operation "\." between '' LEFT JOIN '' and mixed results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
 			path: class/task/saturnetask.class.php
 
 		-
@@ -3919,39 +3589,21 @@ parameters:
 			path: class/task/saturnetask.class.php
 
 		-
-			message: '#^Binary operation "\." between ''Error '' and mixed results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: class/task/saturnetask.class.php
-
-		-
 			message: '#^Binary operation "\." between mixed and '' %%'' results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 2
 			path: class/task/saturnetask.class.php
 
 		-
-			message: '#^Binary operation "\." between mixed and ''projet_task as pt, '' results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: class/task/saturnetask.class.php
-
-		-
 			message: '#^Binary operation "\." between non\-falsy\-string and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
-			count: 3
+			count: 2
 			path: class/task/saturnetask.class.php
 
 		-
 			message: '#^Binary operation "\.\=" between non\-falsy\-string and mixed results in an error\.$#'
 			identifier: assignOp.invalid
 			count: 2
-			path: class/task/saturnetask.class.php
-
-		-
-			message: '#^Call to an undefined method DoliDB\:\:fetch_object\(\)\.$#'
-			identifier: method.notFound
-			count: 1
 			path: class/task/saturnetask.class.php
 
 		-
@@ -3967,31 +3619,7 @@ parameters:
 			path: class/task/saturnetask.class.php
 
 		-
-			message: '#^Call to an undefined method DoliDB\:\:lasterror\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: class/task/saturnetask.class.php
-
-		-
-			message: '#^Call to an undefined method DoliDB\:\:num_rows\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: class/task/saturnetask.class.php
-
-		-
 			message: '#^Call to an undefined method DoliDB\:\:order\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: class/task/saturnetask.class.php
-
-		-
-			message: '#^Call to an undefined method DoliDB\:\:query\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: class/task/saturnetask.class.php
-
-		-
-			message: '#^Call to an undefined method Form\:\:textwithpicto\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: class/task/saturnetask.class.php
@@ -4111,31 +3739,31 @@ parameters:
 			path: class/task/saturnetask.class.php
 
 		-
-			message: '#^Cannot access property \$element_date on mixed\.$#'
+			message: '#^Cannot access property \$element_date on object\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: class/task/saturnetask.class.php
 
 		-
-			message: '#^Cannot access property \$element_date_withhour on mixed\.$#'
+			message: '#^Cannot access property \$element_date_withhour on object\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: class/task/saturnetask.class.php
 
 		-
-			message: '#^Cannot access property \$element_datehour on mixed\.$#'
+			message: '#^Cannot access property \$element_datehour on object\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: class/task/saturnetask.class.php
 
 		-
-			message: '#^Cannot access property \$element_duration on mixed\.$#'
+			message: '#^Cannot access property \$element_duration on object\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: class/task/saturnetask.class.php
 
 		-
-			message: '#^Cannot access property \$fk_user on mixed\.$#'
+			message: '#^Cannot access property \$fk_user on object\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: class/task/saturnetask.class.php
@@ -4171,7 +3799,7 @@ parameters:
 			path: class/task/saturnetask.class.php
 
 		-
-			message: '#^Cannot access property \$note on mixed\.$#'
+			message: '#^Cannot access property \$note on object\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: class/task/saturnetask.class.php
@@ -4183,19 +3811,19 @@ parameters:
 			path: class/task/saturnetask.class.php
 
 		-
-			message: '#^Cannot access property \$project_id on mixed\.$#'
+			message: '#^Cannot access property \$project_id on object\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: class/task/saturnetask.class.php
 
 		-
-			message: '#^Cannot access property \$project_label on mixed\.$#'
+			message: '#^Cannot access property \$project_label on object\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: class/task/saturnetask.class.php
 
 		-
-			message: '#^Cannot access property \$project_ref on mixed\.$#'
+			message: '#^Cannot access property \$project_ref on object\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: class/task/saturnetask.class.php
@@ -4207,43 +3835,43 @@ parameters:
 			path: class/task/saturnetask.class.php
 
 		-
-			message: '#^Cannot access property \$rowid on mixed\.$#'
+			message: '#^Cannot access property \$rowid on object\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: class/task/saturnetask.class.php
 
 		-
-			message: '#^Cannot access property \$socid on mixed\.$#'
+			message: '#^Cannot access property \$socid on object\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: class/task/saturnetask.class.php
 
 		-
-			message: '#^Cannot access property \$task_label on mixed\.$#'
+			message: '#^Cannot access property \$task_label on object\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: class/task/saturnetask.class.php
 
 		-
-			message: '#^Cannot access property \$task_ref on mixed\.$#'
+			message: '#^Cannot access property \$task_ref on object\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: class/task/saturnetask.class.php
 
 		-
-			message: '#^Cannot access property \$thirdparty_email on mixed\.$#'
+			message: '#^Cannot access property \$thirdparty_email on object\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: class/task/saturnetask.class.php
 
 		-
-			message: '#^Cannot access property \$thirdparty_name on mixed\.$#'
+			message: '#^Cannot access property \$thirdparty_name on object\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: class/task/saturnetask.class.php
 
 		-
-			message: '#^Cannot access property \$thm on mixed\.$#'
+			message: '#^Cannot access property \$thm on object\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: class/task/saturnetask.class.php
@@ -4279,18 +3907,6 @@ parameters:
 			path: class/task/saturnetask.class.php
 
 		-
-			message: '#^Constant MAIN_DB_PREFIX not found\.$#'
-			identifier: constant.notFound
-			count: 4
-			path: class/task/saturnetask.class.php
-
-		-
-			message: '#^Default value of the parameter \#4 \$sortedByTasks \(int\) of method SaturneTask\:\:fetchAllTimeSpentAllUsers\(\) is incompatible with type string\.$#'
-			identifier: parameter.defaultValue
-			count: 1
-			path: class/task/saturnetask.class.php
-
-		-
 			message: '#^Function dol_escape_htmltag invoked with 2 parameters, 1 required\.$#'
 			identifier: arguments.count
 			count: 2
@@ -4311,12 +3927,6 @@ parameters:
 		-
 			message: '#^Method SaturneTask\:\:getNomUrl\(\) has parameter \$showFavorite with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: class/task/saturnetask.class.php
-
-		-
-			message: '#^Method SaturneTask\:\:getTaskProgressColorClass\(\) should return string but return statement is missing\.$#'
-			identifier: return.missing
 			count: 1
 			path: class/task/saturnetask.class.php
 
@@ -4345,24 +3955,6 @@ parameters:
 			path: class/task/saturnetask.class.php
 
 		-
-			message: '#^Parameter \#3 \$mode \(string\) of method SaturneTask\:\:getNomUrl\(\) should be compatible with parameter \$notooltip \(int\) of method CommonObject\:\:getNomUrl\(\)$#'
-			identifier: method.childParameterType
-			count: 1
-			path: class/task/saturnetask.class.php
-
-		-
-			message: '#^Parameter \#4 \$addlabel \(int\) of method SaturneTask\:\:getNomUrl\(\) should be compatible with parameter \$morecss \(string\) of method CommonObject\:\:getNomUrl\(\)$#'
-			identifier: method.childParameterType
-			count: 1
-			path: class/task/saturnetask.class.php
-
-		-
-			message: '#^Parameter \#5 \$sep \(string\) of method SaturneTask\:\:getNomUrl\(\) should be compatible with parameter \$save_lastsearch_value \(int\) of method CommonObject\:\:getNomUrl\(\)$#'
-			identifier: method.childParameterType
-			count: 1
-			path: class/task/saturnetask.class.php
-
-		-
 			message: '#^Property SaturneTask\:\:\$fields type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -4372,6 +3964,12 @@ parameters:
 			message: '#^Access to property \$array_options on an unknown class EcmFiles\.$#'
 			identifier: class.notFound
 			count: 2
+			path: core/ajax/favorite.php
+
+		-
+			message: '#^Call to method CommonObject\:\:fetch\(\) on a separate line has no effect\.$#'
+			identifier: method.resultUnused
+			count: 1
 			path: core/ajax/favorite.php
 
 		-
@@ -4393,6 +3991,12 @@ parameters:
 			path: core/ajax/favorite.php
 
 		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 2
+			path: core/ajax/favorite.php
+
+		-
 			message: '#^Instantiated class EcmFiles not found\.$#'
 			identifier: class.notFound
 			count: 1
@@ -4401,6 +4005,12 @@ parameters:
 		-
 			message: '#^Cannot call method setValueFrom\(\) on CommonObject\|int\<\-1, 0\>\.$#'
 			identifier: method.nonObject
+			count: 1
+			path: core/ajax/saturne_update_field.php
+
+		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
 			count: 1
 			path: core/ajax/saturne_update_field.php
 
@@ -4639,6 +4249,12 @@ parameters:
 			path: core/modules/modSaturne.class.php
 
 		-
+			message: '#^Access to an undefined property Contact\:\:\$poste\.$#'
+			identifier: property.notFound
+			count: 1
+			path: core/modules/saturne/modules_saturne.php
+
+		-
 			message: '#^Access to an undefined property SaturneDocumentModel\:\:\$custom_info\.$#'
 			identifier: property.notFound
 			count: 2
@@ -4669,18 +4285,6 @@ parameters:
 			path: core/modules/saturne/modules_saturne.php
 
 		-
-			message: '#^Access to property \$fk_soc on an unknown class Contact\.$#'
-			identifier: class.notFound
-			count: 2
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Access to property \$poste on an unknown class Contact\.$#'
-			identifier: class.notFound
-			count: 1
-			path: core/modules/saturne/modules_saturne.php
-
-		-
 			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 1
@@ -4705,7 +4309,7 @@ parameters:
 			path: core/modules/saturne/modules_saturne.php
 
 		-
-			message: '#^Binary operation "\." between '' FROM '' and mixed results in an error\.$#'
+			message: '#^Binary operation "\." between '' FROM llx_'' and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 4
 			path: core/modules/saturne/modules_saturne.php
@@ -4747,12 +4351,6 @@ parameters:
 			path: core/modules/saturne/modules_saturne.php
 
 		-
-			message: '#^Binary operation "\." between ''\<td class\="right"\>'' and mixed results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: core/modules/saturne/modules_saturne.php
-
-		-
 			message: '#^Binary operation "\." between ''\<tr\>\<td\>'' and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
@@ -4778,12 +4376,6 @@ parameters:
 
 		-
 			message: '#^Binary operation "\." between mixed and '' \- '' results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Binary operation "\." between mixed and ''/custom/'' results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
 			path: core/modules/saturne/modules_saturne.php
@@ -4861,12 +4453,6 @@ parameters:
 			path: core/modules/saturne/modules_saturne.php
 
 		-
-			message: '#^Binary operation "\." between mixed and ''odf\.php'' results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: core/modules/saturne/modules_saturne.php
-
-		-
 			message: '#^Binary operation "\." between mixed and string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
@@ -4875,7 +4461,7 @@ parameters:
 		-
 			message: '#^Binary operation "\." between non\-falsy\-string and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
-			count: 13
+			count: 9
 			path: core/modules/saturne/modules_saturne.php
 
 		-
@@ -4885,9 +4471,27 @@ parameters:
 			path: core/modules/saturne/modules_saturne.php
 
 		-
-			message: '#^Call to an undefined method Form\:\:textwithpicto\(\)\.$#'
+			message: '#^Call to an undefined method Odf\:\:exportAsAttachedPDF\(\)\.$#'
 			identifier: method.notFound
 			count: 1
+			path: core/modules/saturne/modules_saturne.php
+
+		-
+			message: '#^Call to an undefined method Odf\:\:saveToDisk\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: core/modules/saturne/modules_saturne.php
+
+		-
+			message: '#^Call to an undefined method Odf\|Segment\:\:merge\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: core/modules/saturne/modules_saturne.php
+
+		-
+			message: '#^Call to an undefined method Odf\|Segment\:\:setImage\(\)\.$#'
+			identifier: method.notFound
+			count: 2
 			path: core/modules/saturne/modules_saturne.php
 
 		-
@@ -4903,87 +4507,9 @@ parameters:
 			path: core/modules/saturne/modules_saturne.php
 
 		-
-			message: '#^Call to method exportAsAttachedPDF\(\) on an unknown class odf\.$#'
-			identifier: class.notFound
-			count: 1
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Call to method fetch\(\) on an unknown class Contact\.$#'
-			identifier: class.notFound
-			count: 1
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Call to method getMessage\(\) on an unknown class OdfException\.$#'
-			identifier: class.notFound
-			count: 3
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Call to method getMessage\(\) on an unknown class OdfExceptionSegmentNotFound\.$#'
-			identifier: class.notFound
-			count: 1
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Call to method getMessage\(\) on an unknown class SegmentException\.$#'
-			identifier: class.notFound
-			count: 1
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Call to method merge\(\) on an unknown class Odf\.$#'
-			identifier: class.notFound
-			count: 1
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Call to method merge\(\) on an unknown class Segment\.$#'
-			identifier: class.notFound
-			count: 1
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Call to method mergeSegment\(\) on an unknown class Odf\.$#'
-			identifier: class.notFound
-			count: 1
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Call to method saveToDisk\(\) on an unknown class odf\.$#'
-			identifier: class.notFound
-			count: 1
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Call to method setImage\(\) on an unknown class Odf\.$#'
-			identifier: class.notFound
+			message: '#^Call to method CommonObject\:\:fetch\(\) on a separate line has no effect\.$#'
+			identifier: method.resultUnused
 			count: 2
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Call to method setImage\(\) on an unknown class Segment\.$#'
-			identifier: class.notFound
-			count: 2
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Call to method setSegment\(\) on an unknown class Odf\.$#'
-			identifier: class.notFound
-			count: 1
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Call to method setVars\(\) on an unknown class Odf\.$#'
-			identifier: class.notFound
-			count: 6
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Call to method setVars\(\) on an unknown class Segment\.$#'
-			identifier: class.notFound
-			count: 6
 			path: core/modules/saturne/modules_saturne.php
 
 		-
@@ -5257,25 +4783,19 @@ parameters:
 			path: core/modules/saturne/modules_saturne.php
 
 		-
-			message: '#^Caught class OdfException not found\.$#'
-			identifier: class.notFound
-			count: 3
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Caught class OdfExceptionSegmentNotFound not found\.$#'
-			identifier: class.notFound
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
 			count: 1
 			path: core/modules/saturne/modules_saturne.php
 
 		-
-			message: '#^Caught class SegmentException not found\.$#'
-			identifier: class.notFound
+			message: '#^Class DoliDB referenced with incorrect case\: DoliDB\.$#'
+			identifier: class.nameCase
 			count: 1
 			path: core/modules/saturne/modules_saturne.php
 
 		-
-			message: '#^Class DoliDB referenced with incorrect case\: DoliDb\.$#'
+			message: '#^Class Odf referenced with incorrect case\: odf\.$#'
 			identifier: class.nameCase
 			count: 1
 			path: core/modules/saturne/modules_saturne.php
@@ -5287,44 +4807,8 @@ parameters:
 			path: core/modules/saturne/modules_saturne.php
 
 		-
-			message: '#^Constant DOL_MAIN_URL_ROOT not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Constant MAIN_DB_PREFIX not found\.$#'
-			identifier: constant.notFound
-			count: 4
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Constant ODTPHP_PATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: core/modules/saturne/modules_saturne.php
-
-		-
 			message: '#^Deprecated in PHP 8\.0\: Required parameter \$moreParam follows optional parameter \$hideRef\.$#'
 			identifier: parameter.requiredAfterOptional
-			count: 1
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Instantiated class Contact not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Instantiated class odf not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Method CustomModeleNumRefSaturne\:\:getNextValue\(\) should return string but returns int\.$#'
-			identifier: return.type
 			count: 1
 			path: core/modules/saturne/modules_saturne.php
 
@@ -5335,14 +4819,8 @@ parameters:
 			path: core/modules/saturne/modules_saturne.php
 
 		-
-			message: '#^Method ModeleNumRefSaturne\:\:getLastValue\(\) should return string but returns int\.$#'
-			identifier: return.type
-			count: 1
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Method ModeleNumRefSaturne\:\:getNextValue\(\) should return string but returns int\.$#'
-			identifier: return.type
+			message: '#^Method Form\:\:textwithpicto\(\) invoked with 4 parameters, 2 required\.$#'
+			identifier: arguments.count
 			count: 1
 			path: core/modules/saturne/modules_saturne.php
 
@@ -5449,45 +4927,9 @@ parameters:
 			path: core/modules/saturne/modules_saturne.php
 
 		-
-			message: '#^Parameter \#1 \$odfHandler of method SaturneDocumentModel\:\:fillTags\(\) expects Odf, odf given\.$#'
-			identifier: argument.type
+			message: '#^Path in require_once\(\) "odf\.php" is not a file or it does not exist\.$#'
+			identifier: requireOnce.fileNotFound
 			count: 1
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Parameter \#2 \$moreatt of function img_warning expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Parameter \$listLines of method SaturneDocumentModel\:\:setTmpArrayVars\(\) has invalid type Odf\.$#'
-			identifier: class.notFound
-			count: 1
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Parameter \$listLines of method SaturneDocumentModel\:\:setTmpArrayVars\(\) has invalid type Segment\.$#'
-			identifier: class.notFound
-			count: 1
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Parameter \$odfHandler of method SaturneDocumentModel\:\:fillTags\(\) has invalid type Odf\.$#'
-			identifier: class.notFound
-			count: 2
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Parameter \$odfHandler of method SaturneDocumentModel\:\:fillTagsLines\(\) has invalid type Odf\.$#'
-			identifier: class.notFound
-			count: 2
-			path: core/modules/saturne/modules_saturne.php
-
-		-
-			message: '#^Parameter \$odfHandler of method SaturneDocumentModel\:\:setAttendantsSegment\(\) has invalid type Odf\.$#'
-			identifier: class.notFound
-			count: 2
 			path: core/modules/saturne/modules_saturne.php
 
 		-
@@ -5623,14 +5065,14 @@ parameters:
 			path: core/tpl/actions/banner_actions.tpl.php
 
 		-
-			message: '#^Call to method fetch\(\) on an unknown class Activity\.$#'
-			identifier: class.notFound
+			message: '#^Call to method CommonObject\:\:fetch\(\) on a separate line has no effect\.$#'
+			identifier: method.resultUnused
 			count: 1
 			path: core/tpl/actions/component_actions.tpl.php
 
 		-
-			message: '#^Call to method update\(\) on an unknown class Activity\.$#'
-			identifier: class.notFound
+			message: '#^Call to method CommonObject\:\:update\(\) on a separate line has no effect\.$#'
+			identifier: method.resultUnused
 			count: 1
 			path: core/tpl/actions/component_actions.tpl.php
 
@@ -5649,12 +5091,6 @@ parameters:
 		-
 			message: '#^Cannot access offset ''objectLine_id'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: core/tpl/actions/component_actions.tpl.php
-
-		-
-			message: '#^Instantiated class Activity not found\.$#'
-			identifier: class.notFound
 			count: 1
 			path: core/tpl/actions/component_actions.tpl.php
 
@@ -6067,12 +5503,6 @@ parameters:
 			path: core/tpl/actions/signature_actions.tpl.php
 
 		-
-			message: '#^Call to an undefined method Translate\:\:setDefaultLang\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: core/tpl/actions/signature_actions.tpl.php
-
-		-
 			message: '#^Cannot access offset ''object'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -6403,12 +5833,6 @@ parameters:
 			path: core/tpl/admin/object/object_document_model_view.tpl.php
 
 		-
-			message: '#^Binary operation "\." between '' FROM '' and mixed results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: core/tpl/admin/object/object_document_model_view.tpl.php
-
-		-
 			message: '#^Binary operation "\." between '' WHERE type \= \\'''' and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
@@ -6514,12 +5938,6 @@ parameters:
 			message: '#^Cannot call method trans\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 25
-			path: core/tpl/admin/object/object_document_model_view.tpl.php
-
-		-
-			message: '#^Constant MAIN_DB_PREFIX not found\.$#'
-			identifier: constant.notFound
-			count: 1
 			path: core/tpl/admin/object/object_document_model_view.tpl.php
 
 		-
@@ -7057,12 +6475,6 @@ parameters:
 			path: core/tpl/attendants/attendants_table_view.tpl.php
 
 		-
-			message: '#^Access to property \$fk_soc on an unknown class Contact\.$#'
-			identifier: class.notFound
-			count: 2
-			path: core/tpl/attendants/attendants_table_view.tpl.php
-
-		-
 			message: '#^Binary operation "\." between '' \- '' and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
@@ -7156,12 +6568,6 @@ parameters:
 			message: '#^Call to an undefined method User\:\:fetch\(\)\.$#'
 			identifier: method.notFound
 			count: 1
-			path: core/tpl/attendants/attendants_table_view.tpl.php
-
-		-
-			message: '#^Call to method fetch\(\) on an unknown class Contact\.$#'
-			identifier: class.notFound
-			count: 2
 			path: core/tpl/attendants/attendants_table_view.tpl.php
 
 		-
@@ -7399,12 +6805,6 @@ parameters:
 			path: core/tpl/attendants/attendants_table_view.tpl.php
 
 		-
-			message: '#^Instantiated class Contact not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: core/tpl/attendants/attendants_table_view.tpl.php
-
-		-
 			message: '#^Parameter mixed of print cannot be converted to string\.$#'
 			identifier: print.nonString
 			count: 5
@@ -7551,12 +6951,6 @@ parameters:
 		-
 			message: '#^Binary operation "\." between string and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
-			count: 1
-			path: core/tpl/documents/documents_action.tpl.php
-
-		-
-			message: '#^Call to an undefined method Translate\:\:setDefaultLang\(\)\.$#'
-			identifier: method.notFound
 			count: 1
 			path: core/tpl/documents/documents_action.tpl.php
 
@@ -7747,26 +7141,20 @@ parameters:
 			path: core/tpl/documents/saturne_manual_pdf_generation_action.tpl.php
 
 		-
-			message: '#^Binary operation "\." between mixed and ''odf\.php'' results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: core/tpl/documents/saturne_manual_pdf_generation_action.tpl.php
-
-		-
 			message: '#^Binary operation "\." between non\-falsy\-string and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 4
 			path: core/tpl/documents/saturne_manual_pdf_generation_action.tpl.php
 
 		-
-			message: '#^Call to method exportAsAttachedPDF\(\) on an unknown class odf\.$#'
-			identifier: class.notFound
+			message: '#^Call to an undefined method Odf\:\:exportAsAttachedPDF\(\)\.$#'
+			identifier: method.notFound
 			count: 1
 			path: core/tpl/documents/saturne_manual_pdf_generation_action.tpl.php
 
 		-
-			message: '#^Call to method saveToDisk\(\) on an unknown class odf\.$#'
-			identifier: class.notFound
+			message: '#^Call to an undefined method Odf\:\:saveToDisk\(\)\.$#'
+			identifier: method.notFound
 			count: 1
 			path: core/tpl/documents/saturne_manual_pdf_generation_action.tpl.php
 
@@ -7801,14 +7189,14 @@ parameters:
 			path: core/tpl/documents/saturne_manual_pdf_generation_action.tpl.php
 
 		-
-			message: '#^Constant ODTPHP_PATH not found\.$#'
-			identifier: constant.notFound
+			message: '#^Class Odf referenced with incorrect case\: odf\.$#'
+			identifier: class.nameCase
 			count: 1
 			path: core/tpl/documents/saturne_manual_pdf_generation_action.tpl.php
 
 		-
-			message: '#^Instantiated class odf not found\.$#'
-			identifier: class.notFound
+			message: '#^Path in require_once\(\) "odf\.php" is not a file or it does not exist\.$#'
+			identifier: requireOnce.fileNotFound
 			count: 1
 			path: core/tpl/documents/saturne_manual_pdf_generation_action.tpl.php
 
@@ -7882,12 +7270,6 @@ parameters:
 			message: '#^Binary operation "\." between non\-falsy\-string and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 6
-			path: core/tpl/index/index_view.tpl.php
-
-		-
-			message: '#^Call to method text\(\) on an unknown class Parsedown\.$#'
-			identifier: class.notFound
-			count: 1
 			path: core/tpl/index/index_view.tpl.php
 
 		-
@@ -7987,18 +7369,6 @@ parameters:
 			path: core/tpl/index/index_view.tpl.php
 
 		-
-			message: '#^Function llxFooter not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: core/tpl/index/index_view.tpl.php
-
-		-
-			message: '#^Instantiated class Parsedown not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: core/tpl/index/index_view.tpl.php
-
-		-
 			message: '#^Parameter \#1 \(mixed\) of echo cannot be converted to string\.$#'
 			identifier: echo.nonString
 			count: 7
@@ -8013,7 +7383,7 @@ parameters:
 		-
 			message: '#^Parameter mixed of print cannot be converted to string\.$#'
 			identifier: print.nonString
-			count: 2
+			count: 1
 			path: core/tpl/index/index_view.tpl.php
 
 		-
@@ -9495,7 +8865,7 @@ parameters:
 		-
 			message: '#^Binary operation "\." between non\-falsy\-string and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
-			count: 27
+			count: 25
 			path: core/tpl/medias/medias_gallery_modal.tpl.php
 
 		-
@@ -9505,14 +8875,8 @@ parameters:
 			path: core/tpl/medias/medias_gallery_modal.tpl.php
 
 		-
-			message: '#^Call to an undefined method Form\:\:textwithpicto\(\)\.$#'
+			message: '#^Call to an undefined method EcmDirectory\:\:changeNbOfFiles\(\)\.$#'
 			identifier: method.notFound
-			count: 2
-			path: core/tpl/medias/medias_gallery_modal.tpl.php
-
-		-
-			message: '#^Call to method changeNbOfFiles\(\) on an unknown class EcmDirectory\.$#'
-			identifier: class.notFound
 			count: 1
 			path: core/tpl/medias/medias_gallery_modal.tpl.php
 
@@ -9733,9 +9097,9 @@ parameters:
 			path: core/tpl/medias/medias_gallery_modal.tpl.php
 
 		-
-			message: '#^Instantiated class EcmDirectory not found\.$#'
-			identifier: class.notFound
-			count: 1
+			message: '#^Cannot cast mixed to string\.$#'
+			identifier: cast.string
+			count: 6
 			path: core/tpl/medias/medias_gallery_modal.tpl.php
 
 		-
@@ -9753,13 +9117,19 @@ parameters:
 		-
 			message: '#^Parameter mixed of print cannot be converted to string\.$#'
 			identifier: print.nonString
-			count: 2
+			count: 1
 			path: core/tpl/medias/medias_gallery_modal.tpl.php
 
 		-
 			message: '#^Possibly invalid array key type mixed\.$#'
 			identifier: array.invalidKey
 			count: 2
+			path: core/tpl/medias/medias_gallery_modal.tpl.php
+
+		-
+			message: '#^Result of function saturne_show_medias \(void\) is used\.$#'
+			identifier: function.void
+			count: 1
 			path: core/tpl/medias/medias_gallery_modal.tpl.php
 
 		-
@@ -9919,6 +9289,12 @@ parameters:
 			path: core/tpl/modal/modal_badge_component.tpl.php
 
 		-
+			message: '#^Binary operation "\." between ''/custom/'' and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: core/tpl/signature/public_signature_view.tpl.php
+
+		-
 			message: '#^Binary operation "\." between ''\<div class\="center"\>'' and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
@@ -9926,12 +9302,6 @@ parameters:
 
 		-
 			message: '#^Binary operation "\." between mixed and '' '' results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: core/tpl/signature/public_signature_view.tpl.php
-
-		-
-			message: '#^Binary operation "\." between mixed and ''/custom/'' results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
 			path: core/tpl/signature/public_signature_view.tpl.php
@@ -9945,7 +9315,7 @@ parameters:
 		-
 			message: '#^Binary operation "\." between non\-falsy\-string and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
-			count: 3
+			count: 2
 			path: core/tpl/signature/public_signature_view.tpl.php
 
 		-
@@ -10006,12 +9376,6 @@ parameters:
 			message: '#^Cannot call method trans\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 5
-			path: core/tpl/signature/public_signature_view.tpl.php
-
-		-
-			message: '#^Constant DOL_MAIN_URL_ROOT not found\.$#'
-			identifier: constant.notFound
-			count: 1
 			path: core/tpl/signature/public_signature_view.tpl.php
 
 		-
@@ -10441,6 +9805,18 @@ parameters:
 			path: core/triggers/interface_99_modSaturne_SaturneTriggers.class.php
 
 		-
+			message: '#^Cannot call abstract method DolibarrTriggers\:\:getDesc\(\)\.$#'
+			identifier: method.callToAbstract
+			count: 1
+			path: core/triggers/interface_99_modSaturne_SaturneTriggers.class.php
+
+		-
+			message: '#^Cannot call abstract method DolibarrTriggers\:\:getName\(\)\.$#'
+			identifier: method.callToAbstract
+			count: 1
+			path: core/triggers/interface_99_modSaturne_SaturneTriggers.class.php
+
+		-
 			message: '#^Instantiated class ActionComm not found\.$#'
 			identifier: class.notFound
 			count: 1
@@ -10451,6 +9827,42 @@ parameters:
 			identifier: array.invalidKey
 			count: 7
 			path: core/triggers/interface_99_modSaturne_SaturneTriggers.class.php
+
+		-
+			message: '#^Constructor of class DolibarrModules has an unused parameter \$db\.$#'
+			identifier: constructor.unusedParameter
+			count: 1
+			path: dev/phan/stubs.php
+
+		-
+			message: '#^Constructor of class DolibarrTriggers has an unused parameter \$db\.$#'
+			identifier: constructor.unusedParameter
+			count: 1
+			path: dev/phan/stubs.php
+
+		-
+			message: '#^Constructor of class Odf has an unused parameter \$filename\.$#'
+			identifier: constructor.unusedParameter
+			count: 1
+			path: dev/phan/stubs.php
+
+		-
+			message: '#^Constructor of class Odf has an unused parameter \$options\.$#'
+			identifier: constructor.unusedParameter
+			count: 1
+			path: dev/phan/stubs.php
+
+		-
+			message: '#^Constructor of class TCPDF2DBarcode has an unused parameter \$code\.$#'
+			identifier: constructor.unusedParameter
+			count: 1
+			path: dev/phan/stubs.php
+
+		-
+			message: '#^Constructor of class TCPDF2DBarcode has an unused parameter \$type\.$#'
+			identifier: constructor.unusedParameter
+			count: 1
+			path: dev/phan/stubs.php
 
 		-
 			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
@@ -10579,12 +9991,6 @@ parameters:
 			path: lib/documents.lib.php
 
 		-
-			message: '#^Binary operation "\." between '' FROM '' and mixed results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: lib/documents.lib.php
-
-		-
 			message: '#^Binary operation "\." between ''&entity\='' and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
@@ -10699,24 +10105,6 @@ parameters:
 			path: lib/documents.lib.php
 
 		-
-			message: '#^Call to an undefined method DoliDB\:\:fetch_object\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: lib/documents.lib.php
-
-		-
-			message: '#^Call to an undefined method DoliDB\:\:num_rows\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: lib/documents.lib.php
-
-		-
-			message: '#^Call to an undefined method DoliDB\:\:query\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: lib/documents.lib.php
-
-		-
 			message: '#^Call to an undefined method Link\:\:fetchAll\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -10765,13 +10153,7 @@ parameters:
 			path: lib/documents.lib.php
 
 		-
-			message: '#^Cannot access property \$description on mixed\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: lib/documents.lib.php
-
-		-
-			message: '#^Cannot access property \$doc_template_name on mixed\.$#'
+			message: '#^Cannot access property \$doc_template_name on object\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: lib/documents.lib.php
@@ -10801,13 +10183,13 @@ parameters:
 			path: lib/documents.lib.php
 
 		-
-			message: '#^Cannot access property \$id on mixed\.$#'
+			message: '#^Cannot access property \$id on object\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: lib/documents.lib.php
 
 		-
-			message: '#^Cannot access property \$label on mixed\.$#'
+			message: '#^Cannot access property \$label on object\|false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: lib/documents.lib.php
@@ -10849,12 +10231,6 @@ parameters:
 			path: lib/documents.lib.php
 
 		-
-			message: '#^Constant MAIN_DB_PREFIX not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: lib/documents.lib.php
-
-		-
 			message: '#^Function saturne_get_list_of_models\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -10869,12 +10245,6 @@ parameters:
 		-
 			message: '#^Function saturne_show_documents\(\) has parameter \$modulesubdir with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: lib/documents.lib.php
-
-		-
-			message: '#^Function saturne_show_documents\(\) should return string but returns int\.$#'
-			identifier: return.type
 			count: 1
 			path: lib/documents.lib.php
 
@@ -11131,18 +10501,6 @@ parameters:
 			path: lib/medias.lib.php
 
 		-
-			message: '#^Function saturne_get_thumb_name\(\) should return string but returns int\.$#'
-			identifier: return.type
-			count: 1
-			path: lib/medias.lib.php
-
-		-
-			message: '#^Function saturne_show_medias\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: lib/medias.lib.php
-
-		-
 			message: '#^Function saturne_show_medias_linked\(\) has parameter \$moreParams with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -11191,19 +10549,13 @@ parameters:
 			path: lib/object.lib.php
 
 		-
-			message: '#^Binary operation "\." between '' FROM '' and mixed results in an error\.$#'
+			message: '#^Binary operation "\." between '' FROM `llx_'' and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
 			path: lib/object.lib.php
 
 		-
-			message: '#^Binary operation "\." between '' FROM `'' and mixed results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: lib/object.lib.php
-
-		-
-			message: '#^Binary operation "\." between '' LEFT JOIN `'' and mixed results in an error\.$#'
+			message: '#^Binary operation "\." between '' LEFT JOIN `llx_'' and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
 			path: lib/object.lib.php
@@ -11307,7 +10659,7 @@ parameters:
 		-
 			message: '#^Binary operation "\." between non\-falsy\-string and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
-			count: 22
+			count: 20
 			path: lib/object.lib.php
 
 		-
@@ -11779,12 +11131,6 @@ parameters:
 			path: lib/object.lib.php
 
 		-
-			message: '#^Constant MAIN_DB_PREFIX not found\.$#'
-			identifier: constant.notFound
-			count: 3
-			path: lib/object.lib.php
-
-		-
 			message: '#^Function saturne_fetch_all_object_type\(\) has parameter \$filter with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -11847,12 +11193,6 @@ parameters:
 		-
 			message: '#^Function saturne_require_objects_mod\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: lib/object.lib.php
-
-		-
-			message: '#^Parameter \#1 \$db of function dol_print_error expects DoliDB\|null, string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: lib/object.lib.php
 
@@ -12061,12 +11401,6 @@ parameters:
 			path: lib/saturne_functions.lib.php
 
 		-
-			message: '#^Binary operation "\." between '' FROM '' and mixed results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 2
-			path: lib/saturne_functions.lib.php
-
-		-
 			message: '#^Binary operation "\." between ''&module_name\='' and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
@@ -12224,6 +11558,12 @@ parameters:
 
 		-
 			message: '#^Call to function property_exists\(\) with CommonObject and ''element'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: lib/saturne_functions.lib.php
+
+		-
+			message: '#^Call to function property_exists\(\) with CommonObject and ''picto'' will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
 			path: lib/saturne_functions.lib.php
@@ -12727,15 +12067,15 @@ parameters:
 			path: lib/saturne_functions.lib.php
 
 		-
-			message: '#^Cannot use array destructuring on mixed\.$#'
-			identifier: offsetAccess.nonArray
-			count: 1
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 2
 			path: lib/saturne_functions.lib.php
 
 		-
-			message: '#^Constant MAIN_DB_PREFIX not found\.$#'
-			identifier: constant.notFound
-			count: 2
+			message: '#^Cannot use array destructuring on mixed\.$#'
+			identifier: offsetAccess.nonArray
+			count: 1
 			path: lib/saturne_functions.lib.php
 
 		-
@@ -12783,12 +12123,6 @@ parameters:
 		-
 			message: '#^Function saturne_fetch_dictionary\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: lib/saturne_functions.lib.php
-
-		-
-			message: '#^Function saturne_get_fiche_head\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: lib/saturne_functions.lib.php
 
@@ -12944,12 +12278,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property User\:\:\$login\.$#'
-			identifier: property.notFound
-			count: 1
-			path: lib/user.lib.php
-
-		-
-			message: '#^Access to an undefined property User\:\:\$socid\.$#'
 			identifier: property.notFound
 			count: 1
 			path: lib/user.lib.php
@@ -13225,8 +12553,8 @@ parameters:
 			path: public/signature/add_signature.php
 
 		-
-			message: '#^Function llxFooter not found\.$#'
-			identifier: function.notFound
+			message: '#^Function llxFooter invoked with 2 parameters, 0 required\.$#'
+			identifier: arguments.count
 			count: 1
 			path: public/signature/add_signature.php
 
@@ -13279,6 +12607,12 @@ parameters:
 			path: tests/phpunit/bootstrap.php
 
 		-
+			message: '#^Instantiated class DoliDB is abstract\.$#'
+			identifier: new.abstract
+			count: 1
+			path: tests/phpunit/bootstrap.php
+
+		-
 			message: '#^Call to method PHPUnit\\Framework\\Assert\:\:assertIsString\(\) with string will always evaluate to true\.$#'
 			identifier: method.alreadyNarrowedType
 			count: 1
@@ -13327,8 +12661,8 @@ parameters:
 			path: utils/viewimage.php
 
 		-
-			message: '#^Function top_httphead not found\.$#'
-			identifier: function.notFound
+			message: '#^Function top_httphead invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
 			count: 2
 			path: utils/viewimage.php
 
@@ -13561,52 +12895,10 @@ parameters:
 			path: view/saturne_agenda.php
 
 		-
-			message: '#^Function llxFooter not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: view/saturne_agenda.php
-
-		-
 			message: '#^Trying to invoke mixed but it''s not a callable\.$#'
 			identifier: callable.nonCallable
 			count: 1
 			path: view/saturne_agenda.php
-
-		-
-			message: '#^Access to an undefined property User\:\:\$errors\.$#'
-			identifier: property.notFound
-			count: 1
-			path: view/saturne_attendants.php
-
-		-
-			message: '#^Access to an undefined property User\:\:\$users\.$#'
-			identifier: property.notFound
-			count: 1
-			path: view/saturne_attendants.php
-
-		-
-			message: '#^Access to property \$email on an unknown class Contact\.$#'
-			identifier: class.notFound
-			count: 1
-			path: view/saturne_attendants.php
-
-		-
-			message: '#^Access to property \$firstname on an unknown class Contact\.$#'
-			identifier: class.notFound
-			count: 1
-			path: view/saturne_attendants.php
-
-		-
-			message: '#^Access to property \$fk_soc on an unknown class Contact\.$#'
-			identifier: class.notFound
-			count: 2
-			path: view/saturne_attendants.php
-
-		-
-			message: '#^Access to property \$lastname on an unknown class Contact\.$#'
-			identifier: class.notFound
-			count: 1
-			path: view/saturne_attendants.php
 
 		-
 			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
@@ -13753,45 +13045,15 @@ parameters:
 			path: view/saturne_attendants.php
 
 		-
-			message: '#^Binary operation "\.\=" between string and mixed results in an error\.$#'
-			identifier: assignOp.invalid
-			count: 1
-			path: view/saturne_attendants.php
-
-		-
 			message: '#^Call to an undefined method SaturneSignature\:\:call_trigger\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: view/saturne_attendants.php
 
 		-
-			message: '#^Call to an undefined method Translate\:\:setDefaultLang\(\)\.$#'
-			identifier: method.notFound
+			message: '#^Call to method CommonObject\:\:fetch\(\) on a separate line has no effect\.$#'
+			identifier: method.resultUnused
 			count: 1
-			path: view/saturne_attendants.php
-
-		-
-			message: '#^Call to an undefined method User\:\:fetchAll\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: view/saturne_attendants.php
-
-		-
-			message: '#^Call to method fetch\(\) on an unknown class Contact\.$#'
-			identifier: class.notFound
-			count: 1
-			path: view/saturne_attendants.php
-
-		-
-			message: '#^Call to method getCivilityLabel\(\) on an unknown class Contact\.$#'
-			identifier: class.notFound
-			count: 1
-			path: view/saturne_attendants.php
-
-		-
-			message: '#^Call to method getFullName\(\) on an unknown class Contact\.$#'
-			identifier: class.notFound
-			count: 2
 			path: view/saturne_attendants.php
 
 		-
@@ -14029,6 +13291,12 @@ parameters:
 			path: view/saturne_attendants.php
 
 		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 6
+			path: view/saturne_attendants.php
+
+		-
 			message: '#^Class Translate does not have a constructor and must be instantiated without any parameters\.$#'
 			identifier: new.noConstructor
 			count: 1
@@ -14038,12 +13306,6 @@ parameters:
 			message: '#^Class User constructor invoked with 1 parameter, 0 required\.$#'
 			identifier: arguments.count
 			count: 2
-			path: view/saturne_attendants.php
-
-		-
-			message: '#^Function llxFooter not found\.$#'
-			identifier: function.notFound
-			count: 1
 			path: view/saturne_attendants.php
 
 		-
@@ -14059,27 +13321,21 @@ parameters:
 			path: view/saturne_attendants.php
 
 		-
-			message: '#^Instantiated class Contact not found\.$#'
-			identifier: class.notFound
+			message: '#^Method Contact\:\:getFullName\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
 			count: 2
+			path: view/saturne_attendants.php
+
+		-
+			message: '#^Method User\:\:fetchAll\(\) invoked with 7 parameters, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
 			path: view/saturne_attendants.php
 
 		-
 			message: '#^Parameter \#1 \(mixed\) of echo cannot be converted to string\.$#'
 			identifier: echo.nonString
 			count: 4
-			path: view/saturne_attendants.php
-
-		-
-			message: '#^Parameter \#2 \$notrigger of method SaturneSignature\:\:setPending\(\) expects int, false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: view/saturne_attendants.php
-
-		-
-			message: '#^Property SaturneSignature\:\:\$last_email_sent_date \(string\) does not accept int\.$#'
-			identifier: assign.propertyType
-			count: 1
 			path: view/saturne_attendants.php
 
 		-
@@ -14265,12 +13521,6 @@ parameters:
 		-
 			message: '#^Expression on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.expr
-			count: 1
-			path: view/saturne_document.php
-
-		-
-			message: '#^Function llxFooter not found\.$#'
-			identifier: function.notFound
 			count: 1
 			path: view/saturne_document.php
 
@@ -14461,12 +13711,6 @@ parameters:
 			path: view/saturne_list.php
 
 		-
-			message: '#^Function llxFooter not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: view/saturne_list.php
-
-		-
 			message: '#^Negated boolean expression is always true\.$#'
 			identifier: booleanNot.alwaysTrue
 			count: 2
@@ -14548,12 +13792,6 @@ parameters:
 			message: '#^Cannot call method trans\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 2
-			path: view/saturne_note.php
-
-		-
-			message: '#^Function llxFooter not found\.$#'
-			identifier: function.notFound
-			count: 1
 			path: view/saturne_note.php
 
 		-
@@ -14650,48 +13888,6 @@ parameters:
 			message: '#^Binary operation "\." between non\-falsy\-string and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 5
-			path: view/saturne_schedules.php
-
-		-
-			message: '#^Binary operation "\.\=" between ''\<div class\="refidno…'' and mixed results in an error\.$#'
-			identifier: assignOp.invalid
-			count: 1
-			path: view/saturne_schedules.php
-
-		-
-			message: '#^Binary operation "\.\=" between non\-falsy\-string and mixed results in an error\.$#'
-			identifier: assignOp.invalid
-			count: 4
-			path: view/saturne_schedules.php
-
-		-
-			message: '#^Call to an undefined method Form\:\:editfieldkey\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: view/saturne_schedules.php
-
-		-
-			message: '#^Call to an undefined method Form\:\:editfieldval\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: view/saturne_schedules.php
-
-		-
-			message: '#^Call to an undefined method Form\:\:textwithpicto\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: view/saturne_schedules.php
-
-		-
-			message: '#^Call to method fetch\(\) on an unknown class Project\.$#'
-			identifier: class.notFound
-			count: 1
-			path: view/saturne_schedules.php
-
-		-
-			message: '#^Call to method getNomUrl\(\) on an unknown class Project\.$#'
-			identifier: class.notFound
-			count: 1
 			path: view/saturne_schedules.php
 
 		-
@@ -14797,19 +13993,25 @@ parameters:
 			path: view/saturne_schedules.php
 
 		-
-			message: '#^Function llxFooter not found\.$#'
-			identifier: function.notFound
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
 			count: 1
 			path: view/saturne_schedules.php
 
 		-
-			message: '#^Instantiated class Project not found\.$#'
-			identifier: class.notFound
-			count: 1
+			message: '#^Method Form\:\:editfieldkey\(\) invoked with 9 parameters, 5 required\.$#'
+			identifier: arguments.count
+			count: 2
+			path: view/saturne_schedules.php
+
+		-
+			message: '#^Method Form\:\:editfieldval\(\) invoked with 12 parameters, 5 required\.$#'
+			identifier: arguments.count
+			count: 2
 			path: view/saturne_schedules.php
 
 		-
 			message: '#^Parameter mixed of print cannot be converted to string\.$#'
 			identifier: print.nonString
-			count: 3
+			count: 1
 			path: view/saturne_schedules.php
