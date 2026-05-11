@@ -4,7 +4,40 @@ Saturne is a shared Dolibarr ERP framework. All modules (Digirisk, DigiQuali, Sa
 
 ---
 
-## 1. Project Architecture
+## 1. Architecture Philosophy
+
+Saturne follows a strict separation of concerns:
+
+- PHP controllers prepare data only
+- TPL files render HTML only
+- Business logic belongs to `class/`
+- Reusable UI belongs to `core/tpl/`
+- JavaScript is modular and event-driven
+- Styling is component-scoped through `.mod-{module}`
+
+The framework prioritizes:
+- maintainability over cleverness
+- consistency over flexibility
+- backward compatibility with Dolibarr
+- reusable patterns shared across all modules
+
+---
+
+## 2. AI Assistant Instructions
+
+When generating code:
+
+- Always reuse existing Saturne patterns before creating new ones
+- Prefer extending generic Saturne components over module-specific implementations
+- Keep generated diffs minimal
+- Preserve existing comments and spacing
+- Never reformat unrelated code
+- Follow the surrounding file style first
+- When uncertain, mimic the nearest reference file
+
+---
+
+## 3. Project Architecture
 
 ```
 htdocs/custom/saturne/
@@ -39,7 +72,40 @@ class MyObject extends SaturneObject {
 
 ---
 
-## 2. PHP Conventions
+## 4. Anti-Patterns
+
+Never:
+- Put SQL in views
+- Put HTML in classes
+- Put business logic in TPL
+- Use inline CSS or JS
+- Call Dolibarr globals directly inside JS
+- Duplicate generic components already existing in `saturne/`
+- Create module-specific patterns when a shared Saturne pattern exists
+
+### Bad vs Good Examples
+
+**PHP Rendering**
+```php
+// BAD
+echo '<script>alert()</script>';
+
+// GOOD
+saturne_header();
+```
+
+**JavaScript Event Binding**
+```javascript
+// BAD
+$('.btn').click(function(){});
+
+// GOOD
+$(document).on('click', '.btn', handler);
+```
+
+---
+
+## 5. PHP Conventions
 
 **Style** — follow [PSR-12](https://www.php-fig.org/psr/psr-12/) for all PHP code (indentation, spacing, naming, braces, etc.).
 PSR-12 is enforced via PHPCS — run `phpcs --standard=PSR12`. Config in `.phpcs.xml` at the module root.
@@ -98,7 +164,7 @@ class ActionsMyModule {
 
 ---
 
-## 3. JavaScript Conventions
+## 6. JavaScript Conventions
 
 **Namespace pattern** — literal object, no IIFE:
 ```javascript
@@ -127,7 +193,7 @@ window.saturne.modal.openModal = function(event) { /* … */ };
 
 ---
 
-## 4. SCSS Conventions
+## 7. SCSS Conventions
 
 **Structure**:
 ```
@@ -138,7 +204,9 @@ css/scss/page/_mypage.scss
 ```
 
 **Rules**:
-- Use `@use` / `@forward` — `@import` is being phased out
+- Legacy Saturne partials may still use `@import`.
+- New code should use `@use` / `@forward`.
+- Do not refactor existing imports unless touching the file.
 - Target Dolibarr overrides via the `mod-{element}` class injected by `saturne_header` on `<body>`:
   ```scss
   .mod-mymodule .fichecenter { /* override, not a global selector */ }
@@ -149,7 +217,27 @@ css/scss/page/_mypage.scss
 
 ---
 
-## 5. Build Workflow
+## 8. Performance Rules
+
+- Avoid N+1 fetch loops
+- Prefer bulk fetch methods
+- Never load unused JS modules
+- AJAX endpoints must return minimal payloads
+- Large lists must support pagination
+- Avoid synchronous AJAX
+
+---
+
+## 9. Compatibility Rules
+
+- Preserve existing hooks and public method signatures
+- Avoid breaking database schema changes
+- New constants must have migration safety
+- UI changes must remain compatible with existing themes
+
+---
+
+## 10. Build Workflow
 
 ### Lancer gulp en local
 
@@ -193,7 +281,7 @@ npm start   # équivalent, défini dans package.json via cross-env
 
 ---
 
-## 6. Quality Tooling
+## 11. Quality Tooling
 
 | Tool | Purpose | Config file | Enforced in CI |
 |------|---------|-------------|----------------|
@@ -244,7 +332,7 @@ EditorConfig is picked up automatically by most editors (VSCode, PhpStorm, etc.)
 
 ---
 
-## 7. Git Conventions
+## 12. Git Conventions
 
 **Branch**: `{type}/{issue-number}-{short-description}`
 → `fix/503-mail-eventpro`, `feat/478-menu-reorder`
@@ -277,7 +365,7 @@ EditorConfig is picked up automatically by most editors (VSCode, PhpStorm, etc.)
 
 ---
 
-## 8. Reference Files
+## 13. Reference Files
 
 These files are the most complete and representative examples in the codebase. Use them as templates when creating new files of the same type.
 
@@ -425,7 +513,7 @@ Shows the modifier-class architecture used across all Saturne components:
 
 ---
 
-## 9. Pitfalls
+## 14. Pitfalls
 
 - **Zero files outside `htdocs/custom/{module}/`** — never touch Dolibarr core
 - **Don't copy `gulpfile.js`** into each module — use `gulpfile-shared.js`
@@ -435,7 +523,7 @@ Shows the modifier-class architecture used across all Saturne components:
 
 ---
 
-## 10. Release Process
+## 15. Release Process
 
 See `docs/MEMO_RELEASE.md` for the full release workflow.
 
