@@ -64,11 +64,6 @@
         <!-- Toolbar -->
         <div class="saturne-photo-editor-toolbar">
 
-            <!-- Cancel / close -->
-            <button type="button" id="saturne-btn-cancel-photo" class="saturne-editor-btn saturne-editor-btn--cancel" title="<?php echo $langs->trans('Cancel'); ?>">
-                <i class="fas fa-times"></i>
-            </button>
-
             <!-- Drawing tools -->
             <button type="button" class="saturne-tool-btn saturne-editor-btn saturne-editor-btn--tool" data-mode="crop"     title="<?php echo $langs->trans('Crop'); ?>"><i class="fas fa-crop"></i></button>
             <button type="button" class="saturne-tool-btn saturne-editor-btn saturne-editor-btn--tool" data-mode="rotate"   title="<?php echo $langs->trans('Rotate'); ?>"><i class="fas fa-redo"></i></button>
@@ -87,11 +82,13 @@
             <!-- Undo -->
             <button type="button" id="saturne-btn-undo-photo" class="saturne-editor-btn saturne-editor-btn--undo" title="<?php echo $langs->trans('Undo'); ?>"><i class="fas fa-reply"></i></button>
 
-            <!-- Save (uploads, keeps modal open) -->
-            <button type="button" id="saturne-btn-validate-photo" class="saturne-editor-btn saturne-editor-btn--save" title="<?php echo $langs->trans('Save'); ?>"><i class="fas fa-save"></i></button>
-
-            <!-- OK (closes modal) -->
-            <button type="button" id="saturne-btn-ok-photo" class="saturne-editor-btn saturne-editor-btn--ok" title="OK"><i class="fas fa-check"></i></button>
+            <!-- Cancel + OK grouped on the right -->
+            <div class="saturne-photo-editor-toolbar__actions">
+                <button type="button" id="saturne-btn-cancel-photo" class="saturne-editor-btn saturne-editor-btn--cancel" title="<?php echo $langs->trans('Cancel'); ?>">
+                    <i class="fas fa-times"></i>
+                </button>
+                <button type="button" id="saturne-btn-ok-photo" class="saturne-editor-btn saturne-editor-btn--ok" title="OK"><i class="fas fa-check"></i></button>
+            </div>
         </div>
 
     </div>
