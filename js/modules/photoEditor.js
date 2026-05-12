@@ -93,7 +93,6 @@ window.saturne.photoEditor.event = function() {
   var colorPicker  = document.getElementById('saturne-draw-color-picker');
   var cropDiv      = document.getElementById('saturne-crop-selection');
   var btnCancel    = document.getElementById('saturne-btn-cancel-photo');
-  var btnValidate  = document.getElementById('saturne-btn-validate-photo');
   var btnUndo      = document.getElementById('saturne-btn-undo-photo');
   var resDisplay   = document.getElementById('saturne-photo-resolution-display');
 
@@ -184,10 +183,21 @@ window.saturne.photoEditor.event = function() {
     window.saturne.photoEditor._close();
   });
 
-  // OK — close without triggering another save
+  // OK — save then close
   var btnOk = document.getElementById('saturne-btn-ok-photo');
   btnOk.addEventListener('click', function() {
+    var activeText = document.getElementById('saturne-floating-text-input');
+    if (activeText) {
+      activeText.blur();
+    }
+    var onSave = window.saturne.photoEditor._onSave;
+    // Close synchronously first so onSave can safely re-open the editor (e.g. sequential multi-file)
     window.saturne.photoEditor._close();
+    if (typeof onSave === 'function') {
+      canvas.toBlob(function(blob) {
+        onSave(blob);
+      }, 'image/jpeg', 0.85);
+    }
   });
 
   // Close on overlay click
@@ -202,21 +212,6 @@ window.saturne.photoEditor.event = function() {
     if (e.key === 'Escape' && modal.style.display !== 'none') {
       window.saturne.photoEditor._close();
     }
-  });
-
-  // Save — upload to server, keep modal open
-  btnValidate.addEventListener('click', function() {
-    var activeText = document.getElementById('saturne-floating-text-input');
-    if (activeText) {
-      activeText.blur();
-    }
-    var onSave = window.saturne.photoEditor._onSave;
-    if (typeof onSave !== 'function') {
-      return;
-    }
-    canvas.toBlob(function(blob) {
-      onSave(blob);
-    }, 'image/jpeg', 0.85);
   });
 };
 
