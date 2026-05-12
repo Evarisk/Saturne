@@ -204,14 +204,22 @@
     align-items: center;
     font-size: 14px;
 
-    &--cancel   { background-color: #f39c12; }
+    &--cancel   { background-color: #e74c3c; }
     &--tool     { background-color: #34495e; }
     &--undo     { background-color: #7f8c8d; }
-    &--save     { background-color: #2ecc71; }
     &--ok       { background-color: #2ecc71; font-size: 1.1em; }
 
     &.active,
     &--tool.active { background-color: #3498db; }
+}
+
+/* ── Toolbar actions group (cancel + OK, right-aligned) ──────────────────── */
+
+.saturne-photo-editor-toolbar__actions {
+    margin-left: auto;
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
 }
 
 /* ── Pencil tool container ────────────────────────────────────────────────── */

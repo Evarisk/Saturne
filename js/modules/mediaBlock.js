@@ -92,12 +92,14 @@ window.saturne.mediaBlock.onPhotoSelected = function() {
     }
   }
 
-  window.saturne.photoEditor.openFile(files[0], function(blob) {
-    window.saturne.mediaBlock.uploadBlob(blob, module, subdir, block);
-  });
+  // Convert FileList to Array before clearing the input — browsers invalidate
+  // the FileList object when input.val('') is called, so async callbacks lose access
+  var filesArray = Array.prototype.slice.call(files);
 
   // Reset input so the same file can be re-selected if needed
   input.val('');
+
+  window.saturne.mediaBlock.openFilesSequentially(filesArray, 0, module, subdir, block);
 };
 
 /**
@@ -175,5 +177,32 @@ window.saturne.mediaBlock.uploadBlob = function(blob, module, subdir, block, ori
         block.find('.saturne-media-gallery').replaceWith(updatedGallery);
       }
     }
+  });
+};
+
+/**
+ * Open each file in the photo editor sequentially.
+ * After the user validates one photo the editor re-opens automatically for the next.
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param   {FileList} files  Files to process
+ * @param   {number}   index  Current index
+ * @param   {string}   module Module name
+ * @param   {string}   subdir Sub-directory
+ * @param   {jQuery}   block  The .linked-medias block element
+ * @returns {void}
+ */
+window.saturne.mediaBlock.openFilesSequentially = function(files, index, module, subdir, block) {
+  if (index >= files.length) {
+    return;
+  }
+
+  window.saturne.photoEditor.openFile(files[index], function(blob) {
+    window.saturne.mediaBlock.uploadBlob(blob, module, subdir, block);
+    window.saturne.mediaBlock.openFilesSequentially(files, index + 1, module, subdir, block);
   });
 };
