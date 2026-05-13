@@ -171,10 +171,12 @@ window.saturne.mediaBlock.uploadBlob = function(blob, module, subdir, block, ori
     processData : false,
     contentType : false,
     complete    : function(resp) {
-      var doc            = new DOMParser().parseFromString(resp.responseText, 'text/html');
-      var updatedGallery = $(doc).find('.saturne-media-gallery');
-      if (updatedGallery.length && block && block.length) {
-        block.find('.saturne-media-gallery').replaceWith(updatedGallery);
+      var $doc       = $('<div>').html(resp.responseText);
+      var blockId    = block && block.attr('id');
+      var $srcBlock  = blockId ? $doc.find('#' + blockId) : $doc.find('.linked-medias').first();
+      var $gallery   = $srcBlock.find('.saturne-media-gallery');
+      if ($gallery.length && block && block.length) {
+        block.find('.saturne-media-gallery').replaceWith($gallery);
       }
     }
   });

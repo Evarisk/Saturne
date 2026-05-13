@@ -479,9 +479,11 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
     $showPhoto   = isset($options['show_photo'])   ? $options['show_photo']   : true;
     $showAudio   = isset($options['show_audio'])   ? $options['show_audio']   : true;
     $showGallery = isset($options['show_gallery']) ? $options['show_gallery'] : true;
+    $showUpload  = isset($options['show_upload'])  ? $options['show_upload']  : true;
 
     $moduleNameLowerCase = dol_strtolower($moduleName);
-    $containerClass      = !empty($subDir) ? $subDir : 'media_dyn';
+    // Use only the last path segment as CSS class — subDir may contain slashes for deep paths
+    $containerClass      = !empty($subDir) ? basename($subDir) : 'media_dyn';
 
     // Compute the storage directory path.
     $uploadDir = !empty($conf->$moduleNameLowerCase->dir_output)
@@ -503,10 +505,12 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
         $out .= '  <div class="fast-upload-options" data-from-type="' . dol_escape_htmltag($moduleNameLowerCase) . '" data-from-subtype="' . dol_escape_htmltag($containerClass) . '" data-from-subdir="' . dol_escape_htmltag($subDir) . '" data-prefix="' . dol_escape_htmltag($prefix) . '" data-rights="' . dol_escape_htmltag($rightString) . '"></div>';
         $out .= '  <div class="saturne-media-upload-block" data-module="' . dol_escape_htmltag($moduleNameLowerCase) . '" data-subdir="' . dol_escape_htmltag($subDir) . '">';
 
-        $out .= '    <label for="' . $idPrefix . 'upload-media" class="saturne-upload-label">';
-        $out .= '      <i class="fas fa-camera"></i>';
-        $out .= '      <input type="file" id="' . $idPrefix . 'upload-media" class="saturne-photo-upload" name="userfile[]" accept="image/*" data-error-not-image="' . dol_escape_htmltag($langs->trans('ErrorFileNotAnImage')) . '" multiple>';
-        $out .= '    </label>';
+        if ($showUpload) {
+            $out .= '    <label for="' . $idPrefix . 'upload-media" class="saturne-upload-label">';
+            $out .= '      <i class="fas fa-camera"></i>';
+            $out .= '      <input type="file" id="' . $idPrefix . 'upload-media" class="saturne-photo-upload" name="userfile[]" accept="image/*" data-error-not-image="' . dol_escape_htmltag($langs->trans('ErrorFileNotAnImage')) . '" multiple>';
+            $out .= '    </label>';
+        }
 
         $out .= '    <div class="saturne-media-gallery">';
 
