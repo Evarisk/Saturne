@@ -1081,16 +1081,27 @@ function saturne_render_list_presets(array $presets): string
 
     $out = '<div class="saturne-list-presets">';
     foreach ($presets as $preset) {
+        // Caller-built trusted chip (e.g. an action button)
+        if (!empty($preset['raw'])) {
+            $out .= $preset['raw'];
+            continue;
+        }
         if (!isset($preset['label'], $preset['url'])) {
             continue;
         }
-        $class = 'saturne-list-preset' . (!empty($preset['active']) ? ' saturne-list-preset-active' : '');
-        $out  .= '<a href="' . dol_escape_htmltag($preset['url']) . '" class="' . $class . '">';
-        if (!empty($preset['icon'])) {
-            $out .= '<i class="' . dol_escape_htmltag($preset['icon']) . '"></i> ';
+        $activeClass = !empty($preset['active']) ? ' saturne-list-preset-active' : '';
+        $icon        = !empty($preset['icon']) ? '<i class="' . dol_escape_htmltag($preset['icon']) . '"></i> ' : '';
+
+        // Removable chip: link + a remove control carrying a key for the caller's JS to act on
+        if (!empty($preset['removeKey'])) {
+            $out .= '<span class="saturne-list-preset saturne-list-preset-removable' . $activeClass . '">';
+            $out .= '<a href="' . dol_escape_htmltag($preset['url']) . '" class="saturne-list-preset-link">' . $icon . dol_escape_htmltag($preset['label']) . '</a>';
+            $out .= '<span class="saturne-list-preset-remove" data-remove-key="' . dol_escape_htmltag($preset['removeKey']) . '" title="' . dol_escape_htmltag($preset['removeTitle'] ?? '') . '">&times;</span>';
+            $out .= '</span>';
+            continue;
         }
-        $out .= dol_escape_htmltag($preset['label']);
-        $out .= '</a>';
+
+        $out .= '<a href="' . dol_escape_htmltag($preset['url']) . '" class="saturne-list-preset' . $activeClass . '">' . $icon . dol_escape_htmltag($preset['label']) . '</a>';
     }
     $out .= '</div>';
 

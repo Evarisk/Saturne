@@ -42,3 +42,34 @@
         background: #1a68d1;
     }
 }
+
+// Button variant (e.g. "save current view") reusing the chip look
+button.saturne-list-preset {
+    font: inherit;
+    line-height: normal;
+}
+
+// Removable chip: link + remove control sharing a single pill
+.saturne-list-preset-removable {
+    padding-right: 6px;
+
+    .saturne-list-preset-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .saturne-list-preset-remove {
+        margin-left: 6px;
+        font-size: 14px;
+        line-height: 1;
+        color: #b0b6bd;
+        cursor: pointer;
+
+        &:hover {
+            color: #e74c3c;
+        }
+    }
+}
