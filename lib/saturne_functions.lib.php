@@ -999,7 +999,7 @@ function saturne_get_list_aggregates(DoliDB $db, string $baseSql, array $aggrega
  * e.g. through price()); 'label' is escaped. 'icon' is a Font Awesome class, 'color' a modifier
  * (blue, green, yellow, grey) mapped to a SCSS class.
  *
- * @param  array<int,array{label:string,value:string,icon?:string,color?:string}> $cards KPI cards to render
+ * @param  array<int,array{label:string,value:string,icon?:string,color?:string,id?:string,hidden?:bool}> $cards KPI cards to render (id => data-kpi-id for customization, hidden => add the --hidden class)
  * @return string                                                                        HTML for the cards bar, empty if no card
  */
 function saturne_render_kpi_cards(array $cards): string
@@ -1013,8 +1013,10 @@ function saturne_render_kpi_cards(array $cards): string
         if (!isset($card['label'], $card['value'])) {
             continue;
         }
-        $colorClass = !empty($card['color']) ? ' saturne-kpi-card-' . dol_escape_htmltag($card['color']) : '';
-        $out .= '<div class="saturne-kpi-card' . $colorClass . '">';
+        $colorClass  = !empty($card['color']) ? ' saturne-kpi-card-' . dol_escape_htmltag($card['color']) : '';
+        $hiddenClass = !empty($card['hidden']) ? ' saturne-kpi-card--hidden' : '';
+        $idAttr      = !empty($card['id']) ? ' data-kpi-id="' . dol_escape_htmltag($card['id']) . '"' : '';
+        $out .= '<div class="saturne-kpi-card' . $colorClass . $hiddenClass . '"' . $idAttr . '>';
         if (!empty($card['icon'])) {
             $out .= '<span class="saturne-kpi-card-icon"><i class="' . dol_escape_htmltag($card['icon']) . '"></i></span>';
         }
