@@ -1,0 +1,44 @@
+// List presets — clickable saved-view chips displayed above a list
+
+.saturne-list-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 6px 0 12px;
+}
+
+.saturne-list-preset {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    font-size: 13px;
+    color: #4a4f57;
+    background: #fff;
+    border: 1px solid #d4d8dd;
+    border-radius: 16px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+    &:hover {
+        border-color: #2c7be5;
+        color: #2c7be5;
+        text-decoration: none;
+    }
+
+    i {
+        font-size: 12px;
+    }
+}
+
+.saturne-list-preset-active {
+    color: #fff;
+    background: #2c7be5;
+    border-color: #2c7be5;
+
+    &:hover {
+        color: #fff;
+        background: #1a68d1;
+    }
+}

@@ -1063,3 +1063,36 @@ function saturne_user_can_write_element(User $user, CommonObject $object, string
 
     return false;
 }
+
+/**
+ * Render a horizontal bar of preset (saved-view) chips above a list.
+ *
+ * Each preset is a link applying a predefined filtered view in one click. The caller builds
+ * the target URL and the active state; the mechanism is generic and reusable by any module.
+ *
+ * @param  array<int,array{label:string,url:string,icon?:string,active?:bool}> $presets Preset chips
+ * @return string                                                                       HTML for the presets bar, empty if none
+ */
+function saturne_render_list_presets(array $presets): string
+{
+    if (empty($presets)) {
+        return '';
+    }
+
+    $out = '<div class="saturne-list-presets">';
+    foreach ($presets as $preset) {
+        if (!isset($preset['label'], $preset['url'])) {
+            continue;
+        }
+        $class = 'saturne-list-preset' . (!empty($preset['active']) ? ' saturne-list-preset-active' : '');
+        $out  .= '<a href="' . dol_escape_htmltag($preset['url']) . '" class="' . $class . '">';
+        if (!empty($preset['icon'])) {
+            $out .= '<i class="' . dol_escape_htmltag($preset['icon']) . '"></i> ';
+        }
+        $out .= dol_escape_htmltag($preset['label']);
+        $out .= '</a>';
+    }
+    $out .= '</div>';
+
+    return $out;
+}
