@@ -951,3 +951,80 @@ function saturne_css_for_field(array $val, string $key): string
 
     return $cssForField;
 }
+
+/**
+ * Compute aggregate values over a filtered list query.
+ *
+ * Wraps a SELECT query (typically the $sqlForList snapshot built by the generic list) as a subquery
+ * and runs aggregate expressions over it, so totals reflect the whole filtered set, not the current page.
+ * Aggregate expressions reference the columns produced by the wrapped query (e.g. 'SUM(opp_amount)').
+ *
+ * @param  DoliDB        $db         Database handler
+ * @param  string        $baseSql    Already filtered SELECT query (trailing ORDER BY / LIMIT are stripped)
+ * @param  array<string,string> $aggregates Map of result alias => SQL aggregate expression (e.g. ['nb' => 'COUNT(*)'])
+ * @return stdClass|null             Row holding one property per alias, or null on empty input or SQL error
+ */
+function saturne_get_list_aggregates(DoliDB $db, string $baseSql, array $aggregates): ?stdClass
+{
+    if (empty($baseSql) || empty($aggregates)) {
+        return null;
+    }
+
+    // Strip trailing ORDER BY / LIMIT so the snapshot is safe to wrap as a subquery
+    $baseSql = preg_replace('/\s+ORDER BY\s+.*$/is', '', $baseSql);
+    $baseSql = preg_replace('/\s+LIMIT\s+\d+\s*(OFFSET\s+\d+\s*)?$/is', '', $baseSql);
+
+    $selectParts = [];
+    foreach ($aggregates as $alias => $expression) {
+        $selectParts[] = $expression . ' AS ' . $alias;
+    }
+
+    $sql   = 'SELECT ' . implode(', ', $selectParts) . ' FROM (' . $baseSql . ') AS sub';
+    $resql = $db->query($sql);
+    if (!$resql) {
+        dol_syslog('saturne_get_list_aggregates SQL error: ' . $db->lasterror(), LOG_ERR);
+        return null;
+    }
+
+    $row = $db->fetch_object($resql);
+    $db->free($resql);
+
+    return $row ?: null;
+}
+
+/**
+ * Render a horizontal bar of KPI cards (summary metrics) to display above a list.
+ *
+ * The 'value' of each card is printed as-is (caller is responsible for escaping or formatting it,
+ * e.g. through price()); 'label' is escaped. 'icon' is a Font Awesome class, 'color' a modifier
+ * (blue, green, yellow, grey) mapped to a SCSS class.
+ *
+ * @param  array<int,array{label:string,value:string,icon?:string,color?:string}> $cards KPI cards to render
+ * @return string                                                                        HTML for the cards bar, empty if no card
+ */
+function saturne_render_kpi_cards(array $cards): string
+{
+    if (empty($cards)) {
+        return '';
+    }
+
+    $out = '<div class="saturne-kpi-cards">';
+    foreach ($cards as $card) {
+        if (!isset($card['label'], $card['value'])) {
+            continue;
+        }
+        $colorClass = !empty($card['color']) ? ' saturne-kpi-card-' . dol_escape_htmltag($card['color']) : '';
+        $out .= '<div class="saturne-kpi-card' . $colorClass . '">';
+        if (!empty($card['icon'])) {
+            $out .= '<span class="saturne-kpi-card-icon"><i class="' . dol_escape_htmltag($card['icon']) . '"></i></span>';
+        }
+        $out .= '<div class="saturne-kpi-card-body">';
+        $out .= '<div class="saturne-kpi-card-value">' . $card['value'] . '</div>';
+        $out .= '<div class="saturne-kpi-card-label">' . dol_escape_htmltag($card['label']) . '</div>';
+        $out .= '</div>';
+        $out .= '</div>';
+    }
+    $out .= '</div>';
+
+    return $out;
+}

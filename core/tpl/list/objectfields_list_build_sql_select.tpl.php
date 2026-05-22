@@ -28,6 +28,8 @@
  * Parameters : $action, $limit, $searchAll, $sortfield, $sortorder, $page
  * Objects    : $extrafields, $object
  * Variables  : $arrayfields, $excludeFields (optional), $offset, $search, $search_array_options (extrafields_list_search_sql.tpl), $searchCategories
+ *
+ * Exposes    : $sqlForList — full filtered query before sort/pagination, for aggregate/KPI hooks
  */
 
 // Pre-calculate searchAll fields and LEFT JOINs for integer: type fields
@@ -238,6 +240,10 @@ $sql .= $hookmanager->resPrint;
 $parameters = ['search' => $search];
 $hookmanager->executeHooks('printFieldListHaving', $parameters, $object, $action);
 $sql .= $hookmanager->resPrint;
+
+// Snapshot of the full filtered query (all joins, filters and search criteria applied) before sorting and pagination.
+// Aggregate/KPI hooks (e.g. printFieldPreListTitle) can wrap it as a subquery to compute totals over the whole filtered set.
+$sqlForList = $sql;
 
 // Count total nb of records
 $nbTotalOfRecords = '';
