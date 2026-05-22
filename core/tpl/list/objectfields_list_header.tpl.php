@@ -335,6 +335,14 @@ if ($activeFilterCount > 0) {
     $filterButton = '<span class="saturne-filter-btn-wrapper">' . $filterButton . dolGetBadge((string) $activeFilterCount, '', 'secondary') . '</span>';
 }
 $listTitle    = (($conf->browser->layout == 'classic' && $mode != 'pwa') ? $title : '') . ' ' . $cardButton . ' ' . $filterButton;
+
+// Hook: full-width banner above the list title bar (KPI cards, view presets, ...), rendered outside the title/filter header
+$parameters = ['arrayfields' => &$arrayfields];
+$hookmanager->executeHooks('saturneListTopBanner', $parameters, $object, $action);
+if (!empty($hookmanager->resPrint)) {
+    print '<div class="saturne-list-top-banner">' . $hookmanager->resPrint . '</div>';
+}
+
 print_barre_liste($listTitle, $page, $_SERVER['PHP_SELF'], $param, $sortfield, $sortorder, $massActionButton, $num, $nbTotalOfRecords, $object->picto, 0, $newCardButton, '', $limit, 0, 0, 1);
 
 // Add code for pre mass action (confirmation or email presend form)

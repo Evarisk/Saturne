@@ -1,5 +1,10 @@
 // List presets — clickable saved-view chips displayed above a list
 
+// Full-width banner above the list title bar (KPI cards + presets), outside the list header
+.saturne-list-top-banner {
+    margin: 4px 0 10px;
+}
+
 .saturne-list-presets {
     display: flex;
     flex-wrap: wrap;
