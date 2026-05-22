@@ -38,18 +38,51 @@ $action = GETPOST('action', 'aZ09');
 if ($action == 'update_field') {
     $field     = GETPOST('field', 'alpha', 2);
     $element   = GETPOST('element', 'alpha', 2);
-    $fkElement = GETPOST('fk_element', 'alpha', 2);
+    $fkElement = GETPOSTINT('fk_element', 2);
     $type      = GETPOST('type', 'alpha', 2);
 
-    $object = fetchObjectByElement((int) $fkElement, $element);
+    $object = fetchObjectByElement($fkElement, $element);
 
-    $format = '';
-    $value  =  '';
-    if ($type == 'datepicker') {
-        $format    = 'date';
-        $timestamp = GETPOSTINT('fieldValue', 2);
-        $value = ($timestamp / 1000);
+    // Guard: a real object must be loaded and the field must belong to it (prevents writing arbitrary columns)
+    if (!is_object($object) || empty($object->id) || !isset($object->fields[$field])) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'InvalidObjectOrField']);
+        $db->close();
+        exit;
     }
 
-    $object->setValueFrom($field, $value, '', null, $format);
+    // Permission guard: the user must be allowed to write this element
+    if (!saturne_user_can_write_element($user, $object, $element)) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'error' => 'NotEnoughPermissions']);
+        $db->close();
+        exit;
+    }
+
+    $format = '';
+    switch ($type) {
+        case 'datepicker':
+            $format = 'date';
+            $value  = GETPOSTINT('fieldValue', 2) / 1000;
+            break;
+        case 'number':
+            $value = price2num(GETPOST('fieldValue', 'alphanohtml', 2));
+            break;
+        case 'select':
+        case 'text':
+        default:
+            $value = GETPOST('fieldValue', 'restricthtml', 2);
+            break;
+    }
+
+    $result = $object->setValueFrom($field, $value, '', null, $format, '', $user);
+
+    if ($result < 0) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => $object->error ?: 'UpdateFailed']);
+    } else {
+        echo json_encode(['success' => true]);
+    }
+    $db->close();
+    exit;
 }

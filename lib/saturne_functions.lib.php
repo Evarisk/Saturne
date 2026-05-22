@@ -1028,3 +1028,38 @@ function saturne_render_kpi_cards(array $cards): string
 
     return $out;
 }
+
+/**
+ * Tell whether a user is allowed to write (edit) a given object/element.
+ *
+ * Used to guard generic inline-edit endpoints. Tries the common Dolibarr write permission verbs
+ * across both core elements (e.g. projet => 'creer') and Saturne modules (=> 'write'), against the
+ * object module, the requested element and the table element. Admins always pass.
+ *
+ * @param  User         $user    Current user
+ * @param  CommonObject $object  Loaded object to be edited
+ * @param  string       $element Requested element (as sent by the client)
+ * @return bool                  True if the user may write the element
+ */
+function saturne_user_can_write_element(User $user, CommonObject $object, string $element): bool
+{
+    if (!empty($user->admin)) {
+        return true;
+    }
+
+    $modules = array_unique(array_filter([
+        $object->module ?? null,
+        $element,
+        $object->table_element ?? null,
+    ]));
+
+    foreach ($modules as $module) {
+        foreach (['write', 'creer', 'modifier', 'edit', 'create'] as $verb) {
+            if ($user->hasRight($module, $verb) || $user->hasRight($module, $element, $verb)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
