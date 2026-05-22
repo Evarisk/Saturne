@@ -20,8 +20,6 @@
  * \brief   JavaScript inline <select> editing inside list cells
  */
 
-'use strict';
-
 window.saturne.listInlineSelect = {};
 
 /**
@@ -95,7 +93,7 @@ window.saturne.listInlineSelect.onChange = function onChange() {
  */
 window.saturne.listInlineSelect.flash = function flash($td, isOk) {
   $td.removeClass('ce-valid ce-invalid');
-  $td[0].offsetWidth;
+  $td.width(); // force a reflow so the re-added class restarts the CSS animation
   $td.addClass(isOk ? 'ce-valid' : 'ce-invalid');
   setTimeout(function() {
     $td.removeClass('ce-valid ce-invalid');
