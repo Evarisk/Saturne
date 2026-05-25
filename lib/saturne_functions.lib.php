@@ -1161,3 +1161,40 @@ function saturne_get_list_layout(string $listId): array
 
     return ['order' => $order, 'widths' => $widths];
 }
+
+/**
+ * Determine the inline-edit editor type for a list field.
+ *
+ * @param  array  $val Field definition (type, arrayofkeyval, noedit, ...)
+ * @param  string $key Field key
+ * @return string      '' (not inline-editable) | 'text' | 'number' | 'datepicker' | 'select'
+ */
+function saturne_get_inline_edit_type(array $val, string $key): string
+{
+    // Special / identity columns handled elsewhere or not editable
+    if (in_array($key, ['rowid', 'ref', 'status', 'fk_statut'], true)) {
+        return '';
+    }
+    if (!empty($val['noedit']) || !empty($val['disableedit'])) {
+        return '';
+    }
+
+    // Enumerations -> inline select
+    if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) {
+        return 'select';
+    }
+
+    $type = (string) ($val['type'] ?? '');
+    if (in_array($type, ['date', 'datetime', 'timestamp'], true)) {
+        return 'datepicker';
+    }
+    if ($type === 'integer' || $type === 'real' || $type === 'price' || strpos($type, 'double') === 0) {
+        return 'number';
+    }
+    if ($type === 'string' || strpos($type, 'varchar') === 0) {
+        return 'text';
+    }
+
+    // Foreign keys (integer:/sellist:), rich text/html, links, etc. are not inline-editable here
+    return '';
+}
