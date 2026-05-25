@@ -1,0 +1,21 @@
+// Sticky table header on saturne lists.
+// The list table scrolls inside .div-table-responsive (height set adaptively by listStickyHeader.js),
+// so the single header row stays visible while scrolling. An opaque background prevents rows
+// from showing through the sticky header.
+
+.bodyforlist {
+    .div-table-responsive {
+        overflow: auto;
+        max-height: var(--saturne-list-maxh, calc(100vh - 220px));
+    }
+
+    table.liste thead th {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+    }
+
+    table.liste thead tr.liste_titre > th {
+        background-color: #f4f5f7;
+    }
+}
