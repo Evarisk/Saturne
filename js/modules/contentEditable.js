@@ -334,12 +334,21 @@ window.saturne.contentEditable.onBlur = function() {
  * @return {void}
  */
 window.saturne.contentEditable.showFeedback = function($el, isValid) {
-  const $wrap = $el.closest('.contenteditable-wrap');
-  const $td   = $el.closest('td');
+  // Some inline fields are plain spans without a .contenteditable-wrap (e.g. merged-cell
+  // coordinates) and may live outside a <td>. Fall back to the element itself and guard the
+  // <td> access so this never throws — a throw here would skip saveField's .always() restore
+  // and leave the field stuck at contenteditable="false".
+  let $wrap = $el.closest('.contenteditable-wrap');
+  if (!$wrap.length) {
+    $wrap = $el;
+  }
+  const $td = $el.closest('td');
 
-  $td.removeClass('ce-valid ce-invalid');
-  $td[0].offsetWidth;
-  $td.addClass(isValid ? 'ce-valid' : 'ce-invalid');
+  if ($td.length) {
+    $td.removeClass('ce-valid ce-invalid');
+    $td[0].offsetWidth;
+    $td.addClass(isValid ? 'ce-valid' : 'ce-invalid');
+  }
 
   if (isValid) {
     let $icon = $('#ce-feedback-icon');
