@@ -121,7 +121,7 @@ while ($i < $iMaxInLoop) {
                 }
                 print '>';
 
-                $parameters = ['arrayfields' => $arrayfields, 'key' => $key, 'val' => $val];
+                $parameters = ['arrayfields' => $arrayfields, 'key' => $key, 'val' => $val, 'obj' => $obj];
                 $hookmanager->executeHooks('saturnePrintFieldListLoopObject', $parameters, $object);
                 if (!empty($hookmanager->resArray[$key])) {
                     print $hookmanager->resArray[$key];
