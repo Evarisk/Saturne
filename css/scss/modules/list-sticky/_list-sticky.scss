@@ -19,8 +19,15 @@
         background-color: #f4f5f7;
     }
 
-    // The column-picker dropdown (Dolibarr .selectedfieldsleft) defaults to z-index:1, so the
-    // sticky header (z-index:3) shows through it. Lift it above the header when open.
+    // The column-picker dropdown (Dolibarr .selectedfieldsleft) lives INSIDE its own header cell,
+    // which is sticky with z-index:3 like the others; sibling header cells come later in the DOM
+    // so they paint over the open dropdown (a z-index on the dropdown itself can't escape its
+    // cell's stacking context). Raise that header cell above the others so its dropdown floats
+    // over the whole header row.
+    table.liste thead th.maxwidthsearch {
+        z-index: 100;
+    }
+
     .selectedfieldsleft {
         z-index: 1000;
     }
