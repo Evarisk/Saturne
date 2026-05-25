@@ -37,6 +37,7 @@ $savNbField            = $totalarray['nbfield'];
 $totalarray            = [];
 $totalarray['nbfield'] = 0;
 $iMaxInLoop            = ($limit ? min($num, $limit) : $num);
+$listColumnWidths      = $listColumnWidths ?? [];
 while ($i < $iMaxInLoop) {
     $obj = $db->fetch_object($resql);
     if (empty($obj)) {
@@ -111,6 +112,12 @@ while ($i < $iMaxInLoop) {
                 print '<td' . ($cssForField ? ' class="' . $cssForField . ((preg_match('/tdoverflow/', $cssForField) && !in_array($val['type'], ['ip', 'url']) && !is_numeric($object->$key)) ? ' classfortooltip' : '') . '"' : '');
                 if (preg_match('/tdoverflow/', $cssForField) && !in_array($val['type'], ['ip', 'url']) && !is_numeric($object->$key) && $key != 'ref') {
                     print ' title="' . dol_escape_htmltag($object->$key) . '"';
+                }
+                // Per-user column key + saved width (for resize/reorder customization)
+                print ' data-colkey="' . dol_escape_htmltag($key) . '"';
+                $colWidth = !empty($listColumnWidths[$key]) ? (int) $listColumnWidths[$key] : 0;
+                if ($colWidth > 0) {
+                    print ' style="width:' . $colWidth . 'px;min-width:' . $colWidth . 'px;"';
                 }
                 print '>';
 

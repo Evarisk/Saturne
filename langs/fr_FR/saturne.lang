@@ -282,3 +282,7 @@ FavoriteSaved        = Favori enregistré
 ErrorSavingFavorite  = Erreur lors de l’enregistrement du favori
 ResetFilters         = Réinitialiser
 SearchInAllFields    = Rechercher dans tous les champs…
+
+# List column customization
+CustomizeColumns = Colonnes
+ResetColumns = Réinitialiser

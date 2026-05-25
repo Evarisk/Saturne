@@ -1109,3 +1109,55 @@ function saturne_render_list_presets(array $presets): string
 
     return $out;
 }
+
+/**
+ * Build the user_param key holding a list's per-user column layout.
+ *
+ * @param  string $listId List identifier (e.g. the object element)
+ * @return string         Sanitized user_param key
+ */
+function saturne_list_layout_param(string $listId): string
+{
+    return 'SATURNE_LIST_LAYOUT_' . strtoupper(preg_replace('/[^A-Za-z0-9_]/', '', $listId));
+}
+
+/**
+ * Read the per-user column layout (order + widths) saved for a list.
+ *
+ * @param  string $listId List identifier (e.g. the object element)
+ * @return array{order:string[],widths:array<string,int>} Saved layout (empty arrays when none)
+ */
+function saturne_get_list_layout(string $listId): array
+{
+    global $user;
+
+    $empty = ['order' => [], 'widths' => []];
+    if (empty($listId)) {
+        return $empty;
+    }
+
+    $param = saturne_list_layout_param($listId);
+    $raw   = isset($user->conf->$param) ? $user->conf->$param : '';
+    if (empty($raw)) {
+        return $empty;
+    }
+
+    $decoded = json_decode($raw, true);
+    if (!is_array($decoded)) {
+        return $empty;
+    }
+
+    $order  = (!empty($decoded['order']) && is_array($decoded['order'])) ? array_values($decoded['order']) : [];
+    $widths = [];
+    if (!empty($decoded['widths']) && is_array($decoded['widths'])) {
+        foreach ($decoded['widths'] as $colKey => $width) {
+            $colKey = preg_replace('/[^A-Za-z0-9_]/', '', (string) $colKey);
+            $width  = (int) $width;
+            if ($colKey !== '' && $width > 0) {
+                $widths[$colKey] = $width;
+            }
+        }
+    }
+
+    return ['order' => $order, 'widths' => $widths];
+}

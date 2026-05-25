@@ -263,3 +263,7 @@ RecordingInProgress = Recording in progress...
 ExportGraphCSV       = Export the graph in CSV format
 ResetFilters         = Reset filters
 SearchInAllFields    = Search in all fields…
+
+# List column customization
+CustomizeColumns = Columns
+ResetColumns = Reset
