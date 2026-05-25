@@ -43,10 +43,23 @@ if ($action == 'update_field') {
 
     $object = fetchObjectByElement($fkElement, $element);
 
-    // Guard: a real object must be loaded and the field must belong to it (prevents writing arbitrary columns)
-    if (!is_object($object) || empty($object->id) || !isset($object->fields[$field])) {
+    if (!is_object($object) || empty($object->id)) {
         http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'InvalidObjectOrField']);
+        echo json_encode(['success' => false, 'error' => 'InvalidObject']);
+        $db->close();
+        exit;
+    }
+
+    // The field is either a real table column or an extrafield (options_*)
+    require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
+    $extrafields = new ExtraFields($db);
+    $extrafields->fetch_name_optionals_label($object->table_element);
+    $isExtrafield = !empty($extrafields->attributes[$object->table_element]['label'][$field]);
+
+    // Guard: the field must belong to the object (prevents writing arbitrary columns)
+    if (!isset($object->fields[$field]) && !$isExtrafield) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'InvalidField']);
         $db->close();
         exit;
     }
@@ -75,7 +88,13 @@ if ($action == 'update_field') {
             break;
     }
 
-    $result = $object->setValueFrom($field, $value, '', null, $format, '', $user);
+    if ($isExtrafield) {
+        $object->fetch_optionals();
+        $object->array_options['options_' . $field] = $value;
+        $result = $object->updateExtraField($field, '', $user);
+    } else {
+        $result = $object->setValueFrom($field, $value, '', null, $format, '', $user);
+    }
 
     if ($result < 0) {
         http_response_code(500);
