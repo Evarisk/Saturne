@@ -88,6 +88,23 @@ if ($action == 'update_field') {
             break;
     }
 
+    // Optional server-side format validation (mirrors the client data-validate guard)
+    $validate = GETPOST('validate', 'aZ09', 2);
+    if ($validate !== '' && (string) $value !== '') {
+        $valid = true;
+        if ($validate === 'email') {
+            $valid = isValidEmail((string) $value);
+        } elseif ($validate === 'phone') {
+            $valid = (bool) preg_match('/^[+]?[\d\s().-]{6,20}$/', (string) $value);
+        }
+        if (!$valid) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'InvalidFormat']);
+            $db->close();
+            exit;
+        }
+    }
+
     if ($isExtrafield) {
         $object->fetch_optionals();
         $object->array_options['options_' . $field] = $value;

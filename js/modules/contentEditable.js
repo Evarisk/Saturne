@@ -25,6 +25,43 @@
 window.saturne.contentEditable = {};
 
 /**
+ * Validateurs de format pour les champs texte éditables (extensibles par les modules).
+ * Un champ s'y abonne via data-validate="email" / data-validate="phone".
+ * Pour une contrainte ad hoc, utiliser data-validate-pattern="<regex>".
+ */
+window.saturne.contentEditable.validators = {
+  email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  phone: /^[+]?[\d\s().-]{6,20}$/
+};
+
+/**
+ * Valide une valeur texte selon data-validate (nom de validateur intégré) puis
+ * data-validate-pattern (regex brute). Renvoie true si aucune contrainte n'est définie.
+ *
+ * @since   23.0.0
+ * @version 23.0.0
+ *
+ * @param  {jQuery} $el   - L'élément .contenteditable
+ * @param  {string} value - La valeur à valider
+ * @return {boolean}      - true si valide (ou non contraint)
+ */
+window.saturne.contentEditable.isValid = function($el, value) {
+  const name = $el.data('validate');
+  if (name && window.saturne.contentEditable.validators[name]) {
+    return window.saturne.contentEditable.validators[name].test(value);
+  }
+  const pattern = $el.data('validate-pattern');
+  if (pattern) {
+    try {
+      return new RegExp(pattern).test(value);
+    } catch (e) {
+      return true;
+    }
+  }
+  return true;
+};
+
+/**
  * contentEditable init
  *
  * @since   22.0.0
@@ -188,7 +225,8 @@ window.saturne.contentEditable.saveField = function($el, payload) {
       element:    $el.data('element'),
       fk_element: $el.data('id'),
       type:       payload.type,
-      fieldValue: fieldValue
+      fieldValue: fieldValue,
+      validate:   $el.data('validate') || ''
     }
   })
     .done(function() {
@@ -270,8 +308,12 @@ window.saturne.contentEditable.onBlur = function() {
     }
 
   } else {
-    // Champ texte : sauvegarde directe sans parsing
+    // Champ texte : validation de format optionnelle avant sauvegarde
     if (value.length === 0) {
+      window.saturne.contentEditable.showFeedback($el, false);
+      return;
+    }
+    if (!window.saturne.contentEditable.isValid($el, value)) {
       window.saturne.contentEditable.showFeedback($el, false);
       return;
     }
