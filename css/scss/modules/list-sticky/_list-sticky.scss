@@ -18,4 +18,10 @@
     table.liste thead tr.liste_titre > th {
         background-color: #f4f5f7;
     }
+
+    // The column-picker dropdown (Dolibarr .selectedfieldsleft) defaults to z-index:1, so the
+    // sticky header (z-index:3) shows through it. Lift it above the header when open.
+    .selectedfieldsleft {
+        z-index: 1000;
+    }
 }
