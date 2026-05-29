@@ -88,7 +88,7 @@ while ($i < $iMaxInLoop) {
         print '<tr data-rowid="' . $object->id . '" class="oddeven">';
 
         // Action column
-        if (getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
+        if ($useLeftActionColumn ?? true) {
             print '<td class="nowrap center">';
             // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
             if ($massActionButton || $massaction) {
@@ -179,7 +179,7 @@ while ($i < $iMaxInLoop) {
         print $hookmanager->resPrint;
 
         // Action column
-        if (!getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
+        if (!($useLeftActionColumn ?? true)) {
             print '<td class="nowrap center">';
             // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
             if ($massActionButton || $massaction) {

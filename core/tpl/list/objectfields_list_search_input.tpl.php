@@ -32,15 +32,15 @@
 
 // Fields title search
 // --------------------------------------------------------------------
-// When the side filter panel is active, inputs live inside the panel — skip the inline filter row.
-if (!empty($useSideFilterPanel)) {
+// PWA mode keeps its own mobile filter UX — skip the desktop inline filter row.
+if (($mode ?? '') == 'pwa') {
     return;
 }
 
 print '<tr class="liste_titre_filter">';
 
 // Action column
-if (getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
+if ($useLeftActionColumn ?? true) {
     print '<td class="liste_titre center maxwidthsearch">';
     $searchPicto = $form->showFilterButtons('left');
     print $searchPicto;
@@ -135,7 +135,7 @@ $hookmanager->executeHooks('printFieldListOption', $parameters, $object, $action
 print $hookmanager->resPrint;
 
 // Action column
-if (!getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
+if (!($useLeftActionColumn ?? true)) {
     print '<td class="liste_titre center maxwidthsearch">';
     $searchPicto = $form->showFilterButtons();
     print $searchPicto;
