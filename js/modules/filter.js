@@ -12,14 +12,12 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
- * Library javascript to enable Browser notifications
  */
 
 /**
  * \file    js/modules/filter.js
  * \ingroup saturne
- * \brief   JavaScript filter panel file for module Saturne
+ * \brief   JavaScript list filters file for module Saturne
  */
 
 /**
@@ -54,56 +52,7 @@ window.saturne.filter.init = function() {
  * @returns {void}
  */
 window.saturne.filter.event = function() {
-    $(document).on('click', '#saturne-filter-toggle', window.saturne.filter.open);
-    $(document).on('click', '#saturne-filter-backdrop', window.saturne.filter.close);
-    $(document).on('click', '.saturne-filter-panel-close', window.saturne.filter.close);
     $(document).on('click', '.saturne-filter-mode-toggle', window.saturne.filter.toggleMode);
-    $(document).on('keydown', window.saturne.filter.handleKeyDown);
-};
-
-/**
- * Open the filter panel
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @returns {boolean}
- */
-window.saturne.filter.open = function() {
-    $('#saturne-filter-backdrop').show();
-    $('#saturne-filter-panel').css('right', '0');
-    $('body').css('overflow', 'hidden');
-    window.saturne.filter.initSelect2();
-    return false;
-};
-
-/**
- * Close the filter panel
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @returns {void}
- */
-window.saturne.filter.close = function() {
-    $('#saturne-filter-backdrop').hide();
-    $('#saturne-filter-panel').css('right', '-400px');
-    $('body').css('overflow', '');
-};
-
-/**
- * Close the filter panel on Escape key
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @param   {KeyboardEvent} e
- * @returns {void}
- */
-window.saturne.filter.handleKeyDown = function(e) {
-    if (e.key === 'Escape') {
-        window.saturne.filter.close();
-    }
 };
 
 /**
@@ -121,33 +70,6 @@ window.saturne.filter.toggleMode = function() {
     $input.val(exc ? 'exc' : 'inc');
     $(this).html(exc ? '<span class="far fa-eye-slash"></span>' : '<span class="far fa-eye"></span>');
     $(this).toggleClass('saturne-filter-mode-exc', exc).toggleClass('saturne-filter-mode-inc', !exc);
-};
-
-/**
- * Re-init select2 fields inside the panel after it becomes visible
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @returns {void}
- */
-window.saturne.filter.initSelect2 = function() {
-    if (typeof jQuery === 'undefined' || !jQuery.fn.select2) {
-        return;
-    }
-    setTimeout(function() {
-        $('#saturne-filter-panel select').each(function() {
-            var $el = $(this);
-            if ($el.data('select2')) {
-                $el.select2('destroy');
-            }
-            $el.select2({
-                width            : '100%',
-                dropdownParent   : $('body'),
-                dropdownCssClass : 'saturne-filter-select2-drop'
-            });
-        });
-    }, 50);
 };
 
 /**
@@ -222,13 +144,13 @@ window.saturne.filter.initCategoryPicker = function(tagsEl) {
 
     function renderTag(id, lbl, col, mode) {
         var exc  = mode === 'exc';
-        var sign = exc ? '\u2212' : '+';
-        return '<span class="cat-sign saturne-cat-tag-sign" style="background:' + col + '">' + catIcon + ' ' + sign + '</span>'
-            + '<span class="saturne-cat-tag-body">'
-            + '<span class="saturne-cat-tag-label' + (exc ? ' is-exc' : '') + '">' + esc(lbl) + '</span>'
-            + '<span class="cat-remove saturne-cat-tag-remove">\u00d7</span>'
-            + '</span>'
-            + '<input type="hidden" name="search_categories_filter[]" value="' + (exc ? '-' : '+') + id + '">';
+        var sign = exc ? '−' : '+';
+        return '<span class="cat-sign saturne-cat-tag-sign" style="background:' + col + '">' + catIcon + ' ' + sign + '</span>' +
+            '<span class="saturne-cat-tag-body">' +
+            '<span class="saturne-cat-tag-label' + (exc ? ' is-exc' : '') + '">' + esc(lbl) + '</span>' +
+            '<span class="cat-remove saturne-cat-tag-remove">×</span>' +
+            '</span>' +
+            '<input type="hidden" name="search_categories_filter[]" value="' + (exc ? '-' : '+') + id + '">';
     }
 
     function bindTag(s) {
