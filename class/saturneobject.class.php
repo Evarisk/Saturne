@@ -451,6 +451,23 @@ abstract class SaturneObject extends CommonObject
     }
 
     /**
+     * Set unarchived status (back to validated)
+     *
+     * @param  User      $user      Object user that modify
+     * @param  int<0,1>  $noTrigger 0 = launch triggers after, 1 = disable triggers
+     * @return int<-1,1>            Return integer 0 < if KO, 0 if not archived, > 0 if OK
+     */
+    public function setUnarchived(User $user, int $noTrigger = 0): int
+    {
+        // Protection : seul un élément archivé peut être désarchivé
+        if ((int) $this->status !== static::STATUS_ARCHIVED) {
+            return 0;
+        }
+
+        return $this->setStatusCommon($user, static::STATUS_VALIDATED, $noTrigger, strtoupper($this->element) . '_UNARCHIVE');
+    }
+
+    /**
      * Return array of data to show into a tooltip
      * This method must be implemented in each object class
      *

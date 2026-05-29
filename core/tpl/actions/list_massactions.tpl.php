@@ -59,3 +59,34 @@ if (($massaction == 'archive' || ($action == 'archive' && $confirm == 'yes')) &&
         }
     }
 }
+
+// Unarchive mass action
+if (($massaction == 'unarchive' || ($action == 'unarchive' && $confirm == 'yes')) && $permissiontoadd) {
+    if (!empty($toselect)) {
+        $nbOk      = 0;
+        $error     = 0;
+        $objectTmp = new $objectclass($db);
+        foreach ($toselect as $toSelectedID) {
+            $result = $objectTmp->fetch($toSelectedID);
+            if ($result > 0) {
+                $result = $objectTmp->setUnarchived($user, false);
+                if ($result > 0) {
+                    $nbOk++;
+                } elseif ($result < 0) {
+                    // 0 = élément non archivé (garde-fou) : ignoré silencieusement, pas bloquant
+                    setEventMessages($objectTmp->error, $objectTmp->errors, 'errors');
+                    $error++;
+                    break;
+                }
+            } else {
+                setEventMessages($objectTmp->error, $objectTmp->errors, 'errors');
+                $error++;
+                break;
+            }
+        }
+
+        if ($error == 0) {
+            setEventMessages($langs->trans('RecordsUnarchived', $nbOk), []);
+        }
+    }
+}
