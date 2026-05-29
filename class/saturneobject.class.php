@@ -468,6 +468,20 @@ abstract class SaturneObject extends CommonObject
     }
 
     /**
+     * Is the object in a state where its content can still be modified?
+     *
+     * True only for draft/validated. Locked, archived (and deleted) objects are read-only.
+     * This is the server-side counterpart of the UI convention `status < STATUS_LOCKED`.
+     *
+     * @return bool True if content modifications are allowed
+     */
+    public function isModifiable(): bool
+    {
+        return (int) $this->status >= static::STATUS_DRAFT
+            && (int) $this->status < static::STATUS_LOCKED;
+    }
+
+    /**
      * Return array of data to show into a tooltip
      * This method must be implemented in each object class
      *
