@@ -29,7 +29,7 @@
  * Objects    : $categorie, $extrafields (extrafields_list_search_param.tpl), $form, $object
  * Variables  : $arrayfields, $createUrl (optional), $fieldsToSearchAll, $formMoreParams (optional), $helpText (optional),
  *              $nbTotalOfRecords, $num, $permissiontoadd, $resql, $search, $search_array_options (extrafields_list_search_param.tpl),
- *              $searchCategories, $sql, $title
+ *              $searchCategoriesFilter, $sql, $title
  */
 
 // Output page
@@ -84,6 +84,14 @@ foreach ($search as $key => $val) {
     }
 }
 
+// Preserve active category filters across sort / pagination / view-mode links
+foreach (GETPOST('search_categories_filter', 'array') as $catFilterVal) {
+    $catFilterVal = (int) $catFilterVal;
+    if ($catFilterVal != 0) {
+        $param .= '&search_categories_filter[]=' . urlencode((string) $catFilterVal);
+    }
+}
+
 // Add $param from extra fields
 require_once DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_list_search_param.tpl.php';
 
@@ -127,16 +135,16 @@ if (!empty($formMoreParams)) {
     }
 }
 
+// Saturne lists place the action column (search/reset buttons, select-all
+// checkbox) on the LEFT, like a native Dolibarr list with left checkboxes.
+$useLeftActionColumn = true;
+
 // Apply user column preferences to $arrayfields now, so all loops below use correct checked values
 $selectedFields = '';
 if ($mode != 'pwa' && $mode != 'kanban') {
     $varPage        = $contextpage ?: $_SERVER['PHP_SELF'];
-    $selectedFields = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varPage, getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN'));
+    $selectedFields = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varPage, ($useLeftActionColumn ? 'left' : ''));
 }
-
-// Saturne lists place the action column (search/reset buttons, select-all
-// checkbox) on the LEFT, like a native Dolibarr list with left checkboxes.
-$useLeftActionColumn = true;
 
 // Build top filter toolbar content (global search + categories)
 // --------------------------------------------------------------------
@@ -277,5 +285,5 @@ foreach ($search as $key => $val) {
 }
 
 print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you don't need reserved height for your table
-print '<table class="tagtable nobottomiftotal noborder liste' . ($moreForFilter ? ' listwithfilterbefore' : '') . '">';
+print '<table class="tagtable nobottomiftotal noborder liste' . (($moreForFilter || ($mode != 'pwa' && $filterToolbarBody !== '')) ? ' listwithfilterbefore' : '') . '">';
 print '<thead>';
