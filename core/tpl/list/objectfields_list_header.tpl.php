@@ -101,7 +101,8 @@ $arrayOfMassActions = [
     //'generate_doc'=>img_picto('', 'pdf', 'class="pictofixedwidth"').$langs->trans("ReGeneratePDF"),
     //'builddoc'=>img_picto('', 'pdf', 'class="pictofixedwidth"').$langs->trans("PDFMerge"),
     //'presend'=>img_picto('', 'email', 'class="pictofixedwidth"').$langs->trans("SendByMail"),
-    'prearchive' => '<span class="fas fa-archive paddingrightonly"></span>' . $langs->trans('Archive')
+    'prearchive' => '<span class="fas fa-archive paddingrightonly"></span>' . $langs->trans('Archive'),
+    'preunarchive' => '<span class="fas fa-box-open paddingrightonly"></span>' . $langs->trans('Unarchive')
 ];
 
 if (!empty($permissiontodelete)) {
@@ -347,6 +348,10 @@ require_once DOL_DOCUMENT_ROOT . '/core/tpl/massactions_pre.tpl.php';
 
 if ($massaction == 'prearchive') {
     print $form->formconfirm($_SERVER['PHP_SELF'], $langs->trans('ConfirmMassArchive'), $langs->trans('ConfirmMassArchivingQuestion', count($toselect)), 'archive', null, '', 0, 200, 500, 1);
+}
+
+if ($massaction == 'preunarchive') {
+    print $form->formconfirm($_SERVER['PHP_SELF'], $langs->trans('ConfirmMassUnarchive'), $langs->trans('ConfirmMassUnarchivingQuestion', count($toselect)), 'unarchive', null, '', 0, 200, 500, 1);
 }
 
 if ($searchAll) {
