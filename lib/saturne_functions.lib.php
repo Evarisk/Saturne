@@ -901,6 +901,26 @@ function saturne_load_list_parameters(string $contexName): array
     return $listParameters;
 }
 
+/**
+ * Get the status search filter from POST, or a default set of statuses.
+ *
+ * Honors the (multiselect) status filter posted as an array of int. When the user
+ * has not selected anything, falls back to $defaultStatuses. Used by list views to
+ * make the "Archived" status option actually reachable while keeping a sane default.
+ *
+ * @param  int[] $defaultStatuses Default statuses applied when no filter is posted
+ * @return int[]                  Statuses to filter on
+ */
+function saturne_get_status_search_filter(array $defaultStatuses): array
+{
+    $posted = GETPOST('search_status', 'array:int');
+    if (is_array($posted) && !empty($posted)) {
+        return $posted;
+    }
+
+    return $defaultStatuses;
+}
+
 
 /**
  * Load pagination parameters for list
