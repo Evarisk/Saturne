@@ -79,6 +79,7 @@ AllSignatoriesMustHaveSigned     = All participants must have signed to lock %s
 ObjectMustBeValidatedToSendEmail = %s must be in (validated) status to send an email
 ObjectMustBeLockedToSendEmail    = %s must be in (locked) status to send an email
 ObjectMustBeLockedToArchive      = %s must be in status (locked) in order to archive it
+ObjectIsReadOnly                 = %s is read-only (locked or archived)
 
 # Confirm box
 ValidateObject          = Validate %s
