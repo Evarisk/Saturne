@@ -1,0 +1,176 @@
+/*--------------------------------------------------------------
+    Module : List filters (inline row + top toolbar)
+    Version : 2.0.0
+--------------------------------------------------------------*/
+
+// Top filter toolbar (above the table): global search + categories
+.saturne-list-filterbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 4px 10px;
+}
+
+// Global "search in all fields" — kept compact, not full width
+.saturne-filter-search-all-wrapper {
+  flex: 0 0 auto;
+}
+
+.saturne-filter-search-all-input {
+  width: 220px;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 6px 10px;
+  border: 1px solid #c3ccd4;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+// Category picker + tags block
+.saturne-filterbar-cat {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+// Compact category picker — constrain both the raw <select> and the select2 widget
+.saturne-filter-cat-picker {
+  width: 190px;
+}
+
+.saturne-list-filterbar .select2-container {
+  width: 190px !important;
+  min-width: 0;
+}
+
+// Compact include/exclude legend, pushed to the far right, always on one line
+.saturne-filter-legend-inline {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  white-space: nowrap;
+  font-size: 12px;
+  color: #555;
+}
+
+.saturne-filter-legend-include,
+.saturne-filter-legend-exclude {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.saturne-filter-legend-include .far {
+  color: #27ae60;
+  font-size: 14px;
+}
+
+.saturne-filter-legend-exclude .far {
+  color: #c0392b;
+  font-size: 14px;
+}
+
+// Include/exclude per-field toggle (eye icons), used inside the inline filter row
+.saturne-filter-mode-toggle {
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0 4px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.saturne-filter-mode-inc {
+  color: #27ae60;
+}
+
+.saturne-filter-mode-exc {
+  color: #c0392b;
+}
+
+// Inline search-cell wrapper (eye toggle + field on one line)
+.saturne-filter-inline-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+// Category tags container
+.saturne-cat-filter-tags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+// Category icon (small, white-tinted inside the colored sign)
+.saturne-cat-icon {
+  width: 12px;
+  height: 12px;
+  vertical-align: middle;
+  color: inherit;
+  filter: brightness(10);
+}
+
+// Category tag pill
+.saturne-cat-tag {
+  display: inline-flex;
+  align-items: stretch;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 2px solid transparent; // color set inline (dynamic per category)
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .15);
+  cursor: default;
+  user-select: none;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.saturne-cat-tag-sign {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 8px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+  // background set inline (dynamic per category)
+}
+
+.saturne-cat-tag-body {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: #fff;
+  color: #333;
+}
+
+.saturne-cat-tag-label {
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &.is-exc {
+    text-decoration: line-through;
+  }
+}
+
+.saturne-cat-tag-remove {
+  cursor: pointer;
+  color: #aaa;
+  font-size: 14px;
+  line-height: 1;
+  font-weight: bold;
+
+  &:hover {
+    color: #333;
+  }
+}
+
+// jQuery UI datepicker is appended to <body> — keep it above other content
+.ui-datepicker {
+  z-index: 1003 !important;
+}
