@@ -241,6 +241,11 @@ saturne_header(0, '', $title, '', '', 0, 0, [], [], '', 'mod-' . $object->elemen
 <?php
 
 require_once __DIR__ . '/../core/tpl/list/objectfields_list_build_sql_select.tpl.php';
+
+if (empty($createUrl) && !empty($objectMetadata['create_url'])) {
+    $createUrl = dol_buildpath($objectMetadata['create_url'], 1) . '?action=create' . ($moreUrlParameters ?? '');
+}
+
 require_once __DIR__ . '/../core/tpl/list/objectfields_list_header.tpl.php';
 require_once __DIR__ . '/../core/tpl/list/objectfields_list_search_input.tpl.php';
 require_once __DIR__ . '/../core/tpl/list/objectfields_list_search_title.tpl.php';
