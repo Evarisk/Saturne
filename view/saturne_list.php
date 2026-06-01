@@ -257,16 +257,6 @@ if (empty($resHook)) {
 $title = $langs->trans(ucfirst($object->element) . 'List');
 saturne_header(0, '', $title, '', '', 0, 0, [], [], '', 'mod-' . $object->element . ' page-list bodyforlist');
 
-?>
-    <script nonce="<?php echo getNonce(); ?>">
-        Dolibarr.setContextVars(<?php print json_encode([
-            'DOL_VERSION'            => DOL_VERSION,
-            'MAIN_LANG_DEFAULT'      => 'fr_FR',
-            'DOL_LANG_INTERFACE_URL' => dol_buildpath('admin/tools/ui/experimental/experiments/dolibarr-context/langs-tool-interface.php', 1),
-        ]) ?>);
-    </script>
-<?php
-
 require_once __DIR__ . '/../core/tpl/list/objectfields_list_build_sql_select.tpl.php';
 
 if (empty($createUrl) && !empty($objectMetadata['create_url'])) {
