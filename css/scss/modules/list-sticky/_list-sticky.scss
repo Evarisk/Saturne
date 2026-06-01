@@ -1,0 +1,34 @@
+// Sticky table header on saturne lists.
+// The list table scrolls inside .div-table-responsive (height set adaptively by listStickyHeader.js),
+// so the single header row stays visible while scrolling. An opaque background prevents rows
+// from showing through the sticky header.
+
+.bodyforlist {
+    .div-table-responsive {
+        overflow: auto;
+        max-height: var(--saturne-list-maxh, calc(100vh - 220px));
+    }
+
+    table.liste thead th {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+    }
+
+    table.liste thead tr.liste_titre > th {
+        background-color: #f4f5f7;
+    }
+
+    // The column-picker dropdown (Dolibarr .selectedfieldsleft) lives INSIDE its own header cell,
+    // which is sticky with z-index:3 like the others; sibling header cells come later in the DOM
+    // so they paint over the open dropdown (a z-index on the dropdown itself can't escape its
+    // cell's stacking context). Raise that header cell above the others so its dropdown floats
+    // over the whole header row.
+    table.liste thead th.maxwidthsearch {
+        z-index: 100;
+    }
+
+    .selectedfieldsleft {
+        z-index: 1000;
+    }
+}

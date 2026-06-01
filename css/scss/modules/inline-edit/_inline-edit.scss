@@ -1,0 +1,44 @@
+// Inline edit — compact controls for editing a value directly inside a list cell
+
+.saturne-inline-select {
+    max-width: 160px;
+    padding: 2px 6px;
+    font-size: 12px;
+    line-height: 1.4;
+    border: 1px solid #d4d8dd;
+    border-radius: 4px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+        border-color: #b0b6bd;
+    }
+
+    &:focus {
+        outline: none;
+        border-color: #2c7be5;
+        box-shadow: 0 0 0 2px rgba(44, 123, 229, 0.15);
+    }
+
+    &.ce-saving {
+        opacity: 0.6;
+        cursor: progress;
+    }
+}
+
+// Editable opportunity percentage: numeric contenteditable followed by a "%" suffix
+.saturne-inline-percent {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 2px;
+
+    .contenteditable {
+        min-width: 28px;
+        text-align: right;
+    }
+
+    .saturne-inline-percent-suffix {
+        color: #7a7a7a;
+    }
+}

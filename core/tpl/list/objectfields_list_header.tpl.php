@@ -336,6 +336,14 @@ if ($activeFilterCount > 0) {
     $filterButton = '<span class="saturne-filter-btn-wrapper">' . $filterButton . dolGetBadge((string) $activeFilterCount, '', 'secondary') . '</span>';
 }
 $listTitle    = (($conf->browser->layout == 'classic' && $mode != 'pwa') ? $title : '') . ' ' . $cardButton . ' ' . $filterButton;
+
+// Hook: full-width banner above the list title bar (KPI cards, view presets, ...), rendered outside the title/filter header
+$parameters = ['arrayfields' => &$arrayfields];
+$hookmanager->executeHooks('saturneListTopBanner', $parameters, $object, $action);
+if (!empty($hookmanager->resPrint)) {
+    print '<div class="saturne-list-top-banner">' . $hookmanager->resPrint . '</div>';
+}
+
 print_barre_liste($listTitle, $page, $_SERVER['PHP_SELF'], $param, $sortfield, $sortorder, $massActionButton, $num, $nbTotalOfRecords, $object->picto, 0, $newCardButton, '', $limit, 0, 0, 1);
 
 // Add code for pre mass action (confirmation or email presend form)
@@ -420,6 +428,15 @@ foreach ($search as $key => $val) {
     }
 }
 
+// Column customization controls (resize + drag reorder, per-user) — generic, all saturne lists
+$listLayoutId = $listLayoutId ?? ($object->element ?? '');
+if ($mode != 'kanban' && $mode != 'pwa' && !empty($listLayoutId)) {
+    print '<div class="saturne-columns-controls" data-list-layout-id="' . dol_escape_htmltag($listLayoutId) . '">';
+    print '<button type="button" class="saturne-columns-toggle" title="' . dol_escape_htmltag($langs->trans('CustomizeColumns')) . '"><span class="fas fa-table-columns"></span> ' . dol_escape_htmltag($langs->trans('CustomizeColumns')) . '</button>';
+    print '<button type="button" class="saturne-columns-reset" title="' . dol_escape_htmltag($langs->trans('ResetColumns')) . '"><span class="fas fa-undo"></span> ' . dol_escape_htmltag($langs->trans('ResetColumns')) . '</button>';
+    print '</div>';
+}
+
 print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you don't need reserved height for your table
-print '<table class="tagtable nobottomiftotal noborder liste' . ($moreForFilter ? ' listwithfilterbefore' : '') . '">';
+print '<table class="tagtable nobottomiftotal noborder liste' . ($moreForFilter ? ' listwithfilterbefore' : '') . '" data-list-layout-id="' . dol_escape_htmltag($listLayoutId) . '">';
 print '<thead>';

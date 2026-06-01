@@ -153,6 +153,33 @@ foreach ($object->fields as $key => $val) {
 // Extra fields
 require_once DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_list_array_fields.tpl.php';
 
+// Apply the per-user column layout (order + widths) saved for this list
+$listLayoutId     = $object->element;
+$listLayout       = saturne_get_list_layout($listLayoutId);
+$listColumnWidths = $listLayout['widths'];
+if (!empty($listLayout['order'])) {
+    $listColumnPos = 0;
+    foreach ($listLayout['order'] as $colKey) {
+        if (isset($object->fields[$colKey])) {
+            $object->fields[$colKey]['position'] = $listColumnPos;
+        }
+        if (isset($arrayfields['t.' . $colKey])) {
+            $arrayfields['t.' . $colKey]['position'] = $listColumnPos;
+        }
+        $listColumnPos += 10;
+    }
+    // Keep columns not present in the saved order after the ordered ones
+    foreach ($object->fields as $colKey => $fieldVal) {
+        if (!in_array($colKey, $listLayout['order'], true)) {
+            $object->fields[$colKey]['position'] = $listColumnPos;
+            if (isset($arrayfields['t.' . $colKey])) {
+                $arrayfields['t.' . $colKey]['position'] = $listColumnPos;
+            }
+            $listColumnPos += 10;
+        }
+    }
+}
+
 $object->fields = dol_sort_array($object->fields, 'position');
 $arrayfields    = dol_sort_array($arrayfields, 'position');
 

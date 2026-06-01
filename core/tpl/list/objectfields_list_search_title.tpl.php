@@ -44,10 +44,15 @@ if (getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
     $totalarray['nbfield']++;
 }
 
+$listColumnWidths = $listColumnWidths ?? [];
 foreach ($object->fields as $key => $val) {
     $cssForField = saturne_css_for_field($val, $key);
     if (!empty($arrayfields['t.' . $key]['checked'])) {
-        print saturne_get_title_field_of_list($arrayfields['t.' . $key]['label'], 0, $_SERVER['PHP_SELF'], ($val['otheralias'] ?? 't.') . $key, '', $param, ($cssForField ? 'class="' . $cssForField . '"' : ''), $sortfield, $sortorder, ($cssForField ? $cssForField . ' ' : ''), (empty($val['disablesort']) ? '' : $val['disablesort']), (empty($val['helplist']) ? '' : $val['helplist']));
+        // Per-user column key + saved width (for resize/reorder customization)
+        $colWidth   = !empty($listColumnWidths[$key]) ? (int) $listColumnWidths[$key] : 0;
+        $colStyle   = $colWidth > 0 ? ' style="width:' . $colWidth . 'px;min-width:' . $colWidth . 'px;"' : '';
+        $moreAttrib = ($cssForField ? 'class="' . $cssForField . '"' : '') . ' data-colkey="' . dol_escape_htmltag($key) . '"' . $colStyle;
+        print saturne_get_title_field_of_list($arrayfields['t.' . $key]['label'], 0, $_SERVER['PHP_SELF'], ($val['otheralias'] ?? 't.') . $key, '', $param, $moreAttrib, $sortfield, $sortorder, ($cssForField ? $cssForField . ' ' : ''), (empty($val['disablesort']) ? '' : $val['disablesort']), (empty($val['helplist']) ? '' : $val['helplist']));
         $totalarray['nbfield']++;
     }
 }

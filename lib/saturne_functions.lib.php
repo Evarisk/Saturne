@@ -971,3 +971,250 @@ function saturne_css_for_field(array $val, string $key): string
 
     return $cssForField;
 }
+
+/**
+ * Compute aggregate values over a filtered list query.
+ *
+ * Wraps a SELECT query (typically the $sqlForList snapshot built by the generic list) as a subquery
+ * and runs aggregate expressions over it, so totals reflect the whole filtered set, not the current page.
+ * Aggregate expressions reference the columns produced by the wrapped query (e.g. 'SUM(opp_amount)').
+ *
+ * @param  DoliDB        $db         Database handler
+ * @param  string        $baseSql    Already filtered SELECT query (trailing ORDER BY / LIMIT are stripped)
+ * @param  array<string,string> $aggregates Map of result alias => SQL aggregate expression (e.g. ['nb' => 'COUNT(*)'])
+ * @return stdClass|null             Row holding one property per alias, or null on empty input or SQL error
+ */
+function saturne_get_list_aggregates(DoliDB $db, string $baseSql, array $aggregates): ?stdClass
+{
+    if (empty($baseSql) || empty($aggregates)) {
+        return null;
+    }
+
+    // Strip trailing ORDER BY / LIMIT so the snapshot is safe to wrap as a subquery
+    $baseSql = preg_replace('/\s+ORDER BY\s+.*$/is', '', $baseSql);
+    $baseSql = preg_replace('/\s+LIMIT\s+\d+\s*(OFFSET\s+\d+\s*)?$/is', '', $baseSql);
+
+    $selectParts = [];
+    foreach ($aggregates as $alias => $expression) {
+        $selectParts[] = $expression . ' AS ' . $alias;
+    }
+
+    $sql   = 'SELECT ' . implode(', ', $selectParts) . ' FROM (' . $baseSql . ') AS sub';
+    $resql = $db->query($sql);
+    if (!$resql) {
+        dol_syslog('saturne_get_list_aggregates SQL error: ' . $db->lasterror(), LOG_ERR);
+        return null;
+    }
+
+    $row = $db->fetch_object($resql);
+    $db->free($resql);
+
+    return $row ?: null;
+}
+
+/**
+ * Render a horizontal bar of KPI cards (summary metrics) to display above a list.
+ *
+ * The 'value' of each card is printed as-is (caller is responsible for escaping or formatting it,
+ * e.g. through price()); 'label' is escaped. 'icon' is a Font Awesome class, 'color' a modifier
+ * (blue, green, yellow, grey) mapped to a SCSS class.
+ *
+ * @param  array<int,array{label:string,value:string,icon?:string,color?:string,id?:string,hidden?:bool}> $cards KPI cards to render (id => data-kpi-id for customization, hidden => add the --hidden class)
+ * @return string                                                                        HTML for the cards bar, empty if no card
+ */
+function saturne_render_kpi_cards(array $cards): string
+{
+    if (empty($cards)) {
+        return '';
+    }
+
+    $out = '<div class="saturne-kpi-cards">';
+    foreach ($cards as $card) {
+        if (!isset($card['label'], $card['value'])) {
+            continue;
+        }
+        $colorClass  = !empty($card['color']) ? ' saturne-kpi-card-' . dol_escape_htmltag($card['color']) : '';
+        $hiddenClass = !empty($card['hidden']) ? ' saturne-kpi-card--hidden' : '';
+        $idAttr      = !empty($card['id']) ? ' data-kpi-id="' . dol_escape_htmltag($card['id']) . '"' : '';
+        $out .= '<div class="saturne-kpi-card' . $colorClass . $hiddenClass . '"' . $idAttr . '>';
+        if (!empty($card['icon'])) {
+            $out .= '<span class="saturne-kpi-card-icon"><i class="' . dol_escape_htmltag($card['icon']) . '"></i></span>';
+        }
+        $out .= '<div class="saturne-kpi-card-body">';
+        $out .= '<div class="saturne-kpi-card-value">' . $card['value'] . '</div>';
+        $out .= '<div class="saturne-kpi-card-label">' . dol_escape_htmltag($card['label']) . '</div>';
+        $out .= '</div>';
+        $out .= '</div>';
+    }
+    $out .= '</div>';
+
+    return $out;
+}
+
+/**
+ * Tell whether a user is allowed to write (edit) a given object/element.
+ *
+ * Used to guard generic inline-edit endpoints. Tries the common Dolibarr write permission verbs
+ * across both core elements (e.g. projet => 'creer') and Saturne modules (=> 'write'), against the
+ * object module, the requested element and the table element. Admins always pass.
+ *
+ * @param  User         $user    Current user
+ * @param  CommonObject $object  Loaded object to be edited
+ * @param  string       $element Requested element (as sent by the client)
+ * @return bool                  True if the user may write the element
+ */
+function saturne_user_can_write_element(User $user, CommonObject $object, string $element): bool
+{
+    if (!empty($user->admin)) {
+        return true;
+    }
+
+    $modules = array_unique(array_filter([
+        $object->module ?? null,
+        $element,
+        $object->table_element ?? null,
+    ]));
+
+    foreach ($modules as $module) {
+        foreach (['write', 'creer', 'modifier', 'edit', 'create'] as $verb) {
+            if ($user->hasRight($module, $verb) || $user->hasRight($module, $element, $verb)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+/**
+ * Render a horizontal bar of preset (saved-view) chips above a list.
+ *
+ * Each preset is a link applying a predefined filtered view in one click. The caller builds
+ * the target URL and the active state; the mechanism is generic and reusable by any module.
+ *
+ * @param  array<int,array{label:string,url:string,icon?:string,active?:bool}> $presets Preset chips
+ * @return string                                                                       HTML for the presets bar, empty if none
+ */
+function saturne_render_list_presets(array $presets): string
+{
+    if (empty($presets)) {
+        return '';
+    }
+
+    $out = '<div class="saturne-list-presets">';
+    foreach ($presets as $preset) {
+        // Caller-built trusted chip (e.g. an action button)
+        if (!empty($preset['raw'])) {
+            $out .= $preset['raw'];
+            continue;
+        }
+        if (!isset($preset['label'], $preset['url'])) {
+            continue;
+        }
+        $activeClass = !empty($preset['active']) ? ' saturne-list-preset-active' : '';
+        $icon        = !empty($preset['icon']) ? '<i class="' . dol_escape_htmltag($preset['icon']) . '"></i> ' : '';
+
+        // Removable chip: link + a remove control carrying a key for the caller's JS to act on
+        if (!empty($preset['removeKey'])) {
+            $out .= '<span class="saturne-list-preset saturne-list-preset-removable' . $activeClass . '">';
+            $out .= '<a href="' . dol_escape_htmltag($preset['url']) . '" class="saturne-list-preset-link">' . $icon . dol_escape_htmltag($preset['label']) . '</a>';
+            $out .= '<span class="saturne-list-preset-remove" data-remove-key="' . dol_escape_htmltag($preset['removeKey']) . '" title="' . dol_escape_htmltag($preset['removeTitle'] ?? '') . '">&times;</span>';
+            $out .= '</span>';
+            continue;
+        }
+
+        $out .= '<a href="' . dol_escape_htmltag($preset['url']) . '" class="saturne-list-preset' . $activeClass . '">' . $icon . dol_escape_htmltag($preset['label']) . '</a>';
+    }
+    $out .= '</div>';
+
+    return $out;
+}
+
+/**
+ * Build the user_param key holding a list's per-user column layout.
+ *
+ * @param  string $listId List identifier (e.g. the object element)
+ * @return string         Sanitized user_param key
+ */
+function saturne_list_layout_param(string $listId): string
+{
+    return 'SATURNE_LIST_LAYOUT_' . strtoupper(preg_replace('/[^A-Za-z0-9_]/', '', $listId));
+}
+
+/**
+ * Read the per-user column layout (order + widths) saved for a list.
+ *
+ * @param  string $listId List identifier (e.g. the object element)
+ * @return array{order:string[],widths:array<string,int>} Saved layout (empty arrays when none)
+ */
+function saturne_get_list_layout(string $listId): array
+{
+    global $user;
+
+    $empty = ['order' => [], 'widths' => []];
+    if (empty($listId)) {
+        return $empty;
+    }
+
+    $param = saturne_list_layout_param($listId);
+    $raw   = isset($user->conf->$param) ? $user->conf->$param : '';
+    if (empty($raw)) {
+        return $empty;
+    }
+
+    $decoded = json_decode($raw, true);
+    if (!is_array($decoded)) {
+        return $empty;
+    }
+
+    $order  = (!empty($decoded['order']) && is_array($decoded['order'])) ? array_values($decoded['order']) : [];
+    $widths = [];
+    if (!empty($decoded['widths']) && is_array($decoded['widths'])) {
+        foreach ($decoded['widths'] as $colKey => $width) {
+            $colKey = preg_replace('/[^A-Za-z0-9_]/', '', (string) $colKey);
+            $width  = (int) $width;
+            if ($colKey !== '' && $width > 0) {
+                $widths[$colKey] = $width;
+            }
+        }
+    }
+
+    return ['order' => $order, 'widths' => $widths];
+}
+
+/**
+ * Determine the inline-edit editor type for a list field.
+ *
+ * @param  array  $val Field definition (type, arrayofkeyval, noedit, ...)
+ * @param  string $key Field key
+ * @return string      '' (not inline-editable) | 'text' | 'number' | 'datepicker' | 'select'
+ */
+function saturne_get_inline_edit_type(array $val, string $key): string
+{
+    // Special / identity columns handled elsewhere or not editable
+    if (in_array($key, ['rowid', 'ref', 'status', 'fk_statut'], true)) {
+        return '';
+    }
+    if (!empty($val['noedit']) || !empty($val['disableedit'])) {
+        return '';
+    }
+
+    // Enumerations -> inline select
+    if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) {
+        return 'select';
+    }
+
+    $type = (string) ($val['type'] ?? '');
+    if (in_array($type, ['date', 'datetime', 'timestamp'], true)) {
+        return 'datepicker';
+    }
+    if ($type === 'integer' || $type === 'real' || $type === 'price' || strpos($type, 'double') === 0) {
+        return 'number';
+    }
+    if ($type === 'string' || strpos($type, 'varchar') === 0) {
+        return 'text';
+    }
+
+    // Foreign keys (integer:/sellist:), rich text/html, links, etc. are not inline-editable here
+    return '';
+}

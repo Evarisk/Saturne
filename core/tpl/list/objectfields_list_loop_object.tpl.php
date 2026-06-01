@@ -37,6 +37,8 @@ $savNbField            = $totalarray['nbfield'];
 $totalarray            = [];
 $totalarray['nbfield'] = 0;
 $iMaxInLoop            = ($limit ? min($num, $limit) : $num);
+$listColumnWidths      = $listColumnWidths ?? [];
+$permissiontoadd       = $permissiontoadd ?? 0;
 while ($i < $iMaxInLoop) {
     $obj = $db->fetch_object($resql);
     if (empty($obj)) {
@@ -112,9 +114,15 @@ while ($i < $iMaxInLoop) {
                 if (preg_match('/tdoverflow/', $cssForField) && !in_array($val['type'], ['ip', 'url']) && !is_numeric($object->$key) && $key != 'ref') {
                     print ' title="' . dol_escape_htmltag($object->$key) . '"';
                 }
+                // Per-user column key + saved width (for resize/reorder customization)
+                print ' data-colkey="' . dol_escape_htmltag($key) . '"';
+                $colWidth = !empty($listColumnWidths[$key]) ? (int) $listColumnWidths[$key] : 0;
+                if ($colWidth > 0) {
+                    print ' style="width:' . $colWidth . 'px;min-width:' . $colWidth . 'px;"';
+                }
                 print '>';
 
-                $parameters = ['arrayfields' => $arrayfields, 'key' => $key, 'val' => $val];
+                $parameters = ['arrayfields' => $arrayfields, 'key' => $key, 'val' => $val, 'obj' => $obj];
                 $hookmanager->executeHooks('saturnePrintFieldListLoopObject', $parameters, $object);
                 if (!empty($hookmanager->resArray[$key])) {
                     print $hookmanager->resArray[$key];
@@ -126,27 +134,29 @@ while ($i < $iMaxInLoop) {
                 } elseif ($key == 'rowid') {
                     print $object->showOutputField($val, $key, $object->id);
                 } else {
-                    if (!empty($val['contenteditable']) && $val['contenteditable'] == 1) {
-                        $ceType   = !empty($val['type']) && in_array($val['type'], ['date', 'datetime']) ? 'datepicker' : 'text';
-                        $ceDataType = ' data-type="' . $ceType . '"';
+                    // Inline edit: auto-detect an editor per field type (always editable when the user can write)
+                    $inlineType = !empty($permissiontoadd) ? saturne_get_inline_edit_type($val, $key) : '';
+                    if ($inlineType === '' && !empty($val['contenteditable']) && $val['contenteditable'] == 1) {
+                        $inlineType = (!empty($val['type']) && in_array($val['type'], ['date', 'datetime'])) ? 'datepicker' : 'text';
+                    }
+
+                    if ($inlineType === 'select' && !empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) {
+                        print '<select class="saturne-inline-select" data-field="' . dol_escape_htmltag($key) . '" data-element="' . dol_escape_htmltag($object->element ?? '') . '" data-id="' . ((int) $object->id) . '">';
+                        foreach ($val['arrayofkeyval'] as $optKey => $optVal) {
+                            $selected = ((string) ($object->$key ?? '') === (string) $optKey) ? ' selected' : '';
+                            print '<option value="' . dol_escape_htmltag($optKey) . '"' . $selected . '>' . dol_escape_htmltag($langs->trans($optVal)) . '</option>';
+                        }
+                        print '</select>';
+                    } elseif ($inlineType !== '' && $inlineType !== 'select') {
                         $ceElement = $object->element ?? 'unknown';
                         $ceTable   = $object->table_element ?? 'unknown';
                         $ceLabel   = !empty($val['label']) ? dol_escape_htmltag($val['label']) : dol_escape_htmltag($key);
-                        print '<div class="contenteditable-wrap"><div class="contenteditable" contenteditable="true" role="textbox" aria-label="' . $ceLabel . '" data-field="' . $key . '" data-id="' . $object->id . '" data-element="' . $ceElement . '" data-table="' . $ceTable . '"' . $ceDataType . ' data-success="Enregistré" data-error="Format invalide">';
-                    }
-                    print $object->showOutputField($val, $key, $object->$key);
-                    if (!empty($val['contenteditable']) && $val['contenteditable'] == 1) {
-                        $isDateField = !empty($val['type']) && in_array($val['type'], ['date', 'datetime']);
-                        $calBtn = $isDateField ? '
-  <button class="contenteditable-cal-btn" type="button" title="Ouvrir le calendrier" aria-label="Ouvrir le calendrier">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
-      <rect x="3" y="4" width="18" height="18" rx="2"/>
-      <line x1="16" y1="2" x2="16" y2="6"/>
-      <line x1="8"  y1="2" x2="8"  y2="6"/>
-      <line x1="3"  y1="10" x2="21" y2="10"/>
-    </svg>
-  </button>' : '';
+                        print '<div class="contenteditable-wrap"><div class="contenteditable" contenteditable="true" role="textbox" aria-label="' . $ceLabel . '" data-field="' . $key . '" data-id="' . $object->id . '" data-element="' . $ceElement . '" data-table="' . $ceTable . '" data-type="' . $inlineType . '" data-success="Enregistré" data-error="Format invalide">';
+                        print $object->showOutputField($val, $key, $object->$key);
+                        $calBtn = ($inlineType === 'datepicker') ? '<button class="contenteditable-cal-btn" type="button" title="Ouvrir le calendrier" aria-label="Ouvrir le calendrier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>' : '';
                         print '</div>' . $calBtn . '</div>';
+                    } else {
+                        print $object->showOutputField($val, $key, $object->$key);
                     }
                 }
                 print '</td>';
