@@ -79,6 +79,7 @@ AllSignatoriesMustHaveSigned     = Tous les participants doivent avoir signé po
 ObjectMustBeValidatedToSendEmail = %s doit être au statut (validé) pour envoyer un email
 ObjectMustBeLockedToSendEmail    = %s doit être au statut (verrouillé) pour envoyer un email
 ObjectMustBeLockedToArchive      = %s doit être au statut (verrouillé) afin de pouvoir l'archiver
+ObjectIsReadOnly                 = %s est en lecture seule (verrouillé ou archivé)
 
 # Confirm box - Boite de confirmation
 ValidateObject          = Valider %s
@@ -108,6 +109,11 @@ ConfirmMassArchivingQuestion = Êtes-vous sur de vouloir archiver les %d enregis
 
 # SetEventMessage mass action - Notice mass action
 RecordsArchived = %d enregistrement(s) archivé(s)
+ConfirmMassUnarchive           = Confirmation du désarchivage en masse
+ConfirmMassUnarchivingQuestion = Êtes-vous sûr de vouloir désarchiver les %d enregistrement(s) sélectionné(s) ?
+RecordsUnarchived = %d enregistrement(s) désarchivé(s)
+Unarchive = Désarchiver
+Unarchived = Désarchivé
 ObjectNotFound  = %s non trouvé(e)
 
 # Data - Donnée

@@ -451,6 +451,37 @@ abstract class SaturneObject extends CommonObject
     }
 
     /**
+     * Set unarchived status (back to validated)
+     *
+     * @param  User      $user      Object user that modify
+     * @param  int<0,1>  $noTrigger 0 = launch triggers after, 1 = disable triggers
+     * @return int<-1,1>            Return integer 0 < if KO, 0 if not archived, > 0 if OK
+     */
+    public function setUnarchived(User $user, int $noTrigger = 0): int
+    {
+        // Protection : seul un élément archivé peut être désarchivé
+        if ((int) $this->status !== static::STATUS_ARCHIVED) {
+            return 0;
+        }
+
+        return $this->setStatusCommon($user, static::STATUS_VALIDATED, $noTrigger, strtoupper($this->element) . '_UNARCHIVE');
+    }
+
+    /**
+     * Is the object in a state where its content can still be modified?
+     *
+     * True only for draft/validated. Locked, archived (and deleted) objects are read-only.
+     * This is the server-side counterpart of the UI convention `status < STATUS_LOCKED`.
+     *
+     * @return bool True if content modifications are allowed
+     */
+    public function isModifiable(): bool
+    {
+        return (int) $this->status >= static::STATUS_DRAFT
+            && (int) $this->status < static::STATUS_LOCKED;
+    }
+
+    /**
      * Return array of data to show into a tooltip
      * This method must be implemented in each object class
      *

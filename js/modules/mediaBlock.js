@@ -173,7 +173,10 @@ window.saturne.mediaBlock.uploadBlob = function(blob, module, subdir, block, ori
     complete    : function(resp) {
       var $doc       = $('<div>').html(resp.responseText);
       var blockId    = block && block.attr('id');
-      var $srcBlock  = blockId ? $doc.find('#' + blockId) : $doc.find('.linked-medias').first();
+      var $srcBlock  = blockId ? $doc.find('#' + blockId) : $();
+      if (!$srcBlock.length) {
+        $srcBlock = $doc.find('.linked-medias').first();
+      }
       var $gallery   = $srcBlock.find('.saturne-media-gallery');
       if ($gallery.length && block && block.length) {
         block.find('.saturne-media-gallery').replaceWith($gallery);

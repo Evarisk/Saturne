@@ -82,3 +82,21 @@ if ($action == 'confirm_archive' && $permissiontoadd) {
         setEventMessages($object->error, [], 'errors');
     }
 }
+
+// Action to set status STATUS_VALIDATED back from STATUS_ARCHIVED
+if ($action == 'confirm_unarchive' && $permissiontoadd) {
+    $result = $object->setUnarchived($user, false);
+    if ($result > 0) {
+        // Set Unarchived OK
+        $urlToGo = str_replace('__ID__', $result, $backtopage);
+        // New method to autoselect project after a New on another form object creation
+        $urlToGo = preg_replace('/--IDFORBACKTOPAGE--/', $id, $urlToGo);
+        header('Location: ' . $urlToGo);
+        exit;
+        // Set Unarchived KO
+    } elseif (!empty($object->errors)) {
+        setEventMessages('', $object->errors, 'errors');
+    } else {
+        setEventMessages($object->error, [], 'errors');
+    }
+}
