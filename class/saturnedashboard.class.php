@@ -252,7 +252,7 @@ class SaturneDashboard
                     foreach ($dashboardGraphs as $keyElement => $dashboardGraph) {
                         $nbDataset = 0;
                         $uniqueKey = strip_tags($dashboardGraph['title']) . $keyElement;
-                        if (is_array($dashboardGraph['data']) && !empty($dashboardGraph['data'])) {
+                        if (isset($dashboardGraph['data']) && is_array($dashboardGraph['data']) && !empty($dashboardGraph['data'])) {
                             if ($dashboardGraph['dataset'] >= 2) {
                                 foreach ($dashboardGraph['data'] as $dashboardGraphDatasets) {
                                     unset($dashboardGraphDatasets[0]);
@@ -345,7 +345,7 @@ class SaturneDashboard
         if (!empty($dashboards['lists']) && is_array($dashboards['lists'])) {
             foreach ($dashboards['lists'] as $dashboardLists) {
                 foreach ($dashboardLists as $dashboardList) {
-                    if (is_array($dashboardList['data']) && !empty($dashboardList['data'])) {
+                    if (isset($dashboardList['data']) && is_array($dashboardList['data']) && !empty($dashboardList['data'])) {
                         print '<div id="graph-' . $dashboardList['name'] . '"' . (empty($dashboardList['noFullSize']) ? 'style="width: 100%"' : '') . '>';
 
                         if (!empty($dashboardList['name'])) {
