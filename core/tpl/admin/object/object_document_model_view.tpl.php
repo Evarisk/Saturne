@@ -64,7 +64,9 @@ if (is_array($filelist) && !empty($filelist)) {
                 // Active
                 print '<td class="center">';
                 if (in_array($name, $def)) {
+                    print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=del&model_name=' . $name . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
                     print img_picto($langs->trans('Enabled'), 'switch_on');
+                    print '</a>';
                 } else {
                     print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=set&model_name=' . $name . '&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
                     print img_picto($langs->trans('Disabled'), 'switch_off');
