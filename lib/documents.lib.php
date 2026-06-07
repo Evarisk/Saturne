@@ -236,7 +236,7 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 			}
 		}
 		$manualPdfGenerationConf = $moduleNameUpperCase . '_MANUAL_PDF_GENERATION';
-		if ($conf->global->$manualPdfGenerationConf > 0) {
+		if (!empty($conf->global->$manualPdfGenerationConf)) {
 			$out .= '<td></td>';
 		}
 		$out .= '</tr>';
