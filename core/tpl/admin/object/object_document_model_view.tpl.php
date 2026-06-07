@@ -75,7 +75,7 @@ if (is_array($filelist) && !empty($filelist)) {
                 // Default
                 print '<td class="center">';
                 $defaultModelConf = strtoupper($moduleName) . '_' . strtoupper($documentParentType) . '_DEFAULT_MODEL';
-                if ($conf->global->$defaultModelConf == $name) {
+                if (getDolGlobalString($defaultModelConf) == $name) {
                     print img_picto($langs->trans('Default'), 'on');
                 } else {
                     print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setdoc&model_name=' . $name . '&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), 'off') . '</a>';
@@ -124,7 +124,7 @@ if (is_array($filelist) && !empty($filelist)) {
                     // Default
                     print '<td class="center">';
                     $defaultModelConf = strtoupper($moduleName) . '_' . strtoupper($documentParentType) . '_DEFAULT_MODEL';
-                    if ($conf->global->$defaultModelConf == $customName) {
+                    if (getDolGlobalString($defaultModelConf) == $customName) {
                         print img_picto($langs->trans('Default'), 'on');
                     } else {
                         print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setdoc&model_name=' . $customName . '&const=' . $module->custom_scandir . '&label=' . urlencode($module->custom_name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), 'off') . '</a>';
