@@ -1183,6 +1183,37 @@ function saturne_get_list_layout(string $listId): array
 }
 
 /**
+ * Build the user_param key holding a list's per-user filter display mode.
+ *
+ * @param  string $listId List identifier (e.g. the object element)
+ * @return string         Sanitized user_param key
+ */
+function saturne_list_filter_mode_param(string $listId): string
+{
+    return 'SATURNE_LIST_FILTER_MODE_' . strtoupper(preg_replace('/[^A-Za-z0-9_]/', '', $listId));
+}
+
+/**
+ * Read the per-user filter display mode saved for a list.
+ *
+ * @param  string $listId List identifier (e.g. the object element)
+ * @return string         'panel' when the user opted into the side panel, 'classic' otherwise (default)
+ */
+function saturne_get_list_filter_mode(string $listId): string
+{
+    global $user;
+
+    if (empty($listId)) {
+        return 'classic';
+    }
+
+    $param = saturne_list_filter_mode_param($listId);
+    $raw   = isset($user->conf->$param) ? $user->conf->$param : '';
+
+    return ($raw === 'panel') ? 'panel' : 'classic';
+}
+
+/**
  * Determine the inline-edit editor type for a list field.
  *
  * @param  array  $val Field definition (type, arrayofkeyval, noedit, ...)
