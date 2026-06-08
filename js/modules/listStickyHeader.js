@@ -46,4 +46,12 @@ window.saturne.listStickyHeader.apply = function() {
             this.style.maxHeight = h + 'px';
         }
     });
+
+    // Offset the sticky title row by the classic filter row height so both rows stay stacked
+    // (the filter row is absent in panel mode, leaving the title row pinned at the top).
+    $('.bodyforlist table.liste').each(function() {
+        var filterRow = this.querySelector('thead tr.liste_titre_filter');
+        var height    = filterRow ? Math.round(filterRow.getBoundingClientRect().height) : 0;
+        this.style.setProperty('--saturne-filter-row-h', height + 'px');
+    });
 };
