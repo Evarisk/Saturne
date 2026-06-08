@@ -774,7 +774,9 @@ class SaturneDocumentModel extends CommonDocGenerator
 
         $uploadDir = getMultidirOutput($object, $this->module);
         if (!$uploadDir) {
-            setEventMessages($langs->trans('ErrorDirNotFound'), [], 'errors');
+            // multidir_output is keyed on the current entity only; surface module + object entity
+            // so a missing key (e.g. cross-entity object in multicompany) is diagnosable.
+            setEventMessages($langs->trans('ErrorDirNotFound', $this->module . ' (entity ' . (int) $object->entity . ')'), [], 'errors');
             return -1;
         }
 
