@@ -157,6 +157,9 @@ require_once DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_list_array_fields.tpl.ph
 $listLayoutId     = $object->element;
 $listLayout       = saturne_get_list_layout($listLayoutId);
 $listColumnWidths = $listLayout['widths'];
+
+// Per-user filter display mode: classic inline row (default) vs side filter panel
+$useSideFilterPanel = (saturne_get_list_filter_mode($listLayoutId) === 'panel');
 if (!empty($listLayout['order'])) {
     $listColumnPos = 0;
     foreach ($listLayout['order'] as $colKey) {

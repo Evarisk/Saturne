@@ -146,7 +146,7 @@ if ($mode != 'pwa' && $mode != 'kanban') {
 // Build side filter panel content
 // --------------------------------------------------------------------
 $panelFilterBody    = '';
-$useSideFilterPanel = true;
+$useSideFilterPanel = !empty($useSideFilterPanel);
 
 // Panel i18n labels
 $filterBtnLabel = $langs->trans('Filters');
@@ -154,7 +154,7 @@ $applyBtnLabel  = $langs->trans('Apply');
 $resetBtnLabel  = $langs->trans('ResetFilters');
 
 // 0. Global search_all field (if used by calling page)
-if (!empty($fieldsToSearchAll)) {
+if ($useSideFilterPanel && !empty($fieldsToSearchAll)) {
     $searchAllPlaceholder = $langs->trans('SearchInAllFields');
     $panelFilterBody .= '<div class="saturne-filter-search-all-wrapper">';
     $panelFilterBody .= '<input type="text" class="flat saturne-filter-search-all-input" name="search_all" id="panel_search_all" placeholder="' . dol_escape_htmltag($searchAllPlaceholder) . '" value="' . dol_escape_htmltag($searchAll ?? '') . '">';
@@ -162,7 +162,7 @@ if (!empty($fieldsToSearchAll)) {
 }
 
 // 1. Category filter section inside panel
-if (isModEnabled('categorie') && $user->hasRight('categorie', 'read') && isset($categorie->MAP_OBJ_CLASS[$object->element])) {
+if ($useSideFilterPanel && isModEnabled('categorie') && $user->hasRight('categorie', 'read') && isset($categorie->MAP_OBJ_CLASS[$object->element])) {
     require_once DOL_DOCUMENT_ROOT . '/core/class/html.formcategory.class.php';
     $formCategory  = new FormCategory($db);
     $rawCategories = $formCategory->select_all_categories($object->element, '', '', 64, 0, 2); // outputmode=2 → full arbo with color
@@ -240,6 +240,10 @@ if ($toggleTitlePanelRaw === 'ToggleIncludeExclude') {
 $toggleTitlePanel = dol_escape_htmltag($toggleTitlePanelRaw);
 
 foreach ($object->fields as $key => $val) {
+    // Classic mode renders its own inline filter row; skip building the panel rows
+    if (!$useSideFilterPanel) {
+        continue;
+    }
     if (empty($arrayfields['t.' . $key]['checked'])) {
         continue;
     }
@@ -330,10 +334,13 @@ $newCardButton .= dolGetButtonTitle($langs->trans('ViewKanban'), '', 'fa fa-th-l
 $newCardButton .= dolGetButtonTitle($langs->trans('ViewPwa'), '', 'fa fa-mobile imgforviewmode', $_SERVER['PHP_SELF'] . '?mode=pwa' . preg_replace('/([&?])*mode=[^&]+/', '', $param), '', ($mode == 'pwa' ? 2 : 1), ['morecss' => 'reposition']);
 $cardButton     = dolGetButtonTitle($langs->trans('New' . ucfirst($object->element)), $helpText ?? '', 'fa fa-plus-circle', ($createUrl ?? dol_buildpath('custom/' . $object->module . '/view/' . $object->element . '/' . $object->element . '_card.php', 1) . '?action=create' . ($moreUrlParameters ?? '')), '', $permissiontoadd);
 
-// Filter panel toggle button — left side, in the title area
-$filterButton = dolGetButtonTitle($filterBtnLabel, '', 'fas fa-sliders-h', '#', 'saturne-filter-toggle', $activeFilterCount > 0 ? 2 : 1, ['morecss' => 'reposition']);
-if ($activeFilterCount > 0) {
-    $filterButton = '<span class="saturne-filter-btn-wrapper">' . $filterButton . dolGetBadge((string) $activeFilterCount, '', 'secondary') . '</span>';
+// Filter panel button — only in panel mode; opens the side filter panel
+$filterButton = '';
+if ($useSideFilterPanel) {
+    $filterButton = dolGetButtonTitle($filterBtnLabel, '', 'fas fa-sliders-h', '#', 'saturne-filter-toggle', $activeFilterCount > 0 ? 2 : 1, ['morecss' => 'reposition']);
+    if ($activeFilterCount > 0) {
+        $filterButton = '<span class="saturne-filter-btn-wrapper">' . $filterButton . dolGetBadge((string) $activeFilterCount, '', 'secondary') . '</span>';
+    }
 }
 $listTitle    = (($conf->browser->layout == 'classic' && $mode != 'pwa') ? $title : '') . ' ' . $cardButton . ' ' . $filterButton;
 
@@ -388,38 +395,40 @@ if (!empty($arrayOfMassActions)) {
     $selectedFields .= $form->showCheckAddButtons('checkforselect', 1);
 }
 
-// Side filter panel (fixed overlay, inside the form)
+// Side filter panel (fixed overlay, inside the form) — only in panel mode
 // --------------------------------------------------------------------
-print '<div id="saturne-filter-backdrop"></div>';
-print '<div id="saturne-filter-panel">';
+if ($useSideFilterPanel) {
+    print '<div id="saturne-filter-backdrop"></div>';
+    print '<div id="saturne-filter-panel">';
 
-// Panel header
-print '<div class="saturne-filter-panel-header">';
-print '<strong class="saturne-filter-panel-title"><span class="fa fa-sliders-h"></span>' . dol_escape_htmltag($filterBtnLabel) . '</strong>';
-print '<span class="saturne-filter-panel-close">&times;</span>';
-print '</div>';
+    // Panel header
+    print '<div class="saturne-filter-panel-header">';
+    print '<strong class="saturne-filter-panel-title"><span class="fa fa-sliders-h"></span>' . dol_escape_htmltag($filterBtnLabel) . '</strong>';
+    print '<span class="saturne-filter-panel-close">&times;</span>';
+    print '</div>';
 
-// Panel body
-print '<div class="saturne-filter-panel-body">';
+    // Panel body
+    print '<div class="saturne-filter-panel-body">';
 
-// Legend notice explaining the eye/eye-slash toggle icons
-print '<div class="saturne-filter-legend">';
-print '<div class="saturne-filter-legend-items">';
-print '<span class="saturne-filter-legend-include"><span class="far fa-eye"></span> Inclure</span>';
-print '<span class="saturne-filter-legend-exclude"><span class="far fa-eye-slash"></span> Exclure</span>';
-print '</div>';
-print '</div>';
+    // Legend notice explaining the eye/eye-slash toggle icons
+    print '<div class="saturne-filter-legend">';
+    print '<div class="saturne-filter-legend-items">';
+    print '<span class="saturne-filter-legend-include"><span class="far fa-eye"></span> Inclure</span>';
+    print '<span class="saturne-filter-legend-exclude"><span class="far fa-eye-slash"></span> Exclure</span>';
+    print '</div>';
+    print '</div>';
 
-print $panelFilterBody;
-print '</div>';
+    print $panelFilterBody;
+    print '</div>';
 
-// Panel footer
-print '<div class="saturne-filter-panel-footer">';
-print '<button type="submit" class="butAction">' . dol_escape_htmltag($applyBtnLabel) . '</button>';
-print '<button type="submit" class="liste_titre button_removefilter reposition" name="button_removefilter_x" value="x"><span class="fas fa-times"></span> ' . dol_escape_htmltag($resetBtnLabel) . '</button>';
-print '</div>';
+    // Panel footer
+    print '<div class="saturne-filter-panel-footer">';
+    print '<button type="submit" class="butAction">' . dol_escape_htmltag($applyBtnLabel) . '</button>';
+    print '<button type="submit" class="liste_titre button_removefilter reposition" name="button_removefilter_x" value="x"><span class="fas fa-times"></span> ' . dol_escape_htmltag($resetBtnLabel) . '</button>';
+    print '</div>';
 
-print '</div>'; // end #saturne-filter-panel
+    print '</div>'; // end #saturne-filter-panel
+}
 
 // Preserve non-visible search parameters as hidden inputs so they survive form submissions
 foreach ($search as $key => $val) {
@@ -434,6 +443,18 @@ if ($mode != 'kanban' && $mode != 'pwa' && !empty($listLayoutId)) {
     print '<div class="saturne-columns-controls" data-list-layout-id="' . dol_escape_htmltag($listLayoutId) . '">';
     print '<button type="button" class="saturne-columns-toggle" title="' . dol_escape_htmltag($langs->trans('CustomizeColumns')) . '"><span class="fas fa-table-columns"></span> ' . dol_escape_htmltag($langs->trans('CustomizeColumns')) . '</button>';
     print '<button type="button" class="saturne-columns-reset" title="' . dol_escape_htmltag($langs->trans('ResetColumns')) . '"><span class="fas fa-undo"></span> ' . dol_escape_htmltag($langs->trans('ResetColumns')) . '</button>';
+
+    // Filter display mode toggle: classic inline row <-> side panel (per-user)
+    if ($useSideFilterPanel) {
+        $filterModeLabel  = $langs->trans('SwitchFilterToClassic');
+        $filterModeIcon   = 'fas fa-bars';
+        $filterModeTarget = 'classic';
+    } else {
+        $filterModeLabel  = $langs->trans('SwitchFilterToPanel');
+        $filterModeIcon   = 'fas fa-sliders-h';
+        $filterModeTarget = 'panel';
+    }
+    print '<button type="button" class="saturne-filter-mode-switch" data-list-layout-id="' . dol_escape_htmltag($listLayoutId) . '" data-filter-mode="' . $filterModeTarget . '" title="' . dol_escape_htmltag($filterModeLabel) . '"><span class="' . $filterModeIcon . '"></span> ' . dol_escape_htmltag($filterModeLabel) . '</button>';
     print '</div>';
 }
 

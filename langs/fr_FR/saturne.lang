@@ -286,3 +286,7 @@ SearchInAllFields    = Rechercher dans tous les champs…
 # List column customization
 CustomizeColumns = Colonnes
 ResetColumns = Réinitialiser
+
+# List filter display mode
+SwitchFilterToPanel = Filtres en volet
+SwitchFilterToClassic = Filtres en ligne
