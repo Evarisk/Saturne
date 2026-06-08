@@ -58,6 +58,7 @@ window.saturne.filter.event = function() {
     $(document).on('click', '#saturne-filter-backdrop', window.saturne.filter.close);
     $(document).on('click', '.saturne-filter-panel-close', window.saturne.filter.close);
     $(document).on('click', '.saturne-filter-mode-toggle', window.saturne.filter.toggleMode);
+    $(document).on('click', '.saturne-filter-mode-switch', window.saturne.filter.toggleDisplayMode);
     $(document).on('keydown', window.saturne.filter.handleKeyDown);
 };
 
@@ -121,6 +122,38 @@ window.saturne.filter.toggleMode = function() {
     $input.val(exc ? 'exc' : 'inc');
     $(this).html(exc ? '<span class="far fa-eye-slash"></span>' : '<span class="far fa-eye"></span>');
     $(this).toggleClass('saturne-filter-mode-exc', exc).toggleClass('saturne-filter-mode-inc', !exc);
+};
+
+/**
+ * Toggle the list filter display mode (classic inline row <-> side panel),
+ * persist the per-user preference, then reload to re-render the chosen UI
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param   {Event} event
+ * @returns {void}
+ */
+window.saturne.filter.toggleDisplayMode = function(event) {
+    event.preventDefault();
+    var $btn = $(this);
+    $.ajax({
+        url     : window.saturne.listColumns.url(),
+        method  : 'POST',
+        dataType: 'json',
+        data    : {
+            action : 'set_filter_mode',
+            token  : window.saturne.toolbox.getToken(),
+            list_id: $btn.data('list-layout-id'),
+            mode   : $btn.data('filter-mode')
+        },
+        success: function() {
+            window.location.reload();
+        },
+        error: function() {
+            window.location.reload();
+        }
+    });
 };
 
 /**
