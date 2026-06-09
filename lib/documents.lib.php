@@ -236,7 +236,7 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 			}
 		}
 		$manualPdfGenerationConf = $moduleNameUpperCase . '_MANUAL_PDF_GENERATION';
-		if (!empty($conf->global->$manualPdfGenerationConf)) {
+		if (getDolGlobalInt($manualPdfGenerationConf) > 0) {
 			$out .= '<td></td>';
 		}
 		$out .= '</tr>';
@@ -328,7 +328,7 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 				$out .= '<td class="nowrap right">' . dol_print_date($date, 'dayhour', 'tzuser') . '</td>';
 
 				// Show pdf generation icon
-				if (!empty($conf->global->$manualPdfGenerationConf)) {
+				if (getDolGlobalInt($manualPdfGenerationConf) > 0) {
 					$extension = pathinfo($file['name'], PATHINFO_EXTENSION);
 
 					$out .= '<td class="right">';
