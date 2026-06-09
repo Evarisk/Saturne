@@ -290,3 +290,6 @@ ResetColumns = Réinitialiser
 # List filter display mode
 SwitchFilterToPanel = Filtres en volet
 SwitchFilterToClassic = Filtres en ligne
+
+# Attached files drag & drop
+DropFilesHere = Glissez-déposez vos fichiers ici
