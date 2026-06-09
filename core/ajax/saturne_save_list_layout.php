@@ -90,4 +90,17 @@ if ($action === 'reset') {
     exit;
 }
 
+if ($action === 'set_filter_mode') {
+    $mode = GETPOST('mode', 'aZ09');
+    if (!in_array($mode, ['classic', 'panel'], true)) {
+        echo json_encode(['success' => false, 'error' => 'InvalidMode']);
+        exit;
+    }
+
+    $modeKey = saturne_list_filter_mode_param($listId);
+    $res     = dol_set_user_param($db, $conf, $user, [$modeKey => $mode]);
+    echo json_encode($res > 0 ? ['success' => true] : ['success' => false, 'error' => 'SaveFailed']);
+    exit;
+}
+
 echo json_encode(['success' => false, 'error' => 'UnknownAction']);

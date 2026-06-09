@@ -267,3 +267,10 @@ SearchInAllFields    = Search in all fields…
 # List column customization
 CustomizeColumns = Columns
 ResetColumns = Reset
+
+# List filter display mode
+SwitchFilterToPanel = Filters in panel
+SwitchFilterToClassic = Inline filters
+
+# Attached files drag & drop
+DropFilesHere = Drag and drop your files here

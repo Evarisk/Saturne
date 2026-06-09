@@ -90,6 +90,10 @@ foreach ($object->fields as $key => $val) {
                 $showModeToggle = true;
                 $fieldMode = $search[$key . '_mode'] ?? GETPOST('search_' . $key . '_mode', 'alpha') ?: 'inc';
                 $isExc     = ($fieldMode === 'exc');
+                // visible=2 hides the field content in showInputField; force visible for the search input
+                if (isset($val['visible']) && (int) $val['visible'] === 2) {
+                    $object->fields[$key]['visible'] = 1;
+                }
                 print '<span class="saturne-filter-inline-wrapper">';
                 print '<input type="hidden" id="search_' . $key . '_mode" name="search_' . $key . '_mode" value="' . ($isExc ? 'exc' : 'inc') . '">';
                 $titleAttr = dol_escape_htmltag($fieldLabel) . ' - ' . $toggleTitle;

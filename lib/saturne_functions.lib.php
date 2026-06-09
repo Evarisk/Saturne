@@ -512,16 +512,16 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
         $resHook = $hookmanager->executeHooks('saturneBannerTabCustomSubdir', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
         if ($resHook > 0) {
             if (!empty($hookmanager->resArray)) {
-                if ($hookmanager->resArray['modulepart']) {
+                if (!empty($hookmanager->resArray['modulepart'])) {
                     $modulePart = $hookmanager->resArray['modulepart'];
                 }
-                if ($hookmanager->resArray['dir']) {
+                if (!empty($hookmanager->resArray['dir'])) {
                     $baseDir = $hookmanager->resArray['dir'];
                 }
-                if ($hookmanager->resArray['subdir']) {
+                if (!empty($hookmanager->resArray['subdir'])) {
                     $subDir = $hookmanager->resArray['subdir'];
                 }
-                if ($hookmanager->resArray['photoLimit']) {
+                if (!empty($hookmanager->resArray['photoLimit'])) {
                     $photoLimit = $hookmanager->resArray['photoLimit'];
                 }
             }
@@ -731,6 +731,29 @@ function saturne_create_category(string $label = '', string $type = '', int $fkP
     require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 
     $category = new Categorie($db);
+
+    if (!empty($type) && !isset($category->MAP_ID[$type])) {
+        $customTags = [
+            'question'        => ['id' => 436301001, 'obj_class' => 'Question', 'obj_table' => 'digiquali_question'],
+            'sheet'           => ['id' => 436301002, 'obj_class' => 'Sheet', 'obj_table' => 'digiquali_sheet'],
+            'control'         => ['id' => 436301003, 'obj_class' => 'Control', 'obj_table' => 'digiquali_control'],
+            'survey'          => ['id' => 436301004, 'obj_class' => 'Survey', 'obj_table' => 'digiquali_survey'],
+            'questiongroup'   => ['id' => 436301005, 'obj_class' => 'QuestionGroup', 'obj_table' => 'digiquali_questiongroup'],
+            'accident'        => ['id' => 436302001, 'obj_class' => 'Accident', 'obj_table' => 'digiriskdolibarr_accident'],
+            'preventionplan'  => ['id' => 436302002, 'obj_class' => 'PreventionPlan', 'obj_table' => 'digiriskdolibarr_preventionplan'],
+            'firepermit'      => ['id' => 436302003, 'obj_class' => 'FirePermit', 'obj_table' => 'digiriskdolibarr_firepermit'],
+            'risk'            => ['id' => 436302004, 'obj_class' => 'Risk', 'obj_table' => 'digiriskdolibarr_risk'],
+            'meeting'         => ['id' => 436304001, 'obj_class' => 'Meeting', 'obj_table' => 'dolimeet_session'],
+            'trainingsession' => ['id' => 436304002, 'obj_class' => 'Trainingsession', 'obj_table' => 'dolimeet_session'],
+            'audit'           => ['id' => 436304003, 'obj_class' => 'Audit', 'obj_table' => 'dolimeet_session'],
+            'session'         => ['id' => 436304004, 'obj_class' => 'Session', 'obj_table' => 'dolimeet_session']
+        ];
+        if (isset($customTags[$type])) {
+            $category->MAP_ID[$type]        = $customTags[$type]['id'];
+            $category->MAP_OBJ_CLASS[$type] = $customTags[$type]['obj_class'];
+            $category->MAP_OBJ_TABLE[$type] = $customTags[$type]['obj_table'];
+        }
+    }
 
     $category->label       = $label;
     $category->type        = $type;
@@ -1180,6 +1203,37 @@ function saturne_get_list_layout(string $listId): array
     }
 
     return ['order' => $order, 'widths' => $widths];
+}
+
+/**
+ * Build the user_param key holding a list's per-user filter display mode.
+ *
+ * @param  string $listId List identifier (e.g. the object element)
+ * @return string         Sanitized user_param key
+ */
+function saturne_list_filter_mode_param(string $listId): string
+{
+    return 'SATURNE_LIST_FILTER_MODE_' . strtoupper(preg_replace('/[^A-Za-z0-9_]/', '', $listId));
+}
+
+/**
+ * Read the per-user filter display mode saved for a list.
+ *
+ * @param  string $listId List identifier (e.g. the object element)
+ * @return string         'panel' when the user opted into the side panel, 'classic' otherwise (default)
+ */
+function saturne_get_list_filter_mode(string $listId): string
+{
+    global $user;
+
+    if (empty($listId)) {
+        return 'classic';
+    }
+
+    $param = saturne_list_filter_mode_param($listId);
+    $raw   = isset($user->conf->$param) ? $user->conf->$param : '';
+
+    return ($raw === 'panel') ? 'panel' : 'classic';
 }
 
 /**

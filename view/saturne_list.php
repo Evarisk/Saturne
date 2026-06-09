@@ -122,7 +122,7 @@ foreach ($object->fields as $key => $val) {
     if (GETPOST('search_' . $key, 'alpha') !== '') {
         $search[$key] = GETPOST('search_' . $key, 'alpha');
     }
-    if (in_array($val['type'], ['date', 'datetime', 'timestamp'])) {
+    if (isset($val['type']) && in_array($val['type'], ['date', 'datetime', 'timestamp'])) {
         $search[$key . '_dtstart'] = dol_mktime(0, 0, 0, GETPOSTINT('search_' . $key . '_dtstartmonth'), GETPOSTINT('search_' . $key . '_dtstartday'), GETPOSTINT('search_' . $key . '_dtstartyear'));
         $search[$key . '_dtend']   = dol_mktime(23, 59, 59, GETPOSTINT('search_' . $key . '_dtendmonth'), GETPOSTINT('search_' . $key . '_dtendday'), GETPOSTINT('search_' . $key . '_dtendyear'));
     }
@@ -157,6 +157,9 @@ require_once DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_list_array_fields.tpl.ph
 $listLayoutId     = $object->element;
 $listLayout       = saturne_get_list_layout($listLayoutId);
 $listColumnWidths = $listLayout['widths'];
+
+// Per-user filter display mode: classic inline row (default) vs side filter panel
+$useSideFilterPanel = (saturne_get_list_filter_mode($listLayoutId) === 'panel');
 if (!empty($listLayout['order'])) {
     $listColumnPos = 0;
     foreach ($listLayout['order'] as $colKey) {
