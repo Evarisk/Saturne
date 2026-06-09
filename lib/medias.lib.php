@@ -454,21 +454,26 @@ function saturne_get_media_linked_elements(string $moduleName, string $fileName)
 }
 
 /**
- * Render the Saturne Media Block (Photo + Audio) for external modules.
+ * Render the Saturne Media Block (Photo + File + Audio) for external modules.
  *
  * Usage example:
  *   print saturne_render_media_block('saturne', 'test_medias', '', '', ['show_photo' => true, 'show_audio' => false]);
  *   print saturne_render_media_block('saturne', 'test_medias', '', '', ['show_photo' => false, 'show_audio' => true]);
+ *   print saturne_render_media_block('saturne', 'test_medias', '', '', ['show_photo' => true, 'show_file' => true, 'show_audio' => false]);
  *
  * @param  string $moduleName  Module name (e.g. 'saturne', 'digiquali')
  * @param  string $subDir      Sub-directory under module dir_output (e.g. 'photos', 'test_medias')
  * @param  string $prefix      Optional prefix for file names and HTML element ids
  * @param  string $rightString The rights to check on API side (e.g. 'fraispro,creer')
  * @param  array  $options     Rendering options:
- *                               - show_photo   (bool, default true)  Show photo upload section
- *                               - show_audio   (bool, default true)  Show audio recording section
- *                               - show_gallery (bool, default true)  Show gallery of existing files
- * @return string              HTML block string
+ *                               - show_photo       (bool, default true)  Show photo upload section
+ *                               - show_audio       (bool, default true)  Show audio recording section
+ *                               - show_file        (bool, default false) Show document upload section (any file type)
+ *                               - file_sub_dir     (string)              Storage/listing dir for the document section (defaults to $subDir)
+ *                               - file_upload_data (array)               Extra key => value POST data forwarded on document upload
+ *                               - show_gallery     (bool, default true)  Show gallery of existing files
+ *                               - show_upload      (bool, default true)  Show upload/delete controls
+ * @return string                  HTML block string
  */
 function saturne_render_media_block(string $moduleName, string $subDir = '', string $prefix = '', string $rightString = '', array $options = []): string
 {
@@ -478,6 +483,7 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
 
     $showPhoto   = isset($options['show_photo'])   ? $options['show_photo']   : true;
     $showAudio   = isset($options['show_audio'])   ? $options['show_audio']   : true;
+    $showFile    = isset($options['show_file'])    ? $options['show_file']    : false;
     $showGallery = isset($options['show_gallery']) ? $options['show_gallery'] : true;
     $showUpload  = isset($options['show_upload'])  ? $options['show_upload']  : true;
 
@@ -541,6 +547,90 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
                 $out .= '  <span class="saturne-media-count-badge">' . $totalPhotos . '</span>';
                 $out .= '</div>';
             }
+        }
+
+        $out .= '    </div>';
+        $out .= '  </div>';
+        $out .= '</div>';
+    }
+
+    if ($showFile) {
+        $fileContainerClass = $containerClass . '_file';
+
+        // The document section can target a directory different from the photo subDir
+        // (e.g. the linked-files folder of a related object). It also forwards extra
+        // POST data so the host action can resolve/create that object on upload.
+        $fileSubDir = isset($options['file_sub_dir']) ? $options['file_sub_dir'] : $subDir;
+        $fileData   = isset($options['file_upload_data']) && is_array($options['file_upload_data']) ? $options['file_upload_data'] : [];
+
+        $fileUploadDir = !empty($conf->$moduleNameLowerCase->dir_output)
+            ? $conf->$moduleNameLowerCase->dir_output
+            : $conf->ecm->dir_output . '/' . $moduleNameLowerCase;
+        if (!empty($fileSubDir)) {
+            $fileUploadDir .= '/' . $fileSubDir;
+        }
+
+        $documentFiles = [];
+        if (!empty($fileSubDir) && dol_is_dir($fileUploadDir)) {
+            $documentFiles = dol_dir_list($fileUploadDir, 'files', 0, '', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC);
+        }
+
+        $hasFiles    = count($documentFiles) > 0;
+        $fileBlockId = $idPrefix . 'master-media-row-container-file';
+        $fileModalId = $idPrefix . 'files-modal';
+
+        // Inline part: upload button + a compact count badge that opens the files modal
+        $out .= '<div class="linked-medias medias ' . dol_escape_htmltag($fileContainerClass) . '" id="' . $fileBlockId . '">';
+        $out .= '  <div class="fast-upload-options" data-from-type="' . dol_escape_htmltag($moduleNameLowerCase) . '" data-from-subtype="' . dol_escape_htmltag($fileContainerClass) . '" data-from-subdir="' . dol_escape_htmltag($fileSubDir) . '" data-from-extra="' . dol_escape_htmltag(json_encode($fileData)) . '" data-prefix="' . dol_escape_htmltag($prefix) . '" data-rights="' . dol_escape_htmltag($rightString) . '"></div>';
+        $out .= '  <div class="saturne-media-upload-block saturne-media-upload-block-file" data-module="' . dol_escape_htmltag($moduleNameLowerCase) . '" data-subdir="' . dol_escape_htmltag($fileSubDir) . '">';
+
+        if ($showUpload) {
+            $out .= '    <label for="' . $idPrefix . 'upload-file" class="saturne-upload-label saturne-upload-label-file" title="' . dol_escape_htmltag($langs->trans('AddFile')) . '">';
+            $out .= '      <i class="fas fa-paperclip"></i>';
+            $out .= '      <input type="file" id="' . $idPrefix . 'upload-file" class="saturne-file-upload" name="userfile[]" multiple>';
+            $out .= '    </label>';
+        }
+
+        if ($hasFiles) {
+            $out .= '    <div class="saturne-open-files-library" data-modal-id="' . $fileModalId . '" title="' . dol_escape_htmltag($langs->trans('Files')) . '">';
+            $out .= '      <i class="fas fa-folder-open"></i>';
+            $out .= '      <span class="saturne-media-count-badge">' . count($documentFiles) . '</span>';
+            $out .= '    </div>';
+        }
+
+        $out .= '  </div>';
+        $out .= '</div>';
+
+        // Files modal (always rendered so it can be refreshed in place after upload/delete)
+        $out .= '<div class="wpeo-modal saturne-files-modal" id="' . $fileModalId . '" data-block-id="' . dol_escape_htmltag($fileBlockId) . '" data-module="' . dol_escape_htmltag($moduleNameLowerCase) . '" data-subdir="' . dol_escape_htmltag($fileSubDir) . '">';
+        $out .= '  <div class="modal-container modal-flex">';
+        $out .= '    <div class="modal-header">';
+        $out .= '      <span class="modal-title">' . $langs->trans('Files') . '</span>';
+        $out .= '      <span class="modal-close"><i class="fas fa-times"></i></span>';
+        $out .= '    </div>';
+        $out .= '    <div class="modal-content">';
+
+        if ($hasFiles) {
+            $out .= '<div class="saturne-files-library-content">';
+            foreach ($documentFiles as $file) {
+                if (!empty($conf->$moduleNameLowerCase->dir_output)) {
+                    $fUrl = DOL_URL_ROOT . '/document.php?modulepart=' . urlencode($moduleNameLowerCase) . '&entity=' . $conf->entity . '&file=' . urlencode($fileSubDir . '/' . $file['name']);
+                } else {
+                    $fUrl = DOL_URL_ROOT . '/document.php?modulepart=ecm&entity=' . $conf->entity . '&file=' . urlencode($moduleNameLowerCase . '/' . $fileSubDir . '/' . $file['name']);
+                }
+                $fNameHtml = dol_escape_htmltag($file['name']);
+                $fUrlHtml  = dol_escape_htmltag($fUrl);
+
+                $out .= '<div class="saturne-file-item">';
+                $out .= '  <a class="saturne-file-link" href="' . $fUrlHtml . '" target="_blank" title="' . $fNameHtml . '"><i class="fas fa-file"></i><span class="saturne-file-name">' . $fNameHtml . '</span></a>';
+                if ($showUpload) {
+                    $out .= '  <button type="button" class="saturne-file-delete" data-filename="' . $fNameHtml . '"><i class="fas fa-trash-alt"></i></button>';
+                }
+                $out .= '</div>';
+            }
+            $out .= '</div>';
+        } else {
+            $out .= '<p class="saturne-no-files">' . $langs->trans('NoFile') . '</p>';
         }
 
         $out .= '    </div>';
