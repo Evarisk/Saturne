@@ -732,6 +732,29 @@ function saturne_create_category(string $label = '', string $type = '', int $fkP
 
     $category = new Categorie($db);
 
+    if (!empty($type) && !isset($category->MAP_ID[$type])) {
+        $customTags = [
+            'question'        => ['id' => 436301001, 'obj_class' => 'Question', 'obj_table' => 'digiquali_question'],
+            'sheet'           => ['id' => 436301002, 'obj_class' => 'Sheet', 'obj_table' => 'digiquali_sheet'],
+            'control'         => ['id' => 436301003, 'obj_class' => 'Control', 'obj_table' => 'digiquali_control'],
+            'survey'          => ['id' => 436301004, 'obj_class' => 'Survey', 'obj_table' => 'digiquali_survey'],
+            'questiongroup'   => ['id' => 436301005, 'obj_class' => 'QuestionGroup', 'obj_table' => 'digiquali_questiongroup'],
+            'accident'        => ['id' => 436302001, 'obj_class' => 'Accident', 'obj_table' => 'digiriskdolibarr_accident'],
+            'preventionplan'  => ['id' => 436302002, 'obj_class' => 'PreventionPlan', 'obj_table' => 'digiriskdolibarr_preventionplan'],
+            'firepermit'      => ['id' => 436302003, 'obj_class' => 'FirePermit', 'obj_table' => 'digiriskdolibarr_firepermit'],
+            'risk'            => ['id' => 436302004, 'obj_class' => 'Risk', 'obj_table' => 'digiriskdolibarr_risk'],
+            'meeting'         => ['id' => 436304001, 'obj_class' => 'Meeting', 'obj_table' => 'dolimeet_session'],
+            'trainingsession' => ['id' => 436304002, 'obj_class' => 'Trainingsession', 'obj_table' => 'dolimeet_session'],
+            'audit'           => ['id' => 436304003, 'obj_class' => 'Audit', 'obj_table' => 'dolimeet_session'],
+            'session'         => ['id' => 436304004, 'obj_class' => 'Session', 'obj_table' => 'dolimeet_session']
+        ];
+        if (isset($customTags[$type])) {
+            $category->MAP_ID[$type]        = $customTags[$type]['id'];
+            $category->MAP_OBJ_CLASS[$type] = $customTags[$type]['obj_class'];
+            $category->MAP_OBJ_TABLE[$type] = $customTags[$type]['obj_table'];
+        }
+    }
+
     $category->label       = $label;
     $category->type        = $type;
     $category->fk_parent   = $fkParent;
