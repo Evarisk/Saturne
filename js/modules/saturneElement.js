@@ -301,12 +301,15 @@ window.saturne.saturneElement.initSortable = function initSortable() {
  * @return {void}
  */
 window.saturne.saturneElement.saveOrder = function saveOrder() {
-  const $list   = $(this);
-  const $units  = $list.children('li.unit');
-  const ids     = $units.map(function() { return $(this).data('object-id'); }).get();
-  const element = $units.first().data('element');
+  const $list    = $(this);
+  const $units   = $list.children('li.unit');
+  const ids      = $units.map(function() { return $(this).data('object-id'); }).get();
+  const $first   = $units.first();
+  const element  = $first.data('element');
+  const module   = $first.data('module');
+  const objClass = $first.data('class');
 
-  if (!ids.length || !element) {
+  if (!ids.length || !element || !module || !objClass) {
     return;
   }
 
@@ -317,10 +320,12 @@ window.saturne.saturneElement.saveOrder = function saveOrder() {
     url: (window.saturne.config?.urlRoot || '') + '/custom/saturne/core/ajax/saturne_reorder_element.php',
     method: 'POST',
     data: {
-      action:  'reorder_element',
-      token:   token,
-      element: element,
-      ids:     ids
+      action:   'reorder_element',
+      token:    token,
+      module:   module,
+      element:  element,
+      objclass: objClass,
+      ids:      ids
     },
     complete: function() {
       window.saturne.loader.remove($list);

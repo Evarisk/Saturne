@@ -36,12 +36,40 @@ global $db, $user;
 $action = GETPOST('action', 'aZ09');
 
 if ($action == 'reorder_element') {
+    $module  = GETPOST('module', 'aZ09', 2);
     $element = GETPOST('element', 'aZ09', 2);
+    $class   = GETPOST('objclass', 'aZ09', 2);
     $ids     = GETPOST('ids', 'array', 2);
 
-    if (empty($element) || !is_array($ids) || empty($ids)) {
+    if (empty($module) || empty($element) || empty($class) || !is_array($ids) || empty($ids)) {
         http_response_code(400);
         echo json_encode(['success' => false, 'error' => 'InvalidParameters']);
+        $db->close();
+        exit;
+    }
+
+    // Permission guard: the user must be allowed to write this element type
+    if (!$user->hasRight($module, $element, 'write')) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'error' => 'NotEnoughPermissions']);
+        $db->close();
+        exit;
+    }
+
+    // Resolve the element class from the (sanitized, alphanumeric) module/element pair.
+    // fetchObjectByElement() can't be used here: SaturneElement-based elements are not
+    // registered in getElementProperties, so it would fail to resolve the class.
+    $classFile = DOL_DOCUMENT_ROOT . '/custom/' . $module . '/class/' . $element . '.class.php';
+    if (!is_file($classFile)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'InvalidElement']);
+        $db->close();
+        exit;
+    }
+    require_once $classFile;
+    if (!class_exists($class) || !is_subclass_of($class, 'SaturneElement')) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'InvalidClass']);
         $db->close();
         exit;
     }
@@ -49,18 +77,9 @@ if ($action == 'reorder_element') {
     $error    = 0;
     $position = 1;
     foreach ($ids as $id) {
-        $object = fetchObjectByElement((int) $id, $element);
-
-        if (!is_object($object) || empty($object->id)) {
+        $object = new $class($db);
+        if ($object->fetch((int) $id) <= 0) {
             continue;
-        }
-
-        // Permission guard: the user must be allowed to write this element
-        if (!saturne_user_can_write_element($user, $object, $element)) {
-            http_response_code(403);
-            echo json_encode(['success' => false, 'error' => 'NotEnoughPermissions']);
-            $db->close();
-            exit;
         }
 
         // Single-column update of position only (lighter than a full object update)
