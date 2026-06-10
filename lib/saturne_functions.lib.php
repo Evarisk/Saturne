@@ -147,8 +147,11 @@ function saturne_display_recurse_tree(array $moreParams, array $objectElementTre
     }
 
     foreach ($objectElementTree as $objectElement) { ?>
-        <li class="unit type-<?php echo $objectElement['object']->element_type; ?>" id="unit<?php  echo $objectElement['object']->id; ?>" data-object-id="<?php  echo $objectElement['object']->id; ?>">
+        <li class="unit type-<?php echo $objectElement['object']->element_type; ?>" id="unit<?php  echo $objectElement['object']->id; ?>" data-object-id="<?php  echo $objectElement['object']->id; ?>" data-element="<?php echo $objectElement['object']->element; ?>" data-module="<?php echo $objectElement['object']->module; ?>" data-class="<?php echo get_class($objectElement['object']); ?>">
             <div class="unit-container">
+                <?php if ($user->hasRight($objectElement['object']->module, $objectElement['object']->element, 'write')) : ?>
+                    <div class="unit-drag-handle" title="<?php echo dol_escape_htmltag($langs->trans('Reorder')); ?>"><i class="fas fa-grip-vertical"></i></div>
+                <?php endif; ?>
                 <?php if ($objectElement['object']->element_type == $objectElement['object']::ELEMENT_TYPE_0 && count($objectElement['children'])) { ?>
                     <div class="toggle-unit">
                         <i class="toggle-icon fas fa-chevron-right" id="menu<?php echo $objectElement['object']->id; ?>"></i>

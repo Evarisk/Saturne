@@ -274,3 +274,6 @@ SwitchFilterToClassic = Inline filters
 
 # Attached files drag & drop
 DropFilesHere = Drag and drop your files here
+
+# Drag & drop reorder
+Reorder = Reorder

@@ -293,3 +293,6 @@ SwitchFilterToClassic = Filtres en ligne
 
 # Attached files drag & drop
 DropFilesHere = Glissez-déposez vos fichiers ici
+
+# Drag & drop reorder
+Reorder = Réordonner
