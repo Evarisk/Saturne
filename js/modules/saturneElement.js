@@ -40,6 +40,7 @@ window.saturne.saturneElement = {};
 window.saturne.saturneElement.init = function init() {
   window.saturne.saturneElement.event();
   window.saturne.saturneElement.getLeftMenu();
+  window.saturne.saturneElement.initSortable();
 };
 
 /**
@@ -253,4 +254,76 @@ window.saturne.saturneElement.getLeftMenu = function getLeftMenu() {
     // Call the dedicated function to highlight, expand parents, and scroll to the current unit
     window.saturne.saturneElement.getLeftMenuCurrentUnit(id);
   }
+};
+
+/**
+ * Make the workunit-list sortable to reorder elements by drag and drop.
+ * Each <ul> is its own sortable with no connectWith, so items only move between
+ * siblings (same level / same parent). The new order is persisted in SaturneElement.position.
+ *
+ * @since   23.0.0
+ * @version 23.0.0
+ *
+ * @return {void}
+ */
+window.saturne.saturneElement.initSortable = function initSortable() {
+  const $lists = $('.workunit-list, .workunit-list .sub-list');
+  if (!$lists.length || typeof $.fn.sortable !== 'function') {
+    return;
+  }
+
+  $lists.sortable({
+    items:                '> li.unit',
+    handle:               '.unit-drag-handle',
+    axis:                 'y',
+    tolerance:            'pointer',
+    cursor:               'grabbing',
+    opacity:              0.7,
+    placeholder:          'unit-sortable-placeholder',
+    forcePlaceholderSize: true,
+    update: function(event, ui) {
+      // Nested sortables fire update on every ancestor list: only the list that
+      // directly contains the moved item must persist, to avoid duplicate saves.
+      if (this !== ui.item.parent()[0]) {
+        return;
+      }
+      window.saturne.saturneElement.saveOrder.call(this);
+    }
+  });
+};
+
+/**
+ * Persist the new sibling order of a workunit-list <ul> via AJAX (updates position).
+ *
+ * @since   23.0.0
+ * @version 23.0.0
+ *
+ * @return {void}
+ */
+window.saturne.saturneElement.saveOrder = function saveOrder() {
+  const $list   = $(this);
+  const $units  = $list.children('li.unit');
+  const ids     = $units.map(function() { return $(this).data('object-id'); }).get();
+  const element = $units.first().data('element');
+
+  if (!ids.length || !element) {
+    return;
+  }
+
+  const token = window.saturne.toolbox.getToken();
+
+  window.saturne.loader.display($list);
+  $.ajax({
+    url: (window.saturne.config?.urlRoot || '') + '/custom/saturne/core/ajax/saturne_reorder_element.php',
+    method: 'POST',
+    data: {
+      action:  'reorder_element',
+      token:   token,
+      element: element,
+      ids:     ids
+    },
+    complete: function() {
+      window.saturne.loader.remove($list);
+    }
+  });
 };
