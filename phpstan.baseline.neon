@@ -12223,12 +12223,6 @@ parameters:
 			path: lib/saturne_functions.lib.php
 
 		-
-			message: '#^Undefined variable\: \$riskType$#'
-			identifier: variable.undefined
-			count: 1
-			path: lib/saturne_functions.lib.php
-
-		-
 			message: '#^Variable \$head might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1

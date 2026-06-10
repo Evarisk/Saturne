@@ -139,6 +139,8 @@ function saturne_display_recurse_tree(array $moreParams, array $objectElementTre
 {
     global $conf, $langs, $user;
 
+    $riskType = GETPOSTISSET('risk_type') && !empty(GETPOST('risk_type')) ? GETPOST('risk_type') : 'risk';
+
     if (!$user->hasRight($moreParams['moduleNameLowerCase'], $moreParams['objectElement'], 'read')) {
         print $langs->transnoentities('YouDontHaveTheRightOnObject', $langs->trans(dol_ucfirst($moreParams['objectElement'])));
         return;
