@@ -361,6 +361,7 @@ class SaturneTask extends Task
                 $newobj->project_ref   = $obj->project_ref;
                 $newobj->project_label = $obj->project_label;
 
+                $newobj->fk_task    = $obj->task_id;
                 $newobj->task_ref   = $obj->task_ref;
                 $newobj->task_label = $obj->task_label;
 
