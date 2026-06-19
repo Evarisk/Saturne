@@ -748,10 +748,10 @@ function saturne_create_category(string $label = '', string $type = '', int $fkP
             'preventionplan'  => ['id' => 436302002, 'obj_class' => 'PreventionPlan', 'obj_table' => 'digiriskdolibarr_preventionplan'],
             'firepermit'      => ['id' => 436302003, 'obj_class' => 'FirePermit', 'obj_table' => 'digiriskdolibarr_firepermit'],
             'risk'            => ['id' => 436302004, 'obj_class' => 'Risk', 'obj_table' => 'digiriskdolibarr_risk'],
-            'meeting'         => ['id' => 436304001, 'obj_class' => 'Meeting', 'obj_table' => 'dolimeet_session'],
-            'trainingsession' => ['id' => 436304002, 'obj_class' => 'Trainingsession', 'obj_table' => 'dolimeet_session'],
-            'audit'           => ['id' => 436304003, 'obj_class' => 'Audit', 'obj_table' => 'dolimeet_session'],
-            'session'         => ['id' => 436304004, 'obj_class' => 'Session', 'obj_table' => 'dolimeet_session']
+            'meeting'         => ['id' => 436304001, 'obj_class' => 'Meeting', 'obj_table' => 'doliopi_session'],
+            'trainingsession' => ['id' => 436304002, 'obj_class' => 'Trainingsession', 'obj_table' => 'doliopi_session'],
+            'audit'           => ['id' => 436304003, 'obj_class' => 'Audit', 'obj_table' => 'doliopi_session'],
+            'session'         => ['id' => 436304004, 'obj_class' => 'Session', 'obj_table' => 'doliopi_session']
         ];
         if (isset($customTags[$type])) {
             $category->MAP_ID[$type]        = $customTags[$type]['id'];
