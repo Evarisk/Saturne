@@ -86,6 +86,33 @@
         }
     }
 
+    &__delete {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        margin: 0 4px 0 auto;
+        padding: 0;
+        background: none;
+        border: none;
+        border-radius: 8px;
+        color: #e74c3c;
+        font-size: 17px;
+        line-height: 1;
+        cursor: pointer;
+        transition: background-color 0.15s, color 0.15s, transform 0.1s;
+
+        &:hover {
+            background: rgba(231, 76, 60, 0.12);
+            color: #c0392b;
+        }
+
+        &:active {
+            transform: scale(0.92);
+        }
+    }
+
     &__settings {
         position: relative;
         color: #94a3b8;
