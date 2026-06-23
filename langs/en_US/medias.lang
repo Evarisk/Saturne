@@ -29,6 +29,8 @@ PhotoNotSent              = The photo was not sent correctly
 ConfirmUnlinkMedia        = Are you sure you want to detach the selected media ?
 AddPhotoFromComputer      = Add a photo from device gallery
 AddPhotoFromMediaGallery  = Add a photo from media gallery
+DeletePhoto               = Delete photo
+DeletePhotoConfirmation   = Delete this photo?
 
 # Config page
 MediaMaxWidthMini                    = Minimum media width

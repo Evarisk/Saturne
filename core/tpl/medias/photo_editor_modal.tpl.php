@@ -41,6 +41,9 @@
                     <span id="saturne-photo-resolution-display"></span>
                 </h3>
             </div>
+            <button type="button" id="saturne-btn-delete-photo" class="saturne-photo-editor-header__delete" style="display: none;" title="<?php echo dol_escape_htmltag($langs->trans('DeletePhoto')); ?>" data-confirm="<?php echo dol_escape_htmltag($langs->trans('DeletePhotoConfirmation')); ?>">
+                <i class="fas fa-trash"></i>
+            </button>
             <div class="saturne-photo-editor-header__settings" title="<?php echo $langs->trans('Settings'); ?>">
                 <i class="fas fa-ellipsis-v"></i>
                 <select id="saturne-photo-size-select">

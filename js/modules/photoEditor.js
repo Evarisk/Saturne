@@ -51,6 +51,7 @@ window.saturne.photoEditor._startCX      = 0;
 window.saturne.photoEditor._startCY      = 0;
 window.saturne.photoEditor._seqCounter   = 1;
 window.saturne.photoEditor._onSave       = null;
+window.saturne.photoEditor._onDelete     = null;
 window.saturne.photoEditor._urls         = [];
 window.saturne.photoEditor._currentIndex = 0;
 
@@ -200,6 +201,26 @@ window.saturne.photoEditor.event = function() {
     }
   });
 
+  // Delete — remove the currently displayed photo (only when a delete callback was provided)
+  var btnDelete = document.getElementById('saturne-btn-delete-photo');
+  if (btnDelete) {
+    btnDelete.addEventListener('click', function() {
+      var pe = window.saturne.photoEditor;
+      if (typeof pe._onDelete !== 'function' || !pe._urls.length) {
+        return;
+      }
+      var confirmMsg = btnDelete.getAttribute('data-confirm');
+      if (confirmMsg && !window.confirm(confirmMsg)) {
+        return;
+      }
+      var url      = pe._urls[pe._currentIndex];
+      var onDelete = pe._onDelete;
+      // Close first so the gallery refresh from the callback is not hidden behind the editor
+      pe._close();
+      onDelete(url, pe._currentIndex);
+    });
+  }
+
   // Close on overlay click
   modal.addEventListener('click', function(e) {
     if (e.target === modal) {
@@ -227,7 +248,7 @@ window.saturne.photoEditor.event = function() {
  * @param   {Function} onSave Callback receiving a Blob on validate
  * @returns {void}
  */
-window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex) {
+window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex, onDelete) {
   var modal = window.saturne.photoEditor._modal;
   if (!modal) {
     return;
@@ -235,9 +256,16 @@ window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex) {
 
   var pe             = window.saturne.photoEditor;
   pe._onSave         = onSave || null;
+  pe._onDelete       = onDelete || null;
   pe._historyStack   = [];
   pe._urls           = Array.isArray(urlOrUrls) ? urlOrUrls : [urlOrUrls];
   pe._currentIndex   = (typeof startIndex === 'number') ? startIndex : 0;
+
+  // The delete button is only relevant when the caller wired a delete callback
+  var btnDeleteEl = document.getElementById('saturne-btn-delete-photo');
+  if (btnDeleteEl) {
+    btnDeleteEl.style.display = (typeof pe._onDelete === 'function') ? 'flex' : 'none';
+  }
 
   var btnPrevEl = document.getElementById('saturne-btn-prev-photo');
   var btnNextEl = document.getElementById('saturne-btn-next-photo');

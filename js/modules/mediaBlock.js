@@ -134,7 +134,15 @@ window.saturne.mediaBlock.onGalleryClick = function() {
     var filePath         = decodeURIComponent(urlParams.get('file') || '');
     var originalFilename = filePath.split('/').pop() || null;
     window.saturne.mediaBlock.uploadBlob(blob, module, subdir, block, originalFilename);
-  }, 0);
+  }, 0, function(deletedUrl) {
+    // Delete callback: resolve the filename from the document.php URL and ask the server to remove it
+    var delParams   = new URLSearchParams((deletedUrl || '').split('?')[1] || '');
+    var delFilePath = decodeURIComponent(delParams.get('file') || '');
+    var delFilename = delFilePath.split('/').pop() || null;
+    if (delFilename) {
+      window.saturne.mediaBlock.deletePhoto(delFilename, module, subdir, block);
+    }
+  });
 };
 
 /**
@@ -181,6 +189,50 @@ window.saturne.mediaBlock.uploadBlob = function(blob, module, subdir, block, ori
         $srcBlock = $doc.find('.linked-medias').first();
       }
       var $gallery   = $srcBlock.find('.saturne-media-gallery');
+      if ($gallery.length && block && block.length) {
+        block.find('.saturne-media-gallery').replaceWith($gallery);
+      }
+    }
+  });
+};
+
+/**
+ * Delete a photo from the server via AJAX and refresh the gallery section in place.
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param   {string} filename Name of the photo file to delete
+ * @param   {string} module   Module name
+ * @param   {string} subdir   Sub-directory
+ * @param   {jQuery} block    The .linked-medias block element
+ * @returns {void}
+ */
+window.saturne.mediaBlock.deletePhoto = function(filename, module, subdir, block) {
+  var token          = window.saturne.toolbox.getToken();
+  var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+  var formData       = new FormData();
+
+  formData.append('filename', filename);
+  formData.append('module_name', module);
+  formData.append('sub_dir', subdir);
+
+  $.ajax({
+    url         : document.URL + querySeparator + 'action=deletePhoto&token=' + token,
+    type        : 'POST',
+    data        : formData,
+    processData : false,
+    contentType : false,
+    complete    : function(resp) {
+      var $doc      = $('<div>').html(resp.responseText);
+      var blockId   = block && block.attr('id');
+      var $srcBlock = blockId ? $doc.find('#' + blockId) : $();
+      if (!$srcBlock.length) {
+        $srcBlock = $doc.find('.linked-medias').first();
+      }
+      var $gallery = $srcBlock.find('.saturne-media-gallery');
       if ($gallery.length && block && block.length) {
         block.find('.saturne-media-gallery').replaceWith($gallery);
       }
