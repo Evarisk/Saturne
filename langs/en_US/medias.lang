@@ -31,6 +31,8 @@ AddPhotoFromComputer      = Add a photo from device gallery
 AddPhotoFromMediaGallery  = Add a photo from media gallery
 DeletePhoto               = Delete photo
 DeletePhotoConfirmation   = Delete this photo?
+AvailableTools            = Available tools
+Quality                   = Quality
 
 # Config page
 MediaMaxWidthMini                    = Minimum media width

@@ -56,6 +56,56 @@ window.saturne.photoEditor._urls         = [];
 window.saturne.photoEditor._currentIndex = 0;
 
 /**
+ * Resolve the DOM element of a given editor tool ('pencil' is wrapped in its own container).
+ *
+ * @param   {string} tool data-mode of the tool
+ * @returns {Element|null}
+ */
+window.saturne.photoEditor._toolElement = function(tool) {
+  if (tool === 'pencil') {
+    return document.getElementById('saturne-pencil-tool-container');
+  }
+  return document.querySelector('.saturne-tool-btn[data-mode="' + tool + '"]');
+};
+
+/**
+ * Read the list of tools the user chose to hide (persisted per browser).
+ *
+ * @returns {Array}
+ */
+window.saturne.photoEditor._getHiddenTools = function() {
+  try {
+    return JSON.parse(window.localStorage.getItem('saturne_photo_editor_hidden_tools') || '[]') || [];
+  } catch (e) {
+    return [];
+  }
+};
+
+/**
+ * Apply the persisted tool visibility: hide disabled tools, sync the settings checkboxes,
+ * and turn drawing off when the pencil tool is disabled.
+ *
+ * @returns {void}
+ */
+window.saturne.photoEditor._applyToolVisibility = function() {
+  var hidden  = window.saturne.photoEditor._getHiddenTools();
+  var toggles = document.querySelectorAll('.saturne-editor-tool-toggle');
+  for (var i = 0; i < toggles.length; i++) {
+    var tool     = toggles[i].getAttribute('data-tool');
+    var isHidden = hidden.indexOf(tool) !== -1;
+    toggles[i].checked = !isHidden;
+    var el = window.saturne.photoEditor._toolElement(tool);
+    if (el) {
+      el.style.display = isHidden ? 'none' : '';
+    }
+  }
+  // Disabling the pencil must actually stop drawing, not only hide the button
+  if (hidden.indexOf('pencil') !== -1 && window.saturne.photoEditor._currentMode === 'pencil') {
+    window.saturne.photoEditor._currentMode = null;
+  }
+};
+
+/**
  * Photo editor init
  *
  * @memberof Saturne_PhotoEditor
@@ -221,6 +271,44 @@ window.saturne.photoEditor.event = function() {
     });
   }
 
+  // Settings menu (the … vertical button): toggle the panel + per-tool show/hide (persisted)
+  var settingsToggle = document.getElementById('saturne-photo-settings-toggle');
+  var settingsMenu   = document.getElementById('saturne-photo-settings-menu');
+  if (settingsToggle && settingsMenu) {
+    settingsToggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      settingsMenu.style.display = (settingsMenu.style.display === 'none') ? 'block' : 'none';
+    });
+    settingsMenu.addEventListener('click', function(e) {
+      e.stopPropagation();
+    });
+    document.addEventListener('click', function() {
+      settingsMenu.style.display = 'none';
+    });
+  }
+
+  var toolToggles = document.querySelectorAll('.saturne-editor-tool-toggle');
+  for (var ti = 0; ti < toolToggles.length; ti++) {
+    toolToggles[ti].addEventListener('change', function() {
+      var pe     = window.saturne.photoEditor;
+      var hidden = pe._getHiddenTools();
+      var tool   = this.getAttribute('data-tool');
+      var idx    = hidden.indexOf(tool);
+      if (this.checked && idx !== -1) {
+        hidden.splice(idx, 1);
+      } else if (!this.checked && idx === -1) {
+        hidden.push(tool);
+      }
+      try {
+        window.localStorage.setItem('saturne_photo_editor_hidden_tools', JSON.stringify(hidden));
+      } catch (e) {
+        // localStorage unavailable — keep the in-session toggle only
+      }
+      pe._applyToolVisibility();
+    });
+  }
+  window.saturne.photoEditor._applyToolVisibility();
+
   // Close on overlay click
   modal.addEventListener('click', function(e) {
     if (e.target === modal) {
@@ -266,6 +354,9 @@ window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex, onDele
   if (btnDeleteEl) {
     btnDeleteEl.style.display = (typeof pe._onDelete === 'function') ? 'flex' : 'none';
   }
+
+  // Re-apply the user's tool visibility preferences
+  pe._applyToolVisibility();
 
   var btnPrevEl = document.getElementById('saturne-btn-prev-photo');
   var btnNextEl = document.getElementById('saturne-btn-next-photo');

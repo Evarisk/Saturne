@@ -93,16 +93,59 @@
         cursor: pointer;
         padding: 0 5px;
 
-        #saturne-photo-size-select {
+        .saturne-photo-editor-settings-menu {
             position: absolute;
-            top: 0;
+            top: 100%;
             right: 0;
-            width: 30px;
-            height: 100%;
-            opacity: 0;
+            z-index: 30;
+            min-width: 190px;
+            margin-top: 6px;
+            padding: 10px 12px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            font-size: 13px;
+            color: #333;
+            cursor: default;
+            text-align: left;
+        }
+
+        .saturne-settings-section + .saturne-settings-section {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eef0f3;
+        }
+
+        .saturne-settings-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: #8a93a0;
+            margin-bottom: 6px;
+        }
+
+        #saturne-photo-size-select {
+            width: 100%;
+            padding: 4px 6px;
+            border: 1px solid #d4d8de;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .saturne-settings-tool {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 3px 0;
+            font-size: 13px;
             cursor: pointer;
-            appearance: none;
-            -webkit-appearance: none;
+
+            input {
+                cursor: pointer;
+            }
         }
     }
 }

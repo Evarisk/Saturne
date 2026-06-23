@@ -32,6 +32,8 @@ AddPhotoFromComputer      = Ajouter une photo depuis la galerie de l'appareil
 AddPhotoFromMediaGallery  = Ajouter une photo depuis la galerie des médias
 DeletePhoto               = Supprimer la photo
 DeletePhotoConfirmation   = Supprimer cette photo ?
+AvailableTools            = Outils disponibles
+Quality                   = Qualité
 
 # Config page - Page d'administration
 MediaMaxWidthMini                    = Largeur du média mini
