@@ -84,39 +84,6 @@
   padding: 20px 20px 8px;
 }
 
-.saturne-filter-legend {
-  margin-bottom: 16px;
-  padding: 8px 12px;
-  background: #f5f9f5;
-  border: 1px solid #d4edda;
-  border-radius: 6px;
-  font-size: 12px;
-  color: #555;
-}
-
-.saturne-filter-legend-items {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.saturne-filter-legend-include,
-.saturne-filter-legend-exclude {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.saturne-filter-legend-include .far {
-  color: #27ae60;
-  font-size: 14px;
-}
-
-.saturne-filter-legend-exclude .far {
-  color: #c0392b;
-  font-size: 14px;
-}
-
 .saturne-filter-btn-wrapper {
   position: relative;
   display: inline-block;
@@ -127,29 +94,6 @@
   top: -6px;
   right: -6px;
   pointer-events: none;
-}
-
-.saturne-filter-mode-toggle {
-  cursor: pointer;
-  font-size: 13px;
-  padding: 0 4px;
-  flex-shrink: 0;
-  user-select: none;
-}
-
-.saturne-filter-mode-inc {
-  color: #27ae60;
-}
-
-.saturne-filter-mode-exc {
-  color: #c0392b;
-}
-
-// Inline search row wrapper (table filter row)
-.saturne-filter-inline-wrapper {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
 }
 
 // Search-all block at the top of the panel
