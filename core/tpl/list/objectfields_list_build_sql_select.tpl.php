@@ -154,6 +154,14 @@ foreach ($search as $key => $val) {
             continue;
         }
 
+        // Virtual/computed/linked fields (listed in $excludeFields) have no real t.<key>
+        // column in the base table. Linked elements are already handled by the
+        // printFieldListSearch hook above; any excluded field still reaching here would
+        // otherwise produce "Unknown column 't.<key>'" (e.g. signatory role columns such
+        // as 'Controller'). Skip the generic column filter for them.
+        if (!empty($excludeFields) && in_array($key, $excludeFields, true)) {
+            continue;
+        }
 
         $mode_search = (($object->isInt($object->fields[$key]) || $object->isFloat($object->fields[$key])) ? 1 : 0);
         if (isset($object->fields[$key]['type']) && ((strpos($object->fields[$key]['type'], 'integer:') === 0) || (strpos($object->fields[$key]['type'], 'sellist:') === 0) || !empty($object->fields[$key]['arrayofkeyval']))) {
