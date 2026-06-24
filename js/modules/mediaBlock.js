@@ -102,7 +102,13 @@ window.saturne.mediaBlock.onPhotoSelected = function() {
   // Reset input so the same file can be re-selected if needed
   input.val('');
 
-  window.saturne.mediaBlock.openFilesSequentially(filesArray, 0, module, subdir, block);
+  // A single photo opens the editor for annotation; a series is uploaded
+  // directly so the user is not prompted to validate each photo one by one
+  if (filesArray.length > 1) {
+    window.saturne.mediaBlock.uploadPhotosDirectly(filesArray, module, subdir, block);
+  } else {
+    window.saturne.mediaBlock.openFilesSequentially(filesArray, 0, module, subdir, block);
+  }
 };
 
 /**
@@ -182,16 +188,7 @@ window.saturne.mediaBlock.uploadBlob = function(blob, module, subdir, block, ori
     processData : false,
     contentType : false,
     complete    : function(resp) {
-      var $doc       = $('<div>').html(resp.responseText);
-      var blockId    = block && block.attr('id');
-      var $srcBlock  = blockId ? $doc.find('#' + blockId) : $();
-      if (!$srcBlock.length) {
-        $srcBlock = $doc.find('.linked-medias').first();
-      }
-      var $gallery   = $srcBlock.find('.saturne-media-gallery');
-      if ($gallery.length && block && block.length) {
-        block.find('.saturne-media-gallery').replaceWith($gallery);
-      }
+      window.saturne.mediaBlock.refreshGallery(block, resp.responseText);
     }
   });
 };
@@ -226,16 +223,7 @@ window.saturne.mediaBlock.deletePhoto = function(filename, module, subdir, block
     processData : false,
     contentType : false,
     complete    : function(resp) {
-      var $doc      = $('<div>').html(resp.responseText);
-      var blockId   = block && block.attr('id');
-      var $srcBlock = blockId ? $doc.find('#' + blockId) : $();
-      if (!$srcBlock.length) {
-        $srcBlock = $doc.find('.linked-medias').first();
-      }
-      var $gallery = $srcBlock.find('.saturne-media-gallery');
-      if ($gallery.length && block && block.length) {
-        block.find('.saturne-media-gallery').replaceWith($gallery);
-      }
+      window.saturne.mediaBlock.refreshGallery(block, resp.responseText);
     }
   });
 };
@@ -265,6 +253,70 @@ window.saturne.mediaBlock.openFilesSequentially = function(files, index, module,
     window.saturne.mediaBlock.uploadBlob(blob, module, subdir, block);
     window.saturne.mediaBlock.openFilesSequentially(files, index + 1, module, subdir, block);
   });
+};
+
+/**
+ * Upload a series of photo files directly, bypassing the editor.
+ * All selected files are sent in a single request, then the gallery is refreshed.
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param   {Array}  files  Files to upload
+ * @param   {string} module Module name
+ * @param   {string} subdir Sub-directory
+ * @param   {jQuery} block  The .linked-medias block element
+ * @returns {void}
+ */
+window.saturne.mediaBlock.uploadPhotosDirectly = function(files, module, subdir, block) {
+  var token          = window.saturne.toolbox.getToken();
+  var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+  var formData       = new FormData();
+
+  for (var i = 0; i < files.length; i++) {
+    formData.append('userfile[]', files[i], files[i].name);
+  }
+  formData.append('module_name', module);
+  formData.append('sub_dir', subdir || '');
+  formData.append('overwrite', '0');
+
+  $.ajax({
+    url         : document.URL + querySeparator + 'action=uploadPhoto&token=' + token,
+    type        : 'POST',
+    data        : formData,
+    processData : false,
+    contentType : false,
+    complete    : function(resp) {
+      window.saturne.mediaBlock.refreshGallery(block, resp.responseText);
+    }
+  });
+};
+
+/**
+ * Refresh the gallery section of a media block from an AJAX response.
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param   {jQuery} block        The .linked-medias block element
+ * @param   {string} responseText HTML response containing the refreshed block
+ * @returns {void}
+ */
+window.saturne.mediaBlock.refreshGallery = function(block, responseText) {
+  var $doc      = $('<div>').html(responseText);
+  var blockId   = block && block.attr('id');
+  var $srcBlock = blockId ? $doc.find('#' + blockId) : $();
+  if (!$srcBlock.length) {
+    $srcBlock = $doc.find('.linked-medias').first();
+  }
+  var $gallery = $srcBlock.find('.saturne-media-gallery');
+  if ($gallery.length && block && block.length) {
+    block.find('.saturne-media-gallery').replaceWith($gallery);
+  }
 };
 
 /**
