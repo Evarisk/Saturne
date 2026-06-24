@@ -106,6 +106,7 @@
                 <button type="button" id="saturne-btn-cancel-photo" class="saturne-editor-btn saturne-editor-btn--cancel" title="<?php echo $langs->trans('Cancel'); ?>">
                     <i class="fas fa-times"></i>
                 </button>
+                <button type="button" id="saturne-btn-ok-all-photo" class="saturne-editor-btn saturne-editor-btn--ok" style="display: none;" title="<?php echo dol_escape_htmltag($langs->trans('ValidateAll')); ?>"><i class="fas fa-check-double"></i></button>
                 <button type="button" id="saturne-btn-ok-photo" class="saturne-editor-btn saturne-editor-btn--ok" title="OK"><i class="fas fa-check"></i></button>
             </div>
         </div>

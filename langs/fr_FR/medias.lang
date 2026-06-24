@@ -86,3 +86,6 @@ ErrorFileNotDeleted       = Le fichier n'a pas pu être supprimé
 
 # Analyse AI
 AIAnalyseImage	= Analyse de l'image: %s
+
+# Multi-upload
+ValidateAll = Tout valider

@@ -51,6 +51,7 @@ window.saturne.photoEditor._startCX      = 0;
 window.saturne.photoEditor._startCY      = 0;
 window.saturne.photoEditor._seqCounter   = 1;
 window.saturne.photoEditor._onSave       = null;
+window.saturne.photoEditor._onSaveAll    = null;
 window.saturne.photoEditor._onDelete     = null;
 window.saturne.photoEditor._urls         = [];
 window.saturne.photoEditor._currentIndex = 0;
@@ -251,6 +252,24 @@ window.saturne.photoEditor.event = function() {
     }
   });
 
+  // Validate all — save the current photo then let the caller process the remaining files
+  var btnOkAll = document.getElementById('saturne-btn-ok-all-photo');
+  if (btnOkAll) {
+    btnOkAll.addEventListener('click', function() {
+      var activeText = document.getElementById('saturne-floating-text-input');
+      if (activeText) {
+        activeText.blur();
+      }
+      var onSaveAll = window.saturne.photoEditor._onSaveAll;
+      window.saturne.photoEditor._close();
+      if (typeof onSaveAll === 'function') {
+        canvas.toBlob(function(blob) {
+          onSaveAll(blob);
+        }, 'image/jpeg', 0.85);
+      }
+    });
+  }
+
   // Delete — remove the currently displayed photo (only when a delete callback was provided)
   var btnDelete = document.getElementById('saturne-btn-delete-photo');
   if (btnDelete) {
@@ -336,7 +355,7 @@ window.saturne.photoEditor.event = function() {
  * @param   {Function} onSave Callback receiving a Blob on validate
  * @returns {void}
  */
-window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex, onDelete) {
+window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex, onDelete, onSaveAll) {
   var modal = window.saturne.photoEditor._modal;
   if (!modal) {
     return;
@@ -344,6 +363,7 @@ window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex, onDele
 
   var pe             = window.saturne.photoEditor;
   pe._onSave         = onSave || null;
+  pe._onSaveAll      = onSaveAll || null;
   pe._onDelete       = onDelete || null;
   pe._historyStack   = [];
   pe._urls           = Array.isArray(urlOrUrls) ? urlOrUrls : [urlOrUrls];
@@ -353,6 +373,12 @@ window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex, onDele
   var btnDeleteEl = document.getElementById('saturne-btn-delete-photo');
   if (btnDeleteEl) {
     btnDeleteEl.style.display = (typeof pe._onDelete === 'function') ? 'flex' : 'none';
+  }
+
+  // The "validate all" button is only relevant when the caller wired a batch callback
+  var btnOkAllEl = document.getElementById('saturne-btn-ok-all-photo');
+  if (btnOkAllEl) {
+    btnOkAllEl.style.display = (typeof pe._onSaveAll === 'function') ? 'flex' : 'none';
   }
 
   // Re-apply the user's tool visibility preferences
@@ -417,14 +443,49 @@ window.saturne.photoEditor._loadUrlIntoCanvas = function(url, callback) {
  * @param   {Function}  onSave Callback receiving a Blob on validate
  * @returns {void}
  */
-window.saturne.photoEditor.openFile = function(file, onSave) {
+window.saturne.photoEditor.openFile = function(file, onSave, onSaveAll) {
   var url = URL.createObjectURL(file);
   window.saturne.photoEditor.open(url, function(blob) {
     URL.revokeObjectURL(url);
     if (typeof onSave === 'function') {
       onSave(blob);
     }
-  });
+  }, 0, null, onSaveAll);
+};
+
+/**
+ * Resize a File/Blob to the currently selected quality and return a JPEG Blob,
+ * without opening the editor. Mirrors _loadUrlIntoCanvas() resize logic.
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @param   {File|Blob} file     File to resize
+ * @param   {Function}  callback Called with the resized Blob
+ * @returns {void}
+ */
+window.saturne.photoEditor.resizeFileToBlob = function(file, callback) {
+  var sizeSelect = document.getElementById('saturne-photo-size-select');
+  var isFullHD   = sizeSelect && sizeSelect.value === 'fullhd';
+  var maxDim     = isFullHD ? 1920 : 1280;
+  var url        = URL.createObjectURL(file);
+  var img        = new Image();
+  img.onload = function() {
+    var ratio = 1;
+    if (img.width > maxDim || img.height > maxDim) {
+      ratio = maxDim / Math.max(img.width, img.height);
+    }
+    var canvas    = document.createElement('canvas');
+    canvas.width  = img.width  * ratio;
+    canvas.height = img.height * ratio;
+    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+    URL.revokeObjectURL(url);
+    canvas.toBlob(function(blob) {
+      if (typeof callback === 'function') {
+        callback(blob);
+      }
+    }, 'image/jpeg', 0.85);
+  };
+  img.src = url;
 };
 
 /* -------------------------------------------------------------------------
@@ -436,7 +497,8 @@ window.saturne.photoEditor._close = function() {
   if (modal) {
     modal.style.display = 'none';
   }
-  window.saturne.photoEditor._onSave = null;
+  window.saturne.photoEditor._onSave    = null;
+  window.saturne.photoEditor._onSaveAll = null;
 };
 
 window.saturne.photoEditor._saveState = function() {

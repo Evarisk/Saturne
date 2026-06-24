@@ -102,13 +102,9 @@ window.saturne.mediaBlock.onPhotoSelected = function() {
   // Reset input so the same file can be re-selected if needed
   input.val('');
 
-  // A single photo opens the editor for annotation; a series is uploaded
-  // directly so the user is not prompted to validate each photo one by one
-  if (filesArray.length > 1) {
-    window.saturne.mediaBlock.uploadPhotosDirectly(filesArray, module, subdir, block);
-  } else {
-    window.saturne.mediaBlock.openFilesSequentially(filesArray, 0, module, subdir, block);
-  }
+  // Every photo (single or series) goes through the editor sequentially so each one is
+  // resized/annotated like a single photo: validate one, the editor re-opens for the next.
+  window.saturne.mediaBlock.openFilesSequentially(filesArray, 0, module, subdir, block);
 };
 
 /**
@@ -249,9 +245,49 @@ window.saturne.mediaBlock.openFilesSequentially = function(files, index, module,
     return;
   }
 
-  window.saturne.photoEditor.openFile(files[index], function(blob) {
+  // Validate one: upload the edited photo then re-open the editor for the next file.
+  var onValidate = function(blob) {
     window.saturne.mediaBlock.uploadBlob(blob, module, subdir, block);
     window.saturne.mediaBlock.openFilesSequentially(files, index + 1, module, subdir, block);
+  };
+
+  // Validate all (only when more than one photo remains): upload the current edited photo,
+  // then resize + upload every remaining file without opening the editor again.
+  var onValidateAll = null;
+  if (files.length - index > 1) {
+    onValidateAll = function(blob) {
+      window.saturne.mediaBlock.uploadBlob(blob, module, subdir, block);
+      window.saturne.mediaBlock.uploadRemainingResized(files, index + 1, module, subdir, block);
+    };
+  }
+
+  window.saturne.photoEditor.openFile(files[index], onValidate, onValidateAll);
+};
+
+/**
+ * Resize and upload the remaining files one after another, without the editor.
+ * Used by the "validate all" action of the photo editor.
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param   {Array}  files  Files to upload
+ * @param   {number} index  Current index
+ * @param   {string} module Module name
+ * @param   {string} subdir Sub-directory
+ * @param   {jQuery} block  The .linked-medias block element
+ * @returns {void}
+ */
+window.saturne.mediaBlock.uploadRemainingResized = function(files, index, module, subdir, block) {
+  if (index >= files.length) {
+    return;
+  }
+
+  window.saturne.photoEditor.resizeFileToBlob(files[index], function(blob) {
+    window.saturne.mediaBlock.uploadBlob(blob, module, subdir, block);
+    window.saturne.mediaBlock.uploadRemainingResized(files, index + 1, module, subdir, block);
   });
 };
 
