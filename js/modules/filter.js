@@ -57,7 +57,6 @@ window.saturne.filter.event = function() {
     $(document).on('click', '#saturne-filter-toggle', window.saturne.filter.open);
     $(document).on('click', '#saturne-filter-backdrop', window.saturne.filter.close);
     $(document).on('click', '.saturne-filter-panel-close', window.saturne.filter.close);
-    $(document).on('click', '.saturne-filter-mode-toggle', window.saturne.filter.toggleMode);
     $(document).on('click', '.saturne-filter-mode-switch', window.saturne.filter.toggleDisplayMode);
     $(document).on('keydown', window.saturne.filter.handleKeyDown);
 };
@@ -105,23 +104,6 @@ window.saturne.filter.handleKeyDown = function(e) {
     if (e.key === 'Escape') {
         window.saturne.filter.close();
     }
-};
-
-/**
- * Toggle the include/exclude mode of a filter field
- *
- * @since   1.0.0
- * @version 1.0.0
- *
- * @returns {void}
- */
-window.saturne.filter.toggleMode = function() {
-    var key    = this.id.replace('search_mode_toggle_', '');
-    var $input = $('#search_' + key + '_mode');
-    var exc    = $input.val() !== 'exc';
-    $input.val(exc ? 'exc' : 'inc');
-    $(this).html(exc ? '<span class="far fa-eye-slash"></span>' : '<span class="far fa-eye"></span>');
-    $(this).toggleClass('saturne-filter-mode-exc', exc).toggleClass('saturne-filter-mode-inc', !exc);
 };
 
 /**

@@ -47,12 +47,6 @@ if (getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
     print '</td>';
 }
 
-$toggleTitleRaw = $langs->trans('ToggleIncludeExclude');
-if ($toggleTitleRaw == 'ToggleIncludeExclude') {
-    $toggleTitleRaw = 'Inverser le filtre (voir tout sauf la sélection)';
-}
-$toggleTitle = dol_escape_htmltag($toggleTitleRaw);
-
 foreach ($object->fields as $key => $val) {
     $cssForField = saturne_css_for_field($val, $key);
     if (!empty($arrayfields['t.' . $key]['checked'])) {
@@ -66,38 +60,17 @@ foreach ($object->fields as $key => $val) {
         }
 
         if (empty($val['disablesearch'])) {
-            $showModeToggle = false;
-            $fieldLabel     = $langs->trans($val['label'] ?? $key);
             if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) {
-                $showModeToggle = ($key !== 'status');
-                if ($showModeToggle) {
-                    $fieldMode = $search[$key . '_mode'] ?? GETPOST('search_' . $key . '_mode', 'alpha') ?: 'inc';
-                    $isExc     = ($fieldMode === 'exc');
-                    print '<span class="saturne-filter-inline-wrapper">';
-                    print '<input type="hidden" id="search_' . $key . '_mode" name="search_' . $key . '_mode" value="' . ($isExc ? 'exc' : 'inc') . '">';
-                    $titleAttr = dol_escape_htmltag($fieldLabel) . ' - ' . $toggleTitle;
-                    print '<span id="search_mode_toggle_' . $key . '" title="' . $titleAttr . '" class="saturne-filter-mode-toggle ' . ($isExc ? 'saturne-filter-mode-exc' : 'saturne-filter-mode-inc') . '">' . ($isExc ? '<span class="far fa-eye-slash"></span>' : '<span class="far fa-eye"></span>') . '</span>';
-                }
                 if (empty($val['searchmulti'])) {
                     print $form->selectarray('search_' . $key, $val['arrayofkeyval'], $search[$key] ?? '', 1, 0, 0, '', 1, 0, 0, '', 'maxwidth125' . ($key == 'status' ? ' search_status onrightofpage' : ''));
                 } else {
                     print $form->multiselectarray('search_' . $key, $val['arrayofkeyval'], $search[$key] ?? '', 0, 0, 'maxwidth125' . ($key == 'status' ? ' search_status onrightofpage' : ''), 1, '100%');
                 }
-                if ($showModeToggle) {
-                    print '</span>';
-                }
             } elseif (isset($val['type']) && ((strpos($val['type'], 'integer:') === 0) || (strpos($val['type'], 'sellist:') === 0))) {
-                $showModeToggle = true;
-                $fieldMode = $search[$key . '_mode'] ?? GETPOST('search_' . $key . '_mode', 'alpha') ?: 'inc';
-                $isExc     = ($fieldMode === 'exc');
                 // visible=2 hides the field content in showInputField; force visible for the search input
                 if (isset($val['visible']) && (int) $val['visible'] === 2) {
                     $object->fields[$key]['visible'] = 1;
                 }
-                print '<span class="saturne-filter-inline-wrapper">';
-                print '<input type="hidden" id="search_' . $key . '_mode" name="search_' . $key . '_mode" value="' . ($isExc ? 'exc' : 'inc') . '">';
-                $titleAttr = dol_escape_htmltag($fieldLabel) . ' - ' . $toggleTitle;
-                print '<span id="search_mode_toggle_' . $key . '" title="' . $titleAttr . '" class="saturne-filter-mode-toggle ' . ($isExc ? 'saturne-filter-mode-exc' : 'saturne-filter-mode-inc') . '">' . ($isExc ? '<span class="far fa-eye-slash"></span>' : '<span class="far fa-eye"></span>') . '</span>';
                 print $object->showInputField($val, $key, $search[$key] ?? '', '', '', 'search_', $cssForField . ' maxwidth250', 1);
             } elseif (isset($val['type']) && in_array($val['type'], ['date', 'datetime', 'timestamp'])) {
                 print '<div class="nowrap">';
@@ -119,10 +92,6 @@ foreach ($object->fields as $key => $val) {
                 print $formAdmin->select_language(($search[$key] ?? ''), 'search_lang', 0, [], 1, 0, 0, 'minwidth100imp maxwidth125', 2);
             } else {
                 print '<input type="text" class="flat maxwidth' . (isset($val['type']) && in_array($val['type'], ['integer', 'price']) ? '50' : '75') . '" name="search_' . $key . '" value="' . dol_escape_htmltag($search[$key] ?? '') . '">';
-            }
-
-            if (!empty($showModeToggle) && isset($val['type']) && ((strpos($val['type'], 'integer:') === 0) || (strpos($val['type'], 'sellist:') === 0))) {
-                print '</span>'; // close inline-flex wrapper for integer:/sellist: fields
             }
         }
 

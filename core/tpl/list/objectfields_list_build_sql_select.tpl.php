@@ -156,7 +156,6 @@ foreach ($search as $key => $val) {
 
 
         $mode_search = (($object->isInt($object->fields[$key]) || $object->isFloat($object->fields[$key])) ? 1 : 0);
-        $isExclude   = (GETPOST('search_' . $key . '_mode', 'alpha') === 'exc');
         if (isset($object->fields[$key]['type']) && ((strpos($object->fields[$key]['type'], 'integer:') === 0) || (strpos($object->fields[$key]['type'], 'sellist:') === 0) || !empty($object->fields[$key]['arrayofkeyval']))) {
             if ($val == '-1' || ($val === '0' && (empty($object->fields[$key]['arrayofkeyval']) || !array_key_exists('0', $object->fields[$key]['arrayofkeyval'])))) {
                 $val = '';
@@ -175,26 +174,10 @@ foreach ($search as $key => $val) {
         }
         if (empty($object->fields[$key]['searchmulti'])) {
             if (!is_array($val) && $val != '') {
-                if ($isExclude) {
-                    if ($mode_search === 2) {
-                        $sql .= ' AND t.' . $db->escape($key) . ' != ' . (int) $val;
-                    } elseif ($mode_search === 3) {
-                        $sql .= " AND t." . $db->escape($key) . " != '" . $db->escape($val) . "'";
-                    } else {
-                        $sql .= ' AND t.' . $db->escape($key) . ' != ' . (int) $val;
-                    }
-                } else {
-                    $sql .= natural_search('t.' . $db->escape($key), $val, (($key == 'status') ? 2 : $mode_search));
-                }
+                $sql .= natural_search('t.' . $db->escape($key), $val, (($key == 'status') ? 2 : $mode_search));
             }
         } elseif (is_array($val) && !empty($val)) {
-            if ($isExclude && $mode_search === 2) {
-                $sql .= ' AND t.' . $db->escape($key) . ' NOT IN (' . implode(',', array_map('intval', $val)) . ')';
-            } elseif ($isExclude && $mode_search === 3) {
-                $sql .= ' AND t.' . $db->escape($key) . " NOT IN (" . implode(',', array_map(function ($v) use ($db) { return "'" . $db->escape($v) . "'"; }, $val)) . ")";
-            } else {
-                $sql .= natural_search('t.' . $db->escape($key), implode(',', $val), (($key == 'status') ? 2 : $mode_search));
-            }
+            $sql .= natural_search('t.' . $db->escape($key), implode(',', $val), (($key == 'status') ? 2 : $mode_search));
         }
     } elseif (preg_match('/(_dtstart|_dtend)$/', $key) && $val != '') {
         $columnName = preg_replace('/(_dtstart|_dtend)$/', '', $key);

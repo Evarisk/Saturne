@@ -76,15 +76,6 @@ foreach ($search as $key => $val) {
     } elseif ($val != '') {
         $param .= '&search_' . $key . '=' . urlencode($val);
     }
-    // Propagate include/exclude mode for selectable fields
-    if (array_key_exists($key, $object->fields) && $key !== 'status') {
-        $fieldDef      = $object->fields[$key];
-        $isSelectable  = !empty($fieldDef['arrayofkeyval'])
-            || (isset($fieldDef['type']) && (strpos($fieldDef['type'], 'integer:') === 0 || strpos($fieldDef['type'], 'sellist:') === 0));
-        if ($isSelectable && GETPOST('search_' . $key . '_mode', 'alpha') === 'exc') {
-            $param .= '&search_' . $key . '_mode=exc';
-        }
-    }
 }
 
 // Add $param from extra fields
@@ -233,12 +224,6 @@ if ($useSideFilterPanel && isModEnabled('categorie') && $user->hasRight('categor
 }
 
 // 2. Field filters section inside panel
-$toggleTitlePanelRaw = $langs->trans('ToggleIncludeExclude');
-if ($toggleTitlePanelRaw === 'ToggleIncludeExclude') {
-    $toggleTitlePanelRaw = 'Inverser le filtre (voir tout sauf la sélection)';
-}
-$toggleTitlePanel = dol_escape_htmltag($toggleTitlePanelRaw);
-
 foreach ($object->fields as $key => $val) {
     // Classic mode renders its own inline filter row; skip building the panel rows
     if (!$useSideFilterPanel) {
@@ -263,14 +248,6 @@ foreach ($object->fields as $key => $val) {
 
     // @Todo use showinputfield for all types to benefit from all field definition options (like arrayofkeyval, type=integer:sellist, etc.) instead of only relying on type for field rendering and losing some options in the process (like searchmulti for arrayofkeyval)
     if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) {
-        $showToggle = ($key !== 'status');
-        if ($showToggle) {
-            $fMode  = GETPOST('search_' . $key . '_mode', 'alpha') ?: 'inc';
-            $isExc  = ($fMode === 'exc');
-            $tAttr  = dol_escape_htmltag($fieldLabelPanel) . ' - ' . $toggleTitlePanel;
-            $panelFilterBody .= '<input type="hidden" id="search_' . $key . '_mode" name="search_' . $key . '_mode" value="' . ($isExc ? 'exc' : 'inc') . '">';
-            $panelFilterBody .= '<span id="search_mode_toggle_' . $key . '" title="' . $tAttr . '" class="saturne-filter-mode-toggle ' . ($isExc ? 'saturne-filter-mode-exc' : 'saturne-filter-mode-inc') . '">' . ($isExc ? '<span class="far fa-eye-slash"></span>' : '<span class="far fa-eye"></span>') . '</span>';
-        }
         if (empty($val['searchmulti'])) {
             $panelFilterBody .= $form->selectarray('search_' . $key, $val['arrayofkeyval'], $search[$key] ?? '', 1, 0, 0, '', 1, 0, 0, '', 'maxwidth200' . ($key == 'status' ? ' search_status onrightofpage' : ''), 0);
         } else {
@@ -278,11 +255,6 @@ foreach ($object->fields as $key => $val) {
         }
     } elseif (isset($val['type']) && ((strpos($val['type'], 'integer:') === 0) || (strpos($val['type'], 'sellist:') === 0))) {
         $object->fields[$key]['visible'] = 1; // With visible = 2 the content is hidden
-        $fMode = GETPOST('search_' . $key . '_mode', 'alpha') ?: 'inc';
-        $isExc = ($fMode === 'exc');
-        $tAttr = dol_escape_htmltag($fieldLabelPanel) . ' - ' . $toggleTitlePanel;
-        $panelFilterBody .= '<input type="hidden" id="search_' . $key . '_mode" name="search_' . $key . '_mode" value="' . ($isExc ? 'exc' : 'inc') . '">';
-        $panelFilterBody .= '<span id="search_mode_toggle_' . $key . '" title="' . $tAttr . '" class="saturne-filter-mode-toggle ' . ($isExc ? 'saturne-filter-mode-exc' : 'saturne-filter-mode-inc') . '">' . ($isExc ? '<span class="far fa-eye-slash"></span>' : '<span class="far fa-eye"></span>') . '</span>';
         $panelFilterBody .= $object->showInputField($val, $key, $search[$key] ?? '', '', '', 'search_', $cssForFieldPanel . ' maxwidth200 saturne-panel-select', 1);
     } elseif (isset($val['type']) && in_array($val['type'], ['date', 'datetime', 'timestamp'])) {
         $panelFilterBody .= '<div class="saturne-filter-date-wrapper">'
@@ -409,14 +381,6 @@ if ($useSideFilterPanel) {
 
     // Panel body
     print '<div class="saturne-filter-panel-body">';
-
-    // Legend notice explaining the eye/eye-slash toggle icons
-    print '<div class="saturne-filter-legend">';
-    print '<div class="saturne-filter-legend-items">';
-    print '<span class="saturne-filter-legend-include"><span class="far fa-eye"></span> Inclure</span>';
-    print '<span class="saturne-filter-legend-exclude"><span class="far fa-eye-slash"></span> Exclure</span>';
-    print '</div>';
-    print '</div>';
 
     print $panelFilterBody;
     print '</div>';
