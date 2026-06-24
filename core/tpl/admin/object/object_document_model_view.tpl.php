@@ -68,7 +68,11 @@ if (is_array($filelist) && !empty($filelist)) {
                     print img_picto($langs->trans('Enabled'), 'switch_on');
                     print '</a>';
                 } else {
-                    print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=set&model_name=' . $name . '&const=' . $module->scandir . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
+                    // PDF models do not scan a template directory: never store scandir as
+                    // description, otherwise saturne_get_list_of_models() would list one entry
+                    // per file found in that directory instead of a single model entry.
+                    $modelScandir = ($module->type == 'pdf') ? '' : $module->scandir;
+                    print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=set&model_name=' . $name . '&const=' . $modelScandir . '&label=' . urlencode($module->name) . '&type=' . explode('_', $name)[0] . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
                     print img_picto($langs->trans('Disabled'), 'switch_off');
                     print '</a>';
                 }
