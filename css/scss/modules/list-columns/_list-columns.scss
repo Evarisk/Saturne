@@ -37,11 +37,51 @@
 
 table.liste {
     thead th[data-colkey] {
-        // cursor: grab; // Disabled for now to prevent sort conflict, user just wanted resize
-        // user-select: none;
-        
+        position: relative;
+        padding-left: 28px !important;
+
         &.saturne-col-dragging {
             opacity: 0.5;
+        }
+
+        &.saturne-col-drag-over-left {
+            border-left: 3px solid #2c7be5 !important;
+        }
+
+        &.saturne-col-drag-over-right {
+            border-right: 3px solid #2c7be5 !important;
+        }
+
+        .saturne-col-drag-handle {
+            position: absolute;
+            left: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aab2bd;
+            background: transparent;
+            border-radius: 4px;
+            opacity: 0;
+            cursor: grab;
+            padding: 4px;
+            transition: opacity 0.2s, background-color 0.2s;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+
+            &:active {
+                cursor: grabbing;
+            }
+
+            &:hover {
+                color: #4a4f57;
+                background-color: #f1f3f6;
+            }
+        }
+
+        &:hover .saturne-col-drag-handle {
+            opacity: 1;
         }
     }
 
