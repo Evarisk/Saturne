@@ -43,6 +43,10 @@ window.saturne.filter = {};
 window.saturne.filter.init = function() {
     window.saturne.filter.event();
     window.saturne.filter.initCategoryPickers();
+    if (sessionStorage.getItem('saturne_open_filter_panel') === '1') {
+        sessionStorage.removeItem('saturne_open_filter_panel');
+        setTimeout(window.saturne.filter.open, 100);
+    }
 };
 
 /**
@@ -119,6 +123,7 @@ window.saturne.filter.handleKeyDown = function(e) {
 window.saturne.filter.toggleDisplayMode = function(event) {
     event.preventDefault();
     var $btn = $(this);
+    var targetMode = $btn.data('filter-mode');
     $.ajax({
         url     : window.saturne.listColumns.url(),
         method  : 'POST',
@@ -127,12 +132,18 @@ window.saturne.filter.toggleDisplayMode = function(event) {
             action : 'set_filter_mode',
             token  : window.saturne.toolbox.getToken(),
             list_id: $btn.data('list-layout-id'),
-            mode   : $btn.data('filter-mode')
+            mode   : targetMode
         },
         success: function() {
+            if (targetMode === 'panel') {
+                sessionStorage.setItem('saturne_open_filter_panel', '1');
+            }
             window.location.reload();
         },
         error: function() {
+            if (targetMode === 'panel') {
+                sessionStorage.setItem('saturne_open_filter_panel', '1');
+            }
             window.location.reload();
         }
     });
