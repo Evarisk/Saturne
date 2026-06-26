@@ -31,6 +31,15 @@ window.saturne.listColumns.resizing = null;
  */
 window.saturne.listColumns.init = function() {
     window.saturne.listColumns.event();
+    
+    var $t = window.saturne.listColumns.table();
+    if ($t.length) {
+        $t.find('thead th[data-colkey]').each(function() {
+            if (!$(this).find('.saturne-col-resize').length) {
+                $(this).append('<span class="saturne-col-resize" title="Redimensionner"></span>');
+            }
+        });
+    }
 };
 
 /**
@@ -39,17 +48,14 @@ window.saturne.listColumns.init = function() {
  * @return {void}
  */
 window.saturne.listColumns.event = function() {
-    $(document).on('click', '.saturne-columns-toggle', window.saturne.listColumns.toggle);
     $(document).on('click', '.saturne-columns-reset', window.saturne.listColumns.reset);
-    // Prevent sort navigation while editing columns
-    $(document).on('click', 'table.liste.saturne-columns-editing thead th a', function(e) { e.preventDefault(); });
     // Resize
     $(document).on('mousedown', '.saturne-col-resize', window.saturne.listColumns.onResizeStart);
-    // Reorder
-    $(document).on('dragstart', 'table.liste.saturne-columns-editing thead th[data-colkey]', window.saturne.listColumns.onDragStart);
-    $(document).on('dragover', 'table.liste.saturne-columns-editing thead th[data-colkey]', window.saturne.listColumns.onDragOver);
-    $(document).on('drop', 'table.liste.saturne-columns-editing thead th[data-colkey]', window.saturne.listColumns.onDrop);
-    $(document).on('dragend', 'table.liste.saturne-columns-editing thead th[data-colkey]', window.saturne.listColumns.onDragEnd);
+    // Reorder (disabled for now to avoid sort conflict unless dragged by a specific handle, or we can enable it on the th directly if desired. User only asked for resize).
+    // $(document).on('dragstart', 'table.liste thead th[data-colkey]', window.saturne.listColumns.onDragStart);
+    // $(document).on('dragover', 'table.liste thead th[data-colkey]', window.saturne.listColumns.onDragOver);
+    // $(document).on('drop', 'table.liste thead th[data-colkey]', window.saturne.listColumns.onDrop);
+    // $(document).on('dragend', 'table.liste thead th[data-colkey]', window.saturne.listColumns.onDragEnd);
 };
 
 /**
@@ -72,34 +78,6 @@ window.saturne.listColumns.url = function() {
 };
 
 /**
- * Toggle column edit mode.
- *
- * @param  {Event} e Click event
- * @return {void}
- */
-window.saturne.listColumns.toggle = function(e) {
-    e.preventDefault();
-    var $t = window.saturne.listColumns.table();
-    if (!$t.length) {
-        return;
-    }
-    var entering = !$t.hasClass('saturne-columns-editing');
-    $t.toggleClass('saturne-columns-editing', entering);
-    $('.saturne-columns-controls').toggleClass('editing', entering);
-    $('.saturne-columns-toggle').toggleClass('active', entering);
-
-    if (entering) {
-        $t.find('thead th[data-colkey]').attr('draggable', 'true').each(function() {
-            if (!$(this).find('.saturne-col-resize').length) {
-                $(this).append('<span class="saturne-col-resize" title="Redimensionner"></span>');
-            }
-        });
-    } else {
-        $t.find('thead th[data-colkey]').removeAttr('draggable');
-    }
-};
-
-/**
  * Resize: pointer down on a column handle.
  *
  * @param  {Event} e Mouse event
@@ -109,9 +87,10 @@ window.saturne.listColumns.onResizeStart = function(e) {
     e.preventDefault();
     e.stopPropagation();
     var th = $(this).closest('th')[0];
+    $(this).addClass('is-resizing');
     // Disable drag while resizing this column
     $(th).attr('draggable', 'false');
-    window.saturne.listColumns.resizing = { th: th, startX: e.pageX, startW: th.offsetWidth, colkey: $(th).attr('data-colkey') };
+    window.saturne.listColumns.resizing = { th: th, handle: this, startX: e.pageX, startW: th.offsetWidth, colkey: $(th).attr('data-colkey') };
     $('body').addClass('saturne-col-resizing-active');
     $(document).on('mousemove.saturnecol', window.saturne.listColumns.onResizeMove);
     $(document).on('mouseup.saturnecol', window.saturne.listColumns.onResizeEnd);
@@ -143,6 +122,7 @@ window.saturne.listColumns.onResizeEnd = function() {
     var r = window.saturne.listColumns.resizing;
     window.saturne.listColumns.resizing = null;
     if (r) {
+        $(r.handle).removeClass('is-resizing');
         $(r.th).attr('draggable', 'true');
         window.saturne.listColumns.save();
     }

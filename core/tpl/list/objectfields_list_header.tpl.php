@@ -405,7 +405,7 @@ foreach ($search as $key => $val) {
 $listLayoutId = $listLayoutId ?? ($object->element ?? '');
 if ($mode != 'kanban' && $mode != 'pwa' && !empty($listLayoutId)) {
     print '<div class="saturne-columns-controls" data-list-layout-id="' . dol_escape_htmltag($listLayoutId) . '">';
-    print '<button type="button" class="saturne-columns-toggle" title="' . dol_escape_htmltag($langs->trans('CustomizeColumns')) . '"><span class="fas fa-table-columns"></span> ' . dol_escape_htmltag($langs->trans('CustomizeColumns')) . '</button>';
+    // print '<button type="button" class="saturne-columns-toggle" title="' . dol_escape_htmltag($langs->trans('CustomizeColumns')) . '"><span class="fas fa-table-columns"></span> ' . dol_escape_htmltag($langs->trans('CustomizeColumns')) . '</button>';
     print '<button type="button" class="saturne-columns-reset" title="' . dol_escape_htmltag($langs->trans('ResetColumns')) . '"><span class="fas fa-undo"></span> ' . dol_escape_htmltag($langs->trans('ResetColumns')) . '</button>';
 
     // Filter display mode toggle: classic inline row <-> side panel (per-user)
