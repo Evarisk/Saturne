@@ -51,11 +51,6 @@ window.saturne.listColumns.event = function() {
     $(document).on('click', '.saturne-columns-reset', window.saturne.listColumns.reset);
     // Resize
     $(document).on('mousedown', '.saturne-col-resize', window.saturne.listColumns.onResizeStart);
-    // Reorder (disabled for now to avoid sort conflict unless dragged by a specific handle, or we can enable it on the th directly if desired. User only asked for resize).
-    // $(document).on('dragstart', 'table.liste thead th[data-colkey]', window.saturne.listColumns.onDragStart);
-    // $(document).on('dragover', 'table.liste thead th[data-colkey]', window.saturne.listColumns.onDragOver);
-    // $(document).on('drop', 'table.liste thead th[data-colkey]', window.saturne.listColumns.onDrop);
-    // $(document).on('dragend', 'table.liste thead th[data-colkey]', window.saturne.listColumns.onDragEnd);
 };
 
 /**
