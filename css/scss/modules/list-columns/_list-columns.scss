@@ -31,22 +31,15 @@
     }
 
     .saturne-columns-reset {
-        display: none;
-    }
-
-    &.editing .saturne-columns-reset {
         display: inline-flex;
     }
 }
 
-table.liste.saturne-columns-editing {
+table.liste {
     thead th[data-colkey] {
-        position: relative;
-        cursor: grab;
-        user-select: none;
-        outline: 1px dashed #b0b6bd;
-        outline-offset: -2px;
-
+        // cursor: grab; // Disabled for now to prevent sort conflict, user just wanted resize
+        // user-select: none;
+        
         &.saturne-col-dragging {
             opacity: 0.5;
         }
@@ -61,7 +54,7 @@ table.liste.saturne-columns-editing {
         cursor: col-resize;
         background: transparent;
 
-        &:hover {
+        &:hover, &.is-resizing {
             background: rgba(44, 123, 229, 0.4);
         }
     }
