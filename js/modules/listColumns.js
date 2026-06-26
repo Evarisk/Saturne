@@ -35,6 +35,8 @@ window.saturne.listColumns.init = function() {
     var $t = window.saturne.listColumns.table();
     if ($t.length) {
         $t.find('thead th[data-colkey]').each(function() {
+            $(this).attr('draggable', 'true');
+            $(this).find('a').attr('draggable', 'false');
             if (!$(this).find('.saturne-col-resize').length) {
                 $(this).append('<span class="saturne-col-resize" title="Redimensionner"></span>');
             }
@@ -51,6 +53,13 @@ window.saturne.listColumns.event = function() {
     $(document).on('click', '.saturne-columns-reset', window.saturne.listColumns.reset);
     // Resize
     $(document).on('mousedown', '.saturne-col-resize', window.saturne.listColumns.onResizeStart);
+    // Reorder
+    $(document).on('dragstart', 'table.liste thead th[data-colkey]', window.saturne.listColumns.onDragStart);
+    $(document).on('dragover', 'table.liste thead th[data-colkey]', window.saturne.listColumns.onDragOver);
+    $(document).on('dragenter', 'table.liste thead th[data-colkey]', window.saturne.listColumns.onDragEnter);
+    $(document).on('dragleave', 'table.liste thead th[data-colkey]', window.saturne.listColumns.onDragLeave);
+    $(document).on('drop', 'table.liste thead th[data-colkey]', window.saturne.listColumns.onDrop);
+    $(document).on('dragend', 'table.liste thead th[data-colkey]', window.saturne.listColumns.onDragEnd);
 };
 
 /**
@@ -161,6 +170,42 @@ window.saturne.listColumns.onDragOver = function(e) {
         return;
     }
     e.preventDefault();
+    if (e.originalEvent.dataTransfer) {
+        e.originalEvent.dataTransfer.dropEffect = 'move';
+    }
+    
+    var rect = this.getBoundingClientRect();
+    var after = (e.originalEvent.clientX - rect.left) > (rect.width / 2);
+    $(this).removeClass('saturne-col-drag-over-left saturne-col-drag-over-right');
+    if (after) {
+        $(this).addClass('saturne-col-drag-over-right');
+    } else {
+        $(this).addClass('saturne-col-drag-over-left');
+    }
+};
+
+/**
+ * Reorder: drag enter.
+ *
+ * @param  {Event} e Drag event
+ * @return {void}
+ */
+window.saturne.listColumns.onDragEnter = function(e) {
+    var src = window.saturne.listColumns.dragSrc;
+    if (!src || src === this) {
+        return;
+    }
+    e.preventDefault();
+};
+
+/**
+ * Reorder: drag leave.
+ *
+ * @param  {Event} e Drag event
+ * @return {void}
+ */
+window.saturne.listColumns.onDragLeave = function(e) {
+    $(this).removeClass('saturne-col-drag-over-left saturne-col-drag-over-right');
 };
 
 /**
@@ -171,6 +216,7 @@ window.saturne.listColumns.onDragOver = function(e) {
  */
 window.saturne.listColumns.onDrop = function(e) {
     e.preventDefault();
+    $(this).removeClass('saturne-col-drag-over-left saturne-col-drag-over-right');
     var src = window.saturne.listColumns.dragSrc;
     if (!src || src === this) {
         return;
@@ -182,10 +228,10 @@ window.saturne.listColumns.onDrop = function(e) {
 
     if (after) { $(this).after(src); } else { $(this).before(src); }
 
-    window.saturne.listColumns.table().find('tr.oddeven').each(function() {
-        var $srcTd = $(this).find('> td[data-colkey="' + srcKey + '"]');
-        var $tgtTd = $(this).find('> td[data-colkey="' + tgtKey + '"]');
-        if ($srcTd.length && $tgtTd.length) {
+    window.saturne.listColumns.table().find('tr').each(function() {
+        var $srcTd = $(this).find('> td[data-colkey="' + srcKey + '"], > th[data-colkey="' + srcKey + '"]');
+        var $tgtTd = $(this).find('> td[data-colkey="' + tgtKey + '"], > th[data-colkey="' + tgtKey + '"]');
+        if ($srcTd.length && $tgtTd.length && $srcTd[0] !== src) {
             if (after) { $tgtTd.after($srcTd); } else { $tgtTd.before($srcTd); }
         }
     });
@@ -200,6 +246,7 @@ window.saturne.listColumns.onDrop = function(e) {
  */
 window.saturne.listColumns.onDragEnd = function() {
     $(this).removeClass('saturne-col-dragging');
+    window.saturne.listColumns.table().find('th').removeClass('saturne-col-drag-over-left saturne-col-drag-over-right');
     window.saturne.listColumns.dragSrc = null;
 };
 
