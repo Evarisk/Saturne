@@ -37,6 +37,9 @@
 
 table.liste {
     thead th[data-colkey] {
+        position: relative;
+        padding-left: 28px !important;
+
         &.saturne-col-dragging {
             opacity: 0.5;
         }
@@ -51,7 +54,7 @@ table.liste {
 
         .saturne-col-drag-handle {
             position: absolute;
-            left: 2px;
+            left: 4px;
             top: 50%;
             transform: translateY(-50%);
             color: #aab2bd;
@@ -59,7 +62,7 @@ table.liste {
             border-radius: 4px;
             opacity: 0;
             cursor: grab;
-            padding: 4px 4px;
+            padding: 4px;
             transition: opacity 0.2s, background-color 0.2s;
             font-size: 13px;
             display: inline-flex;
