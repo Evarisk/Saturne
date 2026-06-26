@@ -35,10 +35,13 @@ window.saturne.listColumns.init = function() {
     var $t = window.saturne.listColumns.table();
     if ($t.length) {
         $t.find('thead th[data-colkey]').each(function() {
-            $(this).attr('draggable', 'true');
+            $(this).removeAttr('draggable');
             $(this).find('a').attr('draggable', 'false');
             if (!$(this).find('.saturne-col-resize').length) {
                 $(this).append('<span class="saturne-col-resize" title="Redimensionner"></span>');
+            }
+            if (!$(this).find('.saturne-col-drag-handle').length) {
+                $(this).prepend('<span class="saturne-col-drag-handle" title="Déplacer" draggable="true"><span class="fas fa-grip-vertical"></span></span>');
             }
         });
     }
