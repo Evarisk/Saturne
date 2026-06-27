@@ -48,6 +48,10 @@ $listColumnWidths = $listColumnWidths ?? [];
 foreach ($object->fields as $key => $val) {
     $cssForField = saturne_css_for_field($val, $key);
     if (!empty($arrayfields['t.' . $key]['checked'])) {
+        $searchVal = $search[$key] ?? '';
+        if (is_array($searchVal) ? !empty($searchVal) : ($searchVal !== '' && $searchVal != -1)) {
+            $cssForField .= ($cssForField ? ' ' : '') . 'saturne-filter-active';
+        }
         // Per-user column key + saved width (for resize/reorder customization)
         $colWidth   = !empty($listColumnWidths[$key]) ? (int) $listColumnWidths[$key] : 0;
         $colStyle   = $colWidth > 0 ? ' style="width:' . $colWidth . 'px;min-width:' . $colWidth . 'px;"' : '';

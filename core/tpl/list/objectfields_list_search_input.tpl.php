@@ -32,10 +32,6 @@
 
 // Fields title search
 // --------------------------------------------------------------------
-// When the side filter panel is active, inputs live inside the panel — skip the inline filter row.
-if (!empty($useSideFilterPanel)) {
-    return;
-}
 
 print '<tr class="liste_titre_filter">';
 

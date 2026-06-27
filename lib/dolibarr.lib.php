@@ -530,11 +530,16 @@ function saturne_get_title_field_of_list($name, $thead = 0, $file = "", $field =
 		}
 	}
 
+	$caret = '';
+	if (empty($thead) && $field && strpos($moreattrib, 'data-colkey') !== false) {
+		$caret = '<i class="fas fa-caret-down saturne-col-filter-btn"></i>';
+	}
+
 	$tagend = '</'.$tag.'>';
 
     $resizeHandler = '<div class="resize-handle"></div>';
 
-	$out = $tagstart.$sortimg.$out.$tagend.$resizeHandler;
+	$out = $tagstart.$sortimg.$out.$caret.$tagend.$resizeHandler;
 
 	return $out;
 }
