@@ -66,7 +66,9 @@ function saturne_header(int $load_media_gallery = 0, string $head = '', string $
     $arrayofcss = array_unique(array_merge($arrayofcss ?? [], $cssList));
 
     //JS
-    $jsList[] = '/saturne/js/saturne.min.js';
+    $saturne_js_path = dol_buildpath('/saturne/js/saturne.min.js', 0);
+    $saturne_js_mtime = file_exists($saturne_js_path) ? filemtime($saturne_js_path) : 1;
+    $jsList[] = '/saturne/js/saturne.min.js?v=' . $saturne_js_mtime;
 
     if (!empty($load_media_gallery)) {
         $jsList[] = '/saturne/js/includes/signature-pad.min.js';

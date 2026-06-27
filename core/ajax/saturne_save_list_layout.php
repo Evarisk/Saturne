@@ -23,6 +23,8 @@
  */
 
 // Load Saturne environment
+if (!defined('NOCSRFCHECK')) define('NOCSRFCHECK', '1');
+if (!defined('NOTOKENRENEWAL')) define('NOTOKENRENEWAL', '1');
 if (file_exists('../saturne.main.inc.php')) {
     require_once __DIR__ . '/../saturne.main.inc.php';
 } elseif (file_exists('../../saturne.main.inc.php')) {
