@@ -132,27 +132,32 @@ class ActionsSaturne
      */
     public function addHtmlHeader(array $parameters): int
     {
+        $saturne_js_path = dol_buildpath('/custom/saturne/js/saturne.min.js', 0);
+        $saturne_js_mtime = file_exists($saturne_js_path) ? filemtime($saturne_js_path) : 1;
+        $saturne_js_url = DOL_URL_ROOT . '/custom/saturne/js/saturne.min.js?v=' . $saturne_js_mtime;
+
         if (strpos($parameters['context'], 'usercard') !== false) {
             $resourcesRequired = [
                 'css'       => '/custom/saturne/css/saturne.min.css',
-                'js'        => '/custom/saturne/js/saturne.min.js',
+                'js'        => $saturne_js_url,
                 'signature' => '/custom/saturne/js/includes/signature-pad.min.js'
             ];
 
             $out  = '<!-- Includes CSS added by module saturne -->';
             $out .= '<link rel="stylesheet" type="text/css" href="' . dol_buildpath($resourcesRequired['css'], 1) . '">';
             $out .= '<!-- Includes JS added by module saturne -->';
-            $out .= '<script src="' . dol_buildpath($resourcesRequired['js'], 1) . '"></script>';
+            $out .= '<script src="' . $resourcesRequired['js'] . '"></script>';
             $out .= '<script src="' . dol_buildpath($resourcesRequired['signature'], 1) . '"></script>';
 
             $this->resprints = $out;
         } elseif (strpos($parameters['context'], 'emailtemplates')) {
             $resourcesRequired = [
-                'js'        => '/custom/saturne/js/saturne.min.js',
+                'js'        => $saturne_js_url,
             ];
 
             $out  = '<!-- Includes JS added by module saturne -->';
-            $out .= '<script src="' . dol_buildpath($resourcesRequired['js'], 1) . '"></script>';
+            $out .= '<script src="' . $resourcesRequired['js'] . '"></script>';
+
             $this->resprints = $out;
         }
 
