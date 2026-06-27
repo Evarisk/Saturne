@@ -126,8 +126,9 @@ abstract class SaturneObject extends CommonObject
      * @param  int<0,1>    $noLines       0 = Default to load lines, 1 = No lines
      * @return int<-4,1>                  Return integer 0 < if KO, 0 if not found, > 0 if OK
      */
-    public function fetch(int $id, ?string $ref = '', string $moreWhere = '', int $noExtraFields = 0, int $noLines = 0): int
+    public function fetch($id, ?string $ref = '', string $moreWhere = '', int $noExtraFields = 0, int $noLines = 0): int
     {
+        $id = (int) $id;
         $result = $this->fetchCommon($id, $ref, $moreWhere, $noExtraFields);
         if ($result > 0 && !empty($this->table_element_line) && empty($noLines)) {
             $this->fetchLines('', $noExtraFields);
