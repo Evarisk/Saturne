@@ -1,5 +1,6 @@
 <?php
 
+$constArray = $constArray ?? [];
 $parameters = [];
 $reshook    = $hookmanager->executeHooks('saturneAdminObjectConst', $parameters);
 if ($reshook > 0) {
