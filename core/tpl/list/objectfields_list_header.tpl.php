@@ -190,6 +190,9 @@ if ($mode != 'kanban' && $mode != 'pwa' && !empty($listLayoutId)) {
     $cardButton = ($cardButton ?? '') . ' ' . $filterIndicator;
 }
 
+// "New" button to create a new object
+$cardButton = ($cardButton ?? '') . ' ' . dolGetButtonTitle($langs->trans('New' . ucfirst($object->element)), $helpText ?? '', 'fa fa-plus-circle', ($createUrl ?? dol_buildpath('custom/' . $object->module . '/view/' . $object->element . '/' . $object->element . '_card.php', 1) . '?action=create' . ($moreUrlParameters ?? '')), '', $permissiontoadd);
+
 // Format the title text — record count BEFORE filter indicator
 $titleText = ($conf->browser->layout == 'classic' && $mode != 'pwa') ? ($title ?? '') : '';
 $displayRecordCount = (isset($nbTotalOfRecords) && $nbTotalOfRecords !== '' && is_numeric($nbTotalOfRecords)) ? $nbTotalOfRecords : ($num ?? null);
