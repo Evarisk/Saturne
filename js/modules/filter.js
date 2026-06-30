@@ -237,23 +237,43 @@ window.saturne.filter = {
             }
         });
 
-        $popover.find('.action-sort-asc').on('click', function() {
-            var $a = $th.find('a.reposition'); 
-            if ($a.length) {
-                var href = $a.attr('href');
-                href = href.replace(/sortorder=[^&]*/, 'sortorder=asc');
-                window.location.href = href;
-            }
-        });
+        // "Trier" only applies to columns backed by a sortable base-table field, which render a sort
+        // link. Computed/linked columns (disablesort, e.g. the linked product/thirdparty columns) have
+        // no such link and no real t.<col> in the table: disable the options instead of building an
+        // invalid ORDER BY. The sort field is read from the link to keep the right alias.
+        var $sortLink = $th.find('a.reposition');
+        if ($sortLink.length) {
+            var sortFieldMatch = ($sortLink.attr('href') || '').match(/[?&]sortfield=([^&]+)/);
+            var sortField      = sortFieldMatch ? decodeURIComponent(sortFieldMatch[1]) : '';
 
-        $popover.find('.action-sort-desc').on('click', function() {
-            var $a = $th.find('a.reposition');
-            if ($a.length) {
-                var href = $a.attr('href');
-                href = href.replace(/sortorder=[^&]*/, 'sortorder=desc');
-                window.location.href = href;
-            }
-        });
+            // Rebuild the target URL from the current location so active filters/context are preserved.
+            var sortByColumn = function(direction) {
+                if (!sortField) {
+                    return;
+                }
+                var url = new URL(window.location.href);
+                url.searchParams.set('sortfield', sortField);
+                url.searchParams.set('sortorder', direction);
+                url.searchParams.set('page', '0');
+                window.location.href = url.toString();
+            };
+
+            $popover.find('.action-sort-asc').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                sortByColumn('asc');
+            });
+
+            $popover.find('.action-sort-desc').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                sortByColumn('desc');
+            });
+        } else {
+            $popover.find('.action-sort-asc, .action-sort-desc')
+                .css({ opacity: 0.5, cursor: 'not-allowed' })
+                .attr('title', 'Tri non disponible sur cette colonne');
+        }
 
         $popover.find('.action-hide').on('click', function() {
             var colKey = $th.data('colkey');

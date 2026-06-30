@@ -260,6 +260,33 @@ if (!getDolGlobalInt('MAIN_DISABLE_FULL_SCANLIST')) {
     $db->free($resql);
 }
 
+// Guard against an invalid sort field (e.g. a stale URL/session value pointing at a non-sortable
+// linked or computed column such as a linked product) that would crash the whole query with
+// DB_ERROR_NOSUCHFIELD. Build the set of identifiers actually produced by the SELECT and drop the
+// sort when it references something else, so the list self-heals instead of erroring.
+if (!empty($sortfield)) {
+    $validSortFields = [];
+    $selectList      = preg_replace('/^\s*SELECT\s+/i', '', $sqlFields);
+    foreach (explode(',', $selectList) as $selectPart) {
+        $selectPart = trim($selectPart);
+        if (preg_match('/\bAS\s+([A-Za-z0-9_]+)$/i', $selectPart, $matches)) {
+            $validSortFields[$matches[1]] = true;
+        } elseif (preg_match('/^([A-Za-z0-9_]+\.[A-Za-z0-9_]+)$/', $selectPart, $matches)) {
+            $validSortFields[$matches[1]] = true;
+        }
+    }
+
+    foreach (explode(',', $sortfield) as $sortFieldToken) {
+        $sortFieldToken = trim($sortFieldToken);
+        if ($sortFieldToken !== '' && empty($validSortFields[$sortFieldToken])) {
+            dol_syslog('Saturne list: dropping invalid sortfield "' . $sortfield . '" not present in SELECT', LOG_WARNING);
+            $sortfield = '';
+            $sortorder = '';
+            break;
+        }
+    }
+}
+
 // Complete request and execute it with limit
 $sql .= $db->order($sortfield, $sortorder);
 //if (array_key_exists($sortfield, $elementElementFields)) {
