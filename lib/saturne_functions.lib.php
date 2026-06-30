@@ -1213,6 +1213,52 @@ function saturne_get_list_layout(string $listId): array
 }
 
 /**
+ * Apply the per-user column layout (saved order) to a list's fields and return its saved widths.
+ *
+ * Rewrites the 'position' of each field in $object->fields and $arrayfields to match the saved
+ * order, then re-sorts both arrays. Columns absent from the saved order are kept after the ordered
+ * ones. Called by every list using the shared list TPLs (saturne_list.php and the per-module list
+ * controllers reusing core/tpl/list/*) so the saved layout is effective everywhere, not only in
+ * saturne_list.php.
+ *
+ * @param  CommonObject $object      List object (its ->fields are reordered in place)
+ * @param  array        $arrayfields Column definitions keyed by 't.<field>' (reordered in place)
+ * @param  string       $listLayoutId List identifier (e.g. the object element)
+ * @return array<string,int>          Saved column widths (colkey => px), empty when none
+ */
+function saturne_apply_list_layout(CommonObject $object, array &$arrayfields, string $listLayoutId): array
+{
+    $listLayout = saturne_get_list_layout($listLayoutId);
+
+    if (!empty($listLayout['order'])) {
+        $listColumnPos = 0;
+        foreach ($listLayout['order'] as $colKey) {
+            if (isset($object->fields[$colKey])) {
+                $object->fields[$colKey]['position'] = $listColumnPos;
+            }
+            if (isset($arrayfields['t.' . $colKey])) {
+                $arrayfields['t.' . $colKey]['position'] = $listColumnPos;
+            }
+            $listColumnPos += 10;
+        }
+        // Keep columns not present in the saved order after the ordered ones
+        foreach ($object->fields as $colKey => $fieldVal) {
+            if (!in_array($colKey, $listLayout['order'], true)) {
+                $object->fields[$colKey]['position'] = $listColumnPos;
+                if (isset($arrayfields['t.' . $colKey])) {
+                    $arrayfields['t.' . $colKey]['position'] = $listColumnPos;
+                }
+                $listColumnPos += 10;
+            }
+        }
+        $object->fields = dol_sort_array($object->fields, 'position');
+        $arrayfields    = dol_sort_array($arrayfields, 'position');
+    }
+
+    return $listLayout['widths'];
+}
+
+/**
  * Build the user_param key holding a list's per-user filter display mode.
  *
  * @param  string $listId List identifier (e.g. the object element)
