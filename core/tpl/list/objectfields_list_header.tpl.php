@@ -127,6 +127,18 @@ if (!empty($formMoreParams)) {
     }
 }
 
+// Apply the per-user column layout (order + widths) + filter mode saved for this list.
+// Per-module list controllers (control_list.php, question_list.php, ...) reuse these TPLs without
+// running saturne_list.php's layout logic, so applying it here makes the saved layout effective
+// everywhere. saturne_list.php applies it before including this TPL, hence the isset() guards.
+$listLayoutId = $listLayoutId ?? ($object->element ?? '');
+if (!isset($listColumnWidths)) {
+    $listColumnWidths = saturne_apply_list_layout($object, $arrayfields, $listLayoutId);
+}
+if (!isset($useSideFilterPanel)) {
+    $useSideFilterPanel = (saturne_get_list_filter_mode($listLayoutId) === 'panel');
+}
+
 // Apply user column preferences to $arrayfields now, so $panelFilterBody and all loops below use correct checked values
 $selectedFields = '';
 if ($mode != 'pwa' && $mode != 'kanban') {
