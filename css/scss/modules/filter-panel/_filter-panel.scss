@@ -1,8 +1,12 @@
 // Column Popover Filter Styles
 // --------------------------------------------------
 
-// Hide the classic filter row visually but keep it in DOM for functionality
-tr.liste_titre_filter {
+// Hide the classic filter row visually but keep it in DOM for functionality.
+// Scope to tables that actually render the Saturne column-filter caret so the
+// rule never leaks to native Dolibarr lists that merely load saturne.min.css
+// (e.g. reedcrm injects it on thirdpartylist/invoicelist/... where no caret
+// replacement exists — the native filter row must stay usable there).
+table:has(.saturne-col-filter-btn) tr.liste_titre_filter {
     display: none !important;
 }
 
