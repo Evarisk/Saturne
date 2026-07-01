@@ -694,4 +694,39 @@ class ActionsSaturne
         }
         return 0;
     }
+
+    /**
+     * Custom print for field search input in list
+     *
+     * @param  array $parameters Hook metadata (context, etc...)
+     * @param  object &$object    The object to process
+     * @param  string &$action    Current action
+     * @param  HookManager $hookmanager
+     * @return int               0 < on error, 0 on success, 1 to replace standard code
+     */
+    public function saturnePrintFieldListSearch(array $parameters, &$object, &$action, $hookmanager): int
+    {
+        if (isset($object->element) && $object->element === 'project') {
+            $key = $parameters['key'];
+            $search = $parameters['search'];
+
+            if ($key === 'opp_percent' || $key === 'p.opp_percent' || $key === 'project.opp_percent') {
+                $searchVal = GETPOST('search_opp_percent', 'alpha');
+                if (empty($searchVal) && isset($search['opp_percent'])) {
+                    $searchVal = $search['opp_percent'];
+                }
+                $this->results[$key] = '<input type="text" class="flat maxwidth50" name="search_opp_percent" value="' . dol_escape_htmltag($searchVal) . '">';
+                return 1;
+            } elseif ($key === 'opp_amount' || $key === 'p.opp_amount' || $key === 'project.opp_amount') {
+                $searchVal = GETPOST('search_opp_amount', 'alpha');
+                if (empty($searchVal) && isset($search['opp_amount'])) {
+                    $searchVal = $search['opp_amount'];
+                }
+                $this->results[$key] = '<input type="text" class="flat maxwidth50" name="search_opp_amount" value="' . dol_escape_htmltag($searchVal) . '">';
+                return 1;
+            }
+        }
+        
+        return 0;
+    }
 }
