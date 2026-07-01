@@ -711,10 +711,18 @@ class ActionsSaturne
             $search = $parameters['search'];
 
             if ($key === 'opp_percent' || $key === 'p.opp_percent' || $key === 'project.opp_percent') {
-                $this->results[$key] = '<input type="text" class="flat maxwidth50" name="search_' . dol_escape_htmltag($key) . '" value="' . dol_escape_htmltag($search[$key] ?? '') . '">';
+                $searchVal = GETPOST('search_opp_percent', 'alpha');
+                if (empty($searchVal) && isset($search['opp_percent'])) {
+                    $searchVal = $search['opp_percent'];
+                }
+                $this->results[$key] = '<input type="text" class="flat maxwidth50" name="search_opp_percent" value="' . dol_escape_htmltag($searchVal) . '">';
                 return 1;
             } elseif ($key === 'opp_amount' || $key === 'p.opp_amount' || $key === 'project.opp_amount') {
-                $this->results[$key] = '<input type="text" class="flat maxwidth50" name="search_' . dol_escape_htmltag($key) . '" value="' . dol_escape_htmltag($search[$key] ?? '') . '">';
+                $searchVal = GETPOST('search_opp_amount', 'alpha');
+                if (empty($searchVal) && isset($search['opp_amount'])) {
+                    $searchVal = $search['opp_amount'];
+                }
+                $this->results[$key] = '<input type="text" class="flat maxwidth50" name="search_opp_amount" value="' . dol_escape_htmltag($searchVal) . '">';
                 return 1;
             }
         }
