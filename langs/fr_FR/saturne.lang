@@ -296,3 +296,16 @@ DropFilesHere = Glissez-déposez vos fichiers ici
 
 # Drag & drop reorder
 Reorder = Réordonner
+
+# Ticket creation email templates
+TicketCreateMailModelTitle = Modèles d'email pour la création de ticket
+TicketCreateMailModelColumn = Modèle d'email
+TicketCreateMailModelDefault = Contenu par défaut de Dolibarr
+TicketCreateMailModelAdmin = Email de notification interne (admin)
+TicketCreateMailModelAdminDescription = Modèle d'email utilisé pour la notification envoyée à l'adresse de notification des tickets (TICKET_NOTIFICATION_EMAIL_TO) lors de la création d'un ticket. Laisser vide pour conserver le contenu par défaut de Dolibarr.
+TicketCreateMailModelCustomer = Email de confirmation au client
+TicketCreateMailModelCustomerDescription = Modèle d'email utilisé pour la confirmation envoyée au tiers / contact lors de la création d'un ticket. Laisser vide pour conserver le contenu par défaut de Dolibarr.
+TicketCreateMailModelAssignee = Email à l'utilisateur assigné
+TicketCreateMailModelAssigneeDescription = Modèle d'email utilisé pour la notification envoyée à l'utilisateur assigné au ticket lors de sa création. Laisser vide pour conserver le contenu par défaut de Dolibarr.
+TicketCreateMailModelVariables = Variables de substitution disponibles dans les modèles
+TicketCreateMailModelVariablesHelp = Variables propres au ticket : __TICKET_REF__, __TICKET_TRACK_ID__, __TICKET_SUBJECT__, __TICKET_MESSAGE__, __TICKET_TYPE__, __TICKET_CATEGORY__, __TICKET_SEVERITY__, __TICKET_PUBLIC_URL__, __TICKET_MANAGEMENT_URL__.<br>Variables communes : __REF__, __EXTRAFIELD_XXX__ (remplacer XXX par le code de l'attribut supplémentaire, ex. __EXTRAFIELD_GROUPINCHARGEOF__), __MYCOMPANY_NAME__, __THIRDPARTY_NAME__.<br>Les modèles se gèrent dans Accueil &gt; Configuration &gt; Emails &gt; Modèles d'email (type « ticket »).
