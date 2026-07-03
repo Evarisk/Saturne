@@ -277,3 +277,16 @@ DropFilesHere = Drag and drop your files here
 
 # Drag & drop reorder
 Reorder = Reorder
+
+# Ticket creation email templates
+TicketCreateMailModelTitle = Email templates for ticket creation
+TicketCreateMailModelColumn = Email template
+TicketCreateMailModelDefault = Dolibarr default content
+TicketCreateMailModelAdmin = Internal notification email (admin)
+TicketCreateMailModelAdminDescription = Email template used for the notification sent to the ticket notification address (TICKET_NOTIFICATION_EMAIL_TO) when a ticket is created. Leave empty to keep Dolibarr's default content.
+TicketCreateMailModelCustomer = Customer confirmation email
+TicketCreateMailModelCustomerDescription = Email template used for the confirmation sent to the third party / contact when a ticket is created. Leave empty to keep Dolibarr's default content.
+TicketCreateMailModelAssignee = Assigned user email
+TicketCreateMailModelAssigneeDescription = Email template used for the notification sent to the user assigned to the ticket when it is created. Leave empty to keep Dolibarr's default content.
+TicketCreateMailModelVariables = Substitution variables available in templates
+TicketCreateMailModelVariablesHelp = Ticket-specific variables: __TICKET_REF__, __TICKET_TRACK_ID__, __TICKET_SUBJECT__, __TICKET_MESSAGE__, __TICKET_TYPE__, __TICKET_CATEGORY__, __TICKET_SEVERITY__, __TICKET_PUBLIC_URL__, __TICKET_MANAGEMENT_URL__.<br>Common variables: __REF__, __EXTRAFIELD_XXX__ (replace XXX with the extrafield code, e.g. __EXTRAFIELD_GROUPINCHARGEOF__), __MYCOMPANY_NAME__, __THIRDPARTY_NAME__.<br>Templates are managed in Home &gt; Setup &gt; Emails &gt; Email templates (type "ticket").
