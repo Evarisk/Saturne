@@ -387,7 +387,7 @@ function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', st
  */
 function saturne_banner_tab(object $object, string $paramId = 'ref', string $moreHtml = '', int $showNav = 1, string $fieldId = 'ref', string $fieldRef = 'ref', string $moreHtmlRef = '', bool $handlePhoto = false, array $moreParams = []): void
 {
-    global $db, $langs, $hookmanager, $moduleName, $moduleNameLowerCase;
+    global $db, $langs, $hookmanager, $moduleName, $moduleNameLowerCase, $user;
 
     if (isModEnabled('project')) {
         require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
@@ -399,7 +399,14 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
 
     $saturneMoreHtmlRef = '';
     if (array_key_exists('label', $object->fields) && dol_strlen($object->label)) {
-        $saturneMoreHtmlRef .= ' - ' . $object->label . '<br>';
+        // Render the label inline-editable (contenteditable) when the user can write, using the
+        // same mechanism as the list inline edits (saved via saturne_update_field.php).
+        $labelElement = $object->element . (!empty($object->module) ? '@' . $object->module : '');
+        if (saturne_user_can_write_element($user, $object, $labelElement)) {
+            $saturneMoreHtmlRef .= ' - <span class="contenteditable" contenteditable="true" role="textbox" aria-label="' . dol_escape_htmltag($langs->trans('Label')) . '" data-field="label" data-id="' . ((int) $object->id) . '" data-element="' . dol_escape_htmltag($labelElement) . '" data-table="' . dol_escape_htmltag($object->table_element) . '" data-type="text">' . dol_escape_htmltag($object->label) . '</span><br>';
+        } else {
+            $saturneMoreHtmlRef .= ' - ' . dol_escape_htmltag($object->label) . '<br>';
+        }
     }
 
     $saturneMoreHtmlRef .= '<div class="refidno">';
