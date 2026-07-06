@@ -534,7 +534,12 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
             }
         }
 
-        $moreHtmlLeft = '<div class="floatleft inline-block valignmiddle divphotoref">' . saturne_show_medias_linked((dol_strlen($modulePart) > 0 ? $modulePart : $moduleNameLowerCase), $baseDir . '/' . $subDir, 'small', $photoLimit ?? 0, 0, 0, 0, 88, 88, 0, 0, 0, $subDir, $object, 'photo', 0, 0,0, 1) . '</div>';
+        $bannerPhoto = saturne_show_medias_linked((dol_strlen($modulePart) > 0 ? $modulePart : $moduleNameLowerCase), $baseDir . '/' . $subDir, 'small', $photoLimit ?? 0, 0, 0, 0, 88, 88, 0, 0, 0, $subDir, $object, 'photo', 0, 0, 0, 1);
+        if (strpos($bannerPhoto, 'nophoto.png') !== false) {
+            // Use the same "no photo" placeholder as the element tree/menu for a consistent look.
+            $bannerPhoto = saturne_get_nophoto_placeholder(88);
+        }
+        $moreHtmlLeft = '<div class="floatleft inline-block valignmiddle divphotoref">' . $bannerPhoto . '</div>';
         print $form->showrefnav($object, $paramId, $moreParamsMoreHtml, $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, $moreParamsBannerTab, 0, $moreHtmlLeft, $object->getLibStatut(6));
         print '</div>';
     }
@@ -1360,4 +1365,16 @@ function saturne_select_users(string $htmlName, $selected = 0, $showEmpty = 1, s
     }
 
     return $form->selectarray($htmlName, $userOptions, $selected, $showEmpty, 0, 0, '', 0, 0, 0, '', $morecss);
+}
+
+/**
+ * Return the inline "no photo" SVG placeholder (rounded grey box with a camera glyph),
+ * so banners, element trees and menus share the same look when an object has no photo.
+ *
+ * @param  int    $size Rendered width/height in pixels (the drawing scales via the viewBox)
+ * @return string       Inline SVG markup
+ */
+function saturne_get_nophoto_placeholder(int $size = 40): string
+{
+    return '<svg class="nophoto-placeholder" width="' . $size . '" height="' . $size . '" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="6" fill="#f0f0f0"/><path d="M20 16a3 3 0 100 6 3 3 0 000-6z" fill="#bbb"/><path d="M14 13h3l1.5-2h3l1.5 2h3a2 2 0 012 2v10a2 2 0 01-2 2H14a2 2 0 01-2-2V15a2 2 0 012-2z" stroke="#bbb" stroke-width="1.5" fill="none"/></svg>';
 }
