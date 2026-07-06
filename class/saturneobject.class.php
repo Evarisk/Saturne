@@ -226,15 +226,18 @@ abstract class SaturneObject extends CommonObject
                 $record = new static($this->db);
                 $record->setVarsFromFetchObj($obj);
 
-                if (!empty($record->isextrafieldmanaged)) {
-                    $record->fetch_optionals();
-                }
-
                 $records[$record->id] = $record;
 
                 $i++;
             }
             $this->db->free($resql);
+
+            // Load extrafields for every fetched record with a single query instead of
+            // one fetch_optionals() per row (N+1). Falls back to the per-row behaviour for
+            // element types relying on computed/geometry/encrypted extrafields.
+            if (!empty($this->isextrafieldmanaged) && !empty($records)) {
+                $this->loadExtraFieldsForRecords($records);
+            }
 
             return $records;
         } else {
@@ -242,6 +245,114 @@ abstract class SaturneObject extends CommonObject
             dol_syslog(__METHOD__ . ' ' . implode(',', $this->errors), LOG_ERR);
 
             return -1;
+        }
+    }
+
+    /**
+     * Load extrafield values for a set of records already fetched by fetchAll() using a
+     * single query, instead of one fetch_optionals() per record (avoids an N+1 on lists).
+     *
+     * The produced array_options is identical to fetch_optionals(): each record with a row
+     * gets its non-separate values (dates converted with jdate), and each record without a
+     * row gets every option initialised to null. Element types using computed, geometry or
+     * encrypted extrafields fall back to the per-record fetch_optionals() to stay exact.
+     *
+     * @param  array<int,self> $records Records indexed by id, as built by fetchAll()
+     * @return void
+     */
+    protected function loadExtraFieldsForRecords(array $records): void
+    {
+        global $extrafields;
+
+        if (empty($this->table_element)) {
+            return;
+        }
+
+        if (!isset($extrafields) || !is_object($extrafields)) {
+            require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
+            $extrafields = new ExtraFields($this->db);
+        }
+        if (empty($extrafields->attributes[$this->table_element]['loaded'])) {
+            $extrafields->fetch_name_optionals_label($this->table_element);
+        }
+
+        $labels = $extrafields->attributes[$this->table_element]['label'] ?? null;
+        if (!is_array($labels) || empty($labels)) {
+            return;
+        }
+        $types    = $extrafields->attributes[$this->table_element]['type'] ?? [];
+        $computed = $extrafields->attributes[$this->table_element]['computed'] ?? [];
+
+        // Computed, geometry and encrypted extrafields keep the exact per-record behaviour
+        // of fetch_optionals() (formula evaluation, ST_AsWKT read, dolDecrypt).
+        $needsPerRecord = !empty(array_filter($computed));
+        foreach ($types as $type) {
+            if (in_array($type, ['point', 'multipts', 'linestrg', 'polygon', 'password'], true)) {
+                $needsPerRecord = true;
+                break;
+            }
+        }
+        if ($needsPerRecord) {
+            foreach ($records as $record) {
+                $record->fetch_optionals();
+            }
+            return;
+        }
+
+        $tableElement = ($this->table_element === 'categorie') ? 'categories' : $this->table_element;
+
+        $columns = [];
+        foreach ($labels as $name => $label) {
+            if (empty($types[$name]) || !in_array($types[$name], ['separate', 'point', 'multipts', 'linestrg', 'polygon'], true)) {
+                $columns[] = $this->db->sanitize($name);
+            }
+        }
+        if (empty($columns)) {
+            return;
+        }
+
+        $ids  = implode(',', array_map('intval', array_keys($records)));
+        $sql  = 'SELECT fk_object, ' . implode(', ', $columns);
+        $sql .= ' FROM ' . $this->db->prefix() . $tableElement . '_extrafields';
+        $sql .= ' WHERE fk_object IN (' . $ids . ')';
+
+        $resql = $this->db->query($sql);
+        if (!$resql) {
+            // On any error, fall back to the safe per-record path.
+            foreach ($records as $record) {
+                $record->fetch_optionals();
+            }
+            return;
+        }
+
+        $rowsByObject = [];
+        while ($obj = $this->db->fetch_object($resql)) {
+            $rowsByObject[(int) $obj->fk_object] = $obj;
+        }
+        $this->db->free($resql);
+
+        foreach ($records as $id => $record) {
+            $record->array_options = [];
+            if (isset($rowsByObject[$id])) {
+                $obj = $rowsByObject[$id];
+                foreach ($labels as $key => $val) {
+                    if (!empty($types[$key]) && in_array($types[$key], ['separate', 'point', 'multipts', 'linestrg', 'polygon'], true)) {
+                        continue;
+                    }
+                    if (!property_exists($obj, $key)) {
+                        continue;
+                    }
+                    if (!empty($types[$key]) && in_array($types[$key], ['date', 'datetime'], true)) {
+                        $record->array_options['options_' . $key] = $this->db->jdate($obj->$key);
+                    } else {
+                        $record->array_options['options_' . $key] = $obj->$key;
+                    }
+                }
+            } else {
+                foreach ($labels as $key => $val) {
+                    $record->array_options['options_' . $key] = null;
+                }
+            }
         }
     }
 
