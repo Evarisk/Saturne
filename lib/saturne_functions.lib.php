@@ -403,9 +403,9 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
         // same mechanism as the list inline edits (saved via saturne_update_field.php).
         $labelElement = $object->element . (!empty($object->module) ? '@' . $object->module : '');
         if (saturne_user_can_write_element($user, $object, $labelElement)) {
-            $saturneMoreHtmlRef .= ' - <span class="contenteditable" contenteditable="true" role="textbox" aria-label="' . dol_escape_htmltag($langs->trans('Label')) . '" data-field="label" data-id="' . ((int) $object->id) . '" data-element="' . dol_escape_htmltag($labelElement) . '" data-table="' . dol_escape_htmltag($object->table_element) . '" data-type="text">' . dol_escape_htmltag($object->label) . '</span><br>';
+            $saturneMoreHtmlRef .= '<span class="banner-ref-sep"> - </span><span class="contenteditable" contenteditable="true" role="textbox" aria-label="' . dol_escape_htmltag($langs->trans('Label')) . '" data-field="label" data-id="' . ((int) $object->id) . '" data-element="' . dol_escape_htmltag($labelElement) . '" data-table="' . dol_escape_htmltag($object->table_element) . '" data-type="text">' . dol_escape_htmltag($object->label) . '</span><br>';
         } else {
-            $saturneMoreHtmlRef .= ' - ' . dol_escape_htmltag($object->label) . '<br>';
+            $saturneMoreHtmlRef .= '<span class="banner-ref-sep"> - </span>' . dol_escape_htmltag($object->label) . '<br>';
         }
     }
 
@@ -517,7 +517,9 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
     } else {
         global $conf, $form;
 
-        print '<div class="arearef heightref valignmiddle centpercent">';
+        // Expose the object subtype (if any) so modules can style the ref/label (e.g. as a badge).
+        $bannerTypeClass = (property_exists($object, 'element_type') && dol_strlen($object->element_type)) ? ' banner-element-' . dol_string_nospecial($object->element_type) : '';
+        print '<div class="arearef heightref valignmiddle centpercent' . $bannerTypeClass . '">';
 
         $modulePart = '';
         $baseDir    = $conf->$moduleNameLowerCase->multidir_output[$conf->entity];
