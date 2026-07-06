@@ -1325,3 +1325,39 @@ function saturne_get_inline_edit_type(array $val, string $key): string
     // Foreign keys (integer:/sellist:), rich text/html, links, etc. are not inline-editable here
     return '';
 }
+
+/**
+ * Render a user selection <select> re-using a per-request cached user list.
+ *
+ * Form::select_dolusers() runs its "list of users" query on every call. Pages that print
+ * many user dropdowns (e.g. one executive picker per task modal) therefore run the same
+ * query dozens of times. This helper fetches the user list once per request (via
+ * select_dolusers() in output-array mode) and renders each dropdown from that cache with
+ * selectarray(), keeping the same name and CSS class so existing JS selectors still match.
+ *
+ * @param  string     $htmlName  Name attribute of the select field
+ * @param  int|string $selected  Preselected user id (0 for none)
+ * @param  int|string $showEmpty 1 (or a label) to prepend an empty entry
+ * @param  string     $morecss   Extra CSS classes added on the select
+ * @return string                HTML <select> element
+ */
+function saturne_select_users(string $htmlName, $selected = 0, $showEmpty = 1, string $morecss = ''): string
+{
+    global $db, $form;
+
+    if (!is_object($form)) {
+        require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
+        $form = new Form($db);
+    }
+
+    // outputmode = 1 returns an array [userId => label]; run the query only once per request.
+    static $userOptions = null;
+    if ($userOptions === null) {
+        $userOptions = $form->select_dolusers('', '', 0, null, 0, '', '', '', 0, 0, '', 0, '', '', 0, 1);
+        if (!is_array($userOptions)) {
+            $userOptions = [];
+        }
+    }
+
+    return $form->selectarray($htmlName, $userOptions, $selected, $showEmpty, 0, 0, '', 0, 0, 0, '', $morecss);
+}
