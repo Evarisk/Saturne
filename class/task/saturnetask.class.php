@@ -38,6 +38,13 @@ class SaturneTask extends Task
     public $ismultientitymanaged = 1;
 
     /**
+     * @var int|string Task creation date. Declared explicitly because "datec" is a field of
+     * this object: without the declaration each load/read goes through the parent Task's
+     * deprecated-property handler and raises a PHP 8.2 "dynamic property" deprecation per task.
+     */
+    public $datec;
+
+    /**
      * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
      */
     public $fields = [
