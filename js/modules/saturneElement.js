@@ -250,7 +250,11 @@ window.saturne.saturneElement.getLeftMenu = function getLeftMenu() {
   const params = new URLSearchParams(window.location.search);
   const id     = params.get('id') || params.get('fromid');
 
-  if (id) {
+  // Only pages that actually display a digiriskelement (whose id maps to a tree #unit) should
+  // expand/highlight the current unit. Other pages reuse the "id" param for a different object
+  // (e.g. the standard card uses it for the standard), which would otherwise wrongly expand the
+  // element that happens to share that id.
+  if (id && window.location.pathname.indexOf('digiriskelement') !== -1) {
     // Call the dedicated function to highlight, expand parents, and scroll to the current unit
     window.saturne.saturneElement.getLeftMenuCurrentUnit(id);
   }
