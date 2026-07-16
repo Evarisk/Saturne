@@ -108,12 +108,18 @@
     }
     .modal-close {
       margin-left: auto;
-      color: rgba(0,0,0,0.3);
       padding: 4px;
       transition: all 0.2s ease-out;
       &:hover {
         cursor: pointer;
-        color: $color__primary;
+      }
+      // .modal-close sert aussi de simple hook de fermeture sur des boutons :
+      // leur imposer la couleur de l'icone donnerait un texte bleu sur fond bleu.
+      &:not(.wpeo-button) {
+        color: rgba(0,0,0,0.3);
+        &:hover {
+          color: $color__primary;
+        }
       }
     }
   }
