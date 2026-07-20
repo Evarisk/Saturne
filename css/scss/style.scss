@@ -12,6 +12,12 @@
   border: 5px solid #0d8aff;
 }
 
+/* Dolibarr v23 applies grayscale(90%) to fiche-title picto/title; keep the module colored logo on the home banner (nogreyscale marker set in index_view.tpl.php). */
+.fiche > .table-fiche-title.nogreyscale tr.toptitle td.col-picto,
+.fiche > .table-fiche-title.nogreyscale tr.toptitle td.col-title {
+  filter: none;
+}
+
 /* Drag & drop dropzone for the attached-files upload area (saturne.document.js) */
 .attachareaformuserfile {
   position: relative;
