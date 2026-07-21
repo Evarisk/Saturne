@@ -514,7 +514,10 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
         if ($showUpload) {
             $out .= '    <label for="' . $idPrefix . 'upload-media" class="saturne-upload-label">';
             $out .= '      <i class="fas fa-camera"></i>';
-            $out .= '      <input type="file" id="' . $idPrefix . 'upload-media" class="saturne-photo-upload" name="userfile[]" accept="image/*" data-error-not-image="' . dol_escape_htmltag($langs->trans('ErrorFileNotAnImage')) . '" multiple>';
+            // capture="environment" opens the rear camera directly on mobile. Mobile browsers
+            // ignore multiple when capture is set (one shot at a time), desktop ignores capture
+            // and keeps the multiple selection.
+            $out .= '      <input type="file" id="' . $idPrefix . 'upload-media" class="saturne-photo-upload" name="userfile[]" accept="image/*" capture="environment" data-error-not-image="' . dol_escape_htmltag($langs->trans('ErrorFileNotAnImage')) . '" multiple>';
             $out .= '    </label>';
         }
 
@@ -587,7 +590,10 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
         if ($showUpload) {
             $out .= '    <label for="' . $idPrefix . 'upload-file" class="saturne-upload-label saturne-upload-label-file" title="' . dol_escape_htmltag($langs->trans('AddFile')) . '">';
             $out .= '      <i class="fas fa-paperclip"></i>';
-            $out .= '      <input type="file" id="' . $idPrefix . 'upload-file" class="saturne-file-upload" name="userfile[]" multiple>';
+            // Listing document types keeps the camera out of the mobile file picker — an input
+            // without accept offers every source, camera included.
+            $fileAccept = '.pdf,.doc,.docx,.odt,.xls,.xlsx,.ods,.ppt,.pptx,.odp,.csv,.txt,.rtf,.zip,.rar,.7z,.eml,.msg';
+            $out .= '      <input type="file" id="' . $idPrefix . 'upload-file" class="saturne-file-upload" name="userfile[]" accept="' . $fileAccept . '" multiple>';
             $out .= '    </label>';
         }
 
