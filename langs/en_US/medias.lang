@@ -27,6 +27,7 @@ SearchFile                = Search for a file
 PhotoWellSent             = The photo has been added to the media library
 PhotoNotSent              = The photo was not sent correctly
 ConfirmUnlinkMedia        = Are you sure you want to detach the selected media ?
+TakePhoto                 = Take a photo
 AddPhotoFromComputer      = Add a photo from device gallery
 AddPhotoFromMediaGallery  = Add a photo from media gallery
 DeletePhoto               = Delete photo

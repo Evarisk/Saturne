@@ -28,6 +28,7 @@ PhotoWellSent             = La photo a été ajoutée à la bibliothèque de mé
 PhotoNotSent              = La photo ne s'est pas correctement envoyée
 MediaData                 = Configuration des médias
 ConfirmUnlinkMedia        = Êtes vous sur de vouloir détacher le media sélectionné ?
+TakePhoto                 = Prendre une photo
 AddPhotoFromComputer      = Ajouter une photo depuis la galerie de l'appareil
 AddPhotoFromMediaGallery  = Ajouter une photo depuis la galerie des médias
 DeletePhoto               = Supprimer la photo

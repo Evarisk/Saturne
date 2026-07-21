@@ -512,12 +512,19 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
         $out .= '  <div class="saturne-media-upload-block" data-module="' . dol_escape_htmltag($moduleNameLowerCase) . '" data-subdir="' . dol_escape_htmltag($subDir) . '">';
 
         if ($showUpload) {
-            $out .= '    <label for="' . $idPrefix . 'upload-media" class="saturne-upload-label">';
+            $errorNotImage = dol_escape_htmltag($langs->trans('ErrorFileNotAnImage'));
+
+            // Shooting button — capture="environment" opens the rear camera directly on mobile.
+            // Mobile browsers ignore multiple when capture is set, hence one shot at a time here.
+            $out .= '    <label for="' . $idPrefix . 'take-photo" class="saturne-upload-label" title="' . dol_escape_htmltag($langs->trans('TakePhoto')) . '">';
             $out .= '      <i class="fas fa-camera"></i>';
-            // capture="environment" opens the rear camera directly on mobile. Mobile browsers
-            // ignore multiple when capture is set (one shot at a time), desktop ignores capture
-            // and keeps the multiple selection.
-            $out .= '      <input type="file" id="' . $idPrefix . 'upload-media" class="saturne-photo-upload" name="userfile[]" accept="image/*" capture="environment" data-error-not-image="' . dol_escape_htmltag($langs->trans('ErrorFileNotAnImage')) . '" multiple>';
+            $out .= '      <input type="file" id="' . $idPrefix . 'take-photo" class="saturne-photo-upload" name="userfile[]" accept="image/*" capture="environment" data-error-not-image="' . $errorNotImage . '">';
+            $out .= '    </label>';
+
+            // Picking button — no capture attribute, so existing photos can be selected, several at once.
+            $out .= '    <label for="' . $idPrefix . 'upload-media" class="saturne-upload-label saturne-upload-label-gallery" title="' . dol_escape_htmltag($langs->trans('AddPhotoFromComputer')) . '">';
+            $out .= '      <i class="fas fa-images"></i>';
+            $out .= '      <input type="file" id="' . $idPrefix . 'upload-media" class="saturne-photo-upload" name="userfile[]" accept="image/*" data-error-not-image="' . $errorNotImage . '" multiple>';
             $out .= '    </label>';
         }
 
