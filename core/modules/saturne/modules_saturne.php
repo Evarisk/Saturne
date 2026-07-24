@@ -808,7 +808,10 @@ class SaturneDocumentModel extends CommonDocGenerator
         }
         $newFileTmp = str_replace(' ', '_', $newFileTmp);
         $newFileTmp = $newFileTmp . '.' . $this->type;
-        $fileName   = dol_sanitizeFileName($newFileTmp);
+        // Single quotes are removed too ($includequotes = 1): the ODT to PDF conversion
+        // passes the file name through escapeshellarg() then escapeshellcmd(), which
+        // destroys the shell quoting and makes LibreOffice convert nothing
+        $fileName   = dol_sanitizeFileName($newFileTmp, '_', 1, 1);
 
         $objectDocument->setValueFrom('last_main_doc', $fileName, '', null, '', '', $moreParam['user'], '', '');
         if (!empty($objectDocument->error)) {
@@ -882,7 +885,7 @@ class SaturneDocumentModel extends CommonDocGenerator
                 $srcTemplatePath,
                 [
                     'PATH_TO_TMP' => $conf->$moduleNameLowerCase->dir_temp,
-                    'ZIP_PROXY' => 'PclZipProxy', // PhpZipProxy or PclZipProxy. Got "bad compression method" error when using PhpZipProxy
+                    'ZIP_PROXY' => getDolGlobalString('MAIN_ODF_ZIP_PROXY', 'PclZipProxy'), // PhpZipProxy or PclZipProxy. Got "bad compression method" error when using PhpZipProxy
                     'DELIMITER_LEFT' => '{',
                     'DELIMITER_RIGHT' => '}'
                 ]
@@ -923,6 +926,12 @@ class SaturneDocumentModel extends CommonDocGenerator
         if (!empty($conf->global->MAIN_ODT_AS_PDF) && $conf->global->$confPdfName > 0) {
             try {
                 $odfHandler->exportAsAttachedPDF($file);
+
+                // LibreOffice exits with code 0 even when it could not load the source file,
+                // so the PDF has to be checked before announcing a success
+                if (!file_exists($fileInfos['dirname'] . '/' . $pdfName)) {
+                    throw new Exception('ODT to PDF conversion did not generate any file : ' . $pdfName);
+                }
 
                 $documentUrl = DOL_URL_ROOT . '/document.php';
                 setEventMessages($langs->transnoentities('FileGenerated') . ' - ' . '<a href=' . $documentUrl . '?modulepart=' . $moduleNameLowerCase . '&file=' . urlencode($this->document_type . '/' . $object->ref . '/' . $pdfName) . '&entity=' . $conf->entity . '"' . '>' . $pdfName . '</a>', []);
