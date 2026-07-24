@@ -246,11 +246,29 @@ window.saturne.filter = {
             var sortFieldMatch = ($sortLink.attr('href') || '').match(/[?&]sortfield=([^&]+)/);
             var sortField      = sortFieldMatch ? decodeURIComponent(sortFieldMatch[1]) : '';
 
-            // Rebuild the target URL from the current location so active filters/context are preserved.
+            // Sort through the search form so every context carried by its hidden inputs survives.
+            // Rebuilding the URL from window.location only works when the page was reached by GET :
+            // right after a filter/column submit the location has no query string at all, and both
+            // the filters and the page context (fromid/fromtype, object_type, ...) would be dropped.
             var sortByColumn = function(direction) {
                 if (!sortField) {
                     return;
                 }
+
+                var $form = $('#searchFormList');
+                if (!$form.length) {
+                    $form = $th.closest('form');
+                }
+
+                if ($form.length) {
+                    $form.find('input[name="sortfield"]').val(sortField);
+                    $form.find('input[name="sortorder"]').val(direction);
+                    $form.find('input[name="page"]').val('0');
+                    window.saturne.filter.closePopover();
+                    $form.submit();
+                    return;
+                }
+
                 var url = new URL(window.location.href);
                 url.searchParams.set('sortfield', sortField);
                 url.searchParams.set('sortorder', direction);
