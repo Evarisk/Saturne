@@ -23,6 +23,7 @@ ModuleSaturneDesc   = Evarisk framework and library of objects and functions
 ModuleConfig        = Configuration %s
 ModuleConfigSaturne = Configuration Saturne
 MinimizeMenu        = Minimize the menu
+TutoImage           = Image
 
 # Right
 LireModule                  = Read %s
