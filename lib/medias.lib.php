@@ -194,7 +194,9 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 			$fileName = $file['name'];
 			$filePath = $file['path'];
 
-			if (($show_only_favorite && ($object->$favorite_field == $fileName || !$favoriteExists)) || !$show_only_favorite) {
+			// A favorite media that no longer exists in the folder must not fall back on another file,
+			// it would show a media unrelated to the object
+			if (($show_only_favorite && ($object->$favorite_field == $fileName || empty($object->$favorite_field))) || !$show_only_favorite) {
 				if ($showdiv) {
 					$return .= '<div class="media-container">';
 				}
@@ -208,13 +210,23 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 
 					if ($size == 1 || $size == 'small') {   // Format vignette
 						// Find name of thumb file
-						if ($use_mini_format) {
-							$photo_vignette = basename(getImageFileNameForSize($dir . $fileName, '_mini'));
-						} else {
-							$photo_vignette = basename(getImageFileNameForSize($dir . $fileName, '_small'));
-						}
+						$thumbType      = $use_mini_format ? '_mini' : '_small';
+						$photo_vignette = basename(getImageFileNameForSize($dir . $fileName, $thumbType));
 
-						if ( ! dol_is_file($dirthumb . $photo_vignette)) $photo_vignette = '';
+						// Medias added outside the gallery have no thumb, generate it on the fly so the original
+						// file is never served at full resolution in a thumb slot
+						if (!dol_is_file($dirthumb . $photo_vignette)) {
+							$thumbWidth  = getDolGlobalInt($moduleNameUpperCase . '_MEDIA_MAX_WIDTH' . dol_strtoupper($thumbType), getDolGlobalInt('SATURNE_MEDIA_MAX_WIDTH' . dol_strtoupper($thumbType)));
+							$thumbHeight = getDolGlobalInt($moduleNameUpperCase . '_MEDIA_MAX_HEIGHT' . dol_strtoupper($thumbType), getDolGlobalInt('SATURNE_MEDIA_MAX_HEIGHT' . dol_strtoupper($thumbType)));
+							if ($thumbWidth > 0 && $thumbHeight > 0) {
+								saturne_vignette($dir . $fileName, $thumbWidth, $thumbHeight, $thumbType);
+							}
+
+							// Thumb generation may still fail (unsupported format, memory limit), fall back on the original
+							if (!dol_is_file($dirthumb . $photo_vignette)) {
+								$photo_vignette = '';
+							}
+						}
 
 						// Get filesize of original file
 						$imgarray = dol_getImageSize($dir . $photo);
@@ -236,12 +248,23 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 							else $return              .= '<a href="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" class="aphoto" target="_blank">';
 						}
 
+						// The thumb is served as soon as the original does not fit in the requested box
+						$showThumb = !empty($photo_vignette) && (empty($maxHeight) || $imgarray['height'] > $maxHeight);
+
 						// Show image (width height=$maxHeight)
-						$alt               = $langs->transnoentitiesnoconv('File') . ': ' . $relativefile;
-						$alt              .= ' - ' . $langs->transnoentitiesnoconv('Size') . ': ' . $imgarray['width'] . 'x' . $imgarray['height'];
+						$alt = $langs->transnoentitiesnoconv('File') . ': ' . $relativefile;
+						if ($showThumb) {
+							// Title must give the size of the file really served, the original one is only informative
+							$thumbarray = dol_getImageSize($dirthumb . $photo_vignette);
+							$alt       .= ' - ' . $langs->transnoentitiesnoconv('Size') . ': ' . $thumbarray['width'] . 'x' . $thumbarray['height'];
+							$alt       .= ' - ' . $langs->transnoentitiesnoconv('OriginalSize') . ': ' . $imgarray['width'] . 'x' . $imgarray['height'];
+						} else {
+							$alt .= ' - ' . $langs->transnoentitiesnoconv('Size') . ': ' . $imgarray['width'] . 'x' . $imgarray['height'];
+						}
+
 						if ($notitle) $alt = '';
 						if ($usesharelink) {
-                            if (empty($maxHeight) || $photo_vignette && $imgarray['height'] > $maxHeight) {
+                            if ($showThumb) {
                                 $return .= '<!-- Show thumb file -->';
                                 $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo '. $morecss .' photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/custom/saturne/utils/viewimage.php?modulepart=' . $modulepart . '&entity=' . $object->entity . '&file=' . urlencode($pdirthumb . $photo_vignette) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . $object->id . '">';
                             } else {
@@ -249,7 +272,7 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
                                 $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo '. $morecss .' photowithmargin" src="' . DOL_URL_ROOT . '/custom/saturne/utils/viewimage.php?modulepart=' . $modulepart . '&entity=' . $object->entity . '&file=' . urlencode($pdir . $photo) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . $object->id . '">';
                             }
 						} else {
-							if (empty($maxHeight) || $photo_vignette && $imgarray['height'] > $maxHeight) {
+							if ($showThumb) {
 								$return .= '<!-- Show thumb file -->';
 								$return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo '. $morecss .'"  src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdirthumb . $photo_vignette) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . $object->id . '">';
 							} else {
@@ -358,7 +381,10 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 				if ($nbphoto) $return .= '</table>';
 			}
 		}
-	} else {
+	}
+
+	// Nothing shown because the folder is empty, or because the favorite media it holds has been deleted
+	if (empty($nbphoto) && ($show_only_favorite || empty($filearray))) {
         $return .= '<img  width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo '. $morecss .' photowithmargin" src="' . DOL_URL_ROOT . '/public/theme/common/nophoto.png" title="' . $langs->trans('NoPhotoYet') . '">';
     }
 
