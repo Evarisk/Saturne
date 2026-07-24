@@ -57,13 +57,23 @@
   }
 }
 
+// Le menu haut Dolibarr (.side-nav-vert) est sticky avec un z-index de 1005, supérieur à celui de la
+// modal active (1002) : sur une fenêtre moins haute que la modal, il recouvrait l'en-tête, masquant
+// le titre et rendant la croix de fermeture incliquable. On le repasse sous l'overlay tant qu'une
+// modal est ouverte.
+body:has(.wpeo-modal.modal-active) .side-nav-vert {
+  z-index: 1001;
+}
+
 .wpeo-modal {
   .modal-container {
     position: absolute;
     transition: all 0.2s ease-out;
     width: 100%;
     max-width: 860px;
-    height: 100%;
+    // Le retrait garde une respiration en haut et en bas quand la fenêtre est moins haute que
+    // max-height : sans lui la modal est collée aux deux bords.
+    height: calc(100% - 4em);
     max-height: 560px;
     background: #fff;
     padding: 1em 0;
