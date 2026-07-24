@@ -382,6 +382,7 @@ function saturne_get_thumb_name(string $filename, string $thumbType = 'small', s
     $fileExtension = pathinfo($filename, PATHINFO_EXTENSION);
 
     if (!empty($filePath)) {
+        require_once __DIR__ . './dolibarr.lib.php';
         $filePathThumb = $filePath . '/thumbs';
         if (!dol_is_dir($filePathThumb)) {
             dol_mkdir($filePathThumb);
