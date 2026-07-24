@@ -356,23 +356,29 @@ class SaturneDashboard
 
                         print load_fiche_titre($dashboardList['title'], $dashboardList['morehtmlright'], $dashboardList['picto']);
 
+                        // La colonne Ref porte le libellé de la ligne : elle n'est pas tronquée, les colonnes de valeurs le sont
+                        $refCellCss  = $conf->browser->layout == 'classic' ? 'nowraponall ' : '';
+                        $dataCellCss = $conf->browser->layout == 'classic' ? 'nowraponall tdoverflowmax200 ' : '';
+
+                        // Conteneur scrollable : sur mobile le tableau est plus large que l'écran et débordait de la page entière
+                        print '<div class="div-table-responsive-no-min">';
                         print '<table class="noborder centpercent">';
 
                         print '<tr class="liste_titre">';
                         foreach ($dashboardList['labels'] as $key => $dashboardListLabel) {
-                            print '<td class="' . ($conf->browser->layout == 'classic' ? 'nowraponall tdoverflowmax200 ' : '') . (($key != 'Ref') ? 'center' : '') . '">' . $langs->transnoentities($dashboardListLabel) . '</td>';
+                            print '<td class="' . (($key != 'Ref') ? $dataCellCss . 'center' : $refCellCss) . '">' . $langs->transnoentities($dashboardListLabel) . '</td>';
                         }
                         print '</tr>';
 
                         foreach ($dashboardList['data'] as $dashboardListDatasets) {
                             print '<tr class="oddeven">';
                             foreach ($dashboardListDatasets as $key => $dashboardGraphDataset) {
-                                print '<td class="' . ($conf->browser->layout == 'classic' ? 'nowraponall tdoverflowmax200 ' : '') . (($key != 'Ref') ? 'center ' : '') . ($dashboardGraphDataset['morecss'] ?? '') . '"' . ($dashboardGraphDataset['moreAttr'] ?? '') . '>' . $dashboardGraphDataset['value'] . '</td>';
+                                print '<td class="' . (($key != 'Ref') ? $dataCellCss . 'center ' : $refCellCss) . ($dashboardGraphDataset['morecss'] ?? '') . '"' . ($dashboardGraphDataset['moreAttr'] ?? '') . '>' . $dashboardGraphDataset['value'] . '</td>';
                             }
                             print '</tr>';
                         }
 
-                        print '</table></div>';
+                        print '</table></div></div>';
                     }
                 }
             }
