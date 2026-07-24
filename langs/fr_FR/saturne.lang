@@ -23,6 +23,7 @@ ModuleSaturneDesc   = Framework et librairie d'objets et fonctions d'Evarisk
 ModuleConfig        = Configuration %s
 ModuleConfigSaturne = Configuration Saturne
 MinimizeMenu        = Réduire le menu
+TutoImage           = Image
 
 # Right - Droit
 LireModule                  = Consulter %s

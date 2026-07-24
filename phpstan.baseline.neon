@@ -5691,7 +5691,7 @@ parameters:
 		-
 			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
-			count: 3
+			count: 4
 			path: core/tpl/admin/object/object_const_view.tpl.php
 
 		-
@@ -5737,6 +5737,12 @@ parameters:
 			path: core/tpl/admin/object/object_const_view.tpl.php
 
 		-
+			message: '#^Cannot access offset ''tutoImage'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 2
+			path: core/tpl/admin/object/object_const_view.tpl.php
+
+		-
 			message: '#^Cannot access property \$admin on mixed\.$#'
 			identifier: property.nonObject
 			count: 2
@@ -5769,13 +5775,13 @@ parameters:
 		-
 			message: '#^Cannot call method transnoentities\(\) on mixed\.$#'
 			identifier: method.nonObject
-			count: 4
+			count: 5
 			path: core/tpl/admin/object/object_const_view.tpl.php
 
 		-
 			message: '#^Parameter mixed of print cannot be converted to string\.$#'
 			identifier: print.nonString
-			count: 2
+			count: 3
 			path: core/tpl/admin/object/object_const_view.tpl.php
 
 		-
@@ -5811,13 +5817,13 @@ parameters:
 		-
 			message: '#^Variable \$langs might not be defined\.$#'
 			identifier: variable.undefined
-			count: 10
+			count: 11
 			path: core/tpl/admin/object/object_const_view.tpl.php
 
 		-
 			message: '#^Variable \$moduleNameLowerCase might not be defined\.$#'
 			identifier: variable.undefined
-			count: 3
+			count: 4
 			path: core/tpl/admin/object/object_const_view.tpl.php
 
 		-
