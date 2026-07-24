@@ -63,12 +63,13 @@ saturne_load_langs(['admin']);
 $form = new Form($db);
 
 // Get parameters
-$action    = GETPOST('action', 'alpha');
-$modelName = GETPOST('model_name', 'alpha');
-$type      = GETPOST('type', 'alpha');
-$const     = GETPOST('const', 'alpha');
-$label     = GETPOST('label', 'alpha');
-$pageY     = GETPOST('page_y', 'int');
+$action     = GETPOST('action', 'alpha');
+$modelName  = GETPOST('model_name', 'alpha');
+$type       = GETPOST('type', 'alpha');
+$objectType = GETPOST('object_type', 'alpha');
+$const      = GETPOST('const', 'alpha');
+$label      = GETPOST('label', 'alpha');
+$pageY      = GETPOST('page_y', 'int');
 // Used by actions_setmoduleoptions.inc.php
 $modulepart = GETPOST('modulepart', 'aZ09');
 
@@ -108,7 +109,8 @@ if (empty($resHook)) {
 
     // Set default model
     if ($action == 'setdoc') {
-        $confName = dol_strtoupper($moduleName . '_' . $type) . '_DEFAULT_MODEL';
+        // Constant built on the object type, not on the model type, to match the name read when generating a document
+        $confName = dol_strtoupper($moduleName . '_' . $objectType) . '_DEFAULT_MODEL';
         dolibarr_set_const($db, $confName, $modelName, 'chaine', 0, '', $conf->entity);
         header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
         exit;
