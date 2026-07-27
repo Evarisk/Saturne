@@ -340,6 +340,10 @@ class SaturneTask extends Task
         $sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "societe as s ON p.fk_soc = s.rowid";
         $sql .= ") AS selector";
         $sql .= " WHERE fk_element = task_id AND project_linked_id = project_id";
+        // La table element_time est partagée entre types d'élément, sans ce filtre une ligne d'un autre type serait rattachée à la tâche de même rowid
+        if ($versionEighteenOrMore) {
+            $sql .= " AND elementtype = 'task'";
+        }
         $sql .= " AND task_entity IN (" . getEntity('project') . ")";
         if ($morewherefilter) {
             $sql .= $morewherefilter;
