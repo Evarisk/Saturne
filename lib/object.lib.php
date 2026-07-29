@@ -371,6 +371,8 @@ function saturne_get_objects_metadata(string $type = ''): array
     // 'list_url'           => Path to list page
     // 'class_path'         => Path to object class
     // 'lib_path'           => Path to object lib
+    // 'alias_of'           => OPTIONAL : Key of the entry this one duplicates under a legacy name,
+    //                         consumers iterating on the whole array must skip it to avoid processing the object twice
 
     $objectsMetadata = [];
 
@@ -627,7 +629,9 @@ function saturne_get_objects_metadata(string $type = ''): array
             'lib_path'       => 'core/lib/contract.lib.php',
         ];
         //@todo backward compatibility
-        $objectsMetadata['contrat'] = $objectsMetadata['contract'];
+        // Contrat::$element is 'contrat', so the object is still reachable with that legacy key
+        $objectsMetadata['contrat']             = $objectsMetadata['contract'];
+        $objectsMetadata['contrat']['alias_of'] = 'contract';
     }
 
     if (isModEnabled('ticket')) {
@@ -980,6 +984,7 @@ function saturne_get_objects_metadata(string $type = ''): array
                     'defaultorder'       => $objectMetadata['defaultorder'] ?? 'ASC',
                     'class_path'         => $objectMetadata['class_path'] ?? '',
                     'lib_path'           => $objectMetadata['lib_path'] ?? '',
+                    'alias_of'           => $objectMetadata['alias_of'] ?? '',
                     'object'             => $object
                 ];
                 if (!empty($objectMetadata['langfile'])) {
