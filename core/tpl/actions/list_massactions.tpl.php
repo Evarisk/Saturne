@@ -27,8 +27,49 @@
  * Global     : $db, $langs, $user,
  * Parameters : $action, $confirm, $massaction, $toselect
  * Objects    : $object
- * Variable   : $objectclass, $permissiontoadd
+ * Variable   : $enableMassValidate (optional), $objectclass, $permissiontoadd
  */
+
+// Validate mass action - only offered on lists that opted in with $enableMassValidate
+$validateAsked = ($massaction == 'validate' || ($action == 'validate' && $confirm == 'yes'));
+if ($validateAsked && !empty($enableMassValidate) && $permissiontoadd) {
+    if (!empty($toselect)) {
+        $nbOk      = 0;
+        $nbSkipped = 0;
+        $error     = 0;
+        $objectTmp = new $objectclass($db);
+        foreach ($toselect as $toSelectedID) {
+            $result = $objectTmp->fetch($toSelectedID);
+            if ($result > 0) {
+                // Only a draft object can be validated, else a locked or archived one would go back to the validated status
+                if ($objectTmp->status != $objectTmp::STATUS_DRAFT) {
+                    $nbSkipped++;
+                    continue;
+                }
+
+                $result = $objectTmp->validate($user);
+                if ($result > 0) {
+                    $nbOk++;
+                } else {
+                    setEventMessages($objectTmp->error, $objectTmp->errors, 'errors');
+                    $error++;
+                    break;
+                }
+            } else {
+                setEventMessages($objectTmp->error, $objectTmp->errors, 'errors');
+                $error++;
+                break;
+            }
+        }
+
+        if ($error == 0) {
+            setEventMessages($langs->trans('RecordsValidated', $nbOk), []);
+            if ($nbSkipped > 0) {
+                setEventMessages($langs->trans('RecordsNotDraftSkipped', $nbSkipped), [], 'warnings');
+            }
+        }
+    }
+}
 
 // Archive mass action
 if (($massaction == 'archive' || ($action == 'archive' && $confirm == 'yes')) && $permissiontoadd) {

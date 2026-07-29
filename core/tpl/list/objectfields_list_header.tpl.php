@@ -27,9 +27,9 @@
  * Globals    : $conf, $db, $hookmanager, $langs, $user
  * Parameters : $action, $limit, $contextpage, $massaction, $mode, $optioncss, $page, $searchAll, $sortfield, $sortorder, $toselect
  * Objects    : $categorie, $extrafields (extrafields_list_search_param.tpl), $form, $object
- * Variables  : $arrayfields, $createUrl (optional), $fieldsToSearchAll, $formMoreParams (optional), $helpText (optional),
- *              $nbTotalOfRecords, $num, $permissiontoadd, $resql, $search, $search_array_options (extrafields_list_search_param.tpl),
- *              $searchCategories, $sql, $title
+ * Variables  : $arrayfields, $createUrl (optional), $enableMassValidate (optional), $fieldsToSearchAll,
+ *              $formMoreParams (optional), $helpText (optional), $nbTotalOfRecords, $num, $permissiontoadd, $resql,
+ *              $search, $search_array_options (extrafields_list_search_param.tpl), $searchCategories, $sql, $title
  */
 
 // Output page
@@ -87,8 +87,15 @@ $hookmanager->executeHooks('printFieldListSearchParam', $parameters, $object, $a
 $param .= $hookmanager->resPrint;
 
 // List of mass actions available
-$arrayOfMassActions = [
-    //'validate'=>img_picto('', 'check', 'class="pictofixedwidth"').$langs->trans("Validate"),
+$arrayOfMassActions = [];
+
+// Mass validation is opt-in: the list page must set $enableMassValidate, every object is not meant to be validated in bulk
+if (!empty($enableMassValidate) && !empty($permissiontoadd)) {
+    $validatePicto = '<span class="fas fa-check paddingrightonly"></span>';
+    $arrayOfMassActions['prevalidate'] = $validatePicto . $langs->trans('Validate');
+}
+
+$arrayOfMassActions += [
     //'generate_doc'=>img_picto('', 'pdf', 'class="pictofixedwidth"').$langs->trans("ReGeneratePDF"),
     //'builddoc'=>img_picto('', 'pdf', 'class="pictofixedwidth"').$langs->trans("PDFMerge"),
     //'presend'=>img_picto('', 'email', 'class="pictofixedwidth"').$langs->trans("SendByMail"),
@@ -234,6 +241,10 @@ print_barre_liste($listTitle, ($page ?? 0), $_SERVER['PHP_SELF'], ($param ?? '')
 //$trackid = 'xxxx'.$object->id;
 
 require_once DOL_DOCUMENT_ROOT . '/core/tpl/massactions_pre.tpl.php';
+
+if ($massaction == 'prevalidate') {
+    print $form->formconfirm($_SERVER['PHP_SELF'], $langs->trans('ConfirmMassValidate'), $langs->trans('ConfirmMassValidatingQuestion', count($toselect)), 'validate', null, '', 0, 200, 500, 1);
+}
 
 if ($massaction == 'prearchive') {
     print $form->formconfirm($_SERVER['PHP_SELF'], $langs->trans('ConfirmMassArchive'), $langs->trans('ConfirmMassArchivingQuestion', count($toselect)), 'archive', null, '', 0, 200, 500, 1);
