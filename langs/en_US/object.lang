@@ -100,16 +100,20 @@ CloneCategories         = Clone tags/categories ?
 ClonePhotos             = Cloner les photos ?
 
 # Confirm mass box
-ConfirmMassLock              = Bulk lock confirmation
-ConfirmMassLockingQuestion   = Are you sure you want to lock the %d record(s) selected ?
-ConfirmMassArchive           = Bulk archiving confirmation
-ConfirmMassArchivingQuestion = Are you sure you want to archive the %d record(s) selected ?
+ConfirmMassLock               = Bulk lock confirmation
+ConfirmMassLockingQuestion    = Are you sure you want to lock the %d record(s) selected ?
+ConfirmMassArchive            = Bulk archiving confirmation
+ConfirmMassArchivingQuestion  = Are you sure you want to archive the %d record(s) selected ?
+ConfirmMassValidate           = Bulk validation confirmation
+ConfirmMassValidatingQuestion = Are you sure you want to validate the %d record(s) selected ?
 
 # SetEventMessage mass action
 RecordsArchived = %d record(s) archived
 ConfirmMassUnarchive           = Bulk unarchiving confirmation
 ConfirmMassUnarchivingQuestion = Are you sure you want to unarchive the %d record(s) selected ?
 RecordsUnarchived = %d record(s) unarchived
+RecordsValidated = %d record(s) validated
+RecordsNotDraftSkipped = %d record(s) skipped because they are not in draft status
 Unarchive = Unarchive
 Unarchived = Unarchived
 ObjectNotFound  = %s not found
