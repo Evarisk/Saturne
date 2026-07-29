@@ -72,6 +72,14 @@ if ($action == 'update_field') {
         exit;
     }
 
+    // State guard: a locked or archived object is read-only, hiding the editor client-side is not enough
+    if (method_exists($object, 'isModifiable') && !$object->isModifiable()) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'error' => 'ObjectNotModifiable']);
+        $db->close();
+        exit;
+    }
+
     $format = '';
     switch ($type) {
         case 'datepicker':

@@ -239,11 +239,20 @@ $sqlForList = $sql;
 // Count total nb of records
 $nbTotalOfRecords = '';
 if (!getDolGlobalInt('MAIN_DISABLE_FULL_SCANLIST')) {
-    /* The fast and low memory method to get and count full list converts the sql into a sql count */
-    $sqlForCount = preg_replace('/^' . preg_quote($sqlFields, '/') . '/', 'SELECT COUNT(*) as nbtotalofrecords', $sql);
-    // Only strip the extrafields LEFT JOIN (not searchAll joins which are referenced in WHERE)
-    $sqlForCount = preg_replace('/ LEFT JOIN \S+_extrafields\s+as\s+ef\s+ON\s+\([^)]+\)/', '', $sqlForCount);
-    $sqlForCount = preg_replace('/GROUP BY .*$/', '', $sqlForCount);
+    if (preg_match('/\bGROUP\s+BY\b/i', $sqlForList)) {
+        // A printFieldListFrom hook can add a JOIN that multiplies the rows of one object (one row
+        // per linked record), collapsed again by the GROUP BY of printFieldListGroupBy - and possibly
+        // filtered on that aggregate by printFieldListHaving. Turning the SELECT into a COUNT(*) and
+        // dropping the GROUP BY would count the joined rows instead of the objects, so count the rows
+        // the grouped query actually returns.
+        $sqlForCount = 'SELECT COUNT(*) as nbtotalofrecords FROM (' . $sqlForList . ') as countedrows';
+    } else {
+        /* The fast and low memory method to get and count full list converts the sql into a sql count */
+        $countSelect = 'SELECT COUNT(*) as nbtotalofrecords';
+        $sqlForCount = preg_replace('/^' . preg_quote($sqlFields, '/') . '/', $countSelect, $sql);
+        // Only strip the extrafields LEFT JOIN (not searchAll joins which are referenced in WHERE)
+        $sqlForCount = preg_replace('/ LEFT JOIN \S+_extrafields\s+as\s+ef\s+ON\s+\([^)]+\)/', '', $sqlForCount);
+    }
     $resql = $db->query($sqlForCount);
     if ($resql) {
         $objForCount      = $db->fetch_object($resql);
