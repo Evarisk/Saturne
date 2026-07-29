@@ -134,12 +134,14 @@ while ($i < $iMaxInLoop) {
                 } elseif ($key == 'rowid') {
                     print $object->showOutputField($val, $key, $object->id);
                 } else {
-                    // Inline edit: auto-detect an editor per field type (when the user can write and the object is still modifiable)
-                    // A locked or archived object is read-only on its card ($object->status < STATUS_LOCKED), so its
-                    // fields must not be editable from the list either
-                    $isModifiable = !method_exists($object, 'isModifiable') || $object->isModifiable();
-                    $inlineType   = (!empty($permissiontoadd) && $isModifiable) ? saturne_get_inline_edit_type($val, $key) : '';
-                    if ($inlineType === '' && $isModifiable && !empty($val['contenteditable']) && $val['contenteditable'] == 1) {
+                    // Inline edit: auto-detect an editor per field type, when the user can write
+                    // and the object is still modifiable. A locked or archived object is read-only
+                    // on its card, so its fields must not be editable from the list either
+                    $isModifiable      = !method_exists($object, 'isModifiable') || $object->isModifiable();
+                    $canInlineEdit     = !empty($permissiontoadd) && $isModifiable;
+                    $isContentEditable = !empty($val['contenteditable']) && $val['contenteditable'] == 1;
+                    $inlineType        = $canInlineEdit ? saturne_get_inline_edit_type($val, $key) : '';
+                    if ($inlineType === '' && $isModifiable && $isContentEditable) {
                         $inlineType = (!empty($val['type']) && in_array($val['type'], ['date', 'datetime'])) ? 'datepicker' : 'text';
                     }
 

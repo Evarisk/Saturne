@@ -248,7 +248,8 @@ if (!getDolGlobalInt('MAIN_DISABLE_FULL_SCANLIST')) {
         $sqlForCount = 'SELECT COUNT(*) as nbtotalofrecords FROM (' . $sqlForList . ') as countedrows';
     } else {
         /* The fast and low memory method to get and count full list converts the sql into a sql count */
-        $sqlForCount = preg_replace('/^' . preg_quote($sqlFields, '/') . '/', 'SELECT COUNT(*) as nbtotalofrecords', $sql);
+        $countSelect = 'SELECT COUNT(*) as nbtotalofrecords';
+        $sqlForCount = preg_replace('/^' . preg_quote($sqlFields, '/') . '/', $countSelect, $sql);
         // Only strip the extrafields LEFT JOIN (not searchAll joins which are referenced in WHERE)
         $sqlForCount = preg_replace('/ LEFT JOIN \S+_extrafields\s+as\s+ef\s+ON\s+\([^)]+\)/', '', $sqlForCount);
     }
