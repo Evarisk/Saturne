@@ -80,3 +80,121 @@ function saturne_get_enabled_linked_object_types(array $linkableObjects, string 
 
     return $enabledObjectTypes;
 }
+
+/**
+ * Get the tables on which the given extrafields are currently declared
+ *
+ * Read once and reused, so that a missing column never turns into a failing count query.
+ *
+ * @param  array $extraFieldNames Extrafield names to look for
+ * @return array                  name => [elementtype => true]
+ */
+function saturne_get_existing_extrafields(array $extraFieldNames): array
+{
+    global $db;
+
+    $existingExtraFields = [];
+
+    if (empty($extraFieldNames)) {
+        return $existingExtraFields;
+    }
+
+    $escapedNames = [];
+    foreach ($extraFieldNames as $extraFieldName) {
+        $escapedNames[] = "'" . $db->escape($extraFieldName) . "'";
+    }
+
+    $sql  = 'SELECT name, elementtype FROM ' . MAIN_DB_PREFIX . 'extrafields';
+    $sql .= ' WHERE name IN (' . implode(', ', $escapedNames) . ')';
+
+    $resql = $db->query($sql);
+    if ($resql) {
+        while ($obj = $db->fetch_object($resql)) {
+            $existingExtraFields[$obj->name][$obj->elementtype] = true;
+        }
+        $db->free($resql);
+    }
+
+    return $existingExtraFields;
+}
+
+/**
+ * Measure how much each linkable object is actually used
+ *
+ * Feeds the usage column of an admin page, sizes the confirmation shown before a destructive
+ * toggle, and lets a module backward keep every link that already carries data.
+ *
+ * @param  array $linkableObjects    Result of saturne_filter_linkable_objects()
+ * @param  array $extraFieldNames    Extrafield names to count, example ['qc_frequency']
+ * @param  array $linkedElementTypes Element types on the module side, example ['digiquali_control']
+ * @return array                     objectType => ['links' => int, 'extrafields' => [name => int]]
+ */
+function saturne_get_linked_object_usage(
+    array $linkableObjects,
+    array $extraFieldNames,
+    array $linkedElementTypes
+): array {
+    global $db;
+
+    $usage             = [];
+    $objectTypeByLink  = [];
+    $tableByObjectType = [];
+
+    foreach ($linkableObjects as $objectType => $objectMetadata) {
+        $usage[$objectType] = ['links' => 0, 'extrafields' => []];
+        foreach ($extraFieldNames as $extraFieldName) {
+            $usage[$objectType]['extrafields'][$extraFieldName] = 0;
+        }
+
+        $objectTypeByLink[$objectMetadata['link_name']] = $objectType;
+        $tableByObjectType[$objectType]                 = $objectMetadata['table_element'];
+    }
+
+    if (!empty($linkedElementTypes)) {
+        $escapedElementTypes = [];
+        foreach ($linkedElementTypes as $linkedElementType) {
+            $escapedElementTypes[] = "'" . $db->escape($linkedElementType) . "'";
+        }
+        $inClause = implode(', ', $escapedElementTypes);
+
+        $sql  = 'SELECT sourcetype, targettype, COUNT(*) as nb';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'element_element';
+        $sql .= ' WHERE sourcetype IN (' . $inClause . ') OR targettype IN (' . $inClause . ')';
+        $sql .= ' GROUP BY sourcetype, targettype';
+
+        $resql = $db->query($sql);
+        if ($resql) {
+            while ($obj = $db->fetch_object($resql)) {
+                $isSourceOnModuleSide = in_array($obj->sourcetype, $linkedElementTypes, true);
+                $linkedSide           = $isSourceOnModuleSide ? $obj->targettype : $obj->sourcetype;
+                if (isset($objectTypeByLink[$linkedSide])) {
+                    $usage[$objectTypeByLink[$linkedSide]]['links'] += (int) $obj->nb;
+                }
+            }
+            $db->free($resql);
+        }
+    }
+
+    $existingExtraFields = saturne_get_existing_extrafields($extraFieldNames);
+
+    foreach ($tableByObjectType as $objectType => $tableElement) {
+        foreach ($extraFieldNames as $extraFieldName) {
+            if (!isset($existingExtraFields[$extraFieldName][$tableElement])) {
+                continue;
+            }
+
+            $sql  = 'SELECT COUNT(*) as nb FROM ' . MAIN_DB_PREFIX . $tableElement . '_extrafields';
+            $sql .= ' WHERE ' . $extraFieldName . " IS NOT NULL AND " . $extraFieldName . " <> ''";
+
+            $resql = $db->query($sql);
+            if ($resql) {
+                $obj = $db->fetch_object($resql);
+
+                $usage[$objectType]['extrafields'][$extraFieldName] = (int) $obj->nb;
+                $db->free($resql);
+            }
+        }
+    }
+
+    return $usage;
+}
