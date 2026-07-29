@@ -198,3 +198,92 @@ function saturne_get_linked_object_usage(
 
     return $usage;
 }
+
+/**
+ * Add or remove the extrafields carried by the linked objects
+ *
+ * Idempotent : adding an already declared extrafield and deleting an absent one are both no-ops,
+ * so the function can be replayed at will.
+ *
+ * Only the objects present in $linkableObjects are touched. An extrafield left on the table of a
+ * module that no longer contributes metadata is deliberately kept : that module may simply be
+ * disabled, and dropping its column would destroy data.
+ *
+ * @param  array $definitions        Extrafield definitions, each one holding the keys name, label, type,
+ *                                   pos, size, default_value, param, alwayseditable, list, langfile,
+ *                                   enabled, and object_types. An empty object_types means every enabled
+ *                                   object, a filled one restricts the definition to the listed types.
+ * @param  array $linkableObjects    Result of saturne_filter_linkable_objects()
+ * @param  array $enabledObjectTypes Result of saturne_get_enabled_linked_object_types()
+ * @return array                     ['added' => string[], 'deleted' => string[], 'errors' => int]
+ */
+function saturne_sync_linked_object_extrafields(
+    array $definitions,
+    array $linkableObjects,
+    array $enabledObjectTypes
+): array {
+    global $db;
+
+    require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
+
+    $extraFields = new ExtraFields($db);
+    $report      = ['added' => [], 'deleted' => [], 'errors' => 0];
+
+    $extraFieldNames = [];
+    foreach ($definitions as $definition) {
+        $extraFieldNames[] = $definition['name'];
+    }
+    $existingExtraFields = saturne_get_existing_extrafields($extraFieldNames);
+
+    foreach ($definitions as $definition) {
+        foreach ($linkableObjects as $objectType => $objectMetadata) {
+            $tableElement = $objectMetadata['table_element'];
+
+            $restrictedTypes = $definition['object_types'];
+
+            $isEnabled  = in_array($objectType, $enabledObjectTypes, true);
+            $isInScope  = empty($restrictedTypes) || in_array($objectType, $restrictedTypes, true);
+            $isWanted   = $isEnabled && $isInScope;
+            $isDeclared = isset($existingExtraFields[$definition['name']][$tableElement]);
+
+            if ($isWanted && !$isDeclared) {
+                $result = $extraFields->addExtraField(
+                    $definition['name'],
+                    $definition['label'],
+                    $definition['type'],
+                    $definition['pos'],
+                    $definition['size'],
+                    $tableElement,
+                    0,
+                    0,
+                    $definition['default_value'],
+                    $definition['param'],
+                    $definition['alwayseditable'],
+                    '',
+                    $definition['list'],
+                    '',
+                    '',
+                    0,
+                    $definition['langfile'],
+                    $definition['enabled']
+                );
+
+                if ($result > 0) {
+                    $report['added'][] = $definition['name'] . ' @ ' . $tableElement;
+                } else {
+                    $report['errors']++;
+                }
+            } elseif (!$isWanted && $isDeclared) {
+                $result = $extraFields->delete($definition['name'], $tableElement);
+
+                if ($result >= 0) {
+                    $report['deleted'][] = $definition['name'] . ' @ ' . $tableElement;
+                } else {
+                    $report['errors']++;
+                }
+            }
+        }
+    }
+
+    return $report;
+}
