@@ -613,10 +613,12 @@ abstract class SaturneObject extends CommonObject
         if (isset($this->status)) {
             $datas['picto'] .= ' ' . $this->getLibStatut(5);
         }
-        if (property_exists($this, 'ref')) {
+        // isset() rather than property_exists(): a typed property left uninitialized
+        // by a failed fetch() does exist, but reading it raises a fatal error
+        if (isset($this->ref)) {
             $datas['ref'] = '<br><b>' . $langs->trans('Ref') . ' : </b> ' . $this->ref;
         }
-        if (property_exists($this, 'label')) {
+        if (isset($this->label)) {
             $datas['label'] = '<br><b>' . $langs->trans('Label') . ' : </b> ' . $this->label;
         }
 
@@ -720,7 +722,7 @@ abstract class SaturneObject extends CommonObject
             if ($withPicto == 3) {
                 $addLabel = 1;
             }
-            $result .= (($addLabel && property_exists($this, 'label')) ? '<span class="opacitymedium"> - <span contenteditable="true" data-field="label">' . dol_trunc($this->label, ($addLabel > 1 ? $addLabel : 0)) . '</span></span>' : '');
+            $result .= (($addLabel && isset($this->label)) ? '<span class="opacitymedium"> - <span contenteditable="true" data-field="label">' . dol_trunc($this->label, ($addLabel > 1 ? $addLabel : 0)) . '</span></span>' : '');
         }
 
         $hookmanager->initHooks([$this->element . 'dao']);
@@ -1103,13 +1105,13 @@ abstract class SaturneObject extends CommonObject
         if ($selected >= 0) {
             $out .= '<input id="cb' . $this->id . '" class="flat checkforselect fright" type="checkbox" name="toselect[]" value="' . $this->id . '"' . ($selected ? ' checked="checked"' : '') . '>';
         }
-        if (property_exists($this, 'label')) {
+        if (isset($this->label)) {
             $out .= '<div class="inline-block opacitymedium valignmiddle tdoverflowmax100">' . $this->label . '</div>';
         }
-        if (property_exists($this, 'thirdparty') && is_object($this->thirdparty)) {
+        if (isset($this->thirdparty) && is_object($this->thirdparty)) {
             $out .= '<br><div class="info-box-ref tdoverflowmax150">' . $this->thirdparty->getNomUrl(1) . '</div>';
         }
-        if (method_exists($this, 'getLibStatut')) {
+        if (isset($this->status) && method_exists($this, 'getLibStatut')) {
             $out .= '<br><div class="info-box-status">' . $this->getLibStatut(3) . '</div>';
         }
         $out .= '</div>';
