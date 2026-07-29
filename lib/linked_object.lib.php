@@ -287,3 +287,43 @@ function saturne_sync_linked_object_extrafields(
 
     return $report;
 }
+
+/**
+ * Rebuild the tabs and module parts a module registers into the database
+ *
+ * The module descriptor is instantiated again on purpose : it reads the configuration constants in
+ * its constructor, so a fresh instance is the only way to pick up a constant changed in the same
+ * request. delete_tabs() wipes every _TABS_ constant and delete_module_parts() wipes the declared
+ * module part constants, so the rebuild is a full replacement, not a patch.
+ *
+ * Must be called from a web request : in CLI the tabs and objects injected by other modules through
+ * hooks are not loaded, and rebuilding would silently drop them.
+ *
+ * @param  string $moduleDirectory Module directory under htdocs/custom, example 'digiquali'
+ * @param  string $moduleClassName Descriptor class name, example 'modDigiQuali'
+ * @return array                   ['tabs' => int, 'hooks' => int, 'errors' => int]
+ */
+function saturne_refresh_module_registrations(string $moduleDirectory, string $moduleClassName): array
+{
+    global $db;
+
+    $classPath = dol_buildpath('/' . $moduleDirectory . '/core/modules/' . $moduleClassName . '.class.php', 0);
+    if (!file_exists($classPath)) {
+        return ['tabs' => 0, 'hooks' => 0, 'errors' => 1];
+    }
+
+    require_once $classPath;
+
+    $module = new $moduleClassName($db);
+
+    $errors  = $module->delete_tabs();
+    $errors += $module->insert_tabs();
+    $errors += $module->delete_module_parts();
+    $errors += $module->insert_module_parts();
+
+    return [
+        'tabs'   => is_array($module->tabs) ? count($module->tabs) : 0,
+        'hooks'  => isset($module->module_parts['hooks']) ? count($module->module_parts['hooks']) : 0,
+        'errors' => $errors
+    ];
+}
