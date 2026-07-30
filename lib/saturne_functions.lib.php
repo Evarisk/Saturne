@@ -27,6 +27,7 @@ require_once __DIR__ . '/medias.lib.php';
 require_once __DIR__ . '/pagination.lib.php';
 require_once __DIR__ . '/documents.lib.php';
 require_once __DIR__ . '/object.lib.php';
+require_once __DIR__ . '/linked_object.lib.php';
 require_once __DIR__ . '/debug.lib.php';
 require_once __DIR__ . '/component.lib.php';
 require_once __DIR__ . '/dolibarr.lib.php';
