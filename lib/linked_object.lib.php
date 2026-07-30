@@ -28,9 +28,9 @@
  * Alias entries, duplicated table elements and the objects excluded by the caller are dropped, so that
  * a consumer iterating on the result never processes the same database table twice.
  *
- * @param  array $objectsMetadata          Result of saturne_get_objects_metadata()
- * @param  array $excludedLinkNamePrefixes Link name prefixes to drop, example ['digiquali_']
- * @return array                           Subset of $objectsMetadata, original keys preserved
+ * @param  array<string, array<string, mixed>> $objectsMetadata          Result of saturne_get_objects_metadata()
+ * @param  string[]                            $excludedLinkNamePrefixes Prefixes to drop, ex. ['digiquali_']
+ * @return array<string, array<string, mixed>>                           Subset of $objectsMetadata, keys kept
  */
 function saturne_filter_linkable_objects(array $objectsMetadata, array $excludedLinkNamePrefixes = []): array
 {
@@ -64,9 +64,9 @@ function saturne_filter_linkable_objects(array $objectsMetadata, array $excluded
 /**
  * Get the object types whose link is enabled by configuration
  *
- * @param  array  $linkableObjects Result of saturne_filter_linkable_objects()
- * @param  string $constPrefix     Configuration constant prefix, example 'DIGIQUALI_SHEET_LINK_'
- * @return array                   List of enabled object types
+ * @param  array<string, array<string, mixed>> $linkableObjects Result of saturne_filter_linkable_objects()
+ * @param  string                              $constPrefix     Constant prefix, ex. 'DIGIQUALI_SHEET_LINK_'
+ * @return string[]                                             List of enabled object types
  */
 function saturne_get_enabled_linked_object_types(array $linkableObjects, string $constPrefix): array
 {
@@ -86,8 +86,8 @@ function saturne_get_enabled_linked_object_types(array $linkableObjects, string 
  *
  * Read once and reused, so that a missing column never turns into a failing count query.
  *
- * @param  array $extraFieldNames Extrafield names to look for
- * @return array                  name => [elementtype => true]
+ * @param  string[]                           $extraFieldNames Extrafield names to look for
+ * @return array<string, array<string, bool>>                  name => [elementtype => true]
  */
 function saturne_get_existing_extrafields(array $extraFieldNames): array
 {
@@ -124,10 +124,10 @@ function saturne_get_existing_extrafields(array $extraFieldNames): array
  * Feeds the usage column of an admin page, sizes the confirmation shown before a destructive
  * toggle, and lets a module backward keep every link that already carries data.
  *
- * @param  array $linkableObjects    Result of saturne_filter_linkable_objects()
- * @param  array $extraFieldNames    Extrafield names to count, example ['qc_frequency']
- * @param  array $linkedElementTypes Element types on the module side, example ['digiquali_control']
- * @return array                     objectType => ['links' => int, 'extrafields' => [name => int]]
+ * @param  array<string, array<string, mixed>> $linkableObjects    Result of saturne_filter_linkable_objects()
+ * @param  string[]                            $extraFieldNames    Extrafield names to count, example ['qc_frequency']
+ * @param  string[]                            $linkedElementTypes Module side types, ex. ['digiquali_control']
+ * @return array<string, array{links: int, extrafields: array<string, int>}> objectType => usage counters
  */
 function saturne_get_linked_object_usage(
     array $linkableObjects,
@@ -209,13 +209,15 @@ function saturne_get_linked_object_usage(
  * module that no longer contributes metadata is deliberately kept : that module may simply be
  * disabled, and dropping its column would destroy data.
  *
- * @param  array $definitions        Extrafield definitions, each one holding the keys name, label, type,
- *                                   pos, size, default_value, param, alwayseditable, list, langfile,
- *                                   enabled, and object_types. An empty object_types means every enabled
- *                                   object, a filled one restricts the definition to the listed types.
- * @param  array $linkableObjects    Result of saturne_filter_linkable_objects()
- * @param  array $enabledObjectTypes Result of saturne_get_enabled_linked_object_types()
- * @return array                     ['added' => string[], 'deleted' => string[], 'errors' => int]
+ * @param  array<int, array<string, mixed>>    $definitions        Extrafield definitions, each one holding the keys
+ *                                                                 name, label, type, pos, size, default_value, param,
+ *                                                                 alwayseditable, list, langfile, enabled and
+ *                                                                 object_types. An empty object_types means every
+ *                                                                 enabled object, a filled one restricts the
+ *                                                                 definition to the listed types.
+ * @param  array<string, array<string, mixed>> $linkableObjects    Result of saturne_filter_linkable_objects()
+ * @param  string[]                            $enabledObjectTypes Result of saturne_get_enabled_linked_object_types()
+ * @return array{added: string[], deleted: string[], errors: int}  Synchronisation report
  */
 function saturne_sync_linked_object_extrafields(
     array $definitions,
@@ -299,9 +301,9 @@ function saturne_sync_linked_object_extrafields(
  * Must be called from a web request : in CLI the tabs and objects injected by other modules through
  * hooks are not loaded, and rebuilding would silently drop them.
  *
- * @param  string $moduleDirectory Module directory under htdocs/custom, example 'digiquali'
- * @param  string $moduleClassName Descriptor class name, example 'modDigiQuali'
- * @return array                   ['tabs' => int, 'hooks' => int, 'errors' => int]
+ * @param  string $moduleDirectory                          Module directory under htdocs/custom, example 'digiquali'
+ * @param  string $moduleClassName                          Descriptor class name, example 'modDigiQuali'
+ * @return array{tabs: int, hooks: int, errors: int}         Number of tabs and hooks written, and error count
  */
 function saturne_refresh_module_registrations(string $moduleDirectory, string $moduleClassName): array
 {
