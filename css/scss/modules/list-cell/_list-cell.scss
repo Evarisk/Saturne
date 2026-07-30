@@ -1,0 +1,23 @@
+// List cell truncation for rich content
+//
+// Dolibarr's .tdoverflowmax* classes set white-space: nowrap on the <td>, which truncates plain
+// text but not markup : an html field carrying <h2>, <ul> or <li> renders block elements that open
+// their own line boxes, so the row grows to the full height of the description while its width
+// stays correctly capped. Forcing the descendants inline lets the parent truncation apply.
+
+table.liste td[class*="tdoverflowmax"] {
+    * {
+        display: inline;
+        margin: 0;
+        padding: 0;
+        font-size: inherit;
+        font-weight: inherit;
+        line-height: inherit;
+        list-style: none;
+    }
+
+    br,
+    img {
+        display: none;
+    }
+}
