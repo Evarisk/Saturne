@@ -65,6 +65,9 @@ window.saturne.dashboard.event = function() {
     $(document).on('click', '#dashboard-graph-filter-submit', window.saturne.dashboard.selectDashboardFilter);
     $(document).on('click', '#dashboard-close-item', window.saturne.dashboard.closeDashboardItem);
     $(document).on('click', '#export-csv', window.saturne.dashboard.exportCSV);
+    // Bound on the document because the graphs are redrawn by AJAX each time a dashboard filter changes
+    $(document).on('click', '.dolgraph canvas', window.saturne.dashboard.openGraphLink);
+    $(document).on('mousemove', '.dolgraph canvas', window.saturne.dashboard.markGraphAsClickable);
 };
 
 /**
@@ -273,3 +276,171 @@ window.saturne.dashboard.exportCSV = function(e) {
     error: function() {}
   });
 };
+
+/**
+ * Get the options the dashboard attached to the graph a canvas belongs to
+ *
+ * Returns null for every graph without those options, so the graphs declaring none keep their default
+ * behaviour.
+ *
+ * @memberof Saturne_Dashboard
+ *
+ * @since   23.0.0
+ * @version 23.0.0
+ *
+ * @param  {Element}     canvas Canvas the graph is drawn on
+ * @return {Object|null}        Graph options, null when the graph carries none
+ */
+window.saturne.dashboard.getGraphOptions = function(canvas) {
+  let options = $(canvas).closest('[id^="graph-"]').find('.dashboard-graph-options').val();
+
+  return options ? JSON.parse(options) : null;
+};
+
+/**
+ * Get the Chart.js chart drawn on a canvas
+ *
+ * @memberof Saturne_Dashboard
+ *
+ * @since   23.0.0
+ * @version 23.0.0
+ *
+ * @param  {Element}     canvas Canvas the graph is drawn on
+ * @return {Object|null}        Chart drawn on the canvas, null when Chart.js drew none
+ */
+window.saturne.dashboard.getGraphChart = function(canvas) {
+  if (typeof Chart === 'undefined' || !Chart.getChart) {
+    return null;
+  }
+
+  return Chart.getChart(canvas);
+};
+
+/**
+ * Get the URL of the graph bar under the pointer
+ *
+ * @memberof Saturne_Dashboard
+ *
+ * @since   23.0.0
+ * @version 23.0.0
+ *
+ * @param  {Element} canvas Canvas the graph is drawn on
+ * @param  {Event}   event  Mouse event fired on the canvas
+ * @return {string}         URL of the bar, empty when no linked bar is under the pointer
+ */
+window.saturne.dashboard.getGraphLinkUrl = function(canvas, event) {
+  let options = window.saturne.dashboard.getGraphOptions(canvas);
+  let chart   = window.saturne.dashboard.getGraphChart(canvas);
+  if (!options || !chart) {
+    return '';
+  }
+
+  // 'nearest' resolves the single bar under the pointer, so a graph whose series each carry their own filter
+  // knows which one was clicked
+  let bars = chart.getElementsAtEventForMode(event.originalEvent || event, 'nearest', {intersect: true}, true);
+  if (!bars.length) {
+    return '';
+  }
+
+  let links = options.datasetLinks ? options.datasetLinks[bars[0].datasetIndex] : options.links;
+
+  return (links || [])[bars[0].index] || '';
+};
+
+/**
+ * Open the list the clicked graph bar links to
+ *
+ * Opened in a tab of its own, as the links of the dashboard widgets are: the dashboard is rendered by the POST
+ * of the login form when it is the page the user signed in on, and coming back to it then asks the browser to
+ * post those credentials again.
+ *
+ * @memberof Saturne_Dashboard
+ *
+ * @since   23.0.0
+ * @version 23.0.0
+ *
+ * @param  {Event} event Click event fired on the canvas
+ * @return {void}
+ */
+window.saturne.dashboard.openGraphLink = function(event) {
+  let url = window.saturne.dashboard.getGraphLinkUrl(this, event);
+  if (!url) {
+    return;
+  }
+
+  // Falls back on the current tab when the browser blocks the new one
+  if (!window.open(url, '_blank')) {
+    window.location.href = url;
+  }
+};
+
+/**
+ * Show the pointer cursor while a linked graph bar is hovered
+ *
+ * @memberof Saturne_Dashboard
+ *
+ * @since   23.0.0
+ * @version 23.0.0
+ *
+ * @param  {Event} event Mouse move event fired on the canvas
+ * @return {void}
+ */
+window.saturne.dashboard.markGraphAsClickable = function(event) {
+  let url = window.saturne.dashboard.getGraphLinkUrl(this, event);
+  $(this).toggleClass('graph-bar-clickable', url !== '');
+};
+
+/**
+ * Move the dataset declared by the graph to a Y axis of its own
+ *
+ * Two series of different magnitudes on a shared axis flatten the smaller one, and DolGraph draws every
+ * dataset against the single default axis. The scales are rewritten before the first render, so the graph is
+ * drawn once, already readable.
+ *
+ * @memberof Saturne_Dashboard
+ *
+ * @since   23.0.0
+ * @version 23.0.0
+ *
+ * @param  {Object} chart Chart.js chart being initialized
+ * @return {void}
+ */
+window.saturne.dashboard.setSecondAxis = function(chart) {
+  let options = window.saturne.dashboard.getGraphOptions(chart.canvas);
+  if (!options || options.secondAxisDataset === undefined) {
+    return;
+  }
+
+  let dataset = chart.config.data.datasets[options.secondAxisDataset];
+  if (!dataset || !chart.config.options) {
+    return;
+  }
+
+  let secondAxis = {
+    type: 'linear',
+    position: 'right',
+    beginAtZero: true,
+    // The right axis has a scale of its own, its grid lines would cross the ones of the left axis
+    grid: {drawOnChartArea: false}
+  };
+  if (typeof dataset.backgroundColor === 'string') {
+    secondAxis.ticks = {color: dataset.backgroundColor};
+  }
+
+  let scales = chart.config.options.scales || {};
+  scales.y = $.extend({type: 'linear', position: 'left', beginAtZero: true}, scales.y);
+  scales.saturneSecondAxis = secondAxis;
+
+  chart.config.options.scales = scales;
+  dataset.yAxisID = 'saturneSecondAxis';
+};
+
+/* Registered as soon as the file is evaluated rather than from init(): DolGraph creates its charts from inline
+ * scripts running while the page is parsed, long before the document is ready. The plugin is a no-op on every
+ * chart whose graph does not declare a second axis. */
+if (typeof Chart !== 'undefined' && Chart.register) {
+  Chart.register({
+    id: 'saturneDashboard',
+    beforeInit: window.saturne.dashboard.setSecondAxis
+  });
+}

@@ -24,6 +24,8 @@
 
 require_once DOL_DOCUMENT_ROOT . '/projet/class/task.class.php';
 
+require_once __DIR__ . '/../saturnedashboard.class.php';
+
 //require_once __DIR__ . '/digiriskstats.php';
 
 /**
@@ -161,6 +163,18 @@ class SaturneTask extends Task
                 }
             }
         }
+
+        // The task list reads its progress criteria with natural_search, which understands the comparison
+        // operators. '<1' rather than '0' because the list ignores a criteria equal to the empty string, and
+        // '0' is one of them
+        $listUrl = DOL_URL_ROOT . '/projet/tasks/list.php?' . ($projectId > 0 ? 'id=' . $projectId . '&' : '') . 'search_task_progress=';
+        $links   = [
+            $listUrl . urlencode('<1'),
+            $listUrl . urlencode('>0 <100'),
+            $listUrl . urlencode('>=100')
+        ];
+
+        $array['morehtmlright'] = SaturneDashboard::getGraphOptionsInput(['links' => $links]);
 
         return $array;
     }
@@ -340,10 +354,6 @@ class SaturneTask extends Task
         $sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "societe as s ON p.fk_soc = s.rowid";
         $sql .= ") AS selector";
         $sql .= " WHERE fk_element = task_id AND project_linked_id = project_id";
-        // La table element_time est partagée entre types d'élément, sans ce filtre une ligne d'un autre type serait rattachée à la tâche de même rowid
-        if ($versionEighteenOrMore) {
-            $sql .= " AND elementtype = 'task'";
-        }
         $sql .= " AND task_entity IN (" . getEntity('project') . ")";
         if ($morewherefilter) {
             $sql .= $morewherefilter;
