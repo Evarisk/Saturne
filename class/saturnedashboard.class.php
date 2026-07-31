@@ -389,6 +389,26 @@ class SaturneDashboard
     }
 
     /**
+     * Get the hidden input holding the options the dashboard JS needs to enhance a graph
+     *
+     * Dashboard graphs are drawn on a canvas by DolGraph, which handles neither a link per bar nor a second Y
+     * axis, so both are declared here and applied by the dashboard JS.
+     *
+     * @param  array  $options Graph options: 'links' holds the URL each bar opens, in the order of the data rows,
+     *                         'datasetLinks' the same thing per dataset when the series do not share a filter,
+     *                         and 'secondAxisDataset' the index of the dataset to move to its own Y axis
+     * @return string          Hidden input to append to the graph title, empty when no bar links anywhere
+     */
+    public static function getGraphOptionsInput(array $options): string
+    {
+        if (empty($options['links']) && empty($options['datasetLinks'])) {
+            return '';
+        }
+
+        return '<input type="hidden" class="dashboard-graph-options" value="' . dol_escape_htmltag(json_encode($options, JSON_UNESCAPED_UNICODE)) . '">';
+    }
+
+    /**
      * get color range for key
      *
      * @param  int    $key Key to find in color array

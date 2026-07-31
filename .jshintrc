@@ -19,6 +19,7 @@
   "strict": "implied",
   "globals": {
     "angular": false,
+    "Chart": false,
     "module": false,
     "require": false,
     "URLSearchParams": true,
