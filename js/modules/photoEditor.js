@@ -55,6 +55,8 @@ window.saturne.photoEditor._onSaveAll    = null;
 window.saturne.photoEditor._onDelete     = null;
 window.saturne.photoEditor._urls         = [];
 window.saturne.photoEditor._currentIndex = 0;
+window.saturne.photoEditor._files        = null;
+window.saturne.photoEditor._isBatchUpload = false;
 
 /**
  * Resolve the DOM element of a given editor tool ('pencil' is wrapped in its own container).
@@ -194,21 +196,31 @@ window.saturne.photoEditor.event = function() {
   btnPrev.addEventListener('click', function() {
     var pe = window.saturne.photoEditor;
     if (pe._urls.length < 2) return;
-    pe._currentIndex = (pe._currentIndex - 1 + pe._urls.length) % pe._urls.length;
-    pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
-      var badge = document.getElementById('saturne-photo-index-badge');
-      if (badge) badge.textContent = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
-    });
+    var nextIndex = (pe._currentIndex - 1 + pe._urls.length) % pe._urls.length;
+    if (pe._isBatchUpload) {
+      pe._saveCurrentStateAndGo(nextIndex);
+    } else {
+      pe._currentIndex = nextIndex;
+      pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
+        var badge = document.getElementById('saturne-photo-index-badge');
+        if (badge) badge.textContent = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
+      });
+    }
   });
 
   btnNext.addEventListener('click', function() {
     var pe = window.saturne.photoEditor;
     if (pe._urls.length < 2) return;
-    pe._currentIndex = (pe._currentIndex + 1) % pe._urls.length;
-    pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
-      var badge = document.getElementById('saturne-photo-index-badge');
-      if (badge) badge.textContent = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
-    });
+    var nextIndex = (pe._currentIndex + 1) % pe._urls.length;
+    if (pe._isBatchUpload) {
+      pe._saveCurrentStateAndGo(nextIndex);
+    } else {
+      pe._currentIndex = nextIndex;
+      pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
+        var badge = document.getElementById('saturne-photo-index-badge');
+        if (badge) badge.textContent = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
+      });
+    }
   });
 
   // Undo
@@ -261,10 +273,18 @@ window.saturne.photoEditor.event = function() {
         activeText.blur();
       }
       var onSaveAll = window.saturne.photoEditor._onSaveAll;
+      var isBatch = window.saturne.photoEditor._isBatchUpload;
+      var files = window.saturne.photoEditor._files;
+      var currentIndex = window.saturne.photoEditor._currentIndex;
       window.saturne.photoEditor._close();
       if (typeof onSaveAll === 'function') {
         canvas.toBlob(function(blob) {
-          onSaveAll(blob);
+          if (isBatch) {
+            files[currentIndex] = new File([blob], files[currentIndex].name, { type: 'image/jpeg', lastModified: Date.now() });
+            onSaveAll(files);
+          } else {
+            onSaveAll(blob);
+          }
         }, 'image/jpeg', 0.85);
       }
     });
@@ -381,6 +401,12 @@ window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex, onDele
     btnOkAllEl.style.display = (typeof pe._onSaveAll === 'function') ? 'flex' : 'none';
   }
 
+  // Hide the single validate button if we are in batch upload mode
+  var btnOkEl = document.getElementById('saturne-btn-ok-photo');
+  if (btnOkEl) {
+    btnOkEl.style.display = (pe._isBatchUpload && typeof pe._onSaveAll === 'function') ? 'none' : 'flex';
+  }
+
   // Re-apply the user's tool visibility preferences
   pe._applyToolVisibility();
 
@@ -454,6 +480,40 @@ window.saturne.photoEditor.openFile = function(file, onSave, onSaveAll) {
 };
 
 /**
+ * Open the photo editor in batch mode with multiple File objects
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @param   {Array}    files       Array of File objects to load
+ * @param   {Function} onSaveBatch Callback receiving an array of modified File objects on validate all
+ * @returns {void}
+ */
+window.saturne.photoEditor.openBatch = function(files, onSaveBatch) {
+  var pe = window.saturne.photoEditor;
+  var urls = [];
+  for (var i = 0; i < files.length; i++) {
+    urls.push(URL.createObjectURL(files[i]));
+  }
+  
+  pe._files = files;
+  pe._isBatchUpload = true;
+  
+  // Clean up object URLs when saving
+  var onSaveBatchWrapper = function(modifiedFiles) {
+    for (var i = 0; i < urls.length; i++) {
+      if (urls[i].indexOf('blob:') === 0) {
+        URL.revokeObjectURL(urls[i]);
+      }
+    }
+    if (typeof onSaveBatch === 'function') {
+      onSaveBatch(modifiedFiles);
+    }
+  };
+
+  pe.open(urls, null, 0, null, onSaveBatchWrapper);
+};
+
+/**
  * Resize a File/Blob to the currently selected quality and return a JPEG Blob,
  * without opening the editor. Mirrors _loadUrlIntoCanvas() resize logic.
  *
@@ -499,6 +559,30 @@ window.saturne.photoEditor._close = function() {
   }
   window.saturne.photoEditor._onSave    = null;
   window.saturne.photoEditor._onSaveAll = null;
+  window.saturne.photoEditor._isBatchUpload = false;
+  window.saturne.photoEditor._files = null;
+};
+
+window.saturne.photoEditor._saveCurrentStateAndGo = function(nextIndex) {
+  var pe     = window.saturne.photoEditor;
+  var canvas = pe._canvas;
+  
+  canvas.toBlob(function(blob) {
+    var oldUrl = pe._urls[pe._currentIndex];
+    if (oldUrl.indexOf('blob:') === 0) {
+      URL.revokeObjectURL(oldUrl);
+    }
+    pe._urls[pe._currentIndex] = URL.createObjectURL(blob);
+    if (pe._files && pe._files[pe._currentIndex]) {
+      pe._files[pe._currentIndex] = new File([blob], pe._files[pe._currentIndex].name, { type: 'image/jpeg', lastModified: Date.now() });
+    }
+    
+    pe._currentIndex = nextIndex;
+    pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
+      var badge = document.getElementById('saturne-photo-index-badge');
+      if (badge) badge.textContent = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
+    });
+  }, 'image/jpeg', 0.85);
 };
 
 window.saturne.photoEditor._saveState = function() {
