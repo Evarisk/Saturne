@@ -102,9 +102,11 @@ window.saturne.mediaBlock.onPhotoSelected = function() {
   // Reset input so the same file can be re-selected if needed
   input.val('');
 
-  // Every photo (single or series) goes through the editor sequentially so each one is
-  // resized/annotated like a single photo: validate one, the editor re-opens for the next.
-  window.saturne.mediaBlock.openFilesSequentially(filesArray, 0, module, subdir, block);
+  // Send all files to the editor in batch mode. The editor will return an array of
+  // modified File objects once the user clicks Validate All.
+  window.saturne.photoEditor.openBatch(filesArray, function(modifiedFiles) {
+    window.saturne.mediaBlock.uploadBatchFiles(filesArray, modifiedFiles, module, subdir, block);
+  });
 };
 
 /**
@@ -262,6 +264,51 @@ window.saturne.mediaBlock.openFilesSequentially = function(files, index, module,
   }
 
   window.saturne.photoEditor.openFile(files[index], onValidate, onValidateAll);
+};
+
+/**
+ * Upload an array of files in batch mode.
+ * Untouched files (which were never loaded into the canvas) are resized before uploading.
+ * Modified files (which were loaded and potentially edited) are uploaded directly.
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.1.0
+ * @version 1.0.0
+ *
+ * @param   {Array}  originalFiles Original File objects from the input
+ * @param   {Array}  modifiedFiles File objects returned by the editor
+ * @param   {string} module        Module name
+ * @param   {string} subdir        Sub-directory
+ * @param   {jQuery} block         The .linked-medias block element
+ * @returns {void}
+ */
+window.saturne.mediaBlock.uploadBatchFiles = function(originalFiles, modifiedFiles, module, subdir, block) {
+  var index = 0;
+  
+  var processNext = function() {
+    if (index >= modifiedFiles.length) {
+      return;
+    }
+    
+    var uploadAndNext = function(blob) {
+      window.saturne.mediaBlock.uploadBlob(blob, module, subdir, block);
+      index++;
+      processNext();
+    };
+    
+    if (modifiedFiles[index] === originalFiles[index]) {
+      // Untouched file, needs resizing
+      window.saturne.photoEditor.resizeFileToBlob(originalFiles[index], function(blob) {
+        uploadAndNext(blob);
+      });
+    } else {
+      // Already modified/resized by the canvas
+      uploadAndNext(modifiedFiles[index]);
+    }
+  };
+  
+  processNext();
 };
 
 /**
