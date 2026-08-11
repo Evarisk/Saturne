@@ -160,6 +160,15 @@ class ActionsSaturne
 
             $this->resprints = $out;
         }
+        
+        $out = $this->resprints;
+        $out .= "\n" . '<!-- Config Saturne injected by addHtmlHeader -->';
+        $out .= "\n" . '<script>';
+        $out .= "\n" . 'window.saturne = window.saturne || {};';
+        $out .= "\n" . 'window.saturne.config = window.saturne.config || {};';
+        $out .= "\n" . 'window.saturne.config.enableMaxlengthCounter = ' . getDolGlobalInt('SATURNE_ENABLE_MAXLENGTH_COUNTER', 0) . ';';
+        $out .= "\n" . '</script>' . "\n";
+        $this->resprints = $out;
 
         return 0;
     }
