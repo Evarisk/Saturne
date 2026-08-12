@@ -161,7 +161,7 @@ class ActionsSaturne
             $this->resprints = $out;
         }
         
-        $out = $this->resprints;
+        $out = isset($this->resprints) ? $this->resprints : '';
         $out .= "\n" . '<!-- Config Saturne injected by addHtmlHeader -->';
         $out .= "\n" . '<script>';
         $out .= "\n" . 'window.saturne = window.saturne || {};';
