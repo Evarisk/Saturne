@@ -35,6 +35,18 @@
         ?>
         <input type="hidden" name="token" value="<?php echo newToken(); ?>">
 
+        <?php
+        // Determine the document format from the module's default model.
+        // Native PDF models (e.g. "preventionplandocument") do NOT end with "_odt".
+        // ODT models end with "_odt" (e.g. "preventionplandocument_odt").
+        $confDefaultModel = dol_strtoupper($moduleNameLowerCase) . '_' . dol_strtoupper($documentType ?? '') . '_DEFAULT_MODEL';
+        $defaultModel     = getDolGlobalString($confDefaultModel, '');
+        $isNativePdf      = (!empty($defaultModel) && !preg_match('/_odt$/i', $defaultModel));
+
+        $confAutoPdf = dol_strtoupper($moduleNameLowerCase) . '_AUTOMATIC_PDF_GENERATION';
+        $canServePdf = $isNativePdf || (!empty($conf->global->MAIN_ODT_AS_PDF) && getDolGlobalInt($confAutoPdf) > 0);
+        ?>
+
         <div class="public-card__header wpeo-gridlayout grid-2 grid-gap-2">
             <div class="header-information">
                 <div class="<?php echo $moreParams['moreCSS'] ?? ''; ?>"><a href="#" onclick="window.close();" class="information-back" id="signature-back-btn" style="display:none;">
@@ -64,17 +76,6 @@
                     <div class="objet-actions file-generation">
                         <?php
                         $path = DOL_MAIN_URL_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/';
-
-                        // Determine the document format from the module's default model.
-                        // Native PDF models (e.g. "preventionplandocument") do NOT end with "_odt".
-                        // ODT models end with "_odt" (e.g. "preventionplandocument_odt").
-                        $confDefaultModel = dol_strtoupper($moduleNameLowerCase) . '_' . dol_strtoupper($documentType ?? '') . '_DEFAULT_MODEL';
-                        $defaultModel     = getDolGlobalString($confDefaultModel, '');
-                        $isNativePdf      = (!empty($defaultModel) && !preg_match('/_odt$/i', $defaultModel));
-
-                        // If the default model is native PDF, check if ODT-to-PDF is also possible
-                        $confAutoPdf = dol_strtoupper($moduleNameLowerCase) . '_AUTOMATIC_PDF_GENERATION';
-                        $canServePdf = $isNativePdf || (!empty($conf->global->MAIN_ODT_AS_PDF) && getDolGlobalInt($confAutoPdf) > 0);
                         $specimenExt = $canServePdf ? '.pdf' : '.odt';
 
                         $specimenName = $objectType . '_specimen_' . $trackID . $specimenExt;

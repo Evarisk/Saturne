@@ -98,4 +98,4 @@ ExtrafieldsFieldAddFailed    = Failed to add extrafield for key %s
 
 # Public signature page
 DocumentNotAvailable = Document non disponible
-PublicSignatureNoPdfAvailable = Pour consulter le document au format PDF, contactez un administrateur qui activera la génération PDF native.
+PublicSignatureNoPdfAvailable = Pour consulter le document au format PDF, contactez un administrateur qui activera la generation PDF native.
