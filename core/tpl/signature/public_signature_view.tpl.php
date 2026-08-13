@@ -62,8 +62,14 @@
                         <div class="objet-label"><?php echo $object->ref . ' ' . $object->label; ?></div>
                     </div>
                     <div class="objet-actions file-generation">
-                        <?php $path = DOL_MAIN_URL_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/'; ?>
-                        <input type="hidden" class="specimen-name" data-specimen-name="<?php echo $objectType . '_specimen_' . $trackID . '.odt'; ?>">
+                        <?php
+                        $path = DOL_MAIN_URL_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/';
+                        // When automatic PDF generation is enabled, offer the PDF instead of the ODT
+                        $confPdfName  = dol_strtoupper($moduleNameLowerCase) . '_AUTOMATIC_PDF_GENERATION';
+                        $specimenExt  = (!empty($conf->global->MAIN_ODT_AS_PDF) && getDolGlobalInt($confPdfName) > 0) ? '.pdf' : '.odt';
+                        $specimenName = $objectType . '_specimen_' . $trackID . $specimenExt;
+                        ?>
+                        <input type="hidden" class="specimen-name" data-specimen-name="<?php echo $specimenName; ?>">
                         <input type="hidden" class="specimen-path" data-specimen-path="<?php echo $path; ?>">
                         <?php if (GETPOSTISSET('document_type') && $fileExists) :
                             ?>
