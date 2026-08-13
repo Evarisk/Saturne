@@ -88,3 +88,7 @@ Responsible                      = Responsible
 # Public interface
 SavedSignature = Signature saved
 
+
+# Public signature page
+DocumentNotAvailable = Document not available
+PublicSignatureNoPdfAvailable = To view the document in PDF format, contact an administrator to enable native PDF generation.

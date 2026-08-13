@@ -64,9 +64,19 @@
                     <div class="objet-actions file-generation">
                         <?php
                         $path = DOL_MAIN_URL_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/';
-                        // When automatic PDF generation is enabled, offer the PDF instead of the ODT
-                        $confPdfName  = dol_strtoupper($moduleNameLowerCase) . '_AUTOMATIC_PDF_GENERATION';
-                        $specimenExt  = (!empty($conf->global->MAIN_ODT_AS_PDF) && getDolGlobalInt($confPdfName) > 0) ? '.pdf' : '.odt';
+
+                        // Determine the document format from the module's default model.
+                        // Native PDF models (e.g. "preventionplandocument") do NOT end with "_odt".
+                        // ODT models end with "_odt" (e.g. "preventionplandocument_odt").
+                        $confDefaultModel = dol_strtoupper($moduleNameLowerCase) . '_' . dol_strtoupper($documentType ?? '') . '_DEFAULT_MODEL';
+                        $defaultModel     = getDolGlobalString($confDefaultModel, '');
+                        $isNativePdf      = (!empty($defaultModel) && !preg_match('/_odt$/i', $defaultModel));
+
+                        // If the default model is native PDF, check if ODT-to-PDF is also possible
+                        $confAutoPdf = dol_strtoupper($moduleNameLowerCase) . '_AUTOMATIC_PDF_GENERATION';
+                        $canServePdf = $isNativePdf || (!empty($conf->global->MAIN_ODT_AS_PDF) && getDolGlobalInt($confAutoPdf) > 0);
+                        $specimenExt = $canServePdf ? '.pdf' : '.odt';
+
                         $specimenName = $objectType . '_specimen_' . $trackID . $specimenExt;
                         ?>
                         <input type="hidden" class="specimen-name" data-specimen-name="<?php echo $specimenName; ?>">
@@ -77,7 +87,7 @@
                             <?php
                         else :
                             ?>
-                            <div class="wpeo-button button-square-40 button-rounded button-grey"><i class="fas fa-download"></i></div>
+                            <div class="wpeo-button button-square-40 button-rounded button-grey wpeo-tooltip-event" aria-label="<?php echo dol_escape_htmltag($langs->trans('DocumentNotAvailable')); ?>"><i class="fas fa-download"></i></div>
                             <?php
                         endif; ?>
                     </div>
@@ -86,6 +96,13 @@
                 <?php
             endif; ?>
         </div>
+
+        <?php if (!$canServePdf && GETPOSTISSET('document_type')) : ?>
+        <div class="public-card__info" style="background:#fef9e7;border:1px solid #f0c674;border-radius:6px;padding:10px 16px;margin:8px 16px;font-size:0.9em;color:#856404;">
+            <i class="fas fa-info-circle"></i>
+            <?php echo $langs->trans('PublicSignatureNoPdfAvailable'); ?>
+        </div>
+        <?php endif; ?>
 
         <div class="public-card__content signature">
             <div class="signature-element">
