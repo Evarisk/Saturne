@@ -76,9 +76,20 @@ if ($action == 'builddoc') {
         $moreParams = [];
     }
 
-    $confName = strtoupper($moduleName) . '_' . strtoupper($documentType) . '_ADDON_ODT_PATH';
-    $template = preg_replace('/DOL_DOCUMENT_ROOT/', DOL_DOCUMENT_ROOT, $conf->global->$confName);
-    $model    = strtolower($documentType) . '_odt:' . $template . 'template_' . strtolower($documentType) . '.odt';
+    // Determine if the default model is a native PDF or an ODT template.
+    $confDefaultModel = strtoupper($moduleName) . '_' . strtoupper($documentType) . '_DEFAULT_MODEL';
+    $defaultModel     = getDolGlobalString($confDefaultModel, '');
+    $isNativePdf      = (!empty($defaultModel) && !preg_match('/_odt$/i', $defaultModel));
+
+    if ($isNativePdf) {
+        // Native PDF model: use the model name directly (e.g. "preventionplandocument")
+        $model = $defaultModel;
+    } else {
+        // ODT model: build the model string from the template path
+        $confName = strtoupper($moduleName) . '_' . strtoupper($documentType) . '_ADDON_ODT_PATH';
+        $template = preg_replace('/DOL_DOCUMENT_ROOT/', DOL_DOCUMENT_ROOT, $conf->global->$confName);
+        $model    = strtolower($documentType) . '_odt:' . $template . 'template_' . strtolower($documentType) . '.odt';
+    }
 
     $moreParams['object']     = $object;
     $moreParams['user']       = $user;
@@ -89,7 +100,26 @@ if ($action == 'builddoc') {
     $result = $document->generateDocument($model, $outputLangs, $hideDetails, $hideDesc, $hideRef, $moreParams);
 
     if ($result > 0) {
-        dol_copy($upload_dir . '/' . strtolower($objectType) . 'document' . '/' . $object->ref . '/public_specimen/' . $document->last_main_doc, DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $objectType . '_specimen_' . $trackID . '.odt');
+        $sourceDir = $upload_dir . '/' . strtolower($objectType) . 'document/' . $object->ref . '/public_specimen/';
+        $tempDir   = DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/';
+        $baseName  = $objectType . '_specimen_' . $trackID;
+
+        if ($isNativePdf) {
+            // Native PDF: the generated file is already a PDF
+            dol_copy($sourceDir . $document->last_main_doc, $tempDir . $baseName . '.pdf');
+        } else {
+            // ODT model: copy the ODT file
+            dol_copy($sourceDir . $document->last_main_doc, $tempDir . $baseName . '.odt');
+
+            // If automatic PDF conversion is enabled, also copy the PDF version
+            $confAutoPdf = strtoupper($moduleName) . '_AUTOMATIC_PDF_GENERATION';
+            if (!empty($conf->global->MAIN_ODT_AS_PDF) && getDolGlobalInt($confAutoPdf) > 0) {
+                $pdfSource = preg_replace('/\.odt$/', '.pdf', $document->last_main_doc);
+                if (file_exists($sourceDir . $pdfSource)) {
+                    dol_copy($sourceDir . $pdfSource, $tempDir . $baseName . '.pdf');
+                }
+            }
+        }
     } else {
         setEventMessages($document->error, $document->errors, 'errors');
     }
