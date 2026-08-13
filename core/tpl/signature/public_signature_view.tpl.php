@@ -37,10 +37,18 @@
 
         <div class="public-card__header wpeo-gridlayout grid-2 grid-gap-2">
             <div class="header-information">
-                <div class="<?php echo $moreParams['moreCSS'] ?? ''; ?>"><a href="#" onclick="window.close();" class="information-back">
+                <div class="<?php echo $moreParams['moreCSS'] ?? ''; ?>"><a href="#" onclick="window.close();" class="information-back" id="signature-back-btn" style="display:none;">
                     <i class="fas fa-sm fa-chevron-left"></i>
                     <?php echo $langs->trans('Back'); ?>
                 </a></div>
+                <script>
+                    // Show the Back button only when the page was opened by script (window.open)
+                    // so window.close() will actually work. In all other cases (direct link from email),
+                    // the button is hidden because it has no useful destination.
+                    if (window.opener) {
+                        document.getElementById('signature-back-btn').style.display = '';
+                    }
+                </script>
                 <div class="information-title"><?php echo $langs->trans('ElectronicSignature'); ?></div>
                 <div class="information-user"><?php echo dol_strtoupper($signatory->lastname) . ' ' . ucfirst($signatory->firstname); ?></div>
             </div>
