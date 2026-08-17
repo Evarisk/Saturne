@@ -26,7 +26,11 @@ if ($resql) {
 if (is_array($filelist) && !empty($filelist)) {
     foreach ($filelist as $file) {
         if (preg_match('/\.modules\.php$/i', $file) && preg_match('/^(pdf_|doc_)/', $file) && preg_match('/' . $documentParentType . '/i', $file)) {
-            print load_fiche_titre($langs->trans('DocumentTemplate'), '', '');
+            $titleLabel = $langs->trans('DocumentTemplate' . $documentParentType);
+            if ($titleLabel == 'DocumentTemplate' . $documentParentType) {
+                $titleLabel = $langs->trans('DocumentTemplate');
+            }
+            print load_fiche_titre($titleLabel, '', '');
 
             print '<table class="noborder centpercent">';
             print '<tr class="liste_titre">';

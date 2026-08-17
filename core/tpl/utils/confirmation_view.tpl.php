@@ -35,6 +35,7 @@
         <?php
         print $confirmationParams['picto'] ? img_picto('', $confirmationParams['picto'], 'class="confirmation-icon"') : '';
         print $confirmationParams['confirmationTitle'] ? '<div style="color: ' . $confirmationParams['color'] . ';" class="confirmation-title"> ' . $langs->transnoentities($confirmationParams['confirmationTitle']) . ' </div>' : '';
+        print !empty($confirmationParams['confirmationContent']) ? '<div class="confirmation-content" style="margin-top: 15px; font-size: 1.1em; text-align: center;">' . $confirmationParams['confirmationContent'] . '</div>' : '';
         if (is_array($confirmationParams['buttonParams']) && !empty($confirmationParams['buttonParams'])) {
             foreach ($confirmationParams['buttonParams'] as $buttonLabel => $CSSButton) {
                 print '<div class="wpeo-button ' . $CSSButton . '">' . $langs->transnoentities($buttonLabel) . '</div>';

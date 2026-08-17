@@ -1038,10 +1038,16 @@ function saturne_require_objects_mod(array $numberingModulesNames, string $modul
             }
 
             $modPathCustom   = dirname(__FILE__) . '/../../' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $objectType . '/' . $numberingModulesName . '.php';
+            $modPathCustomDoc = dirname(__FILE__) . '/../../' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $objectType . '/' . $numberingModulesName . '.php';
+            $modPathCustomDoc2 = dirname(__FILE__) . '/../../' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $objectType . 'document/' . $numberingModulesName . '.php';
             $modPathDolibarr = DOL_DOCUMENT_ROOT . '/core/modules/' . $objectType . '/'. $numberingModulesName . '.php';
 
             if (file_exists($modPathCustom)) {
                 require_once $modPathCustom;
+            } else if (file_exists($modPathCustomDoc)) {
+                require_once $modPathCustomDoc;
+            } else if (file_exists($modPathCustomDoc2)) {
+                require_once $modPathCustomDoc2;
             } else if (file_exists($modPathDolibarr)) {
                 require_once $modPathDolibarr;
             }

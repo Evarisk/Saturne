@@ -53,7 +53,7 @@ ErrorCreateObject = Error: creation of a %s
 ErrorDeleteObject = Error: deleting a %s
 
 # Numbering modules
-SaturneGenericMaskCodes = This field consists of a prefix followed by a suffix. For example, ABC{000} will result in ABC001, ABC002, etc. You can add as many zeros as you wish.
+SaturneGenericMaskCodes = This field consists of a prefix followed by a suffix. For example, ABC{yy}{mm}-{000} will result in ABC2308-001, ABC2308-002, etc. You can use variables {yy}, {mm}, {dd} for the date and add as many zeros as you wish in the brackets {000}.
 
 # Status
 StatusDraft              = Draft (to be validated)

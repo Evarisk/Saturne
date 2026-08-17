@@ -76,10 +76,10 @@ $modulepart = GETPOST('modulepart', 'aZ09');
 $hookmanager->initHooks([$moduleNameLowerCase . 'admindocuments']);
 
 // Permissions
-$permissionToRead = $user->hasRight($moduleNameLowerCase, 'adminpage', 'read');
+$permissiontoread = $user->hasRight($moduleNameLowerCase, 'adminpage', 'read');
 
 // Security check
-saturne_check_access($permissionToRead);
+saturne_check_access($permissiontoread);
 
 /*
  * Actions
@@ -221,7 +221,7 @@ if (empty($resHook)) {
     }
 
     if ($action == 'specimen') {
-        $documentType = explode('_', $modelName)[1];
+        $documentType = explode('_', $modelName)[0];
 
         require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . $documentType . '.class.php';
 
@@ -244,7 +244,7 @@ if (empty($resHook)) {
             if ($result <= 0) {
                 setEventMessages($document->error, $document->errors, 'errors');
             } else {
-                setEventMessages($langs->trans('FileGenerated') . ' - ' . '<a href=' . DOL_URL_ROOT . '/document.php?modulepart=' . $moreParams['objectType'] . '&file=' . urlencode('public_specimen/' . $document->last_main_doc) . '&entity=' . $conf->entity . '"' . '>' . $document->last_main_doc . '</a>', []);
+                setEventMessages($langs->trans('FileGenerated') . ' - ' . '<a href="' . DOL_URL_ROOT . '/document.php?modulepart=' . $moduleNameLowerCase . '&file=' . urlencode($moreParams['objectType'] . '/public_specimen/' . $document->last_main_doc) . '&entity=' . $conf->entity . '">' . $document->last_main_doc . '</a>', []);
                 header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
                 exit;
             }

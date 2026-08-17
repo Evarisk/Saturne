@@ -84,7 +84,7 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
     $moreParams['user']     = $user;
     $moreParams['zone']     = 'private';
     $constName              = get_class($object) . '::STATUS_LOCKED';
-    $moreParams['specimen'] = defined($constName) && $object->status < $object::STATUS_LOCKED;
+    $moreParams['specimen'] = 0;
 
     if (!empty($model)) {
         $parameters = ['model' => $model, 'outputlangs' => $outputLangs, 'hidedetails' => $hideDetails, 'hidedesc' => $hideDesc, 'hideref' => $hideRef, 'moreparams' => $moreParams];
