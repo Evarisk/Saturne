@@ -251,7 +251,7 @@ abstract class CustomModeleNumRefSaturne extends ModeleNumRefSaturne
 
         // Parametrage du prefix
         $texte .= '<tr><td>'.$langs->trans("Mask").':</td>';
-        $texte .= '<td class="right">'.$form->textwithpicto('<input type="text" class="flat minwidth175" name="addon_value" value="'.$conf->global->$confName.'">', $tooltip, 1, 'help').'</td>';
+        $texte .= '<td class="right">'.$form->textwithpicto('<input type="text" class="flat minwidth175" name="addon_value" value="'.($conf->global->$confName ?? '').'">', $tooltip, 1, 'help').'</td>';
 
         $texte .= '<td class="left" rowspan="2">&nbsp; <input type="submit" class="button button-edit" name="Button"value="'.$langs->trans("Modify").'"></td>';
 

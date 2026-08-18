@@ -91,32 +91,57 @@ if ($action == 'builddoc') {
         $model    = strtolower($documentType) . '_odt:' . $template . 'template_' . strtolower($documentType) . '.odt';
     }
 
+    // Determine if it should be a specimen or a final document
+    $isSpecimen = 0;
+
     $moreParams['object']     = $object;
     $moreParams['user']       = $user;
-    $moreParams['specimen']   = 1;
+    $moreParams['specimen']   = $isSpecimen;
     $moreParams['zone']       = 'public';
     $moreParams['objectType'] = $objectType;
 
-    $result = $document->generateDocument($model, $outputLangs, $hideDetails, $hideDesc, $hideRef, $moreParams);
+    $subDir    = $isSpecimen ? '/public_specimen/' : '/';
+    $sourceDir = $upload_dir . '/' . strtolower($objectType) . 'document/' . $object->ref . $subDir;
+    $files = dol_dir_list($sourceDir, 'files', 1, '\.' . ($canServePdf ? 'pdf' : 'odt') . '$', null, 'date', SORT_DESC);
+    
+    $shouldGenerate = true;
+    if (!empty($files)) {
+        $shouldGenerate = false;
+        $document->last_main_doc = $files[0]['name'];
+        if (isset($signatory->signature_date) && !empty($signatory->signature_date)) {
+            $filemtime = filemtime($sourceDir . $files[0]['name']);
+            if ($filemtime < $signatory->signature_date) {
+                $shouldGenerate = true;
+            }
+        }
+    }
+
+    $result = 1;
+    if ($shouldGenerate) {
+        $result = $document->generateDocument($model, $outputLangs, $hideDetails, $hideDesc, $hideRef, $moreParams);
+    }
 
     if ($result > 0) {
-        $sourceDir = $upload_dir . '/' . strtolower($objectType) . 'document/' . $object->ref . '/public_specimen/';
+        $subDir    = $isSpecimen ? '/public_specimen/' : '/';
+        $sourceDir = $upload_dir . '/' . strtolower($objectType) . 'document/' . $object->ref . $subDir;
         $tempDir   = DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/';
-        $baseName  = $objectType . '_specimen_' . $trackID;
+        $originalName = $document->last_main_doc;
+        $tempFileName = $isSpecimen ? 'specimen_' . $originalName : $originalName;
 
         if ($isNativePdf) {
             // Native PDF: the generated file is already a PDF
-            dol_copy($sourceDir . $document->last_main_doc, $tempDir . $baseName . '.pdf');
+            dol_copy($sourceDir . $originalName, $tempDir . $tempFileName);
         } else {
             // ODT model: copy the ODT file
-            dol_copy($sourceDir . $document->last_main_doc, $tempDir . $baseName . '.odt');
+            dol_copy($sourceDir . $originalName, $tempDir . $tempFileName);
 
             // If automatic PDF conversion is enabled, also copy the PDF version
             $confAutoPdf = strtoupper($moduleName) . '_AUTOMATIC_PDF_GENERATION';
             if (!empty($conf->global->MAIN_ODT_AS_PDF) && getDolGlobalInt($confAutoPdf) > 0) {
-                $pdfSource = preg_replace('/\.odt$/', '.pdf', $document->last_main_doc);
+                $pdfSource = preg_replace('/\.odt$/', '.pdf', $originalName);
+                $pdfTempName = preg_replace('/\.odt$/', '.pdf', $tempFileName);
                 if (file_exists($sourceDir . $pdfSource)) {
-                    dol_copy($sourceDir . $pdfSource, $tempDir . $baseName . '.pdf');
+                    dol_copy($sourceDir . $pdfSource, $tempDir . $pdfTempName);
                 }
             }
         }
