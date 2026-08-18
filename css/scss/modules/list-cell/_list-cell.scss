@@ -17,7 +17,9 @@ table.liste td[class*="tdoverflowmax"] {
     }
 
     br,
-    img {
+    img,
+    script,
+    style {
         display: none;
     }
 }
