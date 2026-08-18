@@ -125,6 +125,11 @@ if ($action == 'builddoc') {
         $subDir    = $isSpecimen ? '/public_specimen/' : '/';
         $sourceDir = $upload_dir . '/' . strtolower($objectType) . 'document/' . $object->ref . $subDir;
         $tempDir   = DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/';
+        
+        if (!is_dir($tempDir)) {
+            dol_mkdir($tempDir);
+        }
+        
         $originalName = $document->last_main_doc;
         $tempFileName = $isSpecimen ? 'specimen_' . $originalName : $originalName;
 
