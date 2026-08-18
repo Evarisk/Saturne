@@ -98,12 +98,12 @@ if (empty($resHook)) {
 
     // Activate a model
     if ($action == 'set') {
-        addDocumentModel($modelName, $type, $label, $const);
-        header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
+        addDocumentModel((string) $modelName, (string) $type, (string) $label, (string) $const);
+        header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . ((string) $pageY));
         exit;
     } elseif ($action == 'del') {
-        delDocumentModel($modelName, $type);
-        header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
+        delDocumentModel((string) $modelName, (string) $type);
+        header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . ((string) $pageY));
         exit;
     }
 
@@ -383,7 +383,7 @@ foreach ($types as $type => $documentData) {
         $documentType       = $documentData['documentType'];
     }
 
-    require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . ($documentData['className'] ?? $documentData['documentType']) . '.class.php';
+    require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . ((string) ($documentData['className'] ?? $documentData['documentType'])) . '.class.php';
 
     if (is_string($type) && class_exists($type)) {
         $object = new $type($db);
