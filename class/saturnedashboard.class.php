@@ -290,9 +290,10 @@ class SaturneDashboard
                                     if ($dashboardGraph['dataset'] >= 2) {
                                             $graphData[$uniqueKey][] = $dashboardGraph['data'][$key];
                                     } else {
+                                        $label = isset($dashboardGraph['labels'][$key]['label']) ? $dashboardGraph['labels'][$key]['label'] : (string)$key;
                                         $graphData[$uniqueKey][] = [
-                                        0 => $dashboardGraph['labels'][$key]['label'],
-                                        1 => $dashboardGraph['data'][$key]
+                                            0 => $label,
+                                            1 => $dashboardGraph['data'][$key]
                                         ];
                                     }
                                 }
