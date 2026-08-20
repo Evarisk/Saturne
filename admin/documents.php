@@ -243,9 +243,10 @@ if (empty($resHook)) {
             $result = $document->generateDocument($modelName, $langs, 0, 0, 0, $moreParams);
             if ($result <= 0) {
                 setEventMessages($document->error, $document->errors, 'errors');
-            } else {
-                setEventMessages($langs->trans('FileGenerated') . ' - ' . '<a href="' . DOL_URL_ROOT . '/document.php?modulepart=' . $moduleNameLowerCase . '&file=' . urlencode($moreParams['objectType'] . '/public_specimen/' . $document->last_main_doc) . '&entity=' . $conf->entity . '">' . $document->last_main_doc . '</a>', []);
                 header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
+                exit;
+            } else {
+                header('Location: ' . DOL_URL_ROOT . '/document.php?modulepart=' . $moduleNameLowerCase . '&file=' . urlencode($moreParams['objectType'] . '/public_specimen/' . $document->last_main_doc) . '&entity=' . $conf->entity);
                 exit;
             }
         }
@@ -310,16 +311,6 @@ print '<td class="center">' . $langs->trans('Status') . '</td>';
 print '<td class="center">' . $langs->trans('Action') . '</td>';
 print '</tr>';
 
-// Automatic PDF generation
-print '<tr class="oddeven"><td>';
-print $langs->trans('AutomaticPdfGeneration');
-print '</td><td>';
-print $langs->trans('AutomaticPdfGenerationDescription');
-print '</td>';
-print '<td class="center">';
-print ajax_constantonoff(strtoupper($moduleName) . '_AUTOMATIC_PDF_GENERATION');
-print '</td></td><td></tr>';
-
 // Manual PDF generation
 print '<tr class="oddeven"><td>';
 print $langs->trans('ManualPdfGeneration');
@@ -328,6 +319,16 @@ print $langs->trans('ManualPdfGenerationDescription');
 print '</td>';
 print '<td class="center">';
 print ajax_constantonoff(strtoupper($moduleName) . '_MANUAL_PDF_GENERATION');
+print '</td></td><td></tr>';
+
+// Automatic PDF generation
+print '<tr class="oddeven"><td>';
+print $langs->trans('AutomaticPdfGeneration');
+print '</td><td>';
+print $langs->trans('AutomaticPdfGenerationDescription');
+print '</td>';
+print '<td class="center">';
+print ajax_constantonoff(strtoupper($moduleName) . '_AUTOMATIC_PDF_GENERATION');
 print '</td></td><td></tr>';
 
 // Show signature specimen
@@ -371,6 +372,28 @@ if (is_array($additionalConfig) && !empty($additionalConfig)) {
 
 print '</form>';
 print '</table>';
+
+?>
+<script <?php print (function_exists('getNonce') ? 'nonce="'.getNonce().'"' : ''); ?>>
+$(document).ready(function() {
+    var prefix = '<?php echo strtoupper($moduleName); ?>_';
+    
+    // When turning OFF manual PDF generation, turn OFF automatic PDF generation
+    $(document).on('click', '#del_' + prefix + 'MANUAL_PDF_GENERATION', function() {
+        if ($('#del_' + prefix + 'AUTOMATIC_PDF_GENERATION').is(':visible')) {
+            $('#del_' + prefix + 'AUTOMATIC_PDF_GENERATION').click();
+        }
+    });
+
+    // When turning ON automatic PDF generation, turn ON manual PDF generation
+    $(document).on('click', '#set_' + prefix + 'AUTOMATIC_PDF_GENERATION', function() {
+        if ($('#set_' + prefix + 'MANUAL_PDF_GENERATION').is(':visible')) {
+            $('#set_' + prefix + 'MANUAL_PDF_GENERATION').click();
+        }
+    });
+});
+</script>
+<?php
 
 foreach ($types as $type => $documentData) {
     $filelist = [];
