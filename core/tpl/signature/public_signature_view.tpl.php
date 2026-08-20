@@ -53,7 +53,7 @@
         $sourceDirDoc = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?? 1] . '/' . strtolower($objectType) . 'document/' . dol_sanitizeFileName($object->ref) . '/';
         $files = dol_dir_list($sourceDirDoc, 'files', 1, '\.' . ($canServePdf ? 'pdf' : 'odt') . '$', null, 'date', SORT_DESC);
         if (!empty($document->last_main_doc)) {
-            $originalName = $document->last_main_doc;
+            $originalName = basename($document->last_main_doc);
             if ($canServePdf) $originalName = preg_replace('/\.odt$/', '.pdf', $originalName);
         } elseif (!empty($files)) {
             $originalName = $files[0]['name'];

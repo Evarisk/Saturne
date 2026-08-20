@@ -246,7 +246,7 @@ if (empty($resHook)) {
                 header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
                 exit;
             } else {
-                header('Location: ' . DOL_URL_ROOT . '/document.php?modulepart=' . $moduleNameLowerCase . '&file=' . urlencode($moreParams['objectType'] . '/public_specimen/' . $document->last_main_doc) . '&entity=' . $conf->entity);
+                header('Location: ' . DOL_URL_ROOT . '/document.php?modulepart=' . $moduleNameLowerCase . '&file=' . urlencode($moreParams['objectType'] . '/public_specimen/' . basename($document->last_main_doc)) . '&entity=' . $conf->entity);
                 exit;
             }
         }
