@@ -243,9 +243,10 @@ if (empty($resHook)) {
             $result = $document->generateDocument($modelName, $langs, 0, 0, 0, $moreParams);
             if ($result <= 0) {
                 setEventMessages($document->error, $document->errors, 'errors');
-            } else {
-                setEventMessages($langs->trans('FileGenerated') . ' - ' . '<a href="' . DOL_URL_ROOT . '/document.php?modulepart=' . $moduleNameLowerCase . '&file=' . urlencode($moreParams['objectType'] . '/public_specimen/' . $document->last_main_doc) . '&entity=' . $conf->entity . '">' . $document->last_main_doc . '</a>', []);
                 header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
+                exit;
+            } else {
+                header('Location: ' . DOL_URL_ROOT . '/document.php?modulepart=' . $moduleNameLowerCase . '&file=' . urlencode($moreParams['objectType'] . '/public_specimen/' . $document->last_main_doc) . '&entity=' . $conf->entity);
                 exit;
             }
         }
