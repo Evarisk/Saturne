@@ -311,16 +311,6 @@ print '<td class="center">' . $langs->trans('Status') . '</td>';
 print '<td class="center">' . $langs->trans('Action') . '</td>';
 print '</tr>';
 
-// Automatic PDF generation
-print '<tr class="oddeven"><td>';
-print $langs->trans('AutomaticPdfGeneration');
-print '</td><td>';
-print $langs->trans('AutomaticPdfGenerationDescription');
-print '</td>';
-print '<td class="center">';
-print ajax_constantonoff(strtoupper($moduleName) . '_AUTOMATIC_PDF_GENERATION');
-print '</td></td><td></tr>';
-
 // Manual PDF generation
 print '<tr class="oddeven"><td>';
 print $langs->trans('ManualPdfGeneration');
@@ -329,6 +319,16 @@ print $langs->trans('ManualPdfGenerationDescription');
 print '</td>';
 print '<td class="center">';
 print ajax_constantonoff(strtoupper($moduleName) . '_MANUAL_PDF_GENERATION');
+print '</td></td><td></tr>';
+
+// Automatic PDF generation
+print '<tr class="oddeven"><td>';
+print $langs->trans('AutomaticPdfGeneration');
+print '</td><td>';
+print $langs->trans('AutomaticPdfGenerationDescription');
+print '</td>';
+print '<td class="center">';
+print ajax_constantonoff(strtoupper($moduleName) . '_AUTOMATIC_PDF_GENERATION');
 print '</td></td><td></tr>';
 
 // Show signature specimen
