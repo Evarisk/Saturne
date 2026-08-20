@@ -130,7 +130,7 @@ if ($action == 'builddoc') {
             dol_mkdir($tempDir);
         }
         
-        $originalName = $document->last_main_doc;
+        $originalName = basename($document->last_main_doc);
         $tempFileName = $isSpecimen ? 'specimen_' . $originalName : $originalName;
 
         if ($isNativePdf) {
