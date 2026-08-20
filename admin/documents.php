@@ -373,6 +373,28 @@ if (is_array($additionalConfig) && !empty($additionalConfig)) {
 print '</form>';
 print '</table>';
 
+?>
+<script <?php print (function_exists('getNonce') ? 'nonce="'.getNonce().'"' : ''); ?>>
+$(document).ready(function() {
+    var prefix = '<?php echo strtoupper($moduleName); ?>_';
+    
+    // When turning OFF manual PDF generation, turn OFF automatic PDF generation
+    $(document).on('click', '#del_' + prefix + 'MANUAL_PDF_GENERATION', function() {
+        if ($('#del_' + prefix + 'AUTOMATIC_PDF_GENERATION').is(':visible')) {
+            $('#del_' + prefix + 'AUTOMATIC_PDF_GENERATION').click();
+        }
+    });
+
+    // When turning ON automatic PDF generation, turn ON manual PDF generation
+    $(document).on('click', '#set_' + prefix + 'AUTOMATIC_PDF_GENERATION', function() {
+        if ($('#set_' + prefix + 'MANUAL_PDF_GENERATION').is(':visible')) {
+            $('#set_' + prefix + 'MANUAL_PDF_GENERATION').click();
+        }
+    });
+});
+</script>
+<?php
+
 foreach ($types as $type => $documentData) {
     $filelist = [];
     if (preg_match('/_/', $documentData['documentType'])) {
