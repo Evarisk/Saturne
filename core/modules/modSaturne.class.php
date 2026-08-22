@@ -145,6 +145,9 @@ class modSaturne extends DolibarrModules
             'GMAO'             => 'gmao',
             'DigiKanban'       => 'digikanban',
             'DoliLetter'       => 'doliletter',
+            'Priseo'           => 'priseo',
+            'Fraispro'         => 'fraispro',
+            'SupplierContract' => 'suppliercontract',
         ];
 
         // Data directories to create when module is enabled.
