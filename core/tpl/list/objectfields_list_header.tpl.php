@@ -78,6 +78,13 @@ foreach ($search as $key => $val) {
     }
 }
 
+// Category criteria lives outside $search : the SQL TPL normalized it, add it to $param so pagination and sort
+// links keep the filter. It is empty when the category module is off or the list TPL was included on its own
+$searchCategories = (isset($searchCategories) && is_array($searchCategories)) ? $searchCategories : [];
+foreach ($searchCategories as $searchCategory) {
+    $param .= '&search_categories_filter[]=' . urlencode($searchCategory);
+}
+
 // Add $param from extra fields
 require_once DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_list_search_param.tpl.php';
 
@@ -171,11 +178,12 @@ if ($mode != 'kanban' && $mode != 'pwa' && !empty($listLayoutId)) {
     }
     if (isset($search_array_options) && is_array($search_array_options)) {
         foreach ($search_array_options as $val) {
-            if (is_array($val) ? !empty($val) : ($val !== '' && $val !== '-1')) {
+            if (is_array($val) ? !empty($val) : ($val !== null && $val !== '' && $val !== '-1')) {
                 $filterCount++;
             }
         }
     }
+    $filterCount += count($searchCategories);
     if (!empty($searchAll)) $filterCount++;
     $hasFilter = ($filterCount > 0);
 
@@ -261,8 +269,106 @@ if ($searchAll) {
     print '<div class="divsearchfieldfilter">' . $langs->trans('FilterOnInto', $searchAll) . implode(', ', $fieldsToSearchAll) . '</div>';
 }
 
-// Hook: extra content above the list (moreForFilter)
 $moreForFilter = '';
+
+// Filter on categories, for every object registered in the category map by a constructCategory hook.
+// Selected categories are rendered as tags whose sign toggles include/exclude, driven by
+// window.saturne.filter.initCategoryPicker() which binds on the [data-cat-colors] container below
+if (isModEnabled('categorie') && $user->hasRight('categorie', 'read') && isset($categorie) && isset($categorie->MAP_OBJ_CLASS[$object->element]) && $mode != 'kanban' && $mode != 'pwa') {
+    require_once DOL_DOCUMENT_ROOT . '/core/class/html.formcategory.class.php';
+
+    // Defaults mirror the SQL TPL, which owns these tokens and normally runs first
+    $categoryNotCategorizedToken = $categoryNotCategorizedToken ?? 'NOTCATEGORIZED';
+    $categoryFallbackColor       = $categoryFallbackColor ?? '#95a5a6';
+
+    $langs->load('categories');
+
+    $formCategory = new FormCategory($db);
+    // outputmode 2 returns the full tree with the category colors
+    $rawCategories = $formCategory->select_all_categories($object->element, '', '', 64, 0, 2);
+
+    $categoryMap = [];
+    if (is_array($rawCategories)) {
+        foreach ($rawCategories as $rawCategory) {
+            $categoryColor                         = !empty($rawCategory['color']) ? '#' . ltrim($rawCategory['color'], '#') : $categoryFallbackColor;
+            $categoryMap[(int) $rawCategory['id']] = ['label' => $rawCategory['fulllabel'], 'color' => $categoryColor];
+        }
+    }
+
+    // Tags already selected, kept in the order they were added
+    $categoryTags   = [];
+    $categoryTagIds = [];
+    foreach ($searchCategories as $searchCategory) {
+        if (ltrim((string) $searchCategory, '+-') === $categoryNotCategorizedToken) {
+            $categoryTags[]   = [
+                'id'    => $categoryNotCategorizedToken,
+                'label' => $langs->trans('NotCategorized'),
+                'color' => $categoryFallbackColor,
+                'mode'  => (strpos($searchCategory, '-') === 0) ? 'exc' : 'inc'
+            ];
+            $categoryTagIds[] = $categoryNotCategorizedToken;
+            continue;
+        }
+
+        $categoryId = abs((int) $searchCategory);
+        if ($categoryId > 0 && isset($categoryMap[$categoryId])) {
+            $categoryTags[]   = [
+                'id'    => $categoryId,
+                'label' => $categoryMap[$categoryId]['label'],
+                'color' => $categoryMap[$categoryId]['color'],
+                'mode'  => ((int) $searchCategory < 0) ? 'exc' : 'inc'
+            ];
+            $categoryTagIds[] = $categoryId;
+        }
+    }
+
+    $categoryElementId = dol_escape_htmltag($object->element);
+    $categoryColorsJs  = json_encode(array_map(function ($categoryData) {
+        return $categoryData['color'];
+    }, $categoryMap));
+    $categoryIcon      = img_picto('', 'category', 'class="saturne-cat-icon"');
+
+    $moreForFilter .= '<div class="divsearchfield saturne-cat-filter">';
+    $moreForFilter .= '<a class="unsetcolor" href="' . DOL_URL_ROOT . '/categories/categorie_list.php?mode=hierarchy&type=' . urlencode($object->element) . '&backtopage=' . urlencode($_SERVER['PHP_SELF']) . '">';
+    $moreForFilter .= img_picto($langs->trans('Categories'), 'category', 'class="pictofixedwidth"');
+    $moreForFilter .= '</a>';
+
+    // Picker : picking an entry hands it over to the tag list, the JS then removes the option from here
+    $moreForFilter .= '<span class="saturne-cat-filter-picker-wrapper">';
+    $moreForFilter .= '<select id="cat_filter_picker_' . $categoryElementId . '" class="flat saturne-filter-cat-picker" title="' . dol_escape_htmltag($langs->trans('Categories')) . '">';
+    $moreForFilter .= '<option value="">' . dol_escape_htmltag($langs->transnoentitiesnoconv('Category')) . '</option>';
+    if (!in_array($categoryNotCategorizedToken, $categoryTagIds)) {
+        $moreForFilter .= '<option value="' . $categoryNotCategorizedToken . '" data-color="' . $categoryFallbackColor . '">' . dol_escape_htmltag($langs->trans('NotCategorized')) . '</option>';
+    }
+    foreach ($categoryMap as $categoryId => $categoryData) {
+        if (in_array($categoryId, $categoryTagIds)) {
+            continue;
+        }
+        $moreForFilter .= '<option value="' . $categoryId . '" data-color="' . dol_escape_htmltag($categoryData['color']) . '">' . dol_escape_htmltag($categoryData['label']) . '</option>';
+    }
+    $moreForFilter .= '</select>';
+    $moreForFilter .= '</span>';
+
+    $moreForFilter .= '<div id="cat_filter_tags_' . $categoryElementId . '" class="saturne-cat-filter-tags" data-picker-id="cat_filter_picker_' . $categoryElementId . '" data-cat-icon="' . dol_escape_htmltag($categoryIcon) . '" data-cat-colors="' . dol_escape_htmltag($categoryColorsJs) . '">';
+    foreach ($categoryTags as $categoryTag) {
+        $isExcludedTag = $categoryTag['mode'] == 'exc';
+        $tagSign       = $isExcludedTag ? '&minus;' : '+';
+        $tagValue      = ($isExcludedTag ? '-' : '+') . $categoryTag['id'];
+
+        $moreForFilter .= '<span class="saturne-cat-tag" style="border-color:' . $categoryTag['color'] . '" data-catid="' . dol_escape_htmltag($categoryTag['id']) . '" data-mode="' . $categoryTag['mode'] . '" data-label="' . dol_escape_htmltag($categoryTag['label']) . '" data-color="' . dol_escape_htmltag($categoryTag['color']) . '">';
+        $moreForFilter .= '<span class="cat-sign saturne-cat-tag-sign" title="' . dol_escape_htmltag($langs->trans('Categories')) . '" style="background:' . $categoryTag['color'] . '">' . $categoryIcon . ' ' . $tagSign . '</span>';
+        $moreForFilter .= '<span class="saturne-cat-tag-body">';
+        $moreForFilter .= '<span class="saturne-cat-tag-label' . ($isExcludedTag ? ' is-exc' : '') . '">' . dol_escape_htmltag($categoryTag['label']) . '</span>';
+        $moreForFilter .= '<span class="cat-remove saturne-cat-tag-remove" title="' . dol_escape_htmltag($langs->trans('Remove')) . '">&times;</span>';
+        $moreForFilter .= '</span>';
+        $moreForFilter .= '<input type="hidden" name="search_categories_filter[]" value="' . dol_escape_htmltag($tagValue) . '">';
+        $moreForFilter .= '</span>';
+    }
+    $moreForFilter .= '</div>';
+    $moreForFilter .= '</div>';
+}
+
+// Hook: extra content above the list (moreForFilter)
 $parameters = ['arrayfields' => &$arrayfields];
 $reshook    = $hookmanager->executeHooks('printFieldPreListTitle', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
 if (empty($reshook)) {

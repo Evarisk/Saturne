@@ -126,12 +126,86 @@ if ($object->ismultientitymanaged == 1) {
     $sql .= ' WHERE 1 = 1';
 }
 
+// Category criteria is a list of signed tokens : "12" includes category 12, "-12" excludes it, and
+// NOTCATEGORIZED / -NOTCATEGORIZED match objects carrying no category at all. Shared with the list header TPL,
+// which renders one tag per token and lets the user flip its sign
+$categoryNotCategorizedToken = 'NOTCATEGORIZED';
+$categoryFallbackColor       = '#95a5a6';
+
+// Not every list controller instantiates the category object nor reads the criteria : do it here so any list built on
+// this TPL gets the category filter, and so the tags printed by the list header TPL are always backed by a WHERE
+if (isModEnabled('categorie')) {
+    require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+
+    if (!isset($categorie) || !$categorie instanceof Categorie) {
+        $categorie = new Categorie($db);
+    }
+
+    // $searchCategories holds the plain category ids read by the list controllers, the tag filter adds the signed
+    // tokens : merge both so old links (and the catid parameter) keep working alongside the tag UI
+    $searchCategories = (isset($searchCategories) && is_array($searchCategories)) ? $searchCategories : [];
+    $searchCategories = array_merge($searchCategories, GETPOST('search_categories_filter', 'array'));
+    if (GETPOSTINT('catid') > 0) {
+        $searchCategories[] = GETPOSTINT('catid');
+    }
+    if (GETPOST('button_removefilter_x', 'alpha') || GETPOST('button_removefilter.x', 'alpha') || GETPOST('button_removefilter', 'alpha')) {
+        $searchCategories = [];
+    }
+
+    // Keep only well-formed tokens, this is what protects the IN () clauses below from raw input
+    $searchCategories = array_values(array_filter($searchCategories, function ($searchCategory) use ($categoryNotCategorizedToken) {
+        return preg_match('/^[+-]?(\d+|' . $categoryNotCategorizedToken . ')$/', (string) $searchCategory) && (string) $searchCategory !== '0';
+    }));
+}
+
 if (isModEnabled('categorie') && isset($categorie->MAP_OBJ_CLASS[$object->element]) && !empty($searchCategories)) {
     $objectElement = $object->element;
     if (!empty($object->parent_element)) {
         $objectElement = $object->parent_element;
     }
-    $sql .= ' AND EXISTS ( SELECT 1 FROM ' . $db->prefix() . 'categorie_' . $objectElement . ' AS cp WHERE t.rowid = cp.fk_' . $objectElement . ' AND cp.fk_categorie IN (' . implode(',', $searchCategories) . '))';
+
+    $categoryExistsSql = 'SELECT 1 FROM ' . $db->prefix() . 'categorie_' . $objectElement . ' AS cp WHERE t.rowid = cp.fk_' . $objectElement;
+
+    $includedCategoryIds = [];
+    $excludedCategoryIds = [];
+    $includeNotCategorized = false;
+    $excludeNotCategorized = false;
+    foreach ($searchCategories as $searchCategory) {
+        $isExcluded    = (strpos((string) $searchCategory, '-') === 0);
+        $categoryToken = ltrim((string) $searchCategory, '+-');
+
+        if ($categoryToken === $categoryNotCategorizedToken) {
+            if ($isExcluded) {
+                $excludeNotCategorized = true;
+            } else {
+                $includeNotCategorized = true;
+            }
+        } elseif ($isExcluded) {
+            $excludedCategoryIds[] = (int) $categoryToken;
+        } else {
+            $includedCategoryIds[] = (int) $categoryToken;
+        }
+    }
+
+    // Included categories widen the result set, so they are ORed together
+    $includeConditions = [];
+    if (!empty($includedCategoryIds)) {
+        $includeConditions[] = 'EXISTS (' . $categoryExistsSql . ' AND cp.fk_categorie IN (' . implode(',', $includedCategoryIds) . '))';
+    }
+    if ($includeNotCategorized) {
+        $includeConditions[] = 'NOT EXISTS (' . $categoryExistsSql . ')';
+    }
+    if (!empty($includeConditions)) {
+        $sql .= ' AND (' . implode(' OR ', $includeConditions) . ')';
+    }
+
+    // Excluded ones always narrow it, whatever was included
+    if (!empty($excludedCategoryIds)) {
+        $sql .= ' AND NOT EXISTS (' . $categoryExistsSql . ' AND cp.fk_categorie IN (' . implode(',', $excludedCategoryIds) . '))';
+    }
+    if ($excludeNotCategorized) {
+        $sql .= ' AND EXISTS (' . $categoryExistsSql . ')';
+    }
 }
 
 // Add default status filter only if the object has a 'status' field in its table
