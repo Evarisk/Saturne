@@ -381,6 +381,20 @@ window.saturne.filter = {
             }
         }
 
+        // A tag change is a filter change : re-run the search right away, the criteria travel
+        // through the hidden inputs the tags carry
+        function submitList() {
+            var $form = $('#searchFormList');
+            if (!$form.length) {
+                $form = $(tagsEl).closest('form');
+            }
+            if (!$form.length) {
+                return;
+            }
+            $form.append('<input type="hidden" name="button_search_x" value="1">');
+            $form.submit();
+        }
+
         function renderTag(id, lbl, col, mode) {
             var exc  = mode === 'exc';
             var sign = exc ? '\u2212' : '+';
@@ -399,11 +413,13 @@ window.saturne.filter = {
                 s.dataset.mode = m;
                 s.innerHTML    = renderTag(s.dataset.catid, s.dataset.label, s.dataset.color, m);
                 bindTag(s);
+                submitList();
             });
             s.querySelector('.cat-remove').addEventListener('click', function(e) {
                 e.stopPropagation();
                 restorePO(s.dataset.catid, s.dataset.label, s.dataset.color);
                 s.remove();
+                submitList();
             });
         }
 
@@ -453,6 +469,7 @@ window.saturne.filter = {
                 var o = e.params.data;
                 buildTag(o.id, o.text, 'inc');
                 jQuery(picker).val('').trigger('change.select2');
+                submitList();
             });
         } else {
             picker.addEventListener('change', function() {
@@ -462,6 +479,7 @@ window.saturne.filter = {
                 }
                 buildTag(o.value, o.text, 'inc');
                 picker.selectedIndex = 0;
+                submitList();
             });
         }
 

@@ -123,3 +123,101 @@ th.saturne-filter-active .saturne-col-filter-btn {
         }
     }
 }
+
+// Category tag filter
+// --------------------------------------------------
+// Rendered inline above the list by objectfields_list_header.tpl.php and driven
+// by window.saturne.filter.initCategoryPicker(). A tag carries its category
+// colour on the border and on the sign block; the sign toggles include/exclude.
+
+// div.divsearchfield forces inline-block in the Dolibarr theme, hence the doubled class
+.divsearchfield.saturne-cat-filter {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: auto;
+}
+
+// select2 stretches the picker to 100%, so the width lives on the wrapper
+.saturne-cat-filter-picker-wrapper {
+    display: inline-block;
+    width: 240px;
+    flex: 0 0 240px;
+}
+
+.saturne-filter-cat-picker {
+    width: 100%;
+}
+
+// Category icon, tinted white to sit on the coloured sign block
+.saturne-cat-icon {
+    width: 12px;
+    height: 12px;
+    vertical-align: middle;
+    color: inherit;
+    filter: brightness(10);
+}
+
+.saturne-cat-filter-tags {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.saturne-cat-tag {
+    display: inline-flex;
+    align-items: stretch;
+    border-radius: 20px;
+    overflow: hidden;
+    // Border colour is set inline, it changes with the category
+    border: 2px solid transparent;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .15);
+    cursor: default;
+    user-select: none;
+    font-size: 12px;
+    line-height: 1;
+}
+
+.saturne-cat-tag-sign {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 4px 8px;
+    color: #fff;
+    cursor: pointer;
+    font-weight: bold;
+    // Background colour is set inline, it changes with the category
+}
+
+.saturne-cat-tag-body {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    background: #fff;
+    color: #333;
+}
+
+.saturne-cat-tag-label {
+    max-width: 140px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &.is-exc {
+        text-decoration: line-through;
+        opacity: .7;
+    }
+}
+
+.saturne-cat-tag-remove {
+    cursor: pointer;
+    font-weight: bold;
+    color: var(--st-gray-400, #9ca3af);
+
+    &:hover {
+        color: var(--st-danger-color, #e74c3c);
+    }
+}
