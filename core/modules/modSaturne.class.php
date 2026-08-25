@@ -208,7 +208,8 @@ class modSaturne extends DolibarrModules
 
             // CONST DOLIBARR
             $i++ => ['MAIN_ALLOW_SVG_FILES_AS_IMAGES', 'integer', 1, '', 0, 'current'],
-            $i   => ['MAIN_CACHE_COUNT ', 'integer', 1, '', 0, 'current']
+            $i++ => ['MAIN_CACHE_COUNT ', 'integer', 1, '', 0, 'current'],
+            $i   => ['CATEGORY_EDIT_IN_MENU_NOT_IN_POPUP', 'integer', 1, '', 0, 'current']
 
 		];
 
