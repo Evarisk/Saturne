@@ -3,10 +3,19 @@
 // Dolibarr's .tdoverflowmax* classes set white-space: nowrap on the <td>, which truncates plain
 // text but not markup : an html field carrying <h2>, <ul> or <li> renders block elements that open
 // their own line boxes, so the row grows to the full height of the description while its width
-// stays correctly capped. Forcing the descendants inline lets the parent truncation apply.
+// stays correctly capped. Forcing those block elements inline lets the parent truncation apply.
+//
+// The reset is deliberately restricted to block-level tags. A universal `*` selector also hit the
+// inline markup a cell legitimately contains : `font-weight: inherit` dropped the Font Awesome
+// pictos (`<span class="fas fa-search-plus">`) from the solid 900 face to the regular 400 one,
+// which has no such glyph, so the icons rendered as empty boxes.
 
 table.liste td[class*="tdoverflowmax"] {
-    * {
+    h1, h2, h3, h4, h5, h6,
+    p, div, section, article, aside, header, footer, main, nav,
+    ul, ol, li, dl, dt, dd,
+    blockquote, pre, address, figure, figcaption, fieldset, legend, hr,
+    table, caption, thead, tbody, tfoot, tr, th, td {
         display: inline;
         margin: 0;
         padding: 0;
