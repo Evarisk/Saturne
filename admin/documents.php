@@ -221,34 +221,59 @@ if (empty($resHook)) {
     }
 
     if ($action == 'specimen') {
-        $documentType = explode('_', $modelName)[0];
+        // The document class is sent by the model list: a model name may hold several underscores,
+        // so its first segment is not the document type when the model carries a suffix
+        $documentType = !empty($objectType) ? $objectType : explode('_', $modelName)[0];
 
-        require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . $documentType . '.class.php';
-
-        if (class_exists($documentType)) {
-            /** @var SaturneDocumentModel $document */
-            $document = new $documentType($db);
+        $documentClassPath = __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . $documentType . '.class.php';
+        if (is_file($documentClassPath)) {
+            require_once $documentClassPath;
         }
+
+        if (!class_exists($documentType)) {
+            setEventMessages($langs->trans('ErrorFileNotFound', $documentClassPath), [], 'errors');
+            header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
+            exit;
+        }
+
+        /** @var SaturneDocumentModel $document */
+        $document = new $documentType($db);
 
         // Search template files
         $dir = __DIR__ . '/../../' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $documentType . '/';
         $file = 'pdf_' . $modelName . '.modules.php';
         if (file_exists($dir . $file)) {
-            $moreParams['object'] = new stdClass();
             $moreParams['user'] = $user;
             $moreParams['specimen'] = 1;
             $moreParams['zone'] = 'public';
             $moreParams['objectType'] = str_replace('document', '', $documentType);
+
+            // Document models call CommonObject methods on the object the document describes:
+            // an empty stdClass makes them fatal, so hand them an unsaved object of that type
+            $moreParams['object'] = saturne_get_specimen_object($moreParams['objectType'], $moduleNameLowerCase);
 
             $result = $document->generateDocument($modelName, $langs, 0, 0, 0, $moreParams);
             if ($result <= 0) {
                 setEventMessages($document->error, $document->errors, 'errors');
                 header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
                 exit;
-            } else {
-                header('Location: ' . DOL_URL_ROOT . '/document.php?modulepart=' . $moduleNameLowerCase . '&file=' . urlencode($moreParams['objectType'] . '/public_specimen/' . basename($document->last_main_doc)) . '&entity=' . $conf->entity);
-                exit;
             }
+
+            // A model files its specimen under its document type directory, a model whose type
+            // carries no document suffix under the object type one: redirect to the file really written
+            $specimenName    = basename($document->last_main_doc);
+            $moduleOutputDir = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] ?? '';
+            foreach ([$documentType, $moreParams['objectType']] as $specimenDir) {
+                $specimenPath = $specimenDir . '/public_specimen/' . $specimenName;
+                if (dol_is_file($moduleOutputDir . '/' . $specimenPath)) {
+                    header('Location: ' . DOL_URL_ROOT . '/document.php?modulepart=' . $moduleNameLowerCase . '&file=' . urlencode($specimenPath) . '&entity=' . $conf->entity);
+                    exit;
+                }
+            }
+
+            setEventMessages($langs->trans('ErrorFileNotFound', $specimenName), [], 'errors');
+            header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
+            exit;
         }
     }
 

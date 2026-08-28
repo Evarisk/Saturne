@@ -1019,6 +1019,36 @@ function saturne_get_objects_metadata(string $type = ''): array
 }
 
 /**
+ * Build an unsaved object of the given type, to be used as the subject of a specimen document
+ *
+ * Document models call CommonObject methods on the object their document describes, so a preview
+ * has to hand them a real object of that type: an empty stdClass makes them fatal on the first call
+ *
+ * @param  string $objectType          Object type the document describes (project, ticket, preventionplan, etc.)
+ * @param  string $moduleNameLowerCase Module name in lower case
+ * @return object                      Unsaved object of that type, an empty stdClass when the type is unknown
+ */
+function saturne_get_specimen_object(string $objectType, string $moduleNameLowerCase = '')
+{
+    global $db;
+
+    // Module objects are registered under a module prefixed key, Dolibarr ones under their bare type
+    $objectMetadata = saturne_get_objects_metadata($moduleNameLowerCase . '_' . $objectType);
+    if (empty($objectMetadata['class_name'])) {
+        $objectMetadata = saturne_get_objects_metadata($objectType);
+    }
+
+    if (!empty($objectMetadata['class_path']) && !empty($objectMetadata['class_name'])) {
+        dol_include_once('/' . $objectMetadata['class_path']);
+        if (class_exists($objectMetadata['class_name'])) {
+            return new $objectMetadata['class_name']($db);
+        }
+    }
+
+    return new stdClass();
+}
+
+/**
  * Require numbering modules of given objects
  *
  * @param  array      $numberingModulesNames Array of numbering modules names
