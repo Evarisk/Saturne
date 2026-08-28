@@ -438,14 +438,15 @@ class SaturneSignature extends SaturneObject
      * Fetch signatory from database
      *
      * @param  string    $role        Role of resource
-     * @param  int       $fk_object   ID of object linked
+     * @param  int|null  $fk_object   ID of object linked
      * @param  string    $object_type ID of object linked
      * @return array|int
      * @throws Exception
      */
-    public function fetchSignatory(string $role, int $fk_object, string $object_type)
+    public function fetchSignatory(string $role, ?int $fk_object, string $object_type)
     {
-        $filter = ['customsql' => 'fk_object=' . $fk_object . ' AND status > 0 AND object_type="' . $object_type . '"'];
+        // An object that was never fetched carries a null id, no signatory is linked to it
+        $filter = ['customsql' => 'fk_object=' . ((int) $fk_object) . ' AND status > 0 AND object_type="' . $object_type . '"'];
         if (strlen($role)) {
             $filter['customsql'] .= ' AND role = "' . $role . '"';
             return $this->fetchAll('', '', 0, 0, $filter);
@@ -466,15 +467,16 @@ class SaturneSignature extends SaturneObject
     /**
      * Fetch signatories in database with parent ID
      *
-     * @param  int           $fk_object   ID of object linked
+     * @param  int|null      $fk_object   ID of object linked
      * @param  string        $object_type Type of object
      * @param  string        $morefilter  Filter
      * @return array|integer
      * @throws Exception
      */
-    public function fetchSignatories(int $fk_object, string $object_type, string $morefilter = '1 = 1')
+    public function fetchSignatories(?int $fk_object, string $object_type, string $morefilter = '1 = 1')
     {
-        $filter = ['customsql' => 'fk_object=' . $fk_object . ' AND ' . $morefilter . ' AND object_type="' . $object_type . '"' . ' AND status > 0'];
+        // An object that was never fetched carries a null id, no signatory is linked to it
+        $filter = ['customsql' => 'fk_object=' . ((int) $fk_object) . ' AND ' . $morefilter . ' AND object_type="' . $object_type . '"' . ' AND status > 0'];
         return $this->fetchAll('', '', 0, 0, $filter);
     }
 
