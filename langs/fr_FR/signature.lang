@@ -85,6 +85,8 @@ Absent                           = Absent
 Delay                            = En retard
 ElectronicSignature              = Signature électronique
 NoUserElectronicSignature        = Vous n'avez pas encore enregistré de signature électronique : rendez-vous sur votre fiche utilisateur pour la dessiner
+AutoSignature                    = Signature automatique
+AutoSignatureTooltip             = Ce participant a enregistré sa signature électronique et demandé à être signé automatiquement dès la validation
 Signatory                        = Signataire
 Responsible                      = Responsable
 

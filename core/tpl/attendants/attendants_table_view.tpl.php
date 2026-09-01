@@ -54,6 +54,8 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
     foreach ($signatories as $element) {
         $usertmp = new User($db);
         $contact = new Contact($db);
+
+        $attendantSignsAutomatically = false;
         print '<tr class="oddeven" data-signatory-id="' . $element->id . '"><td class="minwidth200">';
         if ($element->element_type == 'socpeople') {
             $contact->fetch($element->element_id);
@@ -65,6 +67,8 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
             }
         } else {
             $usertmp->fetch($element->element_id);
+            $usertmp->fetch_optionals();
+            $attendantSignsAutomatically = !empty($usertmp->array_options['options_auto_signature']);
             if ($usertmp->contact_id > 0) {
                 $contact->fetch($usertmp->contact_id);
                 $thirdparty->fetch($contact->fk_soc);
@@ -82,6 +86,12 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
         if (!empty($element->job)) {
             print ' - ' . $element->job;
         }
+
+        // The attendant registered a signature and asked to be signed on validation: nobody has to chase them
+        if ($attendantSignsAutomatically) {
+            print ' <span class="badge badge-status4 classfortooltip" title="' . dol_escape_htmltag($langs->trans('AutoSignatureTooltip')) . '"><i class="fas fa-bolt"></i> ' . $langs->trans('AutoSignature') . '</span>';
+        }
+
         if ($attendantTableMode == 'simple') {
             print '</td><td class="center ' . ($conf->browser->layout != 'classic' && $object->status > $object::STATUS_DRAFT ? 'hidden' : '') . '">';
             print $langs->transnoentities($element->role);
