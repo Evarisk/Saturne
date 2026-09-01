@@ -106,6 +106,8 @@ ConfirmMassArchive            = Bulk archiving confirmation
 ConfirmMassArchivingQuestion  = Are you sure you want to archive the %d record(s) selected ?
 ConfirmMassValidate           = Bulk validation confirmation
 ConfirmMassValidatingQuestion = Are you sure you want to validate the %d record(s) selected ?
+ConfirmMassSign               = Bulk signing confirmation
+ConfirmMassSigningQuestion    = Are you sure you want to sign the %d record(s) selected with your electronic signature ?
 
 # SetEventMessage mass action
 RecordsArchived = %d record(s) archived
@@ -114,6 +116,8 @@ ConfirmMassUnarchivingQuestion = Are you sure you want to unarchive the %d recor
 RecordsUnarchived = %d record(s) unarchived
 RecordsValidated = %d record(s) validated
 RecordsNotDraftSkipped = %d record(s) skipped because they are not in draft status
+RecordsSigned = %d record(s) signed
+RecordsNotSignableSkipped = %d record(s) skipped because they are not validated or you have no pending signature on them
 Unarchive = Unarchive
 Unarchived = Unarchived
 ObjectNotFound  = %s not found

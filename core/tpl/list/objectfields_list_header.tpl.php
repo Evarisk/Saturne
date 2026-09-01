@@ -27,9 +27,10 @@
  * Globals    : $conf, $db, $hookmanager, $langs, $user
  * Parameters : $action, $limit, $contextpage, $massaction, $mode, $optioncss, $page, $searchAll, $sortfield, $sortorder, $toselect
  * Objects    : $categorie, $extrafields (extrafields_list_search_param.tpl), $form, $object
- * Variables  : $arrayfields, $createUrl (optional), $enableMassValidate (optional), $fieldsToSearchAll,
- *              $formMoreParams (optional), $helpText (optional), $nbTotalOfRecords, $num, $permissiontoadd, $resql,
- *              $search, $search_array_options (extrafields_list_search_param.tpl), $searchCategories, $sql, $title
+ * Variables  : $arrayfields, $createUrl (optional), $enableMassSignature (optional), $enableMassValidate (optional),
+ *              $fieldsToSearchAll, $formMoreParams (optional), $helpText (optional), $nbTotalOfRecords, $num,
+ *              $permissiontoadd, $resql, $search, $search_array_options (extrafields_list_search_param.tpl),
+ *              $searchCategories, $sql, $title
  */
 
 // Output page
@@ -100,6 +101,12 @@ $arrayOfMassActions = [];
 if (!empty($enableMassValidate) && !empty($permissiontoadd)) {
     $validatePicto = '<span class="fas fa-check paddingrightonly"></span>';
     $arrayOfMassActions['prevalidate'] = $validatePicto . $langs->trans('Validate');
+}
+
+// Mass signature is opt-in: the list page must set $enableMassSignature, only objects carrying signatories are signed
+if (!empty($enableMassSignature) && !empty($permissiontoadd)) {
+    $signPicto = '<span class="fas fa-file-signature paddingrightonly"></span>';
+    $arrayOfMassActions['presign'] = $signPicto . $langs->trans('Sign');
 }
 
 $arrayOfMassActions += [
@@ -252,6 +259,10 @@ require_once DOL_DOCUMENT_ROOT . '/core/tpl/massactions_pre.tpl.php';
 
 if ($massaction == 'prevalidate') {
     print $form->formconfirm($_SERVER['PHP_SELF'], $langs->trans('ConfirmMassValidate'), $langs->trans('ConfirmMassValidatingQuestion', count($toselect)), 'validate', null, '', 0, 200, 500, 1);
+}
+
+if ($massaction == 'presign') {
+    print $form->formconfirm($_SERVER['PHP_SELF'], $langs->trans('ConfirmMassSign'), $langs->trans('ConfirmMassSigningQuestion', count($toselect)), 'sign', null, '', 0, 200, 500, 1);
 }
 
 if ($massaction == 'prearchive') {

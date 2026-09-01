@@ -82,6 +82,7 @@ Present                          = Present
 Absent                           = Absent
 Delay                            = Delay
 ElectronicSignature              = Electronic signature
+NoUserElectronicSignature        = You have not registered an electronic signature yet: go to your user card to draw it
 Signatory                        = Signatory
 Responsible                      = Responsible
 

@@ -481,6 +481,69 @@ class SaturneSignature extends SaturneObject
     }
 
     /**
+     * Fetch the electronic signature registered on a user card
+     *
+     * @param  int    $userID ID of the user
+     * @return string         Signature as a data URL, empty when the user registered none
+     * @throws Exception
+     */
+    public function fetchUserSignature(int $userID): string
+    {
+        $userSignatory = new self($this->db);
+
+        $result = $userSignatory->fetch(0, '', ' AND fk_object = ' . $userID . ' AND status > 0 AND object_type = "user" AND role = "UserSignature"');
+        if ($result > 0 && dol_strlen($userSignatory->signature) > 0) {
+            return $userSignatory->signature;
+        }
+
+        return '';
+    }
+
+    /**
+     * Sign the signatory lines a user still has to sign on an object, with an already known signature
+     *
+     * @param  User   $user        Object user that signs, only their own signatory lines are signed
+     * @param  int    $fk_object   ID of object linked
+     * @param  string $object_type Type of object linked
+     * @param  string $signature   Signature as a data URL
+     * @return int                 < 0 if KO, 0 if the user has nothing left to sign, > 0 = number of signed lines
+     * @throws Exception
+     */
+    public function signAsUser(User $user, int $fk_object, string $object_type, string $signature): int
+    {
+        $signatories = $this->fetchSignatories($fk_object, $object_type, 't.element_type = "user" AND t.element_id = ' . $user->id);
+        if (!is_array($signatories) || empty($signatories)) {
+            return 0;
+        }
+
+        $nbSigned = 0;
+        foreach ($signatories as $signatory) {
+            // An already signed line must not be overwritten, an absent attendant has nothing to sign
+            if ($signatory->status == self::STATUS_SIGNED || $signatory->attendance == self::ATTENDANCE_ABSENT) {
+                continue;
+            }
+
+            $signatory->signature      = $signature;
+            $signatory->signature_date = dol_now();
+
+            $result = $signatory->update($user, true);
+            if ($result > 0) {
+                $result = $signatory->setSigned($user, false);
+            }
+
+            if ($result < 0) {
+                $this->error  = $signatory->error;
+                $this->errors = $signatory->errors;
+                return -1;
+            }
+
+            $nbSigned++;
+        }
+
+        return $nbSigned;
+    }
+
+    /**
      * Check if signatories signed
      *
      * @param  int       $fk_object   ID of object linked
