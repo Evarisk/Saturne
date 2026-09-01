@@ -84,6 +84,7 @@ Present                          = Présent
 Absent                           = Absent
 Delay                            = En retard
 ElectronicSignature              = Signature électronique
+NoUserElectronicSignature        = Vous n'avez pas encore enregistré de signature électronique : rendez-vous sur votre fiche utilisateur pour la dessiner
 Signatory                        = Signataire
 Responsible                      = Responsable
 

@@ -108,6 +108,8 @@ ConfirmMassArchive            = Confirmation de archivage en masse
 ConfirmMassArchivingQuestion  = Êtes-vous sur de vouloir archiver les %d enregistrement(s) sélectionné(s) ?
 ConfirmMassValidate           = Confirmation de validation en masse
 ConfirmMassValidatingQuestion = Êtes-vous sûr de vouloir valider les %d enregistrement(s) sélectionné(s) ?
+ConfirmMassSign               = Confirmation de signature en masse
+ConfirmMassSigningQuestion    = Êtes-vous sûr de vouloir signer les %d enregistrement(s) sélectionné(s) avec votre signature électronique ?
 
 # SetEventMessage mass action - Notice mass action
 RecordsArchived = %d enregistrement(s) archivé(s)
@@ -116,6 +118,8 @@ ConfirmMassUnarchivingQuestion = Êtes-vous sûr de vouloir désarchiver les %d 
 RecordsUnarchived = %d enregistrement(s) désarchivé(s)
 RecordsValidated = %d enregistrement(s) validé(s)
 RecordsNotDraftSkipped = %d enregistrement(s) ignoré(s) car ils ne sont pas au statut brouillon
+RecordsSigned = %d enregistrement(s) signé(s)
+RecordsNotSignableSkipped = %d enregistrement(s) ignoré(s) car ils ne sont pas au statut validé ou vous n'y avez pas de signature en attente
 Unarchive = Désarchiver
 Unarchived = Désarchivé
 ObjectNotFound  = %s non trouvé(e)
