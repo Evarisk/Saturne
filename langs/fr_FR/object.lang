@@ -119,6 +119,7 @@ RecordsUnarchived = %d enregistrement(s) désarchivé(s)
 RecordsValidated = %d enregistrement(s) validé(s)
 RecordsNotDraftSkipped = %d enregistrement(s) ignoré(s) car ils ne sont pas au statut brouillon
 RecordsSigned = %d enregistrement(s) signé(s)
+RecordsSignedForAttendant = %d enregistrement(s) signé(s) pour %s
 RecordsNotSignableSkipped = %d enregistrement(s) ignoré(s) car ils ne sont pas au statut validé ou vous n'y avez pas de signature en attente
 Unarchive = Désarchiver
 Unarchived = Désarchivé

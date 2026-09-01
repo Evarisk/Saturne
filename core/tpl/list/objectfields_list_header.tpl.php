@@ -105,8 +105,8 @@ if (!empty($enableMassValidate) && !empty($permissiontoadd)) {
 
 // Mass signature is opt-in: the list page must set $enableMassSignature, only objects carrying signatories are signed
 if (!empty($enableMassSignature) && !empty($permissiontoadd)) {
-    $signPicto = '<span class="fas fa-file-signature paddingrightonly"></span>';
-    $arrayOfMassActions['presign'] = $signPicto . $langs->trans('Sign');
+    $arrayOfMassActions['presign']       = '<span class="fas fa-file-signature paddingrightonly"></span>' . $langs->trans('Sign');
+    $arrayOfMassActions['signattendant'] = '<span class="fas fa-user-edit paddingrightonly"></span>' . $langs->trans('SignForAnAttendant');
 }
 
 $arrayOfMassActions += [
