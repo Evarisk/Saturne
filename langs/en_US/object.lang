@@ -117,6 +117,7 @@ RecordsUnarchived = %d record(s) unarchived
 RecordsValidated = %d record(s) validated
 RecordsNotDraftSkipped = %d record(s) skipped because they are not in draft status
 RecordsSigned = %d record(s) signed
+RecordsSignedForAttendant = %d record(s) signed for %s
 RecordsNotSignableSkipped = %d record(s) skipped because they are not validated or you have no pending signature on them
 Unarchive = Unarchive
 Unarchived = Unarchived

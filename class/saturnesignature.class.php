@@ -481,6 +481,26 @@ class SaturneSignature extends SaturneObject
     }
 
     /**
+     * Fetch signatories in database for several parent objects at once
+     *
+     * @param  int[]         $fk_objects  IDs of objects linked
+     * @param  string        $object_type Type of object
+     * @param  string        $morefilter  Filter
+     * @return array<int, mixed>|integer
+     * @throws Exception
+     */
+    public function fetchSignatoriesOfObjects(array $fk_objects, string $object_type, string $morefilter = '1 = 1')
+    {
+        $fk_objects = array_filter(array_map('intval', $fk_objects));
+        if (empty($fk_objects)) {
+            return [];
+        }
+
+        $filter = ['customsql' => 'fk_object IN (' . implode(',', $fk_objects) . ') AND ' . $morefilter . ' AND object_type="' . $object_type . '"' . ' AND status > 0'];
+        return $this->fetchAll('', '', 0, 0, $filter);
+    }
+
+    /**
      * Fetch the electronic signature registered on a user card
      *
      * @param  int    $userID ID of the user
@@ -500,18 +520,21 @@ class SaturneSignature extends SaturneObject
     }
 
     /**
-     * Sign the signatory lines a user still has to sign on an object, with an already known signature
+     * Sign the signatory lines an attendant still has to sign on an object, with an already known signature
      *
-     * @param  User   $user        Object user that signs, only their own signatory lines are signed
-     * @param  int    $fk_object   ID of object linked
-     * @param  string $object_type Type of object linked
-     * @param  string $signature   Signature as a data URL
-     * @return int                 < 0 if KO, 0 if the user has nothing left to sign, > 0 = number of signed lines
+     * @param  User   $user         Object user that makes the signature
+     * @param  int    $fk_object    ID of object linked
+     * @param  string $object_type  Type of object linked
+     * @param  string $element_type Type of the signatory element (user, socpeople)
+     * @param  int    $element_id   ID of the signatory element
+     * @param  string $signature    Signature as a data URL
+     * @return int                  < 0 if KO, 0 if the attendant has nothing left to sign, > 0 = number of signed lines
      * @throws Exception
      */
-    public function signAsUser(User $user, int $fk_object, string $object_type, string $signature): int
+    public function signAsElement(User $user, int $fk_object, string $object_type, string $element_type, int $element_id, string $signature): int
     {
-        $signatories = $this->fetchSignatories($fk_object, $object_type, 't.element_type = "user" AND t.element_id = ' . $user->id);
+        $morefilter  = 't.element_type = "' . $this->db->escape($element_type) . '" AND t.element_id = ' . $element_id;
+        $signatories = $this->fetchSignatories($fk_object, $object_type, $morefilter);
         if (!is_array($signatories) || empty($signatories)) {
             return 0;
         }
@@ -541,6 +564,21 @@ class SaturneSignature extends SaturneObject
         }
 
         return $nbSigned;
+    }
+
+    /**
+     * Sign the signatory lines a user still has to sign on an object, with an already known signature
+     *
+     * @param  User   $user        Object user that signs, only their own signatory lines are signed
+     * @param  int    $fk_object   ID of object linked
+     * @param  string $object_type Type of object linked
+     * @param  string $signature   Signature as a data URL
+     * @return int                 < 0 if KO, 0 if the user has nothing left to sign, > 0 = number of signed lines
+     * @throws Exception
+     */
+    public function signAsUser(User $user, int $fk_object, string $object_type, string $signature): int
+    {
+        return $this->signAsElement($user, $fk_object, $object_type, 'user', $user->id, $signature);
     }
 
     /**

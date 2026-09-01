@@ -86,6 +86,17 @@ NoUserElectronicSignature        = You have not registered an electronic signatu
 Signatory                        = Signatory
 Responsible                      = Responsible
 
+# Mass signature
+MassSignature                 = Bulk signature
+SignForAnAttendant            = Sign for an attendant
+SelectTheAttendantToSign      = Select the attendant who is going to sign the %d selected record(s)
+SignOnceForTheseObjects       = %s signs once for the %d record(s) below
+NbOfObjectsToSign             = Records to sign
+BackToAttendantSelection      = Change attendant
+NoSignableObjectSelected      = None of the selected records can be signed: only a validated record can be
+NoPendingSignatureOnSelection = No signature is waiting on the selected records
+NoAttendantToSign             = No attendant to sign, the signature was not saved
+
 # Public interface
 SavedSignature = Signature saved
 

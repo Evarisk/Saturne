@@ -126,6 +126,19 @@ if ($signAsked && !empty($enableMassSignature) && $permissiontoadd) {
     }
 }
 
+// Sign for an attendant mass action - hands the selection over to the mass signature page
+if ($massaction == 'signattendant' && !empty($enableMassSignature) && $permissiontoadd && !empty($toselect)) {
+    // The filters are held in session, the list restores them on its own when coming back
+    $backToList        = $_SERVER['PHP_SELF'] . '?restore_lastsearch_values=1' . (GETPOSTISSET('object_type') ? '&object_type=' . urlencode(GETPOST('object_type', 'aZ09')) : '');
+    $massSignatureUrl  = dol_buildpath('/saturne/view/saturne_mass_signature.php', 1);
+    $massSignatureUrl .= '?module_name=' . urlencode($object->module) . '&object_type=' . urlencode($object->element);
+    $massSignatureUrl .= '&ids=' . implode(',', array_map('intval', $toselect));
+    $massSignatureUrl .= '&backtopage=' . urlencode($backToList);
+
+    header('Location: ' . $massSignatureUrl);
+    exit;
+}
+
 // Archive mass action
 if (($massaction == 'archive' || ($action == 'archive' && $confirm == 'yes')) && $permissiontoadd) {
     if (!empty($toselect)) {

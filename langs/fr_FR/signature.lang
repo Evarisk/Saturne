@@ -88,6 +88,17 @@ NoUserElectronicSignature        = Vous n'avez pas encore enregistré de signatu
 Signatory                        = Signataire
 Responsible                      = Responsable
 
+# Mass signature - Signature en masse
+MassSignature                 = Signature en masse
+SignForAnAttendant            = Signer pour un participant
+SelectTheAttendantToSign      = Choisissez le participant qui va signer les %d enregistrement(s) sélectionné(s)
+SignOnceForTheseObjects       = %s signe une seule fois pour les %d enregistrement(s) ci-dessous
+NbOfObjectsToSign             = Enregistrements à signer
+BackToAttendantSelection      = Changer de participant
+NoSignableObjectSelected      = Aucun des enregistrements sélectionnés n'est signable : seul un enregistrement validé peut l'être
+NoPendingSignatureOnSelection = Aucune signature en attente sur les enregistrements sélectionnés
+NoAttendantToSign             = Aucun participant à signer, la signature n'a pas été enregistrée
+
 # Public interface - Interface publique
 SavedSignature = Signature enregistrée
 
