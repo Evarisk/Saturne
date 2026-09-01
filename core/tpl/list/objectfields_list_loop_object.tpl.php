@@ -24,10 +24,11 @@
 
 /**
  * The following vars must be defined :
- * Globals    : $conf (extrafields_list_print_fields.tpl), $db, $hookmanager
+ * Globals    : $conf (extrafields_list_print_fields.tpl), $db, $hookmanager, $langs
  * Parameters : $action, $limit, $massaction, $massActionButton, $mode
  * Objects    : $extrafields (extrafields_list_print_fields.tpl), $object
- * Variables  : $arrayfields, $arrayofselected, $num, $resql, $statusMode (optional), $totalarray
+ * Variables  : $arrayfields, $arrayofselected, $enableMassSignature (optional), $num, $resql,
+ *              $signatureDocumentType (optional), $statusMode (optional), $totalarray
  */
 
 // Loop on record
@@ -89,9 +90,19 @@ while ($i < $iMaxInLoop) {
         // Show line of result
         print '<tr data-rowid="' . $object->id . '" class="oddeven">';
 
+        // Direct link to the signature page, offered by the lists that carry signatories
+        $signatureLink = '';
+        if (!empty($enableMassSignature) && $object->status == $object::STATUS_VALIDATED && empty($object->model)) {
+            $signatureUrl   = dol_buildpath('/saturne/view/saturne_attendants.php', 1);
+            $signatureUrl  .= '?id=' . $object->id . '&module_name=' . urlencode($object->module) . '&object_type=' . urlencode($object->element);
+            $signatureUrl  .= '&document_type=' . urlencode($signatureDocumentType ?? '') . '&attendant_table_mode=simple';
+            $signatureLink  = '<a class="paddingrightonly" href="' . $signatureUrl . '" title="' . dol_escape_htmltag($langs->trans('Sign')) . '"><i class="fas fa-file-signature"></i></a>';
+        }
+
         // Action column
         if (getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
             print '<td class="nowrap center">';
+            print $signatureLink;
             // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
             if ($massActionButton || $massaction) {
                 $selected = 0;
@@ -196,6 +207,7 @@ while ($i < $iMaxInLoop) {
         // Action column
         if (!getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
             print '<td class="nowrap center">';
+            print $signatureLink;
             // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
             if ($massActionButton || $massaction) {
                 $selected = 0;
