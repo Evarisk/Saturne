@@ -110,6 +110,17 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
         $actioncomm->userownerid = $user->id;
         $actioncomm->percentage  = -1;
 
+        // A user who registered an electronic signature and asked for it is signed as soon as the object is validated,
+        // instead of being chased for a signature they already agreed to give
+        if (preg_match('/_VALIDATE$/', $action) && $object instanceof SaturneObject) {
+            require_once __DIR__ . '/../../class/saturnesignature.class.php';
+
+            $autoSignatory = new SaturneSignature($this->db, $moduleNameLowerCase, $object->element);
+            if ($autoSignatory->autoSignUsers($user, $object->id, $object->element) < 0) {
+                setEventMessages($autoSignatory->error, $autoSignatory->errors, 'errors');
+            }
+        }
+
         switch ($action) {
             // CERTIFICATE
             case 'SATURNE_CERTIFICATE_CREATE' :

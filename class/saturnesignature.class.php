@@ -582,6 +582,71 @@ class SaturneSignature extends SaturneObject
     }
 
     /**
+     * Sign the pending lines of the users that registered an electronic signature and asked to be signed automatically
+     *
+     * @param  User   $user        Object user that triggers the automatic signature
+     * @param  int    $fk_object   ID of object linked
+     * @param  string $object_type Type of object linked
+     * @return int                 < 0 if KO, >= 0 = number of signed lines
+     * @throws Exception
+     */
+    public function autoSignUsers(User $user, int $fk_object, string $object_type): int
+    {
+        $signatories = $this->fetchSignatories($fk_object, $object_type, 't.element_type = "user"');
+        if (!is_array($signatories) || empty($signatories)) {
+            return 0;
+        }
+
+        // A user holding several roles on the same object carries several lines, they are all signed in one call
+        $userIDs = [];
+        foreach ($signatories as $signatory) {
+            if ($signatory->status == self::STATUS_SIGNED || $signatory->attendance == self::ATTENDANCE_ABSENT) {
+                continue;
+            }
+            $userIDs[$signatory->element_id] = $signatory->element_id;
+        }
+
+        $nbSigned = 0;
+        foreach ($userIDs as $userID) {
+            if (!$this->isAutoSignatureEnabled($userID)) {
+                continue;
+            }
+
+            $signature = $this->fetchUserSignature($userID);
+            if (dol_strlen($signature) == 0) {
+                continue;
+            }
+
+            $result = $this->signAsElement($user, $fk_object, $object_type, 'user', $userID, $signature);
+            if ($result < 0) {
+                return -1;
+            }
+
+            $nbSigned += $result;
+        }
+
+        return $nbSigned;
+    }
+
+    /**
+     * Tell whether a user asked to be signed automatically on their user card
+     *
+     * @param  int  $userID ID of the user
+     * @return bool         True when the user asked for the automatic signature
+     */
+    public function isAutoSignatureEnabled(int $userID): bool
+    {
+        $signatoryUser = new User($this->db);
+        if ($signatoryUser->fetch($userID) <= 0) {
+            return false;
+        }
+
+        $signatoryUser->fetch_optionals();
+
+        return !empty($signatoryUser->array_options['options_auto_signature']);
+    }
+
+    /**
      * Check if signatories signed
      *
      * @param  int       $fk_object   ID of object linked

@@ -388,6 +388,7 @@ class modSaturne extends DolibarrModules
         // Create extrafields during init
         $extraFieldsArrays = [
             'electronic_signature' => ['Label' => 'ElectronicSignature', 'type' => 'text', 'elementtype' => ['user'], 'position' => $this->numero . 10, 'list' => 1, 'entity' => 0, 'langfile' => 'saturne@saturne', 'enabled' => "isModEnabled('saturne') && isModEnabled('user')"],
+            'auto_signature'       => ['Label' => 'AutoSignature', 'type' => 'boolean', 'elementtype' => ['user'], 'position' => $this->numero . 15, 'list' => 1, 'entity' => 0, 'langfile' => 'saturne@saturne', 'enabled' => "isModEnabled('saturne') && isModEnabled('user')"],
             'favorite'             => ['Label' => 'Favorite', 'type' => 'boolean', 'elementtype' => ['links', 'ecm_files'], 'position' => $this->numero . 20, 'list' => 0, 'entity' => 0, 'langfile' => 'saturne@saturne', 'enabled' => "isModEnabled('saturne')"]
         ];
 

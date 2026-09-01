@@ -83,6 +83,8 @@ Absent                           = Absent
 Delay                            = Delay
 ElectronicSignature              = Electronic signature
 NoUserElectronicSignature        = You have not registered an electronic signature yet: go to your user card to draw it
+AutoSignature                    = Automatic signature
+AutoSignatureTooltip             = This attendant registered their electronic signature and asked to be signed automatically as soon as the record is validated
 Signatory                        = Signatory
 Responsible                      = Responsible
 
