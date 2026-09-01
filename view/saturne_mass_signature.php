@@ -149,8 +149,9 @@ if (empty($resHook)) {
 $title   = $langs->trans('MassSignature');
 $pageUrl = $_SERVER['PHP_SELF'] . '?module_name=' . urlencode($moduleName) . '&object_type=' . urlencode($objectType) . '&ids=' . implode(',', array_keys($objects)) . '&backtopage=' . urlencode($backtopage);
 
-// The signature pad is loaded the same way the public signature page loads it
-saturne_header(1, '', $title);
+// The pad library is asked for on its own: the first argument of saturne_header also draws the whole
+// media gallery modal, which this page has no use for
+saturne_header(0, '', $title, '', '', 0, 0, ['/saturne/js/includes/signature-pad.min.js']);
 
 print load_fiche_titre($title, '', '');
 print '<input type="hidden" name="token" value="' . newToken() . '">';
