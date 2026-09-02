@@ -25,6 +25,9 @@ include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 include_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
 
+// Load Saturne libraries
+require_once __DIR__ . '/dolibarr.lib.php';
+
 /**
  * Print medias from media gallery
  *
@@ -399,6 +402,7 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
  *
  * @param  string $filename  File name
  * @param  string $thumbType Thumb type (small, mini, large, medium)
+ * @param  string $filePath  File path, empty to only build the thumb name without creating it
  * @return string|int        Returns the full thumb filename, or -1 on error
  *
  */
@@ -426,7 +430,13 @@ function saturne_get_thumb_name(string $filename, string $thumbType = 'small', s
             return -1; //@todo throw error ?
         }
 
-        return saturne_vignette($filePath . '/' . $filename, $confWidth, $confHeight, '_' . $thumbType);
+        $thumbPath = saturne_vignette($filePath . '/' . $filename, $confWidth, $confHeight, '_' . $thumbType);
+        if (!is_string($thumbPath) || empty($thumbPath) || strpos($thumbPath, 'Error') === 0) {
+            return -1;
+        }
+
+        // saturne_vignette() returns the full path of the thumb, while every caller prefixes the thumbs directory itself
+        return basename($thumbPath);
     }
 
     return $fileName . '_' . $thumbType . '.' . $fileExtension;
