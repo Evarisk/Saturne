@@ -25,7 +25,9 @@ if ($resql) {
 
 if (is_array($filelist) && !empty($filelist)) {
     foreach ($filelist as $file) {
-        if (preg_match('/\.modules\.php$/i', $file) && preg_match('/^(pdf_|doc_)/', $file) && preg_match('/' . $documentParentType . '/i', $file)) {
+        // A document type directory holds the models of every document it groups, and a model is
+        // named after the document it builds: filtering on the directory name hid a sibling model
+        if (preg_match('/\.modules\.php$/i', $file) && preg_match('/^(pdf_|doc_)/', $file)) {
             $titleLabel = $langs->trans('DocumentTemplate' . $documentParentType);
             if ($titleLabel == 'DocumentTemplate' . $documentParentType) {
                 $titleLabel = $langs->trans('DocumentTemplate');
@@ -49,7 +51,9 @@ if (is_array($filelist) && !empty($filelist)) {
 
 if (is_array($filelist) && !empty($filelist)) {
     foreach ($filelist as $file) {
-        if (preg_match('/\.modules\.php$/i', $file) && preg_match('/^(pdf_|doc_)/', $file) && preg_match('/' . $documentParentType . '/i', $file)) {
+        // A document type directory holds the models of every document it groups, and a model is
+        // named after the document it builds: filtering on the directory name hid a sibling model
+        if (preg_match('/\.modules\.php$/i', $file) && preg_match('/^(pdf_|doc_)/', $file)) {
             if (file_exists($dir . '/' . $file)) {
                 $name       = substr($file, 4, dol_strlen($file) - 16);
                 $customName = substr($file, 4, dol_strlen($file) - 20) . '_custom_odt';
