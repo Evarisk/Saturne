@@ -545,7 +545,20 @@ class SaturneDocumentModel extends CommonDocGenerator
                 if (preg_match('/photo|picto/', $key) || preg_match('/logo$/', $key)) {
                     // Image.
                     if (file_exists($val)) {
-                        $listLines->setImage($key, $val);
+                        if (preg_match('/logo$/', $key)) {
+                            // Fit the logo into a bounding box while keeping its aspect ratio,
+                            // otherwise a wide company logo is flattened in the document header.
+                            $ratio     = 1;
+                            $imageSize = getimagesize($val);
+                            if (!empty($imageSize[0]) && !empty($imageSize[1])) {
+                                $maxWidth  = 128; // px, keeps the previous _mini logo footprint
+                                $maxHeight = 72;  // px (16/9 bounding box)
+                                $ratio     = min($maxWidth / $imageSize[0], $maxHeight / $imageSize[1], 1);
+                            }
+                            $listLines->setImage($key, $val, $ratio);
+                        } else {
+                            $listLines->setImage($key, $val);
+                        }
                     } else if (dol_strlen($val) > 0){
 						if ($key == 'mycompany_logo') {
 							$listLines->setVars($key, $outputLangs->transnoentities('ErrorNoSocietyLogo'), true, 'UTF-8');
@@ -900,7 +913,7 @@ class SaturneDocumentModel extends CommonDocGenerator
         $substitutionArray          = getCommonSubstitutionArray($outputLangs, 0, null, $object);
         $arrayObjectFromProperties  = $this->get_substitutionarray_each_var_object($object, $outputLangs);
         $arraySoc                   = $this->get_substitutionarray_mysoc($mysoc, $outputLangs);
-        $arraySoc['mycompany_logo'] = preg_replace('/_small/', '_mini', $arraySoc['mycompany_logo']);
+        // Keep the sharper _small thumbnail; its size is bounded while preserving the aspect ratio in setTmpArrayVars().
 
         $tmpArray = array_merge($substitutionArray, $arrayObjectFromProperties, $arraySoc, $moreParam['tmparray']);
         if (isModEnabled('multicompany')) {
