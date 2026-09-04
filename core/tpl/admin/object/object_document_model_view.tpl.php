@@ -65,7 +65,10 @@ if (is_array($filelist) && !empty($filelist)) {
                 print '<tr class="oddeven"><td>';
                 print (empty($module->name) ? $name : $module->name);
                 print '</td><td>';
-                if (method_exists($module, 'info')) {
+                // info() lists the ODT templates found in the model scan directory and offers to upload
+                // one: a PDF model has no such directory, it inherits the method from SaturneDocumentModel
+                // and advertised the templates of the ODT model shown right under it
+                if ($module->type != 'pdf' && method_exists($module, 'info')) {
                     print $module->info($langs);
                 } else {
                     print $module->description;
@@ -120,8 +123,11 @@ if (is_array($filelist) && !empty($filelist)) {
                 }
                 print '</td></tr>';
 
-                // Custom ODT document
-                if (method_exists($module, 'info')) {
+                // Custom ODT document: only an ODT model scans a template directory. A PDF model
+                // inherits info() and the custom template properties from SaturneDocumentModel, but its
+                // name carries no _odt suffix, so the custom name built above is a truncation naming a
+                // model that does not exist: its buttons registered and defaulted an unusable model.
+                if ($module->type != 'pdf' && method_exists($module, 'info')) {
                     print '<tr class="oddeven"><td>';
                     print $langs->trans('CustomODT');
                     print '</td><td>';
@@ -139,6 +145,7 @@ if (is_array($filelist) && !empty($filelist)) {
                         print img_picto($langs->trans('Disabled'), 'switch_off');
                     }
                     print '</a>';
+                    print '</td>';
 
                     // Default
                     print '<td class="center">';
