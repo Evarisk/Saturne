@@ -178,11 +178,20 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 	$return  = '<!-- Photo -->' . "\n";
 	$nbphoto = 0;
 
-	$filearray = dol_dir_list($dir, 'files', 0,  $moreParams['filter'] ?? '', '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_DESC : SORT_ASC), 1);
+	// Listing then sorting a whole directory to keep the single file whose name is already known
+	// is a scandir per object: an element tree renders one media per GP/UT, on every page
+	$favoriteName = (is_object($object) && !empty($favorite_field) && !empty($object->$favorite_field)) ? $object->$favorite_field : '';
+	$knownFavorite = $show_only_favorite && !empty($favoriteName) && empty($moreParams['filter']);
+
+	if ($knownFavorite) {
+		$filearray = dol_is_file($dir . $favoriteName) ? [['name' => $favoriteName, 'path' => rtrim($dir, '/'), 'fullname' => $dir . $favoriteName]] : [];
+	} else {
+		$filearray = dol_dir_list($dir, 'files', 0,  $moreParams['filter'] ?? '', '(\.meta|_preview.*\.png)$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_DESC : SORT_ASC), 1);
+	}
 
 	$i = 0;
 	if (count($filearray)) {
-		if ($sortfield && $sortorder) {
+		if (!$knownFavorite && $sortfield && $sortorder) {
 			$filearray = dol_sort_array($filearray, $sortfield, $sortorder);
 		}
 		$favoriteExists = 0;
@@ -231,8 +240,9 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 							}
 						}
 
-						// Get filesize of original file
-						$imgarray = dol_getImageSize($dir . $photo);
+						// Reading the header of the original is one file access per media, and its size only
+						// feeds the title: skip it when the caller wants no title and a thumb is available
+						$imgarray = (empty($notitle) || empty($photo_vignette)) ? dol_getImageSize($dir . $photo) : [];
 
 						if ($nbbyrow > 0) {
 							if ($nbphoto == 1) $return .= '<table class="valigntop center centpercent" style="border: 0; padding: 2px; border-spacing: 2px; border-collapse: separate;">';
@@ -251,36 +261,39 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 							else $return              .= '<a href="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" class="aphoto" target="_blank">';
 						}
 
-						// The thumb is served as soon as the original does not fit in the requested box
-						$showThumb = !empty($photo_vignette) && (empty($maxHeight) || $imgarray['height'] > $maxHeight);
+						// The thumb is served as soon as the original does not fit in the requested box, and
+						// whenever the original was not measured: a thumb only exists at the module thumb size
+						$showThumb = !empty($photo_vignette) && (empty($maxHeight) || empty($imgarray) || $imgarray['height'] > $maxHeight);
 
-						// Show image (width height=$maxHeight)
-						$alt = $langs->transnoentitiesnoconv('File') . ': ' . $relativefile;
-						if ($showThumb) {
-							// Title must give the size of the file really served, the original one is only informative
-							$thumbarray = dol_getImageSize($dirthumb . $photo_vignette);
-							$alt       .= ' - ' . $langs->transnoentitiesnoconv('Size') . ': ' . $thumbarray['width'] . 'x' . $thumbarray['height'];
-							$alt       .= ' - ' . $langs->transnoentitiesnoconv('OriginalSize') . ': ' . $imgarray['width'] . 'x' . $imgarray['height'];
-						} else {
-							$alt .= ' - ' . $langs->transnoentitiesnoconv('Size') . ': ' . $imgarray['width'] . 'x' . $imgarray['height'];
+						// Composing the title reads the header of the file too, only do it when it is rendered
+						$alt = '';
+						if (empty($notitle)) {
+							$alt = $langs->transnoentitiesnoconv('File') . ': ' . $relativefile;
+							if ($showThumb) {
+								// Title must give the size of the file really served, the original one is only informative
+								$thumbarray = dol_getImageSize($dirthumb . $photo_vignette);
+								$alt       .= ' - ' . $langs->transnoentitiesnoconv('Size') . ': ' . $thumbarray['width'] . 'x' . $thumbarray['height'];
+								$alt       .= ' - ' . $langs->transnoentitiesnoconv('OriginalSize') . ': ' . $imgarray['width'] . 'x' . $imgarray['height'];
+							} else {
+								$alt .= ' - ' . $langs->transnoentitiesnoconv('Size') . ': ' . $imgarray['width'] . 'x' . $imgarray['height'];
+							}
 						}
 
-						if ($notitle) $alt = '';
 						if ($usesharelink) {
                             if ($showThumb) {
                                 $return .= '<!-- Show thumb file -->';
-                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo '. $morecss .' photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/custom/saturne/utils/viewimage.php?modulepart=' . $modulepart . '&entity=' . $object->entity . '&file=' . urlencode($pdirthumb . $photo_vignette) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . $object->id . '">';
+                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo '. $morecss .' photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/custom/saturne/utils/viewimage.php?modulepart=' . $modulepart . '&entity=' . $object->entity . '&file=' . urlencode($pdirthumb . $photo_vignette) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . $object->id . '" loading="lazy" decoding="async">';
                             } else {
                                 $return .= '<!-- Show original file -->';
-                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo '. $morecss .' photowithmargin" src="' . DOL_URL_ROOT . '/custom/saturne/utils/viewimage.php?modulepart=' . $modulepart . '&entity=' . $object->entity . '&file=' . urlencode($pdir . $photo) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . $object->id . '">';
+                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo '. $morecss .' photowithmargin" src="' . DOL_URL_ROOT . '/custom/saturne/utils/viewimage.php?modulepart=' . $modulepart . '&entity=' . $object->entity . '&file=' . urlencode($pdir . $photo) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . $object->id . '" loading="lazy" decoding="async">';
                             }
 						} else {
 							if ($showThumb) {
 								$return .= '<!-- Show thumb file -->';
-								$return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo '. $morecss .'"  src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdirthumb . $photo_vignette) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . $object->id . '">';
+								$return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo '. $morecss .'"  src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdirthumb . $photo_vignette) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . $object->id . '" loading="lazy" decoding="async">';
 							} else {
 								$return .= '<!-- Show original file -->';
-								$return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo '. $morecss .' photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . $object->id . '">';
+								$return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo '. $morecss .' photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . $object->id . '" loading="lazy" decoding="async">';
 							}
 						}
 
@@ -303,7 +316,7 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 
 					if (empty($size)) {
 						// Format origine
-						$return .= '<img class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" data-object-id="' . $object->id . '">';
+						$return .= '<img class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" data-object-id="' . $object->id . '" loading="lazy" decoding="async">';
 						if ($showfilename) {
 							$return .= '<br>' . $viewfilename;
 						}
@@ -318,7 +331,7 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 						}
 						$widthName  = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_' . strtoupper($size);
 						$heightName = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_' . strtoupper($size);
-						$return .= '<img width="' . $conf->global->$widthName . '" height="' . $conf->global->$heightName . '" class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" data-object-id="' . $object->id . '">';
+						$return .= '<img width="' . $conf->global->$widthName . '" height="' . $conf->global->$heightName . '" class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" data-object-id="' . $object->id . '" loading="lazy" decoding="async">';
 						if ($showfilename) {
                             $return .= '<br>' . $viewfilename;
                         }
