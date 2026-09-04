@@ -306,7 +306,9 @@ abstract class CustomModeleNumRefSaturne extends ModeleNumRefSaturne
         $suffixSize = dol_strlen($this->suffix);
 
         // First we get the max value.
-        $posIndice = dol_strlen($this->prefix) + dol_strlen($sqlLike);
+        // The counter starts right after the prefix: SUBSTRING must not skip the LIKE placeholders,
+        // otherwise MAX() only reads the last digits of the ref and the counter loops on itself.
+        $posIndice = dol_strlen($this->prefix) + 1;
         $sql = 'SELECT MAX(CAST(SUBSTRING(ref FROM ' . $posIndice . ') AS SIGNED)) as max';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . $object->table_element;
         $sql .= " WHERE ref LIKE '" . $db->escape($this->prefix) . $sqlLike . "'";
