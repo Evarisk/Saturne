@@ -87,23 +87,14 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
 	 */
 	public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf): int
 	{
-        global $moduleNameLowerCase;
-
         if (!isModEnabled('saturne')) {
             return 0; // If module is not enabled, we do nothing
         }
 
-        saturne_load_langs();
+        // A trigger never runs on a module page, so the $moduleNameLowerCase global it would rely on is not set
+        $objectModuleName = saturne_get_module_name($object);
 
-        // $moduleNameLowerCase is only set by the Saturne page controllers: fall back on the module carried by the
-        // object when the trigger runs from another context (module activation, cron, API, native Dolibarr page)
-        $objectModuleName = $moduleNameLowerCase ?? '';
-        if (empty($objectModuleName)) {
-            $objectModuleName = !empty($object->module_name) ? $object->module_name : ($object->module ?? '');
-        }
-        if (empty($objectModuleName)) {
-            $objectModuleName = 'saturne';
-        }
+        saturne_load_langs([$objectModuleName . '@' . $objectModuleName]);
 
         // Data and type of action are stored into $object and $action
         dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . '. id=' . $object->id);

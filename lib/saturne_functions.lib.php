@@ -282,9 +282,7 @@ function saturne_check_access($permission, ?object $object = null, bool $allowEx
 {
     global $conf, $langs, $user, $moduleNameLowerCase;
 
-    if (empty($moduleNameLowerCase)) {
-        $moduleNameLowerCase = 'saturne';
-    }
+    $moduleNameLowerCase = saturne_get_module_name();
 
     if (!$permission) {
         accessforbidden();
@@ -316,9 +314,7 @@ function saturne_check_modules_enabled()
 {
 	global $langs, $moduleNameLowerCase;
 
-	if (empty($moduleNameLowerCase)) {
-		$moduleNameLowerCase = 'saturne';
-	}
+	$moduleNameLowerCase = saturne_get_module_name();
 
 	if (!isModEnabled($moduleNameLowerCase) || !isModEnabled('saturne')) {
 		if (!isModEnabled($moduleNameLowerCase)) {
@@ -558,13 +554,44 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
 }
 
 /**
+ *  Return the lowercase module name of the current context.
+ *
+ *  The $moduleNameLowerCase global is only set by the pages of the Saturne based modules. Everywhere else
+ *  (trigger, cron, API, core Dolibarr page) it is null, which breaks every string typed signature it reaches.
+ *  Resolve it from the object being handled when there is one, and default to saturne.
+ *
+ * @param  object|null $object Object carrying the module it belongs to
+ * @return string              Lowercase module name, never empty
+ */
+function saturne_get_module_name(?object $object = null): string
+{
+    global $moduleNameLowerCase;
+
+    if (!empty($moduleNameLowerCase)) {
+        return $moduleNameLowerCase;
+    }
+
+    // Signature lines carry their owning module in module_name, the other Saturne objects expose it as a property
+    if (!empty($object->module_name)) {
+        return $object->module_name;
+    }
+    if (!empty($object->module)) {
+        return $object->module;
+    }
+
+    return 'saturne';
+}
+
+/**
  *  Load saturne and module translation files.
  *
  * @param array $domains Array of lang files to load
  */
 function saturne_load_langs(array $domains = [])
 {
-	global $langs, $moduleNameLowerCase;
+	global $langs;
+
+	$moduleNameLowerCase = saturne_get_module_name();
 
 	$langs->loadLangs(['saturne@saturne', 'object@saturne', 'signature@saturne', 'medias@saturne', 'component@saturne', $moduleNameLowerCase . '@' . $moduleNameLowerCase]);
 
