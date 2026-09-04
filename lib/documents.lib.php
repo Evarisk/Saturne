@@ -514,3 +514,48 @@ function saturne_get_list_of_models(DoliDB $db, string $type, int $maxfilenamele
 		return 0;
 	}
 }
+
+/**
+ * Return the document model set as default for a document type, ready to be passed to generateDocument()
+ *
+ * The default model constant only holds a model name : the ODT template path it must be built with is
+ * known by the model list only. A custom ODT model shares the generation class of the standard one, so
+ * once its template path is resolved its name is normalized back to the standard one
+ *
+ * @param  DoliDB $db           Database handler
+ * @param  string $moduleName   Module name
+ * @param  string $documentType Document type, the object element suffixed by 'document'
+ * @return string               Model to generate the document with, '' if no model is available
+ * @throws Exception
+ */
+function saturne_get_default_model(DoliDB $db, string $moduleName, string $documentType): string
+{
+    $documentType = dol_strtolower($documentType);
+    $confName     = dol_strtoupper($moduleName . '_' . $documentType) . '_DEFAULT_MODEL';
+    $defaultModel = getDolGlobalString($confName);
+
+    $modelList = saturne_get_list_of_models($db, $documentType);
+    if (!is_array($modelList) || empty($modelList)) {
+        return '';
+    }
+
+    asort($modelList);
+    $modelList = array_filter($modelList, 'saturne_remove_index');
+
+    $model = '';
+    if (dol_strlen($defaultModel) > 0) {
+        foreach ($modelList as $key => $label) {
+            // An ODT model key carries its template path after the model name, a native PDF model key does not :
+            // comparing the name alone keeps a PDF model from matching the ODT models built on the same document
+            $modelName = explode(':', (string) $key)[0];
+            if ($modelName == $defaultModel) {
+                $model = (string) $key;
+            }
+        }
+    }
+    if (!dol_strlen($model)) {
+        $model = (string) key($modelList);
+    }
+
+    return str_replace($documentType . '_custom_odt', $documentType . '_odt', $model);
+}

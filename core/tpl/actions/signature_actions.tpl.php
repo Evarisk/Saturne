@@ -76,20 +76,12 @@ if ($action == 'builddoc') {
         $moreParams = [];
     }
 
-    // Determine if the default model is a native PDF or an ODT template.
-    $confDefaultModel = strtoupper($moduleName) . '_' . strtoupper($documentType) . '_DEFAULT_MODEL';
-    $defaultModel     = getDolGlobalString($confDefaultModel, '');
-    $isNativePdf      = (!empty($defaultModel) && !preg_match('/_odt$/i', $defaultModel));
+    // The default model constant only holds a model name : resolve it against the installed models so the
+    // template of a custom ODT model is honoured here as it already is on the object card
+    $model = saturne_get_default_model($db, $moduleName, $documentType);
 
-    if ($isNativePdf) {
-        // Native PDF model: use the model name directly (e.g. "preventionplandocument")
-        $model = $defaultModel;
-    } else {
-        // ODT model: build the model string from the template path
-        $confName = strtoupper($moduleName) . '_' . strtoupper($documentType) . '_ADDON_ODT_PATH';
-        $template = preg_replace('/DOL_DOCUMENT_ROOT/', DOL_DOCUMENT_ROOT, $conf->global->$confName);
-        $model    = strtolower($documentType) . '_odt:' . $template . 'template_' . strtolower($documentType) . '.odt';
-    }
+    // An ODT model carries its template path after the model name, a native PDF model does not
+    $isNativePdf = !preg_match('/_odt:/i', $model);
 
     // Determine if it should be a specimen or a final document
     $isSpecimen = 0;

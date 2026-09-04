@@ -60,21 +60,7 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
     }
 
     if (GETPOST('forcebuilddoc')) {
-        $model      = '';
-        $modelLists = saturne_get_list_of_models($db, $object->element . 'document');
-        if (is_array($modelLists) && !empty($modelLists)) {
-            asort($modelLists);
-            $modelLists = array_filter($modelLists, 'saturne_remove_index');
-            foreach ($modelLists as $key => $modelList) {
-                $confName = dol_strtoupper($object->module . '_' . $document->element) . '_DEFAULT_MODEL';
-                if (dol_strlen(getDolGlobalString($confName)) > 0 && strpos($key, getDolGlobalString($confName)) !== false) {
-                    $model = $key;
-                }
-            }
-            if (!dol_strlen($model)) {
-                $model = key($modelLists);
-            }
-        }
+        $model = saturne_get_default_model($db, $object->module, $document->element);
     } else {
         $model = GETPOST('model', 'alpha');
     }
