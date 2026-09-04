@@ -61,6 +61,18 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
 
         $extraFields->fetch_name_optionals_label($object->table_element);
         $optionsArray = (!empty($extraFields->attributes[$object->table_element]['label']) ? $extraFields->attributes[$object->table_element]['label'] : null);
+
+        // A "separate" extrafield is only a form separator, it owns no column in the
+        // <table>_extrafields table. Selecting it raises "Unknown column eft.<name>" and the whole
+        // fetch returns -1, which most callers turn into an empty list without a word. Dropping
+        // those names here keeps the SELECT and the array_options loop below in step
+        if (is_array($optionsArray)) {
+            foreach (array_keys($optionsArray) as $name) {
+                if (($extraFields->attributes[$object->table_element]['type'][$name] ?? '') == 'separate') {
+                    unset($optionsArray[$name]);
+                }
+            }
+        }
     }
     if (empty($moreparams['count'])) {
         $objectFields = $object->getFieldList('t');
@@ -68,10 +80,8 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
             $objectFields = preg_replace('/t.fk_prospectlevel,/','', $objectFields);
         }
         if (is_array($optionsArray) && !empty($optionsArray) && $extraFieldManagement) {
-            foreach ($optionsArray as $name => $label) {
-                if (empty($extrafields->attributes[$object->table_element]['type'][$name]) || $extrafields->attributes[$object->table_element]['type'][$name] != 'separate') {
-                    $objectFields .= ", eft." . $name;
-                }
+            foreach (array_keys($optionsArray) as $name) {
+                $objectFields .= ", eft." . $name;
             }
         }
     } else {
