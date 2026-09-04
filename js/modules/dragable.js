@@ -96,7 +96,7 @@ window.saturne.dragable.submit = function() {
     method: 'POST',
     data: JSON.stringify(elements),
     processData: false,
-    contentType: false,
+    contentType: 'application/json',
     success: function(response) {
       if (loader !== 'none') {
         window.saturne.loader.remove($container);

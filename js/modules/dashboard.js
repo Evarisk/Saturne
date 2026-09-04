@@ -211,7 +211,7 @@ window.saturne.dashboard.configureDashboard = function(data, loaderElem, refresh
     type: "POST",
     processData: false,
     data: JSON.stringify(data),
-    contentType: false,
+    contentType: 'application/json',
     success: function(resp) {
       window.saturne.loader.remove(loaderElem);
 
