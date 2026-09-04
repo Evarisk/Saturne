@@ -184,7 +184,7 @@ return [
         'PhanStaticCallToNonStatic',
 
         // ── Deprecated functions ──────────────────────────────────────────
-        // strftime() is used for date formatting, not worth fixing now.
+        // Dolibarr core and legacy helpers still call deprecated functions.
         'PhanDeprecatedFunction',
         'PhanDeprecatedFunctionInternal',
 
