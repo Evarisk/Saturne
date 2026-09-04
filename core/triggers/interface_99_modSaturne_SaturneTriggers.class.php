@@ -95,6 +95,16 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
 
         saturne_load_langs();
 
+        // $moduleNameLowerCase is only set by the Saturne page controllers: fall back on the module carried by the
+        // object when the trigger runs from another context (module activation, cron, API, native Dolibarr page)
+        $objectModuleName = $moduleNameLowerCase ?? '';
+        if (empty($objectModuleName)) {
+            $objectModuleName = !empty($object->module_name) ? $object->module_name : ($object->module ?? '');
+        }
+        if (empty($objectModuleName)) {
+            $objectModuleName = 'saturne';
+        }
+
         // Data and type of action are stored into $object and $action
         dol_syslog("Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . '. id=' . $object->id);
 
@@ -102,7 +112,7 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
         $now = dol_now();
         $actioncomm = new ActionComm($this->db);
 
-        $actioncomm->elementtype = $object->element . '@' . $moduleNameLowerCase;
+        $actioncomm->elementtype = $object->element . '@' . $objectModuleName;
         $actioncomm->type_code   = 'AC_OTH_AUTO';
         $actioncomm->code        = 'AC_' . $action;
         $actioncomm->datep       = $now;
@@ -115,7 +125,7 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
         if (preg_match('/_VALIDATE$/', $action) && $object instanceof SaturneObject) {
             require_once __DIR__ . '/../../class/saturnesignature.class.php';
 
-            $autoSignatory = new SaturneSignature($this->db, $moduleNameLowerCase, $object->element);
+            $autoSignatory = new SaturneSignature($this->db, $objectModuleName, $object->element);
             if ($autoSignatory->autoSignUsers($user, $object->id, $object->element) < 0) {
                 setEventMessages($autoSignatory->error, $autoSignatory->errors, 'errors');
             }
@@ -165,7 +175,7 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
 
             // SIGNATURE
             case 'SATURNE_SIGNATURE_ADDATTENDANT' :
-                $actioncomm->elementtype = $object->object_type . '@' . $moduleNameLowerCase;
+                $actioncomm->elementtype = $object->object_type . '@' . $objectModuleName;
                 $actioncomm->label       = $langs->transnoentities('AddAttendantTrigger', $langs->transnoentities($object->role) . ' ' . strtoupper($object->lastname) . ' ' . $object->firstname);
                 if ($object->element_type == 'socpeople') {
                     $actioncomm->socpeopleassigned = [$object->element_id => $object->element_id];
@@ -175,7 +185,7 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
                 break;
 
             case 'SATURNE_SIGNATURE_SIGN' :
-                $actioncomm->elementtype = $object->object_type . '@' . $moduleNameLowerCase;
+                $actioncomm->elementtype = $object->object_type . '@' . $objectModuleName;
                 $actioncomm->label       = $langs->transnoentities('SignedTrigger', $langs->transnoentities($object->role) . ' ' . strtoupper($object->lastname) . ' ' . $object->firstname);
                 if ($object->element_type == 'socpeople') {
                     $actioncomm->socpeopleassigned = [$object->element_id => $object->element_id];
@@ -185,7 +195,7 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
                 break;
 
             case 'SATURNE_SIGNATURE_SIGN_PUBLIC' :
-                $actioncomm->elementtype = $object->object_type . '@' . $moduleNameLowerCase;
+                $actioncomm->elementtype = $object->object_type . '@' . $objectModuleName;
                 $actioncomm->label       = $langs->transnoentities('SignedTrigger', $langs->transnoentities($object->role) . ' ' . strtoupper($object->lastname) . ' ' . $object->firstname);
                 if ($object->element_type == 'socpeople') {
                     $actioncomm->socpeopleassigned = [$object->element_id => $object->element_id];
@@ -200,7 +210,7 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
                 break;
 
             case 'SATURNE_SIGNATURE_PENDING_SIGNATURE' :
-                $actioncomm->elementtype = $object->object_type . '@' . $moduleNameLowerCase;
+                $actioncomm->elementtype = $object->object_type . '@' . $objectModuleName;
                 $actioncomm->label       = $langs->transnoentities('PendingSignatureTrigger', $langs->transnoentities($object->role) . ' ' . strtoupper($object->lastname) . ' ' . $object->firstname);
                 if ($object->element_type == 'socpeople') {
                     $actioncomm->socpeopleassigned = [$object->element_id => $object->element_id];
@@ -218,7 +228,7 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
                 break;
 
             case 'SATURNE_SIGNATURE_ATTENDANCE_DELAY' :
-                $actioncomm->elementtype = $object->object_type . '@' . $moduleNameLowerCase;
+                $actioncomm->elementtype = $object->object_type . '@' . $objectModuleName;
                 $actioncomm->label       = $langs->transnoentities('AttendanceDelayTrigger', $langs->transnoentities($object->role) . ' ' . strtoupper($object->lastname) . ' ' . $object->firstname);
                 if ($object->element_type == 'socpeople') {
                     $actioncomm->socpeopleassigned = [$object->element_id => $object->element_id];
@@ -228,7 +238,7 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
                 break;
 
             case 'SATURNE_SIGNATURE_ATTENDANCE_ABSENT' :
-                $actioncomm->elementtype = $object->object_type . '@' . $moduleNameLowerCase;
+                $actioncomm->elementtype = $object->object_type . '@' . $objectModuleName;
                 $actioncomm->label       = $langs->transnoentities('AttendanceAbsentTrigger', $langs->transnoentities($object->role) . ' ' . strtoupper($object->lastname) . ' ' . $object->firstname);
                 if ($object->element_type == 'socpeople') {
                     $actioncomm->socpeopleassigned = [$object->element_id => $object->element_id];
@@ -238,7 +248,7 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
                 break;
 
             case 'SATURNE_SIGNATURE_DELETE' :
-                $actioncomm->elementtype = $object->object_type . '@' . $moduleNameLowerCase;
+                $actioncomm->elementtype = $object->object_type . '@' . $objectModuleName;
                 $actioncomm->label       = $langs->transnoentities('DeletedTrigger', $langs->transnoentities($object->role) . ' ' . strtoupper($object->lastname) . ' ' . $object->firstname);
                 if ($object->element_type == 'socpeople') {
                     $actioncomm->socpeopleassigned = [$object->element_id => $object->element_id];
