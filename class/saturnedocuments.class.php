@@ -217,12 +217,16 @@ abstract class SaturneDocuments extends SaturneObject
      * @param  string    $moduleNameLowerCase Module name in lowercase
      * @param  string    $fileDir             File directory
      * @param  string    $fileType            Type of file
-     * @param  int       $entity              Entity
+     * @param  int       $entity              Entity (0 = current entity)
      * @return array|int $result              Array of document or -1 if not found
      */
-    public function getLastDocument(string $moduleNameLowerCase = '', string $fileDir = '', string $fileType = '', int $entity = 1)
+    public function getLastDocument(string $moduleNameLowerCase = '', string $fileDir = '', string $fileType = '', int $entity = 0)
     {
+        global $conf;
+
         require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+
+        $entity = $entity > 0 ? $entity : $conf->entity;
 
         $fileDir   = DOL_DATA_ROOT . '/' . ($entity > 1 ? $entity . '/' : '') . $moduleNameLowerCase . '/' . $fileDir;
         $fileList  = dol_dir_list($fileDir, 'files', 0, '(\.' . $fileType .  ')', '', 'date', 'SORT_DESC', 1);
@@ -242,12 +246,14 @@ abstract class SaturneDocuments extends SaturneObject
      * @param  string $fileDir             File directory
      * @param  string $fileType            Type of file
      * @param  string $icon                Icon for download button
-     * @param  int    $entity              Entity
+     * @param  int    $entity              Entity (0 = current entity)
      * @return string                      String of html button
      */
-    public function showUrlOfLastGeneratedDocument(string $moduleNameLowerCase = '', string $fileDir = '', string $fileType = '', string $icon = 'fa-file-word', int $entity = 1): string
+    public function showUrlOfLastGeneratedDocument(string $moduleNameLowerCase = '', string $fileDir = '', string $fileType = '', string $icon = 'fa-file-word', int $entity = 0): string
     {
-        global $langs;
+        global $conf, $langs;
+
+        $entity = $entity > 0 ? $entity : $conf->entity;
 
         $out      = '';
         $document = $this->getLastDocument($moduleNameLowerCase, $fileDir, $fileType, $entity);
