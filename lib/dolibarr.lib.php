@@ -544,3 +544,32 @@ function saturne_get_title_field_of_list($name, $thead = 0, $file = "", $field =
 	return $out;
 }
 
+
+/**
+ * Adapt a WYSIWYG content to an output that does not handle block tags
+ *
+ * WYSIWYG editors wrap their content into block tags (<p>, <ul>, <li>) that most outputs drop
+ * without leaving any separator: the ODT library only keeps inline tags, TCPDF only renders html
+ * through writeHTMLCell and dol_string_nohtmltag() only knows <br> as a line break. Turning the
+ * closing block tags into <br> first is what keeps paragraphs and list items from being glued
+ * together, whatever the target
+ *
+ * @param  string|null $html      WYSIWYG content
+ * @param  bool        $plainText Also remove the remaining tags, for a target without any html
+ * @return string                 Content the target can render
+ */
+function saturne_flatten_wysiwyg_blocks(?string $html, bool $plainText = false): string
+{
+    if (!dol_strlen((string) $html)) {
+        return '';
+    }
+
+    $flattened = preg_replace('#</(p|div|li|tr|h[1-6]|blockquote)>#i', '<br>', (string) $html);
+
+    if ($plainText) {
+        // Second parameter at 0: dol_string_nohtmltag() removes the line feeds otherwise
+        return dol_string_nohtmltag($flattened, 0);
+    }
+
+    return $flattened;
+}
