@@ -1377,6 +1377,11 @@ function saturne_get_inline_edit_type(array $val, string $key): string
  * select_dolusers() in output-array mode) and renders each dropdown from that cache with
  * selectarray(), keeping the same name and CSS class so existing JS selectors still match.
  *
+ * Only the first dropdown of the request lists the users: printing them again in every
+ * dropdown costs 110 Ko of <option> for 63 users on a risk list, ten times that for a large
+ * organisation. The others keep their preselected entry, so reading their value stays right,
+ * and saturne.lazyUserSelect completes them from the first one when they are opened.
+ *
  * @param  string     $htmlName  Name attribute of the select field
  * @param  int|string $selected  Preselected user id (0 for none)
  * @param  int|string $showEmpty 1 (or a label) to prepend an empty entry
@@ -1401,7 +1406,16 @@ function saturne_select_users(string $htmlName, $selected = 0, $showEmpty = 1, s
         }
     }
 
-    return $form->selectarray($htmlName, $userOptions, $selected, $showEmpty, 0, 0, '', 0, 0, 0, '', $morecss);
+    static $userListPrinted = false;
+    if (!$userListPrinted) {
+        $userListPrinted = true;
+
+        return $form->selectarray($htmlName, $userOptions, $selected, $showEmpty, 0, 0, '', 0, 0, 0, '', $morecss . ' saturne-user-select-source');
+    }
+
+    $options = (!empty($selected) && isset($userOptions[$selected])) ? [$selected => $userOptions[$selected]] : [];
+
+    return $form->selectarray($htmlName, $options, $selected, $showEmpty, 0, 0, '', 0, 0, 0, '', $morecss . ' saturne-user-select-lazy');
 }
 
 /**
