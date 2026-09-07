@@ -103,7 +103,7 @@ if ($subaction == 'add_img') {
 
     if (dol_strlen($object->ref) > 0) {
         $pathToObjectImg = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $object->element . '/' . $object->ref . '/' . $data['objectSubdir'];
-        if (empty($object->{$data['objectSubType']})) {
+        if (saturne_favorite_media_needs_update($object, $data['objectSubType'], $pathToObjectImg)) {
             $object->setValueFrom($data['objectSubType'], $fileName, '', '', 'text', '', $user);
         }
     } else {
@@ -172,10 +172,12 @@ if ($subaction == 'addFiles') {
     }
 
     if (!empty($fileNames)) {
+        $favoriteNeedsUpdate = saturne_favorite_media_needs_update($object, $data['objectSubtype'], $pathToObjectImg);
         foreach ($fileNames as $fileName) {
             $fileName = dol_sanitizeFileName($fileName);
-            if (empty($object->{$data['objectSubtype']})) {
+            if ($favoriteNeedsUpdate) {
                 $object->{$data['objectSubtype']} = $fileName;
+                $favoriteNeedsUpdate             = false;
             }
 
             dol_copy($pathToECMImg . '/' . $fileName, $pathToObjectImg . '/' . $fileName);
