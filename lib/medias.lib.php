@@ -411,6 +411,26 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 }
 
 /**
+ * Tell if the favorite media of an object must be replaced by a newly added one
+ *
+ * The favorite is the only media the lists show (show_only_favorite), so one pointing at a file that
+ * is no longer in the object folder leaves them on nophoto forever : it must give way to the new media.
+ *
+ * @param  object $object        Object holding the favorite field
+ * @param  string $favoriteField Name of the field holding the favorite media (photo, signature, ...)
+ * @param  string $objectDir     Folder holding the medias of the object
+ * @return bool                  True when the favorite has to be set on the newly added media
+ */
+function saturne_favorite_media_needs_update(object $object, string $favoriteField, string $objectDir): bool
+{
+    if (!property_exists($object, $favoriteField) || dol_strlen($object->$favoriteField) == 0) {
+        return true;
+    }
+
+    return !dol_is_file(rtrim($objectDir, '/') . '/' . $object->$favoriteField);
+}
+
+/**
  * Return file specified thumb name
  *
  * @param  string $filename  File name
