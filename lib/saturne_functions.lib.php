@@ -274,13 +274,11 @@ function saturne_recurse_tree($moreParams, ?int $parentID = null, int $depth = 0
 /**
  * Check user access on current page
  *
- * @param object|bool|int $permission          Permission to access to current page
- * @param object|null     $object              Object in current page
- * @param bool            $allowExternalUser   Allow external user to have access at current page
- * @param string          $recordNotFoundUrl   URL to redirect to when the requested record does not
- *                                             exist, the module home page by default
+ * @param object|bool|int $permission        Permission to access to current page
+ * @param object|null     $object            Object in current page
+ * @param bool            $allowExternalUser Allow external user to have access at current page
  */
-function saturne_check_access($permission, ?object $object = null, bool $allowExternalUser = false, string $recordNotFoundUrl = '')
+function saturne_check_access($permission, ?object $object = null, bool $allowExternalUser = false)
 {
     global $conf, $langs, $user, $moduleNameLowerCase;
 
@@ -300,11 +298,14 @@ function saturne_check_access($permission, ?object $object = null, bool $allowEx
     // jusqu'a passer une propriete nulle a une methode typee, et s'arreterait sur une erreur
     // fatale. Le test porte sur la tentative memorisee par SaturneObject::fetch() : un objet
     // volontairement vide, jamais charge, ne la porte pas et n'est donc pas concerne
-    if ($object !== null && isset($object->fetchedResult) && $object->fetchedResult <= 0
-        && ($object->fetchedId > 0 || dol_strlen($object->fetchedRef))) {
+    $recordWasFetched   = $object !== null && isset($object->fetchedResult);
+    $recordWasRequested = $recordWasFetched && ($object->fetchedId > 0 || dol_strlen($object->fetchedRef));
+
+    if ($recordWasRequested && $object->fetchedResult <= 0) {
         $langs->load('errors');
         setEventMessages($langs->trans('ErrorRecordNotFound'), null, 'errors');
-        $urlToGo = dol_strlen($recordNotFoundUrl) ? $recordNotFoundUrl : dol_buildpath('/custom/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'index.php?mainmenu=' . $moduleNameLowerCase, 1);
+        $moduleHome = sprintf('/custom/%1$s/%1$sindex.php?mainmenu=%1$s', $moduleNameLowerCase);
+        $urlToGo    = dol_buildpath($moduleHome, 1);
         header('Location: ' . $urlToGo);
         exit;
     }
