@@ -141,11 +141,14 @@ jobs:
               run: composer install --no-interaction --no-progress --prefer-dist
 
             # ── PHPCS ────────────────────────────────────────────────────────────
-            # Pinned: PHPCS is not in composer.lock, so an unpinned install
-            # would let a new PHPCS release redden the CI with no code change.
+            # Constrained to the 4.0 patch line: PHPCS is not in composer.lock,
+            # so an unpinned install would let a new PHPCS minor add sniffs and
+            # redden the CI with no code change. Patch releases stay allowed so
+            # a security advisory does not block the install (composer refuses
+            # to resolve an exact version once one is published against it).
             - name: Install PHPCS
               if: matrix.step == 'phpcs'
-              run: composer global require squizlabs/php_codesniffer:4.0.1 --no-interaction
+              run: composer global require "squizlabs/php_codesniffer:~4.0.4" --no-interaction
 
             - name: Run PHPCS
               if: matrix.step == 'phpcs'

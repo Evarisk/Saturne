@@ -221,6 +221,12 @@ return [
         // implode() false positive (Phan gets confused with the two-arg form).
         'PhanParamSpecial1',
 
+        // ── Core docblocks narrower than reality ─────────────────────────
+        // DolibarrTriggers::$version is documented as an enum of special
+        // values ('', 'development', 'dolibarr', 'experimental') while every
+        // module stores a semver there. The docblock is wrong, not the code.
+        'PhanTypeMismatchPropertyProbablyReal',
+
         // ── Signature mismatches (Dolibarr child overrides widen param types) ──
         // Saturne overrides add type hints that parents lack; Phan flags this.
         'PhanParamSignatureRealMismatchHasParamType',
