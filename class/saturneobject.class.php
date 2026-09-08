@@ -57,6 +57,21 @@ abstract class SaturneObject extends CommonObject
      */
     public string $picto = '';
 
+    /**
+     * @var int Identifiant demande au dernier fetch(), 0 si l'objet n'a jamais ete charge
+     */
+    public int $fetchedId = 0;
+
+    /**
+     * @var string Reference demandee au dernier fetch()
+     */
+    public string $fetchedRef = '';
+
+    /**
+     * @var int|null Resultat du dernier fetch(), null tant que l'objet n'a jamais ete charge
+     */
+    public ?int $fetchedResult = null;
+
     public const STATUS_DELETED   = -1;
     public const STATUS_DRAFT     = 0;
     public const STATUS_VALIDATED = 1;
@@ -130,6 +145,14 @@ abstract class SaturneObject extends CommonObject
     {
         $id = (int) $id;
         $result = $this->fetchCommon($id, $ref, $moreWhere, $noExtraFields);
+
+        // La tentative est memorisee pour saturne_check_access(), qui redirige sur un
+        // enregistrement introuvable. C'est ce qui distingue un objet volontairement vide, jamais
+        // charge, d'un enregistrement demande puis absent
+        $this->fetchedId     = $id;
+        $this->fetchedRef    = (string) $ref;
+        $this->fetchedResult = $result;
+
         if ($result > 0 && !empty($this->table_element_line) && empty($noLines)) {
             $this->fetchLines('', $noExtraFields);
         }

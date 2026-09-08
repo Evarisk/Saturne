@@ -294,6 +294,22 @@ function saturne_check_access($permission, ?object $object = null, bool $allowEx
         }
     }
 
+    // Un enregistrement demande puis introuvable laisse l'objet vide : la page continuerait
+    // jusqu'a passer une propriete nulle a une methode typee, et s'arreterait sur une erreur
+    // fatale. Le test porte sur la tentative memorisee par SaturneObject::fetch() : un objet
+    // volontairement vide, jamais charge, ne la porte pas et n'est donc pas concerne
+    $recordWasFetched   = $object !== null && isset($object->fetchedResult);
+    $recordWasRequested = $recordWasFetched && ($object->fetchedId > 0 || dol_strlen($object->fetchedRef));
+
+    if ($recordWasRequested && $object->fetchedResult <= 0) {
+        $langs->load('errors');
+        setEventMessages($langs->trans('ErrorRecordNotFound'), null, 'errors');
+        $moduleHome = sprintf('/custom/%1$s/%1$sindex.php?mainmenu=%1$s', $moduleNameLowerCase);
+        $urlToGo    = dol_buildpath($moduleHome, 1);
+        header('Location: ' . $urlToGo);
+        exit;
+    }
+
 	if (isModEnabled('multicompany')) {
 		if ($object !== null && $object->id > 0) {
 			if ($object->entity != $conf->entity) {
