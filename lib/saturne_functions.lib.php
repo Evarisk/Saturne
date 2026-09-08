@@ -277,9 +277,15 @@ function saturne_recurse_tree($moreParams, ?int $parentID = null, int $depth = 0
  * @param object|bool|int $permission        Permission to access to current page
  * @param object|null     $object            Object in current page
  * @param bool            $allowExternalUser Allow external user to have access at current page
+ * @param string          $notFoundUrl       Where to redirect when the requested record does not
+ *                                           exist, the object list then the module home by default
  */
-function saturne_check_access($permission, ?object $object = null, bool $allowExternalUser = false)
-{
+function saturne_check_access(
+    $permission,
+    ?object $object = null,
+    bool $allowExternalUser = false,
+    string $notFoundUrl = ''
+) {
     global $conf, $langs, $user, $moduleNameLowerCase;
 
     $moduleNameLowerCase = saturne_get_module_name();
@@ -307,13 +313,14 @@ function saturne_check_access($permission, ?object $object = null, bool $allowEx
 
         // La liste du type demande est le contexte le plus proche de ce que l'utilisateur
         // cherchait. Les modules la nomment view/<element>/<element>_list.php ; a defaut,
-        // l'accueil du module prend le relais
+        // l'accueil du module prend le relais. Un objet consulte ailleurs que dans une liste,
+        // comme les elements DigiRisk dans leur arborescence, passe sa propre destination
         $moduleHome = sprintf('/custom/%1$s/%1$sindex.php?mainmenu=%1$s', $moduleNameLowerCase);
         $objectList = sprintf('/custom/%s/view/%2$s/%2$s_list.php', $moduleNameLowerCase, $object->element);
         $listExists = dol_strlen($object->element) && file_exists(dol_buildpath($objectList, 0));
         $urlToGo    = dol_buildpath($listExists ? $objectList : $moduleHome, 1);
 
-        header('Location: ' . $urlToGo);
+        header('Location: ' . (dol_strlen($notFoundUrl) ? $notFoundUrl : $urlToGo));
         exit;
     }
 
