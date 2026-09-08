@@ -95,7 +95,7 @@ if ($action == 'builddoc') {
     $subDir    = $isSpecimen ? '/public_specimen/' : '/';
     $sourceDir = $upload_dir . '/' . strtolower($objectType) . 'document/' . $object->ref . $subDir;
     $files = dol_dir_list($sourceDir, 'files', 1, '\.' . ($canServePdf ? 'pdf' : 'odt') . '$', null, 'date', SORT_DESC);
-    
+
     $shouldGenerate = true;
     if (!empty($files)) {
         $shouldGenerate = false;
@@ -117,11 +117,11 @@ if ($action == 'builddoc') {
         $subDir    = $isSpecimen ? '/public_specimen/' : '/';
         $sourceDir = $upload_dir . '/' . strtolower($objectType) . 'document/' . $object->ref . $subDir;
         $tempDir   = DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/';
-        
+
         if (!is_dir($tempDir)) {
             dol_mkdir($tempDir);
         }
-        
+
         $originalName = basename($document->last_main_doc);
         $tempFileName = $isSpecimen ? 'specimen_' . $originalName : $originalName;
 

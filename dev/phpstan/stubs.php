@@ -616,15 +616,21 @@ if (!class_exists('Parsedown')) {
 }
 
 if (!class_exists('OdfException')) {
-    class OdfException extends Exception {}
+    class OdfException extends Exception
+    {
+    }
 }
 
 if (!class_exists('OdfExceptionSegmentNotFound')) {
-    class OdfExceptionSegmentNotFound extends Exception {}
+    class OdfExceptionSegmentNotFound extends Exception
+    {
+    }
 }
 
 if (!class_exists('SegmentException')) {
-    class SegmentException extends Exception {}
+    class SegmentException extends Exception
+    {
+    }
 }
 
 if (!class_exists('Segment')) {

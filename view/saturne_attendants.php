@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -201,16 +202,16 @@ if (empty($resHook)) {
                     $signatory->email = $usertmp->email;
                     $signatory->update($user, true);
                 } else {
-					setEventMessage($langs->trans('NoEmailSet', $langs->transnoentities($signatory->role) . ' ' . strtoupper($signatory->lastname) . ' ' . $signatory->firstname), 'warnings');
-				}
+                    setEventMessage($langs->trans('NoEmailSet', $langs->transnoentities($signatory->role) . ' ' . strtoupper($signatory->lastname) . ' ' . $signatory->firstname), 'warnings');
+                }
             } elseif ($signatory->element_type == 'socpeople') {
                 $contact->fetch((int) $signatory->element_id);
                 if (dol_strlen($contact->email)) {
                     $signatory->email = $contact->email;
                     $signatory->update($user, true);
                 } else {
-					setEventMessage($langs->trans('NoEmailSet', $langs->transnoentities($signatory->role) . ' ' . strtoupper($signatory->lastname) . ' ' . $signatory->firstname), 'warnings');
-				}
+                    setEventMessage($langs->trans('NoEmailSet', $langs->transnoentities($signatory->role) . ' ' . strtoupper($signatory->lastname) . ' ' . $signatory->firstname), 'warnings');
+                }
             }
         }
 
@@ -301,13 +302,13 @@ if (empty($resHook)) {
 }
 
 /*
-*	View
+*   View
 */
 
 $title   = $langs->trans('Attendants') . ' - ' . $langs->trans(ucfirst($object->element));
 $helpUrl = 'FR:Module_' . $moduleName;
 
-saturne_header(0,'', $title, $helpUrl);
+saturne_header(0, '', $title, $helpUrl);
 
 if ($id > 0 || !empty($ref) && empty($action)) {
     $object->fetch_optionals();
@@ -340,7 +341,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
 
     if ($object->status == $object::STATUS_VALIDATED && $permissiontoadd) {
         print '<div class="tabsAction" style="margin-bottom: 0">';
-        print '<a class="butAction" href="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode . '&action=presend&mode=init&token=' .newToken() . '#formmailbeforetitle' . '"><i class="fas fa-paper-plane"></i> ' . $langs->trans('SendGlobalSignatureMail') . '</a>';
+        print '<a class="butAction" href="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode . '&action=presend&mode=init&token=' . newToken() . '#formmailbeforetitle' . '"><i class="fas fa-paper-plane"></i> ' . $langs->trans('SendGlobalSignatureMail') . '</a>';
         if ($signatory->checkSignatoriesSignatures($object->id, $object->element)) {
             print '<a class="butAction" href="' . $backtocard . '"><i class="fas fa-lock"></i> ' . $langs->trans('GoToLock', $langs->transnoentities('The' . ucfirst($object->element))) . '</a>';
         }
@@ -417,11 +418,11 @@ if ($id > 0 || !empty($ref) && empty($action)) {
         print dol_get_fiche_head();
 
         // Create form for email
-        require_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
+        require_once DOL_DOCUMENT_ROOT . '/core/class/html.formmail.class.php';
         $formmail = new FormMail($db);
 
         $formmail->param['langsmodels'] = (empty($newlang) ? $langs->defaultlang : $newlang);
-        $formmail->fromtype = (GETPOST('fromtype') ?GETPOST('fromtype') : (!empty($conf->global->MAIN_MAIL_DEFAULT_FROMTYPE) ? $conf->global->MAIN_MAIL_DEFAULT_FROMTYPE : 'user'));
+        $formmail->fromtype = (GETPOST('fromtype') ? GETPOST('fromtype') : (!empty($conf->global->MAIN_MAIL_DEFAULT_FROMTYPE) ? $conf->global->MAIN_MAIL_DEFAULT_FROMTYPE : 'user'));
 
         if ($formmail->fromtype === 'user') {
             $formmail->fromid = $user->id;
@@ -483,32 +484,32 @@ if ($id > 0 || !empty($ref) && empty($action)) {
         $contactarr = $tmpobject->liste_contact(-1, 'external');
 
         if (is_array($contactarr) && count($contactarr) > 0) {
-            require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
-            require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
+            require_once DOL_DOCUMENT_ROOT . '/contact/class/contact.class.php';
+            require_once DOL_DOCUMENT_ROOT . '/societe/class/societe.class.php';
             $contactstatic = new Contact($db);
             $tmpcompany = new Societe($db);
 
             foreach ($contactarr as $contact) {
                 $contactstatic->fetch((int) $contact['id']);
                 // Complete substitution array
-                $substitutionarray['__CONTACT_NAME_'.$contact['code'].'__'] = $contactstatic->getFullName($outputlangs, 1);
-                $substitutionarray['__CONTACT_LASTNAME_'.$contact['code'].'__'] = $contactstatic->lastname;
-                $substitutionarray['__CONTACT_FIRSTNAME_'.$contact['code'].'__'] = $contactstatic->firstname;
-                $substitutionarray['__CONTACT_TITLE_'.$contact['code'].'__'] = $contactstatic->getCivilityLabel();
+                $substitutionarray['__CONTACT_NAME_' . $contact['code'] . '__'] = $contactstatic->getFullName($outputlangs, 1);
+                $substitutionarray['__CONTACT_LASTNAME_' . $contact['code'] . '__'] = $contactstatic->lastname;
+                $substitutionarray['__CONTACT_FIRSTNAME_' . $contact['code'] . '__'] = $contactstatic->firstname;
+                $substitutionarray['__CONTACT_TITLE_' . $contact['code'] . '__'] = $contactstatic->getCivilityLabel();
 
                 // Complete $liste with the $contact
-                if (empty($liste[$contact['id']])) {	// If this contact id not already into the $liste
+                if (empty($liste[$contact['id']])) {    // If this contact id not already into the $liste
                     $contacttoshow = '';
                     if (isset($object->thirdparty) && is_object($object->thirdparty)) {
                         if ($contactstatic->fk_soc != $object->thirdparty->id) {
                             $tmpcompany->fetch((int) $contactstatic->fk_soc);
                             if ($tmpcompany->id > 0) {
-                                $contacttoshow .= $tmpcompany->name.': ';
+                                $contacttoshow .= $tmpcompany->name . ': ';
                             }
                         }
                     }
                     $contacttoshow .= $contactstatic->getFullName($outputlangs, 1);
-                    $contacttoshow .= ' <' .($contactstatic->email ?: $langs->transnoentitiesnoconv('NoEMail')) . '>';
+                    $contacttoshow .= ' <' . ($contactstatic->email ?: $langs->transnoentitiesnoconv('NoEMail')) . '>';
                     $liste[$contact['id']] = $contacttoshow;
                 }
             }

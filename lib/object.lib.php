@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -77,7 +78,7 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
     if (empty($moreparams['count'])) {
         $objectFields = $object->getFieldList('t');
         if (strstr($objectFields, 't.fk_prospectlevel')) {
-            $objectFields = preg_replace('/t.fk_prospectlevel,/','', $objectFields);
+            $objectFields = preg_replace('/t.fk_prospectlevel,/', '', $objectFields);
         }
         if (is_array($optionsArray) && !empty($optionsArray) && $extraFieldManagement) {
             foreach (array_keys($optionsArray) as $name) {
@@ -118,13 +119,13 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
             if ($key == 't.rowid') {
                 $sqlwhere[] = $key . ' = ' . $value;
             } elseif (isset($object->fields[$key]['type']) && in_array($object->fields[$key]['type'], ['date', 'datetime', 'timestamp'])) {
-                $sqlwhere[] = $key .' = \'' . $object->db->idate($value) . '\'';
+                $sqlwhere[] = $key . ' = \'' . $object->db->idate($value) . '\'';
             } elseif ($key == 'customsql') {
                 $sqlwhere[] = $value;
             } elseif (strpos($value, '%') === false) {
-                $sqlwhere[] = $key .' IN (' . $object->db->sanitize($object->db->escape($value)) . ')';
+                $sqlwhere[] = $key . ' IN (' . $object->db->sanitize($object->db->escape($value)) . ')';
             } else {
-                $sqlwhere[] = $key .' LIKE \'%' . $object->db->escape($value) . '%\'';
+                $sqlwhere[] = $key . ' LIKE \'%' . $object->db->escape($value) . '%\'';
             }
         }
     }
@@ -961,7 +962,7 @@ function saturne_get_objects_metadata(string $type = ''): array
     $objectsMetadataArray = [];
     $otherNameType        = '';
     if (is_array($objectsMetadata) && !empty($objectsMetadata)) {
-        foreach($objectsMetadata as $objectType => $objectMetadata) {
+        foreach ($objectsMetadata as $objectType => $objectMetadata) {
             if ($objectType != 'context' && $objectType != 'currentcontext') {
                 if (!empty($objectMetadata['class_path'])) {
                     require_once DOL_DOCUMENT_ROOT . '/' . $objectMetadata['class_path'];
@@ -1071,8 +1072,7 @@ function saturne_require_objects_mod(array $numberingModulesNames, string $modul
 
     $variablesToReturn = [];
     if (!empty($numberingModulesNames)) {
-        foreach($numberingModulesNames as $objectType => $numberingModulesName) {
-
+        foreach ($numberingModulesNames as $objectType => $numberingModulesName) {
             if (strstr($objectType, '_')) {
                 $objectType = str_replace('_', '', $objectType);
             }
@@ -1080,15 +1080,15 @@ function saturne_require_objects_mod(array $numberingModulesNames, string $modul
             $modPathCustom   = dirname(__FILE__) . '/../../' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $objectType . '/' . $numberingModulesName . '.php';
             $modPathCustomDoc = dirname(__FILE__) . '/../../' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $objectType . '/' . $numberingModulesName . '.php';
             $modPathCustomDoc2 = dirname(__FILE__) . '/../../' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $objectType . 'document/' . $numberingModulesName . '.php';
-            $modPathDolibarr = DOL_DOCUMENT_ROOT . '/core/modules/' . $objectType . '/'. $numberingModulesName . '.php';
+            $modPathDolibarr = DOL_DOCUMENT_ROOT . '/core/modules/' . $objectType . '/' . $numberingModulesName . '.php';
 
             if (file_exists($modPathCustom)) {
                 require_once $modPathCustom;
-            } else if (file_exists($modPathCustomDoc)) {
+            } elseif (file_exists($modPathCustomDoc)) {
                 require_once $modPathCustomDoc;
-            } else if (file_exists($modPathCustomDoc2)) {
+            } elseif (file_exists($modPathCustomDoc2)) {
                 require_once $modPathCustomDoc2;
-            } else if (file_exists($modPathDolibarr)) {
+            } elseif (file_exists($modPathDolibarr)) {
                 require_once $modPathDolibarr;
             }
 

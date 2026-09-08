@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -162,8 +163,8 @@ function saturne_display_recurse_tree(array $moreParams, array $objectElementTre
                 <?php } else { ?>
                     <div class="spacer"></div>
                 <?php }
-                print '<span class="open-media-gallery add-media modal-open photo digirisk-element-photo-'. $objectElement['object']->id .'" value="0">';
-                print '<input type="hidden" class="modal-options" data-modal-to-open="media_gallery" data-from-id="'. $objectElement['object']->id .'" data-from-type="'. $objectElement['object']->element_type .'" data-from-subtype="photo" data-from-subdir="" data-photo-class="digirisk-element-photo-'. $objectElement['object']->id .'"/>';
+                print '<span class="open-media-gallery add-media modal-open photo digirisk-element-photo-' . $objectElement['object']->id . '" value="0">';
+                print '<input type="hidden" class="modal-options" data-modal-to-open="media_gallery" data-from-id="' . $objectElement['object']->id . '" data-from-type="' . $objectElement['object']->element_type . '" data-from-subtype="photo" data-from-subdir="" data-photo-class="digirisk-element-photo-' . $objectElement['object']->id . '"/>';
                 print saturne_show_medias_linked('digiriskdolibarr', $conf->digiriskdolibarr->multidir_output[$conf->entity] . '/' . $objectElement['object']->element_type . '/' . $objectElement['object']->ref, 'small', 1, 0, 0, 0, 50, 50, 1, 0, 0, $objectElement['object']->element_type . '/' . $objectElement['object']->ref, $objectElement['object'], 'photo', 0, 0, 0, 1, 'cursorpointer');
                 print '</span>';
                 ?>
@@ -324,16 +325,16 @@ function saturne_check_access(
         exit;
     }
 
-	if (isModEnabled('multicompany')) {
-		if ($object !== null && $object->id > 0) {
-			if ($object->entity != $conf->entity) {
-				setEventMessage($langs->trans('ChangeEntityRedirection'), 'warnings');
-				$urltogo = dol_buildpath('/custom/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'index.php?mainmenu=' . $moduleNameLowerCase, 1);
-				header('Location: ' . $urltogo);
-				exit;
-			}
-		}
-	}
+    if (isModEnabled('multicompany')) {
+        if ($object !== null && $object->id > 0) {
+            if ($object->entity != $conf->entity) {
+                setEventMessage($langs->trans('ChangeEntityRedirection'), 'warnings');
+                $urltogo = dol_buildpath('/custom/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'index.php?mainmenu=' . $moduleNameLowerCase, 1);
+                header('Location: ' . $urltogo);
+                exit;
+            }
+        }
+    }
 }
 
 /**
@@ -342,21 +343,21 @@ function saturne_check_access(
  */
 function saturne_check_modules_enabled()
 {
-	global $langs, $moduleNameLowerCase;
+    global $langs, $moduleNameLowerCase;
 
-	$moduleNameLowerCase = saturne_get_module_name();
+    $moduleNameLowerCase = saturne_get_module_name();
 
-	if (!isModEnabled($moduleNameLowerCase) || !isModEnabled('saturne')) {
-		if (!isModEnabled($moduleNameLowerCase)) {
-			setEventMessage($langs->transnoentitiesnoconv('Enable' . ucfirst($moduleNameLowerCase)), 'warnings');
-		}
-		if (!isModEnabled('saturne')) {
-			setEventMessage($langs->trans('EnableSaturne'), 'warnings');
-		}
-		$urltogo = dol_buildpath('/admin/modules.php?search_nature=external_Evarisk', 1);
-		header('Location: ' . $urltogo);
-		exit;
-	}
+    if (!isModEnabled($moduleNameLowerCase) || !isModEnabled('saturne')) {
+        if (!isModEnabled($moduleNameLowerCase)) {
+            setEventMessage($langs->transnoentitiesnoconv('Enable' . ucfirst($moduleNameLowerCase)), 'warnings');
+        }
+        if (!isModEnabled('saturne')) {
+            setEventMessage($langs->trans('EnableSaturne'), 'warnings');
+        }
+        $urltogo = dol_buildpath('/admin/modules.php?search_nature=external_Evarisk', 1);
+        header('Location: ' . $urltogo);
+        exit;
+    }
 }
 
 /**
@@ -372,11 +373,11 @@ function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', st
 
     // Configuration header
     if (property_exists($object, 'element')) {
-		$element = $object->element;
+        $element = $object->element;
 
-		if ($object->element == 'contrat') {
-			$element = 'contract';
-		} else if ($object->element == 'project_task') {
+        if ($object->element == 'contrat') {
+            $element = 'contract';
+        } elseif ($object->element == 'project_task') {
             $element = 'task';
         }
 
@@ -388,9 +389,9 @@ function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', st
             $head = $prepareHead($object);
         }
     }
-	if (property_exists($object, 'picto')) {
-		$picto = $object->picto;
-	}
+    if (property_exists($object, 'picto')) {
+        $picto = $object->picto;
+    }
     if ($conf->browser->layout == 'phone') {
         $conf->dol_optimize_smallscreen = 0;
     }
@@ -448,7 +449,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
         $customMoreHtmlRef = '';
         if (!empty($hookmanager->resArray)) {
             list($customMoreHtmlRef, $moreParams) = $hookmanager->resArray;
-        } else if (!empty($hookmanager->resPrint)) {
+        } elseif (!empty($hookmanager->resPrint)) {
             $customMoreHtmlRef = $hookmanager->resPrint;
         }
 
@@ -517,7 +518,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
                         } elseif ($bannerElement == $moreParams['bannerElement']) {
                             $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1) : img_picto($langs->trans($moreParams['title']), $moreParams['picto']);
                         }
-                        if(empty($moreParams[$bannerElement]['disable_edit'])) {
+                        if (empty($moreParams[$bannerElement]['disable_edit'])) {
                             $saturneMoreHtmlRef .= ' <a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=edit_' . $bannerElement . '&id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . GETPOST('object_type') . '&token=' . newToken() . '">' . img_edit($langs->transnoentitiesnoconv($bannerElement == 'societe' ? 'SetThirdParty' : 'Set' . ucfirst($bannerElement))) . '</a>';
                         }
                     }
@@ -550,7 +551,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
 
         $modulePart = '';
         $baseDir    = $conf->$moduleNameLowerCase->multidir_output[$conf->entity];
-        $subDir     = $object->element . '/'. $object->ref . '/photos/';
+        $subDir     = $object->element . '/' . $object->ref . '/photos/';
 
         $resHook = $hookmanager->executeHooks('saturneBannerTabCustomSubdir', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
         if ($resHook > 0) {
@@ -619,17 +620,17 @@ function saturne_get_module_name(?object $object = null): string
  */
 function saturne_load_langs(array $domains = [])
 {
-	global $langs;
+    global $langs;
 
-	$moduleNameLowerCase = saturne_get_module_name();
+    $moduleNameLowerCase = saturne_get_module_name();
 
-	$langs->loadLangs(['saturne@saturne', 'object@saturne', 'signature@saturne', 'medias@saturne', 'component@saturne', $moduleNameLowerCase . '@' . $moduleNameLowerCase]);
+    $langs->loadLangs(['saturne@saturne', 'object@saturne', 'signature@saturne', 'medias@saturne', 'component@saturne', $moduleNameLowerCase . '@' . $moduleNameLowerCase]);
 
-	if (!empty($domains)) {
-		foreach ($domains as $domain) {
-			$langs->load($domain);
-		}
-	}
+    if (!empty($domains)) {
+        foreach ($domains as $domain) {
+            $langs->load($domain);
+        }
+    }
 }
 
 /**
@@ -648,46 +649,45 @@ function saturne_load_langs(array $domains = [])
  */
 function saturne_select_dictionary(string $htmlName, string $dictionaryTable, string $keyField = 'code', string $labelField = 'label', string $selected = '', int $useEmpty = 0, string $moreAttrib = '', string $placeHolder = '', string $moreCSS = 'minwidth150'): string
 {
-	global $langs, $db;
+    global $langs, $db;
 
-	$langs->load('admin');
+    $langs->load('admin');
 
     $out = '';
-	$sql = 'SELECT rowid, ' . $keyField . ', ' . $labelField;
-	$sql .= ' FROM ' . MAIN_DB_PREFIX . $dictionaryTable;
+    $sql = 'SELECT rowid, ' . $keyField . ', ' . $labelField;
+    $sql .= ' FROM ' . MAIN_DB_PREFIX . $dictionaryTable;
     $sql .= $db->order('position', 'ASC');
 
-	$result = $db->query($sql);
-	if ($result) {
-		$num = $db->num_rows($result);
-		$i   = 0;
-		if ($num) {
-			$out = '<select id="select' . $htmlName . '" class="flat selectdictionary' . ($moreCSS ? ' ' . $moreCSS : '') . '" name="' . $htmlName . '"' . ($moreAttrib ? ' ' . $moreAttrib : '') . '>';
-			if ($useEmpty == 1 || ($useEmpty == 2 && $num > 1)) {
-				$out .= '<option value="-1">'. (dol_strlen($placeHolder) > 0 ? $langs->transnoentities($placeHolder) : '') .'</option>';
-			}
+    $result = $db->query($sql);
+    if ($result) {
+        $num = $db->num_rows($result);
+        $i   = 0;
+        if ($num) {
+            $out = '<select id="select' . $htmlName . '" class="flat selectdictionary' . ($moreCSS ? ' ' . $moreCSS : '') . '" name="' . $htmlName . '"' . ($moreAttrib ? ' ' . $moreAttrib : '') . '>';
+            if ($useEmpty == 1 || ($useEmpty == 2 && $num > 1)) {
+                $out .= '<option value="-1">' . (dol_strlen($placeHolder) > 0 ? $langs->transnoentities($placeHolder) : '') . '</option>';
+            }
 
-			while ($i < $num) {
-				$obj = $db->fetch_object($result);
-				if ($selected == $obj->rowid || $selected == $obj->$keyField) {
-					$out .= '<option value="' . $obj->$keyField . '" selected>';
-				} else {
-					$out .= '<option value="' . $obj->$keyField . '">';
-				}
-				$out .= $langs->transnoentities($obj->$labelField);
-				$out .= '</option>';
-				$i++;
-			}
-			$out .= '</select>';
-			$out .= ajax_combobox('select' . $htmlName);
-
-		} else {
-			$out = $langs->trans('DictionaryEmpty');
-		}
-	} else {
-		dol_print_error($db);
-	}
-	return $out;
+            while ($i < $num) {
+                $obj = $db->fetch_object($result);
+                if ($selected == $obj->rowid || $selected == $obj->$keyField) {
+                    $out .= '<option value="' . $obj->$keyField . '" selected>';
+                } else {
+                    $out .= '<option value="' . $obj->$keyField . '">';
+                }
+                $out .= $langs->transnoentities($obj->$labelField);
+                $out .= '</option>';
+                $i++;
+            }
+            $out .= '</select>';
+            $out .= ajax_combobox('select' . $htmlName);
+        } else {
+            $out = $langs->trans('DictionaryEmpty');
+        }
+    } else {
+        dol_print_error($db);
+    }
+    return $out;
 }
 
 /**
@@ -700,46 +700,46 @@ function saturne_select_dictionary(string $htmlName, string $dictionaryTable, st
  */
 function saturne_fetch_dictionary(string $tableName, string $sortOrder = 'ASC', string $sortField = 't.position')
 {
-	global $db;
+    global $db;
 
-	$sql  = 'SELECT t.rowid, t.entity, t.ref, t.label, t.description, t.active, t.position';
-	$sql .= ' FROM ' . MAIN_DB_PREFIX . $tableName . ' as t';
-	$sql .= ' WHERE 1 = 1';
-	$sql .= ' AND entity IN (0, ' . getEntity($tableName) . ')';
+    $sql  = 'SELECT t.rowid, t.entity, t.ref, t.label, t.description, t.active, t.position';
+    $sql .= ' FROM ' . MAIN_DB_PREFIX . $tableName . ' as t';
+    $sql .= ' WHERE 1 = 1';
+    $sql .= ' AND entity IN (0, ' . getEntity($tableName) . ')';
 
     if (!empty($sortField)) {
         $sql .= $db->order($sortField, $sortOrder);
     }
 
-	$resql = $db->query($sql);
-	if ($resql) {
-		$num     = $db->num_rows($resql);
-		$i       = 0;
-		$records = [];
-		while ($i < $num) {
-			$obj = $db->fetch_object($resql);
+    $resql = $db->query($sql);
+    if ($resql) {
+        $num     = $db->num_rows($resql);
+        $i       = 0;
+        $records = [];
+        while ($i < $num) {
+            $obj = $db->fetch_object($resql);
 
-			$record = new stdClass();
+            $record = new stdClass();
 
-			$record->id          = $obj->rowid;
-			$record->entity      = $obj->entity;
-			$record->ref         = $obj->ref;
-			$record->label       = $obj->label;
-			$record->description = $obj->description;
-			$record->active      = $obj->active;
+            $record->id          = $obj->rowid;
+            $record->entity      = $obj->entity;
+            $record->ref         = $obj->ref;
+            $record->label       = $obj->label;
+            $record->description = $obj->description;
+            $record->active      = $obj->active;
             $record->position    = $obj->position;
 
-			$records[$record->id] = $record;
+            $records[$record->id] = $record;
 
-			$i++;
-		}
+            $i++;
+        }
 
-		$db->free($resql);
+        $db->free($resql);
 
-		return $records;
-	} else {
-		return -1;
-	}
+        return $records;
+    } else {
+        return -1;
+    }
 }
 
 /**
@@ -931,8 +931,12 @@ function saturne_manage_extrafields(array $extraFieldsArrays, array $commonExtra
         foreach ($extraField['elementtype'] as $extraFieldElementType) {
             // Add ExtraField
             $result = $extraFields->addExtraField(
-                $key, $extraField['Label'], $extraField['type'], $extraField['position'],
-                $extraField['length']   ?? '', $extraFieldElementType,
+                $key,
+                $extraField['Label'],
+                $extraField['type'],
+                $extraField['position'],
+                $extraField['length']   ?? '',
+                $extraFieldElementType,
                 $extraField['unique']   ?? $commonExtraFieldsValue['unique']   ?? 0,
                 $extraField['required'] ?? $commonExtraFieldsValue['required'] ?? 0,
                 $extraField['default']  ?? $commonExtraFieldsValue['default']  ?? '',
@@ -956,7 +960,10 @@ function saturne_manage_extrafields(array $extraFieldsArrays, array $commonExtra
 
             // Update ExtraField
             $result = $extraFields->update(
-                $key, $extraField['Label'], $extraField['type'], $extraField['length'] ?? '',
+                $key,
+                $extraField['Label'],
+                $extraField['type'],
+                $extraField['length'] ?? '',
                 $extraFieldElementType,
                 $extraField['unique']   ?? $commonExtraFieldsValue['unique']   ?? 0,
                 $extraField['required'] ?? $commonExtraFieldsValue['required'] ?? 0,

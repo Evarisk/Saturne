@@ -48,20 +48,22 @@
 
         $path = DOL_MAIN_URL_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/';
         $specimenExt = $canServePdf ? '.pdf' : '.odt';
-        
+
         $isSpecimen = 0;
         $sourceDirDoc = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?? 1] . '/' . strtolower($objectType) . 'document/' . dol_sanitizeFileName($object->ref) . '/';
         $files = dol_dir_list($sourceDirDoc, 'files', 1, '\.' . ($canServePdf ? 'pdf' : 'odt') . '$', null, 'date', SORT_DESC);
         if (!empty($document->last_main_doc)) {
             $originalName = basename($document->last_main_doc);
-            if ($canServePdf) $originalName = preg_replace('/\.odt$/', '.pdf', $originalName);
+            if ($canServePdf) {
+                $originalName = preg_replace('/\.odt$/', '.pdf', $originalName);
+            }
         } elseif (!empty($files)) {
             $originalName = $files[0]['name'];
         } else {
             $safeRef = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $object->ref);
             $originalName = $objectType . '_' . $safeRef . $specimenExt;
         }
-        
+
         $specimenName = $isSpecimen ? 'specimen_' . $originalName : $originalName;
         ?>
 
@@ -94,7 +96,7 @@
                                 <a href="javascript:void(0);" class="auto-download" style="color: inherit; text-decoration: underline;">
                                     <i class="far fa-file-<?php echo ($canServePdf ? 'pdf' : 'word'); ?>"></i> <?php echo $originalName; ?>
                                 </a>
-                            <?php else: ?>
+                            <?php else : ?>
                                 <?php echo $object->ref . ' ' . $object->label; ?>
                             <?php endif; ?>
                         </div>
@@ -159,7 +161,7 @@
 if (isset($moreParams['useConfirmation'])) {
     $downloadLink = '';
     if (GETPOSTISSET('document_type') && $fileExists) {
-        $downloadLink = '<div class="file-generation-modal" style="margin-bottom:10px;"><input type="hidden" class="specimen-name" data-specimen-name="'.$specimenName.'"><input type="hidden" class="specimen-path" data-specimen-path="'.$path.'"><a href="javascript:void(0);" class="auto-download" style="text-decoration: underline; color: #47e58e; font-weight: bold;"><i class="far fa-file-'.($canServePdf ? 'pdf' : 'word').'"></i> '.$originalName.'</a></div>';
+        $downloadLink = '<div class="file-generation-modal" style="margin-bottom:10px;"><input type="hidden" class="specimen-name" data-specimen-name="' . $specimenName . '"><input type="hidden" class="specimen-path" data-specimen-path="' . $path . '"><a href="javascript:void(0);" class="auto-download" style="text-decoration: underline; color: #47e58e; font-weight: bold;"><i class="far fa-file-' . ($canServePdf ? 'pdf' : 'word') . '"></i> ' . $originalName . '</a></div>';
     }
 
     $confirmationParams = [
