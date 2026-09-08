@@ -40,6 +40,7 @@ return [
     'directory_list' => [
         SAT_MODULE_ROOT,
         // Dolibarr core — mirrors the sparse-checkout in quality.yml
+        DOL_DOCUMENT_ROOT . '/api/class/',
         DOL_DOCUMENT_ROOT . '/categories/class/',
         DOL_DOCUMENT_ROOT . '/comm/action/class/',
         DOL_DOCUMENT_ROOT . '/comm/propal/class/',
@@ -57,6 +58,7 @@ return [
         DOL_DOCUMENT_ROOT . '/fichinter/class/',
         DOL_DOCUMENT_ROOT . '/fourn/class/',
         DOL_DOCUMENT_ROOT . '/includes/parsedown/',
+        DOL_DOCUMENT_ROOT . '/includes/restler/framework/',
         DOL_DOCUMENT_ROOT . '/mrp/class/',
         DOL_DOCUMENT_ROOT . '/product/class/',
         DOL_DOCUMENT_ROOT . '/product/inventory/class/',
@@ -76,6 +78,7 @@ return [
 
     // Scan all of the above for type info but do not report errors on them.
     'exclude_analysis_directory_list' => [
+        DOL_DOCUMENT_ROOT . '/api/class/',
         DOL_DOCUMENT_ROOT . '/categories/class/',
         DOL_DOCUMENT_ROOT . '/comm/action/class/',
         DOL_DOCUMENT_ROOT . '/comm/propal/class/',
@@ -93,6 +96,7 @@ return [
         DOL_DOCUMENT_ROOT . '/fichinter/class/',
         DOL_DOCUMENT_ROOT . '/fourn/class/',
         DOL_DOCUMENT_ROOT . '/includes/parsedown/',
+        DOL_DOCUMENT_ROOT . '/includes/restler/framework/',
         DOL_DOCUMENT_ROOT . '/mrp/class/',
         DOL_DOCUMENT_ROOT . '/product/class/',
         DOL_DOCUMENT_ROOT . '/product/inventory/class/',
@@ -108,6 +112,9 @@ return [
         SAT_MODULE_ROOT . '/node_modules/',
         SAT_MODULE_ROOT . '/dev/phan/',
         SAT_MODULE_ROOT . '/tests/',
+        // Template fragments are included mid-scope by their caller: analysed
+        // standalone, their variables and their types are meaningless.
+        SAT_MODULE_ROOT . '/core/tpl/',
     ],
 
     // Report only normal severity and above (no LOW).
