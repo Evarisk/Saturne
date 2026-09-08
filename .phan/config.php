@@ -247,7 +247,6 @@ return [
         DOL_DOCUMENT_ROOT . '/core/actions_sendmails.inc.php',
         DOL_DOCUMENT_ROOT . '/core/actions_setnotes.inc.php',
         SAT_MODULE_ROOT . '/tests/phpunit/bootstrap.php',
-        SAT_MODULE_ROOT . '/dev/phpstan/stubs.php',
     ],
 
     // File extensions to analyze.

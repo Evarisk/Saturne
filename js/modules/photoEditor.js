@@ -144,15 +144,15 @@ window.saturne.photoEditor.event = function() {
 
   var canvas       = window.saturne.photoEditor._canvas;
   var sizeSelect   = document.getElementById('saturne-photo-size-select');
-  var colorPicker  = document.getElementById('saturne-draw-color-picker');
-  var cropDiv      = document.getElementById('saturne-crop-selection');
   var btnCancel    = document.getElementById('saturne-btn-cancel-photo');
   var btnUndo      = document.getElementById('saturne-btn-undo-photo');
   var resDisplay   = document.getElementById('saturne-photo-resolution-display');
 
   // Resolution display
   function updateResDisplay() {
-    if (!resDisplay || !sizeSelect) return;
+    if (!resDisplay || !sizeSelect) {
+      return;
+    }
     var opt   = sizeSelect.options[sizeSelect.selectedIndex];
     var match = opt.text.match(/\(([^)]+)\)/);
     resDisplay.textContent = match ? '(' + match[1] + ')' : '(' + opt.text + ')';
@@ -195,7 +195,9 @@ window.saturne.photoEditor.event = function() {
 
   btnPrev.addEventListener('click', function() {
     var pe = window.saturne.photoEditor;
-    if (pe._urls.length < 2) return;
+    if (pe._urls.length < 2) {
+      return;
+    }
     var nextIndex = (pe._currentIndex - 1 + pe._urls.length) % pe._urls.length;
     if (pe._isBatchUpload) {
       pe._saveCurrentStateAndGo(nextIndex);
@@ -203,14 +205,18 @@ window.saturne.photoEditor.event = function() {
       pe._currentIndex = nextIndex;
       pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
         var badge = document.getElementById('saturne-photo-index-badge');
-        if (badge) badge.textContent = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
+        if (badge) {
+          badge.textContent = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
+        }
       });
     }
   });
 
   btnNext.addEventListener('click', function() {
     var pe = window.saturne.photoEditor;
-    if (pe._urls.length < 2) return;
+    if (pe._urls.length < 2) {
+      return;
+    }
     var nextIndex = (pe._currentIndex + 1) % pe._urls.length;
     if (pe._isBatchUpload) {
       pe._saveCurrentStateAndGo(nextIndex);
@@ -218,7 +224,9 @@ window.saturne.photoEditor.event = function() {
       pe._currentIndex = nextIndex;
       pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
         var badge = document.getElementById('saturne-photo-index-badge');
-        if (badge) badge.textContent = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
+        if (badge) {
+          badge.textContent = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
+        }
       });
     }
   });
@@ -327,8 +335,8 @@ window.saturne.photoEditor.event = function() {
   }
 
   var toolToggles = document.querySelectorAll('.saturne-editor-tool-toggle');
-  for (var ti = 0; ti < toolToggles.length; ti++) {
-    toolToggles[ti].addEventListener('change', function() {
+  toolToggles.forEach(function(toggle) {
+    toggle.addEventListener('change', function() {
       var pe     = window.saturne.photoEditor;
       var hidden = pe._getHiddenTools();
       var tool   = this.getAttribute('data-tool');
@@ -345,7 +353,7 @@ window.saturne.photoEditor.event = function() {
       }
       pe._applyToolVisibility();
     });
-  }
+  });
   window.saturne.photoEditor._applyToolVisibility();
 
   // Close on overlay click
@@ -389,6 +397,31 @@ window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex, onDele
   pe._urls           = Array.isArray(urlOrUrls) ? urlOrUrls : [urlOrUrls];
   pe._currentIndex   = (typeof startIndex === 'number') ? startIndex : 0;
 
+  pe._syncActionButtons();
+
+  // Re-apply the user's tool visibility preferences
+  pe._applyToolVisibility();
+
+  pe._syncNavControls();
+
+  pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
+    modal.style.display = 'flex';
+  });
+};
+
+/**
+ * Show or hide the action buttons according to the callbacks the caller wired
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @returns {void}
+ */
+window.saturne.photoEditor._syncActionButtons = function() {
+  var pe = window.saturne.photoEditor;
+
   // The delete button is only relevant when the caller wired a delete callback
   var btnDeleteEl = document.getElementById('saturne-btn-delete-photo');
   if (btnDeleteEl) {
@@ -406,30 +439,35 @@ window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex, onDele
   if (btnOkEl) {
     btnOkEl.style.display = (pe._isBatchUpload && typeof pe._onSaveAll === 'function') ? 'none' : 'flex';
   }
+};
 
-  // Re-apply the user's tool visibility preferences
-  pe._applyToolVisibility();
-
+/**
+ * Show or hide the previous/next controls and the index badge
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @returns {void}
+ */
+window.saturne.photoEditor._syncNavControls = function() {
+  var pe        = window.saturne.photoEditor;
   var btnPrevEl = document.getElementById('saturne-btn-prev-photo');
   var btnNextEl = document.getElementById('saturne-btn-next-photo');
   var badge     = document.getElementById('saturne-photo-index-badge');
-  if (pe._urls.length > 1) {
-    var label = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
-    if (btnPrevEl) btnPrevEl.style.display = 'flex';
-    if (btnNextEl) btnNextEl.style.display = 'flex';
-    if (badge) {
-      badge.textContent   = label;
-      badge.style.display = 'block';
-    }
-  } else {
-    if (btnPrevEl) btnPrevEl.style.display = 'none';
-    if (btnNextEl) btnNextEl.style.display = 'none';
-    if (badge) badge.style.display = 'none';
-  }
+  var multiple  = pe._urls.length > 1;
 
-  pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
-    modal.style.display = 'flex';
-  });
+  if (btnPrevEl) {
+    btnPrevEl.style.display = multiple ? 'flex' : 'none';
+  }
+  if (btnNextEl) {
+    btnNextEl.style.display = multiple ? 'flex' : 'none';
+  }
+  if (badge) {
+    badge.textContent   = multiple ? (pe._currentIndex + 1) + ' / ' + pe._urls.length : '';
+    badge.style.display = multiple ? 'block' : 'none';
+  }
 };
 
 window.saturne.photoEditor._loadUrlIntoCanvas = function(url, callback) {
@@ -452,7 +490,9 @@ window.saturne.photoEditor._loadUrlIntoCanvas = function(url, callback) {
     canvas.height = img.height * ratio;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    if (typeof callback === 'function') callback();
+    if (typeof callback === 'function') {
+      callback();
+    }
   };
   img.src = url;
 };
@@ -580,7 +620,9 @@ window.saturne.photoEditor._saveCurrentStateAndGo = function(nextIndex) {
     pe._currentIndex = nextIndex;
     pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
       var badge = document.getElementById('saturne-photo-index-badge');
-      if (badge) badge.textContent = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
+      if (badge) {
+        badge.textContent = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
+      }
     });
   }, 'image/jpeg', 0.85);
 };
@@ -618,7 +660,9 @@ window.saturne.photoEditor._getPos = function(e) {
 };
 
 window.saturne.photoEditor._onMouseDown = function(e) {
-  if (e.target.id === 'saturne-floating-text-input') return;
+  if (e.target.id === 'saturne-floating-text-input') {
+    return;
+  }
   var pe   = window.saturne.photoEditor;
   var ctx  = pe._ctx;
   var canvas = pe._canvas;
@@ -660,7 +704,9 @@ window.saturne.photoEditor._onMouseDown = function(e) {
 
 window.saturne.photoEditor._onMouseMove = function(e) {
   var pe   = window.saturne.photoEditor;
-  if (!pe._isDrawing) return;
+  if (!pe._isDrawing) {
+    return;
+  }
   e.preventDefault();
   var ctx    = pe._ctx;
   var canvas = pe._canvas;
@@ -710,7 +756,9 @@ window.saturne.photoEditor._onMouseMove = function(e) {
 
 window.saturne.photoEditor._onMouseUp = function(e) {
   var pe   = window.saturne.photoEditor;
-  if (!pe._isDrawing) return;
+  if (!pe._isDrawing) {
+    return;
+  }
   pe._isDrawing = false;
   var ctx    = pe._ctx;
   var canvas = pe._canvas;
@@ -726,31 +774,93 @@ window.saturne.photoEditor._onMouseUp = function(e) {
     pe._drawRect(ctx, pe._startX, pe._startY, p.x, p.y, cp.value);
   } else if (mode === 'blur') {
     ctx.putImageData(pe._snapshot, 0, 0);
-    var w = p.x - pe._startX, h = p.y - pe._startY;
-    if (Math.abs(w) > 5 && Math.abs(h) > 5) {
-      pe._applyAreaBlur(ctx, pe._startX, pe._startY, w, h, 10);
-    } else {
-      pe._historyStack.pop();
-    }
+    pe._finishBlur(ctx, p);
   } else if (mode === 'sequence') {
     ctx.putImageData(pe._snapshot, 0, 0);
-    if (Math.hypot(p.x - pe._startX, p.y - pe._startY) > 20) {
-      pe._drawArrow(ctx, pe._startX, pe._startY, p.x, p.y, cp.value);
-    }
-    pe._drawSequenceCircle(ctx, pe._startX, pe._startY, pe._seqCounter, cp.value);
-    pe._seqCounter++;
+    pe._finishSequence(ctx, p, cp.value);
   } else if (mode === 'crop') {
-    document.getElementById('saturne-crop-selection').style.display = 'none';
-    var cx = Math.max(0, Math.min(p.x, canvas.width));
-    var cy = Math.max(0, Math.min(p.y, canvas.height));
-    var sx = Math.max(0, Math.min(pe._startX, canvas.width));
-    var sy = Math.max(0, Math.min(pe._startY, canvas.height));
-    var cw = Math.abs(cx - sx), ch = Math.abs(cy - sy);
-    if (cw > 20 && ch > 20) {
-      pe._applyCrop(Math.min(cx, sx), Math.min(cy, sy), cw, ch);
-    } else {
-      pe._historyStack.pop();
-    }
+    pe._finishCrop(p, canvas);
+  }
+};
+
+/**
+ * Blur the area dragged since mouse down, or drop the history entry if the
+ * area is too small to be meaningful
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param   {CanvasRenderingContext2D} ctx Canvas 2D context
+ * @param   {Object}                   p   Pointer position on the canvas
+ * @returns {void}
+ */
+window.saturne.photoEditor._finishBlur = function(ctx, p) {
+  var pe = window.saturne.photoEditor;
+  var w  = p.x - pe._startX;
+  var h  = p.y - pe._startY;
+
+  if (Math.abs(w) > 5 && Math.abs(h) > 5) {
+    pe._applyAreaBlur(ctx, pe._startX, pe._startY, w, h, 10);
+  } else {
+    pe._historyStack.pop();
+  }
+};
+
+/**
+ * Draw the next numbered step, with a leading arrow when the drag is long
+ * enough to express a direction
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param   {CanvasRenderingContext2D} ctx   Canvas 2D context
+ * @param   {Object}                   p     Pointer position on the canvas
+ * @param   {string}                   color Stroke colour
+ * @returns {void}
+ */
+window.saturne.photoEditor._finishSequence = function(ctx, p, color) {
+  var pe = window.saturne.photoEditor;
+
+  if (Math.hypot(p.x - pe._startX, p.y - pe._startY) > 20) {
+    pe._drawArrow(ctx, pe._startX, pe._startY, p.x, p.y, color);
+  }
+  pe._drawSequenceCircle(ctx, pe._startX, pe._startY, pe._seqCounter, color);
+  pe._seqCounter++;
+};
+
+/**
+ * Crop to the dragged rectangle, clamped to the canvas, or drop the history
+ * entry if the rectangle is too small
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param   {Object}            p      Pointer position on the canvas
+ * @param   {HTMLCanvasElement} canvas Edited canvas
+ * @returns {void}
+ */
+window.saturne.photoEditor._finishCrop = function(p, canvas) {
+  var pe = window.saturne.photoEditor;
+
+  document.getElementById('saturne-crop-selection').style.display = 'none';
+
+  var cx = Math.max(0, Math.min(p.x, canvas.width));
+  var cy = Math.max(0, Math.min(p.y, canvas.height));
+  var sx = Math.max(0, Math.min(pe._startX, canvas.width));
+  var sy = Math.max(0, Math.min(pe._startY, canvas.height));
+  var cw = Math.abs(cx - sx);
+  var ch = Math.abs(cy - sy);
+
+  if (cw > 20 && ch > 20) {
+    pe._applyCrop(Math.min(cx, sx), Math.min(cy, sy), cw, ch);
+  } else {
+    pe._historyStack.pop();
   }
 };
 
@@ -842,7 +952,9 @@ window.saturne.photoEditor._drawSequenceCircle = function(ctx, x, y, num, color)
 
 window.saturne.photoEditor._addTextInput = function(canvasX, canvasY, clientX, clientY) {
   var existing = document.getElementById('saturne-floating-text-input');
-  if (existing) existing.blur();
+  if (existing) {
+    existing.blur();
+  }
 
   var canvas  = window.saturne.photoEditor._canvas;
   var ctx     = window.saturne.photoEditor._ctx;
@@ -884,7 +996,11 @@ window.saturne.photoEditor._addTextInput = function(canvasX, canvasY, clientX, c
     this.style.height = Math.max(40, this.scrollHeight + 10) + 'px';
   });
 
-  requestAnimationFrame(function() { if (input) input.focus(); });
+  requestAnimationFrame(function() {
+    if (input) {
+      input.focus();
+    }
+  });
 
   input.addEventListener('blur', function() {
     var text = input.value;
@@ -904,6 +1020,8 @@ window.saturne.photoEditor._addTextInput = function(canvasX, canvasY, clientX, c
     } else {
       window.saturne.photoEditor._historyStack.pop();
     }
-    if (input.parentNode) input.parentNode.removeChild(input);
+    if (input.parentNode) {
+      input.parentNode.removeChild(input);
+    }
   });
 };
