@@ -80,7 +80,7 @@ if (empty($resHook)) {
         $saturneRedirection->from_url = $fromUrl;
         $saturneRedirection->to_url   = $toUrl;
 
-        $result = $saturneRedirection->create($user, true);
+        $result = $saturneRedirection->create($user, 1);
         if ($result > 0) {
             setEventMessage($langs->trans('ObjectCreated', 'redirection'));
             header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
@@ -97,7 +97,7 @@ if (empty($resHook)) {
         if ($result <= 0) {
             setEventMessages($saturneRedirection->error ?: $langs->trans('ErrorObjectNotFound'), [], 'errors');
         } else {
-            $result = $saturneRedirection->delete($user, true, false);
+            $result = $saturneRedirection->delete($user, 1, false);
             if ($result > 0) {
                 setEventMessage($langs->trans('ObjectDeleted', 'redirection'));
                 header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);

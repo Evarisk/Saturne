@@ -174,7 +174,7 @@ if (empty($resHook)) {
                 break;
         }
 
-        $result = $signatory->update($user, true);
+        $result = $signatory->update($user, 1);
 
         if ($result > 0) {
             // Set attendance OK
@@ -200,7 +200,7 @@ if (empty($resHook)) {
                 $usertmp->fetch((int) $signatory->element_id);
                 if (dol_strlen($usertmp->email)) {
                     $signatory->email = $usertmp->email;
-                    $signatory->update($user, true);
+                    $signatory->update($user, 1);
                 } else {
                     setEventMessage($langs->trans('NoEmailSet', $langs->transnoentities($signatory->role) . ' ' . strtoupper($signatory->lastname) . ' ' . $signatory->firstname), 'warnings');
                 }
@@ -208,7 +208,7 @@ if (empty($resHook)) {
                 $contact->fetch((int) $signatory->element_id);
                 if (dol_strlen($contact->email)) {
                     $signatory->email = $contact->email;
-                    $signatory->update($user, true);
+                    $signatory->update($user, 1);
                 } else {
                     setEventMessage($langs->trans('NoEmailSet', $langs->transnoentities($signatory->role) . ' ' . strtoupper($signatory->lastname) . ' ' . $signatory->firstname), 'warnings');
                 }
@@ -247,7 +247,7 @@ if (empty($resHook)) {
                     $signatory->context['email_to']       = $sendto;
                     $signatory->context['email_subject']  = $subject;
                     $signatory->context['email_body']     = $message;
-                    $signatory->update($user, true);
+                    $signatory->update($user, 1);
                     $signatory->setPending($user, false);
                     setEventMessages($langs->trans('SendEmailAt', $signatory->email), []);
                     // Prevent form reloading page

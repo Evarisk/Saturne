@@ -54,7 +54,7 @@ function saturne_completesubstitutionarray(array &$substitutionarray, Translate 
         // Initialize technical objects
         $signatory = new SaturneSignature($db, $moduleNameLowerCase, $object->element);
 
-        $signatory->fetch($signatoryID);
+        $signatory->fetch((int) $signatoryID);
 
         $url = dol_buildpath('/custom/saturne/public/signature/add_signature.php?track_id=' . $signatory->signature_url  . '&entity=' . $conf->entity . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
 
