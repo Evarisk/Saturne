@@ -61,17 +61,20 @@ AttendantsAddStatusManagementDescription = Activate this option to add participa
 UseFastUploadImprovement                 = Improved fast image loading
 UseFastUploadImprovementDescription      = Activate this option to improve image loading speed <br> Option available : <ul><li>Image rotation</li><li>Drawing on the image</li><li>Saving the image on a reduced format</li></ul>
 MediaResolutionDescription          = Selecting image resolution
+ShowAllMediaInfos                        = Show all media information
+ShowAllMediaInfosDescription             = Enable this option to show all media information.<br>This may slow down page loading.
 SignaturePublicInterfaceForbidden        = No access to the public signature interface
-ShowSpecimen                             = See signatures on specimen documents
-ShowSpecimenDescription                  = Allows viewing of signatures on specimen documents
 ShowPatchNoteFromGitHub                  = View release notes from GitHub
 ShowPatchNoteFromGitHubDescription       = Enable this option to display update notes from GitHub <br> (Internet access is required for this option to work)
 ObjectVisibleDescription                 = Display the %s field
+ShowSignatureSpecimen                    = See signatures on specimen documents
+ShowSignatureSpecimenDescription         = Allows viewing of signatures on specimen documents
 SavedConfig                              = Saved configuration
 ErrorSavedConfig                         = An error occurred during the configuration
 Config                                   = Configuration
 Extrafields                              = Extra attributes
 ClickHereToGoToTheConfigPage             = Click here to go to the configuration page
+DefaultPublicInterfaceUserLastName       = Default public interface user
 
 # Redirections
 Redirections = Redirections
@@ -164,6 +167,11 @@ ChooseBoxToAddGraph        = Add a graph to the dashboard
 SetupDefaultDataNotCreated = You have not created default data for %s
 HowToSetupDefaultData      = To set up %s default data, please click on this link :
 ConfigDefaultData          = Configure %s default data
+MissingConfigData            = Setup required
+HowToSetupMissingConfigData  = Before you can use the module, some data must be set up. Please click the link(s) below to complete the configuration:
+MissingSettingConfig         = Module settings (missing setup)
+MissingPublicInterfaceConfig = Public interface (missing setup)
+InitializationWarningConfig  = This step is required for the module to work properly
 
 
 
@@ -229,6 +237,7 @@ CertificateExpired     = There are %s expired certificate(s)
 NoCertificate          = No certificate
 checkDateEndJob        = Checking certificate expiry dates
 checkDateEndJobComment = Checking and updating the status of expired certificates by end date
+ParentElement      = Parent element
 
 
 
@@ -262,6 +271,8 @@ Back                = Back
 DeleteFiles         = Are you sure that you want to delete <span class="filesLinked"></span> selected files ?
 RecordingInProgress = Recording in progress...
 ExportGraphCSV       = Export the graph in CSV format
+FavoriteSaved        = Favorite saved
+ErrorSavingFavorite  = Error while saving the favorite
 ResetFilters         = Reset filters
 SearchInAllFields    = Search in all fields…
 
@@ -291,3 +302,7 @@ TicketCreateMailModelAssignee = Assigned user email
 TicketCreateMailModelAssigneeDescription = Email template used for the notification sent to the user assigned to the ticket when it is created. Leave empty to keep Dolibarr's default content.
 TicketCreateMailModelVariables = Substitution variables available in templates
 TicketCreateMailModelVariablesHelp = Ticket-specific variables: __TICKET_REF__, __TICKET_TRACK_ID__, __TICKET_SUBJECT__, __TICKET_MESSAGE__, __TICKET_TYPE__, __TICKET_CATEGORY__, __TICKET_SEVERITY__, __TICKET_PUBLIC_URL__, __TICKET_MANAGEMENT_URL__.<br>Common variables: __REF__, __EXTRAFIELD_XXX__ (replace XXX with the extrafield code, e.g. __EXTRAFIELD_GROUPINCHARGEOF__), __MYCOMPANY_NAME__, __THIRDPARTY_NAME__.<br>Templates are managed in Home &gt; Setup &gt; Emails &gt; Email templates (type "ticket").
+Javascripts=Javascripts
+JavascriptsConfig=Javascripts setup
+EnableMaxlengthCounter=Enable the character counter
+EnableMaxlengthCounterDescription=Displays a character counter below length-limited fields.

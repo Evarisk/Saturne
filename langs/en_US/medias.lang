@@ -26,6 +26,7 @@ EmptyMediaGallery         = The media library is empty
 SearchFile                = Search for a file
 PhotoWellSent             = The photo has been added to the media library
 PhotoNotSent              = The photo was not sent correctly
+MediaData                 = Media setup
 ConfirmUnlinkMedia        = Are you sure you want to detach the selected media ?
 TakePhoto                 = Take a photo
 AddPhotoFromComputer      = Add a photo from device gallery
@@ -56,6 +57,9 @@ DisplayNumberMediaGallery            = Number of media displayed in the media li
 DisplayNumberMediaGalleryDescription = Displays 8 media (default) per page in the media library
 MediaSizeDocument                    = Media size
 MediaSizeDocumentDescription         = Selection of media size in documents
+ShowOnlyMediasAddedToday             = Only show media added today
+ShowOnlyUnlinkedMedias               = Only show media not linked to any object
+UnlinkedMedias                       = Unlinked media
 
 # Media lib admin page
 MediaLib                  = Media Library
