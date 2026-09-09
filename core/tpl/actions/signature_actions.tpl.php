@@ -94,7 +94,14 @@ if ($action == 'builddoc') {
 
     $subDir    = $isSpecimen ? '/public_specimen/' : '/';
     $sourceDir = $upload_dir . '/' . strtolower($objectType) . 'document/' . $object->ref . $subDir;
-    $files = dol_dir_list($sourceDir, 'files', 1, '\.' . ($canServePdf ? 'pdf' : 'odt') . '$', null, 'date', SORT_DESC);
+    // Meme regle que la vue : le PDF deja genere prime sur l'ODT. $canServePdf etait utilise ici
+    // alors qu'il n'est calcule que dans la vue, incluse apres cette action : la variable etait
+    // toujours indefinie, le filtre retombait sur '.odt', ne voyait jamais le PDF natif et
+    // regenerait donc un document a chaque clic sur le lien de telechargement.
+    $files = dol_dir_list($sourceDir, 'files', 1, '\.pdf$', null, 'date', SORT_DESC);
+    if (empty($files)) {
+        $files = dol_dir_list($sourceDir, 'files', 1, '\.odt$', null, 'date', SORT_DESC);
+    }
 
     $shouldGenerate = true;
     if (!empty($files)) {
