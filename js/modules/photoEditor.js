@@ -465,7 +465,9 @@ window.saturne.photoEditor._syncNavControls = function() {
     btnNextEl.style.display = multiple ? 'flex' : 'none';
   }
   if (badge) {
-    badge.textContent   = multiple ? (pe._currentIndex + 1) + ' / ' + pe._urls.length : '';
+    if (multiple) {
+      badge.textContent = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
+    }
     badge.style.display = multiple ? 'block' : 'none';
   }
 };

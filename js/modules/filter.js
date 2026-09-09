@@ -315,7 +315,10 @@ window.saturne.filter = {
                     $form.submit();
                 }
             } else {
-                alert("DEBUG: colKey=" + colKey + "\nCheckboxes found: t." + colKey + "=" + $checkbox1.length + ", " + colKey + "=" + $checkbox2.length + "\nIs multiselect in DOM? " + $('.multiselectcheckboxselectedfields').length);
+                // No entry for this column in the field selector: there is
+                // nothing to untick. Keep the diagnosis in the console rather
+                // than throwing a technical dialog at the user.
+                console.warn('saturne.filter: aucune case du selecteur de champs pour la colonne "' + colKey + '"');
             }
         });
     },
