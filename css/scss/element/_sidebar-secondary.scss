@@ -104,6 +104,13 @@ body.sidebar-secondary-opened {
       border-radius: 4px;
     }
 
+    .unit-sortable-placeholder {
+      border: 2px dashed rgba(0, 0, 0, 0.25);
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.04);
+      margin: 2px 0;
+    }
+
     .unit-container {
       display: flex;
       position: relative;
@@ -111,6 +118,26 @@ body.sidebar-secondary-opened {
       &:hover .add-container {
         opacity: 1;
         pointer-events: all;
+      }
+
+      .unit-drag-handle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 22px;
+        width: 22px;
+        color: rgba(0, 0, 0, 0.35);
+        cursor: grab;
+        opacity: 0;
+        transition: opacity 0.2s ease-out;
+
+        &:active {
+          cursor: grabbing;
+        }
+      }
+
+      &:hover .unit-drag-handle {
+        opacity: 1;
       }
 
       .toggle-unit {

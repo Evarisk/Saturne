@@ -144,7 +144,7 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 			objectSubtype: objectSubtype
 		}),
 		processData: false,
-		contentType: false,
+		contentType: 'application/json',
 		success: function ( resp ) {
 			$('.wpeo-loader').removeClass('wpeo-loader')
 			mediaGallery.removeClass('modal-active')
@@ -239,7 +239,7 @@ window.saturne.mediaGallery.deleteFilesRequest = function(fileNames) {
     url: document.URL + querySeparator + 'subaction=delete_files&token=' + token,
     type: 'POST',
     processData: false,
-    contentType: false,
+    contentType: 'application/json',
     data: JSON.stringify({
       filenames: fileNames
     }),
@@ -612,7 +612,7 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
 							objectSubdir: objectSubdir
 						}),
 						processData: false,
-						contentType: false,
+						contentType: 'application/json',
 						success: function ( resp ) {
               $('.wpeo-loader').removeClass('wpeo-loader')
               mediaGallery.removeClass('modal-active')
@@ -680,7 +680,7 @@ window.saturne.mediaGallery.selectPage = function( event ) {
 			pagesCounter: pagesCounter
 		}),
 		processData: false,
-		contentType: false,
+		contentType: 'application/json',
 		success: function ( resp ) {
 			$('.wpeo-loader').removeClass('wpeo-loader')
 			mediaGallery.html($(resp).find('#' + containerToRefresh).children());
@@ -786,7 +786,7 @@ window.saturne.mediaGallery.regenerateThumbs = function() {
       fullname: fullname
     }),
     processData: false,
-    contentType: false,
+    contentType: 'application/json',
     success: function(resp) {
       $('.ecm-photo-list-content').replaceWith($(resp).find('.ecm-photo-list-content'));
       window.saturne.modal.loadLazyImages();

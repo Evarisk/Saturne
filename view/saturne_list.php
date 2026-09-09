@@ -122,7 +122,7 @@ foreach ($object->fields as $key => $val) {
     if (GETPOST('search_' . $key, 'alpha') !== '') {
         $search[$key] = GETPOST('search_' . $key, 'alpha');
     }
-    if (in_array($val['type'], ['date', 'datetime', 'timestamp'])) {
+    if (isset($val['type']) && in_array($val['type'], ['date', 'datetime', 'timestamp'])) {
         $search[$key . '_dtstart'] = dol_mktime(0, 0, 0, GETPOSTINT('search_' . $key . '_dtstartmonth'), GETPOSTINT('search_' . $key . '_dtstartday'), GETPOSTINT('search_' . $key . '_dtstartyear'));
         $search[$key . '_dtend']   = dol_mktime(23, 59, 59, GETPOSTINT('search_' . $key . '_dtendmonth'), GETPOSTINT('search_' . $key . '_dtendday'), GETPOSTINT('search_' . $key . '_dtendyear'));
     }
@@ -152,6 +152,13 @@ foreach ($object->fields as $key => $val) {
 
 // Extra fields
 require_once DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_list_array_fields.tpl.php';
+
+// Apply the per-user column layout (order + widths) saved for this list
+$listLayoutId     = $object->element;
+$listColumnWidths = saturne_apply_list_layout($object, $arrayfields, $listLayoutId);
+
+// Per-user filter display mode: classic inline row (default) vs side filter panel
+$useSideFilterPanel = (saturne_get_list_filter_mode($listLayoutId) === 'panel');
 
 $object->fields = dol_sort_array($object->fields, 'position');
 $arrayfields    = dol_sort_array($arrayfields, 'position');
@@ -230,17 +237,12 @@ if (empty($resHook)) {
 $title = $langs->trans(ucfirst($object->element) . 'List');
 saturne_header(0, '', $title, '', '', 0, 0, [], [], '', 'mod-' . $object->element . ' page-list bodyforlist');
 
-?>
-    <script nonce="<?php echo getNonce(); ?>">
-        Dolibarr.setContextVars(<?php print json_encode([
-            'DOL_VERSION'            => DOL_VERSION,
-            'MAIN_LANG_DEFAULT'      => 'fr_FR',
-            'DOL_LANG_INTERFACE_URL' => dol_buildpath('admin/tools/ui/experimental/experiments/dolibarr-context/langs-tool-interface.php', 1),
-        ]) ?>);
-    </script>
-<?php
-
 require_once __DIR__ . '/../core/tpl/list/objectfields_list_build_sql_select.tpl.php';
+
+if (empty($createUrl) && !empty($objectMetadata['create_url'])) {
+    $createUrl = dol_buildpath($objectMetadata['create_url'], 1) . '?action=create' . ($moreUrlParameters ?? '');
+}
+
 require_once __DIR__ . '/../core/tpl/list/objectfields_list_header.tpl.php';
 require_once __DIR__ . '/../core/tpl/list/objectfields_list_search_input.tpl.php';
 require_once __DIR__ . '/../core/tpl/list/objectfields_list_search_title.tpl.php';

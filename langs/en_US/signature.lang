@@ -33,6 +33,7 @@ SignAttendantMessage    = The attendant %s signed
 SendEmailAt             = Send email to %s
 ErrorSetupEmail         = Mail configuration error, you have not configured your mail server in SMTP mode <br> Please use SMTP mode for better delivery and security of emails
 NoEmailSet              = No email entered: %s
+AddAttendants           = Add attendants
 
 # Mail
 EmailSignatureLabel         = SAT_Signature
@@ -47,6 +48,7 @@ EmailGlobalSignatureContent = Hello,<br /><br />Further to your __OBJECT_ELEMENT
 Registered       = Registered
 PendingSignature = Awaiting signature
 Signed           = Signed
+Role             = Role
 
 # Header table
 SignatureLink    = Signature link
@@ -71,9 +73,9 @@ SignatureSaveButton        = Save signature
 Attendant                        = Attendant
 Attendants                       = Attendants
 InternalAttendant                = Internal attendant
-InternalAttendant                = Internal attendants
+InternalAttendants               = Internal attendants
 ExternalAttendant                = External attendant
-ExternalAttendant                = External attendants
+ExternalAttendants               = External attendants
 NoAttendants                     = No linked attendants. To add attendants, the status must be "Draft (to be validated)".
 NoAttendantsWithStatusManagement = No linked participants. To add participants, the status must be "Draft (to be validated) or Validated (awaiting signature)".
 CloneAttendants                  = Clone attendants
@@ -82,9 +84,30 @@ Present                          = Present
 Absent                           = Absent
 Delay                            = Delay
 ElectronicSignature              = Electronic signature
+NoUserElectronicSignature        = You have not registered an electronic signature yet: go to your user card to draw it
+AutoSignature                    = Automatic signature
+AutoSignatureTooltip             = This attendant registered their electronic signature and asked to be signed automatically as soon as the record is validated
 Signatory                        = Signatory
 Responsible                      = Responsible
 
+# Mass signature
+MassSignature                 = Bulk signature
+SignForAnAttendant            = Sign for an attendant
+SelectTheAttendantToSign      = Select the attendant who is going to sign the %d selected record(s)
+SignOnceForTheseObjects       = %s signs once for the %d record(s) below
+NbOfObjectsToSign             = Records to sign
+BackToAttendantSelection      = Change attendant
+NoSignableObjectSelected      = None of the selected records can be signed: only a validated record can be
+NoPendingSignatureOnSelection = No signature is waiting on the selected records
+NoAttendantToSign             = No attendant to sign, the signature was not saved
+
 # Public interface
 SavedSignature = Signature saved
+ExtrafieldsFieldMissing      = Missing or invalid '%s' for key %s
+ExtrafieldsFieldUpdateFailed = Failed to update extrafield for key %s
+ExtrafieldsFieldAddFailed    = Failed to add extrafield for key %s
 
+
+# Public signature page
+DocumentNotAvailable = Document not available
+PublicSignatureNoPdfAvailable = To view the document in PDF format, contact an administrator to enable native PDF generation.

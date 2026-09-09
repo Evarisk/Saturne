@@ -28,6 +28,8 @@
  * Parameters : $action, $limit, $searchAll, $sortfield, $sortorder, $page
  * Objects    : $extrafields, $object
  * Variables  : $arrayfields, $excludeFields (optional), $offset, $search, $search_array_options (extrafields_list_search_sql.tpl), $searchCategories
+ *
+ * Exposes    : $sqlForList — full filtered query before sort/pagination, for aggregate/KPI hooks
  */
 
 // Pre-calculate searchAll fields and LEFT JOINs for integer: type fields
@@ -124,12 +126,86 @@ if ($object->ismultientitymanaged == 1) {
     $sql .= ' WHERE 1 = 1';
 }
 
+// Category criteria is a list of signed tokens : "12" includes category 12, "-12" excludes it, and
+// NOTCATEGORIZED / -NOTCATEGORIZED match objects carrying no category at all. Shared with the list header TPL,
+// which renders one tag per token and lets the user flip its sign
+$categoryNotCategorizedToken = 'NOTCATEGORIZED';
+$categoryFallbackColor       = '#95a5a6';
+
+// Not every list controller instantiates the category object nor reads the criteria : do it here so any list built on
+// this TPL gets the category filter, and so the tags printed by the list header TPL are always backed by a WHERE
+if (isModEnabled('categorie')) {
+    require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+
+    if (!isset($categorie) || !$categorie instanceof Categorie) {
+        $categorie = new Categorie($db);
+    }
+
+    // $searchCategories holds the plain category ids read by the list controllers, the tag filter adds the signed
+    // tokens : merge both so old links (and the catid parameter) keep working alongside the tag UI
+    $searchCategories = (isset($searchCategories) && is_array($searchCategories)) ? $searchCategories : [];
+    $searchCategories = array_merge($searchCategories, GETPOST('search_categories_filter', 'array'));
+    if (GETPOSTINT('catid') > 0) {
+        $searchCategories[] = GETPOSTINT('catid');
+    }
+    if (GETPOST('button_removefilter_x', 'alpha') || GETPOST('button_removefilter.x', 'alpha') || GETPOST('button_removefilter', 'alpha')) {
+        $searchCategories = [];
+    }
+
+    // Keep only well-formed tokens, this is what protects the IN () clauses below from raw input
+    $searchCategories = array_values(array_filter($searchCategories, function ($searchCategory) use ($categoryNotCategorizedToken) {
+        return preg_match('/^[+-]?(\d+|' . $categoryNotCategorizedToken . ')$/', (string) $searchCategory) && (string) $searchCategory !== '0';
+    }));
+}
+
 if (isModEnabled('categorie') && isset($categorie->MAP_OBJ_CLASS[$object->element]) && !empty($searchCategories)) {
     $objectElement = $object->element;
     if (!empty($object->parent_element)) {
         $objectElement = $object->parent_element;
     }
-    $sql .= ' AND EXISTS ( SELECT 1 FROM ' . $db->prefix() . 'categorie_' . $objectElement . ' AS cp WHERE t.rowid = cp.fk_' . $objectElement . ' AND cp.fk_categorie IN (' . implode(',', $searchCategories) . '))';
+
+    $categoryExistsSql = 'SELECT 1 FROM ' . $db->prefix() . 'categorie_' . $objectElement . ' AS cp WHERE t.rowid = cp.fk_' . $objectElement;
+
+    $includedCategoryIds = [];
+    $excludedCategoryIds = [];
+    $includeNotCategorized = false;
+    $excludeNotCategorized = false;
+    foreach ($searchCategories as $searchCategory) {
+        $isExcluded    = (strpos((string) $searchCategory, '-') === 0);
+        $categoryToken = ltrim((string) $searchCategory, '+-');
+
+        if ($categoryToken === $categoryNotCategorizedToken) {
+            if ($isExcluded) {
+                $excludeNotCategorized = true;
+            } else {
+                $includeNotCategorized = true;
+            }
+        } elseif ($isExcluded) {
+            $excludedCategoryIds[] = (int) $categoryToken;
+        } else {
+            $includedCategoryIds[] = (int) $categoryToken;
+        }
+    }
+
+    // Included categories widen the result set, so they are ORed together
+    $includeConditions = [];
+    if (!empty($includedCategoryIds)) {
+        $includeConditions[] = 'EXISTS (' . $categoryExistsSql . ' AND cp.fk_categorie IN (' . implode(',', $includedCategoryIds) . '))';
+    }
+    if ($includeNotCategorized) {
+        $includeConditions[] = 'NOT EXISTS (' . $categoryExistsSql . ')';
+    }
+    if (!empty($includeConditions)) {
+        $sql .= ' AND (' . implode(' OR ', $includeConditions) . ')';
+    }
+
+    // Excluded ones always narrow it, whatever was included
+    if (!empty($excludedCategoryIds)) {
+        $sql .= ' AND NOT EXISTS (' . $categoryExistsSql . ' AND cp.fk_categorie IN (' . implode(',', $excludedCategoryIds) . '))';
+    }
+    if ($excludeNotCategorized) {
+        $sql .= ' AND EXISTS (' . $categoryExistsSql . ')';
+    }
 }
 
 // Add default status filter only if the object has a 'status' field in its table
@@ -139,7 +215,6 @@ if (array_key_exists('status', $object->fields)) {
 
 foreach ($search as $key => $val) {
     if (array_key_exists($key, $object->fields)) {
-
         if ($key == 'status' && $val == -1) {
             continue;
         }
@@ -152,9 +227,16 @@ foreach ($search as $key => $val) {
             continue;
         }
 
+        // Virtual/computed/linked fields (listed in $excludeFields) have no real t.<key>
+        // column in the base table. Linked elements are already handled by the
+        // printFieldListSearch hook above; any excluded field still reaching here would
+        // otherwise produce "Unknown column 't.<key>'" (e.g. signatory role columns such
+        // as 'Controller'). Skip the generic column filter for them.
+        if (!empty($excludeFields) && in_array($key, $excludeFields, true)) {
+            continue;
+        }
 
         $mode_search = (($object->isInt($object->fields[$key]) || $object->isFloat($object->fields[$key])) ? 1 : 0);
-        $isExclude   = (GETPOST('search_' . $key . '_mode', 'alpha') === 'exc');
         if (isset($object->fields[$key]['type']) && ((strpos($object->fields[$key]['type'], 'integer:') === 0) || (strpos($object->fields[$key]['type'], 'sellist:') === 0) || !empty($object->fields[$key]['arrayofkeyval']))) {
             if ($val == '-1' || ($val === '0' && (empty($object->fields[$key]['arrayofkeyval']) || !array_key_exists('0', $object->fields[$key]['arrayofkeyval'])))) {
                 $val = '';
@@ -173,26 +255,10 @@ foreach ($search as $key => $val) {
         }
         if (empty($object->fields[$key]['searchmulti'])) {
             if (!is_array($val) && $val != '') {
-                if ($isExclude) {
-                    if ($mode_search === 2) {
-                        $sql .= ' AND t.' . $db->escape($key) . ' != ' . (int) $val;
-                    } elseif ($mode_search === 3) {
-                        $sql .= " AND t." . $db->escape($key) . " != '" . $db->escape($val) . "'";
-                    } else {
-                        $sql .= ' AND t.' . $db->escape($key) . ' != ' . (int) $val;
-                    }
-                } else {
-                    $sql .= natural_search('t.' . $db->escape($key), $val, (($key == 'status') ? 2 : $mode_search));
-                }
+                $sql .= natural_search('t.' . $db->escape($key), $val, (($key == 'status') ? 2 : $mode_search));
             }
         } elseif (is_array($val) && !empty($val)) {
-            if ($isExclude && $mode_search === 2) {
-                $sql .= ' AND t.' . $db->escape($key) . ' NOT IN (' . implode(',', array_map('intval', $val)) . ')';
-            } elseif ($isExclude && $mode_search === 3) {
-                $sql .= ' AND t.' . $db->escape($key) . " NOT IN (" . implode(',', array_map(function ($v) use ($db) { return "'" . $db->escape($v) . "'"; }, $val)) . ")";
-            } else {
-                $sql .= natural_search('t.' . $db->escape($key), implode(',', $val), (($key == 'status') ? 2 : $mode_search));
-            }
+            $sql .= natural_search('t.' . $db->escape($key), implode(',', $val), (($key == 'status') ? 2 : $mode_search));
         }
     } elseif (preg_match('/(_dtstart|_dtend)$/', $key) && $val != '') {
         $columnName = preg_replace('/(_dtstart|_dtend)$/', '', $key);
@@ -239,14 +305,27 @@ $parameters = ['search' => $search];
 $hookmanager->executeHooks('printFieldListHaving', $parameters, $object, $action);
 $sql .= $hookmanager->resPrint;
 
+// Snapshot of the full filtered query (all joins, filters and search criteria applied) before sorting and pagination.
+// Aggregate/KPI hooks (e.g. printFieldPreListTitle) can wrap it as a subquery to compute totals over the whole filtered set.
+$sqlForList = $sql;
+
 // Count total nb of records
 $nbTotalOfRecords = '';
 if (!getDolGlobalInt('MAIN_DISABLE_FULL_SCANLIST')) {
-    /* The fast and low memory method to get and count full list converts the sql into a sql count */
-    $sqlForCount = preg_replace('/^' . preg_quote($sqlFields, '/') . '/', 'SELECT COUNT(*) as nbtotalofrecords', $sql);
-    // Only strip the extrafields LEFT JOIN (not searchAll joins which are referenced in WHERE)
-    $sqlForCount = preg_replace('/ LEFT JOIN \S+_extrafields\s+as\s+ef\s+ON\s+\([^)]+\)/', '', $sqlForCount);
-    $sqlForCount = preg_replace('/GROUP BY .*$/', '', $sqlForCount);
+    if (preg_match('/\bGROUP\s+BY\b/i', $sqlForList)) {
+        // A printFieldListFrom hook can add a JOIN that multiplies the rows of one object (one row
+        // per linked record), collapsed again by the GROUP BY of printFieldListGroupBy - and possibly
+        // filtered on that aggregate by printFieldListHaving. Turning the SELECT into a COUNT(*) and
+        // dropping the GROUP BY would count the joined rows instead of the objects, so count the rows
+        // the grouped query actually returns.
+        $sqlForCount = 'SELECT COUNT(*) as nbtotalofrecords FROM (' . $sqlForList . ') as countedrows';
+    } else {
+        /* The fast and low memory method to get and count full list converts the sql into a sql count */
+        $countSelect = 'SELECT COUNT(*) as nbtotalofrecords';
+        $sqlForCount = preg_replace('/^' . preg_quote($sqlFields, '/') . '/', $countSelect, $sql);
+        // Only strip the extrafields LEFT JOIN (not searchAll joins which are referenced in WHERE)
+        $sqlForCount = preg_replace('/ LEFT JOIN \S+_extrafields\s+as\s+ef\s+ON\s+\([^)]+\)/', '', $sqlForCount);
+    }
     $resql = $db->query($sqlForCount);
     if ($resql) {
         $objForCount      = $db->fetch_object($resql);
@@ -261,6 +340,33 @@ if (!getDolGlobalInt('MAIN_DISABLE_FULL_SCANLIST')) {
         $offset = 0;
     }
     $db->free($resql);
+}
+
+// Guard against an invalid sort field (e.g. a stale URL/session value pointing at a non-sortable
+// linked or computed column such as a linked product) that would crash the whole query with
+// DB_ERROR_NOSUCHFIELD. Build the set of identifiers actually produced by the SELECT and drop the
+// sort when it references something else, so the list self-heals instead of erroring.
+if (!empty($sortfield)) {
+    $validSortFields = [];
+    $selectList      = preg_replace('/^\s*SELECT\s+/i', '', $sqlFields);
+    foreach (explode(',', $selectList) as $selectPart) {
+        $selectPart = trim($selectPart);
+        if (preg_match('/\bAS\s+([A-Za-z0-9_]+)$/i', $selectPart, $matches)) {
+            $validSortFields[$matches[1]] = true;
+        } elseif (preg_match('/^([A-Za-z0-9_]+\.[A-Za-z0-9_]+)$/', $selectPart, $matches)) {
+            $validSortFields[$matches[1]] = true;
+        }
+    }
+
+    foreach (explode(',', $sortfield) as $sortFieldToken) {
+        $sortFieldToken = trim($sortFieldToken);
+        if ($sortFieldToken !== '' && empty($validSortFields[$sortFieldToken])) {
+            dol_syslog('Saturne list: dropping invalid sortfield "' . $sortfield . '" not present in SELECT', LOG_WARNING);
+            $sortfield = '';
+            $sortorder = '';
+            break;
+        }
+    }
 }
 
 // Complete request and execute it with limit
@@ -283,8 +389,9 @@ if (!$resql) {
 
 $num = $db->num_rows($resql);
 
-// Direct jump if only one record found
-if ($num == 1 && getDolGlobalInt('MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE') && $searchAll && !$page) {
+// Direct jump if only one record found, out of reach once the page header has been printed : the redirect
+// would only raise a "headers already sent" warning and leave the list truncated
+if ($num == 1 && !headers_sent() && getDolGlobalInt('MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE') && $searchAll && !$page) {
     $obj = $db->fetch_object($resql);
     $id = $obj->rowid;
     //@todo parameter

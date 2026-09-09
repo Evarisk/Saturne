@@ -41,13 +41,32 @@
                     <span id="saturne-photo-resolution-display"></span>
                 </h3>
             </div>
-            <div class="saturne-photo-editor-header__settings" title="<?php echo $langs->trans('Settings'); ?>">
-                <i class="fas fa-ellipsis-v"></i>
-                <select id="saturne-photo-size-select">
-                    <option value="hd" selected>HD (720p)</option>
-                    <option value="fullhd">Full HD (1080p)</option>
-                    <option value="full">Original (FULL)</option>
-                </select>
+            <button type="button" id="saturne-btn-delete-photo" class="saturne-photo-editor-header__delete" style="display: none;" title="<?php echo dol_escape_htmltag($langs->trans('DeletePhoto')); ?>" data-confirm="<?php echo dol_escape_htmltag($langs->trans('DeletePhotoConfirmation')); ?>">
+                <i class="fas fa-trash"></i>
+            </button>
+            <div class="saturne-photo-editor-header__settings">
+                <i class="fas fa-ellipsis-v" id="saturne-photo-settings-toggle" title="<?php echo $langs->trans('Settings'); ?>"></i>
+                <div class="saturne-photo-editor-settings-menu" id="saturne-photo-settings-menu" style="display: none;">
+                    <div class="saturne-settings-section">
+                        <span class="saturne-settings-label"><?php echo $langs->trans('Quality'); ?></span>
+                        <select id="saturne-photo-size-select">
+                            <option value="hd" selected>HD (720p)</option>
+                            <option value="fullhd">Full HD (1080p)</option>
+                            <option value="full">Original (FULL)</option>
+                        </select>
+                    </div>
+                    <div class="saturne-settings-section">
+                        <span class="saturne-settings-label"><?php echo $langs->trans('AvailableTools'); ?></span>
+                        <?php
+                        $editorTools = ['crop' => 'Crop', 'rotate' => 'Rotate', 'pencil' => 'Draw', 'text' => 'Text', 'arrow' => 'Arrow', 'rect' => 'Frame', 'blur' => 'Blur', 'sequence' => 'Sequence'];
+                        foreach ($editorTools as $toolKey => $toolLabel) : ?>
+                            <label class="saturne-settings-tool">
+                                <input type="checkbox" class="saturne-editor-tool-toggle" data-tool="<?php echo dol_escape_htmltag($toolKey); ?>" checked>
+                                <span><?php echo $langs->trans($toolLabel); ?></span>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -63,11 +82,6 @@
 
         <!-- Toolbar -->
         <div class="saturne-photo-editor-toolbar">
-
-            <!-- Cancel / close -->
-            <button type="button" id="saturne-btn-cancel-photo" class="saturne-editor-btn saturne-editor-btn--cancel" title="<?php echo $langs->trans('Cancel'); ?>">
-                <i class="fas fa-times"></i>
-            </button>
 
             <!-- Drawing tools -->
             <button type="button" class="saturne-tool-btn saturne-editor-btn saturne-editor-btn--tool" data-mode="crop"     title="<?php echo $langs->trans('Crop'); ?>"><i class="fas fa-crop"></i></button>
@@ -87,11 +101,14 @@
             <!-- Undo -->
             <button type="button" id="saturne-btn-undo-photo" class="saturne-editor-btn saturne-editor-btn--undo" title="<?php echo $langs->trans('Undo'); ?>"><i class="fas fa-reply"></i></button>
 
-            <!-- Save (uploads, keeps modal open) -->
-            <button type="button" id="saturne-btn-validate-photo" class="saturne-editor-btn saturne-editor-btn--save" title="<?php echo $langs->trans('Save'); ?>"><i class="fas fa-save"></i></button>
-
-            <!-- OK (closes modal) -->
-            <button type="button" id="saturne-btn-ok-photo" class="saturne-editor-btn saturne-editor-btn--ok" title="OK"><i class="fas fa-check"></i></button>
+            <!-- Cancel + OK grouped on the right -->
+            <div class="saturne-photo-editor-toolbar__actions">
+                <button type="button" id="saturne-btn-cancel-photo" class="saturne-editor-btn saturne-editor-btn--cancel" title="<?php echo $langs->trans('Cancel'); ?>">
+                    <i class="fas fa-times"></i>
+                </button>
+                <button type="button" id="saturne-btn-ok-all-photo" class="saturne-editor-btn saturne-editor-btn--ok" style="display: none;" title="<?php echo dol_escape_htmltag($langs->trans('ValidateAll')); ?>"><i class="fas fa-check-double"></i></button>
+                <button type="button" id="saturne-btn-ok-photo" class="saturne-editor-btn saturne-editor-btn--ok" title="OK"><i class="fas fa-check"></i></button>
+            </div>
         </div>
 
     </div>

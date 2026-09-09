@@ -11,7 +11,9 @@
   "nonbsp": true,
   "nonew": true,
   "undef": true,
-  "unused": true,
+  // "vars" and not true: an unused parameter is idiomatic in a DOM handler or
+  // a callback signature, while an unused variable is a real smell.
+  "unused": "vars",
   "node": true,
   "browser": true,
   "jquery": true,
@@ -19,6 +21,7 @@
   "strict": "implied",
   "globals": {
     "angular": false,
+    "Chart": false,
     "module": false,
     "require": false,
     "URLSearchParams": true,

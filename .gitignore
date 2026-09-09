@@ -29,3 +29,6 @@ node_modules
 css/*.min.css
 css/*.min.css.map
 js/*.min.js
+
+# PHPUnit test result cache
+.phpunit.result.cache

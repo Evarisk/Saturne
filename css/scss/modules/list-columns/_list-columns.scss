@@ -1,0 +1,106 @@
+// List column customization — edit-mode toggle, resize handle, drag reorder
+
+.saturne-columns-controls {
+    display: inline-flex;
+    gap: 6px;
+    margin: 0 0 6px;
+
+    button {
+        font: inherit;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 3px 10px;
+        font-size: 12px;
+        color: #4a4f57;
+        background: #fff;
+        border: 1px solid #d4d8dd;
+        border-radius: 14px;
+        cursor: pointer;
+
+        &:hover {
+            border-color: #2c7be5;
+            color: #2c7be5;
+        }
+    }
+
+    .saturne-columns-toggle.active {
+        color: #fff;
+        background: #2c7be5;
+        border-color: #2c7be5;
+    }
+
+    .saturne-columns-reset {
+        display: inline-flex;
+    }
+}
+
+table.liste {
+    thead th[data-colkey] {
+        position: relative;
+        padding-left: 28px !important;
+
+        &.saturne-col-dragging {
+            opacity: 0.5;
+        }
+
+        &.saturne-col-drag-over-left {
+            border-left: 3px solid #2c7be5 !important;
+        }
+
+        &.saturne-col-drag-over-right {
+            border-right: 3px solid #2c7be5 !important;
+        }
+
+        .saturne-col-drag-handle {
+            position: absolute;
+            left: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aab2bd;
+            background: transparent;
+            border-radius: 4px;
+            opacity: 0;
+            cursor: grab;
+            padding: 4px;
+            transition: opacity 0.2s, background-color 0.2s;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+
+            &:active {
+                cursor: grabbing;
+            }
+
+            &:hover {
+                color: #4a4f57;
+                background-color: #f1f3f6;
+            }
+        }
+
+        &:hover .saturne-col-drag-handle {
+            opacity: 1;
+        }
+    }
+
+    .saturne-col-resize {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 6px;
+        height: 100%;
+        cursor: col-resize;
+        background: transparent;
+
+        &:hover, &.is-resizing {
+            background: rgba(44, 123, 229, 0.4);
+        }
+    }
+}
+
+body.saturne-col-resizing-active {
+    cursor: col-resize !important;
+    user-select: none !important;
+}

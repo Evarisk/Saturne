@@ -74,6 +74,7 @@ window.saturne.signature.event = function() {
   $(document).on('click', '.auto-download', window.saturne.signature.autoDownloadSpecimen);
   $(document).on('click', '.copy-signatureurl', window.saturne.signature.copySignatureUrlClipboard);
   $(document).on('click', '.set-attendance', window.saturne.signature.setAttendance);
+  $(document).on('click', '.signature-confirmation-close, .page-signature .confirmation-close', window.saturne.signature.closeConfirmation);
   var scriptElement = document.querySelector('script[src*="signature-pad.min.js"]');
   if (scriptElement) {
     window.saturne.signature.drawSignatureOnCanvas();
@@ -163,7 +164,6 @@ window.saturne.signature.createSignature = function() {
     success: function(resp) {
       if ($('.public-card__container').data('public-interface') === true) {
         $('.card__confirmation').removeAttr('style');
-        $('.signature-confirmation-close').attr('onclick', 'window.close()');
         $('.public-card__container').replaceWith($(resp).find('.public-card__container'));
       } else {
         window.location.reload();
@@ -171,6 +171,25 @@ window.saturne.signature.createSignature = function() {
     },
     error: function() {}
   });
+};
+
+/**
+ * Close signature confirmation panel
+ *
+ * @memberof Saturne_Framework_Signature
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @return {void}
+ */
+window.saturne.signature.closeConfirmation = function() {
+  $('.card__confirmation').attr('style', 'display: none;');
+
+  // Le lien de signature arrive par mail : l'onglet n'ayant pas ete ouvert par un script, le
+  // navigateur refuse window.close() et le bouton ne rendait plus la main. Refermer le panneau est
+  // le seul retour garanti, la fermeture de l'onglet ne reste qu'un bonus quand elle est autorisee.
+  window.close();
 };
 
 /**

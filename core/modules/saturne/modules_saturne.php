@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2021-2025 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -118,7 +119,8 @@ abstract class ModeleNumRefSaturne
     {
         global $conf, $langs, $db;
 
-        $coyymm = ''; $max = '';
+        $coyymm = '';
+        $max = '';
 
         $posIndice = strlen($this->prefix) + 6;
         $sql = 'SELECT MAX(CAST(SUBSTRING(ref FROM ' . $posIndice . ') AS SIGNED)) as max';
@@ -132,7 +134,8 @@ abstract class ModeleNumRefSaturne
         if ($resql) {
             $row = $db->fetch_row($resql);
             if ($row) {
-                $coyymm = substr($row[0], 0, 6); $max = $row[0];
+                $coyymm = substr($row[0], 0, 6);
+                $max = $row[0];
             }
         }
         if ($coyymm && !preg_match('/' . $this->prefix . '[0-9][0-9][0-9][0-9]/i', $coyymm)) {
@@ -185,7 +188,7 @@ abstract class ModeleNumRefSaturne
         if ($max >= (pow(10, 4) - 1)) {
             $num = $max + 1; // If counter > 9999, we do not format on 4 chars, we take number as it is
         } else {
-            $num = sprintf('%0'. $suffixSize .'s', $max + 1);
+            $num = sprintf('%0' . $suffixSize . 's', $max + 1);
         }
 
         dol_syslog(get_class($this) . '::getNextValue return ' . $this->prefix . $yymm . '-' . $num);
@@ -240,20 +243,20 @@ abstract class CustomModeleNumRefSaturne extends ModeleNumRefSaturne
         $modName = str_replace('mod_', '', $className);
         $confName = strtoupper($moduleNameLowerCase . '_' . $modName . '_ADDON');
 
-        $texte = $langs->trans('GenericNumRefModelDesc')."<br>\n";
+        $texte = $langs->trans('GenericNumRefModelDesc') . "<br>\n";
         $texte .= '<form action="' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleNameLowerCase . '" method="POST">';
-        $texte .= '<input type="hidden" name="token" value="'.newToken().'">';
+        $texte .= '<input type="hidden" name="token" value="' . newToken() . '">';
         $texte .= '<input type="hidden" name="action" value="update_mask">';
-        $texte .= '<input type="hidden" name="mask" value="'. $confName .'">';
+        $texte .= '<input type="hidden" name="mask" value="' . $confName . '">';
         $texte .= '<table class="nobordernopadding" width="100%">';
 
         $tooltip = $langs->trans("SaturneGenericMaskCodes");
 
         // Parametrage du prefix
-        $texte .= '<tr><td>'.$langs->trans("Mask").':</td>';
-        $texte .= '<td class="right">'.$form->textwithpicto('<input type="text" class="flat minwidth175" name="addon_value" value="'.$conf->global->$confName.'">', $tooltip, 1, 'help').'</td>';
+        $texte .= '<tr><td>' . $langs->trans("Mask") . ':</td>';
+        $texte .= '<td class="right">' . $form->textwithpicto('<input type="text" class="flat minwidth175" name="addon_value" value="' . ($conf->global->$confName ?? '') . '">', $tooltip, 1, 'help') . '</td>';
 
-        $texte .= '<td class="left" rowspan="2">&nbsp; <input type="submit" class="button button-edit" name="Button"value="'.$langs->trans("Modify").'"></td>';
+        $texte .= '<td class="left" rowspan="2">&nbsp; <input type="submit" class="button button-edit" name="Button"value="' . $langs->trans("Modify") . '"></td>';
 
         $texte .= '</tr>';
 
@@ -274,7 +277,7 @@ abstract class CustomModeleNumRefSaturne extends ModeleNumRefSaturne
     {
         $nextValue = $this->getNextValue($object);
 
-        $nextValueSuffix = preg_replace('/'. $this->prefix .'/', '', $nextValue);
+        $nextValueSuffix = preg_replace('/' . $this->prefix . '/', '', $nextValue);
         $nextValueNumber = ltrim($nextValueSuffix, '0');
         $nextValueNumber -= 1;
 
@@ -292,7 +295,7 @@ abstract class CustomModeleNumRefSaturne extends ModeleNumRefSaturne
     /**
      *  Return next value
      *
-     *  @return string      			Value if OK, 0 if KO
+     *  @return string                  Value if OK, 0 if KO
      */
     public function getNextValue(object $object): string
     {
@@ -306,7 +309,9 @@ abstract class CustomModeleNumRefSaturne extends ModeleNumRefSaturne
         $suffixSize = dol_strlen($this->suffix);
 
         // First we get the max value.
-        $posIndice = dol_strlen($this->prefix) + dol_strlen($sqlLike);
+        // The counter starts right after the prefix: SUBSTRING must not skip the LIKE placeholders,
+        // otherwise MAX() only reads the last digits of the ref and the counter loops on itself.
+        $posIndice = dol_strlen($this->prefix) + 1;
         $sql = 'SELECT MAX(CAST(SUBSTRING(ref FROM ' . $posIndice . ') AS SIGNED)) as max';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . $object->table_element;
         $sql .= " WHERE ref LIKE '" . $db->escape($this->prefix) . $sqlLike . "'";
@@ -327,16 +332,13 @@ abstract class CustomModeleNumRefSaturne extends ModeleNumRefSaturne
             return '-1';
         }
 
-        $date = !empty($object->date_creation) ? $object->date_creation : dol_now();
-        $yymm = strftime('%y%m', $date);
-
         if ($max >= (pow(10, 4) - 1)) {
             $num = $max + 1; // If counter > 9999, we do not format on 4 chars, we take number as it is.
         } else {
-            $num = sprintf('%0'. $suffixSize .'s', $max + 1);
+            $num = sprintf('%0' . $suffixSize . 's', $max + 1);
         }
 
-        dol_syslog(get_class($this) . '::getNextValue return ' . $this->prefix . $yymm . '-' . $num);
+        dol_syslog(get_class($this) . '::getNextValue return ' . $this->prefix . $num);
         return $this->prefix . $num;
     }
 
@@ -476,8 +478,7 @@ class SaturneDocumentModel extends CommonDocGenerator
             }
             if (!is_dir($tmpDir)) {
                 $infoTitle .= img_warning($langs->trans('ErrorDirNotFound', $tmpDir), '');
-            }
-            else {
+            } else {
                 $tmpFiles = dol_dir_list($tmpDir, 'files', 0, '\.(ods|odt)');
                 if (count($tmpFiles)) {
                     $listOfFiles = array_merge($listOfFiles, $tmpFiles);
@@ -498,7 +499,7 @@ class SaturneDocumentModel extends CommonDocGenerator
             foreach ($listOfFiles as $file) {
                 // Show list of found files
                 $path = DOL_MAIN_URL_ROOT . '/custom/' . $this->module . '/documents/temp/';
-                $info .= '<input type="hidden" class="template-name" value="'.  $file['name'] .'">';
+                $info .= '<input type="hidden" class="template-name" value="' .  $file['name'] . '">';
                 $info .= '<input type="hidden" class="template-type" value="' . $file['level1name'] . '">';
                 $info .= '<input type="hidden" class="template-path" value="' . $path . '">';
                 $info .= '- ' . $file['name'];
@@ -506,7 +507,7 @@ class SaturneDocumentModel extends CommonDocGenerator
                     $info .= ' <a class="wpeo-button button-blue download-template" style="padding: 1px 2px;">' . img_picto('', 'download') . '</a>';
                 } else {
                     $info .= ' <a class="wpeo-button button-blue" style="padding: 1px 2px;" href="' . DOL_URL_ROOT . '/document.php?modulepart=ecm&attachment=1&entity=' . $conf->entity . '&file=' . $this->module . '/' . dol_strtolower($this->document_type) . '/' . $file['name'] . '">' . img_picto('', 'fontawesome_fa-download_fas_#ffffff') . '</a>';
-                    $info .= ' <a class="wpeo-button button-red" style="padding: 1px 2px;" href="' . $_SERVER['PHP_SELF'] . '?module_name=' . $this->module . '&modulepart=ecm&keyforuploaddir='. $confName . '&action=deletefile&token=' . newToken() . '&file=' . urlencode(basename($file['name'])) . '&type=' . $this->document_type . '">' . img_picto('', 'fontawesome_fa-trash_fas_#ffffff') . '</a>';
+                    $info .= ' <a class="wpeo-button button-red" style="padding: 1px 2px;" href="' . $_SERVER['PHP_SELF'] . '?module_name=' . $this->module . '&modulepart=ecm&keyforuploaddir=' . $confName . '&action=deletefile&token=' . newToken() . '&file=' . urlencode(basename($file['name'])) . '&type=' . $this->document_type . '">' . img_picto('', 'fontawesome_fa-trash_fas_#ffffff') . '</a>';
                 }
                 $info .= '<br>';
             }
@@ -546,12 +547,12 @@ class SaturneDocumentModel extends CommonDocGenerator
                     // Image.
                     if (file_exists($val)) {
                         $listLines->setImage($key, $val);
-                    } else if (dol_strlen($val) > 0){
-						if ($key == 'mycompany_logo') {
-							$listLines->setVars($key, $outputLangs->transnoentities('ErrorNoSocietyLogo'), true, 'UTF-8');
-						} else {
-							$listLines->setVars($key, $outputLangs->transnoentities('ErrorFileNotFound'), true, 'UTF-8');
-						}
+                    } elseif (dol_strlen($val) > 0) {
+                        if ($key == 'mycompany_logo') {
+                            $listLines->setVars($key, $outputLangs->transnoentities('ErrorNoSocietyLogo'), true, 'UTF-8');
+                        } else {
+                            $listLines->setVars($key, $outputLangs->transnoentities('ErrorFileNotFound'), true, 'UTF-8');
+                        }
                     } else {
                         $listLines->setVars($key, '', true, 'UTF-8');
                     }
@@ -571,7 +572,7 @@ class SaturneDocumentModel extends CommonDocGenerator
                 } else {
                     $listLines->setVars($key, html_entity_decode($val, ENT_QUOTES | ENT_HTML5), true, 'UTF-8');
                 }
-            } catch (OdfException|SegmentException $e) {
+            } catch (OdfException | SegmentException $e) {
                 dol_syslog($e->getMessage());
             }
         }
@@ -598,7 +599,7 @@ class SaturneDocumentModel extends CommonDocGenerator
         try {
             $segment   = (!empty($moreParam['segmentName']) ? $moreParam['segmentName'] : 'attendant');
             $listLines = $odfHandler->setSegment($segment);
-        } catch (OdfException|OdfExceptionSegmentNotFound $e) {
+        } catch (OdfException | OdfExceptionSegmentNotFound $e) {
             // We may arrive here if tags for lines not present into template
             $foundTagForLines = 0;
             $listLines        = '';
@@ -766,7 +767,7 @@ class SaturneDocumentModel extends CommonDocGenerator
         $objectDocument->ref  = $objectDocumentRef;
         $objectDocumentRef    = dol_sanitizeFileName($objectDocumentRef);
         $objectDocument->type = $this->document_type;
-        $objectDocumentID     = $objectDocument->create($moreParam['user'], true, $object);
+        $objectDocumentID     = $objectDocument->create($moreParam['user'], 1, $object);
         if ($objectDocumentID < 0) {
             setEventMessages($langs->trans('ErrorCreateObject'), [], 'errors');
             return -1;
@@ -774,7 +775,9 @@ class SaturneDocumentModel extends CommonDocGenerator
 
         $uploadDir = getMultidirOutput($object, $this->module);
         if (!$uploadDir) {
-            setEventMessages($langs->trans('ErrorDirNotFound'), [], 'errors');
+            // multidir_output is keyed on the current entity only; surface module + object entity
+            // so a missing key (e.g. cross-entity object in multicompany) is diagnosable.
+            setEventMessages($langs->trans('ErrorDirNotFound', $this->module . ' (entity ' . (int) $object->entity . ')'), [], 'errors');
             return -1;
         }
 
@@ -806,7 +809,10 @@ class SaturneDocumentModel extends CommonDocGenerator
         }
         $newFileTmp = str_replace(' ', '_', $newFileTmp);
         $newFileTmp = $newFileTmp . '.' . $this->type;
-        $fileName   = dol_sanitizeFileName($newFileTmp);
+        // Single quotes are removed too ($includequotes = 1): the ODT to PDF conversion
+        // passes the file name through escapeshellarg() then escapeshellcmd(), which
+        // destroys the shell quoting and makes LibreOffice convert nothing
+        $fileName   = dol_sanitizeFileName($newFileTmp, '_', 1, 1);
 
         $objectDocument->setValueFrom('last_main_doc', $fileName, '', null, '', '', $moreParam['user'], '', '');
         if (!empty($objectDocument->error)) {
@@ -880,7 +886,7 @@ class SaturneDocumentModel extends CommonDocGenerator
                 $srcTemplatePath,
                 [
                     'PATH_TO_TMP' => $conf->$moduleNameLowerCase->dir_temp,
-                    'ZIP_PROXY' => 'PclZipProxy', // PhpZipProxy or PclZipProxy. Got "bad compression method" error when using PhpZipProxy
+                    'ZIP_PROXY' => getDolGlobalString('MAIN_ODF_ZIP_PROXY', 'PclZipProxy'), // PhpZipProxy or PclZipProxy. Got "bad compression method" error when using PhpZipProxy
                     'DELIMITER_LEFT' => '{',
                     'DELIMITER_RIGHT' => '}'
                 ]
@@ -921,6 +927,12 @@ class SaturneDocumentModel extends CommonDocGenerator
         if (!empty($conf->global->MAIN_ODT_AS_PDF) && $conf->global->$confPdfName > 0) {
             try {
                 $odfHandler->exportAsAttachedPDF($file);
+
+                // LibreOffice exits with code 0 even when it could not load the source file,
+                // so the PDF has to be checked before announcing a success
+                if (!file_exists($fileInfos['dirname'] . '/' . $pdfName)) {
+                    throw new Exception('ODT to PDF conversion did not generate any file : ' . $pdfName);
+                }
 
                 $documentUrl = DOL_URL_ROOT . '/document.php';
                 setEventMessages($langs->transnoentities('FileGenerated') . ' - ' . '<a href=' . $documentUrl . '?modulepart=' . $moduleNameLowerCase . '&file=' . urlencode($this->document_type . '/' . $object->ref . '/' . $pdfName) . '&entity=' . $conf->entity . '"' . '>' . $pdfName . '</a>', []);

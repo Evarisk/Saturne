@@ -136,7 +136,7 @@ if ($reshook > 0) {
     $customHeaderFunction = $hookmanager->resPrint;
     $customHeaderFunction($title, $helpUrl);
 } else {
-    saturne_header($hookmanager->resArray['loadMediaGallery'] ?? 0, '', $title, $helpUrl, '', 0, 0, [], [], '', 'mod-' . $object->module . '-' . $object->element . ' page-list bodyforlist ' . $hookmanager->resArray['moreCSSOnBody'] ?? '');
+    saturne_header($hookmanager->resArray['loadMediaGallery'] ?? 0, '', $title, $helpUrl, '', 0, 0, [], [], '', 'mod-' . $object->module . '-' . $object->element . ' page-list bodyforlist ' . ($hookmanager->resArray['moreCSSOnBody'] ?? ''));
 }
 
 if ($id > 0 || !empty($ref)) {
@@ -168,6 +168,9 @@ if ($id > 0 || !empty($ref)) {
     $moreparam     = $param;
 
     $relativepathwithnofile = $object->element . '/' . dol_sanitizeFileName($object->ref) . '/';
+
+    // Drag & drop hint label, injected into the upload zone by saturne.document.js
+    print '<span id="saturne-drop-files-label" class="hidden">' . dol_escape_htmltag($langs->trans('DropFilesHere')) . '</span>';
 
     require_once DOL_DOCUMENT_ROOT . '/core/tpl/document_actions_post_headers.tpl.php';
 }

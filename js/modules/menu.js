@@ -85,6 +85,13 @@ window.saturne.menu.setMenu = function setMenu() {
     searchBox.slideUp(200);
     menuLeft.animate({ width: '30px' }, 200);
 
+    // Clip the menu: its item containers keep their full width even with the text hidden, so
+    // they overflow over the page content and intercept clicks on it (buttons, checkboxes…).
+    // Constraining their width keeps the icons visible while freeing the content underneath.
+    $('#id-left').css('overflow', 'hidden');
+    menuLeft.css('overflow', 'hidden');
+    menuLeft.find('.menu_titre, .menu_contenu, .blockvmenu, .blockvmenupair, .blockvmenuimpair').css({ 'max-width': '40px', 'overflow': 'hidden' });
+
     minimizeElement.attr('title', 'Agrandir le menu');
     minimizeElement.removeClass('fa-chevron-circle-left').addClass('fa-chevron-circle-right');
 
@@ -98,6 +105,11 @@ window.saturne.menu.setMenu = function setMenu() {
 
     searchBox.slideDown(200);
     menuLeft.animate({ width: '240px' }, 200);
+
+    // Undo the clipping applied when minimizing.
+    $('#id-left').css('overflow', '');
+    menuLeft.css('overflow', '');
+    menuLeft.find('.menu_titre, .menu_contenu, .blockvmenu, .blockvmenupair, .blockvmenuimpair').css({ 'max-width': '', 'overflow': '' });
 
     minimizeElement.attr('title', 'Réduire le menu');
     minimizeElement.removeClass('fa-chevron-circle-right').addClass('fa-chevron-circle-left');

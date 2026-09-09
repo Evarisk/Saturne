@@ -252,7 +252,7 @@ class SaturneDashboard
                     foreach ($dashboardGraphs as $keyElement => $dashboardGraph) {
                         $nbDataset = 0;
                         $uniqueKey = strip_tags($dashboardGraph['title']) . $keyElement;
-                        if (is_array($dashboardGraph['data']) && !empty($dashboardGraph['data'])) {
+                        if (isset($dashboardGraph['data']) && is_array($dashboardGraph['data']) && !empty($dashboardGraph['data'])) {
                             if ($dashboardGraph['dataset'] >= 2) {
                                 foreach ($dashboardGraph['data'] as $dashboardGraphDatasets) {
                                     unset($dashboardGraphDatasets[0]);
@@ -271,8 +271,9 @@ class SaturneDashboard
                             if ($nbDataset > 0) {
                                 if (is_array($dashboardGraph['labels']) && !empty($dashboardGraph['labels'])) {
                                     foreach ($dashboardGraph['labels'] as $key => $dashboardGraphLabel) {
-                                        $dashboardGraphLegend[$uniqueKey][] = $dashboardGraphLabel['label'];
-                                        if (isset($dashboardGraphLabel['color'])) {
+                                        $labelValue = is_array($dashboardGraphLabel) ? ($dashboardGraphLabel['label'] ?? '') : $dashboardGraphLabel;
+                                        $dashboardGraphLegend[$uniqueKey][] = $labelValue;
+                                        if (is_array($dashboardGraphLabel) && isset($dashboardGraphLabel['color'])) {
                                             if (dol_strlen($dashboardGraphLabel['color']) > 0) {
                                                 $dashboardGraphColor[$uniqueKey][] = $dashboardGraphLabel['color'];
                                             } else {
@@ -290,9 +291,10 @@ class SaturneDashboard
                                     if ($dashboardGraph['dataset'] >= 2) {
                                             $graphData[$uniqueKey][] = $dashboardGraph['data'][$key];
                                     } else {
+                                        $label = isset($dashboardGraph['labels'][$key]['label']) ? $dashboardGraph['labels'][$key]['label'] : (string)$key;
                                         $graphData[$uniqueKey][] = [
-                                        0 => $dashboardGraph['labels'][$key]['label'],
-                                        1 => $dashboardGraph['data'][$key]
+                                            0 => $label,
+                                            1 => $dashboardGraph['data'][$key]
                                         ];
                                     }
                                 }
@@ -345,7 +347,7 @@ class SaturneDashboard
         if (!empty($dashboards['lists']) && is_array($dashboards['lists'])) {
             foreach ($dashboards['lists'] as $dashboardLists) {
                 foreach ($dashboardLists as $dashboardList) {
-                    if (is_array($dashboardList['data']) && !empty($dashboardList['data'])) {
+                    if (isset($dashboardList['data']) && is_array($dashboardList['data']) && !empty($dashboardList['data'])) {
                         print '<div id="graph-' . $dashboardList['name'] . '"' . (empty($dashboardList['noFullSize']) ? 'style="width: 100%"' : '') . '>';
 
                         if (!empty($dashboardList['name'])) {
@@ -356,23 +358,29 @@ class SaturneDashboard
 
                         print load_fiche_titre($dashboardList['title'], $dashboardList['morehtmlright'], $dashboardList['picto']);
 
+                        // La colonne Ref porte le libellé de la ligne : elle n'est pas tronquée, les colonnes de valeurs le sont
+                        $refCellCss  = $conf->browser->layout == 'classic' ? 'nowraponall ' : '';
+                        $dataCellCss = $conf->browser->layout == 'classic' ? 'nowraponall tdoverflowmax200 ' : '';
+
+                        // Conteneur scrollable : sur mobile le tableau est plus large que l'écran et débordait de la page entière
+                        print '<div class="div-table-responsive-no-min">';
                         print '<table class="noborder centpercent">';
 
                         print '<tr class="liste_titre">';
                         foreach ($dashboardList['labels'] as $key => $dashboardListLabel) {
-                            print '<td class="' . ($conf->browser->layout == 'classic' ? 'nowraponall tdoverflowmax200 ' : '') . (($key != 'Ref') ? 'center' : '') . '">' . $langs->transnoentities($dashboardListLabel) . '</td>';
+                            print '<td class="' . (($key != 'Ref') ? $dataCellCss . 'center' : $refCellCss) . '">' . $langs->transnoentities($dashboardListLabel) . '</td>';
                         }
                         print '</tr>';
 
                         foreach ($dashboardList['data'] as $dashboardListDatasets) {
                             print '<tr class="oddeven">';
                             foreach ($dashboardListDatasets as $key => $dashboardGraphDataset) {
-                                print '<td class="' . ($conf->browser->layout == 'classic' ? 'nowraponall tdoverflowmax200 ' : '') . (($key != 'Ref') ? 'center ' : '') . ($dashboardGraphDataset['morecss'] ?? '') . '"' . ($dashboardGraphDataset['moreAttr'] ?? '') . '>' . $dashboardGraphDataset['value'] . '</td>';
+                                print '<td class="' . (($key != 'Ref') ? $dataCellCss . 'center ' : $refCellCss) . ($dashboardGraphDataset['morecss'] ?? '') . '"' . ($dashboardGraphDataset['moreAttr'] ?? '') . '>' . $dashboardGraphDataset['value'] . '</td>';
                             }
                             print '</tr>';
                         }
 
-                        print '</table></div>';
+                        print '</table></div></div>';
                     }
                 }
             }
@@ -380,6 +388,26 @@ class SaturneDashboard
 
         print '</div>';
         print '</form>';
+    }
+
+    /**
+     * Get the hidden input holding the options the dashboard JS needs to enhance a graph
+     *
+     * Dashboard graphs are drawn on a canvas by DolGraph, which handles neither a link per bar nor a second Y
+     * axis, so both are declared here and applied by the dashboard JS.
+     *
+     * @param  array  $options Graph options: 'links' holds the URL each bar opens, in the order of the data rows,
+     *                         'datasetLinks' the same thing per dataset when the series do not share a filter,
+     *                         and 'secondAxisDataset' the index of the dataset to move to its own Y axis
+     * @return string          Hidden input to append to the graph title, empty when no bar links anywhere
+     */
+    public static function getGraphOptionsInput(array $options): string
+    {
+        if (empty($options['links']) && empty($options['datasetLinks'])) {
+            return '';
+        }
+
+        return '<input type="hidden" class="dashboard-graph-options" value="' . dol_escape_htmltag(json_encode($options, JSON_UNESCAPED_UNICODE)) . '">';
     }
 
     /**

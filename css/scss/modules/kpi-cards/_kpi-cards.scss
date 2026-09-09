@@ -1,0 +1,81 @@
+// KPI cards — compact summary metrics bar displayed above a list (saturne_render_kpi_cards)
+
+.saturne-kpi-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 4px 0 8px;
+}
+
+.saturne-kpi-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 1 auto; // size to content, do not stretch to fill the row
+    padding: 6px 12px;
+    background: #fff;
+    border: 1px solid #e3e6ea;
+    border-left: 3px solid #6c7a89;
+    border-radius: 6px;
+}
+
+.saturne-kpi-card-icon {
+    font-size: 15px;
+    line-height: 1;
+    color: #6c7a89;
+    opacity: 0.9;
+}
+
+.saturne-kpi-card-value {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.15;
+    color: #2b2b2b;
+}
+
+.saturne-kpi-card-label {
+    font-size: 10px;
+    color: #7a7a7a;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+// Color modifiers
+.saturne-kpi-card-blue {
+    border-left-color: #2c7be5;
+
+    .saturne-kpi-card-icon {
+        color: #2c7be5;
+    }
+}
+
+.saturne-kpi-card-green {
+    border-left-color: #27ae60;
+
+    .saturne-kpi-card-icon {
+        color: #27ae60;
+    }
+}
+
+.saturne-kpi-card-yellow {
+    border-left-color: #f1c40f;
+
+    .saturne-kpi-card-icon {
+        color: #e0ac08;
+    }
+}
+
+.saturne-kpi-card-grey {
+    border-left-color: #6c7a89;
+
+    .saturne-kpi-card-icon {
+        color: #6c7a89;
+    }
+}
+
+@media (max-width: 767px) {
+    .saturne-kpi-card {
+        flex: 1 1 calc(50% - 8px);
+    }
+}

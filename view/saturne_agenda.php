@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,9 +24,9 @@
 
 // Load Saturne environment
 if (file_exists('../saturne.main.inc.php')) {
-	require_once __DIR__ . '/../saturne.main.inc.php';
+    require_once __DIR__ . '/../saturne.main.inc.php';
 } elseif (file_exists('../../saturne.main.inc.php')) {
-	require_once __DIR__ . '/../../saturne.main.inc.php';
+    require_once __DIR__ . '/../../saturne.main.inc.php';
 } else {
     die('Include of saturne main fails');
 }
@@ -140,7 +141,7 @@ if (empty($resHook)) {
 }
 
 /*
-*	View
+*   View
 */
 
 $title    = $langs->trans('Agenda') . ' - ' . $langs->trans(ucfirst($object->element));
@@ -151,7 +152,7 @@ if ($reshook > 0) {
     $customHeaderFunction = $hookmanager->resPrint;
     $customHeaderFunction($title, $helpUrl);
 } else {
-    saturne_header($hookmanager->resArray['loadMediaGallery'] ?? 0,'', $title, $helpUrl, '', 0, 0, [], [], '', 'mod-' . $object->module . '-' . $object->element . ' page-list bodyforlist ' . $hookmanager->resArray['moreCSSOnBody'] ?? '');
+    saturne_header($hookmanager->resArray['loadMediaGallery'] ?? 0, '', $title, $helpUrl, '', 0, 0, [], [], '', 'mod-' . $object->module . '-' . $object->element . ' page-list bodyforlist ' . ($hookmanager->resArray['moreCSSOnBody'] ?? ''));
 }
 
 if ($id > 0 || !empty($ref)) {
@@ -175,7 +176,7 @@ if ($id > 0 || !empty($ref)) {
     $newCardButton = '';
     if (isModEnabled('agenda')) {
         if (!empty($user->rights->agenda->myactions->create) || !empty($user->rights->agenda->allactions->create)) {
-            $newCardButton .= dolGetButtonTitle($langs->trans('AddAction'), '', 'fa fa-plus-circle', DOL_URL_ROOT.'/comm/action/card.php?action=create'.$out);
+            $newCardButton .= dolGetButtonTitle($langs->trans('AddAction'), '', 'fa fa-plus-circle', DOL_URL_ROOT . '/comm/action/card.php?action=create' . $out);
         }
 
         if (!empty($user->rights->agenda->myactions->read) || !empty($user->rights->agenda->allactions->read)) {
@@ -197,7 +198,6 @@ if ($id > 0 || !empty($ref)) {
             show_actions_done($conf, $langs, $db, $object, null, 0, $actioncode, '', $filters, $sortfield, $sortorder, $object->module);
         }
     }
-
 }
 
 // End of page

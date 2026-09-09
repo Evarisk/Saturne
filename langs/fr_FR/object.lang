@@ -53,7 +53,7 @@ ErrorCreateObject = Erreur : création d'un(e) %s
 ErrorDeleteObject = Erreur : suppression d'un(e) %s
 
 # Numbering modules
-SaturneGenericMaskCodes = Ce champ se compose d'un préfixe suivi d'un suffixe. Par exemple : ABC{000} donnera ABC001, ABC002, etc.  Vous pouvez ajouter autant de zéro que vous le souhaitez.
+SaturneGenericMaskCodes = Ce champ se compose d'un préfixe suivi d'un suffixe. Par exemple : ABC{yy}{mm}-{000} donnera ABC2308-001, ABC2308-002, etc. Vous pouvez utiliser les variables {yy}, {mm}, {dd} pour la date et ajouter autant de zéros que vous le souhaitez dans les accolades {000}.
 
 # Status - Statut
 StatusDraft              = Brouillon (à valider)
@@ -79,6 +79,7 @@ AllSignatoriesMustHaveSigned     = Tous les participants doivent avoir signé po
 ObjectMustBeValidatedToSendEmail = %s doit être au statut (validé) pour envoyer un email
 ObjectMustBeLockedToSendEmail    = %s doit être au statut (verrouillé) pour envoyer un email
 ObjectMustBeLockedToArchive      = %s doit être au statut (verrouillé) afin de pouvoir l'archiver
+ObjectIsReadOnly                 = %s est en lecture seule (verrouillé ou archivé)
 
 # Confirm box - Boite de confirmation
 ValidateObject          = Valider %s
@@ -101,13 +102,27 @@ CloneCategories         = Cloner les tags/catégories ?
 ClonePhotos             = Cloner les photos ?
 
 # Confirm mass box - Boite de confirmation mass action
-ConfirmMassLock              = Confirmation de verrouillage en masse
-ConfirmMassLockingQuestion   = Êtes-vous sur de vouloir verrouiller les %d enregistrement(s) sélectionné(s) ?
-ConfirmMassArchive           = Confirmation de archivage en masse
-ConfirmMassArchivingQuestion = Êtes-vous sur de vouloir archiver les %d enregistrement(s) sélectionné(s) ?
+ConfirmMassLock               = Confirmation de verrouillage en masse
+ConfirmMassLockingQuestion    = Êtes-vous sur de vouloir verrouiller les %d enregistrement(s) sélectionné(s) ?
+ConfirmMassArchive            = Confirmation de archivage en masse
+ConfirmMassArchivingQuestion  = Êtes-vous sur de vouloir archiver les %d enregistrement(s) sélectionné(s) ?
+ConfirmMassValidate           = Confirmation de validation en masse
+ConfirmMassValidatingQuestion = Êtes-vous sûr de vouloir valider les %d enregistrement(s) sélectionné(s) ?
+ConfirmMassSign               = Confirmation de signature en masse
+ConfirmMassSigningQuestion    = Êtes-vous sûr de vouloir signer les %d enregistrement(s) sélectionné(s) avec votre signature électronique ?
 
 # SetEventMessage mass action - Notice mass action
 RecordsArchived = %d enregistrement(s) archivé(s)
+ConfirmMassUnarchive           = Confirmation du désarchivage en masse
+ConfirmMassUnarchivingQuestion = Êtes-vous sûr de vouloir désarchiver les %d enregistrement(s) sélectionné(s) ?
+RecordsUnarchived = %d enregistrement(s) désarchivé(s)
+RecordsValidated = %d enregistrement(s) validé(s)
+RecordsNotDraftSkipped = %d enregistrement(s) ignoré(s) car ils ne sont pas au statut brouillon
+RecordsSigned = %d enregistrement(s) signé(s)
+RecordsSignedForAttendant = %d enregistrement(s) signé(s) pour %s
+RecordsNotSignableSkipped = %d enregistrement(s) ignoré(s) car ils ne sont pas au statut validé ou vous n'y avez pas de signature en attente
+Unarchive = Désarchiver
+Unarchived = Désarchivé
 ObjectNotFound  = %s non trouvé(e)
 
 # Data - Donnée

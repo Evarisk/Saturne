@@ -26,9 +26,15 @@ EmptyMediaGallery         = The media library is empty
 SearchFile                = Search for a file
 PhotoWellSent             = The photo has been added to the media library
 PhotoNotSent              = The photo was not sent correctly
+MediaData                 = Media setup
 ConfirmUnlinkMedia        = Are you sure you want to detach the selected media ?
+TakePhoto                 = Take a photo
 AddPhotoFromComputer      = Add a photo from device gallery
 AddPhotoFromMediaGallery  = Add a photo from media gallery
+DeletePhoto               = Delete photo
+DeletePhotoConfirmation   = Delete this photo?
+AvailableTools            = Available tools
+Quality                   = Quality
 
 # Config page
 MediaMaxWidthMini                    = Minimum media width
@@ -51,6 +57,9 @@ DisplayNumberMediaGallery            = Number of media displayed in the media li
 DisplayNumberMediaGalleryDescription = Displays 8 media (default) per page in the media library
 MediaSizeDocument                    = Media size
 MediaSizeDocumentDescription         = Selection of media size in documents
+ShowOnlyMediasAddedToday             = Only show media added today
+ShowOnlyUnlinkedMedias               = Only show media not linked to any object
+UnlinkedMedias                       = Unlinked media
 
 # Media lib admin page
 MediaLib                  = Media Library
@@ -69,9 +78,14 @@ Recording                 = Recording in progress...
 NoAudioYet                = No audio recording yet
 UploadInProgress          = Upload in progress
 ErrorFileNotAnImage       = The uploaded file is not a valid image
+AddFile                   = Add a document
+NoFile                    = No document
 AudioLibrary              = Audio library
 NoAudioRecording          = No audio recording
 FileDeleted               = The file has been deleted
 ErrorFileNotDeleted       = The file could not be deleted
 
 AIAnalyseImage	= Image analysis: %s
+
+# Multi-upload
+ValidateAll = Validate all

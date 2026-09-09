@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -61,17 +62,27 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
 
         $extraFields->fetch_name_optionals_label($object->table_element);
         $optionsArray = (!empty($extraFields->attributes[$object->table_element]['label']) ? $extraFields->attributes[$object->table_element]['label'] : null);
+
+        // A "separate" extrafield is only a form separator, it owns no column in the
+        // <table>_extrafields table. Selecting it raises "Unknown column eft.<name>" and the whole
+        // fetch returns -1, which most callers turn into an empty list without a word. Dropping
+        // those names here keeps the SELECT and the array_options loop below in step
+        if (is_array($optionsArray)) {
+            foreach (array_keys($optionsArray) as $name) {
+                if (($extraFields->attributes[$object->table_element]['type'][$name] ?? '') == 'separate') {
+                    unset($optionsArray[$name]);
+                }
+            }
+        }
     }
     if (empty($moreparams['count'])) {
         $objectFields = $object->getFieldList('t');
         if (strstr($objectFields, 't.fk_prospectlevel')) {
-            $objectFields = preg_replace('/t.fk_prospectlevel,/','', $objectFields);
+            $objectFields = preg_replace('/t.fk_prospectlevel,/', '', $objectFields);
         }
         if (is_array($optionsArray) && !empty($optionsArray) && $extraFieldManagement) {
-            foreach ($optionsArray as $name => $label) {
-                if (empty($extrafields->attributes[$object->table_element]['type'][$name]) || $extrafields->attributes[$object->table_element]['type'][$name] != 'separate') {
-                    $objectFields .= ", eft." . $name;
-                }
+            foreach (array_keys($optionsArray) as $name) {
+                $objectFields .= ", eft." . $name;
             }
         }
     } else {
@@ -108,13 +119,13 @@ function saturne_fetch_all_object_type(string $className = '', string $sortorder
             if ($key == 't.rowid') {
                 $sqlwhere[] = $key . ' = ' . $value;
             } elseif (isset($object->fields[$key]['type']) && in_array($object->fields[$key]['type'], ['date', 'datetime', 'timestamp'])) {
-                $sqlwhere[] = $key .' = \'' . $object->db->idate($value) . '\'';
+                $sqlwhere[] = $key . ' = \'' . $object->db->idate($value) . '\'';
             } elseif ($key == 'customsql') {
                 $sqlwhere[] = $value;
             } elseif (strpos($value, '%') === false) {
-                $sqlwhere[] = $key .' IN (' . $object->db->sanitize($object->db->escape($value)) . ')';
+                $sqlwhere[] = $key . ' IN (' . $object->db->sanitize($object->db->escape($value)) . ')';
             } else {
-                $sqlwhere[] = $key .' LIKE \'%' . $object->db->escape($value) . '%\'';
+                $sqlwhere[] = $key . ' LIKE \'%' . $object->db->escape($value) . '%\'';
             }
         }
     }
@@ -371,6 +382,8 @@ function saturne_get_objects_metadata(string $type = ''): array
     // 'list_url'           => Path to list page
     // 'class_path'         => Path to object class
     // 'lib_path'           => Path to object lib
+    // 'alias_of'           => OPTIONAL : Key of the entry this one duplicates under a legacy name,
+    //                         consumers iterating on the whole array must skip it to avoid processing the object twice
 
     $objectsMetadata = [];
 
@@ -550,7 +563,10 @@ function saturne_get_objects_metadata(string $type = ''): array
             'class_path'     => 'custom/saturne/class/task/saturnetask.class.php',
             'lib_path'       => 'core/lib/project.lib.php',
         ];
-        $objectsMetadata['project_task'] = $objectsMetadata['task'];
+        //@todo backward compatibility
+        // Task::$element is 'project_task', so the object is still reachable with that legacy key
+        $objectsMetadata['project_task']             = $objectsMetadata['task'];
+        $objectsMetadata['project_task']['alias_of'] = 'task';
     }
 
     if (isModEnabled('facture')) {
@@ -627,7 +643,9 @@ function saturne_get_objects_metadata(string $type = ''): array
             'lib_path'       => 'core/lib/contract.lib.php',
         ];
         //@todo backward compatibility
-        $objectsMetadata['contrat'] = $objectsMetadata['contract'];
+        // Contrat::$element is 'contrat', so the object is still reachable with that legacy key
+        $objectsMetadata['contrat']             = $objectsMetadata['contract'];
+        $objectsMetadata['contrat']['alias_of'] = 'contract';
     }
 
     if (isModEnabled('ticket')) {
@@ -944,7 +962,7 @@ function saturne_get_objects_metadata(string $type = ''): array
     $objectsMetadataArray = [];
     $otherNameType        = '';
     if (is_array($objectsMetadata) && !empty($objectsMetadata)) {
-        foreach($objectsMetadata as $objectType => $objectMetadata) {
+        foreach ($objectsMetadata as $objectType => $objectMetadata) {
             if ($objectType != 'context' && $objectType != 'currentcontext') {
                 if (!empty($objectMetadata['class_path'])) {
                     require_once DOL_DOCUMENT_ROOT . '/' . $objectMetadata['class_path'];
@@ -980,6 +998,7 @@ function saturne_get_objects_metadata(string $type = ''): array
                     'defaultorder'       => $objectMetadata['defaultorder'] ?? 'ASC',
                     'class_path'         => $objectMetadata['class_path'] ?? '',
                     'lib_path'           => $objectMetadata['lib_path'] ?? '',
+                    'alias_of'           => $objectMetadata['alias_of'] ?? '',
                     'object'             => $object
                 ];
                 if (!empty($objectMetadata['langfile'])) {
@@ -1011,6 +1030,36 @@ function saturne_get_objects_metadata(string $type = ''): array
 }
 
 /**
+ * Build an unsaved object of the given type, to be used as the subject of a specimen document
+ *
+ * Document models call CommonObject methods on the object their document describes, so a preview
+ * has to hand them a real object of that type: an empty stdClass makes them fatal on the first call
+ *
+ * @param  string $objectType          Object type the document describes (project, ticket, preventionplan, etc.)
+ * @param  string $moduleNameLowerCase Module name in lower case
+ * @return object                      Unsaved object of that type, an empty stdClass when the type is unknown
+ */
+function saturne_get_specimen_object(string $objectType, string $moduleNameLowerCase = '')
+{
+    global $db;
+
+    // Module objects are registered under a module prefixed key, Dolibarr ones under their bare type
+    $objectMetadata = saturne_get_objects_metadata($moduleNameLowerCase . '_' . $objectType);
+    if (empty($objectMetadata['class_name'])) {
+        $objectMetadata = saturne_get_objects_metadata($objectType);
+    }
+
+    if (!empty($objectMetadata['class_path']) && !empty($objectMetadata['class_name'])) {
+        dol_include_once('/' . $objectMetadata['class_path']);
+        if (class_exists($objectMetadata['class_name'])) {
+            return new $objectMetadata['class_name']($db);
+        }
+    }
+
+    return new stdClass();
+}
+
+/**
  * Require numbering modules of given objects
  *
  * @param  array      $numberingModulesNames Array of numbering modules names
@@ -1023,18 +1072,23 @@ function saturne_require_objects_mod(array $numberingModulesNames, string $modul
 
     $variablesToReturn = [];
     if (!empty($numberingModulesNames)) {
-        foreach($numberingModulesNames as $objectType => $numberingModulesName) {
-
+        foreach ($numberingModulesNames as $objectType => $numberingModulesName) {
             if (strstr($objectType, '_')) {
                 $objectType = str_replace('_', '', $objectType);
             }
 
             $modPathCustom   = dirname(__FILE__) . '/../../' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $objectType . '/' . $numberingModulesName . '.php';
-            $modPathDolibarr = DOL_DOCUMENT_ROOT . '/core/modules/' . $objectType . '/'. $numberingModulesName . '.php';
+            $modPathCustomDoc = dirname(__FILE__) . '/../../' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $objectType . '/' . $numberingModulesName . '.php';
+            $modPathCustomDoc2 = dirname(__FILE__) . '/../../' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $objectType . 'document/' . $numberingModulesName . '.php';
+            $modPathDolibarr = DOL_DOCUMENT_ROOT . '/core/modules/' . $objectType . '/' . $numberingModulesName . '.php';
 
             if (file_exists($modPathCustom)) {
                 require_once $modPathCustom;
-            } else if (file_exists($modPathDolibarr)) {
+            } elseif (file_exists($modPathCustomDoc)) {
+                require_once $modPathCustomDoc;
+            } elseif (file_exists($modPathCustomDoc2)) {
+                require_once $modPathCustomDoc2;
+            } elseif (file_exists($modPathDolibarr)) {
                 require_once $modPathDolibarr;
             }
 

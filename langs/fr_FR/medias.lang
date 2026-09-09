@@ -28,8 +28,13 @@ PhotoWellSent             = La photo a été ajoutée à la bibliothèque de mé
 PhotoNotSent              = La photo ne s'est pas correctement envoyée
 MediaData                 = Configuration des médias
 ConfirmUnlinkMedia        = Êtes vous sur de vouloir détacher le media sélectionné ?
+TakePhoto                 = Prendre une photo
 AddPhotoFromComputer      = Ajouter une photo depuis la galerie de l'appareil
 AddPhotoFromMediaGallery  = Ajouter une photo depuis la galerie des médias
+DeletePhoto               = Supprimer la photo
+DeletePhotoConfirmation   = Supprimer cette photo ?
+AvailableTools            = Outils disponibles
+Quality                   = Qualité
 
 # Config page - Page d'administration
 MediaMaxWidthMini                    = Largeur du média mini
@@ -73,6 +78,8 @@ Recording                 = Enregistrement en cours...
 NoAudioYet                = Aucun enregistrement audio pour le moment
 UploadInProgress          = Téléchargement en cours
 ErrorFileNotAnImage       = Le fichier envoyé n'est pas une image valide
+AddFile                   = Ajouter un document
+NoFile                    = Aucun document
 AudioLibrary              = Bibliothèque audio
 NoAudioRecording          = Aucun enregistrement audio
 FileDeleted               = Le fichier a été supprimé
@@ -80,3 +87,6 @@ ErrorFileNotDeleted       = Le fichier n'a pas pu être supprimé
 
 # Analyse AI
 AIAnalyseImage	= Analyse de l'image: %s
+
+# Multi-upload
+ValidateAll = Tout valider

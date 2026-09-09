@@ -63,22 +63,23 @@ saturne_load_langs(['admin']);
 $form = new Form($db);
 
 // Get parameters
-$action    = GETPOST('action', 'alpha');
-$modelName = GETPOST('model_name', 'alpha');
-$type      = GETPOST('type', 'alpha');
-$const     = GETPOST('const', 'alpha');
-$label     = GETPOST('label', 'alpha');
-$pageY     = GETPOST('page_y', 'int');
+$action     = GETPOST('action', 'alpha');
+$modelName  = GETPOST('model_name', 'alpha');
+$type       = GETPOST('type', 'alpha');
+$objectType = GETPOST('object_type', 'alpha');
+$const      = GETPOST('const', 'alpha');
+$label      = GETPOST('label', 'alpha');
+$pageY      = GETPOST('page_y', 'int');
 // Used by actions_setmoduleoptions.inc.php
 $modulepart = GETPOST('modulepart', 'aZ09');
 
 $hookmanager->initHooks([$moduleNameLowerCase . 'admindocuments']);
 
 // Permissions
-$permissionToRead = $user->hasRight($moduleNameLowerCase, 'adminpage', 'read');
+$permissiontoread = $user->hasRight($moduleNameLowerCase, 'adminpage', 'read');
 
 // Security check
-saturne_check_access($permissionToRead);
+saturne_check_access($permissiontoread);
 
 /*
  * Actions
@@ -97,18 +98,19 @@ if (empty($resHook)) {
 
     // Activate a model
     if ($action == 'set') {
-        addDocumentModel($modelName, $type, $label, $const);
-        header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
+        addDocumentModel((string) $modelName, (string) $type, (string) $label, (string) $const);
+        header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . ((string) $pageY));
         exit;
     } elseif ($action == 'del') {
-        delDocumentModel($modelName, $type);
-        header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
+        delDocumentModel((string) $modelName, (string) $type);
+        header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . ((string) $pageY));
         exit;
     }
 
     // Set default model
     if ($action == 'setdoc') {
-        $confName = dol_strtoupper($moduleName . '_' . $type) . '_DEFAULT_MODEL';
+        // Constant built on the object type, not on the model type, to match the name read when generating a document
+        $confName = dol_strtoupper($moduleName . '_' . $objectType) . '_DEFAULT_MODEL';
         dolibarr_set_const($db, $confName, $modelName, 'chaine', 0, '', $conf->entity);
         header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
         exit;
@@ -219,33 +221,59 @@ if (empty($resHook)) {
     }
 
     if ($action == 'specimen') {
-        $documentType = explode('_', $modelName)[1];
+        // The document class is sent by the model list: a model name may hold several underscores,
+        // so its first segment is not the document type when the model carries a suffix
+        $documentType = !empty($objectType) ? $objectType : explode('_', $modelName)[0];
 
-        require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . $documentType . '.class.php';
-
-        if (class_exists($documentType)) {
-            /** @var SaturneDocumentModel $document */
-            $document = new $documentType($db);
+        $documentClassPath = __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . $documentType . '.class.php';
+        if (is_file($documentClassPath)) {
+            require_once $documentClassPath;
         }
+
+        if (!class_exists($documentType)) {
+            setEventMessages($langs->trans('ErrorFileNotFound', $documentClassPath), [], 'errors');
+            header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
+            exit;
+        }
+
+        /** @var SaturneDocumentModel $document */
+        $document = new $documentType($db);
 
         // Search template files
         $dir = __DIR__ . '/../../' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $documentType . '/';
         $file = 'pdf_' . $modelName . '.modules.php';
         if (file_exists($dir . $file)) {
-            $moreParams['object'] = new stdClass();
             $moreParams['user'] = $user;
             $moreParams['specimen'] = 1;
             $moreParams['zone'] = 'public';
             $moreParams['objectType'] = str_replace('document', '', $documentType);
 
+            // Document models call CommonObject methods on the object the document describes:
+            // an empty stdClass makes them fatal, so hand them an unsaved object of that type
+            $moreParams['object'] = saturne_get_specimen_object($moreParams['objectType'], $moduleNameLowerCase);
+
             $result = $document->generateDocument($modelName, $langs, 0, 0, 0, $moreParams);
             if ($result <= 0) {
                 setEventMessages($document->error, $document->errors, 'errors');
-            } else {
-                setEventMessages($langs->trans('FileGenerated') . ' - ' . '<a href=' . DOL_URL_ROOT . '/document.php?modulepart=' . $moreParams['objectType'] . '&file=' . urlencode('public_specimen/' . $document->last_main_doc) . '&entity=' . $conf->entity . '"' . '>' . $document->last_main_doc . '</a>', []);
                 header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
                 exit;
             }
+
+            // A model files its specimen under its document type directory, a model whose type
+            // carries no document suffix under the object type one: redirect to the file really written
+            $specimenName    = basename($document->last_main_doc);
+            $moduleOutputDir = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] ?? '';
+            foreach ([$documentType, $moreParams['objectType']] as $specimenDir) {
+                $specimenPath = $specimenDir . '/public_specimen/' . $specimenName;
+                if (dol_is_file($moduleOutputDir . '/' . $specimenPath)) {
+                    header('Location: ' . DOL_URL_ROOT . '/document.php?modulepart=' . $moduleNameLowerCase . '&file=' . urlencode($specimenPath) . '&entity=' . $conf->entity);
+                    exit;
+                }
+            }
+
+            setEventMessages($langs->trans('ErrorFileNotFound', $specimenName), [], 'errors');
+            header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
+            exit;
         }
     }
 
@@ -308,16 +336,6 @@ print '<td class="center">' . $langs->trans('Status') . '</td>';
 print '<td class="center">' . $langs->trans('Action') . '</td>';
 print '</tr>';
 
-// Automatic PDF generation
-print '<tr class="oddeven"><td>';
-print $langs->trans('AutomaticPdfGeneration');
-print '</td><td>';
-print $langs->trans('AutomaticPdfGenerationDescription');
-print '</td>';
-print '<td class="center">';
-print ajax_constantonoff(strtoupper($moduleName) . '_AUTOMATIC_PDF_GENERATION');
-print '</td></td><td></tr>';
-
 // Manual PDF generation
 print '<tr class="oddeven"><td>';
 print $langs->trans('ManualPdfGeneration');
@@ -326,6 +344,16 @@ print $langs->trans('ManualPdfGenerationDescription');
 print '</td>';
 print '<td class="center">';
 print ajax_constantonoff(strtoupper($moduleName) . '_MANUAL_PDF_GENERATION');
+print '</td></td><td></tr>';
+
+// Automatic PDF generation
+print '<tr class="oddeven"><td>';
+print $langs->trans('AutomaticPdfGeneration');
+print '</td><td>';
+print $langs->trans('AutomaticPdfGenerationDescription');
+print '</td>';
+print '<td class="center">';
+print ajax_constantonoff(strtoupper($moduleName) . '_AUTOMATIC_PDF_GENERATION');
 print '</td></td><td></tr>';
 
 // Show signature specimen
@@ -370,6 +398,28 @@ if (is_array($additionalConfig) && !empty($additionalConfig)) {
 print '</form>';
 print '</table>';
 
+?>
+<script <?php print (function_exists('getNonce') ? 'nonce="' . getNonce() . '"' : ''); ?>>
+$(document).ready(function() {
+    var prefix = '<?php echo strtoupper($moduleName); ?>_';
+    
+    // When turning OFF manual PDF generation, turn OFF automatic PDF generation
+    $(document).on('click', '#del_' + prefix + 'MANUAL_PDF_GENERATION', function() {
+        if ($('#del_' + prefix + 'AUTOMATIC_PDF_GENERATION').is(':visible')) {
+            $('#del_' + prefix + 'AUTOMATIC_PDF_GENERATION').click();
+        }
+    });
+
+    // When turning ON automatic PDF generation, turn ON manual PDF generation
+    $(document).on('click', '#set_' + prefix + 'AUTOMATIC_PDF_GENERATION', function() {
+        if ($('#set_' + prefix + 'MANUAL_PDF_GENERATION').is(':visible')) {
+            $('#set_' + prefix + 'MANUAL_PDF_GENERATION').click();
+        }
+    });
+});
+</script>
+<?php
+
 foreach ($types as $type => $documentData) {
     $filelist = [];
     if (preg_match('/_/', $documentData['documentType'])) {
@@ -381,7 +431,7 @@ foreach ($types as $type => $documentData) {
         $documentType       = $documentData['documentType'];
     }
 
-    require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . ($documentData['className'] ?? $documentData['documentType']) . '.class.php';
+    require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . ((string) ($documentData['className'] ?? $documentData['documentType'])) . '.class.php';
 
     if (is_string($type) && class_exists($type)) {
         $object = new $type($db);

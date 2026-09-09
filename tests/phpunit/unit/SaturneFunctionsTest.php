@@ -224,4 +224,56 @@ class SaturneFunctionsTest extends TestCase
 
         unset($_REQUEST['contextpage']);
     }
+
+    // ─── saturne_list_filter_mode_param ───────────────────────────────────────
+
+    public function testFilterModeParamUppercasesAndPrefixes(): void
+    {
+        $this->assertSame('SATURNE_LIST_FILTER_MODE_MYOBJECT', saturne_list_filter_mode_param('myobject'));
+    }
+
+    public function testFilterModeParamStripsSpecialChars(): void
+    {
+        $this->assertSame('SATURNE_LIST_FILTER_MODE_FOOBAR', saturne_list_filter_mode_param('foo-bar!'));
+    }
+
+    // ─── saturne_get_list_filter_mode ─────────────────────────────────────────
+
+    public function testGetFilterModeDefaultsToClassicWhenNoPref(): void
+    {
+        global $user;
+        $user       = new \stdClass();
+        $user->conf = new \stdClass();
+
+        $this->assertSame('classic', saturne_get_list_filter_mode('myobject'));
+    }
+
+    public function testGetFilterModeReturnsPanelWhenStored(): void
+    {
+        global $user;
+        $user       = new \stdClass();
+        $user->conf = new \stdClass();
+        $key        = saturne_list_filter_mode_param('myobject');
+
+        $user->conf->$key = 'panel';
+
+        $this->assertSame('panel', saturne_get_list_filter_mode('myobject'));
+    }
+
+    public function testGetFilterModeDefaultsToClassicOnInvalidValue(): void
+    {
+        global $user;
+        $user       = new \stdClass();
+        $user->conf = new \stdClass();
+        $key        = saturne_list_filter_mode_param('myobject');
+
+        $user->conf->$key = 'garbage';
+
+        $this->assertSame('classic', saturne_get_list_filter_mode('myobject'));
+    }
+
+    public function testGetFilterModeDefaultsToClassicOnEmptyListId(): void
+    {
+        $this->assertSame('classic', saturne_get_list_filter_mode(''));
+    }
 }

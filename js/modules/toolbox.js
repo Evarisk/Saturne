@@ -42,6 +42,9 @@ window.saturne.toolbox = {};
  * @return {void}
  */
 window.saturne.toolbox.init = function() {
+  if (window.saturne && window.saturne.config && window.saturne.config.enableMaxlengthCounter === 0) {
+    return;
+  }
   $(document).on('input', '[maxlength]', function(event) {
     window.saturne.toolbox.updateCounter(event);
   });

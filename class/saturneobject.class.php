@@ -57,6 +57,21 @@ abstract class SaturneObject extends CommonObject
      */
     public string $picto = '';
 
+    /**
+     * @var int Identifiant demande au dernier fetch(), 0 si l'objet n'a jamais ete charge
+     */
+    public int $fetchedId = 0;
+
+    /**
+     * @var string Reference demandee au dernier fetch()
+     */
+    public string $fetchedRef = '';
+
+    /**
+     * @var int|null Resultat du dernier fetch(), null tant que l'objet n'a jamais ete charge
+     */
+    public ?int $fetchedResult = null;
+
     public const STATUS_DELETED   = -1;
     public const STATUS_DRAFT     = 0;
     public const STATUS_VALIDATED = 1;
@@ -126,9 +141,18 @@ abstract class SaturneObject extends CommonObject
      * @param  int<0,1>    $noLines       0 = Default to load lines, 1 = No lines
      * @return int<-4,1>                  Return integer 0 < if KO, 0 if not found, > 0 if OK
      */
-    public function fetch(int $id, ?string $ref = '', string $moreWhere = '', int $noExtraFields = 0, int $noLines = 0): int
+    public function fetch($id, ?string $ref = '', string $moreWhere = '', int $noExtraFields = 0, int $noLines = 0): int
     {
+        $id = (int) $id;
         $result = $this->fetchCommon($id, $ref, $moreWhere, $noExtraFields);
+
+        // La tentative est memorisee pour saturne_check_access(), qui redirige sur un
+        // enregistrement introuvable. C'est ce qui distingue un objet volontairement vide, jamais
+        // charge, d'un enregistrement demande puis absent
+        $this->fetchedId     = $id;
+        $this->fetchedRef    = (string) $ref;
+        $this->fetchedResult = $result;
+
         if ($result > 0 && !empty($this->table_element_line) && empty($noLines)) {
             $this->fetchLines('', $noExtraFields);
         }
@@ -225,15 +249,18 @@ abstract class SaturneObject extends CommonObject
                 $record = new static($this->db);
                 $record->setVarsFromFetchObj($obj);
 
-                if (!empty($record->isextrafieldmanaged)) {
-                    $record->fetch_optionals();
-                }
-
                 $records[$record->id] = $record;
 
                 $i++;
             }
             $this->db->free($resql);
+
+            // Load extrafields for every fetched record with a single query instead of
+            // one fetch_optionals() per row (N+1). Falls back to the per-row behaviour for
+            // element types relying on computed/geometry/encrypted extrafields.
+            if (!empty($this->isextrafieldmanaged) && !empty($records)) {
+                $this->loadExtraFieldsForRecords($records);
+            }
 
             return $records;
         } else {
@@ -241,6 +268,114 @@ abstract class SaturneObject extends CommonObject
             dol_syslog(__METHOD__ . ' ' . implode(',', $this->errors), LOG_ERR);
 
             return -1;
+        }
+    }
+
+    /**
+     * Load extrafield values for a set of records already fetched by fetchAll() using a
+     * single query, instead of one fetch_optionals() per record (avoids an N+1 on lists).
+     *
+     * The produced array_options is identical to fetch_optionals(): each record with a row
+     * gets its non-separate values (dates converted with jdate), and each record without a
+     * row gets every option initialised to null. Element types using computed, geometry or
+     * encrypted extrafields fall back to the per-record fetch_optionals() to stay exact.
+     *
+     * @param  array<int,self> $records Records indexed by id, as built by fetchAll()
+     * @return void
+     */
+    protected function loadExtraFieldsForRecords(array $records): void
+    {
+        global $extrafields;
+
+        if (empty($this->table_element)) {
+            return;
+        }
+
+        if (!isset($extrafields) || !is_object($extrafields)) {
+            require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
+            $extrafields = new ExtraFields($this->db);
+        }
+        if (empty($extrafields->attributes[$this->table_element]['loaded'])) {
+            $extrafields->fetch_name_optionals_label($this->table_element);
+        }
+
+        $labels = $extrafields->attributes[$this->table_element]['label'] ?? null;
+        if (!is_array($labels) || empty($labels)) {
+            return;
+        }
+        $types    = $extrafields->attributes[$this->table_element]['type'] ?? [];
+        $computed = $extrafields->attributes[$this->table_element]['computed'] ?? [];
+
+        // Computed, geometry and encrypted extrafields keep the exact per-record behaviour
+        // of fetch_optionals() (formula evaluation, ST_AsWKT read, dolDecrypt).
+        $needsPerRecord = !empty(array_filter($computed));
+        foreach ($types as $type) {
+            if (in_array($type, ['point', 'multipts', 'linestrg', 'polygon', 'password'], true)) {
+                $needsPerRecord = true;
+                break;
+            }
+        }
+        if ($needsPerRecord) {
+            foreach ($records as $record) {
+                $record->fetch_optionals();
+            }
+            return;
+        }
+
+        $tableElement = ($this->table_element === 'categorie') ? 'categories' : $this->table_element;
+
+        $columns = [];
+        foreach ($labels as $name => $label) {
+            if (empty($types[$name]) || !in_array($types[$name], ['separate', 'point', 'multipts', 'linestrg', 'polygon'], true)) {
+                $columns[] = $this->db->sanitize($name);
+            }
+        }
+        if (empty($columns)) {
+            return;
+        }
+
+        $ids  = implode(',', array_map('intval', array_keys($records)));
+        $sql  = 'SELECT fk_object, ' . implode(', ', $columns);
+        $sql .= ' FROM ' . $this->db->prefix() . $tableElement . '_extrafields';
+        $sql .= ' WHERE fk_object IN (' . $ids . ')';
+
+        $resql = $this->db->query($sql);
+        if (!$resql) {
+            // On any error, fall back to the safe per-record path.
+            foreach ($records as $record) {
+                $record->fetch_optionals();
+            }
+            return;
+        }
+
+        $rowsByObject = [];
+        while ($obj = $this->db->fetch_object($resql)) {
+            $rowsByObject[(int) $obj->fk_object] = $obj;
+        }
+        $this->db->free($resql);
+
+        foreach ($records as $id => $record) {
+            $record->array_options = [];
+            if (isset($rowsByObject[$id])) {
+                $obj = $rowsByObject[$id];
+                foreach ($labels as $key => $val) {
+                    if (!empty($types[$key]) && in_array($types[$key], ['separate', 'point', 'multipts', 'linestrg', 'polygon'], true)) {
+                        continue;
+                    }
+                    if (!property_exists($obj, $key)) {
+                        continue;
+                    }
+                    if (!empty($types[$key]) && in_array($types[$key], ['date', 'datetime'], true)) {
+                        $record->array_options['options_' . $key] = $this->db->jdate($obj->$key);
+                    } else {
+                        $record->array_options['options_' . $key] = $obj->$key;
+                    }
+                }
+            } else {
+                foreach ($labels as $key => $val) {
+                    $record->array_options['options_' . $key] = null;
+                }
+            }
         }
     }
 
@@ -451,6 +586,37 @@ abstract class SaturneObject extends CommonObject
     }
 
     /**
+     * Set unarchived status (back to validated)
+     *
+     * @param  User      $user      Object user that modify
+     * @param  int<0,1>  $noTrigger 0 = launch triggers after, 1 = disable triggers
+     * @return int<-1,1>            Return integer 0 < if KO, 0 if not archived, > 0 if OK
+     */
+    public function setUnarchived(User $user, int $noTrigger = 0): int
+    {
+        // Protection : seul un élément archivé peut être désarchivé
+        if ((int) $this->status !== static::STATUS_ARCHIVED) {
+            return 0;
+        }
+
+        return $this->setStatusCommon($user, static::STATUS_VALIDATED, $noTrigger, strtoupper($this->element) . '_UNARCHIVE');
+    }
+
+    /**
+     * Is the object in a state where its content can still be modified?
+     *
+     * True only for draft/validated. Locked, archived (and deleted) objects are read-only.
+     * This is the server-side counterpart of the UI convention `status < STATUS_LOCKED`.
+     *
+     * @return bool True if content modifications are allowed
+     */
+    public function isModifiable(): bool
+    {
+        return (int) $this->status >= static::STATUS_DRAFT
+            && (int) $this->status < static::STATUS_LOCKED;
+    }
+
+    /**
      * Return array of data to show into a tooltip
      * This method must be implemented in each object class
      *
@@ -470,10 +636,12 @@ abstract class SaturneObject extends CommonObject
         if (isset($this->status)) {
             $datas['picto'] .= ' ' . $this->getLibStatut(5);
         }
-        if (property_exists($this, 'ref')) {
+        // isset() rather than property_exists(): a typed property left uninitialized
+        // by a failed fetch() does exist, but reading it raises a fatal error
+        if (isset($this->ref)) {
             $datas['ref'] = '<br><b>' . $langs->trans('Ref') . ' : </b> ' . $this->ref;
         }
-        if (property_exists($this, 'label')) {
+        if (isset($this->label)) {
             $datas['label'] = '<br><b>' . $langs->trans('Label') . ' : </b> ' . $this->label;
         }
 
@@ -577,7 +745,7 @@ abstract class SaturneObject extends CommonObject
             if ($withPicto == 3) {
                 $addLabel = 1;
             }
-            $result .= (($addLabel && property_exists($this, 'label')) ? '<span class="opacitymedium"> - <span contenteditable="true" data-field="label">' . dol_trunc($this->label, ($addLabel > 1 ? $addLabel : 0)) . '</span></span>' : '');
+            $result .= (($addLabel && isset($this->label)) ? '<span class="opacitymedium"> - <span contenteditable="true" data-field="label">' . dol_trunc($this->label, ($addLabel > 1 ? $addLabel : 0)) . '</span></span>' : '');
         }
 
         $hookmanager->initHooks([$this->element . 'dao']);
@@ -960,13 +1128,13 @@ abstract class SaturneObject extends CommonObject
         if ($selected >= 0) {
             $out .= '<input id="cb' . $this->id . '" class="flat checkforselect fright" type="checkbox" name="toselect[]" value="' . $this->id . '"' . ($selected ? ' checked="checked"' : '') . '>';
         }
-        if (property_exists($this, 'label')) {
+        if (isset($this->label)) {
             $out .= '<div class="inline-block opacitymedium valignmiddle tdoverflowmax100">' . $this->label . '</div>';
         }
-        if (property_exists($this, 'thirdparty') && is_object($this->thirdparty)) {
+        if (isset($this->thirdparty) && is_object($this->thirdparty)) {
             $out .= '<br><div class="info-box-ref tdoverflowmax150">' . $this->thirdparty->getNomUrl(1) . '</div>';
         }
-        if (method_exists($this, 'getLibStatut')) {
+        if (isset($this->status) && method_exists($this, 'getLibStatut')) {
             $out .= '<br><div class="info-box-status">' . $this->getLibStatut(3) . '</div>';
         }
         $out .= '</div>';

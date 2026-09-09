@@ -29,7 +29,9 @@
  * Remaining stubs cover:
  *   - DoliDB        → htdocs/core/db/ (not in sparse checkout)
  *   - CommonObject  → redeclared to add $photo / $picto absent from real class
- *   - DolibarrModules / DolibarrTriggers → not in core/class/
+ *   - DolibarrModules → not in core/class/ (DolibarrTriggers comes from
+ *     core/triggers/, which is scanned: stubbing it made getName()/getDesc()
+ *     look abstract and broke every trigger class)
  *   - Third-party libs: Odf, OdfException, Segment, Parsedown, TCPDF2DBarcode
  *   - Dolibarr helpers not resolvable from class dirs: Activity, EcmDirectory
  *   - Global functions: llxHeader, llxFooter, top_httphead
@@ -128,38 +130,6 @@ abstract class DolibarrModules
     {
         return '';
     }
-}
-
-// ─── DolibarrTriggers ─────────────────────────────────────────────────────────
-// Abstract base for Dolibarr event triggers. Not in htdocs/core/class/.
-
-abstract class DolibarrTriggers
-{
-    /** @var string */
-    public $version = '';
-
-    /** @var string */
-    public $picto = '';
-
-    public function __construct(DoliDB $db)
-    {
-    }
-
-    /** @return string */
-    abstract public function getName(): string;
-
-    /** @return string */
-    abstract public function getDesc(): string;
-
-    /**
-     * @param string       $action
-     * @param CommonObject $object
-     * @param User         $user
-     * @param Translate    $langs
-     * @param Conf         $conf
-     * @return int
-     */
-    abstract public function runTrigger(string $action, $object, User $user, Translate $langs, Conf $conf): int;
 }
 
 // ─── Activity ─────────────────────────────────────────────────────────────────

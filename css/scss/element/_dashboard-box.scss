@@ -1,5 +1,10 @@
 @use '../variable/variable' as *;
 
+/* Set by dashboard.js while a graph bar carrying a link is hovered */
+.dolgraph canvas.graph-bar-clickable {
+  cursor: pointer;
+}
+
 .wpeo-infobox-container {
   gap: 1em;
   width: calc(100% + 1em);

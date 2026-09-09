@@ -162,7 +162,6 @@ class SaturneRedirection extends SaturneObject
             $htaccessContent = file_get_contents(DOL_DOCUMENT_ROOT . '/../.htaccess');
 
             if (!strpos($htaccessContent, $redirectionLines)) {
-
                 $rewriteEnginePos = strpos($htaccessContent, 'RewriteEngine on');
                 if ($rewriteEnginePos === false) {
                     $rewriteEngineLine   = 'RewriteEngine on' . PHP_EOL;

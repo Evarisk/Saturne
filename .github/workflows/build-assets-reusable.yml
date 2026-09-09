@@ -30,7 +30,10 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ github.repository }}
-          ref: ${{ github.sha }}
+          # Checkout the branch, not the SHA: checking out a SHA leaves the runner on a
+          # detached HEAD, and the `git push` of the commit step below then has no branch
+          # to target (fatal: You are not currently on a branch).
+          ref: ${{ github.ref_name }}
 
       - name: Checkout Saturne
         uses: actions/checkout@v4

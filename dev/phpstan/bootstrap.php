@@ -19,44 +19,22 @@
 /**
  * PHPStan bootstrap for the Saturne module.
  *
- * Defines Dolibarr constants and suppresses session/login/redirect side-effects
- * so that main.inc.php can be loaded without a running web server or database.
- * Falls back to stubs when Dolibarr core is not found (e.g. isolated CI).
+ * Defines the Dolibarr constants that module code reads at analysis time.
+ * Dolibarr classes are NOT stubbed here: they are resolved from the real core
+ * through phpstan.neon scanDirectories. Declaring stubs in a bootstrap file
+ * makes them win over the real classes and turns every core method call into
+ * a false "undefined method" error.
  */
 
-// Suppress Dolibarr bootstrap side-effects.
-if (!defined('NOLOGIN')) {
-    define('NOLOGIN', '1');
-}
-if (!defined('NOSESSION')) {
-    define('NOSESSION', '1');
-}
-if (!defined('NOHTTPSREDIRECT')) {
-    define('NOHTTPSREDIRECT', '1');
-}
-if (!defined('NOCSRFCHECK')) {
-    define('NOCSRFCHECK', '1');
-}
-
-// Resolve Dolibarr root: two directories above this module (htdocs/).
+// Dolibarr root is four directories above this file (htdocs/).
 $dolibarrRoot = realpath(__DIR__ . '/../../../../');
-$mainIncPath  = $dolibarrRoot . '/main.inc.php';
 
-// Always use stub mode: loading main.inc.php triggers DB connections and
-// session handling which are incompatible with static analysis.
-// PHPStan resolves Dolibarr class definitions via scanDirectories instead.
 define('DOL_DOCUMENT_ROOT', $dolibarrRoot);
 define('DOL_DATA_ROOT', dirname($dolibarrRoot) . '/documents');
 define('DOL_URL_ROOT', '/');
+define('DOL_MAIN_URL_ROOT', 'http://localhost');
 define('DOL_VERSION', '0.0.0');
+define('MAIN_DB_PREFIX', 'llx_');
 define('GETPOST_ALLOWHTML', 1);
-
-include_once __DIR__ . '/stubs.php';
-
-// tcpdf is delivered via composer — load the barcodes file so PHPStan can
-// resolve TCPDF_BARCODES_2D and related classes (vendor/ is excluded from
-// scanDirectories by excludePaths.analyseAndScan, so bootstrap is the only path).
-$tcpdfBarcodesFile = __DIR__ . '/../../vendor/tecnickcom/tcpdf/tcpdf_barcodes_2d.php';
-if (file_exists($tcpdfBarcodesFile)) {
-    require_once $tcpdfBarcodesFile;
-}
+define('ODTPHP_PATH', $dolibarrRoot . '/includes/odtphp/');
+define('TCPDF_PATH', $dolibarrRoot . '/includes/tecnickcom/tcpdf/');

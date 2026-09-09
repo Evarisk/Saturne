@@ -37,7 +37,7 @@ if ($action == 'add_signature') {
     $signatory->signature      = $data['signature'];
     $signatory->signature_date = dol_now();
 
-    $result = $signatory->update($user, true);
+    $result = $signatory->update($user, 1);
     // Creation signature OK
     if ($result > 0) {
         $signatory->setSigned($user, false, 'public');
@@ -76,20 +76,79 @@ if ($action == 'builddoc') {
         $moreParams = [];
     }
 
-    $confName = strtoupper($moduleName) . '_' . strtoupper($documentType) . '_ADDON_ODT_PATH';
-    $template = preg_replace('/DOL_DOCUMENT_ROOT/', DOL_DOCUMENT_ROOT, $conf->global->$confName);
-    $model    = strtolower($documentType) . '_odt:' . $template . 'template_' . strtolower($documentType) . '.odt';
+    // The default model constant only holds a model name : resolve it against the installed models so the
+    // template of a custom ODT model is honoured here as it already is on the object card
+    $model = saturne_get_default_model($db, $moduleName, $documentType);
+
+    // An ODT model carries its template path after the model name, a native PDF model does not
+    $isNativePdf = !preg_match('/_odt:/i', $model);
+
+    // Determine if it should be a specimen or a final document
+    $isSpecimen = 0;
 
     $moreParams['object']     = $object;
     $moreParams['user']       = $user;
-    $moreParams['specimen']   = 1;
+    $moreParams['specimen']   = $isSpecimen;
     $moreParams['zone']       = 'public';
     $moreParams['objectType'] = $objectType;
 
-    $result = $document->generateDocument($model, $outputLangs, $hideDetails, $hideDesc, $hideRef, $moreParams);
+    $subDir    = $isSpecimen ? '/public_specimen/' : '/';
+    $sourceDir = $upload_dir . '/' . strtolower($objectType) . 'document/' . $object->ref . $subDir;
+    // Meme regle que la vue : le PDF deja genere prime sur l'ODT. $canServePdf etait utilise ici
+    // alors qu'il n'est calcule que dans la vue, incluse apres cette action : la variable etait
+    // toujours indefinie, le filtre retombait sur '.odt', ne voyait jamais le PDF natif et
+    // regenerait donc un document a chaque clic sur le lien de telechargement.
+    $files = dol_dir_list($sourceDir, 'files', 1, '\.pdf$', null, 'date', SORT_DESC);
+    if (empty($files)) {
+        $files = dol_dir_list($sourceDir, 'files', 1, '\.odt$', null, 'date', SORT_DESC);
+    }
+
+    $shouldGenerate = true;
+    if (!empty($files)) {
+        $shouldGenerate = false;
+        $document->last_main_doc = $files[0]['name'];
+        if (isset($signatory->signature_date) && !empty($signatory->signature_date)) {
+            $filemtime = filemtime($sourceDir . $files[0]['name']);
+            if ($filemtime < $signatory->signature_date) {
+                $shouldGenerate = true;
+            }
+        }
+    }
+
+    $result = 1;
+    if ($shouldGenerate) {
+        $result = $document->generateDocument($model, $outputLangs, $hideDetails, $hideDesc, $hideRef, $moreParams);
+    }
 
     if ($result > 0) {
-        dol_copy($upload_dir . '/' . strtolower($objectType) . 'document' . '/' . $object->ref . '/public_specimen/' . $document->last_main_doc, DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $objectType . '_specimen_' . $trackID . '.odt');
+        $subDir    = $isSpecimen ? '/public_specimen/' : '/';
+        $sourceDir = $upload_dir . '/' . strtolower($objectType) . 'document/' . $object->ref . $subDir;
+        $tempDir   = DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/';
+
+        if (!is_dir($tempDir)) {
+            dol_mkdir($tempDir);
+        }
+
+        $originalName = basename($document->last_main_doc);
+        $tempFileName = $isSpecimen ? 'specimen_' . $originalName : $originalName;
+
+        if ($isNativePdf) {
+            // Native PDF: the generated file is already a PDF
+            dol_copy($sourceDir . $originalName, $tempDir . $tempFileName);
+        } else {
+            // ODT model: copy the ODT file
+            dol_copy($sourceDir . $originalName, $tempDir . $tempFileName);
+
+            // If automatic PDF conversion is enabled, also copy the PDF version
+            $confAutoPdf = strtoupper($moduleName) . '_AUTOMATIC_PDF_GENERATION';
+            if (!empty($conf->global->MAIN_ODT_AS_PDF) && getDolGlobalInt($confAutoPdf) > 0) {
+                $pdfSource = preg_replace('/\.odt$/', '.pdf', $originalName);
+                $pdfTempName = preg_replace('/\.odt$/', '.pdf', $tempFileName);
+                if (file_exists($sourceDir . $pdfSource)) {
+                    dol_copy($sourceDir . $pdfSource, $tempDir . $pdfTempName);
+                }
+            }
+        }
     } else {
         setEventMessages($document->error, $document->errors, 'errors');
     }

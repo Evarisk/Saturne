@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2026 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -84,26 +85,26 @@ function saturne_get_image_file_name_for_size($file, $extName, $extImgTarget = '
 }
 
 /**
- *    	Create a thumbnail from an image file (Supported extensions are gif, jpg, png and bmp).
+ *      Create a thumbnail from an image file (Supported extensions are gif, jpg, png and bmp).
  *      If file is myfile.jpg, new file may be myfile_small.jpg. But extension may differs if original file has a format and an extension
  *      of another one, like a.jpg file when real format is png.
  *
- *    	@param     string	$file           	Path of source file to resize
- *    	@param     int		$maxWidth       	Maximum width of the thumbnail (-1=unchanged, 160 by default)
- *    	@param     int		$maxHeight      	Maximum height of the thumbnail (-1=unchanged, 120 by default)
- *    	@param     string	$extName        	Extension to differentiate thumb file name ('_small', '_mini')
- *    	@param     int		$quality        	Quality after compression (0=worst so better compression, 100=best so low or no compression)
- *      @param     string	$outdir           	Directory where to store thumb
- *      @param     int		$targetformat     	New format of target (IMAGETYPE_GIF, IMAGETYPE_JPG, IMAGETYPE_PNG, IMAGETYPE_BMP, IMAGETYPE_WBMP ... or 0 to keep original format)
- *    	@return    string|int<0,0>				Full path of thumb or '' if it fails or 'Error...' if it fails, or 0 if it fails to detect the type of image
+ *      @param     string   $file               Path of source file to resize
+ *      @param     int      $maxWidth           Maximum width of the thumbnail (-1=unchanged, 160 by default)
+ *      @param     int      $maxHeight          Maximum height of the thumbnail (-1=unchanged, 120 by default)
+ *      @param     string   $extName            Extension to differentiate thumb file name ('_small', '_mini')
+ *      @param     int      $quality            Quality after compression (0=worst so better compression, 100=best so low or no compression)
+ *      @param     string   $outdir             Directory where to store thumb
+ *      @param     int      $targetformat       New format of target (IMAGETYPE_GIF, IMAGETYPE_JPG, IMAGETYPE_PNG, IMAGETYPE_BMP, IMAGETYPE_WBMP ... or 0 to keep original format)
+ *      @return    string|int<0,0>              Full path of thumb or '' if it fails or 'Error...' if it fails, or 0 if it fails to detect the type of image
  */
 function saturne_vignette($file, $maxWidth = 160, $maxHeight = 120, $extName = '_small', $quality = 50, $outdir = 'thumbs', $targetformat = 0)
 {
-    require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
+    require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
 
     global $langs;
 
-    dol_syslog("vignette file=".$file." extName=".$extName." maxWidth=".$maxWidth." maxHeight=".$maxHeight." quality=".$quality." outdir=".$outdir." targetformat=".$targetformat);
+    dol_syslog("vignette file=" . $file . " extName=" . $extName . " maxWidth=" . $maxWidth . " maxHeight=" . $maxHeight . " quality=" . $quality . " outdir=" . $outdir . " targetformat=" . $targetformat);
 
     // Clean parameters
     $file = dol_sanitizePathName(trim($file));
@@ -113,7 +114,7 @@ function saturne_vignette($file, $maxWidth = 160, $maxHeight = 120, $extName = '
         // If the file has not been indicated
         return 'ErrorBadParameters';
     } elseif (image_format_supported($file) < 0) {
-        dol_syslog('This file '.$file.' does not seem to be a supported image file name (bad extension).', LOG_WARNING);
+        dol_syslog('This file ' . $file . ' does not seem to be a supported image file name (bad extension).', LOG_WARNING);
         return 'ErrorBadImageFormat';
     } elseif (!is_numeric($maxWidth) || empty($maxWidth) || $maxWidth < -1) {
         // If max width is incorrect (not numeric, empty, or less than 0)
@@ -134,8 +135,8 @@ function saturne_vignette($file, $maxWidth = 160, $maxHeight = 120, $extName = '
     }
 
     $infoImg = getimagesize($filetoread); // Get information like size and real format of image. Warning real format may be png when extension is .jpg
-    $imgWidth = $infoImg[0]; 	// Width of image
-    $imgHeight = $infoImg[1]; 	// Height of image
+    $imgWidth = $infoImg[0];    // Width of image
+    $imgHeight = $infoImg[1];   // Height of image
 
     // TODO LDR
     //if $infoImg[2] != extension of file $file, return a string 'Error: content of file has a format that differs of the format of its extension
@@ -164,41 +165,41 @@ function saturne_vignette($file, $maxWidth = 160, $maxHeight = 120, $extName = '
 
     $imgfonction = '';
     switch ($infoImg[2]) {
-        case IMAGETYPE_GIF:	    // 1
+        case IMAGETYPE_GIF:     // 1
             $imgfonction = 'imagecreatefromgif';
             break;
         case IMAGETYPE_JPEG:    // 2
             $imgfonction = 'imagecreatefromjpeg';
             break;
-        case IMAGETYPE_PNG:	    // 3
+        case IMAGETYPE_PNG:     // 3
             $imgfonction = 'imagecreatefrompng';
             break;
-        case IMAGETYPE_BMP:	    // 6
+        case IMAGETYPE_BMP:     // 6
             // Not supported by PHP GD
             break;
-        case IMAGETYPE_WBMP:	// 15
+        case IMAGETYPE_WBMP:    // 15
             $imgfonction = 'imagecreatefromwbmp';
             break;
-        case IMAGETYPE_WEBP:	// 18
+        case IMAGETYPE_WEBP:    // 18
             $imgfonction = 'imagecreatefromwebp';
             break;
     }
     if ($imgfonction) {
         if (!function_exists($imgfonction)) {
             // Conversion functions not present in this PHP
-            return 'Error: Creation of thumbs not possible. This PHP does not support GD function '.$imgfonction;
+            return 'Error: Creation of thumbs not possible. This PHP does not support GD function ' . $imgfonction;
         }
     }
 
     // We create the directory containing the thumbnails
-    $dirthumb = dirname($file).($outdir ? '/'.$outdir : ''); // Path to thumbnail folder
+    $dirthumb = dirname($file) . ($outdir ? '/' . $outdir : ''); // Path to thumbnail folder
     dol_mkdir($dirthumb);
 
     // Variable initialization according to image extension
     $img = null;
     $extImg = null;
     switch ($infoImg[2]) {
-        case IMAGETYPE_GIF:	    // 1
+        case IMAGETYPE_GIF:     // 1
             $img = imagecreatefromgif($filetoread);
             $extImg = '.gif';
             break;
@@ -206,19 +207,19 @@ function saturne_vignette($file, $maxWidth = 160, $maxHeight = 120, $extName = '
             $img = imagecreatefromjpeg($filetoread);
             $extImg = (preg_match('/\.jpeg$/', $file) ? '.jpeg' : '.jpg');
             break;
-        case IMAGETYPE_PNG:	    // 3
+        case IMAGETYPE_PNG:     // 3
             $img = imagecreatefrompng($filetoread);
             $extImg = '.png';
             break;
-        case IMAGETYPE_BMP:	    // 6
+        case IMAGETYPE_BMP:     // 6
             // Not supported by PHP GD
             $extImg = '.bmp';
             break;
-        case IMAGETYPE_WBMP:	// 15
+        case IMAGETYPE_WBMP:    // 15
             $img = imagecreatefromwbmp($filetoread);
             $extImg = '.bmp';
             break;
-        case IMAGETYPE_WEBP:	// 18
+        case IMAGETYPE_WEBP:    // 18
             $img = imagecreatefromwebp($filetoread);
             $extImg = '.webp';
             break;
@@ -227,7 +228,7 @@ function saturne_vignette($file, $maxWidth = 160, $maxHeight = 120, $extName = '
     // Before PHP8, img was a resource, With PHP8, it is a GdImage
     // if (!is_resource($img) && class_exists('GdImage') && !($img instanceof GdImage)) {
     if (is_null($img) || $img === false) {
-        dol_syslog('Failed to detect type of image. We found infoImg[2]='.$infoImg[2], LOG_WARNING);
+        dol_syslog('Failed to detect type of image. We found infoImg[2]=' . $infoImg[2], LOG_WARNING);
         return 0;
     }
 
@@ -326,7 +327,7 @@ function saturne_vignette($file, $maxWidth = 160, $maxHeight = 120, $extName = '
     $trans_colour = false;
     $newquality = null;
     switch ($targetformat) {
-        case IMAGETYPE_GIF:	    // 1
+        case IMAGETYPE_GIF:     // 1
             $trans_colour = imagecolorallocate($imgThumb, 255, 255, 255); // The GIF format works differently
             imagecolortransparent($imgThumb, $trans_colour);
             $extImgTarget = '.gif';
@@ -337,23 +338,23 @@ function saturne_vignette($file, $maxWidth = 160, $maxHeight = 120, $extName = '
             $extImgTarget = (preg_match('/\.jpeg$/i', $file) ? '.jpeg' : '.jpg');
             $newquality = $quality;
             break;
-        case IMAGETYPE_PNG:	    // 3
+        case IMAGETYPE_PNG:     // 3
             imagealphablending($imgThumb, false); // For compatibility on certain systems
             $trans_colour = imagecolorallocatealpha($imgThumb, 255, 255, 255, 127); // Keep transparent channel
             $extImgTarget = '.png';
             $newquality = round(abs($quality - 100) * 9 / 100);
             break;
-        case IMAGETYPE_BMP:	    // 6
+        case IMAGETYPE_BMP:     // 6
             // Not supported by PHP GD
             $extImgTarget = '.bmp';
             $newquality = 'NU';
             break;
-        case IMAGETYPE_WBMP:	// 15
+        case IMAGETYPE_WBMP:    // 15
             $trans_colour = imagecolorallocatealpha($imgThumb, 255, 255, 255, 0);
             $extImgTarget = '.bmp';
             $newquality = 'NU';
             break;
-        case IMAGETYPE_WEBP:	// 18
+        case IMAGETYPE_WEBP:    // 18
             $trans_colour = imagecolorallocatealpha($imgThumb, 255, 255, 255, 0);
             $extImgTarget = '.webp';
             $newquality = $quality;
@@ -379,16 +380,16 @@ function saturne_vignette($file, $maxWidth = 160, $maxHeight = 120, $extName = '
 
     // Create image on disk
     switch ($targetformat) {
-        case IMAGETYPE_GIF:	    // 1
+        case IMAGETYPE_GIF:     // 1
             imagegif($imgThumb, $imgThumbName);
             break;
         case IMAGETYPE_JPEG:    // 2
             imagejpeg($imgThumb, $imgThumbName, $newquality); // @phan-suppress-current-line PhanTypeMismatchArgumentNullableInternal,PhanPossiblyUndeclaredVariable
             break;
-        case IMAGETYPE_PNG:	    // 3
+        case IMAGETYPE_PNG:     // 3
             imagepng($imgThumb, $imgThumbName, !is_numeric($newquality) ? -1 : (int) $newquality);  // @phan-suppress-current-line PhanPossiblyUndeclaredVariable
             break;
-        case IMAGETYPE_BMP:	    // 6
+        case IMAGETYPE_BMP:     // 6
             // Not supported by PHP GD
             break;
         case IMAGETYPE_WBMP:    // 15
@@ -410,132 +411,166 @@ function saturne_vignette($file, $maxWidth = 160, $maxHeight = 120, $extName = '
 }
 
 /**
- *	Get title line of an array
+ *  Get title line of an array
  *
- *	@param	?string		$name			Translation key of field to show or complete HTML string to show
- *	@param	int<0,2>	$thead	 		0=To use with standard table format, 1=To use inside <thead><tr>, 2=To use with <div>
- *	@param	string		$file			Url used when we click on sort picto
- *	@param	string		$field			Field to use for new sorting. Empty if this field is not sortable. Example "t.abc" or "t.abc,t.def"
- *	@param	string		$begin       	("" by default)
- *	@param	string		$moreparam		Add more parameters on sort url links ("" by default)
- *	@param  string		$moreattrib		Add more attributes on th ("" by default). To add more css class, use param $prefix.
- *	@param  ?string		$sortfield	 	Current field used to sort (Ex: 'd.datep,d.id')
- *	@param  ?string		$sortorder		Current sort order (Ex: 'asc,desc')
- *  @param	string		$prefix	 		Prefix for css. Use space after prefix to add your own CSS tag, for example 'mycss '.
- *  @param	int<0,1>	$disablesortlink	1=Disable sort link
- *  @param	?string		$tooltip 		Tooltip
- *  @param	int<0,1> 	$forcenowrapcolumntitle		No need to use 'wrapcolumntitle' css style
- *	@return	string
+ *  @param  ?string     $name           Translation key of field to show or complete HTML string to show
+ *  @param  int<0,2>    $thead          0=To use with standard table format, 1=To use inside <thead><tr>, 2=To use with <div>
+ *  @param  string      $file           Url used when we click on sort picto
+ *  @param  string      $field          Field to use for new sorting. Empty if this field is not sortable. Example "t.abc" or "t.abc,t.def"
+ *  @param  string      $begin          ("" by default)
+ *  @param  string      $moreparam      Add more parameters on sort url links ("" by default)
+ *  @param  string      $moreattrib     Add more attributes on th ("" by default). To add more css class, use param $prefix.
+ *  @param  ?string     $sortfield      Current field used to sort (Ex: 'd.datep,d.id')
+ *  @param  ?string     $sortorder      Current sort order (Ex: 'asc,desc')
+ *  @param  string      $prefix         Prefix for css. Use space after prefix to add your own CSS tag, for example 'mycss '.
+ *  @param  int<0,1>    $disablesortlink    1=Disable sort link
+ *  @param  ?string     $tooltip        Tooltip
+ *  @param  int<0,1>    $forcenowrapcolumntitle     No need to use 'wrapcolumntitle' css style
+ *  @return string
  */
 function saturne_get_title_field_of_list($name, $thead = 0, $file = "", $field = "", $begin = "", $moreparam = "", $moreattrib = "", $sortfield = "", $sortorder = "", $prefix = "", $disablesortlink = 0, $tooltip = '', $forcenowrapcolumntitle = 0, $linkcustomclass = "")
 {
-	global $langs, $form;
-	//print "$name, $file, $field, $begin, $options, $moreattrib, $sortfield, $sortorder<br>\n";
+    global $langs, $form;
+    //print "$name, $file, $field, $begin, $options, $moreattrib, $sortfield, $sortorder<br>\n";
 
-	if ($moreattrib == 'class="right"') {
-		$prefix .= 'right '; // For backward compatibility
-	}
+    if ($moreattrib == 'class="right"') {
+        $prefix .= 'right '; // For backward compatibility
+    }
 
-	$sortorder = strtoupper((string) $sortorder);
-	$out = '';
-	$sortimg = '';
+    $sortorder = strtoupper((string) $sortorder);
+    $out = '';
+    $sortimg = '';
 
-	$tag = 'th';
-	if ($thead == 2) {
-		$tag = 'div';
-	}
+    $tag = 'th';
+    if ($thead == 2) {
+        $tag = 'div';
+    }
 
-	$tmpsortfield = explode(',', (string) $sortfield);
-	$sortfield1 = trim($tmpsortfield[0]); // If $sortfield is 'd.datep,d.id', it becomes 'd.datep'
-	$tmpfield = explode(',', $field);
-	$field1 = trim($tmpfield[0]); // If $field is 'd.datep,d.id', it becomes 'd.datep'
+    $tmpsortfield = explode(',', (string) $sortfield);
+    $sortfield1 = trim($tmpsortfield[0]); // If $sortfield is 'd.datep,d.id', it becomes 'd.datep'
+    $tmpfield = explode(',', $field);
+    $field1 = trim($tmpfield[0]); // If $field is 'd.datep,d.id', it becomes 'd.datep'
 
-	if (!getDolGlobalString('MAIN_DISABLE_WRAPPING_ON_COLUMN_TITLE') && empty($forcenowrapcolumntitle)) {
-		$prefix = 'wrapcolumntitle '.$prefix;
-	}
+    if (!getDolGlobalString('MAIN_DISABLE_WRAPPING_ON_COLUMN_TITLE') && empty($forcenowrapcolumntitle)) {
+        $prefix = 'wrapcolumntitle ' . $prefix;
+    }
 
-	//var_dump('field='.$field.' field1='.$field1.' sortfield='.$sortfield.' sortfield1='.$sortfield1);
-	// If field is used as sort criteria we use a specific css class liste_titre_sel
-	// Example if (sortfield,field)=("nom","xxx.nom") or (sortfield,field)=("nom","nom")
-	$liste_titre = 'liste_titre';
-	if ($field1 && ($sortfield1 == $field1 || $sortfield1 == preg_replace("/^[^\.]+\./", "", $field1))) {
-		$liste_titre = 'liste_titre_sel';
-	}
+    //var_dump('field='.$field.' field1='.$field1.' sortfield='.$sortfield.' sortfield1='.$sortfield1);
+    // If field is used as sort criteria we use a specific css class liste_titre_sel
+    // Example if (sortfield,field)=("nom","xxx.nom") or (sortfield,field)=("nom","nom")
+    $liste_titre = 'liste_titre';
+    if ($field1 && ($sortfield1 == $field1 || $sortfield1 == preg_replace("/^[^\.]+\./", "", $field1))) {
+        $liste_titre = 'liste_titre_sel';
+    }
 
-	$tagstart = '<'.$tag.' class="'.$prefix.$liste_titre.'" '.$moreattrib;
-	//$out .= (($field && empty($conf->global->MAIN_DISABLE_WRAPPING_ON_COLUMN_TITLE) && preg_match('/^[a-zA-Z_0-9\s\.\-:&;]*$/', $name)) ? ' title="'.dol_escape_htmltag($langs->trans($name)).'"' : '');
-	$tagstart .= ($name && !getDolGlobalString('MAIN_DISABLE_WRAPPING_ON_COLUMN_TITLE') && empty($forcenowrapcolumntitle) && !dol_textishtml($name)) ? ' title="'.dolPrintHTMLForAttribute($langs->trans($name)).'"' : '';
-	$tagstart .= '>';
+    $tagstart = '<' . $tag . ' class="' . $prefix . $liste_titre . '" ' . $moreattrib;
+    //$out .= (($field && empty($conf->global->MAIN_DISABLE_WRAPPING_ON_COLUMN_TITLE) && preg_match('/^[a-zA-Z_0-9\s\.\-:&;]*$/', $name)) ? ' title="'.dol_escape_htmltag($langs->trans($name)).'"' : '');
+    $tagstart .= ($name && !getDolGlobalString('MAIN_DISABLE_WRAPPING_ON_COLUMN_TITLE') && empty($forcenowrapcolumntitle) && !dol_textishtml($name)) ? ' title="' . dolPrintHTMLForAttribute($langs->trans($name)) . '"' : '';
+    $tagstart .= '>';
 
-	if (empty($thead) && $field && empty($disablesortlink)) {    // If this is a sort field
-		$options = preg_replace('/sortfield=([a-zA-Z0-9,\s\.]+)/i', '', (is_scalar($moreparam) ? $moreparam : ''));
-		$options = preg_replace('/sortorder=([a-zA-Z0-9,\s\.]+)/i', '', $options);
-		$options = preg_replace('/&+/i', '&', $options);
-		if (!preg_match('/^&/', $options)) {
-			$options = '&'.$options;
-		}
+    if (empty($thead) && $field && empty($disablesortlink)) {    // If this is a sort field
+        $options = preg_replace('/sortfield=([a-zA-Z0-9,\s\.]+)/i', '', (is_scalar($moreparam) ? $moreparam : ''));
+        $options = preg_replace('/sortorder=([a-zA-Z0-9,\s\.]+)/i', '', $options);
+        $options = preg_replace('/&+/i', '&', $options);
+        if (!preg_match('/^&/', $options)) {
+            $options = '&' . $options;
+        }
 
-		$sortordertouseinlink = '';
-		if ($field1 != $sortfield1) { // We are on another field than current sorted field
-			if (preg_match('/^DESC/i', $sortorder)) {
-				$sortordertouseinlink .= str_repeat('desc,', count(explode(',', $field)));
-			} else { // We reverse the var $sortordertouseinlink
-				$sortordertouseinlink .= str_repeat('asc,', count(explode(',', $field)));
-			}
-		} else { // We are on field that is the first current sorting criteria
-			if (preg_match('/^ASC/i', $sortorder)) {	// We reverse the var $sortordertouseinlink
-				$sortordertouseinlink .= str_repeat('desc,', count(explode(',', $field)));
-			} else {
-				$sortordertouseinlink .= str_repeat('asc,', count(explode(',', $field)));
-			}
-		}
-		$sortordertouseinlink = preg_replace('/,$/', '', $sortordertouseinlink);
-		$out .= '<a class="reposition ' . $linkcustomclass . '" href="'.$file.'?sortfield='.urlencode($field).'&sortorder='.urlencode($sortordertouseinlink).'&begin='.urlencode($begin).$options.'"';
-		//$out .= (getDolGlobalString('MAIN_DISABLE_WRAPPING_ON_COLUMN_TITLE') ? '' : ' title="'.dol_escape_htmltag($langs->trans($name)).'"');
-		$out .= '>';
-	}
-	if ($tooltip) {
-		// You can also use 'TranslationString:keyfortooltiponclick:tooltipdirection' for a tooltip on click or to change tooltip position.
-		if (strpos($tooltip, ':') !== false) {
-			$tmptooltip = explode(':', $tooltip);
-		} else {
-			$tmptooltip = array($tooltip);
-		}
-		$out .= $form->textwithpicto($langs->trans((string) $name), $langs->trans($tmptooltip[0]), (empty($tmptooltip[2]) ? '1' : $tmptooltip[2]), 'help', '', 0, 3, (empty($tmptooltip[1]) ? '' : 'extra_'.str_replace('.', '_', $field).'_'.$tmptooltip[1]));
-	} else {
-		$out .= $langs->trans((string) $name);
-	}
+        $sortordertouseinlink = '';
+        if ($field1 != $sortfield1) { // We are on another field than current sorted field
+            if (preg_match('/^DESC/i', $sortorder)) {
+                $sortordertouseinlink .= str_repeat('desc,', count(explode(',', $field)));
+            } else { // We reverse the var $sortordertouseinlink
+                $sortordertouseinlink .= str_repeat('asc,', count(explode(',', $field)));
+            }
+        } else { // We are on field that is the first current sorting criteria
+            if (preg_match('/^ASC/i', $sortorder)) {    // We reverse the var $sortordertouseinlink
+                $sortordertouseinlink .= str_repeat('desc,', count(explode(',', $field)));
+            } else {
+                $sortordertouseinlink .= str_repeat('asc,', count(explode(',', $field)));
+            }
+        }
+        $sortordertouseinlink = preg_replace('/,$/', '', $sortordertouseinlink);
+        $out .= '<a class="reposition ' . $linkcustomclass . '" href="' . $file . '?sortfield=' . urlencode($field) . '&sortorder=' . urlencode($sortordertouseinlink) . '&begin=' . urlencode($begin) . $options . '"';
+        //$out .= (getDolGlobalString('MAIN_DISABLE_WRAPPING_ON_COLUMN_TITLE') ? '' : ' title="'.dol_escape_htmltag($langs->trans($name)).'"');
+        $out .= '>';
+    }
+    if ($tooltip) {
+        // You can also use 'TranslationString:keyfortooltiponclick:tooltipdirection' for a tooltip on click or to change tooltip position.
+        if (strpos($tooltip, ':') !== false) {
+            $tmptooltip = explode(':', $tooltip);
+        } else {
+            $tmptooltip = array($tooltip);
+        }
+        $out .= $form->textwithpicto($langs->trans((string) $name), $langs->trans($tmptooltip[0]), (empty($tmptooltip[2]) ? '1' : $tmptooltip[2]), 'help', '', 0, 3, (empty($tmptooltip[1]) ? '' : 'extra_' . str_replace('.', '_', $field) . '_' . $tmptooltip[1]));
+    } else {
+        $out .= $langs->trans((string) $name);
+    }
 
-	if (empty($thead) && $field && empty($disablesortlink)) {    // If this is a sort field
-		$out .= '</a>';
-	}
+    if (empty($thead) && $field && empty($disablesortlink)) {    // If this is a sort field
+        $out .= '</a>';
+    }
 
-	if (empty($thead) && $field) {    // If this is a sort field
-		$options = preg_replace('/sortfield=([a-zA-Z0-9,\s\.]+)/i', '', (is_scalar($moreparam) ? $moreparam : ''));
-		$options = preg_replace('/sortorder=([a-zA-Z0-9,\s\.]+)/i', '', $options);
-		$options = preg_replace('/&+/i', '&', $options);
-		if (!preg_match('/^&/', $options)) {
-			$options = '&'.$options;
-		}
+    if (empty($thead) && $field) {    // If this is a sort field
+        $options = preg_replace('/sortfield=([a-zA-Z0-9,\s\.]+)/i', '', (is_scalar($moreparam) ? $moreparam : ''));
+        $options = preg_replace('/sortorder=([a-zA-Z0-9,\s\.]+)/i', '', $options);
+        $options = preg_replace('/&+/i', '&', $options);
+        if (!preg_match('/^&/', $options)) {
+            $options = '&' . $options;
+        }
 
-		if (!$sortorder || ($field1 != $sortfield1)) {
-			// Nothing
-		} else {
-			if (preg_match('/^DESC/', $sortorder)) {
-				$sortimg .= '<span class="nowrap">'.img_up("Z-A", 0, 'paddingright').'</span>';
-			}
-			if (preg_match('/^ASC/', $sortorder)) {
-				$sortimg .= '<span class="nowrap">'.img_down("A-Z", 0, 'paddingright').'</span>';
-			}
-		}
-	}
+        if (!$sortorder || ($field1 != $sortfield1)) {
+            // Nothing
+        } else {
+            if (preg_match('/^DESC/', $sortorder)) {
+                $sortimg .= '<span class="nowrap">' . img_up("Z-A", 0, 'paddingright') . '</span>';
+            }
+            if (preg_match('/^ASC/', $sortorder)) {
+                $sortimg .= '<span class="nowrap">' . img_down("A-Z", 0, 'paddingright') . '</span>';
+            }
+        }
+    }
 
-	$tagend = '</'.$tag.'>';
+    $caret = '';
+    if (empty($thead) && $field && strpos($moreattrib, 'data-colkey') !== false) {
+        $caret = '<i class="fas fa-caret-down saturne-col-filter-btn"></i>';
+    }
+
+    $tagend = '</' . $tag . '>';
 
     $resizeHandler = '<div class="resize-handle"></div>';
 
-	$out = $tagstart.$sortimg.$out.$tagend.$resizeHandler;
+    $out = $tagstart . $sortimg . $out . $caret . $tagend . $resizeHandler;
 
-	return $out;
+    return $out;
 }
 
+
+/**
+ * Adapt a WYSIWYG content to an output that does not handle block tags
+ *
+ * WYSIWYG editors wrap their content into block tags (<p>, <ul>, <li>) that most outputs drop
+ * without leaving any separator: the ODT library only keeps inline tags, TCPDF only renders html
+ * through writeHTMLCell and dol_string_nohtmltag() only knows <br> as a line break. Turning the
+ * closing block tags into <br> first is what keeps paragraphs and list items from being glued
+ * together, whatever the target
+ *
+ * @param  string|null $html      WYSIWYG content
+ * @param  bool        $plainText Also remove the remaining tags, for a target without any html
+ * @return string                 Content the target can render
+ */
+function saturne_flatten_wysiwyg_blocks(?string $html, bool $plainText = false): string
+{
+    if (!dol_strlen((string) $html)) {
+        return '';
+    }
+
+    $flattened = preg_replace('#</(p|div|li|tr|h[1-6]|blockquote)>#i', '<br>', (string) $html);
+
+    if ($plainText) {
+        // Second parameter at 0: dol_string_nohtmltag() removes the line feeds otherwise
+        return dol_string_nohtmltag($flattened, 0);
+    }
+
+    return $flattened;
+}

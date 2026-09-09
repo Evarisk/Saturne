@@ -114,7 +114,7 @@ window.saturne.utils.draganddrop = function() {
           order: lineOrder
         }),
         processData: false,
-        contentType: false,
+        contentType: 'application/json',
         success: function () {},
         error: function() {}
       });
@@ -264,7 +264,7 @@ window.saturne.utils.toggleSetting = function(action, dataKey) {
     data: JSON.stringify({
       [dataKey]: newValue
     }),
-    contentType: false,
+    contentType: 'application/json',
     success: function(resp) {
       // Loop through each element in the updateTargets array
       updateTargets.forEach(selector => {

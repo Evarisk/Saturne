@@ -24,6 +24,8 @@
 
 require_once DOL_DOCUMENT_ROOT . '/projet/class/task.class.php';
 
+require_once __DIR__ . '/../saturnedashboard.class.php';
+
 //require_once __DIR__ . '/digiriskstats.php';
 
 /**
@@ -36,6 +38,13 @@ class SaturneTask extends Task
      * 0=No test on entity, 1=Test with field entity, 'field@table'=Test with link by field@table
      */
     public $ismultientitymanaged = 1;
+
+    /**
+     * @var int|string Task creation date. Declared explicitly because "datec" is a field of
+     * this object: without the declaration each load/read goes through the parent Task's
+     * deprecated-property handler and raises a PHP 8.2 "dynamic property" deprecation per task.
+     */
+    public $datec;
 
     /**
      * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor.
@@ -154,6 +163,18 @@ class SaturneTask extends Task
                 }
             }
         }
+
+        // The task list reads its progress criteria with natural_search, which understands the comparison
+        // operators. '<1' rather than '0' because the list ignores a criteria equal to the empty string, and
+        // '0' is one of them
+        $listUrl = DOL_URL_ROOT . '/projet/tasks/list.php?' . ($projectId > 0 ? 'id=' . $projectId . '&' : '') . 'search_task_progress=';
+        $links   = [
+            $listUrl . urlencode('<1'),
+            $listUrl . urlencode('>0 <100'),
+            $listUrl . urlencode('>=100')
+        ];
+
+        $array['morehtmlright'] = SaturneDashboard::getGraphOptionsInput(['links' => $links]);
 
         return $array;
     }
@@ -361,6 +382,7 @@ class SaturneTask extends Task
                 $newobj->project_ref   = $obj->project_ref;
                 $newobj->project_label = $obj->project_label;
 
+                $newobj->fk_task    = $obj->task_id;
                 $newobj->task_ref   = $obj->task_ref;
                 $newobj->task_label = $obj->task_label;
 

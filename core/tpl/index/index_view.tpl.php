@@ -65,14 +65,15 @@ $helpUrl = 'FR:Module_' . $moduleName;
 
 saturne_header(0, '', $title . ' ' . $modModule->version, $helpUrl);
 
-print load_fiche_titre($title . ' ' . $modModule->version, $morehtmlright ?? '', $moduleNameLowerCase . '_color.png@' . $moduleNameLowerCase);
+// The nogreyscale class keeps the module's colored logo visible: Dolibarr v23 applies grayscale(90%) to fiche-title pictos (see style.scss override).
+print load_fiche_titre($title . ' ' . $modModule->version, $morehtmlright ?? '', $moduleNameLowerCase . '_color.png@' . $moduleNameLowerCase, 0, '', 'nogreyscale');
 
 $moduleJustUpdated   = strtoupper($moduleName) . '_JUST_UPDATED';
 $moduleVersion       = strtoupper($moduleName) . '_VERSION';
 $moduleShowPatchNote = strtoupper($moduleName) . '_SHOW_PATCH_NOTE';
 
 
-if ($conf->global->$moduleVersion != $modModule->version) {
+if (getDolGlobalString($moduleVersion) !== $modModule->version) {
     $modModule->remove();
     $modModule->init();
 
@@ -80,7 +81,7 @@ if ($conf->global->$moduleVersion != $modModule->version) {
     dolibarr_set_const($db, $moduleShowPatchNote, 1, 'integer', 0, '', $conf->entity);
 }
 
-if ($conf->global->$moduleJustUpdated == 1) : ?>
+if (getDolGlobalInt($moduleJustUpdated) === 1) : ?>
     <div class="wpeo-notice notice-success">
         <div class="notice-content">
             <div class="notice-subtitle"><strong><?php echo $langs->trans('ModuleUpdate', $moduleName); ?></strong>
@@ -93,7 +94,7 @@ endif;
 
 $data = null;
 
-if ($conf->global->$moduleShowPatchNote > 0 && getDolGlobalInt('SATURNE_SHOW_PATCH_NOTE_FROM_GITHUB')) : ?>
+if (getDolGlobalInt($moduleShowPatchNote) > 0 && getDolGlobalInt('SATURNE_SHOW_PATCH_NOTE_FROM_GITHUB')) : ?>
     <div class="wpeo-notice notice-info">
         <input type="hidden" name="token" value="<?php echo newToken(); ?>">
         <div class="notice-content">

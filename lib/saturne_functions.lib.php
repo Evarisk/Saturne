@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2022-2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -27,6 +28,7 @@ require_once __DIR__ . '/medias.lib.php';
 require_once __DIR__ . '/pagination.lib.php';
 require_once __DIR__ . '/documents.lib.php';
 require_once __DIR__ . '/object.lib.php';
+require_once __DIR__ . '/linked_object.lib.php';
 require_once __DIR__ . '/debug.lib.php';
 require_once __DIR__ . '/component.lib.php';
 require_once __DIR__ . '/dolibarr.lib.php';
@@ -66,7 +68,9 @@ function saturne_header(int $load_media_gallery = 0, string $head = '', string $
     $arrayofcss = array_unique(array_merge($arrayofcss ?? [], $cssList));
 
     //JS
-    $jsList[] = '/saturne/js/saturne.min.js';
+    $saturne_js_path = dol_buildpath('/saturne/js/saturne.min.js', 0);
+    $saturne_js_mtime = file_exists($saturne_js_path) ? filemtime($saturne_js_path) : 1;
+    $jsList[] = '/saturne/js/saturne.min.js?v=' . $saturne_js_mtime;
 
     if (!empty($load_media_gallery)) {
         $jsList[] = '/saturne/js/includes/signature-pad.min.js';
@@ -139,14 +143,19 @@ function saturne_display_recurse_tree(array $moreParams, array $objectElementTre
 {
     global $conf, $langs, $user;
 
+    $riskType = GETPOSTISSET('risk_type') && !empty(GETPOST('risk_type')) ? GETPOST('risk_type') : 'risk';
+
     if (!$user->hasRight($moreParams['moduleNameLowerCase'], $moreParams['objectElement'], 'read')) {
         print $langs->transnoentities('YouDontHaveTheRightOnObject', $langs->trans(dol_ucfirst($moreParams['objectElement'])));
         return;
     }
 
     foreach ($objectElementTree as $objectElement) { ?>
-        <li class="unit type-<?php echo $objectElement['object']->element_type; ?>" id="unit<?php  echo $objectElement['object']->id; ?>" data-object-id="<?php  echo $objectElement['object']->id; ?>">
+        <li class="unit type-<?php echo $objectElement['object']->element_type; ?>" id="unit<?php  echo $objectElement['object']->id; ?>" data-object-id="<?php  echo $objectElement['object']->id; ?>" data-element="<?php echo $objectElement['object']->element; ?>" data-module="<?php echo $objectElement['object']->module; ?>" data-class="<?php echo get_class($objectElement['object']); ?>">
             <div class="unit-container">
+                <?php if ($user->hasRight($objectElement['object']->module, $objectElement['object']->element, 'write')) : ?>
+                    <div class="unit-drag-handle" title="<?php echo dol_escape_htmltag($langs->trans('Reorder')); ?>"><i class="fas fa-grip-vertical"></i></div>
+                <?php endif; ?>
                 <?php if ($objectElement['object']->element_type == $objectElement['object']::ELEMENT_TYPE_0 && count($objectElement['children'])) { ?>
                     <div class="toggle-unit">
                         <i class="toggle-icon fas fa-chevron-right" id="menu<?php echo $objectElement['object']->id; ?>"></i>
@@ -154,8 +163,8 @@ function saturne_display_recurse_tree(array $moreParams, array $objectElementTre
                 <?php } else { ?>
                     <div class="spacer"></div>
                 <?php }
-                print '<span class="open-media-gallery add-media modal-open photo digirisk-element-photo-'. $objectElement['object']->id .'" value="0">';
-                print '<input type="hidden" class="modal-options" data-modal-to-open="media_gallery" data-from-id="'. $objectElement['object']->id .'" data-from-type="'. $objectElement['object']->element_type .'" data-from-subtype="photo" data-from-subdir="" data-photo-class="digirisk-element-photo-'. $objectElement['object']->id .'"/>';
+                print '<span class="open-media-gallery add-media modal-open photo digirisk-element-photo-' . $objectElement['object']->id . '" value="0">';
+                print '<input type="hidden" class="modal-options" data-modal-to-open="media_gallery" data-from-id="' . $objectElement['object']->id . '" data-from-type="' . $objectElement['object']->element_type . '" data-from-subtype="photo" data-from-subdir="" data-photo-class="digirisk-element-photo-' . $objectElement['object']->id . '"/>';
                 print saturne_show_medias_linked('digiriskdolibarr', $conf->digiriskdolibarr->multidir_output[$conf->entity] . '/' . $objectElement['object']->element_type . '/' . $objectElement['object']->ref, 'small', 1, 0, 0, 0, 50, 50, 1, 0, 0, $objectElement['object']->element_type . '/' . $objectElement['object']->ref, $objectElement['object'], 'photo', 0, 0, 0, 1, 'cursorpointer');
                 print '</span>';
                 ?>
@@ -269,14 +278,18 @@ function saturne_recurse_tree($moreParams, ?int $parentID = null, int $depth = 0
  * @param object|bool|int $permission        Permission to access to current page
  * @param object|null     $object            Object in current page
  * @param bool            $allowExternalUser Allow external user to have access at current page
+ * @param string          $notFoundUrl       Where to redirect when the requested record does not
+ *                                           exist, the object list then the module home by default
  */
-function saturne_check_access($permission, ?object $object = null, bool $allowExternalUser = false)
-{
+function saturne_check_access(
+    $permission,
+    ?object $object = null,
+    bool $allowExternalUser = false,
+    string $notFoundUrl = ''
+) {
     global $conf, $langs, $user, $moduleNameLowerCase;
 
-    if (empty($moduleNameLowerCase)) {
-        $moduleNameLowerCase = 'saturne';
-    }
+    $moduleNameLowerCase = saturne_get_module_name();
 
     if (!$permission) {
         accessforbidden();
@@ -288,16 +301,40 @@ function saturne_check_access($permission, ?object $object = null, bool $allowEx
         }
     }
 
-	if (isModEnabled('multicompany')) {
-		if ($object !== null && $object->id > 0) {
-			if ($object->entity != $conf->entity) {
-				setEventMessage($langs->trans('ChangeEntityRedirection'), 'warnings');
-				$urltogo = dol_buildpath('/custom/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'index.php?mainmenu=' . $moduleNameLowerCase, 1);
-				header('Location: ' . $urltogo);
-				exit;
-			}
-		}
-	}
+    // Un enregistrement demande puis introuvable laisse l'objet vide : la page continuerait
+    // jusqu'a passer une propriete nulle a une methode typee, et s'arreterait sur une erreur
+    // fatale. Le test porte sur la tentative memorisee par SaturneObject::fetch() : un objet
+    // volontairement vide, jamais charge, ne la porte pas et n'est donc pas concerne
+    $recordWasFetched   = $object !== null && isset($object->fetchedResult);
+    $recordWasRequested = $recordWasFetched && ($object->fetchedId > 0 || dol_strlen($object->fetchedRef));
+
+    if ($recordWasRequested && $object->fetchedResult <= 0) {
+        $langs->load('errors');
+        setEventMessages($langs->trans('ErrorRecordNotFound'), null, 'errors');
+
+        // La liste du type demande est le contexte le plus proche de ce que l'utilisateur
+        // cherchait. Les modules la nomment view/<element>/<element>_list.php ; a defaut,
+        // l'accueil du module prend le relais. Un objet consulte ailleurs que dans une liste,
+        // comme les elements DigiRisk dans leur arborescence, passe sa propre destination
+        $moduleHome = sprintf('/custom/%1$s/%1$sindex.php?mainmenu=%1$s', $moduleNameLowerCase);
+        $objectList = sprintf('/custom/%s/view/%2$s/%2$s_list.php', $moduleNameLowerCase, $object->element);
+        $listExists = dol_strlen($object->element) && file_exists(dol_buildpath($objectList, 0));
+        $urlToGo    = dol_buildpath($listExists ? $objectList : $moduleHome, 1);
+
+        header('Location: ' . (dol_strlen($notFoundUrl) ? $notFoundUrl : $urlToGo));
+        exit;
+    }
+
+    if (isModEnabled('multicompany')) {
+        if ($object !== null && $object->id > 0) {
+            if ($object->entity != $conf->entity) {
+                setEventMessage($langs->trans('ChangeEntityRedirection'), 'warnings');
+                $urltogo = dol_buildpath('/custom/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'index.php?mainmenu=' . $moduleNameLowerCase, 1);
+                header('Location: ' . $urltogo);
+                exit;
+            }
+        }
+    }
 }
 
 /**
@@ -306,23 +343,21 @@ function saturne_check_access($permission, ?object $object = null, bool $allowEx
  */
 function saturne_check_modules_enabled()
 {
-	global $langs, $moduleNameLowerCase;
+    global $langs, $moduleNameLowerCase;
 
-	if (empty($moduleNameLowerCase)) {
-		$moduleNameLowerCase = 'saturne';
-	}
+    $moduleNameLowerCase = saturne_get_module_name();
 
-	if (!isModEnabled($moduleNameLowerCase) || !isModEnabled('saturne')) {
-		if (!isModEnabled($moduleNameLowerCase)) {
-			setEventMessage($langs->transnoentitiesnoconv('Enable' . ucfirst($moduleNameLowerCase)), 'warnings');
-		}
-		if (!isModEnabled('saturne')) {
-			setEventMessage($langs->trans('EnableSaturne'), 'warnings');
-		}
-		$urltogo = dol_buildpath('/admin/modules.php?search_nature=external_Evarisk', 1);
-		header('Location: ' . $urltogo);
-		exit;
-	}
+    if (!isModEnabled($moduleNameLowerCase) || !isModEnabled('saturne')) {
+        if (!isModEnabled($moduleNameLowerCase)) {
+            setEventMessage($langs->transnoentitiesnoconv('Enable' . ucfirst($moduleNameLowerCase)), 'warnings');
+        }
+        if (!isModEnabled('saturne')) {
+            setEventMessage($langs->trans('EnableSaturne'), 'warnings');
+        }
+        $urltogo = dol_buildpath('/admin/modules.php?search_nature=external_Evarisk', 1);
+        header('Location: ' . $urltogo);
+        exit;
+    }
 }
 
 /**
@@ -338,11 +373,11 @@ function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', st
 
     // Configuration header
     if (property_exists($object, 'element')) {
-		$element = $object->element;
+        $element = $object->element;
 
-		if ($object->element == 'contrat') {
-			$element = 'contract';
-		} else if ($object->element == 'project_task') {
+        if ($object->element == 'contrat') {
+            $element = 'contract';
+        } elseif ($object->element == 'project_task') {
             $element = 'task';
         }
 
@@ -354,9 +389,9 @@ function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', st
             $head = $prepareHead($object);
         }
     }
-	if (property_exists($object, 'picto')) {
-		$picto = $object->picto;
-	}
+    if (property_exists($object, 'picto')) {
+        $picto = $object->picto;
+    }
     if ($conf->browser->layout == 'phone') {
         $conf->dol_optimize_smallscreen = 0;
     }
@@ -380,7 +415,7 @@ function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', st
  */
 function saturne_banner_tab(object $object, string $paramId = 'ref', string $moreHtml = '', int $showNav = 1, string $fieldId = 'ref', string $fieldRef = 'ref', string $moreHtmlRef = '', bool $handlePhoto = false, array $moreParams = []): void
 {
-    global $db, $langs, $hookmanager, $moduleName, $moduleNameLowerCase;
+    global $db, $langs, $hookmanager, $moduleName, $moduleNameLowerCase, $user;
 
     if (isModEnabled('project')) {
         require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
@@ -392,7 +427,14 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
 
     $saturneMoreHtmlRef = '';
     if (array_key_exists('label', $object->fields) && dol_strlen($object->label)) {
-        $saturneMoreHtmlRef .= ' - ' . $object->label . '<br>';
+        // Render the label inline-editable (contenteditable) when the user can write, using the
+        // same mechanism as the list inline edits (saved via saturne_update_field.php).
+        $labelElement = $object->element . (!empty($object->module) ? '@' . $object->module : '');
+        if (saturne_user_can_write_element($user, $object, $labelElement)) {
+            $saturneMoreHtmlRef .= '<span class="banner-ref-sep"> - </span><span class="contenteditable" contenteditable="true" role="textbox" aria-label="' . dol_escape_htmltag($langs->trans('Label')) . '" data-field="label" data-id="' . ((int) $object->id) . '" data-element="' . dol_escape_htmltag($labelElement) . '" data-table="' . dol_escape_htmltag($object->table_element) . '" data-type="text">' . dol_escape_htmltag($object->label) . '</span><br>';
+        } else {
+            $saturneMoreHtmlRef .= '<span class="banner-ref-sep"> - </span>' . dol_escape_htmltag($object->label) . '<br>';
+        }
     }
 
     $saturneMoreHtmlRef .= '<div class="refidno">';
@@ -407,7 +449,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
         $customMoreHtmlRef = '';
         if (!empty($hookmanager->resArray)) {
             list($customMoreHtmlRef, $moreParams) = $hookmanager->resArray;
-        } else if (!empty($hookmanager->resPrint)) {
+        } elseif (!empty($hookmanager->resPrint)) {
             $customMoreHtmlRef = $hookmanager->resPrint;
         }
 
@@ -476,7 +518,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
                         } elseif ($bannerElement == $moreParams['bannerElement']) {
                             $saturneMoreHtmlRef .= $object->$objectKey > 0 ? $BannerElementObject->getNomUrl(1) : img_picto($langs->trans($moreParams['title']), $moreParams['picto']);
                         }
-                        if(empty($moreParams[$bannerElement]['disable_edit'])) {
+                        if (empty($moreParams[$bannerElement]['disable_edit'])) {
                             $saturneMoreHtmlRef .= ' <a class="editfielda" href="' . $_SERVER['PHP_SELF'] . '?action=edit_' . $bannerElement . '&id=' . $object->id . '&module_name=' . $moduleName . '&object_type=' . GETPOST('object_type') . '&token=' . newToken() . '">' . img_edit($langs->transnoentitiesnoconv($bannerElement == 'societe' ? 'SetThirdParty' : 'Set' . ucfirst($bannerElement))) . '</a>';
                         }
                     }
@@ -503,36 +545,72 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
     } else {
         global $conf, $form;
 
-        print '<div class="arearef heightref valignmiddle centpercent">';
+        // Expose the object subtype (if any) so modules can style the ref/label (e.g. as a badge).
+        $bannerTypeClass = (property_exists($object, 'element_type') && dol_strlen($object->element_type)) ? ' banner-element-' . dol_string_nospecial($object->element_type) : '';
+        print '<div class="arearef heightref valignmiddle centpercent' . $bannerTypeClass . '">';
 
         $modulePart = '';
         $baseDir    = $conf->$moduleNameLowerCase->multidir_output[$conf->entity];
-        $subDir     = $object->element . '/'. $object->ref . '/photos/';
+        $subDir     = $object->element . '/' . $object->ref . '/photos/';
 
         $resHook = $hookmanager->executeHooks('saturneBannerTabCustomSubdir', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
         if ($resHook > 0) {
             if (!empty($hookmanager->resArray)) {
-                if ($hookmanager->resArray['modulepart']) {
+                if (!empty($hookmanager->resArray['modulepart'])) {
                     $modulePart = $hookmanager->resArray['modulepart'];
                 }
-                if ($hookmanager->resArray['dir']) {
+                if (!empty($hookmanager->resArray['dir'])) {
                     $baseDir = $hookmanager->resArray['dir'];
                 }
-                if ($hookmanager->resArray['subdir']) {
+                if (!empty($hookmanager->resArray['subdir'])) {
                     $subDir = $hookmanager->resArray['subdir'];
                 }
-                if ($hookmanager->resArray['photoLimit']) {
+                if (!empty($hookmanager->resArray['photoLimit'])) {
                     $photoLimit = $hookmanager->resArray['photoLimit'];
                 }
             }
         }
 
-        $moreHtmlLeft = '<div class="floatleft inline-block valignmiddle divphotoref">' . saturne_show_medias_linked((dol_strlen($modulePart) > 0 ? $modulePart : $moduleNameLowerCase), $baseDir . '/' . $subDir, 'small', $photoLimit ?? 0, 0, 0, 0, 88, 88, 0, 0, 0, $subDir, $object, 'photo', 0, 0,0, 1) . '</div>';
+        $bannerPhoto = saturne_show_medias_linked((dol_strlen($modulePart) > 0 ? $modulePart : $moduleNameLowerCase), $baseDir . '/' . $subDir, 'small', $photoLimit ?? 0, 0, 0, 0, 88, 88, 0, 0, 0, $subDir, $object, 'photo', 0, 0, 0, 1);
+        if (strpos($bannerPhoto, 'nophoto.png') !== false) {
+            // Use the same "no photo" placeholder as the element tree/menu for a consistent look.
+            $bannerPhoto = saturne_get_nophoto_placeholder(88);
+        }
+        $moreHtmlLeft = '<div class="floatleft inline-block valignmiddle divphotoref">' . $bannerPhoto . '</div>';
         print $form->showrefnav($object, $paramId, $moreParamsMoreHtml, $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, $moreParamsBannerTab, 0, $moreHtmlLeft, $object->getLibStatut(6));
         print '</div>';
     }
 
     print '<div class="underbanner clearboth"></div>';
+}
+
+/**
+ *  Return the lowercase module name of the current context.
+ *
+ *  The $moduleNameLowerCase global is only set by the pages of the Saturne based modules. Everywhere else
+ *  (trigger, cron, API, core Dolibarr page) it is null, which breaks every string typed signature it reaches.
+ *  Resolve it from the object being handled when there is one, and default to saturne.
+ *
+ * @param  object|null $object Object carrying the module it belongs to
+ * @return string              Lowercase module name, never empty
+ */
+function saturne_get_module_name(?object $object = null): string
+{
+    global $moduleNameLowerCase;
+
+    if (!empty($moduleNameLowerCase)) {
+        return $moduleNameLowerCase;
+    }
+
+    // Signature lines carry their owning module in module_name, the other Saturne objects expose it as a property
+    if (!empty($object->module_name)) {
+        return $object->module_name;
+    }
+    if (!empty($object->module)) {
+        return $object->module;
+    }
+
+    return 'saturne';
 }
 
 /**
@@ -542,15 +620,17 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
  */
 function saturne_load_langs(array $domains = [])
 {
-	global $langs, $moduleNameLowerCase;
+    global $langs;
 
-	$langs->loadLangs(['saturne@saturne', 'object@saturne', 'signature@saturne', 'medias@saturne', 'component@saturne', $moduleNameLowerCase . '@' . $moduleNameLowerCase]);
+    $moduleNameLowerCase = saturne_get_module_name();
 
-	if (!empty($domains)) {
-		foreach ($domains as $domain) {
-			$langs->load($domain);
-		}
-	}
+    $langs->loadLangs(['saturne@saturne', 'object@saturne', 'signature@saturne', 'medias@saturne', 'component@saturne', $moduleNameLowerCase . '@' . $moduleNameLowerCase]);
+
+    if (!empty($domains)) {
+        foreach ($domains as $domain) {
+            $langs->load($domain);
+        }
+    }
 }
 
 /**
@@ -569,46 +649,45 @@ function saturne_load_langs(array $domains = [])
  */
 function saturne_select_dictionary(string $htmlName, string $dictionaryTable, string $keyField = 'code', string $labelField = 'label', string $selected = '', int $useEmpty = 0, string $moreAttrib = '', string $placeHolder = '', string $moreCSS = 'minwidth150'): string
 {
-	global $langs, $db;
+    global $langs, $db;
 
-	$langs->load('admin');
+    $langs->load('admin');
 
     $out = '';
-	$sql = 'SELECT rowid, ' . $keyField . ', ' . $labelField;
-	$sql .= ' FROM ' . MAIN_DB_PREFIX . $dictionaryTable;
+    $sql = 'SELECT rowid, ' . $keyField . ', ' . $labelField;
+    $sql .= ' FROM ' . MAIN_DB_PREFIX . $dictionaryTable;
     $sql .= $db->order('position', 'ASC');
 
-	$result = $db->query($sql);
-	if ($result) {
-		$num = $db->num_rows($result);
-		$i   = 0;
-		if ($num) {
-			$out = '<select id="select' . $htmlName . '" class="flat selectdictionary' . ($moreCSS ? ' ' . $moreCSS : '') . '" name="' . $htmlName . '"' . ($moreAttrib ? ' ' . $moreAttrib : '') . '>';
-			if ($useEmpty == 1 || ($useEmpty == 2 && $num > 1)) {
-				$out .= '<option value="-1">'. (dol_strlen($placeHolder) > 0 ? $langs->transnoentities($placeHolder) : '') .'</option>';
-			}
+    $result = $db->query($sql);
+    if ($result) {
+        $num = $db->num_rows($result);
+        $i   = 0;
+        if ($num) {
+            $out = '<select id="select' . $htmlName . '" class="flat selectdictionary' . ($moreCSS ? ' ' . $moreCSS : '') . '" name="' . $htmlName . '"' . ($moreAttrib ? ' ' . $moreAttrib : '') . '>';
+            if ($useEmpty == 1 || ($useEmpty == 2 && $num > 1)) {
+                $out .= '<option value="-1">' . (dol_strlen($placeHolder) > 0 ? $langs->transnoentities($placeHolder) : '') . '</option>';
+            }
 
-			while ($i < $num) {
-				$obj = $db->fetch_object($result);
-				if ($selected == $obj->rowid || $selected == $obj->$keyField) {
-					$out .= '<option value="' . $obj->$keyField . '" selected>';
-				} else {
-					$out .= '<option value="' . $obj->$keyField . '">';
-				}
-				$out .= $langs->transnoentities($obj->$labelField);
-				$out .= '</option>';
-				$i++;
-			}
-			$out .= '</select>';
-			$out .= ajax_combobox('select' . $htmlName);
-
-		} else {
-			$out = $langs->trans('DictionaryEmpty');
-		}
-	} else {
-		dol_print_error($db);
-	}
-	return $out;
+            while ($i < $num) {
+                $obj = $db->fetch_object($result);
+                if ($selected == $obj->rowid || $selected == $obj->$keyField) {
+                    $out .= '<option value="' . $obj->$keyField . '" selected>';
+                } else {
+                    $out .= '<option value="' . $obj->$keyField . '">';
+                }
+                $out .= $langs->transnoentities($obj->$labelField);
+                $out .= '</option>';
+                $i++;
+            }
+            $out .= '</select>';
+            $out .= ajax_combobox('select' . $htmlName);
+        } else {
+            $out = $langs->trans('DictionaryEmpty');
+        }
+    } else {
+        dol_print_error($db);
+    }
+    return $out;
 }
 
 /**
@@ -621,46 +700,46 @@ function saturne_select_dictionary(string $htmlName, string $dictionaryTable, st
  */
 function saturne_fetch_dictionary(string $tableName, string $sortOrder = 'ASC', string $sortField = 't.position')
 {
-	global $db;
+    global $db;
 
-	$sql  = 'SELECT t.rowid, t.entity, t.ref, t.label, t.description, t.active, t.position';
-	$sql .= ' FROM ' . MAIN_DB_PREFIX . $tableName . ' as t';
-	$sql .= ' WHERE 1 = 1';
-	$sql .= ' AND entity IN (0, ' . getEntity($tableName) . ')';
+    $sql  = 'SELECT t.rowid, t.entity, t.ref, t.label, t.description, t.active, t.position';
+    $sql .= ' FROM ' . MAIN_DB_PREFIX . $tableName . ' as t';
+    $sql .= ' WHERE 1 = 1';
+    $sql .= ' AND entity IN (0, ' . getEntity($tableName) . ')';
 
     if (!empty($sortField)) {
         $sql .= $db->order($sortField, $sortOrder);
     }
 
-	$resql = $db->query($sql);
-	if ($resql) {
-		$num     = $db->num_rows($resql);
-		$i       = 0;
-		$records = [];
-		while ($i < $num) {
-			$obj = $db->fetch_object($resql);
+    $resql = $db->query($sql);
+    if ($resql) {
+        $num     = $db->num_rows($resql);
+        $i       = 0;
+        $records = [];
+        while ($i < $num) {
+            $obj = $db->fetch_object($resql);
 
-			$record = new stdClass();
+            $record = new stdClass();
 
-			$record->id          = $obj->rowid;
-			$record->entity      = $obj->entity;
-			$record->ref         = $obj->ref;
-			$record->label       = $obj->label;
-			$record->description = $obj->description;
-			$record->active      = $obj->active;
+            $record->id          = $obj->rowid;
+            $record->entity      = $obj->entity;
+            $record->ref         = $obj->ref;
+            $record->label       = $obj->label;
+            $record->description = $obj->description;
+            $record->active      = $obj->active;
             $record->position    = $obj->position;
 
-			$records[$record->id] = $record;
+            $records[$record->id] = $record;
 
-			$i++;
-		}
+            $i++;
+        }
 
-		$db->free($resql);
+        $db->free($resql);
 
-		return $records;
-	} else {
-		return -1;
-	}
+        return $records;
+    } else {
+        return -1;
+    }
 }
 
 /**
@@ -731,6 +810,29 @@ function saturne_create_category(string $label = '', string $type = '', int $fkP
     require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
 
     $category = new Categorie($db);
+
+    if (!empty($type) && !isset($category->MAP_ID[$type])) {
+        $customTags = [
+            'question'        => ['id' => 436301001, 'obj_class' => 'Question', 'obj_table' => 'digiquali_question'],
+            'sheet'           => ['id' => 436301002, 'obj_class' => 'Sheet', 'obj_table' => 'digiquali_sheet'],
+            'control'         => ['id' => 436301003, 'obj_class' => 'Control', 'obj_table' => 'digiquali_control'],
+            'survey'          => ['id' => 436301004, 'obj_class' => 'Survey', 'obj_table' => 'digiquali_survey'],
+            'questiongroup'   => ['id' => 436301005, 'obj_class' => 'QuestionGroup', 'obj_table' => 'digiquali_questiongroup'],
+            'accident'        => ['id' => 436302001, 'obj_class' => 'Accident', 'obj_table' => 'digiriskdolibarr_accident'],
+            'preventionplan'  => ['id' => 436302002, 'obj_class' => 'PreventionPlan', 'obj_table' => 'digiriskdolibarr_preventionplan'],
+            'firepermit'      => ['id' => 436302003, 'obj_class' => 'FirePermit', 'obj_table' => 'digiriskdolibarr_firepermit'],
+            'risk'            => ['id' => 436302004, 'obj_class' => 'Risk', 'obj_table' => 'digiriskdolibarr_risk'],
+            'meeting'         => ['id' => 436304001, 'obj_class' => 'Meeting', 'obj_table' => 'dolimeet_session'],
+            'trainingsession' => ['id' => 436304002, 'obj_class' => 'Trainingsession', 'obj_table' => 'dolimeet_session'],
+            'audit'           => ['id' => 436304003, 'obj_class' => 'Audit', 'obj_table' => 'dolimeet_session'],
+            'session'         => ['id' => 436304004, 'obj_class' => 'Session', 'obj_table' => 'dolimeet_session']
+        ];
+        if (isset($customTags[$type])) {
+            $category->MAP_ID[$type]        = $customTags[$type]['id'];
+            $category->MAP_OBJ_CLASS[$type] = $customTags[$type]['obj_class'];
+            $category->MAP_OBJ_TABLE[$type] = $customTags[$type]['obj_table'];
+        }
+    }
 
     $category->label       = $label;
     $category->type        = $type;
@@ -829,8 +931,12 @@ function saturne_manage_extrafields(array $extraFieldsArrays, array $commonExtra
         foreach ($extraField['elementtype'] as $extraFieldElementType) {
             // Add ExtraField
             $result = $extraFields->addExtraField(
-                $key, $extraField['Label'], $extraField['type'], $extraField['position'],
-                $extraField['length']   ?? '', $extraFieldElementType,
+                $key,
+                $extraField['Label'],
+                $extraField['type'],
+                $extraField['position'],
+                $extraField['length']   ?? '',
+                $extraFieldElementType,
                 $extraField['unique']   ?? $commonExtraFieldsValue['unique']   ?? 0,
                 $extraField['required'] ?? $commonExtraFieldsValue['required'] ?? 0,
                 $extraField['default']  ?? $commonExtraFieldsValue['default']  ?? '',
@@ -854,7 +960,10 @@ function saturne_manage_extrafields(array $extraFieldsArrays, array $commonExtra
 
             // Update ExtraField
             $result = $extraFields->update(
-                $key, $extraField['Label'], $extraField['type'], $extraField['length'] ?? '',
+                $key,
+                $extraField['Label'],
+                $extraField['type'],
+                $extraField['length'] ?? '',
                 $extraFieldElementType,
                 $extraField['unique']   ?? $commonExtraFieldsValue['unique']   ?? 0,
                 $extraField['required'] ?? $commonExtraFieldsValue['required'] ?? 0,
@@ -899,6 +1008,26 @@ function saturne_load_list_parameters(string $contexName): array
     //$listParameters['groupby']     = GETPOST('groupby', 'aZ09'); // Example: $groupby = 'p.fk_opp_status' or $groupby = 'p.fk_statut'
 
     return $listParameters;
+}
+
+/**
+ * Get the status search filter from POST, or a default set of statuses.
+ *
+ * Honors the (multiselect) status filter posted as an array of int. When the user
+ * has not selected anything, falls back to $defaultStatuses. Used by list views to
+ * make the "Archived" status option actually reachable while keeping a sane default.
+ *
+ * @param  int[] $defaultStatuses Default statuses applied when no filter is posted
+ * @return int[]                  Statuses to filter on
+ */
+function saturne_get_status_search_filter(array $defaultStatuses): array
+{
+    $posted = GETPOST('search_status', 'array:int');
+    if (is_array($posted) && !empty($posted)) {
+        return $posted;
+    }
+
+    return $defaultStatuses;
 }
 
 
@@ -950,4 +1079,390 @@ function saturne_css_for_field(array $val, string $key): string
     $cssForField .= (empty($val['csslist']) ? (empty($val['css']) ? '' : ' ' . $val['css']) : ' ' . $val['csslist']);
 
     return $cssForField;
+}
+
+/**
+ * Compute aggregate values over a filtered list query.
+ *
+ * Wraps a SELECT query (typically the $sqlForList snapshot built by the generic list) as a subquery
+ * and runs aggregate expressions over it, so totals reflect the whole filtered set, not the current page.
+ * Aggregate expressions reference the columns produced by the wrapped query (e.g. 'SUM(opp_amount)').
+ *
+ * @param  DoliDB        $db         Database handler
+ * @param  string        $baseSql    Already filtered SELECT query (trailing ORDER BY / LIMIT are stripped)
+ * @param  array<string,string> $aggregates Map of result alias => SQL aggregate expression (e.g. ['nb' => 'COUNT(*)'])
+ * @return stdClass|null             Row holding one property per alias, or null on empty input or SQL error
+ */
+function saturne_get_list_aggregates(DoliDB $db, string $baseSql, array $aggregates): ?stdClass
+{
+    if (empty($baseSql) || empty($aggregates)) {
+        return null;
+    }
+
+    // Strip trailing ORDER BY / LIMIT so the snapshot is safe to wrap as a subquery
+    $baseSql = preg_replace('/\s+ORDER BY\s+.*$/is', '', $baseSql);
+    $baseSql = preg_replace('/\s+LIMIT\s+\d+\s*(OFFSET\s+\d+\s*)?$/is', '', $baseSql);
+
+    $selectParts = [];
+    foreach ($aggregates as $alias => $expression) {
+        $selectParts[] = $expression . ' AS ' . $alias;
+    }
+
+    $sql   = 'SELECT ' . implode(', ', $selectParts) . ' FROM (' . $baseSql . ') AS sub';
+    $resql = $db->query($sql);
+    if (!$resql) {
+        dol_syslog('saturne_get_list_aggregates SQL error: ' . $db->lasterror(), LOG_ERR);
+        return null;
+    }
+
+    $row = $db->fetch_object($resql);
+    $db->free($resql);
+
+    return $row ?: null;
+}
+
+/**
+ * Render a horizontal bar of KPI cards (summary metrics) to display above a list.
+ *
+ * The 'value' of each card is printed as-is (caller is responsible for escaping or formatting it,
+ * e.g. through price()); 'label' is escaped. 'icon' is a Font Awesome class, 'color' a modifier
+ * (blue, green, yellow, grey) mapped to a SCSS class.
+ *
+ * @param  array<int,array{label:string,value:string,icon?:string,color?:string,id?:string,hidden?:bool}> $cards KPI cards to render (id => data-kpi-id for customization, hidden => add the --hidden class)
+ * @return string                                                                        HTML for the cards bar, empty if no card
+ */
+function saturne_render_kpi_cards(array $cards): string
+{
+    if (empty($cards)) {
+        return '';
+    }
+
+    $out = '<div class="saturne-kpi-cards">';
+    foreach ($cards as $card) {
+        if (!isset($card['label'], $card['value'])) {
+            continue;
+        }
+        $colorClass  = !empty($card['color']) ? ' saturne-kpi-card-' . dol_escape_htmltag($card['color']) : '';
+        $hiddenClass = !empty($card['hidden']) ? ' saturne-kpi-card--hidden' : '';
+        $idAttr      = !empty($card['id']) ? ' data-kpi-id="' . dol_escape_htmltag($card['id']) . '"' : '';
+        $out .= '<div class="saturne-kpi-card' . $colorClass . $hiddenClass . '"' . $idAttr . '>';
+        if (!empty($card['icon'])) {
+            $out .= '<span class="saturne-kpi-card-icon"><i class="' . dol_escape_htmltag($card['icon']) . '"></i></span>';
+        }
+        $out .= '<div class="saturne-kpi-card-body">';
+        $out .= '<div class="saturne-kpi-card-value">' . $card['value'] . '</div>';
+        $out .= '<div class="saturne-kpi-card-label">' . dol_escape_htmltag($card['label']) . '</div>';
+        $out .= '</div>';
+        $out .= '</div>';
+    }
+    $out .= '</div>';
+
+    return $out;
+}
+
+/**
+ * Tell whether a user is allowed to write (edit) a given object/element.
+ *
+ * Used to guard generic inline-edit endpoints. Tries the common Dolibarr write permission verbs
+ * across both core elements (e.g. projet => 'creer') and Saturne modules (=> 'write'), against the
+ * object module, the requested element and the table element. Admins always pass.
+ *
+ * @param  User         $user    Current user
+ * @param  CommonObject $object  Loaded object to be edited
+ * @param  string       $element Requested element (as sent by the client)
+ * @return bool                  True if the user may write the element
+ */
+function saturne_user_can_write_element(User $user, CommonObject $object, string $element): bool
+{
+    if (!empty($user->admin)) {
+        return true;
+    }
+
+    $modules = array_unique(array_filter([
+        $object->module ?? null,
+        $element,
+        $object->table_element ?? null,
+    ]));
+
+    foreach ($modules as $module) {
+        foreach (['write', 'creer', 'modifier', 'edit', 'create'] as $verb) {
+            if ($user->hasRight($module, $verb) || $user->hasRight($module, $element, $verb)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+/**
+ * Render a horizontal bar of preset (saved-view) chips above a list.
+ *
+ * Each preset is a link applying a predefined filtered view in one click. The caller builds
+ * the target URL and the active state; the mechanism is generic and reusable by any module.
+ *
+ * @param  array<int,array{label:string,url:string,icon?:string,active?:bool}> $presets Preset chips
+ * @return string                                                                       HTML for the presets bar, empty if none
+ */
+function saturne_render_list_presets(array $presets): string
+{
+    if (empty($presets)) {
+        return '';
+    }
+
+    $out = '<div class="saturne-list-presets">';
+    foreach ($presets as $preset) {
+        // Caller-built trusted chip (e.g. an action button)
+        if (!empty($preset['raw'])) {
+            $out .= $preset['raw'];
+            continue;
+        }
+        if (!isset($preset['label'], $preset['url'])) {
+            continue;
+        }
+        $activeClass = !empty($preset['active']) ? ' saturne-list-preset-active' : '';
+        $icon        = !empty($preset['icon']) ? '<i class="' . dol_escape_htmltag($preset['icon']) . '"></i> ' : '';
+
+        // Removable chip: link + a remove control carrying a key for the caller's JS to act on
+        if (!empty($preset['removeKey'])) {
+            $out .= '<span class="saturne-list-preset saturne-list-preset-removable' . $activeClass . '">';
+            $out .= '<a href="' . dol_escape_htmltag($preset['url']) . '" class="saturne-list-preset-link">' . $icon . dol_escape_htmltag($preset['label']) . '</a>';
+            $out .= '<span class="saturne-list-preset-remove" data-remove-key="' . dol_escape_htmltag($preset['removeKey']) . '" title="' . dol_escape_htmltag($preset['removeTitle'] ?? '') . '">&times;</span>';
+            $out .= '</span>';
+            continue;
+        }
+
+        $out .= '<a href="' . dol_escape_htmltag($preset['url']) . '" class="saturne-list-preset' . $activeClass . '">' . $icon . dol_escape_htmltag($preset['label']) . '</a>';
+    }
+    $out .= '</div>';
+
+    return $out;
+}
+
+/**
+ * Build the user_param key holding a list's per-user column layout.
+ *
+ * @param  string $listId List identifier (e.g. the object element)
+ * @return string         Sanitized user_param key
+ */
+function saturne_list_layout_param(string $listId): string
+{
+    return 'SATURNE_LIST_LAYOUT_' . strtoupper(preg_replace('/[^A-Za-z0-9_]/', '', $listId));
+}
+
+/**
+ * Read the per-user column layout (order + widths) saved for a list.
+ *
+ * @param  string $listId List identifier (e.g. the object element)
+ * @return array{order:string[],widths:array<string,int>} Saved layout (empty arrays when none)
+ */
+function saturne_get_list_layout(string $listId): array
+{
+    global $user;
+
+    $empty = ['order' => [], 'widths' => []];
+    if (empty($listId)) {
+        return $empty;
+    }
+
+    $param = saturne_list_layout_param($listId);
+    $raw   = isset($user->conf->$param) ? $user->conf->$param : '';
+    if (empty($raw)) {
+        return $empty;
+    }
+
+    $decoded = json_decode($raw, true);
+    if (!is_array($decoded)) {
+        return $empty;
+    }
+
+    $order  = (!empty($decoded['order']) && is_array($decoded['order'])) ? array_values($decoded['order']) : [];
+    $widths = [];
+    if (!empty($decoded['widths']) && is_array($decoded['widths'])) {
+        foreach ($decoded['widths'] as $colKey => $width) {
+            $colKey = preg_replace('/[^A-Za-z0-9_]/', '', (string) $colKey);
+            $width  = (int) $width;
+            if ($colKey !== '' && $width > 0) {
+                $widths[$colKey] = $width;
+            }
+        }
+    }
+
+    return ['order' => $order, 'widths' => $widths];
+}
+
+/**
+ * Apply the per-user column layout (saved order) to a list's fields and return its saved widths.
+ *
+ * Rewrites the 'position' of each field in $object->fields and $arrayfields to match the saved
+ * order, then re-sorts both arrays. Columns absent from the saved order are kept after the ordered
+ * ones. Called by every list using the shared list TPLs (saturne_list.php and the per-module list
+ * controllers reusing core/tpl/list/*) so the saved layout is effective everywhere, not only in
+ * saturne_list.php.
+ *
+ * @param  CommonObject $object      List object (its ->fields are reordered in place)
+ * @param  array        $arrayfields Column definitions keyed by 't.<field>' (reordered in place)
+ * @param  string       $listLayoutId List identifier (e.g. the object element)
+ * @return array<string,int>          Saved column widths (colkey => px), empty when none
+ */
+function saturne_apply_list_layout(CommonObject $object, array &$arrayfields, string $listLayoutId): array
+{
+    $listLayout = saturne_get_list_layout($listLayoutId);
+
+    if (!empty($listLayout['order'])) {
+        $listColumnPos = 0;
+        foreach ($listLayout['order'] as $colKey) {
+            if (isset($object->fields[$colKey])) {
+                $object->fields[$colKey]['position'] = $listColumnPos;
+            }
+            if (isset($arrayfields['t.' . $colKey])) {
+                $arrayfields['t.' . $colKey]['position'] = $listColumnPos;
+            }
+            $listColumnPos += 10;
+        }
+        // Keep columns not present in the saved order after the ordered ones
+        foreach ($object->fields as $colKey => $fieldVal) {
+            if (!in_array($colKey, $listLayout['order'], true)) {
+                $object->fields[$colKey]['position'] = $listColumnPos;
+                if (isset($arrayfields['t.' . $colKey])) {
+                    $arrayfields['t.' . $colKey]['position'] = $listColumnPos;
+                }
+                $listColumnPos += 10;
+            }
+        }
+        $object->fields = dol_sort_array($object->fields, 'position');
+        $arrayfields    = dol_sort_array($arrayfields, 'position');
+    }
+
+    return $listLayout['widths'];
+}
+
+/**
+ * Build the user_param key holding a list's per-user filter display mode.
+ *
+ * @param  string $listId List identifier (e.g. the object element)
+ * @return string         Sanitized user_param key
+ */
+function saturne_list_filter_mode_param(string $listId): string
+{
+    return 'SATURNE_LIST_FILTER_MODE_' . strtoupper(preg_replace('/[^A-Za-z0-9_]/', '', $listId));
+}
+
+/**
+ * Read the per-user filter display mode saved for a list.
+ *
+ * @param  string $listId List identifier (e.g. the object element)
+ * @return string         'panel' when the user opted into the side panel, 'classic' otherwise (default)
+ */
+function saturne_get_list_filter_mode(string $listId): string
+{
+    global $user;
+
+    if (empty($listId)) {
+        return 'classic';
+    }
+
+    $param = saturne_list_filter_mode_param($listId);
+    $raw   = isset($user->conf->$param) ? $user->conf->$param : '';
+
+    return ($raw === 'panel') ? 'panel' : 'classic';
+}
+
+/**
+ * Determine the inline-edit editor type for a list field.
+ *
+ * @param  array  $val Field definition (type, arrayofkeyval, noedit, ...)
+ * @param  string $key Field key
+ * @return string      '' (not inline-editable) | 'text' | 'number' | 'datepicker' | 'select'
+ */
+function saturne_get_inline_edit_type(array $val, string $key): string
+{
+    // Special / identity columns handled elsewhere or not editable
+    if (in_array($key, ['rowid', 'ref', 'status', 'fk_statut'], true)) {
+        return '';
+    }
+    if (!empty($val['noedit']) || !empty($val['disableedit'])) {
+        return '';
+    }
+
+    // Enumerations -> inline select
+    if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) {
+        return 'select';
+    }
+
+    $type = (string) ($val['type'] ?? '');
+    if (in_array($type, ['date', 'datetime', 'timestamp'], true)) {
+        return 'datepicker';
+    }
+    if ($type === 'integer' || $type === 'real' || $type === 'price' || strpos($type, 'double') === 0) {
+        return 'number';
+    }
+    if ($type === 'string' || strpos($type, 'varchar') === 0) {
+        return 'text';
+    }
+
+    // Foreign keys (integer:/sellist:), rich text/html, links, etc. are not inline-editable here
+    return '';
+}
+
+/**
+ * Render a user selection <select> re-using a per-request cached user list.
+ *
+ * Form::select_dolusers() runs its "list of users" query on every call. Pages that print
+ * many user dropdowns (e.g. one executive picker per task modal) therefore run the same
+ * query dozens of times. This helper fetches the user list once per request (via
+ * select_dolusers() in output-array mode) and renders each dropdown from that cache with
+ * selectarray(), keeping the same name and CSS class so existing JS selectors still match.
+ *
+ * Only the first dropdown of the request lists the users: printing them again in every
+ * dropdown costs 110 Ko of <option> for 63 users on a risk list, ten times that for a large
+ * organisation. The others keep their preselected entry, so reading their value stays right,
+ * and saturne.lazyUserSelect completes them from the first one when they are opened.
+ *
+ * @param  string     $htmlName  Name attribute of the select field
+ * @param  int|string $selected  Preselected user id (0 for none)
+ * @param  int|string $showEmpty 1 (or a label) to prepend an empty entry
+ * @param  string     $morecss   Extra CSS classes added on the select
+ * @return string                HTML <select> element
+ */
+function saturne_select_users(string $htmlName, $selected = 0, $showEmpty = 1, string $morecss = ''): string
+{
+    global $db, $form;
+
+    if (!is_object($form)) {
+        require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
+        $form = new Form($db);
+    }
+
+    // outputmode = 1 returns an array [userId => label]; run the query only once per request.
+    static $userOptions = null;
+    if ($userOptions === null) {
+        $userOptions = $form->select_dolusers('', '', 0, null, 0, '', '', '', 0, 0, '', 0, '', '', 0, 1);
+        if (!is_array($userOptions)) {
+            $userOptions = [];
+        }
+    }
+
+    static $userListPrinted = false;
+    if (!$userListPrinted) {
+        $userListPrinted = true;
+
+        return $form->selectarray($htmlName, $userOptions, $selected, $showEmpty, 0, 0, '', 0, 0, 0, '', $morecss . ' saturne-user-select-source');
+    }
+
+    $options = (!empty($selected) && isset($userOptions[$selected])) ? [$selected => $userOptions[$selected]] : [];
+
+    return $form->selectarray($htmlName, $options, $selected, $showEmpty, 0, 0, '', 0, 0, 0, '', $morecss . ' saturne-user-select-lazy');
+}
+
+/**
+ * Return the inline "no photo" SVG placeholder (rounded grey box with a camera glyph),
+ * so banners, element trees and menus share the same look when an object has no photo.
+ *
+ * @param  int    $size Rendered width/height in pixels (the drawing scales via the viewBox)
+ * @return string       Inline SVG markup
+ */
+function saturne_get_nophoto_placeholder(int $size = 40): string
+{
+    return '<svg class="nophoto-placeholder" width="' . $size . '" height="' . $size . '" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="6" fill="#f0f0f0"/><path d="M20 16a3 3 0 100 6 3 3 0 000-6z" fill="#bbb"/><path d="M14 13h3l1.5-2h3l1.5 2h3a2 2 0 012 2v10a2 2 0 01-2 2H14a2 2 0 01-2-2V15a2 2 0 012-2z" stroke="#bbb" stroke-width="1.5" fill="none"/></svg>';
 }

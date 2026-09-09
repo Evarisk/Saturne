@@ -27,8 +27,9 @@
  * Globals    : $conf, $db, $hookmanager, $langs, $user
  * Parameters : $action, $limit, $contextpage, $massaction, $mode, $optioncss, $page, $searchAll, $sortfield, $sortorder, $toselect
  * Objects    : $categorie, $extrafields (extrafields_list_search_param.tpl), $form, $object
- * Variables  : $arrayfields, $createUrl (optional), $fieldsToSearchAll, $formMoreParams (optional), $helpText (optional),
- *              $nbTotalOfRecords, $num, $permissiontoadd, $resql, $search, $search_array_options (extrafields_list_search_param.tpl),
+ * Variables  : $arrayfields, $createUrl (optional), $enableMassSignature (optional), $enableMassValidate (optional),
+ *              $fieldsToSearchAll, $formMoreParams (optional), $helpText (optional), $nbTotalOfRecords, $num,
+ *              $permissiontoadd, $resql, $search, $search_array_options (extrafields_list_search_param.tpl),
  *              $searchCategories, $sql, $title
  */
 
@@ -76,15 +77,13 @@ foreach ($search as $key => $val) {
     } elseif ($val != '') {
         $param .= '&search_' . $key . '=' . urlencode($val);
     }
-    // Propagate include/exclude mode for selectable fields
-    if (array_key_exists($key, $object->fields) && $key !== 'status') {
-        $fieldDef      = $object->fields[$key];
-        $isSelectable  = !empty($fieldDef['arrayofkeyval'])
-            || (isset($fieldDef['type']) && (strpos($fieldDef['type'], 'integer:') === 0 || strpos($fieldDef['type'], 'sellist:') === 0));
-        if ($isSelectable && GETPOST('search_' . $key . '_mode', 'alpha') === 'exc') {
-            $param .= '&search_' . $key . '_mode=exc';
-        }
-    }
+}
+
+// Category criteria lives outside $search : the SQL TPL normalized it, add it to $param so pagination and sort
+// links keep the filter. It is empty when the category module is off or the list TPL was included on its own
+$searchCategories = (isset($searchCategories) && is_array($searchCategories)) ? $searchCategories : [];
+foreach ($searchCategories as $searchCategory) {
+    $param .= '&search_categories_filter[]=' . urlencode($searchCategory);
 }
 
 // Add $param from extra fields
@@ -96,12 +95,26 @@ $hookmanager->executeHooks('printFieldListSearchParam', $parameters, $object, $a
 $param .= $hookmanager->resPrint;
 
 // List of mass actions available
-$arrayOfMassActions = [
-    //'validate'=>img_picto('', 'check', 'class="pictofixedwidth"').$langs->trans("Validate"),
+$arrayOfMassActions = [];
+
+// Mass validation is opt-in: the list page must set $enableMassValidate, every object is not meant to be validated in bulk
+if (!empty($enableMassValidate) && !empty($permissiontoadd)) {
+    $validatePicto = '<span class="fas fa-check paddingrightonly"></span>';
+    $arrayOfMassActions['prevalidate'] = $validatePicto . $langs->trans('Validate');
+}
+
+// Mass signature is opt-in: the list page must set $enableMassSignature, only objects carrying signatories are signed
+if (!empty($enableMassSignature) && !empty($permissiontoadd)) {
+    $arrayOfMassActions['presign']       = '<span class="fas fa-file-signature paddingrightonly"></span>' . $langs->trans('Sign');
+    $arrayOfMassActions['signattendant'] = '<span class="fas fa-user-edit paddingrightonly"></span>' . $langs->trans('SignForAnAttendant');
+}
+
+$arrayOfMassActions += [
     //'generate_doc'=>img_picto('', 'pdf', 'class="pictofixedwidth"').$langs->trans("ReGeneratePDF"),
     //'builddoc'=>img_picto('', 'pdf', 'class="pictofixedwidth"').$langs->trans("PDFMerge"),
     //'presend'=>img_picto('', 'email', 'class="pictofixedwidth"').$langs->trans("SendByMail"),
-    'prearchive' => '<span class="fas fa-archive paddingrightonly"></span>' . $langs->trans('Archive')
+    'prearchive' => '<span class="fas fa-archive paddingrightonly"></span>' . $langs->trans('Archive'),
+    'preunarchive' => '<span class="fas fa-box-open paddingrightonly"></span>' . $langs->trans('Unarchive')
 ];
 
 if (!empty($permissiontodelete)) {
@@ -135,6 +148,18 @@ if (!empty($formMoreParams)) {
     }
 }
 
+// Apply the per-user column layout (order + widths) + filter mode saved for this list.
+// Per-module list controllers (control_list.php, question_list.php, ...) reuse these TPLs without
+// running saturne_list.php's layout logic, so applying it here makes the saved layout effective
+// everywhere. saturne_list.php applies it before including this TPL, hence the isset() guards.
+$listLayoutId = $listLayoutId ?? ($object->element ?? '');
+if (!isset($listColumnWidths)) {
+    $listColumnWidths = saturne_apply_list_layout($object, $arrayfields, $listLayoutId);
+}
+if (!isset($useSideFilterPanel)) {
+    $useSideFilterPanel = (saturne_get_list_filter_mode($listLayoutId) === 'panel');
+}
+
 // Apply user column preferences to $arrayfields now, so $panelFilterBody and all loops below use correct checked values
 $selectedFields = '';
 if ($mode != 'pwa' && $mode != 'kanban') {
@@ -142,200 +167,89 @@ if ($mode != 'pwa' && $mode != 'kanban') {
     $selectedFields = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varPage, getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN'));
 }
 
-// Build side filter panel content
-// --------------------------------------------------------------------
-$panelFilterBody    = '';
-$useSideFilterPanel = true;
+// Build side filter panel content has been removed
 
-// Panel i18n labels
-$filterBtnLabel = $langs->trans('Filters');
-$applyBtnLabel  = $langs->trans('Apply');
-$resetBtnLabel  = $langs->trans('ResetFilters');
-
-// 0. Global search_all field (if used by calling page)
-if (!empty($fieldsToSearchAll)) {
-    $searchAllPlaceholder = $langs->trans('SearchInAllFields');
-    $panelFilterBody .= '<div class="saturne-filter-search-all-wrapper">';
-    $panelFilterBody .= '<input type="text" class="flat saturne-filter-search-all-input" name="search_all" id="panel_search_all" placeholder="' . dol_escape_htmltag($searchAllPlaceholder) . '" value="' . dol_escape_htmltag($searchAll ?? '') . '">';
-    $panelFilterBody .= '</div>';
-}
-
-// 1. Category filter section inside panel
-if (isModEnabled('categorie') && $user->hasRight('categorie', 'read') && isset($categorie->MAP_OBJ_CLASS[$object->element])) {
-    require_once DOL_DOCUMENT_ROOT . '/core/class/html.formcategory.class.php';
-    $formCategory  = new FormCategory($db);
-    $rawCategories = $formCategory->select_all_categories($object->element, '', '', 64, 0, 2); // outputmode=2 → full arbo with color
-    $langs->load('categories');
-
-    $categoryMap = [];
-    if (is_array($rawCategories)) {
-        foreach ($rawCategories as $cat) {
-            $hex                           = !empty($cat['color']) ? '#' . ltrim($cat['color'], '#') : '#95a5a6';
-            $categoryMap[(int) $cat['id']] = ['label' => $cat['fulllabel'], 'color' => $hex];
+$listLayoutId = $listLayoutId ?? ($object->element ?? '');
+if ($mode != 'kanban' && $mode != 'pwa' && !empty($listLayoutId)) {
+    // Count active filters on table columns
+    $filterCount = 0;
+    if (isset($search) && is_array($search)) {
+        foreach ($search as $key => $val) {
+            if (is_array($val)) {
+                continue; // Skip array values like status (which has defaults)
+            }
+            if ($val !== '' && $val !== '-1') {
+                $filterCount++;
+            }
         }
     }
-
-    if (!isset($searchCategoriesFilter)) {
-        $searchCategoriesFilter = array_values(array_filter(array_map('intval', GETPOST('search_categories_filter', 'array'))));
-    }
-
-    $initialTags      = [];
-    $initialTagCatIds = [];
-    foreach (($searchCategoriesFilter ?? []) as $filterVal) {
-        $id      = abs((int) $filterVal);
-        $catMode = ((int) $filterVal < 0) ? 'exc' : 'inc';
-        if ($id > 0 && isset($categoryMap[$id])) {
-            $initialTags[]      = ['id' => $id, 'label' => $categoryMap[$id]['label'], 'color' => $categoryMap[$id]['color'], 'mode' => $catMode];
-            $initialTagCatIds[] = $id;
+    if (isset($search_array_options) && is_array($search_array_options)) {
+        foreach ($search_array_options as $val) {
+            if (is_array($val) ? !empty($val) : ($val !== null && $val !== '' && $val !== '-1')) {
+                $filterCount++;
+            }
         }
     }
+    $filterCount += count($searchCategories);
+    if (!empty($searchAll)) {
+        $filterCount++;
+    }
+    $hasFilter = ($filterCount > 0);
 
-    $elementId   = dol_escape_htmltag($object->element);
-    $catColorsJs = json_encode(array_map(fn($v) => $v['color'], $categoryMap));
-    $catIcon     = img_picto('', 'category', 'class="saturne-cat-icon"');
+    // Funnel SVG icon (16×16 Feather-style, GPL-compatible)
+    $svgIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="' . ($hasFilter ? '#e67e22' : '#666') . '" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;">';
+    $svgIcon .= '<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>';
+    if ($hasFilter) {
+        $svgIcon .= '<line x1="16" y1="16" x2="22" y2="22" stroke="#e74c3c" stroke-width="2"></line><line x1="22" y1="16" x2="16" y2="22" stroke="#e74c3c" stroke-width="2"></line>';
+    }
+    $svgIcon .= '</svg>';
 
-    $panelFilterBody .= '<div class="saturne-filter-section">';
-    $panelFilterBody .= '<div class="saturne-filter-section-title">'
-        . img_picto($langs->trans('Categories'), 'category', 'class="pictofixedwidth"')
-        . ' ' . $langs->trans('Categories') . '</div>';
-
-    // Picker (full-width inside panel)
-    $panelFilterBody .= '<select id="cat_filter_picker_' . $elementId . '" class="flat saturne-filter-cat-picker" title="' . dol_escape_htmltag($langs->trans('AddCategory')) . '">';
-    $panelFilterBody .= '<option value="">&nbsp;</option>';
-    foreach ($categoryMap as $catId => $catData) {
-        if (in_array($catId, $initialTagCatIds)) {
-            continue;
+    // Build the filter indicator: funnel icon (clickable when filters active) + count badge
+    $filterIndicator = '<span class="saturne-filter-indicator" style="margin-left: 10px; display: inline-flex; align-items: center; gap: 4px; vertical-align: middle;">';
+    if ($hasFilter) {
+        // Build reset URL — direct GET navigation
+        $clearUrl = $_SERVER['PHP_SELF'] . '?button_removefilter_x=1&button_removefilter=1&token=' . newToken();
+        if (!empty($formMoreParams)) {
+            foreach ($formMoreParams as $k => $v) {
+                $clearUrl .= '&' . urlencode($k) . '=' . urlencode($v);
+            }
         }
-        $panelFilterBody .= '<option value="' . $catId . '" data-color="' . dol_escape_htmltag($catData['color']) . '">' . dol_escape_htmltag($catData['label']) . '</option>';
-    }
-    $panelFilterBody .= '</select>';
-
-    // Tag list
-    $panelFilterBody .= '<div id="cat_filter_tags_' . $elementId . '" class="saturne-cat-filter-tags" data-picker-id="cat_filter_picker_' . $elementId . '" data-cat-icon="' . dol_escape_htmltag($catIcon) . '" data-cat-colors="' . dol_escape_htmltag($catColorsJs) . '">';
-    foreach ($initialTags as $tag) {
-        $isExcTag = $tag['mode'] === 'exc';
-        $color    = $tag['color'];
-        $sign     = $isExcTag ? '&minus;' : '+';
-        $tagVal   = ($isExcTag ? '-' : '+') . $tag['id'];
-        $panelFilterBody .= '<span class="saturne-cat-tag" style="border-color:' . $color . '"';
-        $panelFilterBody .= ' data-catid="' . $tag['id'] . '" data-mode="' . $tag['mode'] . '" data-label="' . dol_escape_htmltag($tag['label']) . '" data-color="' . dol_escape_htmltag($color) . '">';
-        $panelFilterBody .= '<span class="cat-sign saturne-cat-tag-sign" title="' . dol_escape_htmltag($langs->trans('ToggleIncludeExclude')) . '" style="background:' . $color . '">' . $catIcon . ' ' . $sign . '</span>';
-        $panelFilterBody .= '<span class="saturne-cat-tag-body"><span class="saturne-cat-tag-label' . ($isExcTag ? ' is-exc' : '') . '">' . dol_escape_htmltag($tag['label']) . '</span>';
-        $panelFilterBody .= '<span class="cat-remove saturne-cat-tag-remove" title="' . dol_escape_htmltag($langs->trans('Remove')) . '">&times;</span></span>';
-        $panelFilterBody .= '<input type="hidden" name="search_categories_filter[]" value="' . dol_escape_htmltag($tagVal) . '">';
-        $panelFilterBody .= '</span>';
-    }
-    $panelFilterBody .= '</div>';
-
-
-    $panelFilterBody .= '</div>';
-}
-
-// 2. Field filters section inside panel
-$toggleTitlePanelRaw = $langs->trans('ToggleIncludeExclude');
-if ($toggleTitlePanelRaw === 'ToggleIncludeExclude') {
-    $toggleTitlePanelRaw = 'Inverser le filtre (voir tout sauf la sélection)';
-}
-$toggleTitlePanel = dol_escape_htmltag($toggleTitlePanelRaw);
-
-foreach ($object->fields as $key => $val) {
-    if (empty($arrayfields['t.' . $key]['checked'])) {
-        continue;
-    }
-    if (!empty($val['disablesearch'])) {
-        continue;
-    }
-    if (isset($val['visible']) && (int) $val['visible'] === 0) {
-        continue;
-    }
-
-    $fieldLabelPanel = $langs->trans($val['label'] ?? $key);
-    $cssForFieldPanel = saturne_css_for_field($val, $key);
-
-    $panelFilterBody .= '<div class="saturne-filter-field-row">';
-    $panelFilterBody .= '<div class="saturne-filter-field-label">' . dol_escape_htmltag($fieldLabelPanel) . '</div>';
-    $panelFilterBody .= '<div class="saturne-filter-field-input">';
-
-    // @Todo use showinputfield for all types to benefit from all field definition options (like arrayofkeyval, type=integer:sellist, etc.) instead of only relying on type for field rendering and losing some options in the process (like searchmulti for arrayofkeyval)
-    if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) {
-        $showToggle = ($key !== 'status');
-        if ($showToggle) {
-            $fMode  = GETPOST('search_' . $key . '_mode', 'alpha') ?: 'inc';
-            $isExc  = ($fMode === 'exc');
-            $tAttr  = dol_escape_htmltag($fieldLabelPanel) . ' - ' . $toggleTitlePanel;
-            $panelFilterBody .= '<input type="hidden" id="search_' . $key . '_mode" name="search_' . $key . '_mode" value="' . ($isExc ? 'exc' : 'inc') . '">';
-            $panelFilterBody .= '<span id="search_mode_toggle_' . $key . '" title="' . $tAttr . '" class="saturne-filter-mode-toggle ' . ($isExc ? 'saturne-filter-mode-exc' : 'saturne-filter-mode-inc') . '">' . ($isExc ? '<span class="far fa-eye-slash"></span>' : '<span class="far fa-eye"></span>') . '</span>';
-        }
-        if (empty($val['searchmulti'])) {
-            $panelFilterBody .= $form->selectarray('search_' . $key, $val['arrayofkeyval'], $search[$key] ?? '', 1, 0, 0, '', 1, 0, 0, '', 'maxwidth200' . ($key == 'status' ? ' search_status onrightofpage' : ''), 0);
-        } else {
-            $panelFilterBody .= $form->multiselectarray('search_' . $key, $val['arrayofkeyval'], $search[$key] ?? '', 0, 0, 'maxwidth200' . ($key == 'status' ? ' search_status onrightofpage' : ''), 1, '100%', '', 0);
-        }
-    } elseif (isset($val['type']) && ((strpos($val['type'], 'integer:') === 0) || (strpos($val['type'], 'sellist:') === 0))) {
-        $object->fields[$key]['visible'] = 1; // With visible = 2 the content is hidden
-        $fMode = GETPOST('search_' . $key . '_mode', 'alpha') ?: 'inc';
-        $isExc = ($fMode === 'exc');
-        $tAttr = dol_escape_htmltag($fieldLabelPanel) . ' - ' . $toggleTitlePanel;
-        $panelFilterBody .= '<input type="hidden" id="search_' . $key . '_mode" name="search_' . $key . '_mode" value="' . ($isExc ? 'exc' : 'inc') . '">';
-        $panelFilterBody .= '<span id="search_mode_toggle_' . $key . '" title="' . $tAttr . '" class="saturne-filter-mode-toggle ' . ($isExc ? 'saturne-filter-mode-exc' : 'saturne-filter-mode-inc') . '">' . ($isExc ? '<span class="far fa-eye-slash"></span>' : '<span class="far fa-eye"></span>') . '</span>';
-        $panelFilterBody .= $object->showInputField($val, $key, $search[$key] ?? '', '', '', 'search_', $cssForFieldPanel . ' maxwidth200 saturne-panel-select', 1);
-    } elseif (isset($val['type']) && in_array($val['type'], ['date', 'datetime', 'timestamp'])) {
-        $panelFilterBody .= '<div class="saturne-filter-date-wrapper">'
-            . '<div class="nowrap">' . $form->selectDate($search[$key . '_dtstart'] ?? '', 'search_' . $key . '_dtstart', 0, 0, 1, '', 1, 0, 0, '', '', '', '', 1, '', $langs->trans('From')) . '</div>'
-            . '<div class="nowrap">' . $form->selectDate($search[$key . '_dtend'] ?? '', 'search_' . $key . '_dtend', 0, 0, 1, '', 1, 0, 0, '', '', '', '', 1, '', $langs->trans('to')) . '</div>'
-            . '</div>';
-    } elseif (isset($val['type']) && $val['type'] == 'duration') {
-        $panelFilterBody .= '<div class="saturne-filter-date-wrapper">'
-            . '<div class="nowrap">' . $form->select_duration('search_' . $key . '_dtstart', $search[$key . '_dtstart'] ?? '', 0, 'text', 0, 1) . '</div>'
-            . '<div class="nowrap">' . $form->select_duration('search_' . $key . '_dtend', $search[$key . '_dtend'] ?? '', 0, 'text', 0, 1) . '</div>'
-            . '</div>';
-    } elseif ($key == 'lang') {
-        require_once DOL_DOCUMENT_ROOT . '/core/class/html.formadmin.class.php';
-        $formAdmin        = new FormAdmin($db);
-        $panelFilterBody .= $formAdmin->select_language(($search[$key] ?? ''), 'search_lang', 0, [], 1, 0, 0, 'minwidth100imp maxwidth200', 2);
+        // Wrap the SVG icon in a clickable link
+        $filterIndicator .= '<a href="' . dol_escape_htmltag($clearUrl) . '" onclick="window.location.href=this.href;return false;" title="' . dol_escape_htmltag($langs->trans('RemoveFilter')) . '" style="text-decoration: none; display: inline-flex; align-items: center;">' . $svgIcon . '</a>';
+        // Counter only — no text
+        $filterIndicator .= ' <span style="color: #e67e22; font-weight: 600; font-size: 0.85em;">(' . $filterCount . ')</span>';
     } else {
-        $panelFilterBody .= '<input type="text" class="flat saturne-filter-text-input" name="search_' . $key . '" value="' . dol_escape_htmltag($search[$key] ?? '') . '">';
+        $filterIndicator .= $svgIcon;
     }
+    $filterIndicator .= '</span>';
 
-    $panelFilterBody .= '</div>';
-    $panelFilterBody .= '</div>';
+    $cardButton = ($cardButton ?? '') . ' ' . $filterIndicator;
 }
 
-// Count active filters for badge — mirrors the panel field visibility rules
-$activeFilterCount = 0;
-foreach ($object->fields as $key => $val) {
-    if (empty($arrayfields['t.' . $key]['checked'])) {
-        continue;
-    }
-    if (!empty($val['disablesearch'])) {
-        continue;
-    }
-    if (isset($val['visible']) && (int) $val['visible'] === 0) {
-        continue;
-    }
-    $searchVal = $search[$key] ?? '';
-    if (is_array($searchVal) ? !empty($searchVal) : ($searchVal !== '' && $searchVal != -1)) {
-        $activeFilterCount++;
-    }
+// "New" button to create a new object
+$cardButton = ($cardButton ?? '') . ' ' . dolGetButtonTitle($langs->trans('New' . ucfirst($object->element)), $helpText ?? '', 'fa fa-plus-circle', ($createUrl ?? dol_buildpath('custom/' . $object->module . '/view/' . $object->element . '/' . $object->element . '_card.php', 1) . '?action=create' . ($moreUrlParameters ?? '')), '', $permissiontoadd);
+
+// Format the title text — record count BEFORE filter indicator
+$titleText = ($conf->browser->layout == 'classic' && $mode != 'pwa') ? ($title ?? '') : '';
+$displayRecordCount = (isset($nbTotalOfRecords) && $nbTotalOfRecords !== '' && is_numeric($nbTotalOfRecords)) ? $nbTotalOfRecords : ($num ?? null);
+if ($displayRecordCount !== null && is_numeric($displayRecordCount)) {
+    $titleText .= ' <span class="opacitymedium colorblack marginleftonly">(' . $displayRecordCount . ')</span>';
+    $nbTotalOfRecords = -1; // Prevent print_barre_liste from appending it again
 }
-$activeFilterCount += count($searchCategoriesFilter ?? []);
-if (!empty($searchAll)) {
-    $activeFilterCount++;
+$listTitle = $titleText . ' ' . ($cardButton ?? '');
+
+// Add selectedFields back to the title bar on the right, or hidden if we don't want the gear icon.
+// Since Saturne removed it to put it in the side panel, we must put it back so checkboxes exist!
+$newCardButton = ($newCardButton ?? '') . ' <div style="display:none;" id="saturne-hidden-column-selector">' . $selectedFields . '</div>';
+
+// Hook: full-width banner above the list title bar (KPI cards, view presets, ...), rendered outside the title/filter header
+$parameters = ['arrayfields' => &$arrayfields];
+$hookmanager->executeHooks('saturneListTopBanner', $parameters, $object, $action);
+if (!empty($hookmanager->resPrint)) {
+    print '<div class="saturne-list-top-banner">' . $hookmanager->resPrint . '</div>';
 }
 
-$newCardButton  = ($newCardButton ?? '');
-$newCardButton .= dolGetButtonTitle($langs->trans('ViewList'), '', 'fa fa-bars imgforviewmode', $_SERVER['PHP_SELF'] . '?mode=common' . preg_replace('/([&?])*mode=[^&]+/', '', $param), '', ((empty($mode) || $mode == 'common') ? 2 : 1), ['morecss' => 'reposition']);
-$newCardButton .= dolGetButtonTitle($langs->trans('ViewKanban'), '', 'fa fa-th-list imgforviewmode', $_SERVER['PHP_SELF'] . '?mode=kanban' . preg_replace('/([&?])*mode=[^&]+/', '', $param), '', ($mode == 'kanban' ? 2 : 1), ['morecss' => 'reposition']);
-$newCardButton .= dolGetButtonTitle($langs->trans('ViewPwa'), '', 'fa fa-mobile imgforviewmode', $_SERVER['PHP_SELF'] . '?mode=pwa' . preg_replace('/([&?])*mode=[^&]+/', '', $param), '', ($mode == 'pwa' ? 2 : 1), ['morecss' => 'reposition']);
-$cardButton     = dolGetButtonTitle($langs->trans('New' . ucfirst($object->element)), $helpText ?? '', 'fa fa-plus-circle', ($createUrl ?? dol_buildpath('custom/' . $object->module . '/view/' . $object->element . '/' . $object->element . '_card.php', 1) . '?action=create' . ($moreUrlParameters ?? '')), '', $permissiontoadd);
-
-// Filter panel toggle button — left side, in the title area
-$filterButton = dolGetButtonTitle($filterBtnLabel, '', 'fas fa-sliders-h', '#', 'saturne-filter-toggle', $activeFilterCount > 0 ? 2 : 1, ['morecss' => 'reposition']);
-if ($activeFilterCount > 0) {
-    $filterButton = '<span class="saturne-filter-btn-wrapper">' . $filterButton . dolGetBadge((string) $activeFilterCount, '', 'secondary') . '</span>';
-}
-$listTitle    = (($conf->browser->layout == 'classic' && $mode != 'pwa') ? $title : '') . ' ' . $cardButton . ' ' . $filterButton;
-print_barre_liste($listTitle, $page, $_SERVER['PHP_SELF'], $param, $sortfield, $sortorder, $massActionButton, $num, $nbTotalOfRecords, $object->picto, 0, $newCardButton, '', $limit, 0, 0, 1);
+print_barre_liste($listTitle, ($page ?? 0), $_SERVER['PHP_SELF'], ($param ?? ''), ($sortfield ?? ''), ($sortorder ?? ''), ($massActionButton ?? ''), ($num ?? 0), ($nbTotalOfRecords ?? 0), ($object->picto ?? ''), 0, ($newCardButton ?? ''), '', ($limit ?? 0), 0, 0, 1);
 
 // Add code for pre mass action (confirmation or email presend form)
 //$topicmail = "SendMyObjectRef";
@@ -345,8 +259,20 @@ print_barre_liste($listTitle, $page, $_SERVER['PHP_SELF'], $param, $sortfield, $
 
 require_once DOL_DOCUMENT_ROOT . '/core/tpl/massactions_pre.tpl.php';
 
+if ($massaction == 'prevalidate') {
+    print $form->formconfirm($_SERVER['PHP_SELF'], $langs->trans('ConfirmMassValidate'), $langs->trans('ConfirmMassValidatingQuestion', count($toselect)), 'validate', null, '', 0, 200, 500, 1);
+}
+
+if ($massaction == 'presign') {
+    print $form->formconfirm($_SERVER['PHP_SELF'], $langs->trans('ConfirmMassSign'), $langs->trans('ConfirmMassSigningQuestion', count($toselect)), 'sign', null, '', 0, 200, 500, 1);
+}
+
 if ($massaction == 'prearchive') {
     print $form->formconfirm($_SERVER['PHP_SELF'], $langs->trans('ConfirmMassArchive'), $langs->trans('ConfirmMassArchivingQuestion', count($toselect)), 'archive', null, '', 0, 200, 500, 1);
+}
+
+if ($massaction == 'preunarchive') {
+    print $form->formconfirm($_SERVER['PHP_SELF'], $langs->trans('ConfirmMassUnarchive'), $langs->trans('ConfirmMassUnarchivingQuestion', count($toselect)), 'unarchive', null, '', 0, 200, 500, 1);
 }
 
 if ($searchAll) {
@@ -356,8 +282,106 @@ if ($searchAll) {
     print '<div class="divsearchfieldfilter">' . $langs->trans('FilterOnInto', $searchAll) . implode(', ', $fieldsToSearchAll) . '</div>';
 }
 
-// Hook: extra content above the list (moreForFilter)
 $moreForFilter = '';
+
+// Filter on categories, for every object registered in the category map by a constructCategory hook.
+// Selected categories are rendered as tags whose sign toggles include/exclude, driven by
+// window.saturne.filter.initCategoryPicker() which binds on the [data-cat-colors] container below
+if (isModEnabled('categorie') && $user->hasRight('categorie', 'read') && isset($categorie) && isset($categorie->MAP_OBJ_CLASS[$object->element]) && $mode != 'kanban' && $mode != 'pwa') {
+    require_once DOL_DOCUMENT_ROOT . '/core/class/html.formcategory.class.php';
+
+    // Defaults mirror the SQL TPL, which owns these tokens and normally runs first
+    $categoryNotCategorizedToken = $categoryNotCategorizedToken ?? 'NOTCATEGORIZED';
+    $categoryFallbackColor       = $categoryFallbackColor ?? '#95a5a6';
+
+    $langs->load('categories');
+
+    $formCategory = new FormCategory($db);
+    // outputmode 2 returns the full tree with the category colors
+    $rawCategories = $formCategory->select_all_categories($object->element, '', '', 64, 0, 2);
+
+    $categoryMap = [];
+    if (is_array($rawCategories)) {
+        foreach ($rawCategories as $rawCategory) {
+            $categoryColor                         = !empty($rawCategory['color']) ? '#' . ltrim($rawCategory['color'], '#') : $categoryFallbackColor;
+            $categoryMap[(int) $rawCategory['id']] = ['label' => $rawCategory['fulllabel'], 'color' => $categoryColor];
+        }
+    }
+
+    // Tags already selected, kept in the order they were added
+    $categoryTags   = [];
+    $categoryTagIds = [];
+    foreach ($searchCategories as $searchCategory) {
+        if (ltrim((string) $searchCategory, '+-') === $categoryNotCategorizedToken) {
+            $categoryTags[]   = [
+                'id'    => $categoryNotCategorizedToken,
+                'label' => $langs->trans('NotCategorized'),
+                'color' => $categoryFallbackColor,
+                'mode'  => (strpos($searchCategory, '-') === 0) ? 'exc' : 'inc'
+            ];
+            $categoryTagIds[] = $categoryNotCategorizedToken;
+            continue;
+        }
+
+        $categoryId = abs((int) $searchCategory);
+        if ($categoryId > 0 && isset($categoryMap[$categoryId])) {
+            $categoryTags[]   = [
+                'id'    => $categoryId,
+                'label' => $categoryMap[$categoryId]['label'],
+                'color' => $categoryMap[$categoryId]['color'],
+                'mode'  => ((int) $searchCategory < 0) ? 'exc' : 'inc'
+            ];
+            $categoryTagIds[] = $categoryId;
+        }
+    }
+
+    $categoryElementId = dol_escape_htmltag($object->element);
+    $categoryColorsJs  = json_encode(array_map(function ($categoryData) {
+        return $categoryData['color'];
+    }, $categoryMap));
+    $categoryIcon      = img_picto('', 'category', 'class="saturne-cat-icon"');
+
+    $moreForFilter .= '<div class="divsearchfield saturne-cat-filter">';
+    $moreForFilter .= '<a class="unsetcolor" href="' . DOL_URL_ROOT . '/categories/categorie_list.php?mode=hierarchy&type=' . urlencode($object->element) . '&backtopage=' . urlencode($_SERVER['PHP_SELF']) . '">';
+    $moreForFilter .= img_picto($langs->trans('Categories'), 'category', 'class="pictofixedwidth"');
+    $moreForFilter .= '</a>';
+
+    // Picker : picking an entry hands it over to the tag list, the JS then removes the option from here
+    $moreForFilter .= '<span class="saturne-cat-filter-picker-wrapper">';
+    $moreForFilter .= '<select id="cat_filter_picker_' . $categoryElementId . '" class="flat saturne-filter-cat-picker" title="' . dol_escape_htmltag($langs->trans('Categories')) . '">';
+    $moreForFilter .= '<option value="">' . dol_escape_htmltag($langs->transnoentitiesnoconv('Category')) . '</option>';
+    if (!in_array($categoryNotCategorizedToken, $categoryTagIds)) {
+        $moreForFilter .= '<option value="' . $categoryNotCategorizedToken . '" data-color="' . $categoryFallbackColor . '">' . dol_escape_htmltag($langs->trans('NotCategorized')) . '</option>';
+    }
+    foreach ($categoryMap as $categoryId => $categoryData) {
+        if (in_array($categoryId, $categoryTagIds)) {
+            continue;
+        }
+        $moreForFilter .= '<option value="' . $categoryId . '" data-color="' . dol_escape_htmltag($categoryData['color']) . '">' . dol_escape_htmltag($categoryData['label']) . '</option>';
+    }
+    $moreForFilter .= '</select>';
+    $moreForFilter .= '</span>';
+
+    $moreForFilter .= '<div id="cat_filter_tags_' . $categoryElementId . '" class="saturne-cat-filter-tags" data-picker-id="cat_filter_picker_' . $categoryElementId . '" data-cat-icon="' . dol_escape_htmltag($categoryIcon) . '" data-cat-colors="' . dol_escape_htmltag($categoryColorsJs) . '">';
+    foreach ($categoryTags as $categoryTag) {
+        $isExcludedTag = $categoryTag['mode'] == 'exc';
+        $tagSign       = $isExcludedTag ? '&minus;' : '+';
+        $tagValue      = ($isExcludedTag ? '-' : '+') . $categoryTag['id'];
+
+        $moreForFilter .= '<span class="saturne-cat-tag" style="border-color:' . $categoryTag['color'] . '" data-catid="' . dol_escape_htmltag($categoryTag['id']) . '" data-mode="' . $categoryTag['mode'] . '" data-label="' . dol_escape_htmltag($categoryTag['label']) . '" data-color="' . dol_escape_htmltag($categoryTag['color']) . '">';
+        $moreForFilter .= '<span class="cat-sign saturne-cat-tag-sign" title="' . dol_escape_htmltag($langs->trans('Categories')) . '" style="background:' . $categoryTag['color'] . '">' . $categoryIcon . ' ' . $tagSign . '</span>';
+        $moreForFilter .= '<span class="saturne-cat-tag-body">';
+        $moreForFilter .= '<span class="saturne-cat-tag-label' . ($isExcludedTag ? ' is-exc' : '') . '">' . dol_escape_htmltag($categoryTag['label']) . '</span>';
+        $moreForFilter .= '<span class="cat-remove saturne-cat-tag-remove" title="' . dol_escape_htmltag($langs->trans('Remove')) . '">&times;</span>';
+        $moreForFilter .= '</span>';
+        $moreForFilter .= '<input type="hidden" name="search_categories_filter[]" value="' . dol_escape_htmltag($tagValue) . '">';
+        $moreForFilter .= '</span>';
+    }
+    $moreForFilter .= '</div>';
+    $moreForFilter .= '</div>';
+}
+
+// Hook: extra content above the list (moreForFilter)
 $parameters = ['arrayfields' => &$arrayfields];
 $reshook    = $hookmanager->executeHooks('printFieldPreListTitle', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
 if (empty($reshook)) {
@@ -375,38 +399,7 @@ if (!empty($arrayOfMassActions)) {
     $selectedFields .= $form->showCheckAddButtons('checkforselect', 1);
 }
 
-// Side filter panel (fixed overlay, inside the form)
-// --------------------------------------------------------------------
-print '<div id="saturne-filter-backdrop"></div>';
-print '<div id="saturne-filter-panel">';
-
-// Panel header
-print '<div class="saturne-filter-panel-header">';
-print '<strong class="saturne-filter-panel-title"><span class="fa fa-sliders-h"></span>' . dol_escape_htmltag($filterBtnLabel) . '</strong>';
-print '<span class="saturne-filter-panel-close">&times;</span>';
-print '</div>';
-
-// Panel body
-print '<div class="saturne-filter-panel-body">';
-
-// Legend notice explaining the eye/eye-slash toggle icons
-print '<div class="saturne-filter-legend">';
-print '<div class="saturne-filter-legend-items">';
-print '<span class="saturne-filter-legend-include"><span class="far fa-eye"></span> Inclure</span>';
-print '<span class="saturne-filter-legend-exclude"><span class="far fa-eye-slash"></span> Exclure</span>';
-print '</div>';
-print '</div>';
-
-print $panelFilterBody;
-print '</div>';
-
-// Panel footer
-print '<div class="saturne-filter-panel-footer">';
-print '<button type="submit" class="butAction">' . dol_escape_htmltag($applyBtnLabel) . '</button>';
-print '<button type="submit" class="liste_titre button_removefilter reposition" name="button_removefilter_x" value="x"><span class="fas fa-times"></span> ' . dol_escape_htmltag($resetBtnLabel) . '</button>';
-print '</div>';
-
-print '</div>'; // end #saturne-filter-panel
+// Side filter panel removed
 
 // Preserve non-visible search parameters as hidden inputs so they survive form submissions
 foreach ($search as $key => $val) {
@@ -416,5 +409,5 @@ foreach ($search as $key => $val) {
 }
 
 print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you don't need reserved height for your table
-print '<table class="tagtable nobottomiftotal noborder liste' . ($moreForFilter ? ' listwithfilterbefore' : '') . '">';
+print '<table class="tagtable nobottomiftotal noborder liste' . ($moreForFilter ? ' listwithfilterbefore' : '') . '" data-list-layout-id="' . dol_escape_htmltag($listLayoutId) . '">';
 print '<thead>';
