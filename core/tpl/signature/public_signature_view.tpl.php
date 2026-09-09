@@ -47,11 +47,21 @@
         $canServePdf = $isNativePdf || (!empty($conf->global->MAIN_ODT_AS_PDF) && getDolGlobalInt($confAutoPdf) > 0);
 
         $path = DOL_MAIN_URL_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/';
-        $specimenExt = $canServePdf ? '.pdf' : '.odt';
 
         $isSpecimen = 0;
         $sourceDirDoc = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?? 1] . '/' . strtolower($objectType) . 'document/' . dol_sanitizeFileName($object->ref) . '/';
-        $files = dol_dir_list($sourceDirDoc, 'files', 1, '\.' . ($canServePdf ? 'pdf' : 'odt') . '$', null, 'date', SORT_DESC);
+        // Le format servi suit le fichier reellement present : un PDF prime toujours sur l'ODT.
+        // La constante de modele peut mentir - un module dont le generateur natif est un PDF
+        // produit un PDF meme quand elle designe encore le modele ODT - et le repli plus bas
+        // fabriquait alors un nom de fichier en .odt que personne ne pouvait telecharger.
+        // Elle ne decide donc plus que du format attendu tant que rien n'a ete genere.
+        $files = dol_dir_list($sourceDirDoc, 'files', 1, '\.pdf$', null, 'date', SORT_DESC);
+        if (!empty($files)) {
+            $canServePdf = true;
+        } else {
+            $files = dol_dir_list($sourceDirDoc, 'files', 1, '\.odt$', null, 'date', SORT_DESC);
+        }
+        $specimenExt = $canServePdf ? '.pdf' : '.odt';
         if (!empty($document->last_main_doc)) {
             $originalName = basename($document->last_main_doc);
             if ($canServePdf) {
