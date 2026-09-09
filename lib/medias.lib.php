@@ -157,6 +157,11 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
  * @param  int         $show_only_favorite   Show only object favorite media
  * @param  string      $morecss              Add more CSS on link
  * @param  int         $showdiv              Add div with "media-container" class
+ * @param  array       $moreParams           More parameters:
+ *                                             - filter      (string) Name filter forwarded to dol_dir_list()
+ *                                             - useAi       (bool)   Show the AI generation button on the medias
+ *                                             - hideNoPhoto (bool)   Skip the "no photo yet" placeholder: a creation
+ *                                                                    form has an empty folder by construction
  * @return string      $return               Show medias linked
  */
 function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $size = 0, $nbmax = 0, int $nbbyrow = 5, int $showfilename = 0, int $showaction = 0, int $maxHeight = 120, int $maxWidth = 160, int $nolink = 0, int $notitle = 0, int $usesharelink = 0, string $subdir = '', object $object = null, string $favorite_field = 'photo', int $show_favorite_button = 1, int $show_unlink_button = 1 , int $use_mini_format = 0, int $show_only_favorite = 0, string $morecss = '', int $showdiv = 1, array $moreParams = []): string
@@ -400,7 +405,7 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 	}
 
 	// Nothing shown because the folder is empty, or because the favorite media it holds has been deleted
-	if (empty($nbphoto) && ($show_only_favorite || empty($filearray))) {
+	if (empty($nbphoto) && ($show_only_favorite || empty($filearray)) && empty($moreParams['hideNoPhoto'])) {
         $return .= '<img  width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo '. $morecss .' photowithmargin" src="' . DOL_URL_ROOT . '/public/theme/common/nophoto.png" title="' . $langs->trans('NoPhotoYet') . '">';
     }
 
