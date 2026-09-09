@@ -673,7 +673,7 @@ class SaturneDocumentModel extends CommonDocGenerator
                             $tmpArray[$segment . '_attendance']     = $attendance;
                             if (dol_strlen($objectSignatory->signature) > 0 && $objectSignatory->signature != $langs->transnoentities('FileGenerated')) {
                                 $confSignatureName = dol_strtoupper($this->module) . '_SHOW_SIGNATURE_SPECIMEN';
-                                if ($moreParam['specimen'] == 0 || ($moreParam['specimen'] == 1 && $conf->global->$confSignatureName == 1)) {
+                                if (empty($moreParam['specimen']) || getDolGlobalInt($confSignatureName) == 1) {
                                     $encodedImage = explode(',', $objectSignatory->signature)[1];
                                     $decodedImage = base64_decode($encodedImage);
                                     file_put_contents($tempDir . 'signature' . $objectSignatory->id . '.png', $decodedImage);
@@ -757,7 +757,7 @@ class SaturneDocumentModel extends CommonDocGenerator
 
     public function buildDocumentFilename($objectDocument, $outputLangs, $object, $moreParam, $srcTemplatePath = '')
     {
-        global $langs;
+        global $conf, $langs;
 
         $confRefModName   = dol_strtoupper($this->module) . '_' . dol_strtoupper($this->document_type) . '_ADDON';
         $numberingModules = [(!empty($moreParam['subDir']) ? $moreParam['subDir'] : $this->module . 'documents/') . $this->document_type => getDolGlobalString($confRefModName)];
@@ -773,7 +773,10 @@ class SaturneDocumentModel extends CommonDocGenerator
             return -1;
         }
 
-        $uploadDir = getMultidirOutput($object, $this->module);
+        // getMultidirOutput() indexes multidir_output on the object entity without guarding the key:
+        // an object of another entity (multicompany sharing) makes it warn before returning nothing.
+        $objectEntity = empty($object->entity) ? $conf->entity : $object->entity;
+        $uploadDir    = isset($conf->{$this->module}->multidir_output[$objectEntity]) ? getMultidirOutput($object, $this->module) : '';
         if (!$uploadDir) {
             // multidir_output is keyed on the current entity only; surface module + object entity
             // so a missing key (e.g. cross-entity object in multicompany) is diagnosable.
@@ -782,7 +785,7 @@ class SaturneDocumentModel extends CommonDocGenerator
         }
 
         $dir = $uploadDir . '/' . $this->document_type . (dol_strlen($object->ref) > 0 ? '/' . $object->ref : '');
-        if ($moreParam['specimen'] == 1 && $moreParam['zone'] == 'public') {
+        if (!empty($moreParam['specimen']) && ($moreParam['zone'] ?? '') == 'public') {
             $dir .= '/public_specimen';
         }
 
@@ -804,7 +807,7 @@ class SaturneDocumentModel extends CommonDocGenerator
         $date        = dol_print_date(dol_now(), 'dayxcard');
         $newFileTmp  = $date . (dol_strlen($object->ref) > 0 ? '_' . $object->ref : '') . '_' . $objectDocumentRef . ($moreParam['hideTemplateName'] ? '' : '_' . $outputLangs->transnoentities($newFileTmp)) . '_' . (!empty($moreParam['documentName']) ? $moreParam['documentName'] : '') . $societyName . (!empty($moreParam['additionalName']) ? $moreParam['additionalName'] : '');
 
-        if ($moreParam['specimen'] == 1) {
+        if (!empty($moreParam['specimen'])) {
             $newFileTmp .= '_specimen';
         }
         $newFileTmp = str_replace(' ', '_', $newFileTmp);
@@ -958,7 +961,10 @@ class SaturneDocumentModel extends CommonDocGenerator
             @chmod($file, octdec($conf->global->MAIN_UMASK));
         }
 
-        $tempDir = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?? 1] . '/temp/';
+        // multidir_output is only keyed on the entities where the module is active: an object of
+        // another entity falls back on the current one instead of emitting a warning.
+        $multidirOutput = $conf->$moduleNameLowerCase->multidir_output;
+        $tempDir        = ($multidirOutput[$object->entity ?? $conf->entity] ?? $multidirOutput[$conf->entity] ?? '') . '/temp/';
         $fileArray = dol_dir_list($tempDir, 'files');
         if (!empty($fileArray)) {
             foreach ($fileArray as $file) {
