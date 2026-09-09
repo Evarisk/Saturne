@@ -706,7 +706,7 @@ parameters:
 			path: core/triggers/interface_10_modSaturne_TicketMailModel.class.php
 
 		-
-			message: '#^Property DolibarrTriggers\:\:\$version \(''''\|''development''\|''dolibarr''\|''experimental''\) does not accept ''23\.0\.0''\.$#'
+			message: '#^Property DolibarrTriggers\:\:\$version \(''''\|''development''\|''dolibarr''\|''experimental''\) does not accept ''[0-9]+\.[0-9]+\.[0-9]+''\.$#'
 			identifier: assign.propertyType
 			path: core/triggers/interface_99_modSaturne_SaturneTriggers.class.php
 
