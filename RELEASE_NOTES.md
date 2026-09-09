@@ -1,90 +1,114 @@
-# [Saturne] [23.0.0] - Médiathèque enrichie - Filtres avancés sur les listes
+# [Saturne] [23.1.0] - Listes personnalisables - Édition en ligne - Signature en masse
 
-Description : Cette version refond complètement la médiathèque (éditeur photo réutilisable, enregistrement et bibliothèque audio), introduit un système de filtres avancés sur la vue liste générique et ajoute la compatibilité avec Dolibarr 22.
+Description : Cette version fait de la liste générique un véritable outil de travail — colonnes redimensionnables et réordonnables par utilisateur, en-tête collant, édition en ligne, filtres en volet latéral et cartes d'indicateurs. Elle industrialise la signature avec des actions de masse, enrichit l'éditeur photo, et referme le chantier qualité : les cinq contrôles d'intégration continue passent enfin au vert.
 
 ## Nouvelles fonctionnalités et innovations
 
-### Médiathèque
+### Listes génériques
 
-* Nouveau bloc média réutilisable (`saturne_render_media_block`) avec un onglet d'administration dédié et des traductions complètes — chaque module peut désormais afficher la médiathèque via un seul appel.
-* L'éditeur photo basé sur canvas est remplacé par le composant `photo-editor-modal` issu de ReedCRM : recadrage, dessin, ajout de texte et flou désormais disponibles partout.
-* Navigation précédent / suivant dans l'éditeur photo : on peut parcourir toute une galerie sans la quitter, avec un badge d'index et un remplacement automatique de la photo en cours d'édition.
-* Bibliothèque audio complète : enregistrement, lecture, modale de sélection et suppression — gérée intégralement via attributs `data-*` (zéro JS inline).
-* Upload des photos auto-déclenché en AJAX via `mediaBlock.js`, avec validation MIME côté serveur et messages d'erreur via jnotify.
+* Chaque utilisateur compose sa vue : **redimensionnement fluide des colonnes** et **réorganisation par glisser-déposer** via une poignée à six points, la disposition étant mémorisée par utilisateur et par liste.
+* **En-tête de tableau collant** : les intitulés de colonnes restent visibles pendant le défilement, y compris la ligne de filtres classique.
+* **Cartes d'indicateurs** au-dessus des listes filtrées, repliables et compactes, avec un mécanisme générique réutilisable par chaque module.
+* **Barre de préréglages** avec des puces retirables, pour visualiser et lever les filtres actifs d'un geste.
+* Nouveau hook `saturneListTopBanner` au-dessus du bandeau de titre, et le hook `saturnePrintFieldListLoopObject` reçoit désormais la ligne brute de la requête.
+
+![Le sélecteur de colonnes ouvert sur une liste générique](https://raw.githubusercontent.com/nicolas-eoxia/Saturne/assets/release-23.1.0/.shots/23.1.0-liste-colonnes.png)
+
+### Édition en ligne
+
+* **Édition directe dans la liste**, toujours active sur les champs éditables : texte, sélecteurs et listes déroulantes, sans quitter la page ni ouvrir la fiche.
+* Prise en charge des **extrafields** et validation optionnelle par expression régulière sur les champs texte.
+* Le point d'entrée AJAX a été sécurisé et les objets en lecture seule ne sont plus modifiables, grâce au nouveau contrôle serveur `isModifiable()`.
+* Le libellé de l'objet devient éditable directement depuis le bandeau de fiche.
 
 <!-- 📸 Ajouter une screenshot ici -->
 
-### Filtres avancés sur les listes
+### Filtres
 
-* Nouveau système de filtres sur la vue liste générique : ajout, retrait (croix dédiée), recherche globale (`searchall`) et recherche sur un champ unique fonctionnent désormais de manière cohérente.
-* Les paramètres de recherche non visibles sont préservés lors du tri/pagination grâce à l'utilisation d'un `contextpage` unique.
-* Hook ajouté sur la liste pour permettre aux modules enfants d'injecter leurs propres filtres.
-* Badges de filtres alignés sur le rendu Dolibarr standard (couleurs, spans des catégories).
-
-<!-- 📸 Ajouter une screenshot ici -->
-
-### Compatibilité Dolibarr 22
-
-* `SaturneObject` : remplacement de `dolBuildUrl` par `http_build_query` pour rester compatible avec Dolibarr 22 (la fonction `dolBuildUrl` ayant été retirée).
-
----
-
-## Améliorations & corrections
-
-### Médiathèque
-
-* MIME type des images vérifié à l'upload, avec un message d'erreur explicite via jnotify.
-* La modale audio se ferme correctement au clic extérieur et se rafraîchit après chaque enregistrement.
-* Suppression d'audio depuis la modale via attributs `data-*` (plus d'inline `onclick`).
-* Vignette de galerie correctement encapsulée dans `.saturne-media-gallery` pour que le rafraîchissement post-upload fonctionne.
-* Bouton OK distinct du bouton Save : sauvegarder une photo dans l'éditeur ne ferme plus involontairement la modale.
-* Bouton « OK » avec coche verte, barre d'outils sur une seule ligne, navigation déplacée à l'intérieur du canvas — refonte complète du visuel de l'éditeur photo.
-* Tous les styles inline (PHP et JS) ont été migrés vers SCSS pour faciliter la personnalisation par module.
-* Conflit de loader corrigé : utilisation de `butAction` au lieu de `wpeo-button` sur les boutons d'upload.
-* Garde `!empty()` ajoutée sur les préférences `$user->conf` de la galerie pour éviter les notices PHP.
-* Helpers de jeton d'upload et fonction `get_media_files` documentés (PHPDoc utilisateur).
-
-### Vue liste
-
-* Champ calendrier à nouveau visible dans les filtres.
-* Badge correctement affiché lorsqu'un seul `searchall` est utilisé.
-* Recherche `searchall` sur un seul champ fonctionnelle.
-* Recherche inversée sur les champs corrigée.
-* Inclusion JS/CSS multiples supprimée — `maxwidthsearch` correctement appliqué.
-* CSS et JS inline retirés des templates.
-* Champs et traductions de filtres correctement remontés.
-
-### Tableau de bord
-
-* Affichage de 4 graphiques par ligne (au lieu d'une grille incohérente).
-* Filtre multi-critères sur les graphiques corrigé (résultats vides quand plusieurs filtres étaient combinés).
-
-### Schéma SQL
-
-* Ajout des tables d'extrafields manquantes pour `saturne_object_documents`, signature et schedules.
-* Fichiers SQL d'extrafields obsolètes retirés ; `isextrafieldmanaged` passé à `0` quand inutile — schéma simplifié.
+* **Volet latéral de filtres** avec compteur de filtres actifs et remise à zéro globale.
+* **Bascule entre deux présentations** — ligne de filtres classique ou volet latéral — mémorisée par utilisateur.
+* Retour du **filtre par tag de catégorie** sur les listes génériques.
 
 ### Signature
 
-* Détails de l'email (sujet, destinataires) journalisés dans `actioncomm` à l'envoi pour faciliter le suivi.
+* **Signature automatique** des utilisateurs qui en ont fait la demande.
+* **Action de masse** appliquant la signature électronique de l'utilisateur à plusieurs objets, et **page de signature en masse** pour signer au nom d'un seul participant.
+* Lien direct vers la page de signature depuis les listes d'objets.
 
-### Pipeline CI/CD
+### Actions de masse
 
-* Workflow `release.yml` finalisé avec gestion correcte de `.gitattributes` (export-ignore) et compilation automatique des assets minifiés sur push.
-* Workflow Phan / PHPStan stabilisé après plusieurs itérations.
-* `cross-env` utilisé pour les builds Gulp (compatibilité Windows / Linux).
-* Suppression du CSS non minifié du dépôt.
-* Paramètre `module` correctement passé pour permettre la compilation d'autres modules que Saturne.
+* **Valider**, proposée en option sur les listes d'objets.
+* **Archiver et désarchiver** : action de masse avec confirmation, action de fiche `confirm_unarchive`, et méthode `setUnarchived()` ramenant un objet archivé à l'état validé.
 
-## Comparaison des versions [22.1.0](https://github.com/Evarisk/Saturne/compare/22.1.0...23.0.0) et 23.0.0
+### Médiathèque et éditeur photo
 
-* [#1346] [MediaLib] fix: guard $user->conf media gallery prefs with !empty [`#1347`](https://github.com/Evarisk/Saturne/pull/1347)
-* [#1342] [Signature] fix: log email details in actioncomm on send_email [`#1343`](https://github.com/Evarisk/Saturne/pull/1343)
-* [#1337] [MediaLib] feat: photo editor modal, audio library, media block [`#1338`](https://github.com/Evarisk/Saturne/pull/1338)
-* [#1339] [SQL] fix: missing extrafields tables and cleanup [`#1340`](https://github.com/Evarisk/Saturne/pull/1340) [`#1341`](https://github.com/Evarisk/Saturne/pull/1341)
-* [SaturneObject] fix: replace dolBuildUrl with http_build_query for Dolibarr 22 compat [`4b17d693`](https://github.com/Evarisk/Saturne/commit/4b17d693)
-* [List] fix: use unique contextpage and preserve non-visible search params [`7c9a2269`](https://github.com/Evarisk/Saturne/commit/7c9a2269)
-* [#1319] [List] add: new filter on saturne list [`#1320`](https://github.com/Evarisk/Saturne/pull/1320)
-* [#1321] [Graph] fix: bugged filter when multi filter [`#1322`](https://github.com/Evarisk/Saturne/pull/1322)
-* [#1323] [CSS] fix: warning scss [`0ed974c4`](https://github.com/Evarisk/Saturne/commit/0ed974c4)
-* [#127] [CI] add: release workflow and gitattributes [`#1314`](https://github.com/Evarisk/Saturne/pull/1314)
+* **Éditeur photo séquentiel** lors d'un envoi multiple : les photos s'enchaînent sans quitter l'éditeur, avec redimensionnement de toutes les images et action « tout valider ».
+* **Suppression d'une photo** directement depuis l'éditeur de la galerie, et affichage des outils configurable un par un.
+* Section d'**envoi de documents** dans le bloc média, et **glisser-déposer** sur l'onglet des fichiers joints.
+* Boutons distincts pour la **prise de vue** et pour la **galerie**, et option `hideNoPhoto` pour masquer le repli « pas de photo ».
+
+<!-- 📸 Ajouter une screenshot ici -->
+
+### Objets liables
+
+* Nouvelle section d'administration des **éléments liables**, avec mesure de l'usage réel de chaque objet avant toute modification.
+* **Synchronisation idempotente des extrafields**, aide de reconstruction des onglets et des hooks, et confirmation avant un changement de lien destructeur.
+
+### Divers
+
+* **API REST** : socle générique `SaturneApi`, dispatcher que chaque module peut étendre.
+* **Graphes du tableau de bord cliquables**, renvoyant vers la liste correspondante.
+* **Réorganisation par glisser-déposer** des éléments dans le menu des unités de travail.
+* Emails de création de ticket fondés sur un **modèle d'email configurable**.
+* `saturne_flatten_wysiwyg_blocks()` pour produire des sorties sans balises de bloc.
+
+## Améliorations & corrections
+
+### Performance
+
+* Les extrafields sont **chargés en une seule requête** dans `fetchAll` au lieu d'une par ligne, ce qui supprime le N+1 le plus coûteux des pages de liste.
+* Nouveau `saturne_select_users()` avec liste d'utilisateurs mise en cache par requête ; les utilisateurs ne sont plus listés que dans le premier sélecteur.
+* La médiathèque ne liste ni ne mesure plus les fichiers inutilement.
+
+### Vue liste
+
+* Le sélecteur de colonnes s'affichait derrière l'en-tête collant ; le tri par colonne passe désormais par le formulaire de recherche et conserve filtres et contexte.
+* Un champ restait bloqué en lecture après une sauvegarde réussie de l'édition en ligne.
+* Le bouton « + » avait disparu de toutes les listes, et la disposition enregistrée des colonnes n'était pas appliquée sur le gabarit partagé.
+* Les colonnes virtuelles ne provoquent plus d'erreur « Unknown column » dans la clause de recherche, les lignes groupées sont comptées correctement, et un tri invalide ne casse plus l'affichage.
+* Le saut direct vers un enregistrement unique n'affiche plus une page blanche.
+* Les lignes gardent une hauteur d'une ligne même lorsqu'une cellule contient du HTML enrichi, et la loupe d'aperçu masquée par la remise à zéro des cellules est de retour.
+
+### Médiathèque
+
+* Envoi d'une série de photos sans passer par la fenêtre de l'éditeur, ouverture de l'appareil photo sur le champ dédié, et restriction du champ documents aux documents.
+* Une vignette est servie à la place de l'original, un favori supprimé cède la place au média suivant au lieu de masquer la photo, et le titre affiché redevient honnête.
+
+### Documents et modèles
+
+* Un modèle PDF n'affiche plus les templates ODT du modèle voisin sur la page de configuration, et les modèles d'un document frère y sont enfin visibles.
+* La constante de modèle par défaut est construite sur le type d'objet, l'aperçu et la bascule « défaut » fonctionnent, et l'entité courante sert de repli pour les liens de document.
+* Les guillemets sont retirés des noms de fichiers générés, qui cassaient la conversion ODT vers PDF, et le répertoire temporaire est créé avant copie.
+* Le compteur des modèles de numérotation personnalisés était lu au mauvais offset, et l'appel mort à `strftime()` est supprimé.
+* La page de signature sert le PDF généré au lieu d'un `.odt` inexistant, et résout correctement le modèle par défaut.
+
+### Fiches, menus et interface
+
+* Un enregistrement introuvable renvoie vers la liste de son type plutôt que vers une erreur fatale, avec une destination surchargeable par le module appelant.
+* L'arborescence ne se déplie automatiquement que sur les pages concernées, et le menu gauche réduit ne déborde plus sur le contenu.
+* Le logo du module n'est plus grisé sur l'accueil, l'en-tête des fenêtres modales reste au-dessus du menu supérieur de Dolibarr, et les tableaux du tableau de bord défilent sans emporter la page entière.
+
+### Socle et compatibilité
+
+* Saturne **déclare les modules dont il dépend** — ECM, Agenda, FCKeditor et Catégories — au lieu de laisser chaque module les redéclarer.
+* Correction de plusieurs avertissements PHP 8 : propriétés dynamiques dépréciées, propriétés typées jamais reçues, variables non initialisées dans l'arborescence et le tableau de bord.
+* Parité complète des fichiers de langue en_US, clés mortes et doublons retirés.
+* La compatibilité annoncée est resserrée sur **Dolibarr 23**.
+
+### Intégration continue
+
+* Les **cinq contrôles qualité passent au vert** sur `develop` : jshint, phpcs, phan, phpstan et phpunit.
+* Passage de `phpcbf` sur les 1412 violations PSR-12 automatiquement corrigeables, et respect des types déclarés aux appels signalés par phan.
+* Un `alert()` de débogage oublié dans le popover de filtre a été retiré de la production.
+
+## Comparaison des versions [23.0.0](https://github.com/Evarisk/Saturne/compare/23.0.0...23.1.0) et 23.1.0
