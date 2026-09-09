@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2023 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -42,46 +43,48 @@ $form = new Form($db);
 $mediaSizes = ['mini', 'small', 'medium', 'large'];
 
 if (!(isset($error) && $error) && $subaction == 'uploadPhoto' && ! empty($conf->global->MAIN_UPLOAD_DOC)) {
+    // Define relativepath and upload_dir
+    $relativepath                                             = $moduleNameLowerCase . '/medias';
+    $uploadDir                                                = $conf->ecm->dir_output . '/' . $relativepath;
 
-	// Define relativepath and upload_dir
-	$relativepath                                             = $moduleNameLowerCase . '/medias';
-	$uploadDir                                                = $conf->ecm->dir_output . '/' . $relativepath;
+    if (is_array($_FILES['userfile']['tmp_name'])) {
+        $userfiles = $_FILES['userfile']['tmp_name'];
+    } else {
+        $userfiles                                           = array($_FILES['userfile']['tmp_name']);
+    }
 
-	if (is_array($_FILES['userfile']['tmp_name'])) $userfiles = $_FILES['userfile']['tmp_name'];
-	else $userfiles                                           = array($_FILES['userfile']['tmp_name']);
+    foreach ($userfiles as $key => $userfile) {
+        $error = 0;
+        if (empty($_FILES['userfile']['tmp_name'][$key])) {
+            $error++;
+            if ($_FILES['userfile']['error'][$key] == 1 || $_FILES['userfile']['error'][$key] == 2) {
+                setEventMessages($langs->transnoentitiesnoconv('ErrorThisFileSizeTooLarge', (string) ($_FILES['userfile']['name'][$key] ?? '')), null, 'errors');
+                $submitFileErrorText = array('message' => $langs->transnoentitiesnoconv('ErrorThisFileSizeTooLarge', (string) ($_FILES['userfile']['name'][$key] ?? '')), 'code' => '1337');
+            } else {
+                setEventMessages($langs->transnoentitiesnoconv("ErrorThisFileSizeTooLarge", (string) ($_FILES['userfile']['name'][$key] ?? ''), $langs->transnoentitiesnoconv("File")), null, 'errors');
+                $submitFileErrorText = array('message' => $langs->transnoentitiesnoconv('ErrorThisFileSizeTooLarge', (string) ($_FILES['userfile']['name'][$key] ?? '')), 'code' => '1337');
+            }
+        }
 
-	foreach ($userfiles as $key => $userfile) {
-		$error = 0;
-		if (empty($_FILES['userfile']['tmp_name'][$key])) {
-			$error++;
-			if ($_FILES['userfile']['error'][$key] == 1 || $_FILES['userfile']['error'][$key] == 2) {
-				setEventMessages($langs->transnoentitiesnoconv('ErrorThisFileSizeTooLarge', (string) ($_FILES['userfile']['name'][$key] ?? '')), null, 'errors');
-				$submitFileErrorText = array('message' => $langs->transnoentitiesnoconv('ErrorThisFileSizeTooLarge', (string) ($_FILES['userfile']['name'][$key] ?? '')), 'code' => '1337');
-			} else {
-				setEventMessages($langs->transnoentitiesnoconv("ErrorThisFileSizeTooLarge", (string) ($_FILES['userfile']['name'][$key] ?? ''), $langs->transnoentitiesnoconv("File")), null, 'errors');
-				$submitFileErrorText = array('message' => $langs->transnoentitiesnoconv('ErrorThisFileSizeTooLarge', (string) ($_FILES['userfile']['name'][$key] ?? '')), 'code' => '1337');
-			}
-		}
-
-		if ( ! $error) {
-			$generatethumbs = 1;
-			$res = dol_add_file_process($uploadDir, 0, 1, 'userfile', '', null, '', $generatethumbs);
-			if ($res > 0) {
+        if (! $error) {
+            $generatethumbs = 1;
+            $res = dol_add_file_process($uploadDir, 0, 1, 'userfile', '', null, '', $generatethumbs);
+            if ($res > 0) {
                 $confWidthMedium  = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_MEDIUM';
                 $confHeightMedium = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_MEDIUM';
                 $confWidthLarge   = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_LARGE';
                 $confHeightLarge  = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_LARGE';
 
                 // Create thumbs
-				$imgThumbLarge  = saturne_vignette($uploadDir . '/' . $_FILES['userfile']['name'][$key], $conf->global->$confWidthLarge, $conf->global->$confHeightLarge, '_large');
-				$imgThumbMedium = saturne_vignette($uploadDir . '/' . $_FILES['userfile']['name'][$key], $conf->global->$confWidthMedium, $conf->global->$confHeightMedium, '_medium');
-				$result         = $ecmdir->changeNbOfFiles('+');
-			} else {
-				setEventMessages($langs->transnoentitiesnoconv("ErrorThisFileExists", (string) ($_FILES['userfile']['name'][$key] ?? ''), $langs->transnoentitiesnoconv("File")), null, 'errors');
-				$submitFileErrorText = array('message' => $langs->transnoentities('ErrorThisFileExists', (string) ($_FILES['userfile']['name'][$key] ?? '')), 'code' => '1337');
-			}
-		}
-	}
+                $imgThumbLarge  = saturne_vignette($uploadDir . '/' . $_FILES['userfile']['name'][$key], $conf->global->$confWidthLarge, $conf->global->$confHeightLarge, '_large');
+                $imgThumbMedium = saturne_vignette($uploadDir . '/' . $_FILES['userfile']['name'][$key], $conf->global->$confWidthMedium, $conf->global->$confHeightMedium, '_medium');
+                $result         = $ecmdir->changeNbOfFiles('+');
+            } else {
+                setEventMessages($langs->transnoentitiesnoconv("ErrorThisFileExists", (string) ($_FILES['userfile']['name'][$key] ?? ''), $langs->transnoentitiesnoconv("File")), null, 'errors');
+                $submitFileErrorText = array('message' => $langs->transnoentities('ErrorThisFileExists', (string) ($_FILES['userfile']['name'][$key] ?? '')), 'code' => '1337');
+            }
+        }
+    }
 }
 
 if ($subaction == 'add_img') {
@@ -124,7 +127,7 @@ if ($subaction == 'add_img') {
     dol_copy($pathToECMImg . '/' . $fileName, $pathToObjectImg . '/' . $fileName);
 
     // Create thumbs
-    foreach($mediaSizes as $size) {
+    foreach ($mediaSizes as $size) {
         $confWidth  = 'SATURNE_MEDIA_MAX_WIDTH_' . dol_strtoupper($size);
         $confHeight = 'SATURNE_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size);
         saturne_vignette($pathToECMImg . '/' . $fileName, $conf->global->$confWidth, $conf->global->$confHeight, '_' . $size);
@@ -142,7 +145,7 @@ if ($subaction == 'addFiles') {
     $object    = new $className($db);
     $object->fetch($objectId);
 
-    $pathToECMImg = $conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias';
+    $pathToECMImg = $conf->ecm->multidir_output[$conf->entity] . '/' . $moduleNameLowerCase . '/medias';
     if (!dol_is_dir($pathToECMImg)) {
         dol_mkdir($pathToECMImg);
     }
@@ -183,7 +186,7 @@ if ($subaction == 'addFiles') {
             dol_copy($pathToECMImg . '/' . $fileName, $pathToObjectImg . '/' . $fileName);
 
             // Create thumbs
-            foreach($mediaSizes as $size) {
+            foreach ($mediaSizes as $size) {
                 $confWidth  = 'SATURNE_MEDIA_MAX_WIDTH_' . dol_strtoupper($size);
                 $confHeight = 'SATURNE_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size);
                 saturne_vignette($pathToObjectImg . '/' . $fileName, $conf->global->$confWidth, $conf->global->$confHeight, '_' . $size);
@@ -210,7 +213,7 @@ if ($subaction == 'delete_files') {
             $fileName       = dol_sanitizeFileName($fileName);
             $pathToECMPhoto = $conf->ecm->multidir_output[$conf->entity] . '/' . $moduleNameLowerCase . '/medias/' . $fileName;
             if (is_file($pathToECMPhoto)) {
-                foreach($mediaSizes as $size) {
+                foreach ($mediaSizes as $size) {
                     $thumbName = $conf->ecm->multidir_output[$conf->entity] . '/' . $moduleNameLowerCase . '/medias/thumbs/' . saturne_get_thumb_name($fileName, $size);
                     if (is_file($thumbName)) {
                         unlink($thumbName);
@@ -229,7 +232,7 @@ if ($subaction == 'unlinkFile') {
     if (is_file($fullPath)) {
         unlink($fullPath);
 
-        foreach($mediaSizes as $size) {
+        foreach ($mediaSizes as $size) {
             $thumbName = $data['filepath'] . '/thumbs/' . saturne_get_thumb_name($data['filename'], $size);
             if (is_file($thumbName)) {
                 unlink($thumbName);
@@ -273,12 +276,12 @@ if ($subaction == 'addToFavorite') {
 }
 
 if (!(isset($error) && $error) && $subaction == 'pagination') {
-	$data = json_decode(file_get_contents('php://input'), true);
+    $data = json_decode(file_get_contents('php://input'), true);
 
-	$offset       = $data['offset'];
-	$pagesCounter = $data['pagesCounter'];
+    $offset       = $data['offset'];
+    $pagesCounter = $data['pagesCounter'];
 
-	$loadedPageArray = saturne_load_pagination($pagesCounter, [], $offset);
+    $loadedPageArray = saturne_load_pagination($pagesCounter, [], $offset);
 }
 
 if (!(isset($error) && $error) && $subaction == 'toggleTodayMedias') {
@@ -286,7 +289,7 @@ if (!(isset($error) && $error) && $subaction == 'toggleTodayMedias') {
 
     $tabparam['SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS'] = $toggleValue;
 
-    dol_set_user_param($db, $conf,$user, $tabparam);
+    dol_set_user_param($db, $conf, $user, $tabparam);
 }
 
 if (!(isset($error) && $error) && $subaction == 'toggleUnlinkedMedias') {
@@ -294,13 +297,13 @@ if (!(isset($error) && $error) && $subaction == 'toggleUnlinkedMedias') {
 
     $tabparam['SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS'] = $toggleValue;
 
-    dol_set_user_param($db, $conf,$user, $tabparam);
+    dol_set_user_param($db, $conf, $user, $tabparam);
 }
 
 if (!(isset($error) && $error) && $subaction == 'regenerate_thumbs') {
     $data = json_decode(file_get_contents('php://input'), true);
 
-    foreach($mediaSizes as $size) {
+    foreach ($mediaSizes as $size) {
         $confWidth  = 'SATURNE_MEDIA_MAX_WIDTH_' . dol_strtoupper($size);
         $confHeight = 'SATURNE_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size);
         saturne_vignette($data['fullname'], $conf->global->$confWidth, $conf->global->$confHeight, '_' . $size);
@@ -308,7 +311,7 @@ if (!(isset($error) && $error) && $subaction == 'regenerate_thumbs') {
 }
 
 if (!empty($submitFileErrorText) && is_array($submitFileErrorText)) {
-	print '<input class="error-medias" value="'. htmlspecialchars(json_encode($submitFileErrorText)) .'">';
+    print '<input class="error-medias" value="' . htmlspecialchars(json_encode($submitFileErrorText)) . '">';
 }
 
 $mediaResolutionParts = explode('-', getDolGlobalString('SATURNE_MEDIA_RESOLUTION_USED'));
@@ -318,49 +321,49 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
 
 <!-- START MEDIA GALLERY MODAL -->
 <div class="wpeo-modal modal-photo" id="media_gallery" data-id="<?php echo (isset($object) && $object) ? $object->id : 0 ?>">
-	<div class="modal-container wpeo-modal-event">
-		<!-- Modal-Header -->
-		<div class="modal-header">
-			<h2 class="modal-title"><?php echo $langs->trans('MediaGallery')?></h2>
-			<div class="modal-close"><i class="fas fa-2x fa-times"></i></div>
-		</div>
-		<!-- Modal-Content -->
-		<div class="modal-content" id="#modalMediaGalleryContent">
-			<div class="messageSuccessSendPhoto notice hidden">
-				<div class="wpeo-notice notice-success send-photo-success-notice">
-					<div class="notice-content">
-						<div class="notice-title"><?php echo $langs->trans('PhotoWellSent') ?></div>
-					</div>
-					<div class="notice-close"><i class="fas fa-times"></i></div>
-				</div>
-			</div>
-			<div class="messageErrorSendPhoto notice hidden">
-				<div class="wpeo-notice notice-error send-photo-error-notice">
-					<div class="notice-content">
-						<div class="notice-title"><?php echo $langs->trans('PhotoNotSent') ?></div>
-						<div class="notice-subtitle"></div>
-					</div>
-					<div class="notice-close"><i class="fas fa-times"></i></div>
-				</div>
-			</div>
-			<div class="wpeo-gridlayout grid-3">
+    <div class="modal-container wpeo-modal-event">
+        <!-- Modal-Header -->
+        <div class="modal-header">
+            <h2 class="modal-title"><?php echo $langs->trans('MediaGallery')?></h2>
+            <div class="modal-close"><i class="fas fa-2x fa-times"></i></div>
+        </div>
+        <!-- Modal-Content -->
+        <div class="modal-content" id="#modalMediaGalleryContent">
+            <div class="messageSuccessSendPhoto notice hidden">
+                <div class="wpeo-notice notice-success send-photo-success-notice">
+                    <div class="notice-content">
+                        <div class="notice-title"><?php echo $langs->trans('PhotoWellSent') ?></div>
+                    </div>
+                    <div class="notice-close"><i class="fas fa-times"></i></div>
+                </div>
+            </div>
+            <div class="messageErrorSendPhoto notice hidden">
+                <div class="wpeo-notice notice-error send-photo-error-notice">
+                    <div class="notice-content">
+                        <div class="notice-title"><?php echo $langs->trans('PhotoNotSent') ?></div>
+                        <div class="notice-subtitle"></div>
+                    </div>
+                    <div class="notice-close"><i class="fas fa-times"></i></div>
+                </div>
+            </div>
+            <div class="wpeo-gridlayout grid-3">
                 <div class="modal-add-media">
                     <input type="hidden" name="token" value="<?php echo newToken(); ?>">
                     <strong><?php echo $langs->trans('AddFile'); ?></strong>
                     <input type="file" id="add_media_to_gallery" class="flat minwidth400 maxwidth200onsmartphone" name="userfile[]" multiple accept='image/*'>
                     <div class="underbanner clearboth"></div>
                 </div>
-				<div class="form-element">
-					<span class="form-label"><strong><?php print $langs->trans('SearchFile') ?></strong></span>
-					<div class="form-field-container">
-						<div class="wpeo-autocomplete">
-							<label class="autocomplete-label" for="media-gallery-search">
-								<i class="autocomplete-icon-before fas fa-search"></i>
-								<input id="search_in_gallery" placeholder="<?php echo $langs->trans('Search') . '...' ?>" class="autocomplete-search-input" type="text" />
-							</label>
-						</div>
-					</div>
-				</div>
+                <div class="form-element">
+                    <span class="form-label"><strong><?php print $langs->trans('SearchFile') ?></strong></span>
+                    <div class="form-field-container">
+                        <div class="wpeo-autocomplete">
+                            <label class="autocomplete-label" for="media-gallery-search">
+                                <i class="autocomplete-icon-before fas fa-search"></i>
+                                <input id="search_in_gallery" placeholder="<?php echo $langs->trans('Search') . '...' ?>" class="autocomplete-search-input" type="text" />
+                            </label>
+                        </div>
+                    </div>
+                </div>
                 <div>
                     <div>
                         <?php
@@ -380,30 +383,30 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
                         } ?>
                     </div>
                 </div>
-			</div>
-			<div id="progressBarContainer" style="display: none;">
-				<div id="progressBar"></div>
-			</div>
-			<div class="ecm-photo-list-content">
-				<?php
-				$relativepath = $moduleNameLowerCase . '/medias/thumbs';
-				print saturne_show_medias($moduleNameLowerCase, 'ecm', $conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias', 'small', 80, 80, (!empty($offset) ? $offset : 1));
-				?>
-			</div>
-		</div>
-		<!-- Modal-Footer -->
-		<div class="modal-footer">
-			<?php
-			$filearray                    = dol_dir_list($conf->ecm->multidir_output[$conf->entity] . '/'. $moduleNameLowerCase .'/medias/', "files", 0, '', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC);
-			$moduleImageNumberPerPageConf = strtoupper($moduleNameLowerCase) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
+            </div>
+            <div id="progressBarContainer" style="display: none;">
+                <div id="progressBar"></div>
+            </div>
+            <div class="ecm-photo-list-content">
+                <?php
+                $relativepath = $moduleNameLowerCase . '/medias/thumbs';
+                print saturne_show_medias($moduleNameLowerCase, 'ecm', $conf->ecm->multidir_output[$conf->entity] . '/' . $moduleNameLowerCase . '/medias', 'small', 80, 80, (!empty($offset) ? $offset : 1));
+                ?>
+            </div>
+        </div>
+        <!-- Modal-Footer -->
+        <div class="modal-footer">
+            <?php
+            $filearray                    = dol_dir_list($conf->ecm->multidir_output[$conf->entity] . '/' . $moduleNameLowerCase . '/medias/', "files", 0, '', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC);
+            $moduleImageNumberPerPageConf = strtoupper($moduleNameLowerCase) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
             if (isset($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS) && $user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS == 1) {
                 $yesterdayTimeStamp = dol_time_plus_duree(dol_now(), -1, 'd');
-                $filearray = array_filter($filearray, function($file) use ($yesterdayTimeStamp) {
+                $filearray = array_filter($filearray, function ($file) use ($yesterdayTimeStamp) {
                     return $file['date'] > $yesterdayTimeStamp;
                 });
             }
             if (getDolGlobalInt('SATURNE_MEDIA_GALLERY_SHOW_ALL_MEDIA_INFOS')) {
-                $filearray = array_filter($filearray, function($file) use ($conf, $moduleNameLowerCase) {
+                $filearray = array_filter($filearray, function ($file) use ($conf, $moduleNameLowerCase) {
                     $regexFormattedFileName = preg_quote($file['name'], '/');
                     $fileArrays             = dol_dir_list($conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1], 'files', 1, $regexFormattedFileName, '.odt|.pdf|barcode|_mini|_medium|_small|_large');
 
@@ -411,13 +414,13 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
                 });
             }
             $allMediasNumber = count($filearray);
-			$pagesCounter    = $conf->global->$moduleImageNumberPerPageConf ? ceil($allMediasNumber/($conf->global->$moduleImageNumberPerPageConf ?: 1)) : 1;
-			$page_array      = saturne_load_pagination($pagesCounter, $loadedPageArray ?? [], $offset ?? 0);
+            $pagesCounter    = $conf->global->$moduleImageNumberPerPageConf ? ceil($allMediasNumber / ($conf->global->$moduleImageNumberPerPageConf ?: 1)) : 1;
+            $page_array      = saturne_load_pagination($pagesCounter, $loadedPageArray ?? [], $offset ?? 0);
 
-			print saturne_show_pagination($pagesCounter, $page_array, $offset ?? 0); ?>
-			<div class="save-photo wpeo-button button-blue button-disable" value="">
+            print saturne_show_pagination($pagesCounter, $page_array, $offset ?? 0); ?>
+            <div class="save-photo wpeo-button button-blue button-disable" value="">
                 <span><?php echo $langs->trans('Add'); ?></span>
-			</div>
+            </div>
             <div class="wpeo-button button-red button-disable delete-photo">
                 <i class="fas fa-trash-alt"></i>
             </div>
@@ -430,6 +433,6 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
             ];
             require __DIR__ . '/../utils/confirmation_view.tpl.php'; ?>
         </div>
-	</div>
+    </div>
 </div>
 <!-- END MEDIA GALLERY MODAL -->

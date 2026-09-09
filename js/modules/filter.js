@@ -88,7 +88,9 @@ window.saturne.filter = {
 
     highlightFilteredColumns: function() {
         var $searchRow = $('tr.liste_titre_filter');
-        if (!$searchRow.length) return;
+        if (!$searchRow.length) {
+            return;
+        }
         
         $searchRow.find('td').each(function(index) {
             var $td = $(this);
@@ -141,7 +143,9 @@ window.saturne.filter = {
 
         // Find the input container in the hidden row
         var $td = $('.liste_titre_filter td').eq(colIndex);
-        if (!$td.length) return;
+        if (!$td.length) {
+            return;
+        }
 
         // Build popover HTML
         var html = `
@@ -304,10 +308,17 @@ window.saturne.filter = {
                     $checkbox.trigger('click');
                 }
                 var $form = $('#searchFormList');
-                if (!$form.length) $form = $td.closest('form');
-                if ($form.length) $form.submit();
+                if (!$form.length) {
+                    $form = $td.closest('form');
+                }
+                if ($form.length) {
+                    $form.submit();
+                }
             } else {
-                alert("DEBUG: colKey=" + colKey + "\nCheckboxes found: t." + colKey + "=" + $checkbox1.length + ", " + colKey + "=" + $checkbox2.length + "\nIs multiselect in DOM? " + $('.multiselectcheckboxselectedfields').length);
+                // No entry for this column in the field selector: there is
+                // nothing to untick. Keep the diagnosis in the console rather
+                // than throwing a technical dialog at the user.
+                console.warn('saturne.filter: aucune case du selecteur de champs pour la colonne "' + colKey + '"');
             }
         });
     },
@@ -398,12 +409,12 @@ window.saturne.filter = {
         function renderTag(id, lbl, col, mode) {
             var exc  = mode === 'exc';
             var sign = exc ? '\u2212' : '+';
-            return '<span class="cat-sign saturne-cat-tag-sign" style="background:' + col + '">' + catIcon + ' ' + sign + '</span>'
-                + '<span class="saturne-cat-tag-body">'
-                + '<span class="saturne-cat-tag-label' + (exc ? ' is-exc' : '') + '">' + esc(lbl) + '</span>'
-                + '<span class="cat-remove saturne-cat-tag-remove">\u00d7</span>'
-                + '</span>'
-                + '<input type="hidden" name="search_categories_filter[]" value="' + (exc ? '-' : '+') + id + '">';
+            return '<span class="cat-sign saturne-cat-tag-sign" style="background:' + col + '">' + catIcon + ' ' + sign + '</span>' +
+                '<span class="saturne-cat-tag-body">' +
+                '<span class="saturne-cat-tag-label' + (exc ? ' is-exc' : '') + '">' + esc(lbl) + '</span>' +
+                '<span class="cat-remove saturne-cat-tag-remove">\u00d7</span>' +
+                '</span>' +
+                '<input type="hidden" name="search_categories_filter[]" value="' + (exc ? '-' : '+') + id + '">';
         }
 
         function bindTag(s) {

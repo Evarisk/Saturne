@@ -549,7 +549,7 @@ class SaturneSignature extends SaturneObject
             $signatory->signature      = $signature;
             $signatory->signature_date = dol_now();
 
-            $result = $signatory->update($user, true);
+            $result = $signatory->update($user, 1);
             if ($result > 0) {
                 $result = $signatory->setSigned($user, false);
             }
@@ -718,7 +718,7 @@ class SaturneSignature extends SaturneObject
         $signatoriesToDelete = $this->fetchAll('', '', 0, 0, $filter);
         if (!empty($signatoriesToDelete) && $signatoriesToDelete > 0) {
             foreach ($signatoriesToDelete as $signatoryToDelete) {
-                $signatoryToDelete->setDeleted($user, true);
+                $signatoryToDelete->setDeleted($user, 1);
             }
             return 1;
         } else {

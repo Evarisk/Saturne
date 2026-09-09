@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2025 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -82,55 +83,55 @@ function saturne_get_badge_component_html(array $args = []): string
         'actions'   => []
     ];
 
-    $merged_args = array_merge( $defaults, $args );
+    $merged_args = array_merge($defaults, $args);
 
     // Sanitize and prepare data
-    $componentId    = ! empty( $merged_args['id'] ) ? ' id="' . htmlspecialchars( $merged_args['id'] ) . '"' : '';
+    $componentId    = ! empty($merged_args['id']) ? ' id="' . htmlspecialchars($merged_args['id']) . '"' : '';
     // Main block class is 'badge', then add any custom classes
-    $classNames     = 'wpeo-badge ' . htmlspecialchars( $merged_args['className'] );
-    $iconClass      = htmlspecialchars( $merged_args['iconClass'] );
+    $classNames     = 'wpeo-badge ' . htmlspecialchars($merged_args['className']);
+    $iconClass      = htmlspecialchars($merged_args['iconClass']);
     $title          = $langs->transnoentities($merged_args['title']);
     $details        = (array) $merged_args['details'];
     $actions        = (array) $merged_args['actions'];
 
     // Build details HTML
     $detailsHtml = '';
-    foreach ( $details as $detail ) {
-        $detailsHtml .= '<div class="badge__detail" contenteditable="true" data-field="' . $merged_args['field'] . '">' . htmlspecialchars( $detail ) . '</div>'; // BEM class
+    foreach ($details as $detail) {
+        $detailsHtml .= '<div class="badge__detail" contenteditable="true" data-field="' . $merged_args['field'] . '">' . htmlspecialchars($detail) . '</div>'; // BEM class
     }
 
     // Build actions HTML
     $actionButtonsHtml = '';
-    if ( ! empty( $actions ) ) {
-        foreach ( $actions as $action ) {
-            $actionIconClass = isset( $action['iconClass'] ) ? htmlspecialchars( $action['iconClass'] ) : '';
-            $actionLabel     = isset( $action['label'] ) ? htmlspecialchars( $action['label'] ) : 'Action';
-            $actionHref      = isset( $action['href'] ) ? ' href="' . htmlspecialchars( $action['href'] ) . '"' : '';
-            $actionOnClick   = isset( $action['onClick'] ) ? ' onclick="' . htmlspecialchars( $action['onClick'] ) . '"' : '';
+    if (! empty($actions)) {
+        foreach ($actions as $action) {
+            $actionIconClass = isset($action['iconClass']) ? htmlspecialchars($action['iconClass']) : '';
+            $actionLabel     = isset($action['label']) ? htmlspecialchars($action['label']) : 'Action';
+            $actionHref      = isset($action['href']) ? ' href="' . htmlspecialchars($action['href']) . '"' : '';
+            $actionOnClick   = isset($action['onClick']) ? ' onclick="' . htmlspecialchars($action['onClick']) . '"' : '';
 
             // Add BEM modifier if provided
-            $actionModifierClass = isset( $action['modifierClass'] ) ? ' action-button--' . htmlspecialchars( $action['modifierClass'] ) : '';
+            $actionModifierClass = isset($action['modifierClass']) ? ' action-button--' . htmlspecialchars($action['modifierClass']) : '';
             // Any additional custom class for the button
-            $actionCustomClass   = isset( $action['className'] ) ? ' ' . htmlspecialchars( $action['className'] ) : '';
+            $actionCustomClass   = isset($action['className']) ? ' ' . htmlspecialchars($action['className']) : '';
 
             $fullButtonClasses = 'action-button' . $actionModifierClass . $actionCustomClass;
 
             // Decide if it's a button or an anchor link
-            $tag = empty( $actionHref ) ? 'button' : 'a';
+            $tag = empty($actionHref) ? 'button' : 'a';
             $typeAttribute = ( $tag === 'button' ) ? ' type="button"' : '';
 
             // Build hidden inputs HTML
             $hiddenInputsHtml = '';
-            if ( isset( $action['hiddenInputs'] ) && is_array( $action['hiddenInputs'] ) ) {
-                foreach ( $action['hiddenInputs'] as $input ) {
-                    $inputName  = isset( $input['name'] ) ? ' name="' . htmlspecialchars( $input['name'] ) . '"' : '';
-                    $inputValue = isset( $input['value'] ) ? ' value="' . htmlspecialchars( $input['value'] ) . '"' : '';
-                    $inputClass = isset( $input['class'] ) ? ' class="' . htmlspecialchars( $input['class'] ) . '"' : '';
+            if (isset($action['hiddenInputs']) && is_array($action['hiddenInputs'])) {
+                foreach ($action['hiddenInputs'] as $input) {
+                    $inputName  = isset($input['name']) ? ' name="' . htmlspecialchars($input['name']) . '"' : '';
+                    $inputValue = isset($input['value']) ? ' value="' . htmlspecialchars($input['value']) . '"' : '';
+                    $inputClass = isset($input['class']) ? ' class="' . htmlspecialchars($input['class']) . '"' : '';
 
                     $inputDataAttrs = '';
-                    if ( isset( $input['data'] ) && is_array( $input['data'] ) ) {
-                        foreach ( $input['data'] as $dataKey => $dataValue ) {
-                            $inputDataAttrs .= ' data-' . htmlspecialchars( $dataKey ) . '="' . htmlspecialchars( $dataValue ) . '"';
+                    if (isset($input['data']) && is_array($input['data'])) {
+                        foreach ($input['data'] as $dataKey => $dataValue) {
+                            $inputDataAttrs .= ' data-' . htmlspecialchars($dataKey) . '="' . htmlspecialchars($dataValue) . '"';
                         }
                     }
                     $hiddenInputsHtml .= "<input type=\"hidden\"{$inputName}{$inputValue}{$inputClass}{$inputDataAttrs}>";

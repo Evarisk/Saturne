@@ -182,7 +182,7 @@ abstract class SaturneDocuments extends SaturneObject
         }
 
         $result = $this->commonGenerateDocument($modelPath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
-        
+
         // Fallback for Saturne modules: if doc generator wasn't found in the first path, try the 'document' suffixed path
         if ($result <= 0 && (strpos($this->error, 'Failed to load doc generator') !== false || $this->error == 'ErrorFailedToLoadDocumentGenerator')) {
             $modelPathFallback = 'custom/' . $baseModulePath . $this->element . 'document/';
@@ -198,7 +198,7 @@ abstract class SaturneDocuments extends SaturneObject
 
         if ($result > 0) {
             $this->call_trigger(strtoupper($this->type) . '_GENERATE', $moreparams['user']);
-            
+
             if (empty($this->last_main_doc)) {
                 if (!empty($this->result['fullpath'])) {
                     $this->last_main_doc = basename($this->result['fullpath']);

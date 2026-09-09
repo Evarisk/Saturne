@@ -160,7 +160,7 @@ class ActionsSaturne
 
             $this->resprints = $out;
         }
-        
+
         $out = isset($this->resprints) ? $this->resprints : '';
         $out .= "\n" . '<!-- Config Saturne injected by addHtmlHeader -->';
         $out .= "\n" . '<script>';
@@ -274,7 +274,7 @@ class ActionsSaturne
             <script>
                 $('.user_extras_electronic_signature').html(<?php echo json_encode($out); ?>);
             </script>
-        <?php
+            <?php
         } elseif (
             strpos($_SERVER['PHP_SELF'], '/document.php') !== false ||
                     strpos($_SERVER['PHP_SELF'], '/saturne_document.php') !== false
@@ -388,7 +388,6 @@ class ActionsSaturne
                         });
                 </script>
             ";
-
         } elseif (strpos($parameters['context'], 'emailtemplates')) {
             ?>
             <script>
@@ -431,7 +430,7 @@ class ActionsSaturne
             $signatory->signature      = $data['signature'];
             $signatory->signature_date = dol_now();
 
-            $result = $signatory->update($user, true);
+            $result = $signatory->update($user, 1);
             if ($result > 0) {
                 // Creation signature OK
                 $signatory->setSigned($user, false);
@@ -553,17 +552,17 @@ class ActionsSaturne
                 $object->fields['fk_opp_status']['visible'] = 1;
                 $object->fields['fk_opp_status']['searchall'] = 1;
                 $object->fields['fk_opp_status']['csslist'] = 'center';
-                
+
                 // Add arrayofkeyval to fk_opp_status so it natively renders as an inline select in Saturne
                 require_once DOL_DOCUMENT_ROOT . '/core/class/cleadstatus.class.php';
                 $leadStatus = new CLeadStatus($db);
                 $leadStatus->fetchAll();
-                
+
                 $arrayofkeyval = [];
                 $langs->load('projects');
-                
+
                 $arrayofkeyval[''] = '';
-                
+
                 foreach ($leadStatus->records as $line) {
                     $transLabel = $langs->trans("OppStatus" . $line->code);
                     $label = ($transLabel !== "OppStatus" . $line->code) ? $transLabel : $line->label;
@@ -597,21 +596,21 @@ class ActionsSaturne
     public function saturnePrintFieldListLoopObject(array $parameters, &$object, &$action, $hookmanager): int
     {
         global $langs, $conf, $db;
-        
+
         if (isset($object->element) && $object->element === 'project') {
             $key = $parameters['key'];
             $val = $parameters['val'];
-            
+
             error_log("SATURNE_HOOK: " . $key);
 
             if ($key === 'fk_opp_status' || $key === 'p.fk_opp_status' || $key === 'project.fk_opp_status') {
                 $ceElement = $object->element;
                 $ceTable   = $object->table_element;
-                
+
                 require_once DOL_DOCUMENT_ROOT . '/core/class/cleadstatus.class.php';
                 $leadStatus = new CLeadStatus($db);
                 $leadStatus->fetchAll();
-                
+
                 $html = '';
                 static $saturneOppJsAdded = false;
                 if (!$saturneOppJsAdded) {
@@ -642,7 +641,7 @@ class ActionsSaturne
                     });
                     </script>';
                 }
-                
+
                 // Render the inline select for the row with ONLY the real statuses
                 $html .= '<select class="saturne-inline-select" data-field="fk_opp_status" data-element="' . $ceElement . '" data-id="' . $object->id . '">';
                 $html .= '<option value="0">&nbsp;</option>';
@@ -653,50 +652,48 @@ class ActionsSaturne
                     $html .= '<option value="' . $line->id . '"' . $selected . '>' . dol_escape_htmltag($label) . '</option>';
                 }
                 $html .= '</select>';
-                
+
                 $this->results[$key] = $html;
                 return 1;
-                
             } elseif ($key === 'opp_percent' || $key === 'p.opp_percent' || $key === 'project.opp_percent') {
                 $ceElement = $object->element;
                 $ceTable   = $object->table_element;
                 $ceLabel   = !empty($val['label']) ? dol_escape_htmltag($val['label']) : 'Pourcentage';
-                
+
                 $percent = (float) $object->opp_percent;
                 if ($percent > 100) {
                     $percent = 100;
                 }
-                
+
                 if ($percent >= 50) {
                     $badgeClass = 'badge-status4'; // Green
                 } else {
                     $badgeClass = 'badge-status3'; // Orange
                 }
-                
+
                 // Colored badge container for inline editing
                 $html = '<div class="saturne-inline-percent badge ' . $badgeClass . '" style="display: inline-flex; align-items: center; justify-content: center; padding: 3px 6px;">';
                 $html .= '<div class="contenteditable" contenteditable="true" role="textbox" aria-label="' . $ceLabel . '" data-field="opp_percent" data-id="' . $object->id . '" data-element="' . $ceElement . '" data-table="' . $ceTable . '" data-type="number" data-success="Enregistré" data-error="Maximum 100%" data-validate-pattern="^(100([.,]0+)?|\d{1,2}([.,]\d+)?)$" ondblclick="event.stopPropagation();" onblur="var v=parseFloat(this.innerText.replace(\',\',\'.\')); if(v>100) this.innerText=\'100\';">';
                 $html .= price($percent, 0, '', 0, -1, -1, '');
                 $html .= '</div><span class="saturne-inline-percent-suffix" style="margin-left: 2px;">%</span>';
                 $html .= '</div>';
-                
+
                 $this->results[$key] = $html;
                 return 1;
-                
             } elseif ($key === 'opp_amount' || $key === 'p.opp_amount' || $key === 'project.opp_amount') {
                 $ceElement = $object->element;
                 $ceTable   = $object->table_element;
                 $ceLabel   = !empty($val['label']) ? dol_escape_htmltag($val['label']) : 'Montant';
-                
+
                 $currencySymbol = $langs->getCurrencySymbol($conf->currency);
-                
+
                 $html = '<div class="saturne-inline-amount" style="display: flex; align-items: center; justify-content: center; gap: 4px;">';
                 $html .= '<div class="contenteditable" contenteditable="true" role="textbox" aria-label="' . $ceLabel . '" data-field="opp_amount" data-id="' . $object->id . '" data-element="' . $ceElement . '" data-table="' . $ceTable . '" data-type="number" data-success="Enregistré" data-error="Format invalide" ondblclick="event.stopPropagation();">';
                 $html .= price($object->opp_amount, 0, '', 0, -1, -1, '');
                 $html .= '</div>';
                 $html .= '<span class="saturne-inline-amount-suffix">' . $currencySymbol . '</span>';
                 $html .= '</div>';
-                
+
                 $this->results[$key] = $html;
                 return 1;
             }
@@ -735,7 +732,7 @@ class ActionsSaturne
                 return 1;
             }
         }
-        
+
         return 0;
     }
 }

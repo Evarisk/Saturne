@@ -191,7 +191,9 @@ if ($mode != 'kanban' && $mode != 'pwa' && !empty($listLayoutId)) {
         }
     }
     $filterCount += count($searchCategories);
-    if (!empty($searchAll)) $filterCount++;
+    if (!empty($searchAll)) {
+        $filterCount++;
+    }
     $hasFilter = ($filterCount > 0);
 
     // Funnel SVG icon (16×16 Feather-style, GPL-compatible)

@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2022-2025 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,7 +17,7 @@
  */
 
 /**
- * 	\defgroup   saturne     Module Saturne
+ *  \defgroup   saturne     Module Saturne
  *  \brief      Saturne module descriptor.
  *
  *  \file       core/modules/modSaturne.class.php
@@ -31,15 +32,15 @@ include_once DOL_DOCUMENT_ROOT . '/core/modules/DolibarrModules.class.php';
  */
 class modSaturne extends DolibarrModules
 {
-	/**
-	 * Constructor. Define names, constants, directories, boxes, permissions
-	 *
-	 * @param DoliDB $db Database handler
-	 */
-	public function __construct($db)
-	{
-		global $langs, $conf;
-		$this->db = $db;
+    /**
+     * Constructor. Define names, constants, directories, boxes, permissions
+     *
+     * @param DoliDB $db Database handler
+     */
+    public function __construct($db)
+    {
+        global $langs, $conf;
+        $this->db = $db;
 
         require_once __DIR__ . '/../../lib/saturne_functions.lib.php';
 
@@ -47,47 +48,47 @@ class modSaturne extends DolibarrModules
 
         // ID for module (must be unique).
         // Use here a free id (See in Home -> System information -> Dolibarr for list of used module id).
-		$this->numero = 436318;
+        $this->numero = 436318;
 
         // Key text used to identify module (for permissions, menus, etc...)
-		$this->rights_class = 'saturne';
+        $this->rights_class = 'saturne';
 
         // Family can be 'base' (core modules),'crm','financial','hr','projects','products','ecm','technic' (transverse modules),'interface' (link with external tools),'other','...'
         // It is used to group modules by family in module setup page
-		$this->family = '';
+        $this->family = '';
 
         // Module position in the family on 2 digits ('01', '10', '20', ...)
-		$this->module_position = '';
+        $this->module_position = '';
 
         // Gives the possibility for the module, to provide his own family info and position of this family (Overwrite $this->family and $this->module_position. Avoid this)
         $this->familyinfo = ['Evarisk' => ['position' => '01', 'label' => $langs->trans('Evarisk')]];
 
         // Module label (no space allowed), used if translation string 'ModulePriseoName' not found (Priseo is name of module).
-		$this->name = preg_replace('/^mod/i', '', get_class($this));
+        $this->name = preg_replace('/^mod/i', '', get_class($this));
 
         // Module description, used if translation string 'ModulePriseoDesc' not found (Priseo is name of module).
-		$this->description = $langs->trans('SaturneDescription');
+        $this->description = $langs->trans('SaturneDescription');
         // Used only if file README.md and README-LL.md not found.
-		$this->descriptionlong = $langs->trans('SaturneDescriptionLong');
+        $this->descriptionlong = $langs->trans('SaturneDescriptionLong');
 
         // Author
-		$this->editor_name = 'Evarisk';
-		$this->editor_url  = 'https://evarisk.com/';
+        $this->editor_name = 'Evarisk';
+        $this->editor_url  = 'https://evarisk.com/';
 
         // Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
-		$this->version = '23.0.0';
+        $this->version = '23.0.0';
 
         // Url to the file with your last numberversion of this module
         //$this->url_last_version = 'http://www.example.com/versionmodule.txt';
 
         // Key used in llx_const table to save module status enabled/disabled (where SATURNE is value of property name of module in uppercase)
-		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
+        $this->const_name = 'MAIN_MODULE_' . strtoupper($this->name);
 
         // Name of image file used for this module.
         // If file is in theme/yourtheme/img directory under name object_pictovalue.png, use this->picto='pictovalue'
         // If file is in module/img directory under name object_pictovalue.png, use this->picto='pictovalue@module'
         // To use a supported fa-xxx css style of font awesome, use this->picto='xxx'
-		$this->picto = 'saturne_color@saturne';
+        $this->picto = 'saturne_color@saturne';
 
         // Define some features supported by module (triggers, login, substitutions, menus, css, etc...)
         $this->module_parts = [
@@ -110,19 +111,19 @@ class modSaturne extends DolibarrModules
             // Set this to 1 if module has its own theme directory (theme)
             'theme' => 0,
             // Set this to relative path of css file if module has its own css file
-			'css' => ['/saturne/css/scss/modules/picto/_picto.min.css'],
+            'css' => ['/saturne/css/scss/modules/picto/_picto.min.css'],
             // Set this to relative path of js file if module must load a js on all pages
             'js' => [
-				'/saturne/js/saturne.js',
-				'/saturne/js/modules/menu.js',
+                '/saturne/js/saturne.js',
+                '/saturne/js/modules/menu.js',
                 '/saturne/js/modules/toolbox.js',
-			],
+            ],
             // Set here all hooks context managed by module. To find available hook context, make a "grep -r '>initHooks(' *" on source code. You can also set hook context to 'all'
             'hooks' => [
                 'all',
                 'saturnepublicinterface',
                 'emailtemplates',
-				'usercard',
+                'usercard',
                 'category',
                 'categoryindex',
                 'index',
@@ -152,34 +153,34 @@ class modSaturne extends DolibarrModules
 
         // Data directories to create when module is enabled.
         // Example: this->dirs = array("/saturne/temp","/saturne/subdir");
-		$this->dirs = ['/saturne/temp'];
+        $this->dirs = ['/saturne/temp'];
 
         // Config pages. Put here list of php page, stored into saturne/admin directory, to use to set up module.
-		$this->config_page_url = ['setup.php@saturne'];
+        $this->config_page_url = ['setup.php@saturne'];
 
         // A condition to hide module
-		$this->hidden = false;
+        $this->hidden = false;
         // List of module class names as string that must be enabled if this module is enabled. Example: array('always1'=>'modModuleToEnable1','always2'=>'modModuleToEnable2', 'FR1'=>'modModuleToEnableFR'...)
-		// Modules utilises par le socle lui-meme, donc inutiles a redeclarer dans les modules metier :
-		// ECM heberge la galerie medias ($conf->ecm->dir_output n'existe que si le module est actif),
-		// Agenda porte l'onglet Evenements alimente par le trigger, Fckeditor rend les champs de type
-		// html des objets Saturne et Categorie porte les tags et le filtre des listes generiques
-		$this->depends = ['modECM', 'modAgenda', 'modFckeditor', 'modCategorie'];
+        // Modules utilises par le socle lui-meme, donc inutiles a redeclarer dans les modules metier :
+        // ECM heberge la galerie medias ($conf->ecm->dir_output n'existe que si le module est actif),
+        // Agenda porte l'onglet Evenements alimente par le trigger, Fckeditor rend les champs de type
+        // html des objets Saturne et Categorie porte les tags et le filtre des listes generiques
+        $this->depends = ['modECM', 'modAgenda', 'modFckeditor', 'modCategorie'];
         foreach ($modulesList as $moduleName => $moduleNameLowerCase) {
             $this->requiredby[] = 'mod' . $moduleName; // List of module class names as string to disable if this one is disabled. Example: array('modModuleToDisable1', ...)
         }
-		$this->conflictwith = []; // List of module class names as string this module is in conflict with. Example: array('modModuleToDisable1', ...)
+        $this->conflictwith = []; // List of module class names as string this module is in conflict with. Example: array('modModuleToDisable1', ...)
 
         // The language file dedicated to your module
-		$this->langfiles = ['saturne@saturne'];
+        $this->langfiles = ['saturne@saturne'];
 
         // Prerequisites
-		$this->phpmin = [7, 4]; // Minimum version of PHP required by module
-		$this->need_dolibarr_version = [21, 0]; // Minimum version of Dolibarr required by module
+        $this->phpmin = [7, 4]; // Minimum version of PHP required by module
+        $this->need_dolibarr_version = [21, 0]; // Minimum version of Dolibarr required by module
 
         // Messages at activation
-		$this->warnings_activation = []; // Warning to show when we activate module. array('always'='text') or array('FR'='textfr','MX'='textmx'...)
-		$this->warnings_activation_ext = []; // Warning to show when we activate an external module. array('always'='text') or array('FR'='textfr','MX'='textmx'...)
+        $this->warnings_activation = []; // Warning to show when we activate module. array('always'='text') or array('FR'='textfr','MX'='textmx'...)
+        $this->warnings_activation_ext = []; // Warning to show when we activate an external module. array('always'='text') or array('FR'='textfr','MX'='textmx'...)
 
         // Constants
         // List of particular constants to add when module is enabled (key, 'chaine', value, desc, visible, 'current' or 'allentities', deleteonunactive)
@@ -215,22 +216,22 @@ class modSaturne extends DolibarrModules
             $i++ => ['MAIN_CACHE_COUNT ', 'integer', 1, '', 0, 'current'],
             $i   => ['CATEGORY_EDIT_IN_MENU_NOT_IN_POPUP', 'integer', 1, '', 0, 'current']
 
-		];
+        ];
 
-		if (!isset($conf->saturne) || !isset($conf->saturne->enabled)) {
-			$conf->saturne = new stdClass();
-			$conf->saturne->enabled = 0;
-		}
+        if (!isset($conf->saturne) || !isset($conf->saturne->enabled)) {
+            $conf->saturne = new stdClass();
+            $conf->saturne->enabled = 0;
+        }
 
         // Array to add new pages in new tabs
         // Example:
-        // $this->tabs[] = array('data'=>'objecttype:+tabname2:SUBSTITUTION_Title2:mylangfile@saturne:$user->rights->othermodule->read:/saturne/mynewtab2.php?id=__ID__',  	// To add another new tab identified by code tabname2. Label will be result of calling all substitution functions on 'Title2' key.
+        // $this->tabs[] = array('data'=>'objecttype:+tabname2:SUBSTITUTION_Title2:mylangfile@saturne:$user->rights->othermodule->read:/saturne/mynewtab2.php?id=__ID__',   // To add another new tab identified by code tabname2. Label will be result of calling all substitution functions on 'Title2' key.
         // $this->tabs[] = array('data'=>'objecttype:-tabname:NU:conditiontoremove');
-		$this->tabs = [];
+        $this->tabs = [];
 
         // Permissions provided by this module
-		$this->rights = [];
-		$r = 0;
+        $this->rights = [];
+        $r = 0;
 
         /* SATURNE PERMISSIONS */
         $this->rights[$r][0] = $this->numero . sprintf('%02d', $r + 1);
@@ -262,7 +263,7 @@ class modSaturne extends DolibarrModules
                 'prefix'   => img_picto($langs->transnoentities('ModuleConfig', $moduleName), 'fontawesome_fa-cog_fas', 'class="pictofixedwidth"'),
                 'mainmenu' => $moduleNameLowerCase,
                 'leftmenu' => $moduleNameLowerCase . '_config',
-                'url'      => '/'. $moduleNameLowerCase . '/admin/setup.php',
+                'url'      => '/' . $moduleNameLowerCase . '/admin/setup.php',
                 'langs'    => $moduleNameLowerCase . '@' . $moduleNameLowerCase,
                 'position' => 2000 + $r,
                 'enabled'  => 'isModEnabled(' . $moduleNameLowerCase . ')',

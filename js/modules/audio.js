@@ -177,28 +177,46 @@ window.saturne.audio.onUploadComplete = function(resp) {
 
   window.saturne.audio._context = null;
 
-  if (blockId) {
-    var doc = new DOMParser().parseFromString(resp.responseText, 'text/html');
-
-    // Refresh the audio block (play button, badge)
-    var el      = doc.getElementById(blockId);
-    var updated = el ? $(el) : $();
-    if (updated.length && block && block.length) {
-      block.replaceWith(updated);
-    }
-
-    // Refresh the library modal (updated audio list)
-    var modalId      = blockId.replace('master-media-row-container-audio', 'audio-library-modal');
-    var updatedModal = doc.getElementById(modalId);
-    if (updatedModal && $('#' + modalId).length) {
-      $('#' + modalId).replaceWith($(updatedModal));
+  if (!blockId) {
+    if (block) {
+      block.find('.saturne-recording-indicator').hide();
     }
 
     return;
   }
 
-  if (block) {
-    block.find('.saturne-recording-indicator').hide();
+  window.saturne.audio.refreshBlockFromResponse(resp.responseText, blockId, block);
+};
+
+/**
+ * Replace the audio block and its library modal with the versions carried by
+ * an upload response
+ *
+ * @memberof Saturne_Audio
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param   {string} html    Response body to parse
+ * @param   {string} blockId DOM id of the audio block to refresh
+ * @param   {jQuery} block   Current audio block
+ * @returns {void}
+ */
+window.saturne.audio.refreshBlockFromResponse = function(html, blockId, block) {
+  var doc = new DOMParser().parseFromString(html, 'text/html');
+
+  // Refresh the audio block (play button, badge)
+  var el      = doc.getElementById(blockId);
+  var updated = el ? $(el) : $();
+  if (updated.length && block && block.length) {
+    block.replaceWith(updated);
+  }
+
+  // Refresh the library modal (updated audio list)
+  var modalId      = blockId.replace('master-media-row-container-audio', 'audio-library-modal');
+  var updatedModal = doc.getElementById(modalId);
+  if (updatedModal && $('#' + modalId).length) {
+    $('#' + modalId).replaceWith($(updatedModal));
   }
 };
 

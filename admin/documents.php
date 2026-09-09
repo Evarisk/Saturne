@@ -399,7 +399,7 @@ print '</form>';
 print '</table>';
 
 ?>
-<script <?php print (function_exists('getNonce') ? 'nonce="'.getNonce().'"' : ''); ?>>
+<script <?php print (function_exists('getNonce') ? 'nonce="' . getNonce() . '"' : ''); ?>>
 $(document).ready(function() {
     var prefix = '<?php echo strtoupper($moduleName); ?>_';
     

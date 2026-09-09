@@ -65,6 +65,7 @@ jobs:
                   ref: '23.0.0'
                   path: dolibarr-core
                   sparse-checkout: |
+                      htdocs/api/class
                       htdocs/categories/class
                       htdocs/comm/action/class
                       htdocs/comm/propal/class
@@ -80,6 +81,7 @@ jobs:
                       htdocs/core/actions_sendmails.inc.php
                       htdocs/core/actions_setnotes.inc.php
                       htdocs/core/class
+                      htdocs/core/db
                       htdocs/core/lib
                       htdocs/core/modules
                       htdocs/core/tpl
@@ -88,7 +90,12 @@ jobs:
                       htdocs/expedition/class
                       htdocs/fichinter/class
                       htdocs/fourn/class
+                      htdocs/includes/odtphp
                       htdocs/includes/parsedown
+                      htdocs/includes/restler/framework
+                      htdocs/includes/tecnickcom/tcpdf/tcpdf_barcodes_1d.php
+                      htdocs/includes/tecnickcom/tcpdf/tcpdf_barcodes_2d.php
+                      htdocs/main.inc.php
                       htdocs/mrp/class
                       htdocs/product/class
                       htdocs/product/inventory/class
@@ -134,9 +141,14 @@ jobs:
               run: composer install --no-interaction --no-progress --prefer-dist
 
             # ── PHPCS ────────────────────────────────────────────────────────────
+            # Constrained to the 4.0 patch line: PHPCS is not in composer.lock,
+            # so an unpinned install would let a new PHPCS minor add sniffs and
+            # redden the CI with no code change. Patch releases stay allowed so
+            # a security advisory does not block the install (composer refuses
+            # to resolve an exact version once one is published against it).
             - name: Install PHPCS
               if: matrix.step == 'phpcs'
-              run: composer global require squizlabs/php_codesniffer --no-interaction
+              run: composer global require "squizlabs/php_codesniffer:~4.0.4" --no-interaction
 
             - name: Run PHPCS
               if: matrix.step == 'phpcs'

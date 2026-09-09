@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2021-2024 EVARISK <technique@evarisk.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -67,7 +68,7 @@ require_once __DIR__ . '/../../class/saturnesignature.class.php';
 
 if (file_exists(__DIR__ . '/../../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php')) {
     require_once __DIR__ . '/../../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
-} else if (file_exists(__DIR__ . '/../../../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php')) {
+} elseif (file_exists(__DIR__ . '/../../../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php')) {
     require_once __DIR__ . '/../../../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
 } else {
     die('Include of ' . $moduleNameLowerCase . ' class fails');
@@ -138,7 +139,7 @@ $moreJS = ['/saturne/js/includes/signature-pad.min.js'];
 $conf->dol_hide_topmenu  = 1;
 $conf->dol_hide_leftmenu = 1;
 
-saturne_header(0,'', $title, '', '', 0, 0, $moreJS, [], '', 'page-public-card page-signature');
+saturne_header(0, '', $title, '', '', 0, 0, $moreJS, [], '', 'page-public-card page-signature');
 
 $moreParams['useConfirmation'] = 1;
 require_once __DIR__ . '/../../core/tpl/signature/public_signature_view.tpl.php';

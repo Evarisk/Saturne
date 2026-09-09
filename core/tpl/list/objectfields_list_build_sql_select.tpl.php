@@ -215,7 +215,6 @@ if (array_key_exists('status', $object->fields)) {
 
 foreach ($search as $key => $val) {
     if (array_key_exists($key, $object->fields)) {
-
         if ($key == 'status' && $val == -1) {
             continue;
         }

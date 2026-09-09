@@ -265,7 +265,7 @@ function saturne_sync_linked_object_extrafields(
                     $definition['list'],
                     '',
                     '',
-                    0,
+                    '0',
                     $definition['langfile'],
                     $definition['enabled']
                 );
