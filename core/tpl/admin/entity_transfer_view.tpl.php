@@ -194,7 +194,7 @@ print '<input class="flat" type="file" name="entityImportFile[]" accept=".zip,.s
 print '<input type="submit" class="button reposition" name="entityImportSubmit" value="' . $langs->trans('Upload') . '">';
 
 if ($maxFileSize['maxmin'] > 0) {
-    print '<br><span class="opacitymedium">' . $langs->trans('MaxSize') . ' : ' . dol_print_size($maxFileSize['maxmin'] * 1024);
+    print '<br><span class="opacitymedium">' . $langs->trans('MaxSize') . ' : ' . dol_print_size($maxFileSize['maxmin'] * 1024, 1, 1);
     if (!empty($maxFileSize['maxphptoshowparam'])) {
         print ' (' . $maxFileSize['maxphptoshowparam'] . ')';
     }

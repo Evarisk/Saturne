@@ -47,7 +47,7 @@ require_once __DIR__ . '/../lib/entity_transfer.lib.php';
 global $conf, $db, $langs, $user;
 
 // Load translation files required by the page
-saturne_load_langs(['admin']);
+saturne_load_langs(['admin', 'other']);
 
 // Get parameters
 $action = GETPOST('action', 'aZ09');
@@ -166,7 +166,7 @@ if ($action == 'importEntity' && $permissiontotransfer && getDolGlobalInt('MAIN_
     if (in_array($uploadError, [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)) {
         // PHP drops the file before any code runs: without this the archive simply looks missing
         $maxFileSize = getMaxFileSizeArray();
-        $errors[]    = $langs->trans('EntityImportFileTooLarge', dol_print_size($maxFileSize['maxmin'] * 1024), $maxFileSize['maxphptoshowparam']);
+        $errors[]    = $langs->trans('EntityImportFileTooLarge', dol_print_size($maxFileSize['maxmin'] * 1024, 1, 1), $maxFileSize['maxphptoshowparam']);
     } elseif (empty($_FILES['entityImportFile']['tmp_name'][0])) {
         $errors[] = $langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv('File'));
     } elseif (!saturne_entity_transfer_mkdir($importDir)) {
