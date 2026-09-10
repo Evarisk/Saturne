@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2026 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -154,6 +155,41 @@ function saturne_entity_transfer_modules(DoliDB $db, array $schema = []): array
 
 
 /**
+ * List the modules a dump really carries rows for, read from the tables of its manifest.
+ * The export ticks every module of the source install, so its module list names modules
+ * that brought nothing: requiring their activation on the target would block an import
+ * that has no need of them.
+ *
+ * @param  array<string,mixed> $manifest Manifest of the dump
+ * @return array<string>                 Module names, sorted
+ */
+function saturne_entity_transfer_dump_modules(array $manifest): array
+{
+    $declared = array_map('strtolower', (array) ($manifest['modules'] ?? []));
+    if (empty($declared) || empty($manifest['tables'])) {
+        return $declared;
+    }
+
+    $modules = [];
+
+    foreach ((array) $manifest['tables'] as $table) {
+        $short = (string) ($table['short'] ?? '');
+
+        foreach ($declared as $module) {
+            // A dictionary is named c_<module>_xxx, the tables of the objects <module>_xxx
+            if (strpos($short, $module . '_') === 0 || strpos($short, 'c_' . $module . '_') === 0) {
+                $modules[$module] = $module;
+            }
+        }
+    }
+
+    $modules = array_values($modules);
+    sort($modules);
+
+    return $modules;
+}
+
+/**
  * Map a Dolibarr element type (as stored in llx_element_element or in the name of a
  * llx_categorie_xxx link table) to the table holding those objects.
  *
@@ -263,6 +299,35 @@ function saturne_entity_transfer_child_map(): array
 }
 
 /**
+ * List the database views, to keep them out of the introspection. SHOW FULL TABLES is
+ * MySQL only: on another engine the list stays empty and the introspection keeps its
+ * former behaviour rather than logging a failed query.
+ *
+ * @param  DoliDB            $db Database handler
+ * @return array<string,int>     Prefixed view name => 1
+ */
+function saturne_entity_transfer_view_names(DoliDB $db): array
+{
+    $views = [];
+
+    if ($db->type !== 'mysqli') {
+        return $views;
+    }
+
+    $resql = $db->query("SHOW FULL TABLES WHERE Table_type = 'VIEW'");
+    if (!$resql) {
+        return $views;
+    }
+
+    while ($row = $db->fetch_row($resql)) {
+        $views[$row[0]] = 1;
+    }
+    $db->free($resql);
+
+    return $views;
+}
+
+/**
  * Read the structure of the database tables.
  *
  * @param  DoliDB                            $db       Database handler
@@ -272,9 +337,17 @@ function saturne_entity_transfer_child_map(): array
 function saturne_entity_transfer_get_schema(DoliDB $db, array $patterns = []): array
 {
     $schema = [];
+    $views  = saturne_entity_transfer_view_names($db);
 
     foreach ($db->DDLListTables($db->database_name) as $table) {
         if (strpos($table, MAIN_DB_PREFIX) !== 0) {
+            continue;
+        }
+
+        // DDLListTables() returns the views too. Introspecting one whose underlying table
+        // is gone raises a warning on every call, and a view carrying an entity column
+        // would enter the plan, with INSERT statements written against it
+        if (isset($views[$table])) {
             continue;
         }
 
@@ -285,7 +358,14 @@ function saturne_entity_transfer_get_schema(DoliDB $db, array $patterns = []): a
 
         $columns = [];
         foreach ($db->DDLInfoTable($table) as $info) {
-            $columns[$info[0]] = strtolower($info[1]);
+            // The rows of SHOW FULL COLUMNS come back as numeric arrays, name then type,
+            // while the core signature only promises an array: read them by position
+            $info = array_values((array) $info);
+            if (count($info) < 2) {
+                continue;
+            }
+
+            $columns[(string) $info[0]] = strtolower((string) $info[1]);
         }
 
         $schema[$short] = $columns;
@@ -677,9 +757,19 @@ function saturne_entity_transfer_build_plan(DoliDB $db, array $options): array
         $origin = '';
         $depth  = 0;
 
+        // A dictionary row shipped by a module activation carries entity 0, the Dolibarr
+        // convention for a value shared by every entity: filtering it on the entity of the
+        // export would leave the table empty, whatever the entity asked for
+        $dictionary = (strpos($short, 'c_') === 0 && isset($columns['entity']));
+
         if (in_array($short, $satellite, true)) {
             $where  = saturne_entity_transfer_satellite_where($short, $options);
             $origin = 'custom';
+        }
+
+        if ($where === null && $dictionary) {
+            $where  = '(entity IN (' . SATURNE_TRANSFER_ENTITY_PLACEHOLDER . ') OR entity = 0)';
+            $origin = 'entity';
         }
 
         if ($where === null && isset($columns['entity'])) {
@@ -717,6 +807,7 @@ function saturne_entity_transfer_build_plan(DoliDB $db, array $options): array
             'where_template' => $where,
             'origin'         => $origin,
             'depth'          => $depth,
+            'dictionary'     => $dictionary,
             'primary_key'    => saturne_entity_transfer_primary_key($columns)
         ];
     }
@@ -932,7 +1023,7 @@ function saturne_entity_transfer_count_plan(DoliDB $db, array $plan, array $enti
         $object = $db->fetch_object($resql);
         $db->free($resql);
 
-        $counts[$short] = (int) $object->nb;
+        $counts[$short] = (!empty($object) ? (int) $object->nb : 0);
         $total         += $counts[$short];
 
         if ($counts[$short] > 0) {
@@ -947,11 +1038,12 @@ function saturne_entity_transfer_count_plan(DoliDB $db, array $plan, array $enti
             continue;
         }
 
-        $object = $db->fetch_object($resql);
+        $object      = $db->fetch_object($resql);
+        $rowsInTable = (!empty($object) ? (int) $object->nb : 0);
         $db->free($resql);
 
-        if ((int) $object->nb > 0) {
-            $skipped[$short] = $reason . ', ' . (int) $object->nb . ' rows in the table';
+        if ($rowsInTable > 0) {
+            $skipped[$short] = $reason . ', ' . $rowsInTable . ' rows in the table';
         }
     }
 
@@ -1036,6 +1128,11 @@ function saturne_entity_transfer_export(DoliDB $db, array $options): array
         $columnList  = '`' . implode('`, `', $columnNames) . '`';
         $primaryKey  = $table['primary_key'];
 
+        // The module activation already filled the dictionaries of the target install with
+        // the very same primary keys: a plain INSERT would fail on each of them, so the rows
+        // of the export take their place and carry the values edited on the source
+        $tableVerb = (!empty($table['dictionary']) ? 'REPLACE INTO' : $insertVerb);
+
         fwrite($handle, '-- ' . $table['name'] . ' (' . $counted['counts'][$short] . " rows)\n");
 
         // Read by pages, a table like llx_actioncomm does not fit in memory as a whole.
@@ -1062,7 +1159,10 @@ function saturne_entity_transfer_export(DoliDB $db, array $options): array
                 $values = [];
                 foreach ($columnNames as $column) {
                     if ($column === 'entity') {
-                        $values[] = (string) ((int) $options['target_entity']);
+                        // Entity 0 of a dictionary means "every entity": rewriting it to the
+                        // target would nail a shared value to a single entity
+                        $shared   = (!empty($table['dictionary']) && (int) $row[$column] === 0);
+                        $values[] = (string) ($shared ? 0 : (int) $options['target_entity']);
                         continue;
                     }
 
@@ -1077,7 +1177,7 @@ function saturne_entity_transfer_export(DoliDB $db, array $options): array
 
                 // Flush on the row count and on the statement size, to stay below max_allowed_packet
                 if (count($rows) >= $options['chunk'] || $bytes > 2000000) {
-                    fwrite($handle, $insertVerb . ' ' . $table['name'] . ' (' . $columnList . ') VALUES ' . implode(', ', $rows) . ";\n");
+                    fwrite($handle, $tableVerb . ' ' . $table['name'] . ' (' . $columnList . ') VALUES ' . implode(', ', $rows) . ";\n");
                     $rows  = [];
                     $bytes = 0;
                 }
@@ -1088,7 +1188,7 @@ function saturne_entity_transfer_export(DoliDB $db, array $options): array
         } while (!empty($primaryKey) && $fetched === $pageSize);
 
         if (!empty($rows)) {
-            fwrite($handle, $insertVerb . ' ' . $table['name'] . ' (' . $columnList . ') VALUES ' . implode(', ', $rows) . ";\n");
+            fwrite($handle, $tableVerb . ' ' . $table['name'] . ' (' . $columnList . ') VALUES ' . implode(', ', $rows) . ";\n");
         }
 
         $manifestTables[] = [
@@ -1293,7 +1393,7 @@ function saturne_entity_transfer_import(DoliDB $db, string $sqlFile, array $opti
             $object = $db->fetch_object($resql);
             $db->free($resql);
 
-            $result['checks'][] = ['name' => $name, 'found' => (int) $object->nb, 'expected' => (int) $table['rows']];
+            $result['checks'][] = ['name' => $name, 'found' => (!empty($object) ? (int) $object->nb : 0), 'expected' => (int) $table['rows']];
         }
     }
 

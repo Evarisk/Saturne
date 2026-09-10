@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2026 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -46,7 +47,7 @@ require_once __DIR__ . '/../lib/entity_transfer.lib.php';
 global $conf, $db, $langs, $user;
 
 // Load translation files required by the page
-saturne_load_langs(['admin']);
+saturne_load_langs(['admin', 'other']);
 
 // Get parameters
 $action = GETPOST('action', 'aZ09');
@@ -118,7 +119,9 @@ if ($action == 'exportEntity' && $permissiontotransfer) {
         }
     }
 
-    header('Location: ' . $_SERVER['PHP_SELF']);
+    // The entity travels through the redirect: the form is rebuilt by a GET, and showing
+    // the entity of the session again would tell the administrator he exported that one
+    header('Location: ' . $_SERVER['PHP_SELF'] . ($canChooseEntity ? '?exportEntity=' . $sourceEntities[0] : ''));
     exit;
 }
 
@@ -158,7 +161,13 @@ if ($action == 'importEntity' && $permissiontotransfer && getDolGlobalInt('MAIN_
     $importDir = $conf->admin->dir_temp . '/saturne_entity_import_' . dol_print_date(dol_now(), '%Y%m%d%H%M%S');
     $errors    = [];
 
-    if (empty($_FILES['entityImportFile']['tmp_name'][0])) {
+    $uploadError = (int) ($_FILES['entityImportFile']['error'][0] ?? UPLOAD_ERR_NO_FILE);
+
+    if (in_array($uploadError, [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)) {
+        // PHP drops the file before any code runs: without this the archive simply looks missing
+        $maxFileSize = getMaxFileSizeArray();
+        $errors[]    = $langs->trans('EntityImportFileTooLarge', dol_print_size($maxFileSize['maxmin'] * 1024, 1, 1), $maxFileSize['maxphptoshowparam']);
+    } elseif (empty($_FILES['entityImportFile']['tmp_name'][0])) {
         $errors[] = $langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv('File'));
     } elseif (!saturne_entity_transfer_mkdir($importDir)) {
         $errors[] = $langs->trans('ErrorFailedToCreateDir', $importDir);
@@ -204,7 +213,7 @@ if ($action == 'importEntity' && $permissiontotransfer && getDolGlobalInt('MAIN_
     // touching them fails one by one: say so before writing anything
     if (empty($errors)) {
         $missingModules = [];
-        foreach ((array) ($manifest['modules'] ?? []) as $module) {
+        foreach (saturne_entity_transfer_dump_modules(is_array($manifest) ? $manifest : []) as $module) {
             if (!isModEnabled($module)) {
                 $missingModules[] = $module;
             }

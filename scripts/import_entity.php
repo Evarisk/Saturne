@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2026 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -62,6 +63,17 @@ if (isset($arguments['help']) || !isset($arguments['input'])) {
     print "  --dry-run            Only print what would be done\n";
     print "  --confirm            Really write into the database\n";
     print "  --help               Print this help\n";
+    print "\n";
+    print "Which install to import into:\n";
+    print "  1. A Dolibarr already installed. The archive holds data only, not the structure:\n";
+    print "     a database without tables is not a target, run the installer first.\n";
+    print "  2. With the modules of the archive enabled on it. Their activation is what creates\n";
+    print "     their tables, rights, menus, document models and directories.\n";
+    print "  3. With no business data entered since. The import keeps the original ids, it would\n";
+    print "     overwrite or collide with the records already there: an install that has been\n";
+    print "     used is not a valid target.\n";
+    print "  4. Right after that activation, add --purge. The activation already wrote constants\n";
+    print "     and base records holding the same keys as those of the archive.\n";
     print "\n";
     exit(0);
 }
@@ -137,7 +149,7 @@ if (!isModEnabled('saturne')) {
 // A module of the dump left disabled here has none of its tables, and every statement
 // touching them fails one by one: say so before writing anything
 $missingModules = [];
-foreach ((array) ($manifest['modules'] ?? []) as $module) {
+foreach (saturne_entity_transfer_dump_modules((array) $manifest) as $module) {
     if (!isModEnabled($module)) {
         $missingModules[] = $module;
     }

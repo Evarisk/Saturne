@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2026 EVARISK <technique@evarisk.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -36,9 +37,9 @@ if (empty($permissiontotransfer)) {
 ?>
 
 <div class="wpeo-notice notice-info">
-	<div class="notice-content">
-		<div class="notice-subtitle"><strong><?php print $langs->trans('EntityTransferDescription'); ?></strong></div>
-	</div>
+    <div class="notice-content">
+        <div class="notice-subtitle"><strong><?php print $langs->trans('EntityTransferDescription'); ?></strong></div>
+    </div>
 </div>
 
 <?php
@@ -61,14 +62,18 @@ print $langs->trans('EntityExportDescription') . '<br>';
 print '<br>' . $langs->trans('EntityToExport') . ' ';
 
 if ($canChooseEntity && !empty($entityList)) {
+    // The page redisplays itself after the export: showing the entity of the session again
+    // would tell the administrator he exported entity 1 while the archive holds another one
+    $selectedEntity = (GETPOSTISSET('exportEntity') ? GETPOSTINT('exportEntity') : $conf->entity);
+
     print '<select name="exportEntity" class="flat minwidth200">';
     foreach ($entityList as $entityId => $entityLabel) {
-        print '<option value="' . $entityId . '"' . ($entityId == $conf->entity ? ' selected' : '') . '>' . $entityId . ' - ' . dol_escape_htmltag($entityLabel) . '</option>';
+        print '<option value="' . $entityId . '"' . ($entityId == $selectedEntity ? ' selected' : '') . '>' . $entityId . ' - ' . dol_escape_htmltag($entityLabel) . '</option>';
     }
     print '</select>';
 
     print '<br>' . $langs->trans('ExtraEntities') . ' ';
-    print '<input type="text" name="extraEntities" class="flat maxwidth100" placeholder="1">';
+    print '<input type="text" name="extraEntities" class="flat maxwidth100" placeholder="1" value="' . dol_escape_htmltag(GETPOST('extraEntities', 'alphanohtml')) . '">';
     print ' <span class="opacitymedium">' . $langs->trans('ExtraEntitiesDescription') . '</span>';
 } else {
     // Not a super administrator: the export is nailed to the entity of the session
@@ -147,9 +152,19 @@ print load_fiche_titre($langs->trans('EntityImport'), '', '');
 ?>
 
 <div class="wpeo-notice notice-warning">
-	<div class="notice-content">
-		<div class="notice-subtitle"><strong><?php print $langs->trans('EntityImportWarning'); ?></strong></div>
-	</div>
+    <div class="notice-content">
+        <div class="notice-subtitle"><strong><?php print $langs->trans('EntityImportWarning'); ?></strong></div>
+    </div>
+</div>
+
+<div class="wpeo-notice notice-info">
+    <div class="notice-content">
+        <div class="notice-subtitle"><strong><?php print $langs->trans('EntityImportTargetTitle'); ?></strong></div>
+        <div><?php print $langs->trans('EntityImportTargetStep1'); ?></div>
+        <div><?php print $langs->trans('EntityImportTargetStep2'); ?></div>
+        <div><?php print $langs->trans('EntityImportTargetStep3'); ?></div>
+        <div><?php print $langs->trans('EntityImportTargetStep4'); ?></div>
+    </div>
 </div>
 
 <?php
@@ -171,11 +186,31 @@ print $langs->trans('EntityImportDescription');
 print '<br><br>';
 print '<label><input type="checkbox" name="importWithFiles" value="1" checked> ' . $langs->trans('EntityImportWithFiles') . '</label><br>';
 print '<label><input type="checkbox" name="importPurge" value="1"> ' . $langs->trans('EntityImportPurge') . '</label>';
+print '<br><span class="opacitymedium">' . $langs->trans('EntityImportPurgeHint') . '</span>';
 print '</td>';
 
 print '<td class="center">';
+
+// An archive heavier than what PHP accepts never reaches the server: the upload is dropped
+// before any code runs, so the size has to be shown next to the field, not discovered after
+$maxFileSize = getMaxFileSizeArray();
+
+if ($maxFileSize['maxmin'] > 0) {
+    // MAX_FILE_SIZE must precede the file field
+    print '<input type="hidden" name="MAX_FILE_SIZE" value="' . ($maxFileSize['maxmin'] * 1024) . '">';
+}
+
 print '<input class="flat" type="file" name="entityImportFile[]" accept=".zip,.sql">';
 print '<input type="submit" class="button reposition" name="entityImportSubmit" value="' . $langs->trans('Upload') . '">';
+
+if ($maxFileSize['maxmin'] > 0) {
+    print '<br><span class="opacitymedium">' . $langs->trans('MaxSize') . ' : ' . dol_print_size($maxFileSize['maxmin'] * 1024, 1, 1);
+    if (!empty($maxFileSize['maxphptoshowparam'])) {
+        print ' (' . $maxFileSize['maxphptoshowparam'] . ')';
+    }
+    print '</span>';
+}
+
 print '</td>';
 print '</tr>';
 print '</table>';
