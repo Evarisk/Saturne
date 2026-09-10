@@ -26,7 +26,7 @@
  * The following vars must be defined :
  * Global     : $conf, $db, $langs
  * Parameters : $action
- * Variable   : $moduleName, $permissiontoread
+ * Variable   : $moduleName, $permissiontoread or $permissiontowrite
  */
 
 if ($action == 'set_mod' && $permissiontoread) {
@@ -49,4 +49,13 @@ if ($action == 'update_mask' && $permissiontoread) {
         header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
         exit;
     }
+}
+
+// Switch of a module constant without javascript: ajax_constantonoff() then falls back on
+// set_<CONST> / del_<CONST> links, handled here so the constant is set to zero instead of deleted
+$permissionToWriteConf = $permissiontowrite ?? $permissiontoread ?? 0;
+if ($permissionToWriteConf && preg_match('/^(set|del)_([A-Z0-9_]+)$/', $action, $constAction)) {
+    $constEntity = GETPOSTISSET('entity') ? GETPOSTINT('entity') : $conf->entity;
+    dolibarr_set_const($db, $constAction[2], ($constAction[1] == 'set' ? 1 : 0), 'chaine', 0, '', $constEntity);
+    setEventMessage('SavedConfig');
 }
