@@ -1466,3 +1466,42 @@ function saturne_get_nophoto_placeholder(int $size = 40): string
 {
     return '<svg class="nophoto-placeholder" width="' . $size . '" height="' . $size . '" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="6" fill="#f0f0f0"/><path d="M20 16a3 3 0 100 6 3 3 0 000-6z" fill="#bbb"/><path d="M14 13h3l1.5-2h3l1.5 2h3a2 2 0 012 2v10a2 2 0 01-2 2H14a2 2 0 01-2-2V15a2 2 0 012-2z" stroke="#bbb" stroke-width="1.5" fill="none"/></svg>';
 }
+
+/**
+ * Return whether the current user may change a module setting.
+ *
+ * The core ajax component that writes the constants (core/ajax/constantonoff.php)
+ * only answers to administrators. Without this check a read-only user is shown a
+ * switch that silently does nothing, instead of the state of the setting.
+ *
+ * @return int 1 if the user may write the module settings, 0 otherwise
+ */
+function saturne_check_admin_write_access(): int
+{
+    global $user;
+
+    return (int) !empty($user->admin);
+}
+
+/**
+ * Show the on/off switch of a module constant, writing a zero instead of deleting the constant.
+ *
+ * ajax_constantonoff() deletes the constant when the switch goes off, and
+ * DolibarrModules::insert_const() only recreates a line that is absent: a setting turned
+ * off comes back to its default value at the next activation or upgrade of the module.
+ * Writing a zero keeps the choice, and tells "never configured" from "deliberately disabled".
+ *
+ * Without the write permission the switch is rendered disabled: the user reads the state
+ * of the setting but cannot act on it.
+ *
+ * @param  string   $constName         Name of the constant to switch
+ * @param  int      $permissionToWrite 1 to render an active switch, 0 for a read-only one
+ * @param  int|null $entity            Entity to write the constant for, current entity by default
+ * @return string                      HTML of the switch
+ */
+function saturne_constant_onoff(string $constName, int $permissionToWrite = 1, ?int $entity = null): string
+{
+    require_once DOL_DOCUMENT_ROOT . '/core/lib/ajax.lib.php';
+
+    return ajax_constantonoff($constName, [], $entity, 0, 0, 0, 2, 0, 1, '', '', 'inline-block', 0, '', empty($permissionToWrite) ? 1 : 0);
+}
