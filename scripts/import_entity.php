@@ -190,6 +190,11 @@ foreach ($result['messages'] as $message) {
     print '  ! ' . $message . "\n";
 }
 
+if (!empty($result['extrafields'])) {
+    print '  ' . $result['extrafields'] . " custom field column(s) created from the definitions of the dump
+";
+}
+
 if ($result['documents'] > 0) {
     print "\nDocuments:\n";
     print '  ' . $result['documents'] . " files copied\n";
