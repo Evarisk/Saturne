@@ -180,8 +180,27 @@ print '<br><span class="opacitymedium">' . $langs->trans('EntityImportPurgeHint'
 print '</td>';
 
 print '<td class="center">';
+
+// An archive heavier than what PHP accepts never reaches the server: the upload is dropped
+// before any code runs, so the size has to be shown next to the field, not discovered after
+$maxFileSize = getMaxFileSizeArray();
+
+if ($maxFileSize['maxmin'] > 0) {
+    // MAX_FILE_SIZE must precede the file field
+    print '<input type="hidden" name="MAX_FILE_SIZE" value="' . ($maxFileSize['maxmin'] * 1024) . '">';
+}
+
 print '<input class="flat" type="file" name="entityImportFile[]" accept=".zip,.sql">';
 print '<input type="submit" class="button reposition" name="entityImportSubmit" value="' . $langs->trans('Upload') . '">';
+
+if ($maxFileSize['maxmin'] > 0) {
+    print '<br><span class="opacitymedium">' . $langs->trans('MaxSize') . ' : ' . dol_print_size($maxFileSize['maxmin'] * 1024);
+    if (!empty($maxFileSize['maxphptoshowparam'])) {
+        print ' (' . $maxFileSize['maxphptoshowparam'] . ')';
+    }
+    print '</span>';
+}
+
 print '</td>';
 print '</tr>';
 print '</table>';

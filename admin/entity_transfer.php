@@ -161,7 +161,13 @@ if ($action == 'importEntity' && $permissiontotransfer && getDolGlobalInt('MAIN_
     $importDir = $conf->admin->dir_temp . '/saturne_entity_import_' . dol_print_date(dol_now(), '%Y%m%d%H%M%S');
     $errors    = [];
 
-    if (empty($_FILES['entityImportFile']['tmp_name'][0])) {
+    $uploadError = (int) ($_FILES['entityImportFile']['error'][0] ?? UPLOAD_ERR_NO_FILE);
+
+    if (in_array($uploadError, [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)) {
+        // PHP drops the file before any code runs: without this the archive simply looks missing
+        $maxFileSize = getMaxFileSizeArray();
+        $errors[]    = $langs->trans('EntityImportFileTooLarge', dol_print_size($maxFileSize['maxmin'] * 1024), $maxFileSize['maxphptoshowparam']);
+    } elseif (empty($_FILES['entityImportFile']['tmp_name'][0])) {
         $errors[] = $langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv('File'));
     } elseif (!saturne_entity_transfer_mkdir($importDir)) {
         $errors[] = $langs->trans('ErrorFailedToCreateDir', $importDir);

@@ -347,6 +347,7 @@ EntityImportWarning                          = L'import écrit directement en ba
 EntityImportWithFiles                        = Copier également les documents contenus dans l'archive
 EntityImportPurge                            = Vider les tables de l'entité courante avant l'import
 EntityImportPurgeHint                        = À cocher dès que les modules ont été activés sur cette installation : leur activation a déjà écrit des constantes et des enregistrements de base qui portent les mêmes clés que ceux de l'archive.
+EntityImportFileTooLarge                     = L'archive dépasse la taille maximale acceptée par PHP (%s, limite %s) : augmentez cette limite ou passez par scripts/import_entity.php.
 EntityImportNoDumpFound                      = Aucun fichier SQL trouvé dans l'archive envoyée
 EntityImportMissingModules                   = L'archive contient les tables de modules non activés ici : %s. Activez-les avant l'import.
 EntityImportDone                             = Import terminé : %s instructions exécutées, %s fichiers copiés
