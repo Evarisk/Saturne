@@ -157,6 +157,16 @@ print load_fiche_titre($langs->trans('EntityImport'), '', '');
     </div>
 </div>
 
+<div class="wpeo-notice notice-info">
+    <div class="notice-content">
+        <div class="notice-subtitle"><strong><?php print $langs->trans('EntityImportTargetTitle'); ?></strong></div>
+        <div><?php print $langs->trans('EntityImportTargetStep1'); ?></div>
+        <div><?php print $langs->trans('EntityImportTargetStep2'); ?></div>
+        <div><?php print $langs->trans('EntityImportTargetStep3'); ?></div>
+        <div><?php print $langs->trans('EntityImportTargetStep4'); ?></div>
+    </div>
+</div>
+
 <?php
 print '<form name="entityImport" id="entityImport" action="' . $_SERVER['PHP_SELF'] . '" enctype="multipart/form-data" method="POST">';
 print '<input type="hidden" name="token" value="' . newToken() . '">';

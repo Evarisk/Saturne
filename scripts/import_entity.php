@@ -64,6 +64,17 @@ if (isset($arguments['help']) || !isset($arguments['input'])) {
     print "  --confirm            Really write into the database\n";
     print "  --help               Print this help\n";
     print "\n";
+    print "Which install to import into:\n";
+    print "  1. A Dolibarr already installed. The archive holds data only, not the structure:\n";
+    print "     a database without tables is not a target, run the installer first.\n";
+    print "  2. With the modules of the archive enabled on it. Their activation is what creates\n";
+    print "     their tables, rights, menus, document models and directories.\n";
+    print "  3. With no business data entered since. The import keeps the original ids, it would\n";
+    print "     overwrite or collide with the records already there: an install that has been\n";
+    print "     used is not a valid target.\n";
+    print "  4. Right after that activation, add --purge. The activation already wrote constants\n";
+    print "     and base records holding the same keys as those of the archive.\n";
+    print "\n";
     exit(0);
 }
 
