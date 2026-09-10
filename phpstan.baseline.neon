@@ -766,6 +766,11 @@ parameters:
 			path: lib/documents.lib.php
 
 		-
+			message: '#^Function json_encode invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			path: lib/entity_transfer.lib.php
+
+		-
 			message: '#^Call to function function_exists\(\) with ''imagecreatefromgif''\|''imagecreatefromjpeg''\|''imagecreatefrompng''\|''imagecreatefromwbmp''\|''imagecreatefromwebp'' will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			path: lib/dolibarr.lib.php
