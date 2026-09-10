@@ -176,6 +176,7 @@ print $langs->trans('EntityImportDescription');
 print '<br><br>';
 print '<label><input type="checkbox" name="importWithFiles" value="1" checked> ' . $langs->trans('EntityImportWithFiles') . '</label><br>';
 print '<label><input type="checkbox" name="importPurge" value="1"> ' . $langs->trans('EntityImportPurge') . '</label>';
+print '<br><span class="opacitymedium">' . $langs->trans('EntityImportPurgeHint') . '</span>';
 print '</td>';
 
 print '<td class="center">';

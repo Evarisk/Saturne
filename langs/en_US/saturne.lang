@@ -338,6 +338,7 @@ EntityImportDescription                      = Replays on this install a ZIP arc
 EntityImportWarning                          = The import writes straight into the database and keeps the original identifiers: use it on an empty mono entity install only. Back up the database before running it.
 EntityImportWithFiles                        = Also copy the documents held by the archive
 EntityImportPurge                            = Empty the tables of the current entity before the import
+EntityImportPurgeHint                        = Tick it as soon as the modules have been enabled on this install: their activation already wrote constants and base records holding the same keys as those of the archive.
 EntityImportNoDumpFound                      = No SQL file found in the uploaded archive
 EntityImportMissingModules                   = The archive holds the tables of modules not enabled here: %s. Enable them before the import.
 EntityImportDone                             = Import done: %s statements executed, %s files copied

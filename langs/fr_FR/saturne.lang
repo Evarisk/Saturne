@@ -346,6 +346,7 @@ EntityImportDescription                      = Rejoue sur cette installation une
 EntityImportWarning                          = L'import écrit directement en base et conserve les identifiants d'origine : à réserver à une installation mono-entité vierge. Sauvegardez la base avant de lancer l'opération.
 EntityImportWithFiles                        = Copier également les documents contenus dans l'archive
 EntityImportPurge                            = Vider les tables de l'entité courante avant l'import
+EntityImportPurgeHint                        = À cocher dès que les modules ont été activés sur cette installation : leur activation a déjà écrit des constantes et des enregistrements de base qui portent les mêmes clés que ceux de l'archive.
 EntityImportNoDumpFound                      = Aucun fichier SQL trouvé dans l'archive envoyée
 EntityImportMissingModules                   = L'archive contient les tables de modules non activés ici : %s. Activez-les avant l'import.
 EntityImportDone                             = Import terminé : %s instructions exécutées, %s fichiers copiés
