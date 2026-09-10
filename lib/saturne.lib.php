@@ -79,6 +79,11 @@ function saturne_admin_prepare_head(): array
     $head[$h][2] = 'media';
     $h++;
 
+    $head[$h][0] = dol_buildpath('/saturne/admin/entity_transfer.php', 1);
+    $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-exchange-alt pictofixedwidth"></i>' . $langs->trans('EntityTransfer') : '<i class="fas fa-exchange-alt"></i>';
+    $head[$h][2] = 'entitytransfer';
+    $h++;
+
     complete_head_from_modules($conf, $langs, null, $head, $h, 'saturne@saturne');
 
     complete_head_from_modules($conf, $langs, null, $head, $h, 'saturne@saturne', 'remove');
