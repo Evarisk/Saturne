@@ -155,6 +155,41 @@ function saturne_entity_transfer_modules(DoliDB $db, array $schema = []): array
 
 
 /**
+ * List the modules a dump really carries rows for, read from the tables of its manifest.
+ * The export ticks every module of the source install, so its module list names modules
+ * that brought nothing: requiring their activation on the target would block an import
+ * that has no need of them.
+ *
+ * @param  array<string,mixed> $manifest Manifest of the dump
+ * @return array<string>                 Module names, sorted
+ */
+function saturne_entity_transfer_dump_modules(array $manifest): array
+{
+    $declared = array_map('strtolower', (array) ($manifest['modules'] ?? []));
+    if (empty($declared) || empty($manifest['tables'])) {
+        return $declared;
+    }
+
+    $modules = [];
+
+    foreach ((array) $manifest['tables'] as $table) {
+        $short = (string) ($table['short'] ?? '');
+
+        foreach ($declared as $module) {
+            // A dictionary is named c_<module>_xxx, the tables of the objects <module>_xxx
+            if (strpos($short, $module . '_') === 0 || strpos($short, 'c_' . $module . '_') === 0) {
+                $modules[$module] = $module;
+            }
+        }
+    }
+
+    $modules = array_values($modules);
+    sort($modules);
+
+    return $modules;
+}
+
+/**
  * Map a Dolibarr element type (as stored in llx_element_element or in the name of a
  * llx_categorie_xxx link table) to the table holding those objects.
  *

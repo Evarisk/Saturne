@@ -119,7 +119,9 @@ if ($action == 'exportEntity' && $permissiontotransfer) {
         }
     }
 
-    header('Location: ' . $_SERVER['PHP_SELF']);
+    // The entity travels through the redirect: the form is rebuilt by a GET, and showing
+    // the entity of the session again would tell the administrator he exported that one
+    header('Location: ' . $_SERVER['PHP_SELF'] . ($canChooseEntity ? '?exportEntity=' . $sourceEntities[0] : ''));
     exit;
 }
 
@@ -205,7 +207,7 @@ if ($action == 'importEntity' && $permissiontotransfer && getDolGlobalInt('MAIN_
     // touching them fails one by one: say so before writing anything
     if (empty($errors)) {
         $missingModules = [];
-        foreach ((array) ($manifest['modules'] ?? []) as $module) {
+        foreach (saturne_entity_transfer_dump_modules(is_array($manifest) ? $manifest : []) as $module) {
             if (!isModEnabled($module)) {
                 $missingModules[] = $module;
             }

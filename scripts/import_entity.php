@@ -138,7 +138,7 @@ if (!isModEnabled('saturne')) {
 // A module of the dump left disabled here has none of its tables, and every statement
 // touching them fails one by one: say so before writing anything
 $missingModules = [];
-foreach ((array) ($manifest['modules'] ?? []) as $module) {
+foreach (saturne_entity_transfer_dump_modules((array) $manifest) as $module) {
     if (!isModEnabled($module)) {
         $missingModules[] = $module;
     }
