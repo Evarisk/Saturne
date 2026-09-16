@@ -77,6 +77,7 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
 
         $moduleImageNumberPerPageConf = strtoupper($moduleName) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
         for ($i = (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf); $i < ($conf->global->$moduleImageNumberPerPageConf + (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf)); $i++) {
+            if (empty($filearray[$i])) { break; }
             $fileName = $filearray[$i]['name'];
             if (image_format_supported($fileName) >= 0) {
                 $nbphoto++;
