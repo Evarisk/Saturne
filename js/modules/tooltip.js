@@ -85,13 +85,22 @@ if ( ! window.saturne.tooltip ) {
 	 */
 	window.saturne.tooltip.display = function( element ) {
 		var direction = ( $( element ).data( 'direction' ) ) ? $( element ).data( 'direction' ) : 'top';
-		var el = $( '<span class="wpeo-tooltip tooltip-' + direction + '">' + $( element ).attr( 'aria-label' ) + '</span>' );
+		var label = $( element ).attr( 'aria-label' );
+		var el = $( '<span class="wpeo-tooltip tooltip-' + direction + '">' + label + '</span>' );
 		var offset = $( element ).offset();
 		$( element )[0].tooltipElement = el;
 		$( 'body' ).append( $( element )[0].tooltipElement );
 
 		if ( $( element ).data( 'color' ) ) {
 			el.addClass( 'tooltip-' + $( element ).data( 'color' ) );
+		}
+
+		// Un label qui porte déjà des sauts de ligne, ou qui demande explicitement la variante,
+		// s'affiche sur plusieurs lignes : la règle par défaut le sortirait de la fenêtre et
+		// n'en montrerait que la première ligne. La classe est posée avant le calcul de la
+		// position, qui mesure la hauteur et la largeur réelles de l'infobulle.
+		if ( $( element ).data( 'multiline' ) || /[\r\n]/.test( label ) ) {
+			el.addClass( 'tooltip-multiline' );
 		}
 
 		var top = 0;
@@ -119,6 +128,17 @@ if ( ! window.saturne.tooltip ) {
 				left = ( offset.left - ( el.outerWidth() / 2 ) + ( $( element ).outerWidth() / 2 ) ) + 'px';
 				break;
 		}
+
+		// La position est calculée à partir du seul élément survolé, sans tenir compte des bords
+		// de la fenêtre : une infobulle large, ou multiligne donc plus haute, en sortait et
+		// devenait illisible. On la ramène dedans, celles qui y tenaient déjà ne bougent pas.
+		var margin  = 4;
+		var minLeft = $( window ).scrollLeft() + margin;
+		var maxLeft = minLeft + $( window ).width() - el.outerWidth() - ( margin * 2 );
+		var minTop  = $( window ).scrollTop() + margin;
+
+		top  = Math.max( parseFloat( top ), minTop ) + 'px';
+		left = Math.max( Math.min( parseFloat( left ), maxLeft ), minLeft ) + 'px';
 
 		el.css( {
 			'top': top,
