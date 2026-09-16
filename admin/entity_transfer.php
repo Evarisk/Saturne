@@ -222,6 +222,19 @@ if ($action == 'importEntity' && $permissiontotransfer && getDolGlobalInt('MAIN_
         if (!empty($missingModules)) {
             $errors[] = $langs->trans('EntityImportMissingModules', implode(', ', $missingModules));
         }
+
+        // A module that brought no row of its own may still be named by the data: its custom
+        // fields sit on the objects of the export, and its absence only shows when a page reads them
+        $absentModules = [];
+        foreach ((array) (is_array($manifest) ? ($manifest['modules'] ?? []) : []) as $module) {
+            if (!isModEnabled($module)) {
+                $absentModules[] = $module;
+            }
+        }
+
+        if (empty($errors) && !empty($absentModules)) {
+            setEventMessages($langs->trans('EntityImportAbsentModules', implode(', ', $absentModules)), [], 'warnings');
+        }
     }
 
     if (empty($errors)) {

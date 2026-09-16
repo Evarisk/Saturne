@@ -347,5 +347,6 @@ EntityImportPurgeHint                        = Tick it as soon as the modules ha
 EntityImportFileTooLarge                     = The archive is larger than what PHP accepts (%s, limit %s): raise that limit or use scripts/import_entity.php.
 EntityImportNoDumpFound                      = No SQL file found in the uploaded archive
 EntityImportMissingModules                   = The archive holds the tables of modules not enabled here: %s. Enable them before the import.
+EntityImportAbsentModules                    = Those modules ran on the source install and are not enabled here: %s. The imported rows may point at data of theirs, and some screens will not show them.
 EntityImportDone                             = Import done: %s statements executed, %s files copied
 EntityImportFinishedWithErrors               = Import done: %s statements executed, %s error(s)

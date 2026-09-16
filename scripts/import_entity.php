@@ -161,6 +161,20 @@ if (!empty($missingModules)) {
     exit(1);
 }
 
+// A module that brought no row of its own may still be named by the data: its custom fields
+// sit on the objects of the export, and its absence only shows when a page reads them
+$absentModules = [];
+foreach ((array) ($manifest['modules'] ?? []) as $module) {
+    if (!isModEnabled($module)) {
+        $absentModules[] = $module;
+    }
+}
+
+if (!empty($absentModules)) {
+    print '  ! Modules     : ' . implode(', ', $absentModules) . " ran on the source install and are not enabled here.\n";
+    print "                  The exported rows may point at data of theirs.\n";
+}
+
 print "\n";
 
 if (!$dryRun && !isset($arguments['confirm'])) {
@@ -188,6 +202,11 @@ print '  Errors        : ' . $result['errors'] . "\n";
 
 foreach ($result['messages'] as $message) {
     print '  ! ' . $message . "\n";
+}
+
+if (!empty($result['extrafields'])) {
+    print '  ' . $result['extrafields'] . " custom field column(s) created from the definitions of the dump
+";
 }
 
 if ($result['documents'] > 0) {

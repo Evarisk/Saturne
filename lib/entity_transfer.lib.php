@@ -617,10 +617,15 @@ function saturne_entity_transfer_satellite_where(string $short, array $options):
             return $where;
 
         case 'extrafields':
+            // A definition written by a module activation carries entity 0, shared by every
+            // entity: filtered on the entity of the export, the table comes out empty and the
+            // target install then knows none of the custom fields the exported rows fill in
+            $sharedWhere = '(' . $entityWhere . ' OR entity = 0)';
+
             if (!$moduleScope) {
-                return $entityWhere;
+                return $sharedWhere;
             }
-            return $entityWhere . ' AND ' . saturne_entity_transfer_prefix_condition('elementtype', $prefixes);
+            return $sharedWhere . ' AND ' . saturne_entity_transfer_prefix_condition('elementtype', $prefixes);
 
         case 'ecm_files':
         case 'ecm_directories':
@@ -757,17 +762,17 @@ function saturne_entity_transfer_build_plan(DoliDB $db, array $options): array
         $origin = '';
         $depth  = 0;
 
-        // A dictionary row shipped by a module activation carries entity 0, the Dolibarr
-        // convention for a value shared by every entity: filtering it on the entity of the
-        // export would leave the table empty, whatever the entity asked for
-        $dictionary = (strpos($short, 'c_') === 0 && isset($columns['entity']));
+        // A dictionary row, like an extrafield definition, is written by a module activation
+        // and carries entity 0, the Dolibarr convention for a value shared by every entity:
+        // filtering it on the entity of the export leaves the table empty, whatever the entity
+        $shared = ((strpos($short, 'c_') === 0 || $short === 'extrafields') && isset($columns['entity']));
 
         if (in_array($short, $satellite, true)) {
             $where  = saturne_entity_transfer_satellite_where($short, $options);
             $origin = 'custom';
         }
 
-        if ($where === null && $dictionary) {
+        if ($where === null && $shared) {
             $where  = '(entity IN (' . SATURNE_TRANSFER_ENTITY_PLACEHOLDER . ') OR entity = 0)';
             $origin = 'entity';
         }
@@ -807,7 +812,7 @@ function saturne_entity_transfer_build_plan(DoliDB $db, array $options): array
             'where_template' => $where,
             'origin'         => $origin,
             'depth'          => $depth,
-            'dictionary'     => $dictionary,
+            'shared'         => $shared,
             'primary_key'    => saturne_entity_transfer_primary_key($columns)
         ];
     }
@@ -1131,7 +1136,7 @@ function saturne_entity_transfer_export(DoliDB $db, array $options): array
         // The module activation already filled the dictionaries of the target install with
         // the very same primary keys: a plain INSERT would fail on each of them, so the rows
         // of the export take their place and carry the values edited on the source
-        $tableVerb = (!empty($table['dictionary']) ? 'REPLACE INTO' : $insertVerb);
+        $tableVerb = (!empty($table['shared']) ? 'REPLACE INTO' : $insertVerb);
 
         fwrite($handle, '-- ' . $table['name'] . ' (' . $counted['counts'][$short] . " rows)\n");
 
@@ -1159,10 +1164,10 @@ function saturne_entity_transfer_export(DoliDB $db, array $options): array
                 $values = [];
                 foreach ($columnNames as $column) {
                     if ($column === 'entity') {
-                        // Entity 0 of a dictionary means "every entity": rewriting it to the
-                        // target would nail a shared value to a single entity
-                        $shared   = (!empty($table['dictionary']) && (int) $row[$column] === 0);
-                        $values[] = (string) ($shared ? 0 : (int) $options['target_entity']);
+                        // Entity 0 means "every entity": rewriting it to the target would nail
+                        // a shared value to a single entity
+                        $sharedRow = (!empty($table['shared']) && (int) $row[$column] === 0);
+                        $values[]  = (string) ($sharedRow ? 0 : (int) $options['target_entity']);
                         continue;
                     }
 
@@ -1256,6 +1261,9 @@ function saturne_entity_transfer_export(DoliDB $db, array $options): array
         'rows'             => $result['rows'],
         'tables'           => $manifestTables,
         'skipped_tables'   => $counted['skipped'],
+        // Read again as structured data: replaying the rows of llx_extrafields tells the target
+        // install which custom fields exist, but only a DDL creates the columns holding them
+        'extrafields'      => saturne_entity_transfer_extrafield_definitions($db, $counted['exported'], $options['entities']),
         'documents'        => $result['documents']
     ];
 
@@ -1266,6 +1274,186 @@ function saturne_entity_transfer_export(DoliDB $db, array $options): array
     $result['manifest'] = $manifest;
 
     return $result;
+}
+
+/**
+ * Read the definitions of the custom fields the exported rows fill in. They travel in the
+ * manifest, not only as rows of llx_extrafields: replaying those rows tells the target
+ * install that a field exists, while the column holding its values is created by a DDL.
+ *
+ * @param  DoliDB                     $db       Database handler
+ * @param  array<string,array<string,mixed>> $exported Tables of the export, as counted
+ * @param  array<int>                 $entities Source entities
+ * @return array<int,array<string,mixed>>       Definitions, empty when llx_extrafields is out of the export
+ */
+function saturne_entity_transfer_extrafield_definitions(DoliDB $db, array $exported, array $entities): array
+{
+    if (empty($exported['extrafields'])) {
+        return [];
+    }
+
+    $where  = saturne_entity_transfer_compile_where($exported['extrafields']['where_template'], $entities);
+    $fields = [];
+
+    $resql = $db->query('SELECT name, entity, elementtype, label, type, size, param, pos, alwayseditable, perms, list, fielddefault, fieldcomputed, fieldrequired, fieldunique, langs, enabled, totalizable, printable, help'
+        . ' FROM ' . MAIN_DB_PREFIX . 'extrafields WHERE ' . $where . ' ORDER BY elementtype, pos');
+
+    if (!$resql) {
+        return [];
+    }
+
+    while ($object = $db->fetch_object($resql)) {
+        $fields[] = [
+            'name'           => $object->name,
+            'entity'         => (int) $object->entity,
+            'elementtype'    => $object->elementtype,
+            'label'          => $object->label,
+            'type'           => $object->type,
+            'size'           => $object->size,
+            'param'          => $object->param,
+            'pos'            => (int) $object->pos,
+            'alwayseditable' => (int) $object->alwayseditable,
+            'perms'          => $object->perms,
+            'list'           => $object->list,
+            'default'        => $object->fielddefault,
+            'computed'       => $object->fieldcomputed,
+            'required'       => (int) $object->fieldrequired,
+            'unique'         => (int) $object->fieldunique,
+            'langfile'       => $object->langs,
+            'enabled'        => $object->enabled,
+            'totalizable'    => (int) $object->totalizable,
+            'printable'      => (int) $object->printable,
+            'help'           => $object->help
+        ];
+    }
+    $db->free($resql);
+
+    return $fields;
+}
+
+/**
+ * Create on this install the columns holding the custom fields of the dump. A definition
+ * replayed into llx_extrafields declares a field, it does not add the column its values
+ * are written to: without this every INSERT into a table of extra fields fails on an
+ * unknown column, and the values of the entity are lost without the rest noticing.
+ *
+ * A table absent here belongs to a module this install does not have. Creating it would
+ * put back a structure whose owner is missing, so the case is reported, not repaired.
+ *
+ * @param  DoliDB              $db       Database handler
+ * @param  array<string,mixed> $manifest Manifest of the dump
+ * @return array{created:int,messages:array<string>} Columns created, and what could not be
+ */
+function saturne_entity_transfer_prepare_extrafields(DoliDB $db, array $manifest): array
+{
+    global $langs;
+
+    $result = ['created' => 0, 'messages' => []];
+
+    if (empty($manifest['extrafields'])) {
+        return $result;
+    }
+
+    require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
+
+    $extrafields = new ExtraFields($db);
+    $schema      = saturne_entity_transfer_get_schema($db);
+    $missing     = [];
+
+    foreach ((array) $manifest['extrafields'] as $field) {
+        $elementType = (string) ($field['elementtype'] ?? '');
+        $name        = (string) ($field['name'] ?? '');
+
+        if (empty($elementType) || empty($name)) {
+            continue;
+        }
+
+        // The names the core rewrites before reaching the table
+        $table = ['thirdparty' => 'societe', 'contact' => 'socpeople', 'categorie' => 'categories'][$elementType] ?? $elementType;
+        $table .= '_extrafields';
+
+        if (!isset($schema[$table])) {
+            $missing[$table] = $table;
+            continue;
+        }
+
+        if (isset($schema[$table][strtolower($name)])) {
+            continue;
+        }
+
+        $done = $extrafields->addExtraField(
+            $name,
+            ($field['label'] ?? $name),
+            ($field['type'] ?? 'varchar'),
+            (int) ($field['pos'] ?? 0),
+            ($field['size'] ?? ''),
+            $elementType,
+            (int) ($field['unique'] ?? 0),
+            (int) ($field['required'] ?? 0),
+            ($field['default'] ?? ''),
+            ($field['param'] ?? ''),
+            (int) ($field['alwayseditable'] ?? 0),
+            ($field['perms'] ?? ''),
+            ($field['list'] ?? '-1'),
+            ($field['help'] ?? ''),
+            ($field['computed'] ?? ''),
+            (string) ($field['entity'] ?? ''),
+            ($field['langfile'] ?? ''),
+            ($field['enabled'] ?? '1'),
+            (int) ($field['totalizable'] ?? 0),
+            (int) ($field['printable'] ?? 0)
+        );
+
+        // addExtraField() adds the column, then writes the definition. The definition may
+        // already be there, replayed by an earlier import, and the call then reports the
+        // duplicate although the column it was called for now exists: the column decides
+        $columns = saturne_entity_transfer_get_schema($db, [$table]);
+
+        if ($done > 0 || isset($columns[$table][strtolower($name)])) {
+            $result['created']++;
+            $schema[$table][strtolower($name)] = ($field['type'] ?? 'varchar');
+        } else {
+            $result['messages'][] = 'Custom field ' . $name . ' of ' . $elementType . ' : ' . ($extrafields->error ?: 'creation failed');
+        }
+    }
+
+    foreach ($missing as $table) {
+        $result['messages'][] = MAIN_DB_PREFIX . $table . ' does not exist here: the module owning it is not installed, its custom fields are not imported';
+    }
+
+    return $result;
+}
+
+/**
+ * Name the table one statement of the dump writes into, without its prefix.
+ *
+ * @param  string $statement SQL statement of the dump
+ * @return string            Unprefixed table name, empty when the statement targets none
+ */
+function saturne_entity_transfer_statement_table(string $statement): string
+{
+    if (!preg_match("/^(?:INSERT(?: IGNORE)? INTO|REPLACE INTO|DELETE FROM)\s+`?" . preg_quote(MAIN_DB_PREFIX, "/") . "([a-z0-9_]+)`?/i", $statement, $matches)) {
+        return "";
+    }
+
+    return strtolower($matches[1]);
+}
+
+/**
+ * Rewrite the table prefix of one statement, for a target install using another one.
+ * Only the names following INTO, FROM, JOIN, UPDATE or TABLE are touched: replacing the
+ * prefix everywhere would rewrite it inside the exported values too, and a row holding
+ * llx_ in a text, a path or the options of a sellist field would come out corrupted.
+ *
+ * @param  string $statement    SQL statement of the dump
+ * @param  string $sourcePrefix Prefix of the install the dump comes from
+ * @return string               Statement written against the tables of this install
+ */
+function saturne_entity_transfer_rewrite_prefix(string $statement, string $sourcePrefix): string
+{
+    $pattern = '/(\b(?:INTO|FROM|JOIN|UPDATE|TABLE)\s+`?)' . preg_quote($sourcePrefix, '/') . '/i';
+
+    return (string) preg_replace($pattern, '${1}' . MAIN_DB_PREFIX, $statement);
 }
 
 /**
@@ -1291,7 +1479,15 @@ function saturne_entity_transfer_import(DoliDB $db, string $sqlFile, array $opti
     $manifest     = $options['manifest'];
     $sourcePrefix = (string) ($manifest['source']['prefix'] ?? MAIN_DB_PREFIX);
 
-    $result = ['statements' => 0, 'executed' => 0, 'purged' => 0, 'errors' => 0, 'messages' => [], 'checks' => [], 'documents' => 0];
+    $result = ['statements' => 0, 'executed' => 0, 'purged' => 0, 'errors' => 0, 'messages' => [], 'checks' => [], 'documents' => 0, 'extrafields' => 0];
+
+    // Before anything is replayed: the INSERT of a table of extra fields names its columns,
+    // they have to exist by then
+    if (empty($options['dry_run'])) {
+        $prepared              = saturne_entity_transfer_prepare_extrafields($db, $manifest);
+        $result['extrafields'] = $prepared['created'];
+        $result['messages']    = array_merge($result['messages'], $prepared['messages']);
+    }
 
     $run = function (string $sql) use ($db, $options, &$result): bool {
         if (!empty($options['dry_run'])) {
@@ -1307,6 +1503,9 @@ function saturne_entity_transfer_import(DoliDB $db, string $sqlFile, array $opti
         return true;
     };
 
+    $schema        = saturne_entity_transfer_get_schema($db);
+    $skippedTables = [];
+
     if (!empty($options['purge'])) {
         if (empty($manifest['tables'])) {
             $result['messages'][] = 'The purge needs the manifest.json of the export';
@@ -1318,6 +1517,10 @@ function saturne_entity_transfer_import(DoliDB $db, string $sqlFile, array $opti
         foreach (array_reverse($manifest['tables']) as $table) {
             $name  = str_replace($sourcePrefix, MAIN_DB_PREFIX, $table['name']);
             $where = str_replace($sourcePrefix, MAIN_DB_PREFIX, $table['purge']);
+
+            if (!isset($schema[strtolower((string) ($table['short'] ?? ''))])) {
+                continue;
+            }
 
             if ($run('DELETE FROM ' . $name . ' WHERE ' . $where)) {
                 $result['purged']++;
@@ -1352,10 +1555,24 @@ function saturne_entity_transfer_import(DoliDB $db, string $sqlFile, array $opti
         $buffer    = '';
 
         if ($sourcePrefix !== MAIN_DB_PREFIX) {
-            $statement = preg_replace('/\b' . preg_quote($sourcePrefix, '/') . '/', MAIN_DB_PREFIX, $statement);
+            $statement = saturne_entity_transfer_rewrite_prefix($statement, $sourcePrefix);
         }
 
         $result['statements']++;
+
+        // A table of the dump that this install does not have belongs to a module absent here.
+        // Running the statement would only pile up SQL errors saying the same thing on every
+        // chunk of the table, so it is skipped and the table is named once
+        $target = saturne_entity_transfer_statement_table($statement);
+        if ($target !== '' && !isset($schema[$target])) {
+            if (!isset($skippedTables[$target])) {
+                $skippedTables[$target] = 0;
+                $result['messages'][]   = MAIN_DB_PREFIX . $target . ' does not exist here: the module owning it is not installed, its rows are not imported';
+            }
+
+            $skippedTables[$target]++;
+            continue;
+        }
 
         if ($run($statement)) {
             $result['executed']++;
@@ -1366,6 +1583,8 @@ function saturne_entity_transfer_import(DoliDB $db, string $sqlFile, array $opti
     }
 
     fclose($handle);
+
+    $result['skipped_tables'] = $skippedTables;
 
     if (!empty($options['documents_dir']) && is_dir($options['documents_dir']) && empty($options['dry_run'])) {
         $targetRoot = saturne_entity_transfer_data_root((int) $options['target_entity']);
@@ -1383,6 +1602,12 @@ function saturne_entity_transfer_import(DoliDB $db, string $sqlFile, array $opti
         foreach ($manifest['tables'] as $table) {
             $name  = str_replace($sourcePrefix, MAIN_DB_PREFIX, $table['name']);
             $where = str_replace($sourcePrefix, MAIN_DB_PREFIX, $table['purge']);
+
+            // Already reported when its statements were skipped, counting its rows would
+            // only repeat that the table is not here
+            if (!isset($schema[strtolower((string) ($table['short'] ?? ''))])) {
+                continue;
+            }
 
             $resql = $db->query('SELECT COUNT(*) AS nb FROM ' . $name . ' WHERE ' . $where);
             if (!$resql) {
