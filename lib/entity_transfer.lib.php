@@ -1425,6 +1425,144 @@ function saturne_entity_transfer_prepare_extrafields(DoliDB $db, array $manifest
 }
 
 /**
+ * Split the VALUES part of an INSERT into its tuples, each as a list of raw values.
+ * Written by hand because the exported values are escaped SQL literals: a comma or a
+ * closing parenthesis inside a string must not be read as a separator.
+ *
+ * @param  string $values VALUES part of the statement, without the trailing semicolon
+ * @return array<int,array<int,string>> One entry per tuple, one string per raw value
+ */
+function saturne_entity_transfer_split_values(string $values): array
+{
+    $tuples  = [];
+    $current = [];
+    $buffer  = '';
+    $depth   = 0;
+    $inside  = false;
+    $escaped = false;
+    $length  = strlen($values);
+
+    for ($i = 0; $i < $length; $i++) {
+        $char = $values[$i];
+
+        if ($inside) {
+            $buffer .= $char;
+
+            if ($escaped) {
+                $escaped = false;
+            } elseif ($char === '\\') {
+                $escaped = true;
+            } elseif ($char === "'") {
+                $inside = false;
+            }
+
+            continue;
+        }
+
+        if ($char === "'") {
+            $inside  = true;
+            $buffer .= $char;
+            continue;
+        }
+
+        if ($char === '(') {
+            $depth++;
+            if ($depth === 1) {
+                $current = [];
+                $buffer  = '';
+                continue;
+            }
+        }
+
+        if ($char === ')') {
+            $depth--;
+            if ($depth === 0) {
+                $current[] = trim($buffer);
+                $tuples[]  = $current;
+                $buffer    = '';
+                continue;
+            }
+        }
+
+        if ($char === ',' && $depth === 1) {
+            $current[] = trim($buffer);
+            $buffer    = '';
+            continue;
+        }
+
+        if ($depth > 0) {
+            $buffer .= $char;
+        }
+    }
+
+    return $tuples;
+}
+
+/**
+ * Rewrite one INSERT of the dump without the columns this install does not have.
+ *
+ * A database migrated over the years keeps columns a fresh install no longer creates
+ * (fk_user_done on llx_actioncomm, ref_int on llx_societe...). Naming one of them makes
+ * the whole statement fail, and a table of thousands of rows is then lost over a column
+ * whose values have no meaning here anyway.
+ *
+ * @param  string        $statement SQL statement of the dump
+ * @param  array<string> $columns   Column names the target table really has
+ * @return string                   Statement without the unknown columns, unchanged when there is none
+ */
+function saturne_entity_transfer_drop_unknown_columns(string $statement, array $columns): string
+{
+    if (!preg_match('/^(INSERT(?: IGNORE)? INTO|REPLACE INTO)\s+(\S+)\s+\(([^)]*)\)\s+VALUES\s+(.*)$/is', $statement, $matches)) {
+        return $statement;
+    }
+
+    $names = array_map(function ($name) {
+        return strtolower(trim(trim($name), '`'));
+    }, explode(',', $matches[3]));
+
+    $known = array_map('strtolower', $columns);
+    $keep  = [];
+
+    foreach ($names as $index => $name) {
+        if (in_array($name, $known, true)) {
+            $keep[] = $index;
+        }
+    }
+
+    if (count($keep) === count($names) || empty($keep)) {
+        return $statement;
+    }
+
+    $tuples = saturne_entity_transfer_split_values($matches[4]);
+    if (empty($tuples)) {
+        return $statement;
+    }
+
+    $rows = [];
+    foreach ($tuples as $tuple) {
+        $values = [];
+        foreach ($keep as $index) {
+            // A tuple shorter than the column list is a statement this function cannot
+            // rewrite safely: better replayed as it is, and reported by the database
+            if (!isset($tuple[$index])) {
+                return $statement;
+            }
+
+            $values[] = $tuple[$index];
+        }
+
+        $rows[] = '(' . implode(', ', $values) . ')';
+    }
+
+    $columnList = [];
+    foreach ($keep as $index) {
+        $columnList[] = '`' . $names[$index] . '`';
+    }
+
+    return $matches[1] . ' ' . $matches[2] . ' (' . implode(', ', $columnList) . ') VALUES ' . implode(', ', $rows);
+}
+
+/**
  * Name the table one statement of the dump writes into, without its prefix.
  *
  * @param  string $statement SQL statement of the dump
@@ -1503,8 +1641,9 @@ function saturne_entity_transfer_import(DoliDB $db, string $sqlFile, array $opti
         return true;
     };
 
-    $schema        = saturne_entity_transfer_get_schema($db);
-    $skippedTables = [];
+    $schema         = saturne_entity_transfer_get_schema($db);
+    $skippedTables  = [];
+    $droppedColumns = [];
 
     if (!empty($options['purge'])) {
         if (empty($manifest['tables'])) {
@@ -1572,6 +1711,22 @@ function saturne_entity_transfer_import(DoliDB $db, string $sqlFile, array $opti
 
             $skippedTables[$target]++;
             continue;
+        }
+
+        // A source migrated over the years still holds columns a fresh install no longer
+        // creates. Naming one of them makes the whole statement fail, and a table of
+        // thousands of rows would be lost over a column that means nothing here
+        if ($target !== '') {
+            $rewritten = saturne_entity_transfer_drop_unknown_columns($statement, array_keys($schema[$target]));
+
+            if ($rewritten !== $statement) {
+                $statement = $rewritten;
+
+                if (!isset($droppedColumns[$target])) {
+                    $droppedColumns[$target] = 1;
+                    $result['messages'][]    = MAIN_DB_PREFIX . $target . ' : the dump holds columns this install does not have, they are left out of the import';
+                }
+            }
         }
 
         if ($run($statement)) {

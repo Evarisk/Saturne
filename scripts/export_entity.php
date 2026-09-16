@@ -121,10 +121,11 @@ if (!empty($arguments['extra-entities'])) {
     }
 }
 
-// No module given while the scope is the modules themselves: take every module of the
-// install, an export holding the Saturne tables alone would leave the business data behind
+// No module named: take every module of the install, whatever the scope. The core scope
+// adds the users, the third parties and the events to the modules, it does not replace
+// them, and an export holding the Saturne tables alone would leave the business data behind
 $modules = array_filter(array_map('trim', explode(',', (string) ($arguments['with-modules'] ?? ''))));
-if (empty($modules) && $scope === 'module') {
+if (empty($modules)) {
     $modules = saturne_entity_transfer_modules($db);
 }
 
