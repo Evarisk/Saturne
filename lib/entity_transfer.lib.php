@@ -1687,8 +1687,27 @@ function saturne_entity_transfer_import(DoliDB $db, string $sqlFile, array $opti
             return $result;
         }
 
-        // Children first, the manifest lists the tables in insertion order
+        // The export carries no table Dolibarr does not tie to an entity, so a link table
+        // left out of it still points at the rows about to go: llx_societe_commerciaux
+        // refuses the purge of llx_societe. The replay turns the checks off the same way
+        $run('SET FOREIGN_KEY_CHECKS = 0');
+
+        // The manifest is ordered for insertion, where a table filtered through its parent
+        // may still come first. Emptying the parent at that point makes the rows of the
+        // child invisible to their own DELETE, and they collide with the replay: whatever
+        // is filtered through another table is purged first
+        $dependent  = [];
+        $standalone = [];
+
         foreach (array_reverse($manifest['tables']) as $table) {
+            if (stripos((string) ($table['purge'] ?? ''), ' FROM ') !== false) {
+                $dependent[] = $table;
+            } else {
+                $standalone[] = $table;
+            }
+        }
+
+        foreach (array_merge($dependent, $standalone) as $table) {
             $name  = str_replace($sourcePrefix, MAIN_DB_PREFIX, $table['name']);
             $where = str_replace($sourcePrefix, MAIN_DB_PREFIX, $table['purge']);
 
@@ -1700,6 +1719,8 @@ function saturne_entity_transfer_import(DoliDB $db, string $sqlFile, array $opti
                 $result['purged']++;
             }
         }
+
+        $run('SET FOREIGN_KEY_CHECKS = 1');
     }
 
     $handle = fopen($sqlFile, 'r');
