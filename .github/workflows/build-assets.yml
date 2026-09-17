@@ -1,43 +1,43 @@
 name: Build assets
 
 on:
-  push:
-    branches:
-      - main
-      - develop
-    paths:
-      - 'css/scss/**'
-      - 'js/**/*.js'
-      - '!js/*.min.js'
-      - '!css/*.min.css'
-      - 'build-assets.js'
-
-permissions:
-  contents: write
+    # Les .min ne sont volontairement pas exclus : en lecture seule, une PR qui ne fait
+    # que rafraichir les assets compiles est justement une PR qu'on veut verifier.
+    pull_request:
+        paths:
+            - 'css/scss/**'
+            - 'js/**'
+            - 'build-assets.js'
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+    verify:
+        runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v4
+        steps:
+            - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: '22'
 
-      - name: Install dependencies
-        run: npm ci
+            - name: Install dependencies
+              run: npm ci
 
-      - name: Build assets
-        run: node build-assets.js --module=saturne
+            - name: Build assets
+              run: node build-assets.js --module=saturne
 
-      - name: Commit built assets if changed
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add --force css/saturne.min.css js/saturne.min.js
-          if ! git diff --staged --quiet; then
-            git commit -m "[CI] chore: build assets JS/CSS minified"
-            git push
-          fi
+            # Ecrit ici plutot que delegue au workflow reutilisable : celui-ci clone Saturne
+            # dans .saturne, et pour Saturne lui-meme build-assets.js resoudrait la racine du
+            # module sur cette copie de develop, verifiant les mauvais fichiers.
+            - name: Verify committed assets are up to date
+              run: |
+                  # Le staging avant comparaison donne le meme verdict que l'ancienne etape de
+                  # commit, y compris pour un module qui garderait ses .min hors de git.
+                  git add --force css/saturne.min.css js/saturne.min.js
+                  if git diff --staged --quiet; then
+                    echo "Committed assets match a fresh build."
+                    exit 0
+                  fi
+                  git diff --staged --stat
+                  echo "::error::Committed .min files are stale. Rebuild them with npm run build and commit css/saturne.min.css and js/saturne.min.js."
+                  exit 1
