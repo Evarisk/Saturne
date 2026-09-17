@@ -43,6 +43,28 @@ const paths = {
     js_backend: [path.join(moduleRoot, 'js/' + moduleName + '.js'), path.join(moduleRoot, 'js/modules/*.js')]
 };
 
+/**
+ * The files of js/modules/, in an order that does not depend on the machine.
+ *
+ * Left to the glob of gulp.src, the order comes from a localeCompare() and therefore from the
+ * ICU collation of the machine, which sorts case and punctuation differently on a developer
+ * workstation and on a Linux runner. Since the order of concatenation decides the bytes of the
+ * bundle, the same sources then compile to two different .min.js, and the verify mode of the CI
+ * reports a difference nobody introduced.
+ *
+ * Array.prototype.sort() without a comparator sorts by UTF-16 code point: same result everywhere.
+ *
+ * @return {string[]} Absolute paths, the module entry point first
+ */
+function jsSources() {
+    const modulesDir = path.join(moduleRoot, 'js/modules');
+    const moduleFiles = fs.existsSync(modulesDir)
+        ? fs.readdirSync(modulesDir).filter(file => file.endsWith('.js')).sort().map(file => path.join(modulesDir, file))
+        : [];
+
+    return [path.join(moduleRoot, 'js/' + moduleName + '.js')].concat(moduleFiles);
+}
+
 /** SCSS — dev : sourcemaps inline, minifié */
 gulp.task('scss_core', function() {
     return gulp.src(paths.scss_core[0])
@@ -65,7 +87,7 @@ gulp.task('scss_core:prod', function() {
 
 /** JS — concat + uglify (dev et prod) */
 gulp.task('js_backend', function() {
-    return gulp.src(paths.js_backend)
+    return gulp.src(jsSources())
         .pipe(concat(moduleName + '.min.js'))
         .pipe(uglify())
         .pipe(gulp.dest(path.join(moduleRoot, 'js/')));
