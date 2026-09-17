@@ -77,7 +77,9 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
 
         $moduleImageNumberPerPageConf = strtoupper($moduleName) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
         for ($i = (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf); $i < ($conf->global->$moduleImageNumberPerPageConf + (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf)); $i++) {
-            if (empty($filearray[$i])) { break; }
+            if (empty($filearray[$i])) {
+                break;
+            }
             $fileName = $filearray[$i]['name'];
             if (image_format_supported($fileName) >= 0) {
                 $nbphoto++;
@@ -186,7 +188,7 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 
     // Listing then sorting a whole directory to keep the single file whose name is already known
     // is a scandir per object: an element tree renders one media per GP/UT, on every page
-    $favoriteName = (is_object($object) && !empty($favorite_field) && !empty((is_object($object) ? $object->$favorite_field : ''))) ? (is_object($object) ? $object->$favorite_field : '') : '';
+    $favoriteName = (is_object($object) && !empty($favorite_field) && !empty($object->$favorite_field)) ? $object->$favorite_field : '';
     $knownFavorite = $show_only_favorite && !empty($favoriteName) && empty($moreParams['filter']);
 
     if ($knownFavorite) {
