@@ -85,8 +85,12 @@ if ( ! window.saturne.tooltip ) {
 	 */
 	window.saturne.tooltip.display = function( element ) {
 		var direction = ( $( element ).data( 'direction' ) ) ? $( element ).data( 'direction' ) : 'top';
-		var label = $( element ).attr( 'aria-label' );
-		var el = $( '<span class="wpeo-tooltip tooltip-' + direction + '">' + label + '</span>' );
+		var label = $( element ).attr( 'aria-label' ) || '';
+
+		// Le label est posé en texte, jamais concaténé dans du HTML : le parseur décode les
+		// entités de l'attribut avant que le JS ne le lise, donc un contenu échappé par
+		// dol_escape_htmltag() redevient du balisage exécutable une fois réinjecté.
+		var el = $( '<span></span>' ).addClass( 'wpeo-tooltip tooltip-' + direction ).text( label );
 		var offset = $( element ).offset();
 		$( element )[0].tooltipElement = el;
 		$( 'body' ).append( $( element )[0].tooltipElement );
