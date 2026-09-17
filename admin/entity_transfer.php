@@ -84,7 +84,7 @@ if ($action == 'exportEntity' && $permissiontotransfer) {
         }
     }
 
-    $availableModules = saturne_entity_transfer_modules($db);
+    $availableModules = saturne_entity_transfer_modules($db, [], $sourceEntities);
     $selectedModules  = array_values(array_intersect($availableModules, (array) GETPOST('exportModules', 'array')));
 
     $exportName = 'entity_' . $sourceEntities[0] . '_' . dol_print_date(dol_now(), '%Y%m%d%H%M%S');
@@ -282,7 +282,10 @@ print dol_get_fiche_head($head, 'entitytransfer', $title, -1, 'saturne_color@sat
 
 // Mode 1 is required, otherwise dol_dir_list() does not fill the size of the files
 $entityExports    = ($permissiontotransfer ? dol_dir_list($entityExportDir, 'files', 0, '\.zip$', '', 'date', SORT_DESC, 1) : []);
-$availableModules = ($permissiontotransfer ? saturne_entity_transfer_modules($db) : []);
+// The boxes describe the entity about to be exported: a module enabled there and off in the
+// entity of the session would otherwise never be offered, and its data would stay behind
+$displayedEntity  = ($canChooseEntity && GETPOSTISSET('exportEntity') ? GETPOSTINT('exportEntity') : $conf->entity);
+$availableModules = ($permissiontotransfer ? saturne_entity_transfer_modules($db, [], [$displayedEntity]) : []);
 $entityList       = [];
 
 // The entity list is only useful to a super administrator, the others stay on their own entity
