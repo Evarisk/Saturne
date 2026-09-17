@@ -10,7 +10,7 @@ on:
       - 'js/**/*.js'
       - '!js/*.min.js'
       - '!css/*.min.css'
-      - 'gulpfile-shared.js'
+      - 'build-assets.js'
 
 permissions:
   contents: write
@@ -30,7 +30,7 @@ jobs:
         run: npm ci
 
       - name: Build assets
-        run: MODULE_NAME=saturne node node_modules/gulp/bin/gulp.js --gulpfile gulpfile-shared.js build
+        run: node build-assets.js --module=saturne
 
       - name: Commit built assets if changed
         run: |
