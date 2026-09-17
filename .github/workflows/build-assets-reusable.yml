@@ -17,9 +17,26 @@ on:
         description: 'Module name (e.g. reedcrm)'
         required: true
         type: string
+      mode:
+        # `commit` only works where github-actions[bot] may push straight to the
+        # branch. A repository ruleset that requires a pull request applies to the
+        # bot as much as to a human, so on such a repository every push is rejected
+        # and the assets quietly stay stale. `verify` is the read-only counterpart:
+        # it turns the same build into a check, which is also the only thing a pull
+        # request coming from a fork can do, its GITHUB_TOKEN being read-only.
+        description: '`commit` to push the rebuilt .min files, `verify` to fail when they are stale'
+        required: false
+        default: commit
+        type: string
 
 permissions:
   contents: write
+
+# Two runs of this workflow on the same branch would both rebuild and both push.
+# Queue them rather than cancel them: a cancelled run leaves the assets unbuilt.
+concurrency:
+  group: build-assets-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -33,7 +50,15 @@ jobs:
           # Checkout the branch, not the SHA: checking out a SHA leaves the runner on a
           # detached HEAD, and the `git push` of the commit step below then has no branch
           # to target (fatal: You are not currently on a branch).
-          ref: ${{ github.ref_name }}
+          # In verify mode nothing is pushed and the run comes from a pull request, whose
+          # github.ref_name is a merge ref and not a branch: let checkout pick its own
+          # default, which is the merge commit we want to validate.
+          ref: ${{ inputs.mode == 'commit' && github.ref_name || '' }}
+          # Full history is what lets the commit step rebase when the branch moved while
+          # the assets were building; a shallow clone has no common ancestor to rebase
+          # onto. The depths are quoted because 0 is falsy in a GitHub expression, and an
+          # unquoted 0 would make the `&& ... || ...` idiom fall through to the other branch.
+          fetch-depth: ${{ inputs.mode == 'commit' && '0' || '1' }}
 
       - name: Checkout Saturne
         uses: actions/checkout@v4
@@ -56,12 +81,42 @@ jobs:
           MODULE_NAME=${{ inputs.module }} node .saturne/node_modules/gulp/bin/gulp.js \
             --gulpfile .saturne/gulpfile-shared.js build
 
+      - name: Verify committed assets are up to date
+        if: inputs.mode == 'verify'
+        run: |
+          # Staging before comparing gives the same verdict as the commit step,
+          # including for a module that keeps its .min files out of git.
+          git add --force css/${{ inputs.module }}.min.css js/${{ inputs.module }}.min.js
+          if git diff --staged --quiet; then
+            echo "Committed assets match a fresh build."
+            exit 0
+          fi
+          git diff --staged --stat
+          echo "::error::Committed .min files are stale. Rebuild them with the Saturne gulp build (MODULE_NAME=${{ inputs.module }} ... gulpfile-shared.js build) and commit css/${{ inputs.module }}.min.css and js/${{ inputs.module }}.min.js."
+          exit 1
+
       - name: Commit built assets if changed
+        if: inputs.mode == 'commit'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add --force css/${{ inputs.module }}.min.css js/${{ inputs.module }}.min.js
-          if ! git diff --staged --quiet; then
-            git commit -m "[CI] chore: build assets JS/CSS minified"
-            git push
+          if git diff --staged --quiet; then
+            echo "Committed assets already match a fresh build, nothing to push."
+            exit 0
           fi
+          git commit -m "[CI] chore: build assets JS/CSS minified"
+          # A merge landing while the assets were being built moves the branch and the
+          # push then dies on `cannot lock ref` (seen on Eoxia/reedcrm run 34582923522).
+          # Rebase onto the branch as it stands now and try again before giving up.
+          for attempt in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            git pull --rebase --autostash origin "$GITHUB_REF_NAME" || break
+          done
+          # Without this the only trace of a ruleset rejection is the raw GH013 line from
+          # the remote, which reads like a token problem and sends the reader looking at
+          # `contents: write` instead of at the branch rules.
+          echo "::error::Push refused on ${GITHUB_REF_NAME}. Either grant github-actions[bot] a bypass on the branch ruleset of ${GITHUB_REPOSITORY}, or call this workflow with mode: verify and keep committing the .min files by hand."
+          exit 1
