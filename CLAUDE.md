@@ -51,7 +51,7 @@ htdocs/custom/saturne/
 ├── js/modules/     # JS feature modules → compiled to js/saturne.min.js
 ├── lib/            # snake_case PHP utility functions
 ├── view/           # Generic views (saturne_list.php, saturne_document.php, …)
-└── gulpfile.js     # Build config (child modules reference gulpfile-shared.js)
+└── build-assets.js # Build des assets (les modules l'appellent avec --module)
 ```
 
 **Child module entry point** (`{module}.main.inc.php`):
@@ -239,44 +239,48 @@ css/scss/page/_mypage.scss
 
 ## 10. Build Workflow
 
-### Lancer gulp en local
+### Compiler les assets en local
 
-**Windows CMD :**
-```cmd
-set MODULE_NAME=saturne && node node_modules/gulp/bin/gulp.js --gulpfile gulpfile-shared.js
-```
-
-**Linux / macOS / PowerShell :**
 ```bash
-npm start   # équivalent, défini dans package.json via cross-env
+npm run build     # compilation one-shot
+npm run watch     # recompile a chaque sauvegarde
 ```
 
-**Tâches disponibles :**
+Depuis un autre module, le script se pilote par son option `--module` :
 
-| Commande | Description |
-|----------|-------------|
-| `default` | Compile SCSS + JS puis lance le watch (dev) |
-| `build` | Compilation prod one-shot, minifiée, sans sourcemaps |
-| `scss_core` | SCSS dev uniquement (sourcemaps + minification) |
-| `js_backend` | JS concat + uglify uniquement |
+```bash
+node ../saturne/build-assets.js --module=digiriskdolibarr
+node ../saturne/build-assets.js --module=digiriskdolibarr --watch
+```
+
+La variable d'environnement `MODULE_NAME` reste acceptée, c'est la forme qu'utilisait gulp.
+
+**La chaîne** (voir #1613) : `sass` compile `css/scss/style.scss`, `esbuild` minifie le CSS puis le JS.
+Deux dépendances de build au lieu des dix de gulp 4, qui n'était plus maintenu depuis 2019.
 
 ### Ce qui est compilé
 
-| Fichier | Local | CI/prod |
-|---------|-------|---------|
-| `css/saturne.min.css` | ✅ gulp (avec sourcemaps) | ✅ gulp `build` (sans sourcemaps) |
-| `js/saturne.min.js` | ✅ gulp | ✅ gulp `build` |
-| `css/saturne.min.css.map` | ✅ gulp (debug local) | ❌ jamais généré ni commité |
+| Fichier | Produit par |
+|---------|-------------|
+| `css/<module>.min.css` | `css/scss/style.scss` compilé par sass, minifié par esbuild |
+| `js/<module>.min.js` | `js/<module>.js` puis `js/modules/*.js`, **triés par point de code**, concaténés et minifiés |
+
+L'ordre de concaténation est trié explicitement et non laissé à un glob : sinon il dépend de la
+collation ICU de la machine, et les mêmes sources compilent en deux fichiers différents selon le
+poste (#1607). Aucun sourcemap n'est produit.
 
 ### Git et assets compilés
 
-- La CI (`build-assets.yml`) compile et commite `.min.css` / `.min.js` automatiquement sur push vers `main` ou `develop` — **ne jamais les commiter manuellement**
-- Le sourcemap `.map` est dans `.gitignore` — uniquement utile en local pour le debug DevTools
-- En local, Git ignore les modifications sur les `.min` grâce à `assume-unchanged` :
-  ```bash
-  git update-index --assume-unchanged css/saturne.min.css
-  git update-index --assume-unchanged js/saturne.min.js
-  ```
+- **Deux régimes, selon ce que le dépôt autorise au robot :**
+  - `mode: commit` (Saturne, reedcrm) — la CI compile et pousse les `.min` elle-même sur `main` ou
+    `develop`, donc ne pas les commiter à la main ;
+  - `mode: verify` (Digirisk) — le ruleset du dépôt exige une pull request pour toutes les refs, donc
+    `github-actions[bot]` ne peut rien pousser. Les `.min` **sont commités à la main dans la PR**, et
+    la CI se contente de recompiler pour vérifier qu'ils correspondent aux sources.
+  Un run vert en mode `commit` ne prouve rien à lui seul : l'étape sort en 0 dès qu'il n'y a rien à
+  commiter.
+- `git update-index --assume-unchanged` sur les `.min` fait sauter les recompilations du radar : à
+  réserver au mode `commit`, il fait manquer un `.min` à commiter dans les dépôts en mode `verify`
 - Use `npm ci` in CI (reproducible installs from lock file), `npm install` locally
 
 ---
@@ -516,7 +520,7 @@ Shows the modifier-class architecture used across all Saturne components:
 ## 14. Pitfalls
 
 - **Zero files outside `htdocs/custom/{module}/`** — never touch Dolibarr core
-- **Don't copy `gulpfile.js`** into each module — use `gulpfile-shared.js`
+- **Don't copy a build script** into each module — use `build-assets.js` of saturne with `--module`
 - **Test install/uninstall** on a clean Dolibarr instance before opening a PR
 - **`.min` files are auto-generated** — conflicts on them = recompile, don't hand-merge
 - `$moduleNameLowerCase` must be set before `saturne.main.inc.php` is required

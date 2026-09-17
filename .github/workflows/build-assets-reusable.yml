@@ -11,7 +11,7 @@ on:
     #       paths:
     #         - 'css/scss/**'
     #         - 'js/modules/**'
-    #         - 'gulpfile*.js'
+    #         - 'build-assets.js'
     inputs:
       module:
         description: 'Module name (e.g. reedcrm)'
@@ -78,8 +78,7 @@ jobs:
 
       - name: Build assets
         run: |
-          MODULE_NAME=${{ inputs.module }} node .saturne/node_modules/gulp/bin/gulp.js \
-            --gulpfile .saturne/gulpfile-shared.js build
+          node .saturne/build-assets.js --module=${{ inputs.module }}
 
       - name: Verify committed assets are up to date
         if: inputs.mode == 'verify'
@@ -92,7 +91,7 @@ jobs:
             exit 0
           fi
           git diff --staged --stat
-          echo "::error::Committed .min files are stale. Rebuild them with the Saturne gulp build (MODULE_NAME=${{ inputs.module }} ... gulpfile-shared.js build) and commit css/${{ inputs.module }}.min.css and js/${{ inputs.module }}.min.js."
+          echo "::error::Committed .min files are stale. Rebuild them with the Saturne build (node .saturne/build-assets.js --module=${{ inputs.module }}) and commit css/${{ inputs.module }}.min.css and js/${{ inputs.module }}.min.js."
           exit 1
 
       - name: Commit built assets if changed
