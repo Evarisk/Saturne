@@ -107,15 +107,48 @@ function saturne_entity_transfer_satellite_tables(): array
 }
 
 /**
+ * Name the modules enabled in the given entities, read from their own constants. A module
+ * enabled in the entity being exported may be off in the entity of the session, and reading
+ * the modules of the session would then leave its tables, and the data they hold, behind.
+ *
+ * @param  DoliDB      $db       Database handler
+ * @param  array<int>  $entities Entities to read the enabled modules of
+ * @return array<string>         Lowercase module names
+ */
+function saturne_entity_transfer_entity_modules(DoliDB $db, array $entities): array
+{
+    $ids = array_map('intval', $entities);
+    if (empty($ids)) {
+        return [];
+    }
+
+    $modules = [];
+
+    $resql = $db->query("SELECT DISTINCT name FROM " . MAIN_DB_PREFIX . "const WHERE entity IN (" . implode(', ', $ids) . ") AND name LIKE 'MAIN_MODULE_%'");
+    if (!$resql) {
+        return [];
+    }
+
+    while ($object = $db->fetch_object($resql)) {
+        // The activation also writes MAIN_MODULE_<NAME>_CSS, _TABS_..., which name no module
+        $modules[] = strtolower(substr($object->name, strlen('MAIN_MODULE_')));
+    }
+    $db->free($resql);
+
+    return $modules;
+}
+
+/**
  * List the modules holding tables of their own, so the caller can offer to take them
  * along. Their tables belong to the entity just like the Saturne ones, and an export
  * leaving them behind carries signatures and documents pointing at nothing.
  *
- * @param  DoliDB                             $db     Database handler
- * @param  array<string,array<string,string>> $schema Database structure, read when not given
- * @return array<string>                              Module names, sorted
+ * @param  DoliDB                             $db       Database handler
+ * @param  array<string,array<string,string>> $schema   Database structure, read when not given
+ * @param  array<int>                         $entities Entities whose enabled modules are read, the session ones when empty
+ * @return array<string>                                Module names, sorted
  */
-function saturne_entity_transfer_modules(DoliDB $db, array $schema = []): array
+function saturne_entity_transfer_modules(DoliDB $db, array $schema = [], array $entities = []): array
 {
     global $conf;
 
@@ -127,9 +160,11 @@ function saturne_entity_transfer_modules(DoliDB $db, array $schema = []): array
     $ignored = ['saturne', 'multicompany'];
     $modules = [];
 
-    foreach ((array) $conf->modules as $module) {
+    $candidates = (!empty($entities) ? saturne_entity_transfer_entity_modules($db, $entities) : (array) $conf->modules);
+
+    foreach ($candidates as $module) {
         $module = strtolower($module);
-        if (in_array($module, $ignored, true)) {
+        if (in_array($module, $ignored, true) || in_array($module, $modules, true)) {
             continue;
         }
 

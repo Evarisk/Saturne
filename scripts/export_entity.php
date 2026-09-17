@@ -83,7 +83,7 @@ if (isset($arguments['help']) || (!isset($arguments['entity']) && !isset($argume
 
 if (isset($arguments['list-modules'])) {
     print "Modules holding tables of their own:\n";
-    foreach (saturne_entity_transfer_modules($db) as $module) {
+    foreach (saturne_entity_transfer_modules($db, [], [(int) ($arguments['entity'] ?? 0)]) as $module) {
         print '  - ' . $module . "\n";
     }
     $db->close();
@@ -126,7 +126,7 @@ if (!empty($arguments['extra-entities'])) {
 // them, and an export holding the Saturne tables alone would leave the business data behind
 $modules = array_filter(array_map('trim', explode(',', (string) ($arguments['with-modules'] ?? ''))));
 if (empty($modules)) {
-    $modules = saturne_entity_transfer_modules($db);
+    $modules = saturne_entity_transfer_modules($db, [], $sourceEntities);
 }
 
 $defaultOutput = $conf->admin->dir_output . '/saturne_entity_export/entity_' . $sourceEntity . '_' . dol_print_date(dol_now(), '%Y%m%d%H%M%S');
