@@ -607,7 +607,7 @@ class SaturneDocumentModel extends CommonDocGenerator
                         if ($key == 'mycompany_logo') {
                             $listLines->setVars($key, $outputLangs->transnoentities('ErrorNoSocietyLogo'), true, 'UTF-8');
                         } else {
-                            $listLines->setVars($key, $outputLangs->transnoentities('ErrorFileNotFound'), true, 'UTF-8');
+                            $listLines->setVars($key, $outputLangs->transnoentities('ErrorImageFileNotFound'), true, 'UTF-8');
                         }
                     } else {
                         $listLines->setVars($key, '', true, 'UTF-8');
