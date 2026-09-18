@@ -48,6 +48,7 @@ if (!$res) {
 }
 
 require_once __DIR__ . '/../lib/entity_transfer.lib.php';
+require_once __DIR__ . '/../lib/maintenance.lib.php';
 
 global $db;
 
@@ -66,25 +67,23 @@ if (isset($arguments['help'])) {
     exit(0);
 }
 
-$table  = MAIN_DB_PREFIX . 'saturne_object_documents';
-$where  = ' WHERE last_main_doc IS NULL';
-$where .= isset($arguments['entity']) ? ' AND entity = ' . ((int) $arguments['entity']) : '';
-$where .= isset($arguments['type']) ? " AND type = '" . $db->escape($arguments['type']) . "'" : '';
-
-$resql = $db->query('SELECT entity, type, COUNT(*) AS nb FROM ' . $table . $where . ' GROUP BY entity, type ORDER BY entity, type');
-if (!$resql) {
-    print 'SQL error: ' . $db->lasterror() . "\n";
-    exit(1);
+$filters = [];
+if (isset($arguments['entity'])) {
+    $filters['entity'] = (int) $arguments['entity'];
+}
+if (isset($arguments['type'])) {
+    $filters['type'] = $arguments['type'];
 }
 
+$rows  = saturne_orphan_documents_count($db, $filters);
 $total = 0;
+
 print "\n";
 printf("%-8s %-32s %s\n", 'entity', 'type', 'rows');
-while ($object = $db->fetch_object($resql)) {
-    printf("%-8d %-32s %d\n", $object->entity, $object->type, $object->nb);
-    $total += (int) $object->nb;
+foreach ($rows as $row) {
+    printf("%-8d %-32s %d\n", $row['entity'], $row['type'], $row['nb']);
+    $total += $row['nb'];
 }
-$db->free($resql);
 
 print "\n" . $total . " orphan row(s)\n";
 
@@ -97,17 +96,11 @@ if (empty($arguments['go'])) {
     exit(0);
 }
 
-$db->begin();
-
-$resql = $db->query('DELETE FROM ' . $table . $where);
-if (!$resql) {
+$deleted = saturne_orphan_documents_delete($db, $filters);
+if ($deleted < 0) {
     print 'SQL error: ' . $db->lasterror() . "\n";
-    $db->rollback();
     exit(1);
 }
-
-$deleted = $db->affected_rows($resql);
-$db->commit();
 
 print $deleted . " row(s) deleted.\n\n";
 

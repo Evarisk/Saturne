@@ -351,3 +351,13 @@ EntityImportMissingModules                   = The archive holds the tables of m
 EntityImportAbsentModules                    = Those modules ran on the source install and are not enabled here: %s. The imported rows may point at data of theirs, and some screens will not show them.
 EntityImportDone                             = Import done: %s statements executed, %s files copied
 EntityImportFinishedWithErrors               = Import done: %s statements executed, %s error(s)
+
+# Maintenance
+Maintenance                                  = Maintenance
+MaintenanceAdminOnly                         = Maintenance is reserved to administrators: the operations delete database rows.
+OrphanDocuments                              = Documents naming no file
+OrphanDocumentsDescription                   = A document generation stopped before the file was named used to leave a row naming nothing, having burnt a reference from the counter. The cause is fixed; those rows are still there to remove.
+OrphanDocumentsNone                          = No such row.
+OrphanDocumentsFound                         = %s row(s) to delete
+OrphanDocumentsConfirmDelete                 = Permanently delete %s row(s)? This cannot be undone.
+OrphanDocumentsDeleted                       = %s row(s) deleted
