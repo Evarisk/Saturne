@@ -829,14 +829,18 @@ class SaturneDocumentModel extends CommonDocGenerator
             return -1;
         }
 
-        // getMultidirOutput() indexes multidir_output on the object entity without guarding the key:
-        // an object of another entity (multicompany sharing) makes it warn before returning nothing.
+        // multidir_output only ever holds the current entity, and getMultidirOutput() indexes it on
+        // the object entity: a parent shared from another entity (multicompany) makes it warn then
+        // return nothing. The document created here belongs to the current entity, so its file
+        // belongs to the current entity directory.
         $objectEntity = empty($object->entity) ? $conf->entity : $object->entity;
-        $uploadDir    = isset($conf->{$this->module}->multidir_output[$objectEntity]) ? getMultidirOutput($object, $this->module) : '';
+        if (!isset($conf->{$this->module}->multidir_output[$objectEntity])) {
+            $objectEntity = $conf->entity;
+        }
+
+        $uploadDir = $conf->{$this->module}->multidir_output[$objectEntity] ?? '';
         if (!$uploadDir) {
-            // multidir_output is keyed on the current entity only; surface module + object entity
-            // so a missing key (e.g. cross-entity object in multicompany) is diagnosable.
-            setEventMessages($langs->trans('ErrorDirNotFound', $this->module . ' (entity ' . (int) $object->entity . ')'), [], 'errors');
+            setEventMessages($langs->trans('ErrorDirNotFound', $this->module . ' (entity ' . (int) $objectEntity . ')'), [], 'errors');
             return -1;
         }
 
