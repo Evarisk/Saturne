@@ -98,6 +98,7 @@ ErrorFileNotFound           = Fichier non trouvé
 ErrorNoSocietyLogo          = Aucun logo de la société renseigné
 CustomODT                   = ODT personnalisé
 ErrorWrongFileNameExtension = Erreur : mauvaise extension de fichier %s
+ErrorFileNameCanNotBeBuilt  = Le nom du fichier n'a pas pu être construit
 
 # Trigger - Événements
 ConfTrigger                 = Configuration des événements

@@ -819,16 +819,9 @@ class SaturneDocumentModel extends CommonDocGenerator
         $numberingModules = [(!empty($moreParam['subDir']) ? $moreParam['subDir'] : $this->module . 'documents/') . $this->document_type => getDolGlobalString($confRefModName)];
         list($refModName) = saturne_require_objects_mod($numberingModules, $this->module);
 
-        $objectDocumentRef    = $refModName->getNextValue($objectDocument);
-        $objectDocument->ref  = $objectDocumentRef;
-        $objectDocumentRef    = dol_sanitizeFileName($objectDocumentRef);
-        $objectDocument->type = $this->document_type;
-        $objectDocumentID     = $objectDocument->create($moreParam['user'], 1, $object);
-        if ($objectDocumentID < 0) {
-            setEventMessages($langs->trans('ErrorCreateObject'), [], 'errors');
-            return -1;
-        }
-
+        // The output directory is resolved before the document row is created: nothing below reads
+        // the created document, and a failure after create() used to leave behind a row with no
+        // last_main_doc, naming no file and having burnt a reference from the numbering counter.
         // multidir_output only ever holds the current entity, and getMultidirOutput() indexes it on
         // the object entity: a parent shared from another entity (multicompany) makes it warn then
         // return nothing. The document created here belongs to the current entity, so its file
@@ -854,6 +847,16 @@ class SaturneDocumentModel extends CommonDocGenerator
                 $this->error = $langs->transnoentities('ErrorCanNotCreateDir', $dir);
                 return -1;
             }
+        }
+
+        $objectDocumentRef    = $refModName->getNextValue($objectDocument);
+        $objectDocument->ref  = $objectDocumentRef;
+        $objectDocumentRef    = dol_sanitizeFileName($objectDocumentRef);
+        $objectDocument->type = $this->document_type;
+        $objectDocumentID     = $objectDocument->create($moreParam['user'], 1, $object);
+        if ($objectDocumentID < 0) {
+            setEventMessages($langs->trans('ErrorCreateObject'), [], 'errors');
+            return -1;
         }
 
         $newFileTmp = $this->name;
@@ -926,7 +929,14 @@ class SaturneDocumentModel extends CommonDocGenerator
 
         $outputLangs->charset_output = 'UTF-8';
 
+        // buildDocumentFilename() returns -1 on failure, the file path otherwise. Unchecked, the
+        // generation carried on with -1 as a path, still reported a success to commonGenerateDocument()
+        // and fired the _GENERATE trigger for a document that was never written.
         $file = $this->buildDocumentFilename($objectDocument, $outputLangs, $object, $moreParam);
+        if (!is_string($file) || empty($file)) {
+            $this->error = $outputLangs->transnoentities('ErrorFileNameCanNotBeBuilt');
+            return -1;
+        }
 
         dol_mkdir($conf->$moduleNameLowerCase->dir_temp);
         if (!is_writable($conf->$moduleNameLowerCase->dir_temp)) {
