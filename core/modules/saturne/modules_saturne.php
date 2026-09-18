@@ -1026,11 +1026,11 @@ class SaturneDocumentModel extends CommonDocGenerator
     /**
      * Add a page when the block about to be written would not fit on the current one.
      *
-     * @param  TCPDF $pdf          PDF handler.
+     * @param  mixed $pdf          PDF handler, a TCPDF instance.
      * @param  float $neededHeight Height the next block needs.
      * @return void
      */
-    public function checkPageBreak(TCPDF $pdf, float $neededHeight)
+    public function checkPageBreak($pdf, float $neededHeight)
     {
         if ($pdf->GetY() + $neededHeight + $pdf->getBreakMargin() > $pdf->getPageHeight()) {
             $pdf->AddPage();
@@ -1041,13 +1041,13 @@ class SaturneDocumentModel extends CommonDocGenerator
     /**
      * Split a text in two : the longest beginning fitting in a given height, and the rest.
      *
-     * @param  TCPDF  $pdf    PDF handler.
+     * @param  mixed  $pdf    PDF handler, a TCPDF instance.
      * @param  string $text   Text to split.
      * @param  float  $width  Width of the cell the text is written in.
      * @param  float  $height Height available for the beginning.
      * @return array          Beginning and rest, the rest being empty when everything fits.
      */
-    public function splitTextToHeight(TCPDF $pdf, string $text, float $width, float $height): array
+    public function splitTextToHeight($pdf, string $text, float $width, float $height): array
     {
         if (dol_strlen($text) == 0 || $pdf->getStringHeight($width, $text) <= $height) {
             return [$text, ''];
@@ -1088,14 +1088,14 @@ class SaturneDocumentModel extends CommonDocGenerator
      * look. Optional keys : 'title' for the banner above the table, 'align' for the horizontal
      * alignment of each column, 'Ln' for the space left before the first row.
      *
-     * @param  TCPDF $pdf             PDF handler.
+     * @param  mixed $pdf             PDF handler, a TCPDF instance.
      * @param  array $table           Table to draw.
      * @param  float $tableWidth      Total width of the table.
      * @param  float $lineHeight      Height of a row holding a single line.
      * @param  float $defaultFontSize Font size of the document.
      * @return void
      */
-    public function drawTable(TCPDF $pdf, array $table, float $tableWidth, float $lineHeight, float $defaultFontSize)
+    public function drawTable($pdf, array $table, float $tableWidth, float $lineHeight, float $defaultFontSize)
     {
         global $langs;
 
@@ -1229,13 +1229,13 @@ class SaturneDocumentModel extends CommonDocGenerator
     /**
      * Write the footer on every page of the document, once its content is generated.
      *
-     * @param  TCPDF     $pdf             PDF handler.
+     * @param  mixed     $pdf             PDF handler, a TCPDF instance.
      * @param  object    $object          Object the document is about.
      * @param  Translate $outputLangs     Lang object for output.
      * @param  float     $defaultFontSize Font size of the document.
      * @return void
      */
-    public function drawFooterOnEveryPage(TCPDF $pdf, $object, Translate $outputLangs, float $defaultFontSize)
+    public function drawFooterOnEveryPage($pdf, $object, Translate $outputLangs, float $defaultFontSize)
     {
         // The footer itself belongs to the model : nothing to write without it.
         if (!method_exists($this, '_pagefooter')) {
