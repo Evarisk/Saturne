@@ -79,19 +79,36 @@ jobs:
       - name: Build assets
         run: |
           node .saturne/build-assets.js --module=${{ inputs.module }}
+          # A module does not necessarily ship both bundles: DoliMeet has no css/ directory
+          # at all. `git add` on a pathspec that matches nothing fails the step with exit 128
+          # before anything is compared, and the run then reads like a stale asset instead of
+          # a missing path. Keep the bundles that exist on disk or are already tracked, so a
+          # bundle deleted by the build still stages as a deletion.
+          bundles=""
+          for bundle in css/${{ inputs.module }}.min.css js/${{ inputs.module }}.min.js; do
+            if [ -e "$bundle" ] || git ls-files --error-unmatch "$bundle" >/dev/null 2>&1; then
+              bundles="$bundles $bundle"
+            fi
+          done
+          if [ -z "$bundles" ]; then
+            echo "::error::No bundle to check for ${{ inputs.module }}: the build produced neither css/${{ inputs.module }}.min.css nor js/${{ inputs.module }}.min.js."
+            exit 1
+          fi
+          echo "ASSET_BUNDLES=${bundles# }" >> "$GITHUB_ENV"
 
       - name: Verify committed assets are up to date
         if: inputs.mode == 'verify'
         run: |
           # Staging before comparing gives the same verdict as the commit step,
           # including for a module that keeps its .min files out of git.
-          git add --force css/${{ inputs.module }}.min.css js/${{ inputs.module }}.min.js
+          # shellcheck disable=SC2086 -- ASSET_BUNDLES holds one or two paths and must split
+          git add --force $ASSET_BUNDLES
           if git diff --staged --quiet; then
             echo "Committed assets match a fresh build."
             exit 0
           fi
           git diff --staged --stat
-          echo "::error::Committed .min files are stale. Rebuild them with the Saturne build (node .saturne/build-assets.js --module=${{ inputs.module }}) and commit css/${{ inputs.module }}.min.css and js/${{ inputs.module }}.min.js."
+          echo "::error::Committed .min files are stale. Rebuild them with the Saturne build (node .saturne/build-assets.js --module=${{ inputs.module }}) and commit ${ASSET_BUNDLES}."
           exit 1
 
       - name: Commit built assets if changed
@@ -99,7 +116,8 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add --force css/${{ inputs.module }}.min.css js/${{ inputs.module }}.min.js
+          # shellcheck disable=SC2086 -- ASSET_BUNDLES holds one or two paths and must split
+          git add --force $ASSET_BUNDLES
           if git diff --staged --quiet; then
             echo "Committed assets already match a fresh build, nothing to push."
             exit 0
