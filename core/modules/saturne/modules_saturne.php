@@ -1030,7 +1030,7 @@ class SaturneDocumentModel extends CommonDocGenerator
      * @param  float $neededHeight Height the next block needs.
      * @return void
      */
-    public function checkPageBreak($pdf, float $neededHeight)
+    protected function checkPageBreak($pdf, float $neededHeight)
     {
         if ($pdf->GetY() + $neededHeight + $pdf->getBreakMargin() > $pdf->getPageHeight()) {
             $pdf->AddPage();
@@ -1047,7 +1047,7 @@ class SaturneDocumentModel extends CommonDocGenerator
      * @param  float  $height Height available for the beginning.
      * @return array          Beginning and rest, the rest being empty when everything fits.
      */
-    public function splitTextToHeight($pdf, string $text, float $width, float $height): array
+    protected function splitTextToHeight($pdf, string $text, float $width, float $height): array
     {
         if (dol_strlen($text) == 0 || $pdf->getStringHeight($width, $text) <= $height) {
             return [$text, ''];
@@ -1095,7 +1095,7 @@ class SaturneDocumentModel extends CommonDocGenerator
      * @param  float $defaultFontSize Font size of the document.
      * @return void
      */
-    public function drawTable($pdf, array $table, float $tableWidth, float $lineHeight, float $defaultFontSize)
+    protected function drawTable($pdf, array $table, float $tableWidth, float $lineHeight, float $defaultFontSize)
     {
         global $langs;
 
@@ -1235,7 +1235,7 @@ class SaturneDocumentModel extends CommonDocGenerator
      * @param  float     $defaultFontSize Font size of the document.
      * @return void
      */
-    public function drawFooterOnEveryPage($pdf, $object, Translate $outputLangs, float $defaultFontSize)
+    protected function drawFooterOnEveryPage($pdf, $object, Translate $outputLangs, float $defaultFontSize)
     {
         // The footer itself belongs to the model : nothing to write without it.
         if (!method_exists($this, '_pagefooter')) {
