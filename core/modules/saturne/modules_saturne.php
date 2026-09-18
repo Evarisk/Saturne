@@ -391,6 +391,16 @@ class SaturneDocumentModel extends CommonDocGenerator
     public string $document_type = '';
 
     /**
+     * Height of one line of text, in the document unit. Each generator sets the value that
+     * suits its layout, in its own constructor. It is declared here because six generators
+     * across two modules were assigning it while no class ever declared it, which makes it
+     * a dynamic property - deprecated since PHP 8.2, removed in PHP 9.
+     *
+     * @var float
+     */
+    public float $height = 5;
+
+    /**
      * @var array RGB background colour of the title banner drawn by drawTable().
      */
     public array $tableTitleColor = [42, 157, 143];
