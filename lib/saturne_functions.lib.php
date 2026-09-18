@@ -624,7 +624,10 @@ function saturne_load_langs(array $domains = [])
 
     $moduleNameLowerCase = saturne_get_module_name();
 
-    $langs->loadLangs(['saturne@saturne', 'object@saturne', 'signature@saturne', 'medias@saturne', 'component@saturne', $moduleNameLowerCase . '@' . $moduleNameLowerCase]);
+    // 'errors' last: the first loaded definition wins, so module domains keep priority. Without it,
+    // trans('SomeErrorKey', $param) returns the bare key, and get_htmloutput_mesg() translates that key
+    // at display time without the parameters — the user reads a message with empty placeholders.
+    $langs->loadLangs(['saturne@saturne', 'object@saturne', 'signature@saturne', 'medias@saturne', 'component@saturne', $moduleNameLowerCase . '@' . $moduleNameLowerCase, 'errors']);
 
     if (!empty($domains)) {
         foreach ($domains as $domain) {
