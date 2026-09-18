@@ -84,6 +84,11 @@ function saturne_admin_prepare_head(): array
     $head[$h][2] = 'entitytransfer';
     $h++;
 
+    $head[$h][0] = dol_buildpath('/saturne/admin/maintenance.php', 1);
+    $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-broom pictofixedwidth"></i>' . $langs->trans('Maintenance') : '<i class="fas fa-broom"></i>';
+    $head[$h][2] = 'maintenance';
+    $h++;
+
     complete_head_from_modules($conf, $langs, null, $head, $h, 'saturne@saturne');
 
     complete_head_from_modules($conf, $langs, null, $head, $h, 'saturne@saturne', 'remove');

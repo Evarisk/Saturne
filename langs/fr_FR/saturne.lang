@@ -359,3 +359,13 @@ EntityImportMissingModules                   = L'archive contient les tables de 
 EntityImportAbsentModules                    = Ces modules tournaient sur l'installation d'origine et ne sont pas activés ici : %s. Les données importées peuvent renvoyer aux leurs, et certains écrans ne les afficheront pas.
 EntityImportDone                             = Import terminé : %s instructions exécutées, %s fichiers copiés
 EntityImportFinishedWithErrors               = Import terminé : %s instructions exécutées, %s erreur(s)
+
+# Maintenance
+Maintenance                                  = Maintenance
+MaintenanceAdminOnly                         = La maintenance est réservée aux administrateurs : les opérations suppriment des lignes en base.
+OrphanDocuments                              = Documents sans fichier
+OrphanDocumentsDescription                   = Une génération de document interrompue avant que le fichier soit nommé laissait une ligne qui ne désigne rien et qui a consommé une référence du compteur. La cause est corrigée ; ces lignes-là restent à retirer.
+OrphanDocumentsNone                          = Aucune ligne de ce type.
+OrphanDocumentsFound                         = %s ligne(s) à supprimer
+OrphanDocumentsConfirmDelete                 = Supprimer définitivement %s ligne(s) ? Cette action est irréversible.
+OrphanDocumentsDeleted                       = %s ligne(s) supprimée(s)
