@@ -63,14 +63,15 @@ saturne_check_access($permissiontoread);
  */
 
 if ($action == 'cleanOrphanDocuments' && $permissiontoclean) {
-    // A super administrator sees every entity, anyone else stays on his own
-    $filters = (empty($user->entity) && $conf->entity == 1) ? [] : ['entity' => $conf->entity];
+    $scope = saturne_maintenance_scope($user, $conf);
 
-    $deleted = saturne_orphan_documents_delete($db, $filters);
+    $deleted = saturne_orphan_documents_delete($db, $scope['filters']);
     if ($deleted < 0) {
         setEventMessages($langs->trans('ErrorSQL'), [], 'errors');
+    } elseif ($scope['all']) {
+        setEventMessages($langs->trans('OrphanDocumentsDeletedAllEntities', $deleted), []);
     } else {
-        setEventMessages($langs->trans('OrphanDocumentsDeleted', $deleted), []);
+        setEventMessages($langs->trans('OrphanDocumentsDeletedEntity', $deleted, $scope['entity']), []);
     }
 
     header('Location: ' . $_SERVER['PHP_SELF']);
@@ -95,9 +96,9 @@ print load_fiche_titre($title, $linkback, 'title_setup');
 $head = saturne_admin_prepare_head();
 print dol_get_fiche_head($head, 'maintenance', $title, -1, 'saturne_color@saturne');
 
-// A super administrator sees every entity, anyone else stays on his own
-$orphanFilters   = (empty($user->entity) && $conf->entity == 1) ? [] : ['entity' => $conf->entity];
-$orphanDocuments = ($permissiontoclean ? saturne_orphan_documents_count($db, $orphanFilters) : []);
+// Both the listing and the deletion read the same scope, so what is displayed is what is removed
+$scope           = saturne_maintenance_scope($user, $conf);
+$orphanDocuments = ($permissiontoclean ? saturne_orphan_documents_count($db, $scope['filters']) : []);
 
 require_once __DIR__ . '/../core/tpl/admin/maintenance_view.tpl.php';
 
