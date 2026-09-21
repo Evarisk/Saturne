@@ -21,7 +21,7 @@
  * \ingroup saturne
  * \brief   View of the Saturne maintenance page
  *
- * Expects $permissiontoclean and $orphanDocuments prepared by admin/maintenance.php
+ * Expects $permissiontoclean, $scope and $orphanDocuments prepared by admin/maintenance.php
  */
 
 global $langs;
@@ -53,7 +53,16 @@ print '</tr>';
 print '<tr class="oddeven">';
 print '<td class="tdtop">' . $langs->trans('OrphanDocuments') . '</td>';
 print '<td>';
-print $langs->trans('OrphanDocumentsDescription') . '<br><br>';
+print $langs->trans('OrphanDocumentsDescription') . '<br>';
+
+// The two screens look alike when a single entity comes out: without this line nothing tells
+// whether the rest of the installation is clean or simply out of reach
+if ($scope['all']) {
+    print '<strong>' . $langs->trans('OrphanDocumentsScopeAllEntities') . '</strong><br><br>';
+} else {
+    print '<strong>' . $langs->trans('OrphanDocumentsScopeCurrentEntity', $scope['entity'] . ' - ' . getDolGlobalString('MAIN_INFO_SOCIETE_NOM')) . '</strong><br>';
+    print '<span class="opacitymedium">' . $langs->trans('OrphanDocumentsScopeCurrentEntityHelp') . '</span><br><br>';
+}
 
 if (empty($orphanDocuments)) {
     print '<strong>' . $langs->trans('OrphanDocumentsNone') . '</strong>';
@@ -82,10 +91,14 @@ print '<td class="center tdtop">';
 if (empty($orphanDocuments)) {
     print '<input type="submit" class="button" value="' . $langs->trans('Delete') . '" disabled>';
 } else {
-    // The deletion cannot be undone and the count is the only thing the administrator has read:
-    // repeat it in the confirmation rather than asking a bare "are you sure"
+    // The deletion cannot be undone: the confirmation repeats the count and the scope, the two
+    // things the administrator has just read, rather than asking a bare "are you sure"
+    $confirmMessage = $scope['all']
+        ? $langs->transnoentities('OrphanDocumentsConfirmDeleteAllEntities', $orphanTotal)
+        : $langs->transnoentities('OrphanDocumentsConfirmDeleteEntity', $orphanTotal, $scope['entity']);
+
     print '<input type="submit" class="button reposition" name="cleanOrphanDocumentsSubmit" value="' . $langs->trans('Delete') . '"';
-    print ' onclick="return confirm(\'' . dol_escape_js($langs->transnoentities('OrphanDocumentsConfirmDelete', $orphanTotal)) . '\');">';
+    print ' onclick="return confirm(\'' . dol_escape_js($confirmMessage) . '\');">';
 }
 print '</td>';
 print '</tr>';

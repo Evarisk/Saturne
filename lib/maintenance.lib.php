@@ -23,6 +23,28 @@
  */
 
 /**
+ * Return the entity scope of the maintenance operations.
+ *
+ * Only a super administrator connected on the master entity acts on the whole installation, anyone
+ * else stays on the entity of his session. Both the listing and the deletion read this scope, so
+ * what is displayed is what is removed.
+ *
+ * @param  User $user User running the operation
+ * @param  Conf $conf Dolibarr configuration
+ * @return array      ['all' => bool, 'entity' => int, 'filters' => array]
+ */
+function saturne_maintenance_scope(User $user, Conf $conf): array
+{
+    $all = (empty($user->entity) && $conf->entity == 1);
+
+    return [
+        'all'     => $all,
+        'entity'  => (int) $conf->entity,
+        'filters' => $all ? [] : ['entity' => (int) $conf->entity],
+    ];
+}
+
+/**
  * Build the WHERE clause selecting the object document rows that name no file.
  *
  * A row of saturne_object_documents exists to name a produced file, in last_main_doc. Until #1634
