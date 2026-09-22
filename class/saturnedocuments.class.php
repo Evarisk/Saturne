@@ -266,7 +266,7 @@ abstract class SaturneDocuments extends SaturneObject
         // Dolibarr 24 only reads a template stored under DOL_DATA_ROOT/ecm or DOL_DATA_ROOT/doctemplates : mirror the
         // ones shipped inside the module there, and refresh the copy as soon as the file of the module changes
         $dataRoot = rtrim(strtr(DOL_DATA_ROOT, DIRECTORY_SEPARATOR, '/'), '/');
-        if ((int) DOL_VERSION >= 24 && strpos($templatePath, $dataRoot . '/ecm/') !== 0 && strpos($templatePath, $dataRoot . '/doctemplates/') !== 0) {
+        if (version_compare(DOL_VERSION, '24.0.0', '>=') && strpos($templatePath, $dataRoot . '/ecm/') !== 0 && strpos($templatePath, $dataRoot . '/doctemplates/') !== 0) {
             $mirrorDir  = $dataRoot . '/doctemplates/' . $this->module . '/' . $documentType;
             $mirrorPath = $mirrorDir . '/' . basename($templatePath);
             if (!dol_is_file($mirrorPath) || filesize($mirrorPath) != filesize($templatePath) || filemtime($mirrorPath) < filemtime($templatePath)) {
