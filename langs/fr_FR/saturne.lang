@@ -374,3 +374,6 @@ OrphanDocumentsConfirmDeleteAllEntities      = Supprimer définitivement %s lign
 OrphanDocumentsConfirmDeleteEntity           = Supprimer définitivement %s ligne(s) de l'entité %s ? Cette action est irréversible.
 OrphanDocumentsDeletedAllEntities            = %s ligne(s) supprimée(s) sur l'ensemble des entités
 OrphanDocumentsDeletedEntity                 = %s ligne(s) supprimée(s) sur l'entité %s
+
+# Document generation - Generation de document
+ErrorTemplateFileNotAllowed                  = Le modèle de document « %s » ne se trouve pas dans un répertoire de modèles du module.
