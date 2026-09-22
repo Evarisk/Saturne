@@ -891,6 +891,25 @@ class SaturneDocumentModel extends CommonDocGenerator
     }
 
     /**
+     * Get the more param of a document generation
+     *
+     * Dolibarr 24 stopped forwarding them to write_file() and leaves them in the context of the document object,
+     * so every write_file() of a module has to read them back through this method
+     *
+     * @param  SaturneDocuments $objectDocument Object source to build document
+     * @param  array            $moreParam      More param received by write_file()
+     * @return array                            More param of the generation (Object/user/etc)
+     */
+    public static function getMoreParam(SaturneDocuments $objectDocument, array $moreParam): array
+    {
+        if (!isset($moreParam['object']) && is_array($objectDocument->context['moreparams'] ?? null)) {
+            $moreParam = array_merge($objectDocument->context['moreparams'], $moreParam);
+        }
+
+        return $moreParam;
+    }
+
+    /**
      * Function to build a document on disk
      *
      * @param  SaturneDocuments $objectDocument  Object source to build document
@@ -903,12 +922,14 @@ class SaturneDocumentModel extends CommonDocGenerator
      * @return int                               1 if OK, <=0 if KO
      * @throws Exception
      */
-    public function write_file(SaturneDocuments $objectDocument, Translate $outputLangs, string $srcTemplatePath, int $hideDetails = 0, int $hideDesc = 0, int $hideRef = 0, array $moreParam): int
+    public function write_file(SaturneDocuments $objectDocument, Translate $outputLangs, string $srcTemplatePath, int $hideDetails = 0, int $hideDesc = 0, int $hideRef = 0, array $moreParam = []): int
     {
         global $action, $conf, $hookmanager, $langs, $moduleNameLowerCase, $mysoc;
 
         // Load Dolibarr libraries
         require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php'; // Need for get_substitutionarray_mysoc
+
+        $moreParam = self::getMoreParam($objectDocument, $moreParam);
 
         $object = $moreParam['object'];
 

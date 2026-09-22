@@ -366,3 +366,6 @@ OrphanDocumentsConfirmDeleteAllEntities      = Permanently delete %s row(s), acr
 OrphanDocumentsConfirmDeleteEntity           = Permanently delete %s row(s) of entity %s? This cannot be undone.
 OrphanDocumentsDeletedAllEntities            = %s row(s) deleted across every entity
 OrphanDocumentsDeletedEntity                 = %s row(s) deleted on entity %s
+
+# Document generation
+ErrorTemplateFileNotAllowed                  = The document template '%s' is not stored in a template directory of the module.
