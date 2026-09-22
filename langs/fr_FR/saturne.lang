@@ -299,18 +299,30 @@ DropFilesHere = Glissez-déposez vos fichiers ici
 # Drag & drop reorder
 Reorder = Réordonner
 
-# Ticket creation email templates
-TicketCreateMailModelTitle = Modèles d'email pour la création de ticket
+# Ticket notification email templates
+TicketMailModelTitle = Modèles d'email des tickets
+TicketMailModelIntro = Dolibarr construit ces emails directement dans son code : ni leur mise en forme, ni l'ordre des informations qu'ils contiennent ne sont modifiables depuis l'interface. Choisir un modèle d'email ci-dessous remplace entièrement le sujet et le corps du mail concerné. Chaque ligne est indépendante : celles laissées sur « Contenu par défaut de Dolibarr » gardent le comportement d'origine.
+TicketMailModelCreateSection = À la création du ticket
+TicketMailModelCloseSection = À la clôture du ticket
+TicketMailModelAssignedSection = À la prise en charge du ticket (assignation)
 TicketCreateMailModelColumn = Modèle d'email
 TicketCreateMailModelDefault = Contenu par défaut de Dolibarr
-TicketCreateMailModelAdmin = Email de notification interne (admin)
-TicketCreateMailModelAdminDescription = Modèle d'email utilisé pour la notification envoyée à l'adresse de notification des tickets (TICKET_NOTIFICATION_EMAIL_TO) lors de la création d'un ticket. Laisser vide pour conserver le contenu par défaut de Dolibarr.
-TicketCreateMailModelCustomer = Email de confirmation au client
-TicketCreateMailModelCustomerDescription = Modèle d'email utilisé pour la confirmation envoyée au tiers / contact lors de la création d'un ticket. Laisser vide pour conserver le contenu par défaut de Dolibarr.
-TicketCreateMailModelAssignee = Email à l'utilisateur assigné
-TicketCreateMailModelAssigneeDescription = Modèle d'email utilisé pour la notification envoyée à l'utilisateur assigné au ticket lors de sa création. Laisser vide pour conserver le contenu par défaut de Dolibarr.
-TicketCreateMailModelVariables = Variables de substitution disponibles dans les modèles
-TicketCreateMailModelVariablesHelp = Variables propres au ticket : __TICKET_REF__, __TICKET_TRACK_ID__, __TICKET_SUBJECT__, __TICKET_MESSAGE__, __TICKET_TYPE__, __TICKET_CATEGORY__, __TICKET_SEVERITY__, __TICKET_PUBLIC_URL__, __TICKET_MANAGEMENT_URL__.<br>Variables communes : __REF__, __EXTRAFIELD_XXX__ (remplacer XXX par le code de l'attribut supplémentaire, ex. __EXTRAFIELD_GROUPINCHARGEOF__), __MYCOMPANY_NAME__, __THIRDPARTY_NAME__.<br>Les modèles se gèrent dans Accueil &gt; Configuration &gt; Emails &gt; Modèles d'email (type « ticket »).
+TicketCreateMailModelAdmin = Notification interne (admin)
+TicketCreateMailModelAdminDescription = Part dès qu'un ticket est créé, à l'adresse de notification des tickets. Envoyé uniquement si cette adresse est renseignée dans la configuration du module Ticket (TICKET_NOTIFICATION_EMAIL_TO).
+TicketCreateMailModelCustomer = Confirmation au client
+TicketCreateMailModelCustomerDescription = Part au contact choisi à la création, à défaut au tiers, à défaut à l'adresse d'origine du ticket. Envoyé uniquement si la notification du tiers est demandée à la création.
+TicketCreateMailModelAssignee = Notification à l'utilisateur assigné
+TicketCreateMailModelAssigneeDescription = Part à l'utilisateur assigné dès la création, s'il y en a un et qu'il n'est pas l'auteur du ticket.
+TicketCloseMailModelAdmin = Notification interne (admin)
+TicketCloseMailModelAdminDescription = Part à l'adresse de notification des tickets quand un ticket est clôturé. Même condition qu'à la création : l'adresse doit être renseignée (TICKET_NOTIFICATION_EMAIL_TO).
+TicketCloseMailModelCustomer = Notification au client
+TicketCloseMailModelCustomerDescription = Part aux contacts du ticket à la clôture, selon le destinataire retenu dans la fenêtre de clôture. L'option « Notifier les contacts à la clôture » (TICKET_NOTIFY_AT_CLOSING) sert de valeur par défaut à ce choix.
+TicketAssignedMailModelAssignee = Notification à l'utilisateur assigné
+TicketAssignedMailModelAssigneeDescription = Part à l'utilisateur qui vient d'être assigné au ticket, sauf s'il s'assigne lui-même. Rien n'est envoyé si les emails de tickets sont désactivés (TICKET_DISABLE_ALL_MAILS).
+TicketAssignedMailModelCustomer = Information au client
+TicketAssignedMailModelCustomerDescription = Prévient le demandeur que son ticket est pris en charge, à la première assignation seulement. Envoyé uniquement si l'option correspondante du module Ticket est activée (TICKET_NOTIFY_CUSTOMER_TICKET_ASSIGNED).
+TicketCreateMailModelVariables = Comment écrire un modèle, et variables disponibles
+TicketCreateMailModelVariablesHelp = Les modèles se gèrent dans Accueil &gt; Configuration &gt; Emails &gt; Modèles d'email, en choisissant le type « Ticket » (les types « ticket_send » et « Tous » sont également proposés dans les listes ci-dessus).<br><br>Le sujet et le corps du modèle remplacent intégralement ceux de Dolibarr : les informations du ticket ne sont plus ajoutées automatiquement, il faut les placer soi-même à l'aide des variables ci-dessous.<br><br>Variables propres au ticket : __TICKET_REF__, __TICKET_TRACK_ID__, __TICKET_SUBJECT__, __TICKET_MESSAGE__, __TICKET_TYPE__, __TICKET_CATEGORY__, __TICKET_SEVERITY__, __TICKET_PUBLIC_URL__, __TICKET_MANAGEMENT_URL__.<br>Variables communes : __REF__, __EXTRAFIELD_XXX__ (remplacer XXX par le code de l'attribut supplémentaire, ex. __EXTRAFIELD_GROUPINCHARGEOF__), __MYCOMPANY_NAME__, __THIRDPARTY_NAME__.
 Javascripts=Javascripts
 JavascriptsConfig=Configuration Javascripts
 EnableMaxlengthCounter=Activer le compteur de caracteres

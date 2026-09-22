@@ -291,18 +291,30 @@ DropFilesHere = Drag and drop your files here
 # Drag & drop reorder
 Reorder = Reorder
 
-# Ticket creation email templates
-TicketCreateMailModelTitle = Email templates for ticket creation
+# Ticket notification email templates
+TicketMailModelTitle = Ticket email templates
+TicketMailModelIntro = Dolibarr builds these emails directly in its code: neither their layout nor the order of the information they carry can be changed from the interface. Picking an email template below entirely replaces the subject and the body of that email. Each row is independent: the ones left on "Dolibarr default content" keep the original behaviour.
+TicketMailModelCreateSection = On ticket creation
+TicketMailModelCloseSection = On ticket closing
+TicketMailModelAssignedSection = On ticket assignment
 TicketCreateMailModelColumn = Email template
 TicketCreateMailModelDefault = Dolibarr default content
-TicketCreateMailModelAdmin = Internal notification email (admin)
-TicketCreateMailModelAdminDescription = Email template used for the notification sent to the ticket notification address (TICKET_NOTIFICATION_EMAIL_TO) when a ticket is created. Leave empty to keep Dolibarr's default content.
-TicketCreateMailModelCustomer = Customer confirmation email
-TicketCreateMailModelCustomerDescription = Email template used for the confirmation sent to the third party / contact when a ticket is created. Leave empty to keep Dolibarr's default content.
-TicketCreateMailModelAssignee = Assigned user email
-TicketCreateMailModelAssigneeDescription = Email template used for the notification sent to the user assigned to the ticket when it is created. Leave empty to keep Dolibarr's default content.
-TicketCreateMailModelVariables = Substitution variables available in templates
-TicketCreateMailModelVariablesHelp = Ticket-specific variables: __TICKET_REF__, __TICKET_TRACK_ID__, __TICKET_SUBJECT__, __TICKET_MESSAGE__, __TICKET_TYPE__, __TICKET_CATEGORY__, __TICKET_SEVERITY__, __TICKET_PUBLIC_URL__, __TICKET_MANAGEMENT_URL__.<br>Common variables: __REF__, __EXTRAFIELD_XXX__ (replace XXX with the extrafield code, e.g. __EXTRAFIELD_GROUPINCHARGEOF__), __MYCOMPANY_NAME__, __THIRDPARTY_NAME__.<br>Templates are managed in Home &gt; Setup &gt; Emails &gt; Email templates (type "ticket").
+TicketCreateMailModelAdmin = Internal notification (admin)
+TicketCreateMailModelAdminDescription = Sent to the ticket notification address as soon as a ticket is created. Only sent if that address is filled in the Ticket module setup (TICKET_NOTIFICATION_EMAIL_TO).
+TicketCreateMailModelCustomer = Customer confirmation
+TicketCreateMailModelCustomerDescription = Sent to the contact picked at creation, otherwise to the third party, otherwise to the ticket origin address. Only sent when notifying the third party is requested at creation.
+TicketCreateMailModelAssignee = Assigned user notification
+TicketCreateMailModelAssigneeDescription = Sent to the assigned user right at creation, if there is one and they are not the ticket author.
+TicketCloseMailModelAdmin = Internal notification (admin)
+TicketCloseMailModelAdminDescription = Sent to the ticket notification address when a ticket is closed. Same condition as on creation: the address must be filled (TICKET_NOTIFICATION_EMAIL_TO).
+TicketCloseMailModelCustomer = Customer notification
+TicketCloseMailModelCustomerDescription = Sent to the ticket contacts on closing, according to the recipient picked in the closing dialog. The "Notify contacts when closing" option (TICKET_NOTIFY_AT_CLOSING) is the default for that choice.
+TicketAssignedMailModelAssignee = Assigned user notification
+TicketAssignedMailModelAssigneeDescription = Sent to the user who has just been assigned to the ticket, unless they assign it to themselves. Nothing is sent when ticket emails are disabled (TICKET_DISABLE_ALL_MAILS).
+TicketAssignedMailModelCustomer = Customer information
+TicketAssignedMailModelCustomerDescription = Tells the requester their ticket is now handled, on the first assignment only. Only sent when the matching Ticket module option is enabled (TICKET_NOTIFY_CUSTOMER_TICKET_ASSIGNED).
+TicketCreateMailModelVariables = How to write a template, and available variables
+TicketCreateMailModelVariablesHelp = Templates are managed in Home &gt; Setup &gt; Emails &gt; Email templates, picking the "Ticket" type (the "ticket_send" and "All" types are offered in the lists above too).<br><br>The template subject and body entirely replace Dolibarr's: ticket information is no longer appended automatically, it has to be placed with the variables below.<br><br>Ticket-specific variables: __TICKET_REF__, __TICKET_TRACK_ID__, __TICKET_SUBJECT__, __TICKET_MESSAGE__, __TICKET_TYPE__, __TICKET_CATEGORY__, __TICKET_SEVERITY__, __TICKET_PUBLIC_URL__, __TICKET_MANAGEMENT_URL__.<br>Common variables: __REF__, __EXTRAFIELD_XXX__ (replace XXX with the extrafield code, e.g. __EXTRAFIELD_GROUPINCHARGEOF__), __MYCOMPANY_NAME__, __THIRDPARTY_NAME__.
 Javascripts=Javascripts
 JavascriptsConfig=Javascripts setup
 EnableMaxlengthCounter=Enable the character counter
