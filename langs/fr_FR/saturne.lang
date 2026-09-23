@@ -94,10 +94,11 @@ StandardModel   = Renvoie le numéro sous la forme %syymm-nnnn où yy est l'ann�
 YourDocuments               = Documents
 DocumentTemplate            = Modèle de documents
 ODTDefaultTemplateName      = ODT par défaut
-ErrorFileNotFound           = Fichier non trouvé
+ErrorImageFileNotFound      = Fichier non trouvé
 ErrorNoSocietyLogo          = Aucun logo de la société renseigné
 CustomODT                   = ODT personnalisé
 ErrorWrongFileNameExtension = Erreur : mauvaise extension de fichier %s
+ErrorFileNameCanNotBeBuilt  = Le nom du fichier n'a pas pu être construit
 
 # Trigger - Événements
 ConfTrigger                 = Configuration des événements
@@ -298,19 +299,93 @@ DropFilesHere = Glissez-déposez vos fichiers ici
 # Drag & drop reorder
 Reorder = Réordonner
 
-# Ticket creation email templates
-TicketCreateMailModelTitle = Modèles d'email pour la création de ticket
+# Ticket notification email templates
+TicketMailModelTitle = Modèles d'email des tickets
+TicketMailModelIntro = Dolibarr construit ces emails directement dans son code : ni leur mise en forme, ni l'ordre des informations qu'ils contiennent ne sont modifiables depuis l'interface. Choisir un modèle d'email ci-dessous remplace entièrement le sujet et le corps du mail concerné. Chaque ligne est indépendante : celles laissées sur « Contenu par défaut de Dolibarr » gardent le comportement d'origine.
+TicketMailModelCreateSection = À la création du ticket
+TicketMailModelCloseSection = À la clôture du ticket
+TicketMailModelAssignedSection = À la prise en charge du ticket (assignation)
 TicketCreateMailModelColumn = Modèle d'email
 TicketCreateMailModelDefault = Contenu par défaut de Dolibarr
-TicketCreateMailModelAdmin = Email de notification interne (admin)
-TicketCreateMailModelAdminDescription = Modèle d'email utilisé pour la notification envoyée à l'adresse de notification des tickets (TICKET_NOTIFICATION_EMAIL_TO) lors de la création d'un ticket. Laisser vide pour conserver le contenu par défaut de Dolibarr.
-TicketCreateMailModelCustomer = Email de confirmation au client
-TicketCreateMailModelCustomerDescription = Modèle d'email utilisé pour la confirmation envoyée au tiers / contact lors de la création d'un ticket. Laisser vide pour conserver le contenu par défaut de Dolibarr.
-TicketCreateMailModelAssignee = Email à l'utilisateur assigné
-TicketCreateMailModelAssigneeDescription = Modèle d'email utilisé pour la notification envoyée à l'utilisateur assigné au ticket lors de sa création. Laisser vide pour conserver le contenu par défaut de Dolibarr.
-TicketCreateMailModelVariables = Variables de substitution disponibles dans les modèles
-TicketCreateMailModelVariablesHelp = Variables propres au ticket : __TICKET_REF__, __TICKET_TRACK_ID__, __TICKET_SUBJECT__, __TICKET_MESSAGE__, __TICKET_TYPE__, __TICKET_CATEGORY__, __TICKET_SEVERITY__, __TICKET_PUBLIC_URL__, __TICKET_MANAGEMENT_URL__.<br>Variables communes : __REF__, __EXTRAFIELD_XXX__ (remplacer XXX par le code de l'attribut supplémentaire, ex. __EXTRAFIELD_GROUPINCHARGEOF__), __MYCOMPANY_NAME__, __THIRDPARTY_NAME__.<br>Les modèles se gèrent dans Accueil &gt; Configuration &gt; Emails &gt; Modèles d'email (type « ticket »).
+TicketCreateMailModelAdmin = Notification interne (admin)
+TicketCreateMailModelAdminDescription = Part dès qu'un ticket est créé, à l'adresse de notification des tickets. Envoyé uniquement si cette adresse est renseignée dans la configuration du module Ticket (TICKET_NOTIFICATION_EMAIL_TO).
+TicketCreateMailModelCustomer = Confirmation au client
+TicketCreateMailModelCustomerDescription = Part au contact choisi à la création, à défaut au tiers, à défaut à l'adresse d'origine du ticket. Envoyé uniquement si la notification du tiers est demandée à la création.
+TicketCreateMailModelAssignee = Notification à l'utilisateur assigné
+TicketCreateMailModelAssigneeDescription = Part à l'utilisateur assigné dès la création, s'il y en a un et qu'il n'est pas l'auteur du ticket.
+TicketCloseMailModelAdmin = Notification interne (admin)
+TicketCloseMailModelAdminDescription = Part à l'adresse de notification des tickets quand un ticket est clôturé. Même condition qu'à la création : l'adresse doit être renseignée (TICKET_NOTIFICATION_EMAIL_TO).
+TicketCloseMailModelCustomer = Notification au client
+TicketCloseMailModelCustomerDescription = Part aux contacts du ticket à la clôture, selon le destinataire retenu dans la fenêtre de clôture. L'option « Notifier les contacts à la clôture » (TICKET_NOTIFY_AT_CLOSING) sert de valeur par défaut à ce choix.
+TicketAssignedMailModelAssignee = Notification à l'utilisateur assigné
+TicketAssignedMailModelAssigneeDescription = Part à l'utilisateur qui vient d'être assigné au ticket, sauf s'il s'assigne lui-même. Rien n'est envoyé si les emails de tickets sont désactivés (TICKET_DISABLE_ALL_MAILS).
+TicketAssignedMailModelCustomer = Information au client
+TicketAssignedMailModelCustomerDescription = Prévient le demandeur que son ticket est pris en charge, à la première assignation seulement. Envoyé uniquement si l'option correspondante du module Ticket est activée (TICKET_NOTIFY_CUSTOMER_TICKET_ASSIGNED).
+TicketCreateMailModelVariables = Comment écrire un modèle, et variables disponibles
+TicketCreateMailModelVariablesHelp = Les modèles se gèrent dans Accueil &gt; Configuration &gt; Emails &gt; Modèles d'email, en choisissant le type « Ticket » (les types « ticket_send » et « Tous » sont également proposés dans les listes ci-dessus).<br><br>Le sujet et le corps du modèle remplacent intégralement ceux de Dolibarr : les informations du ticket ne sont plus ajoutées automatiquement, il faut les placer soi-même à l'aide des variables ci-dessous.<br><br>Variables propres au ticket : __TICKET_REF__, __TICKET_TRACK_ID__, __TICKET_SUBJECT__, __TICKET_MESSAGE__, __TICKET_TYPE__, __TICKET_CATEGORY__, __TICKET_SEVERITY__, __TICKET_PUBLIC_URL__, __TICKET_MANAGEMENT_URL__.<br>Variables communes : __REF__, __EXTRAFIELD_XXX__ (remplacer XXX par le code de l'attribut supplémentaire, ex. __EXTRAFIELD_GROUPINCHARGEOF__), __MYCOMPANY_NAME__, __THIRDPARTY_NAME__.
 Javascripts=Javascripts
 JavascriptsConfig=Configuration Javascripts
 EnableMaxlengthCounter=Activer le compteur de caracteres
 EnableMaxlengthCounterDescription=Affiche un compteur de caracteres sous les champs limites en longueur.
+
+# Entity transfer - Transfert d'entite
+EntityTransfer                               = Transfert d'entité
+EntityTransferAdminOnly                      = Le transfert d'entité est réservé aux administrateurs : un export contient toute la base de l'entité, comptes utilisateurs compris.
+EntityTransferDescription                    = Exporte les données d'une entité dans une archive rejouable sur un Dolibarr mono-entité (l'entité devient l'entité 1). Les modules de l'export doivent être activés sur l'installation cible AVANT l'import : droits, menus, modèles de documents et répertoires sont créés par l'activation.
+EntityToExportCurrentOnly                    = (entité de votre session ; seul un super administrateur peut en choisir une autre)
+EntityExportModules                          = Modules à inclure
+EntityExportModulesDescription               = Modules installés qui possèdent leurs propres tables. Les décocher les laisse hors de l'export : les signatures et les documents qui les référencent pointeront alors dans le vide.
+EntityExport                                 = Export d'une entité
+EntityExportDescription                      = Génère une archive ZIP contenant le dump SQL, le manifeste et, en option, les documents de l'entité.
+EntityToExport                               = Entité à exporter
+ExtraEntities                                = Entités supplémentaires
+ExtraEntitiesDescription                     = Identifiants séparés par des virgules, pour les données partagées par Multicompany (utilisateurs, tiers)
+EntityExportScope                            = Périmètre
+EntityExportScopeModule                      = Saturne et les modules cochés
+EntityExportScopeCore                        = Saturne, les modules cochés et le socle (utilisateurs, tiers, projets, tickets, agenda, catégories, GED)
+EntityExportScopeFull                        = Entité complète (toute table portant une colonne entity)
+EntityExportWithFiles                        = Inclure les documents de l'entité
+EntityExportWithDictionaries                 = Inclure les dictionnaires de Saturne et des modules cochés
+EntityExportWithPurge                        = Ajouter les DELETE de l'entité cible avant les INSERT
+EntityExportArchives                         = Archives générées
+NoEntityExportYet                            = Aucune archive générée pour le moment
+EntityExportArchiveDeleted                   = Archive %s supprimée
+EntityExportArchiveNotFound                  = Archive %s introuvable
+EntityExportDone                             = Export terminé : %s lignes dans %s tables
+EntityExportArchiveFailed                    = La création de l'archive ZIP a échoué, l'export reste disponible dans %s
+EntityExportSkippedTables                    = Tables non exportées car aucun filtre d'entité n'a pu être résolu : %s
+EntityImport                                 = Import d'une entité
+EntityImportDescription                      = Rejoue sur cette installation une archive ZIP (ou un fichier SQL) produite par l'export d'entité.
+EntityImportWarning                          = L'import écrit directement en base et conserve les identifiants d'origine : à réserver à une installation mono-entité vierge. Sauvegardez la base avant de lancer l'opération.
+EntityImportTargetTitle                      = Sur quelle installation lancer l'import
+EntityImportTargetStep1                      = 1. Un Dolibarr déjà installé : l'archive ne contient que des données, pas la structure. Une base sans tables ne convient pas, il faut passer l'installeur avant.
+EntityImportTargetStep2                      = 2. Les modules de l'archive activés dessus : c'est l'activation qui crée leurs tables, leurs droits, leurs menus, leurs modèles de documents et leurs répertoires.
+EntityImportTargetStep3                      = 3. Aucune donnée métier saisie depuis : l'import conserve les identifiants d'origine, il écraserait ou heurterait les enregistrements déjà en place. Une installation qui a vécu n'est pas une cible valable.
+EntityImportTargetStep4                      = 4. Juste après cette activation, cochez « Vider les tables de l'entité courante » : l'activation a déjà écrit des constantes et des enregistrements de base qui portent les mêmes clés que ceux de l'archive.
+EntityImportWithFiles                        = Copier également les documents contenus dans l'archive
+EntityImportPurge                            = Vider les tables de l'entité courante avant l'import
+EntityImportPurgeHint                        = À cocher dès que les modules ont été activés sur cette installation : leur activation a déjà écrit des constantes et des enregistrements de base qui portent les mêmes clés que ceux de l'archive.
+EntityImportFileTooLarge                     = L'archive dépasse la taille maximale acceptée par PHP (%s, limite %s) : augmentez cette limite ou passez par scripts/import_entity.php.
+EntityImportNoDumpFound                      = Aucun fichier SQL trouvé dans l'archive envoyée
+EntityImportMissingModules                   = L'archive contient les tables de modules non activés ici : %s. Activez-les avant l'import.
+EntityImportAbsentModules                    = Ces modules tournaient sur l'installation d'origine et ne sont pas activés ici : %s. Les données importées peuvent renvoyer aux leurs, et certains écrans ne les afficheront pas.
+EntityImportDone                             = Import terminé : %s instructions exécutées, %s fichiers copiés
+EntityImportFinishedWithErrors               = Import terminé : %s instructions exécutées, %s erreur(s)
+
+# Maintenance
+Maintenance                                  = Maintenance
+MaintenanceAdminOnly                         = La maintenance est réservée aux administrateurs : les opérations suppriment des lignes en base.
+OrphanDocuments                              = Documents sans fichier
+OrphanDocumentsDescription                   = Une génération de document interrompue avant que le fichier soit nommé laissait une ligne qui ne désigne rien et qui a consommé une référence du compteur. La cause est corrigée ; ces lignes-là restent à retirer.
+OrphanDocumentsNone                          = Aucune ligne de ce type.
+OrphanDocumentsFound                         = %s ligne(s) à supprimer
+OrphanDocumentsScopeAllEntities              = Portée : toutes les entités.
+OrphanDocumentsScopeCurrentEntity            = Portée : l'entité %s uniquement.
+OrphanDocumentsScopeCurrentEntityHelp        = Pour traiter toutes les entités en une seule fois, connectez-vous sur l'entité maître avec un compte super-administrateur (utilisateur rattaché à aucune entité).
+OrphanDocumentsConfirmDeleteAllEntities      = Supprimer définitivement %s ligne(s), sur l'ensemble des entités ? Cette action est irréversible.
+OrphanDocumentsConfirmDeleteEntity           = Supprimer définitivement %s ligne(s) de l'entité %s ? Cette action est irréversible.
+OrphanDocumentsDeletedAllEntities            = %s ligne(s) supprimée(s) sur l'ensemble des entités
+OrphanDocumentsDeletedEntity                 = %s ligne(s) supprimée(s) sur l'entité %s
+
+# Document generation - Generation de document
+ErrorTemplateFileNotAllowed                  = Le modèle de document « %s » ne se trouve pas dans un répertoire de modèles du module.

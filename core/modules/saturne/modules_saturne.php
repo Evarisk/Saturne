@@ -391,6 +391,62 @@ class SaturneDocumentModel extends CommonDocGenerator
     public string $document_type = '';
 
     /**
+     * Height of one line of text, in the document unit. Each generator sets the value that
+     * suits its layout, in its own constructor. It is declared here because six generators
+     * across two modules were assigning it while no class ever declared it, which makes it
+     * a dynamic property - deprecated since PHP 8.2, removed in PHP 9.
+     *
+     * @var float
+     */
+    public float $height = 5;
+
+    /**
+     * @var array RGB background colour of the title banner drawn by drawTable().
+     */
+    public array $tableTitleColor = [42, 157, 143];
+
+    /**
+     * @var float Height of that title banner, in the document unit.
+     */
+    public float $tableTitleHeight = 8;
+
+    /**
+     * @var string Horizontal alignment of the title inside its banner.
+     */
+    public string $tableTitleAlign = 'C';
+
+    /**
+     * @var array RGB background colour of the label cells, empty to leave them unfilled.
+     */
+    public array $tableLabelFillColor = [];
+
+    /**
+     * @var string Alignment of a cell whose column says nothing in the 'align' key.
+     */
+    public string $tableDefaultAlign = 'C';
+
+    /**
+     * @var float Subtracted from the document font size to get the font size of the cells.
+     */
+    public float $tableCellFontSizeOffset = 2;
+
+    /**
+     * @var float Vertical space left after a table, in the document unit.
+     */
+    public float $tableSpaceAfter = 0;
+
+    /**
+     * @var bool Start a table on a new page rather than let its first rows sit alone at the
+     *           bottom of the current one. Only worth it for a table shorter than a page.
+     */
+    public bool $keepTableTogether = false;
+
+    /**
+     * @var bool Write the NoData label in an empty cell instead of leaving it blank.
+     */
+    public bool $tableFillEmptyCells = false;
+
+    /**
      * Constructor.
      *
      * @param  DoliDB $db                  Database handler.
@@ -551,7 +607,7 @@ class SaturneDocumentModel extends CommonDocGenerator
                         if ($key == 'mycompany_logo') {
                             $listLines->setVars($key, $outputLangs->transnoentities('ErrorNoSocietyLogo'), true, 'UTF-8');
                         } else {
-                            $listLines->setVars($key, $outputLangs->transnoentities('ErrorFileNotFound'), true, 'UTF-8');
+                            $listLines->setVars($key, $outputLangs->transnoentities('ErrorImageFileNotFound'), true, 'UTF-8');
                         }
                     } else {
                         $listLines->setVars($key, '', true, 'UTF-8');
@@ -763,24 +819,21 @@ class SaturneDocumentModel extends CommonDocGenerator
         $numberingModules = [(!empty($moreParam['subDir']) ? $moreParam['subDir'] : $this->module . 'documents/') . $this->document_type => getDolGlobalString($confRefModName)];
         list($refModName) = saturne_require_objects_mod($numberingModules, $this->module);
 
-        $objectDocumentRef    = $refModName->getNextValue($objectDocument);
-        $objectDocument->ref  = $objectDocumentRef;
-        $objectDocumentRef    = dol_sanitizeFileName($objectDocumentRef);
-        $objectDocument->type = $this->document_type;
-        $objectDocumentID     = $objectDocument->create($moreParam['user'], 1, $object);
-        if ($objectDocumentID < 0) {
-            setEventMessages($langs->trans('ErrorCreateObject'), [], 'errors');
-            return -1;
+        // The output directory is resolved before the document row is created: nothing below reads
+        // the created document, and a failure after create() used to leave behind a row with no
+        // last_main_doc, naming no file and having burnt a reference from the numbering counter.
+        // multidir_output only ever holds the current entity, and getMultidirOutput() indexes it on
+        // the object entity: a parent shared from another entity (multicompany) makes it warn then
+        // return nothing. The document created here belongs to the current entity, so its file
+        // belongs to the current entity directory.
+        $objectEntity = empty($object->entity) ? $conf->entity : $object->entity;
+        if (!isset($conf->{$this->module}->multidir_output[$objectEntity])) {
+            $objectEntity = $conf->entity;
         }
 
-        // getMultidirOutput() indexes multidir_output on the object entity without guarding the key:
-        // an object of another entity (multicompany sharing) makes it warn before returning nothing.
-        $objectEntity = empty($object->entity) ? $conf->entity : $object->entity;
-        $uploadDir    = isset($conf->{$this->module}->multidir_output[$objectEntity]) ? getMultidirOutput($object, $this->module) : '';
+        $uploadDir = $conf->{$this->module}->multidir_output[$objectEntity] ?? '';
         if (!$uploadDir) {
-            // multidir_output is keyed on the current entity only; surface module + object entity
-            // so a missing key (e.g. cross-entity object in multicompany) is diagnosable.
-            setEventMessages($langs->trans('ErrorDirNotFound', $this->module . ' (entity ' . (int) $object->entity . ')'), [], 'errors');
+            setEventMessages($langs->trans('ErrorDirNotFound', $this->module . ' (entity ' . (int) $objectEntity . ')'), [], 'errors');
             return -1;
         }
 
@@ -794,6 +847,16 @@ class SaturneDocumentModel extends CommonDocGenerator
                 $this->error = $langs->transnoentities('ErrorCanNotCreateDir', $dir);
                 return -1;
             }
+        }
+
+        $objectDocumentRef    = $refModName->getNextValue($objectDocument);
+        $objectDocument->ref  = $objectDocumentRef;
+        $objectDocumentRef    = dol_sanitizeFileName($objectDocumentRef);
+        $objectDocument->type = $this->document_type;
+        $objectDocumentID     = $objectDocument->create($moreParam['user'], 1, $object);
+        if ($objectDocumentID < 0) {
+            setEventMessages($langs->trans('ErrorCreateObject'), [], 'errors');
+            return -1;
         }
 
         $newFileTmp = $this->name;
@@ -828,6 +891,25 @@ class SaturneDocumentModel extends CommonDocGenerator
     }
 
     /**
+     * Get the more param of a document generation
+     *
+     * Dolibarr 24 stopped forwarding them to write_file() and leaves them in the context of the document object,
+     * so every write_file() of a module has to read them back through this method
+     *
+     * @param  SaturneDocuments $objectDocument Object source to build document
+     * @param  array            $moreParam      More param received by write_file()
+     * @return array                            More param of the generation (Object/user/etc)
+     */
+    public static function getMoreParam(SaturneDocuments $objectDocument, array $moreParam): array
+    {
+        if (!isset($moreParam['object']) && is_array($objectDocument->context['moreparams'] ?? null)) {
+            $moreParam = array_merge($objectDocument->context['moreparams'], $moreParam);
+        }
+
+        return $moreParam;
+    }
+
+    /**
      * Function to build a document on disk
      *
      * @param  SaturneDocuments $objectDocument  Object source to build document
@@ -840,12 +922,14 @@ class SaturneDocumentModel extends CommonDocGenerator
      * @return int                               1 if OK, <=0 if KO
      * @throws Exception
      */
-    public function write_file(SaturneDocuments $objectDocument, Translate $outputLangs, string $srcTemplatePath, int $hideDetails = 0, int $hideDesc = 0, int $hideRef = 0, array $moreParam): int
+    public function write_file(SaturneDocuments $objectDocument, Translate $outputLangs, string $srcTemplatePath, int $hideDetails = 0, int $hideDesc = 0, int $hideRef = 0, array $moreParam = []): int
     {
         global $action, $conf, $hookmanager, $langs, $moduleNameLowerCase, $mysoc;
 
         // Load Dolibarr libraries
         require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php'; // Need for get_substitutionarray_mysoc
+
+        $moreParam = self::getMoreParam($objectDocument, $moreParam);
 
         $object = $moreParam['object'];
 
@@ -866,7 +950,14 @@ class SaturneDocumentModel extends CommonDocGenerator
 
         $outputLangs->charset_output = 'UTF-8';
 
+        // buildDocumentFilename() returns -1 on failure, the file path otherwise. Unchecked, the
+        // generation carried on with -1 as a path, still reported a success to commonGenerateDocument()
+        // and fired the _GENERATE trigger for a document that was never written.
         $file = $this->buildDocumentFilename($objectDocument, $outputLangs, $object, $moreParam);
+        if (!is_string($file) || empty($file)) {
+            $this->error = $outputLangs->transnoentities('ErrorFileNameCanNotBeBuilt');
+            return -1;
+        }
 
         dol_mkdir($conf->$moduleNameLowerCase->dir_temp);
         if (!is_writable($conf->$moduleNameLowerCase->dir_temp)) {
@@ -975,5 +1066,239 @@ class SaturneDocumentModel extends CommonDocGenerator
         $odfHandler = null; // Destroy object
 
         return 1; // Success
+    }
+
+    /**
+     * Add a page when the block about to be written would not fit on the current one.
+     *
+     * @param  mixed $pdf          PDF handler, a TCPDF instance.
+     * @param  float $neededHeight Height the next block needs.
+     * @return void
+     */
+    protected function checkPageBreak($pdf, float $neededHeight)
+    {
+        if ($pdf->GetY() + $neededHeight + $pdf->getBreakMargin() > $pdf->getPageHeight()) {
+            $pdf->AddPage();
+            $pdf->SetY($this->marge_haute);
+        }
+    }
+
+    /**
+     * Split a text in two : the longest beginning fitting in a given height, and the rest.
+     *
+     * @param  mixed  $pdf    PDF handler, a TCPDF instance.
+     * @param  string $text   Text to split.
+     * @param  float  $width  Width of the cell the text is written in.
+     * @param  float  $height Height available for the beginning.
+     * @return array          Beginning and rest, the rest being empty when everything fits.
+     */
+    protected function splitTextToHeight($pdf, string $text, float $width, float $height): array
+    {
+        if (dol_strlen($text) == 0 || $pdf->getStringHeight($width, $text) <= $height) {
+            return [$text, ''];
+        }
+
+        // Longest beginning that still fits, looked up by dichotomy : TCPDF exposes no way to
+        // ask where it would have wrapped the text.
+        $low  = 0;
+        $high = dol_strlen($text);
+        while ($low < $high) {
+            $middle = (int) ceil(($low + $high) / 2);
+            if ($pdf->getStringHeight($width, dol_substr($text, 0, $middle)) <= $height) {
+                $low = $middle;
+            } else {
+                $high = $middle - 1;
+            }
+        }
+
+        // Always move forward, even when a single character does not fit : an empty beginning
+        // would keep the caller looping on the same text for ever.
+        $cut = max(1, $low);
+
+        // Cut on a space so a word is not torn between two pages.
+        $beginning = dol_substr($text, 0, $cut);
+        $space     = function_exists('mb_strrpos') ? mb_strrpos($beginning, ' ') : strrpos($beginning, ' ');
+        if ($space !== false && $space > 0) {
+            $cut = $space;
+        }
+
+        return [dol_substr($text, 0, $cut), trim(dol_substr($text, $cut))];
+    }
+
+    /**
+     * Draw a table whose every row is bounded, written over as many pages as it needs.
+     *
+     * The table is an array of 'rows', each row an array of cells indexed like 'widths'. A cell
+     * is a string, or an array with a 'text' key and an optional 'label' flag for the heading
+     * look. Optional keys : 'title' for the banner above the table, 'align' for the horizontal
+     * alignment of each column, 'Ln' for the space left before the first row.
+     *
+     * @param  mixed $pdf             PDF handler, a TCPDF instance.
+     * @param  array $table           Table to draw.
+     * @param  float $tableWidth      Total width of the table.
+     * @param  float $lineHeight      Height of a row holding a single line.
+     * @param  float $defaultFontSize Font size of the document.
+     * @return void
+     */
+    protected function drawTable($pdf, array $table, float $tableWidth, float $lineHeight, float $defaultFontSize)
+    {
+        global $langs;
+
+        if (empty($table['rows']) || empty($table['widths'])) {
+            return;
+        }
+
+        $widths       = $table['widths'];
+        $aligns       = $table['align'] ?? [];
+        $cellFontSize = $defaultFontSize - $this->tableCellFontSizeOffset;
+        $usableHeight = $pdf->getPageHeight() - $pdf->getBreakMargin() - $this->marge_haute;
+
+        // A short table reads better whole : ask for the room it needs before starting it.
+        if ($this->keepTableTogether) {
+            $this->checkPageBreak($pdf, min($lineHeight * (count($table['rows']) + 1), $usableHeight));
+        }
+
+        if (!empty($table['title'])) {
+            $pdf->SetFont('', 'B', $defaultFontSize);
+            $pdf->SetFillColor($this->tableTitleColor[0], $this->tableTitleColor[1], $this->tableTitleColor[2]);
+            $pdf->SetTextColor(255, 255, 255);
+            $pdf->SetX($this->marge_gauche);
+            $pdf->Cell($tableWidth, $this->tableTitleHeight, $table['title'], 1, 1, $this->tableTitleAlign, true);
+            $pdf->SetTextColor(0, 0, 0);
+            $pdf->SetFont('', '', $cellFontSize);
+        }
+
+        if (isset($table['Ln'])) {
+            $pdf->Ln($table['Ln']);
+        }
+
+        foreach ($table['rows'] as $cells) {
+            // Text and font of every cell, resolved once : a row longer than a page is written
+            // over several of them and each fragment redraws the same cells.
+            $texts   = [];
+            $isLabel = [];
+            foreach ($cells as $key => $cellData) {
+                if (!isset($widths[$key])) {
+                    continue;
+                }
+                if (is_array($cellData)) {
+                    $texts[$key]   = (string) ($cellData['text'] ?? '');
+                    $isLabel[$key] = !empty($cellData['label']);
+                } else {
+                    $texts[$key]   = (string) $cellData;
+                    $isLabel[$key] = false;
+                }
+            }
+
+            $firstFragment = true;
+            while (true) {
+                $maxHeight = $lineHeight;
+
+                // Measured with the font the cell will be drawn with, and through
+                // getStringHeight() which accounts for the cell padding : the row height is also
+                // the MultiCell maximum, so an approximation would cut the text.
+                foreach ($texts as $key => $text) {
+                    $pdf->SetFont('', $isLabel[$key] ? 'B' : '', $cellFontSize);
+                    $height = $pdf->getStringHeight($widths[$key], $text);
+
+                    if ($height > $maxHeight) {
+                        $maxHeight = $height;
+                    }
+                }
+
+                // Send the whole row to the next page rather than let it be cut in half. A row
+                // that would not fit on an empty page either is left where it is : it gets split
+                // below, so moving it would only waste the end of the page.
+                if ($maxHeight <= $usableHeight) {
+                    $this->checkPageBreak($pdf, $maxHeight);
+                }
+
+                $availableHeight = $pdf->getPageHeight() - $pdf->getBreakMargin() - $pdf->GetY();
+                $splitRow        = $maxHeight > $availableHeight;
+                if ($splitRow) {
+                    $maxHeight = $availableHeight;
+                }
+
+                $pdf->SetX($this->marge_gauche);
+
+                $remaining = [];
+                foreach ($texts as $key => $text) {
+                    $pdf->SetFont('', $isLabel[$key] ? 'B' : '', $cellFontSize);
+
+                    $fill = false;
+                    if ($isLabel[$key] && !empty($this->tableLabelFillColor)) {
+                        $pdf->SetFillColor($this->tableLabelFillColor[0], $this->tableLabelFillColor[1], $this->tableLabelFillColor[2]);
+                        $fill = true;
+                    }
+
+                    if ($splitRow) {
+                        list($text, $remaining[$key]) = $this->splitTextToHeight($pdf, $text, $widths[$key], $maxHeight);
+                    }
+
+                    // Only on the first fragment : a cell already written has to stay blank on
+                    // the pages the rest of the row carries on to.
+                    if ($this->tableFillEmptyCells && $firstFragment && dol_strlen($text) == 0) {
+                        $text = $langs->transnoentities('NoData');
+                    }
+
+                    $x     = $pdf->GetX();
+                    $y     = $pdf->GetY();
+                    $align = $aligns[$key] ?? $this->tableDefaultAlign;
+
+                    // Minimum and maximum both set to the row height : every cell of the row
+                    // shares the same border, TCPDF keeps honouring the 'M' vertical alignment,
+                    // and the tallest text still fits since the height was measured on it.
+                    $pdf->MultiCell($widths[$key], $maxHeight, $text, 1, $align, $fill, 0, $x, $y, true, 0, false, true, $maxHeight, 'M');
+                    $pdf->SetXY($x + $widths[$key], $y);
+                }
+                $pdf->Ln($maxHeight);
+
+                if (dol_strlen(implode('', $remaining)) == 0) {
+                    break;
+                }
+
+                // What is left carries on at the top of the next page, in the same cells : one
+                // already emptied keeps its border, so the columns stay readable.
+                $texts         = $remaining;
+                $firstFragment = false;
+                $pdf->AddPage();
+                $pdf->SetY($this->marge_haute);
+            }
+        }
+
+        if ($this->tableSpaceAfter > 0) {
+            $pdf->Ln($this->tableSpaceAfter);
+        }
+    }
+
+    /**
+     * Write the footer on every page of the document, once its content is generated.
+     *
+     * @param  mixed     $pdf             PDF handler, a TCPDF instance.
+     * @param  object    $object          Object the document is about.
+     * @param  Translate $outputLangs     Lang object for output.
+     * @param  float     $defaultFontSize Font size of the document.
+     * @return void
+     */
+    protected function drawFooterOnEveryPage($pdf, $object, Translate $outputLangs, float $defaultFontSize)
+    {
+        // The footer itself belongs to the model : nothing to write without it.
+        if (!method_exists($this, '_pagefooter')) {
+            return;
+        }
+
+        // The count is read once : should a page still be appended, re-reading it here would
+        // give the loop a moving end and hang the generation until the time limit.
+        $numPages = $pdf->getNumPages();
+        for ($page = 1; $page <= $numPages; $page++) {
+            $pdf->setPage($page);
+
+            // setPage() restores the automatic page break saved with the page, so it has to be
+            // switched off again on each one : the footer is written past the break limit and
+            // would otherwise append a page, which would in turn get a footer.
+            $pdf->SetAutoPageBreak(false, 0);
+
+            $this->_pagefooter($pdf, $object, $outputLangs, $defaultFontSize);
+        }
     }
 }
