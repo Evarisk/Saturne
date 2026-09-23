@@ -6,6 +6,7 @@ on:
         branches:
             - main
             - develop
+            - '23.0'
         paths:
             - '**/*.php'
             - 'js/modules/*.js'
@@ -17,21 +18,19 @@ on:
             - 'tests/**'
             - 'composer.json'
             - 'composer.lock'
+    # La branche de maintenance manquait aux deux listes : une pull request visant 23.0
+    # ne declenchait donc rien du tout, filtre paths ou pas.
+    #
+    # Pas de filtre paths ici, contrairement a push, et c'est volontaire : une
+    # verification requise qui ne se declenche pas laisse la pull request en
+    # « Expected - Waiting for status to be reported », indefiniment. Filtrer sur les
+    # chemins reviendrait donc a bloquer toute pull request sans PHP, une note de
+    # release par exemple. Sur push le job n'est qu'informatif, le filtre y garde son sens.
     pull_request:
         branches:
             - main
             - develop
-        paths:
-            - '**/*.php'
-            - 'js/modules/*.js'
-            - '.phpcs.xml'
-            - '.jshintrc'
-            - 'phpstan.neon'
-            - 'phpstan.baseline.neon'
-            - '.phan/config.php'
-            - 'tests/**'
-            - 'composer.json'
-            - 'composer.lock'
+            - '23.0'
     workflow_dispatch:
 
 concurrency:
@@ -40,7 +39,12 @@ concurrency:
 
 jobs:
     quality:
-        name: PHP ${{ matrix.php }} — ${{ matrix.step }}
+        # Le nom du job est le nom du contexte cite par les verifications requises du
+        # ruleset, et il doit etre le meme que sur develop. Interpoler la version de PHP
+        # le rendrait mouvant : passer la matrice en 8.2 renommerait les cinq contextes,
+        # ceux exiges par le ruleset ne seraient plus jamais publies et toute pull request
+        # resterait sur « Expected ».
+        name: ${{ matrix.step }}
         runs-on: ubuntu-latest
 
         strategy:
