@@ -94,10 +94,11 @@ StandardModel   = Returns the number in the form %syymm-nnnn where yy is the yea
 YourDocuments               = Documents
 DocumentTemplate            = Model documents
 ODTDefaultTemplateName      = Default ODT of documents
-ErrorFileNotFound           = File not found
+ErrorImageFileNotFound      = File not found
 ErrorNoSocietyLogo          = No company logo found
 CustomODT                   = Custom ODT of documents
 ErrorWrongFileNameExtension = Error: wrong file extension %s
+ErrorFileNameCanNotBeBuilt  = The file name could not be built
 
 # Trigger
 ConfTrigger                 = Event configuration
@@ -290,19 +291,93 @@ DropFilesHere = Drag and drop your files here
 # Drag & drop reorder
 Reorder = Reorder
 
-# Ticket creation email templates
-TicketCreateMailModelTitle = Email templates for ticket creation
+# Ticket notification email templates
+TicketMailModelTitle = Ticket email templates
+TicketMailModelIntro = Dolibarr builds these emails directly in its code: neither their layout nor the order of the information they carry can be changed from the interface. Picking an email template below entirely replaces the subject and the body of that email. Each row is independent: the ones left on "Dolibarr default content" keep the original behaviour.
+TicketMailModelCreateSection = On ticket creation
+TicketMailModelCloseSection = On ticket closing
+TicketMailModelAssignedSection = On ticket assignment
 TicketCreateMailModelColumn = Email template
 TicketCreateMailModelDefault = Dolibarr default content
-TicketCreateMailModelAdmin = Internal notification email (admin)
-TicketCreateMailModelAdminDescription = Email template used for the notification sent to the ticket notification address (TICKET_NOTIFICATION_EMAIL_TO) when a ticket is created. Leave empty to keep Dolibarr's default content.
-TicketCreateMailModelCustomer = Customer confirmation email
-TicketCreateMailModelCustomerDescription = Email template used for the confirmation sent to the third party / contact when a ticket is created. Leave empty to keep Dolibarr's default content.
-TicketCreateMailModelAssignee = Assigned user email
-TicketCreateMailModelAssigneeDescription = Email template used for the notification sent to the user assigned to the ticket when it is created. Leave empty to keep Dolibarr's default content.
-TicketCreateMailModelVariables = Substitution variables available in templates
-TicketCreateMailModelVariablesHelp = Ticket-specific variables: __TICKET_REF__, __TICKET_TRACK_ID__, __TICKET_SUBJECT__, __TICKET_MESSAGE__, __TICKET_TYPE__, __TICKET_CATEGORY__, __TICKET_SEVERITY__, __TICKET_PUBLIC_URL__, __TICKET_MANAGEMENT_URL__.<br>Common variables: __REF__, __EXTRAFIELD_XXX__ (replace XXX with the extrafield code, e.g. __EXTRAFIELD_GROUPINCHARGEOF__), __MYCOMPANY_NAME__, __THIRDPARTY_NAME__.<br>Templates are managed in Home &gt; Setup &gt; Emails &gt; Email templates (type "ticket").
+TicketCreateMailModelAdmin = Internal notification (admin)
+TicketCreateMailModelAdminDescription = Sent to the ticket notification address as soon as a ticket is created. Only sent if that address is filled in the Ticket module setup (TICKET_NOTIFICATION_EMAIL_TO).
+TicketCreateMailModelCustomer = Customer confirmation
+TicketCreateMailModelCustomerDescription = Sent to the contact picked at creation, otherwise to the third party, otherwise to the ticket origin address. Only sent when notifying the third party is requested at creation.
+TicketCreateMailModelAssignee = Assigned user notification
+TicketCreateMailModelAssigneeDescription = Sent to the assigned user right at creation, if there is one and they are not the ticket author.
+TicketCloseMailModelAdmin = Internal notification (admin)
+TicketCloseMailModelAdminDescription = Sent to the ticket notification address when a ticket is closed. Same condition as on creation: the address must be filled (TICKET_NOTIFICATION_EMAIL_TO).
+TicketCloseMailModelCustomer = Customer notification
+TicketCloseMailModelCustomerDescription = Sent to the ticket contacts on closing, according to the recipient picked in the closing dialog. The "Notify contacts when closing" option (TICKET_NOTIFY_AT_CLOSING) is the default for that choice.
+TicketAssignedMailModelAssignee = Assigned user notification
+TicketAssignedMailModelAssigneeDescription = Sent to the user who has just been assigned to the ticket, unless they assign it to themselves. Nothing is sent when ticket emails are disabled (TICKET_DISABLE_ALL_MAILS).
+TicketAssignedMailModelCustomer = Customer information
+TicketAssignedMailModelCustomerDescription = Tells the requester their ticket is now handled, on the first assignment only. Only sent when the matching Ticket module option is enabled (TICKET_NOTIFY_CUSTOMER_TICKET_ASSIGNED).
+TicketCreateMailModelVariables = How to write a template, and available variables
+TicketCreateMailModelVariablesHelp = Templates are managed in Home &gt; Setup &gt; Emails &gt; Email templates, picking the "Ticket" type (the "ticket_send" and "All" types are offered in the lists above too).<br><br>The template subject and body entirely replace Dolibarr's: ticket information is no longer appended automatically, it has to be placed with the variables below.<br><br>Ticket-specific variables: __TICKET_REF__, __TICKET_TRACK_ID__, __TICKET_SUBJECT__, __TICKET_MESSAGE__, __TICKET_TYPE__, __TICKET_CATEGORY__, __TICKET_SEVERITY__, __TICKET_PUBLIC_URL__, __TICKET_MANAGEMENT_URL__.<br>Common variables: __REF__, __EXTRAFIELD_XXX__ (replace XXX with the extrafield code, e.g. __EXTRAFIELD_GROUPINCHARGEOF__), __MYCOMPANY_NAME__, __THIRDPARTY_NAME__.
 Javascripts=Javascripts
 JavascriptsConfig=Javascripts setup
 EnableMaxlengthCounter=Enable the character counter
 EnableMaxlengthCounterDescription=Displays a character counter below length-limited fields.
+
+# Entity transfer
+EntityTransfer                               = Entity transfer
+EntityTransferAdminOnly                      = The entity transfer is reserved to administrators: an export holds the whole database of the entity, user accounts included.
+EntityTransferDescription                    = Exports the data of one entity into an archive replayable on a mono entity Dolibarr (the entity becomes entity 1). The modules of the export must be enabled on the target install BEFORE the import: rights, menus, document models and directories are created by the activation.
+EntityToExportCurrentOnly                    = (entity of your session; only a super administrator can pick another one)
+EntityExportModules                          = Modules to include
+EntityExportModulesDescription               = Installed modules holding tables of their own. Unticking one leaves it out of the export: the signatures and the documents pointing at it will then point at nothing.
+EntityExport                                 = Entity export
+EntityExportDescription                      = Builds a ZIP archive holding the SQL dump, the manifest and, optionally, the documents of the entity.
+EntityToExport                               = Entity to export
+ExtraEntities                                = Extra entities
+ExtraEntitiesDescription                     = Comma separated identifiers, for the data shared by Multicompany (users, third parties)
+EntityExportScope                            = Scope
+EntityExportScopeModule                      = Saturne and the ticked modules
+EntityExportScopeCore                        = Saturne, the ticked modules and the core (users, third parties, projects, tickets, events, categories, ECM)
+EntityExportScopeFull                        = Whole entity (every table holding an entity column)
+EntityExportWithFiles                        = Include the documents of the entity
+EntityExportWithDictionaries                 = Include the dictionaries of Saturne and of the ticked modules
+EntityExportWithPurge                        = Add the DELETE of the target entity before the INSERT
+EntityExportArchives                         = Generated archives
+NoEntityExportYet                            = No archive generated yet
+EntityExportArchiveDeleted                   = Archive %s deleted
+EntityExportArchiveNotFound                  = Archive %s not found
+EntityExportDone                             = Export done: %s rows in %s tables
+EntityExportArchiveFailed                    = Building the ZIP archive failed, the export is still available in %s
+EntityExportSkippedTables                    = Tables not exported because no entity filter could be resolved: %s
+EntityImport                                 = Entity import
+EntityImportDescription                      = Replays on this install a ZIP archive (or a SQL file) produced by the entity export.
+EntityImportWarning                          = The import writes straight into the database and keeps the original identifiers: use it on an empty mono entity install only. Back up the database before running it.
+EntityImportTargetTitle                      = Which install to import into
+EntityImportTargetStep1                      = 1. A Dolibarr already installed: the archive holds data only, not the structure. A database without tables is not a target, run the installer first.
+EntityImportTargetStep2                      = 2. The modules of the archive enabled on it: their activation is what creates their tables, rights, menus, document models and directories.
+EntityImportTargetStep3                      = 3. No business data entered since: the import keeps the original ids, it would overwrite or collide with the records already there. An install that has been used is not a valid target.
+EntityImportTargetStep4                      = 4. Right after that activation, tick "Empty the tables of the current entity": the activation already wrote constants and base records holding the same keys as those of the archive.
+EntityImportWithFiles                        = Also copy the documents held by the archive
+EntityImportPurge                            = Empty the tables of the current entity before the import
+EntityImportPurgeHint                        = Tick it as soon as the modules have been enabled on this install: their activation already wrote constants and base records holding the same keys as those of the archive.
+EntityImportFileTooLarge                     = The archive is larger than what PHP accepts (%s, limit %s): raise that limit or use scripts/import_entity.php.
+EntityImportNoDumpFound                      = No SQL file found in the uploaded archive
+EntityImportMissingModules                   = The archive holds the tables of modules not enabled here: %s. Enable them before the import.
+EntityImportAbsentModules                    = Those modules ran on the source install and are not enabled here: %s. The imported rows may point at data of theirs, and some screens will not show them.
+EntityImportDone                             = Import done: %s statements executed, %s files copied
+EntityImportFinishedWithErrors               = Import done: %s statements executed, %s error(s)
+
+# Maintenance
+Maintenance                                  = Maintenance
+MaintenanceAdminOnly                         = Maintenance is reserved to administrators: the operations delete database rows.
+OrphanDocuments                              = Documents naming no file
+OrphanDocumentsDescription                   = A document generation stopped before the file was named used to leave a row naming nothing, having burnt a reference from the counter. The cause is fixed; those rows are still there to remove.
+OrphanDocumentsNone                          = No such row.
+OrphanDocumentsFound                         = %s row(s) to delete
+OrphanDocumentsScopeAllEntities              = Scope: every entity.
+OrphanDocumentsScopeCurrentEntity            = Scope: entity %s only.
+OrphanDocumentsScopeCurrentEntityHelp        = To handle every entity at once, log in on the master entity with a super administrator account (a user belonging to no entity).
+OrphanDocumentsConfirmDeleteAllEntities      = Permanently delete %s row(s), across every entity? This cannot be undone.
+OrphanDocumentsConfirmDeleteEntity           = Permanently delete %s row(s) of entity %s? This cannot be undone.
+OrphanDocumentsDeletedAllEntities            = %s row(s) deleted across every entity
+OrphanDocumentsDeletedEntity                 = %s row(s) deleted on entity %s
+
+# Document generation
+ErrorTemplateFileNotAllowed                  = The document template '%s' is not stored in a template directory of the module.

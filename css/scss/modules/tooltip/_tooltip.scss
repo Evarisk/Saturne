@@ -40,6 +40,20 @@
 	}
 }
 
+/* Variante multiligne : la règle par défaut tient sur une seule ligne et n'a pas de largeur
+   maximale, donc un label un peu long sort de la fenêtre et ses sauts de ligne sont perdus. */
+.wpeo-tooltip.tooltip-multiline {
+	white-space: pre-line;
+	max-width: 420px;
+	height: auto;
+	// La règle de base pose bottom: 0, sans effet tant que la hauteur est fixe : en hauteur
+	// automatique il étirerait l'infobulle jusqu'au bas de la page.
+	bottom: auto;
+	line-height: 1.5;
+	padding: 0.6em 1em;
+	text-align: left;
+}
+
 /* Couleurs */
 @mixin set-arrow-color($color) {
 	&.tooltip-top::before {

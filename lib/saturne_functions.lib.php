@@ -624,7 +624,10 @@ function saturne_load_langs(array $domains = [])
 
     $moduleNameLowerCase = saturne_get_module_name();
 
-    $langs->loadLangs(['saturne@saturne', 'object@saturne', 'signature@saturne', 'medias@saturne', 'component@saturne', $moduleNameLowerCase . '@' . $moduleNameLowerCase]);
+    // 'errors' last: the first loaded definition wins, so module domains keep priority. Without it,
+    // trans('SomeErrorKey', $param) returns the bare key, and get_htmloutput_mesg() translates that key
+    // at display time without the parameters — the user reads a message with empty placeholders.
+    $langs->loadLangs(['saturne@saturne', 'object@saturne', 'signature@saturne', 'medias@saturne', 'component@saturne', $moduleNameLowerCase . '@' . $moduleNameLowerCase, 'errors']);
 
     if (!empty($domains)) {
         foreach ($domains as $domain) {
@@ -1002,7 +1005,7 @@ function saturne_load_list_parameters(string $contexName): array
 
     $listParameters['confirm']     = GETPOST('confirm', 'alpha');      // Result of a confirmation
     $listParameters['toselect']    = GETPOST('toselect', 'array:int'); // Array of ids of elements selected into a list
-    $listParameters['contextpage'] = GETPOSTISSET('contextpage') ? GETPOST('contextpage', 'aZ') : $contexName . 'list'; // To manage different context of search
+    $listParameters['contextpage'] = (GETPOSTISSET('contextpage') && GETPOST('contextpage', 'aZ09')) ? GETPOST('contextpage', 'aZ09') : $contexName . 'list'; // To manage different context of search, 'aZ09' keeps the underscores a context may hold
     $listParameters['optioncss']   = GETPOST('optioncss', 'aZ'); // Option for the css output (always '' except when 'print')
     $listParameters['mode']        = GETPOST('mode', 'aZ');      // The display mode ('list', 'kanban', 'pwa', 'calendar', 'gantt', ...)
     //$listParameters['groupby']     = GETPOST('groupby', 'aZ09'); // Example: $groupby = 'p.fk_opp_status' or $groupby = 'p.fk_statut'

@@ -19,16 +19,18 @@
 /**
  * \file    core/triggers/interface_10_modSaturne_TicketMailModel.class.php
  * \ingroup saturne
- * \brief   Trigger that sends the ticket-creation emails (admin, customer, assignee)
- *          from a configurable "Email template" (Modèle d'email) instead of Dolibarr's
- *          hardcoded content.
+ * \brief   Trigger that sends the ticket notification emails from a configurable
+ *          "Email template" (Modèle d'email) instead of Dolibarr's hardcoded content.
+ *
+ *          Three events are covered, which is every email the core trigger builds in PHP:
+ *          - TICKET_CREATE   : admin, customer and assignee emails
+ *          - TICKET_CLOSE    : admin and customer emails
+ *          - TICKET_ASSIGNED : assignee and customer emails
  *
  *          It is prefixed "10" on purpose: triggers run in filename order, so this one
  *          runs BEFORE the core ticket email trigger (interface_50_modTicket_TicketEmail).
- *          It sets $object->context['disableticketemail'] = 1 so the core trigger skips
- *          its own 3 creation emails, then sends them itself. When no template is
- *          configured for a given recipient type, it falls back to the exact original
- *          Dolibarr content, so nothing regresses until templates are created.
+ *          When no template is configured for a given recipient type, it falls back to the
+ *          exact original Dolibarr content, so nothing regresses until templates are created.
  */
 
 require_once DOL_DOCUMENT_ROOT . '/core/triggers/dolibarrtriggers.class.php';
@@ -58,8 +60,8 @@ class InterfaceTicketMailModel extends DolibarrTriggers
 
         $this->name        = preg_replace('/^Interface/i', '', get_class($this));
         $this->family      = 'ticket';
-        $this->description = 'Send ticket creation emails from configurable email templates (Modèles d\'email).';
-        $this->version     = '1.0.0';
+        $this->description = 'Send ticket notification emails from configurable email templates (Modèles d\'email).';
+        $this->version     = '1.1.0';
         $this->picto       = 'saturne@saturne';
     }
 
@@ -79,19 +81,39 @@ class InterfaceTicketMailModel extends DolibarrTriggers
         if (!isModEnabled('ticket')) {
             return 0; // Ticket module not active, nothing to do
         }
-        if ($action !== 'TICKET_CREATE') {
-            return 0; // We only take over the ticket creation emails
-        }
 
         /** @var Ticket $object */
 
+        switch ($action) {
+            case 'TICKET_CREATE':
+                return $this->handleTicketCreate($object, $user, $langs, $conf);
+            case 'TICKET_CLOSE':
+                return $this->handleTicketClose($object, $user, $langs, $conf);
+            case 'TICKET_ASSIGNED':
+                return $this->handleTicketAssigned($object, $user, $langs, $conf);
+        }
+
+        return 0;
+    }
+
+    /**
+     * Send the three ticket creation emails (admin, assignee, customer).
+     *
+     * @param  Ticket    $object The created ticket
+     * @param  User      $user   Object user
+     * @param  Translate $langs  The translation object
+     * @param  Conf      $conf   Object conf
+     * @return int               0 if nothing was done, 1 if the emails were handled here
+     */
+    private function handleTicketCreate($object, User $user, Translate $langs, Conf $conf)
+    {
         // If another process (e.g. a public interface) already handles the ticket emails,
         // let it do its job and do not take over.
         if (!empty($object->context['disableticketemail'])) {
             return 0;
         }
 
-        dol_syslog("Trigger '" . $this->name . "' for action '" . $action . "' launched by " . __FILE__ . ". id=" . $object->id);
+        dol_syslog("Trigger '" . $this->name . "' for action 'TICKET_CREATE' launched by " . __FILE__ . ". id=" . $object->id);
 
         $langs->load('ticket');
 
@@ -109,7 +131,7 @@ class InterfaceTicketMailModel extends DolibarrTriggers
         // --- Admin notification email ---
         if (getDolGlobalString('TICKET_NOTIFICATION_EMAIL_TO')) {
             $sendto = getDolGlobalString('TICKET_NOTIFICATION_EMAIL_TO');
-            $this->sendAdminMessage($sendto, $object, $user, $langs, $conf, $filepaths, $mimetypes, $filenames);
+            $this->sendAdminMessage($sendto, $object, $user, $langs, $conf, 'SATURNE_TICKET_CREATE_MAIL_MODEL_ADMIN', 'TicketNewEmailSubjectAdmin', 'TicketNewEmailBodyAdmin', $filepaths, $mimetypes, $filenames);
         }
 
         // --- Assignee email (if an assignee was set at creation) ---
@@ -121,7 +143,7 @@ class InterfaceTicketMailModel extends DolibarrTriggers
                     $old_autocopy = getDolGlobalString('MAIN_MAIL_AUTOCOPY_TO');
                     $conf->global->MAIN_MAIL_AUTOCOPY_TO = '';
                 }
-                $this->sendAssigneeMessage($userstat->email, $object, $user, $langs, $filepaths, $mimetypes, $filenames);
+                $this->sendAssigneeMessage($userstat->email, $object, $user, $langs, 'SATURNE_TICKET_CREATE_MAIL_MODEL_ASSIGNEE', $filepaths, $mimetypes, $filenames);
                 if (getDolGlobalString('TICKET_DISABLE_MAIL_AUTOCOPY_TO')) {
                     $conf->global->MAIN_MAIL_AUTOCOPY_TO = $old_autocopy;
                 }
@@ -151,11 +173,202 @@ class InterfaceTicketMailModel extends DolibarrTriggers
             }
 
             if ($sendto) {
-                $this->sendCustomerMessage($sendto, $object, $user, $langs, $conf, $filepaths, $mimetypes, $filenames);
+                $this->sendCustomerMessage($sendto, $object, $user, $langs, $conf, 'SATURNE_TICKET_CREATE_MAIL_MODEL_CUSTOMER', 'TicketNewEmailSubjectCustomer', 'TicketNewEmailBodyCustomer', 'TicketNewEmailBodyInfosTrackUrlCustomer', $filepaths, $mimetypes, $filenames);
             }
         }
 
         return 1;
+    }
+
+    /**
+     * Send the two ticket closing emails (admin, customer).
+     *
+     * Unlike the creation case, this only takes over when at least one closing template is
+     * configured. As long as nothing is configured the core trigger keeps running untouched,
+     * so the recipient resolution below can never diverge from Dolibarr's on a default setup.
+     *
+     * @param  Ticket    $object The closed ticket
+     * @param  User      $user   Object user
+     * @param  Translate $langs  The translation object
+     * @param  Conf      $conf   Object conf
+     * @return int               0 if nothing was done, 1 if the emails were handled here
+     */
+    private function handleTicketClose($object, User $user, Translate $langs, Conf $conf)
+    {
+        if (!getDolGlobalString('SATURNE_TICKET_CLOSE_MAIL_MODEL_ADMIN') && !getDolGlobalString('SATURNE_TICKET_CLOSE_MAIL_MODEL_CUSTOMER')) {
+            return 0;
+        }
+
+        // If another process already handles the ticket emails, let it do its job.
+        if (!empty($object->context['disableticketemail'])) {
+            return 0;
+        }
+
+        dol_syslog("Trigger '" . $this->name . "' for action 'TICKET_CLOSE' launched by " . __FILE__ . ". id=" . $object->id);
+
+        $langs->load('ticket');
+
+        // Take over: the core trigger (interface_50) skips both closing emails on this flag.
+        $object->context['disableticketemail'] = 1;
+
+        // --- Admin notification email ---
+        if (getDolGlobalString('TICKET_NOTIFICATION_EMAIL_TO')) {
+            $sendto = getDolGlobalString('TICKET_NOTIFICATION_EMAIL_TO');
+            $this->sendAdminMessage($sendto, $object, $user, $langs, $conf, 'SATURNE_TICKET_CLOSE_MAIL_MODEL_ADMIN', 'TicketCloseEmailSubjectAdmin', 'TicketCloseEmailBodyAdmin');
+        }
+
+        // --- Customer email ---
+        $sendto = $this->getCloseCustomerRecipients($object, $langs);
+        if ($sendto === null) {
+            // The posted contact is not one of the ticket contacts, the error is already reported.
+            return 0;
+        }
+        if ($sendto !== '') {
+            $this->sendCustomerMessage($sendto, $object, $user, $langs, $conf, 'SATURNE_TICKET_CLOSE_MAIL_MODEL_CUSTOMER', 'TicketCloseEmailSubjectCustomer', 'TicketCloseEmailBodyCustomer', 'TicketCloseEmailBodyInfosTrackUrlCustomer');
+        }
+
+        return 1;
+    }
+
+    /**
+     * Send the two ticket assignment emails (assignee, customer).
+     *
+     * The core trigger ignores $object->context['disableticketemail'] on TICKET_ASSIGNED, so the
+     * only way to stop it from sending its own hardcoded emails is to blank the two options it
+     * tests. That is done in memory on $conf only: nothing is written to the database and $conf
+     * is rebuilt on the next request. It is also done only once a template is configured, so a
+     * default setup never goes through this path.
+     *
+     * @param  Ticket    $object The assigned ticket
+     * @param  User      $user   Object user
+     * @param  Translate $langs  The translation object
+     * @param  Conf      $conf   Object conf
+     * @return int               0 if nothing was done, 1 if the emails were handled here
+     */
+    private function handleTicketAssigned($object, User $user, Translate $langs, Conf $conf)
+    {
+        if (!getDolGlobalString('SATURNE_TICKET_ASSIGNED_MAIL_MODEL_ASSIGNEE') && !getDolGlobalString('SATURNE_TICKET_ASSIGNED_MAIL_MODEL_CUSTOMER')) {
+            return 0;
+        }
+
+        if ($object->fk_user_assign <= 0) {
+            return 0;
+        }
+
+        dol_syslog("Trigger '" . $this->name . "' for action 'TICKET_ASSIGNED' launched by " . __FILE__ . ". id=" . $object->id);
+
+        $langs->load('ticket');
+
+        // Read the two gating options before neutralising them just below.
+        $allMailsDisabled = (bool) getDolGlobalString('TICKET_DISABLE_ALL_MAILS');
+        $notifyCustomer   = getDolGlobalString('TICKET_NOTIFY_CUSTOMER_TICKET_ASSIGNED') && empty($object->oldcopy->fk_user_assign);
+
+        $conf->global->TICKET_DISABLE_ALL_MAILS               = 1;
+        $conf->global->TICKET_NOTIFY_CUSTOMER_TICKET_ASSIGNED = '';
+
+        // --- Assignee email ---
+        if (!$allMailsDisabled && $object->fk_user_assign != $user->id) {
+            $userstat = new User($this->db);
+            if ($userstat->fetch($object->fk_user_assign) > 0) {
+                if (!empty($userstat->email)) {
+                    $this->sendAssigneeMessage($userstat->email, $object, $user, $langs, 'SATURNE_TICKET_ASSIGNED_MAIL_MODEL_ASSIGNEE');
+                }
+            } else {
+                $this->setErrorsFromObject($userstat);
+            }
+        }
+
+        // --- Customer email, telling the requester their ticket is now handled ---
+        if ($notifyCustomer) {
+            $sendto = $this->getAssignedCustomerRecipients($object);
+            if ($sendto !== '') {
+                $this->sendCustomerMessage($sendto, $object, $user, $langs, $conf, 'SATURNE_TICKET_ASSIGNED_MAIL_MODEL_CUSTOMER', 'TicketAssignedCustomerEmail', 'TicketAssignedCustomerBody', 'TicketNewEmailBodyInfosTrackUrlCustomer');
+            }
+        }
+
+        return 1;
+    }
+
+    /**
+     * Resolve the customer recipients of a closing email, reproducing the core trigger rules.
+     *
+     * @param  Ticket      $object The closed ticket
+     * @param  Translate   $langs  The translation object
+     * @return string|null         Comma separated addresses, '' when there is nobody to notify,
+     *                             null when the posted contact is not a contact of the ticket
+     */
+    private function getCloseCustomerRecipients($object, Translate $langs)
+    {
+        $linked_contacts = $object->listeContact(-1, 'thirdparty');
+        $linked_contacts = array_merge($linked_contacts, $object->listeContact(-1, 'internal'));
+        if (empty($linked_contacts) && getDolGlobalString('TICKET_NOTIFY_AT_CLOSING') && !empty($object->fk_soc)) {
+            $object->fetch_thirdparty();
+            $linked_contacts[]['email'] = $object->thirdparty->email;
+        }
+
+        $contactid  = empty($object->context['contact_id']) ? 0 : $object->context['contact_id'];
+        $contactObj = null;
+
+        if ($contactid > 0) {
+            // Only a contact that is really linked to the ticket as external/thirdparty may be used.
+            $externalContactIds = array_column(
+                array_filter(
+                    $linked_contacts,
+                    static function ($contact) {
+                        // The TICKET_NOTIFY_AT_CLOSING fallback above pushes an entry holding only an email
+                        return isset($contact['source']) && in_array($contact['source'], ['external', 'thirdparty']);
+                    }
+                ),
+                'id'
+            );
+
+            if (in_array($contactid, $externalContactIds)) {
+                $contactObj = new Contact($this->db);
+                if ($contactObj->fetch($contactid) <= 0) {
+                    $contactObj = null;
+                }
+            }
+
+            if ($contactObj === null) {
+                setEventMessages($langs->trans('Error') . ' : ' . $langs->transnoentities('TicketWrongContact'), [], 'errors');
+
+                return null;
+            }
+        }
+
+        if ($contactObj !== null && !empty($contactObj->email) && !empty($contactObj->statut)) {
+            return $contactObj->email;
+        }
+
+        // Sending to every contact, either explicitly or through the mass "close" action.
+        if (!empty($linked_contacts) && ($contactid == -2 || (GETPOST('massaction', 'alpha') == 'close' && GETPOST('confirm', 'alpha') == 'yes'))) {
+            return implode(', ', array_column($linked_contacts, 'email'));
+        }
+
+        return '';
+    }
+
+    /**
+     * Resolve the customer recipients of an assignment email, reproducing the core trigger rules.
+     *
+     * @param  Ticket $object The assigned ticket
+     * @return string         Comma separated addresses, '' when there is nobody to notify
+     */
+    private function getAssignedCustomerRecipients($object)
+    {
+        $emails = [];
+        if ($object->origin_email) {
+            $emails[] = $object->origin_email;
+        }
+
+        foreach ($object->listeContact(-1, 'thirdparty') as $contact) {
+            // Guard against a contact being listed twice
+            if (!in_array($contact['email'], $emails)) {
+                $emails[] = $contact['email'];
+            }
+        }
+
+        return implode(', ', $emails);
     }
 
     /**
@@ -259,33 +472,36 @@ class InterfaceTicketMailModel extends DolibarrTriggers
     }
 
     /**
-     * Compose and send the admin notification email for a new ticket.
+     * Compose and send the admin notification email of a ticket event.
      * Uses the configured email template, or falls back to the original Dolibarr content.
      *
-     * @param  string        $sendto    Recipient addresses
-     * @param  Ticket        $object    The ticket the email refers to
-     * @param  User          $user      Object user
-     * @param  Translate     $langs     The translation object
-     * @param  Conf          $conf      Object conf
-     * @param  array<string> $filepaths File paths
-     * @param  array<string> $mimetypes Mime types
-     * @param  array<string> $filenames File names
+     * @param  string        $sendto     Recipient addresses
+     * @param  Ticket        $object     The ticket the email refers to
+     * @param  User          $user       Object user
+     * @param  Translate     $langs      The translation object
+     * @param  Conf          $conf       Object conf
+     * @param  string        $constName  Name of the config constant holding the template label
+     * @param  string        $subjectKey Language key of the fallback subject
+     * @param  string        $bodyKey    Language key of the fallback body intro
+     * @param  array<string> $filepaths  File paths
+     * @param  array<string> $mimetypes  Mime types
+     * @param  array<string> $filenames  File names
      * @return void
      */
-    private function sendAdminMessage($sendto, $object, User $user, Translate $langs, Conf $conf, $filepaths, $mimetypes, $filenames)
+    private function sendAdminMessage($sendto, $object, User $user, Translate $langs, Conf $conf, $constName, $subjectKey, $bodyKey, $filepaths = [], $mimetypes = [], $filenames = [])
     {
         global $mysoc;
 
         $appli = $mysoc->name;
 
-        $templated = $this->getTemplatedContent('SATURNE_TICKET_CREATE_MAIL_MODEL_ADMIN', $object, $user, $langs);
+        $templated = $this->getTemplatedContent($constName, $object, $user, $langs);
         if ($templated !== null) {
             $subject       = $templated['subject'];
             $message_admin = $templated['body'];
         } else {
             // Fallback: original content of interface_50_modTicket_TicketEmail::composeAndSendAdminMessage()
-            $subject        = '[' . $appli . '] ' . $langs->transnoentities('TicketNewEmailSubjectAdmin', $object->ref, $object->track_id);
-            $message_admin  = $langs->transnoentities('TicketNewEmailBodyAdmin', $object->track_id) . '<br>';
+            $subject        = '[' . $appli . '] ' . $langs->transnoentities($subjectKey, $object->ref, $object->track_id);
+            $message_admin  = $langs->transnoentities($bodyKey, $object->track_id) . '<br>';
             $message_admin .= '<ul><li>' . $langs->trans('Title') . ' : ' . $object->subject . '</li>';
             $message_admin .= '<li>' . $langs->trans('Type') . ' : ' . $langs->getLabelFromKey($this->db, 'TicketTypeShort' . $object->type_code, 'c_ticket_type', 'code', 'label', $object->type_code) . '</li>';
             $message_admin .= '<li>' . $langs->trans('TicketCategory') . ' : ' . $langs->getLabelFromKey($this->db, 'TicketCategoryShort' . $object->category_code, 'c_ticket_category', 'code', 'label', $object->category_code) . '</li>';
@@ -320,33 +536,37 @@ class InterfaceTicketMailModel extends DolibarrTriggers
     }
 
     /**
-     * Compose and send the customer notification email for a new ticket.
+     * Compose and send the customer notification email of a ticket event.
      * Uses the configured email template, or falls back to the original Dolibarr content.
      *
-     * @param  string        $sendto    Recipient addresses
-     * @param  Ticket        $object    The ticket the email refers to
-     * @param  User          $user      Object user
-     * @param  Translate     $langs     The translation object
-     * @param  Conf          $conf      Object conf
-     * @param  array<string> $filepaths File paths
-     * @param  array<string> $mimetypes Mime types
-     * @param  array<string> $filenames File names
+     * @param  string        $sendto       Recipient addresses
+     * @param  Ticket        $object       The ticket the email refers to
+     * @param  User          $user         Object user
+     * @param  Translate     $langs        The translation object
+     * @param  Conf          $conf         Object conf
+     * @param  string        $constName    Name of the config constant holding the template label
+     * @param  string        $subjectKey   Language key of the fallback subject
+     * @param  string        $bodyKey      Language key of the fallback body intro
+     * @param  string        $seeTicketKey Language key of the fallback public interface link label
+     * @param  array<string> $filepaths    File paths
+     * @param  array<string> $mimetypes    Mime types
+     * @param  array<string> $filenames    File names
      * @return void
      */
-    private function sendCustomerMessage($sendto, $object, User $user, Translate $langs, Conf $conf, $filepaths, $mimetypes, $filenames)
+    private function sendCustomerMessage($sendto, $object, User $user, Translate $langs, Conf $conf, $constName, $subjectKey, $bodyKey, $seeTicketKey, $filepaths = [], $mimetypes = [], $filenames = [])
     {
         global $extrafields, $mysoc;
 
         $appli = $mysoc->name;
 
-        $templated = $this->getTemplatedContent('SATURNE_TICKET_CREATE_MAIL_MODEL_CUSTOMER', $object, $user, $langs);
+        $templated = $this->getTemplatedContent($constName, $object, $user, $langs);
         if ($templated !== null) {
             $subject          = $templated['subject'];
             $message_customer = $templated['body'];
         } else {
             // Fallback: original content of interface_50_modTicket_TicketEmail::composeAndSendCustomerMessage()
-            $subject           = '[' . $appli . '] ' . $langs->transnoentities('TicketNewEmailSubjectCustomer');
-            $message_customer  = $langs->transnoentities('TicketNewEmailBodyCustomer', $object->track_id) . '<br>';
+            $subject           = '[' . $appli . '] ' . $langs->transnoentities($subjectKey);
+            $message_customer  = $langs->transnoentities($bodyKey, $object->track_id) . '<br>';
             $message_customer .= '<ul><li>' . $langs->trans('Title') . ' : ' . $object->subject . '</li>';
             $message_customer .= '<li>' . $langs->trans('Type') . ' : ' . $langs->getLabelFromKey($this->db, 'TicketTypeShort' . $object->type_code, 'c_ticket_type', 'code', 'label', $object->type_code) . '</li>';
             $message_customer .= '<li>' . $langs->trans('TicketCategory') . ' : ' . $langs->getLabelFromKey($this->db, 'TicketCategoryShort' . $object->category_code, 'c_ticket_category', 'code', 'label', $object->category_code) . '</li>';
@@ -388,7 +608,7 @@ class InterfaceTicketMailModel extends DolibarrTriggers
 
             if (getDolGlobalInt('TICKET_ENABLE_PUBLIC_INTERFACE')) {
                 $url_public_ticket = getDolGlobalString('TICKET_URL_PUBLIC_INTERFACE', dol_buildpath('/public/ticket/', 2)) . 'view.php?track_id=' . urlencode($object->track_id);
-                $message_customer .= '<p>' . $langs->trans('TicketNewEmailBodyInfosTrackUrlCustomer') . ' : <a href="' . $url_public_ticket . '">' . $url_public_ticket . '</a></p>';
+                $message_customer .= '<p>' . $langs->trans($seeTicketKey) . ' : <a href="' . $url_public_ticket . '">' . $url_public_ticket . '</a></p>';
                 $message_customer .= '<p>' . $langs->trans('TicketEmailPleaseDoNotReplyToThisEmail') . '</p>';
             } else {
                 $message_customer .= '<p>' . $langs->trans('TicketEmailPleaseDoNotReplyToThisEmailNoInterface') . '</p>';
@@ -401,25 +621,26 @@ class InterfaceTicketMailModel extends DolibarrTriggers
     }
 
     /**
-     * Compose and send the assignee notification email for a new ticket.
+     * Compose and send the assignee notification email of a ticket event.
      * Uses the configured email template, or falls back to the original Dolibarr content.
      *
      * @param  string        $sendto    Recipient addresses
      * @param  Ticket        $object    The ticket the email refers to
      * @param  User          $user      Object user
      * @param  Translate     $langs     The translation object
+     * @param  string        $constName Name of the config constant holding the template label
      * @param  array<string> $filepaths File paths
      * @param  array<string> $mimetypes Mime types
      * @param  array<string> $filenames File names
      * @return void
      */
-    private function sendAssigneeMessage($sendto, $object, User $user, Translate $langs, $filepaths, $mimetypes, $filenames)
+    private function sendAssigneeMessage($sendto, $object, User $user, Translate $langs, $constName, $filepaths = [], $mimetypes = [], $filenames = [])
     {
         global $conf, $mysoc;
 
         $appli = $mysoc->name;
 
-        $templated = $this->getTemplatedContent('SATURNE_TICKET_CREATE_MAIL_MODEL_ASSIGNEE', $object, $user, $langs);
+        $templated = $this->getTemplatedContent($constName, $object, $user, $langs);
         if ($templated !== null) {
             $subject = $templated['subject'];
             $message = $templated['body'];
