@@ -1,18 +1,52 @@
-# [Saturne] [23.1.1] - Pages d'administration réparées
+# [Saturne] [23.2.0] - Transfert d'entité et documents fiabilisés
 
-Description : Version corrective. Elle rétablit les pages d'administration des modules bâtis sur Saturne, en ajoutant les deux fonctions d'aide qu'elles appelaient sans qu'elles existent, et supprime les avertissements PHP 8 restants à la génération d'un document.
+Description : Cette version apporte l'export et l'import d'une entité vers une installation Dolibarr mono-entité, une page de maintenance pour les documents restés sans fichier, et des modèles d'email pour les tickets. Elle rétablit surtout la génération de documents sur Dolibarr 24, qui était complètement bloquée, et corrige une série de défauts qui laissaient des lignes mortes en base ou cassaient les modèles PDF des modules.
+
+## Nouvelles fonctionnalités et innovations
+
+### Transfert d'entité
+
+* Export d'une entité complète — tables, champs personnalisés et documents — et import dans un Dolibarr mono-entité. Les modules absents de l'installation cible sont signalés avant l'import plutôt que découverts après.
+* L'export suit les périmètres `core` et `full`, lit la liste des modules réellement actifs sur l'entité exportée, et l'import supporte une cible dont les colonnes diffèrent de la source.
+
+### Maintenance
+
+* Nouvelle page d'administration listant les documents dont la ligne en base ne désigne aucun fichier. Une génération interrompue avant que le fichier soit nommé laissait une ligne morte qui avait consommé une référence du compteur ; ces lignes se suppriment maintenant depuis l'interface.
+* La page annonce explicitement la portée du nettoyage : toutes les entités si vous êtes super-administrateur sur l'entité maître, l'entité courante sinon.
+
+### Tickets
+
+* Modèles d'email pour les messages de clôture et de prise en charge d'un ticket.
 
 ## Améliorations & corrections
 
-### Administration
+### Génération de documents
 
-* Ajout de `saturne_check_admin_write_access()` et `saturne_constant_onoff()`, appelées par les pages d'administration de Digirisk mais absentes du socle : les sept pages de configuration du module étaient inaccessibles.
-* Éteindre un réglage écrit désormais un `0` au lieu de supprimer la constante. Une constante supprimée était recréée à sa valeur par défaut à la prochaine activation ou mise à jour du module : le réglage se rallumait tout seul.
-* Un utilisateur sans droit d'administration voit maintenant l'état d'un réglage, sous la forme d'un interrupteur désactivé, au lieu d'un interrupteur qui ne répondait pas.
-* Le repli sans javascript des interrupteurs (liens `set_` / `del_`) est pris en charge et écrit lui aussi un `0`.
+* **Dolibarr 24 : la génération de documents est réparée.** Le cœur y refuse tout modèle stocké hors de `documents/ecm` et `documents/doctemplates`, ce qui est le cas de tous les modèles livrés avec les modules, et ne transmet plus ses paramètres au générateur. Toute génération répondait `BadDirForTemplateFile` ou perdait son objet source.
+* Le chemin du modèle choisi est désormais vérifié contre les répertoires de modèles déclarés par le module. Un fichier quelconque du serveur ne peut plus servir de modèle.
+* Une génération qui échoue ne laisse plus de ligne orpheline en base.
+* Un objet appartenant à une autre entité ne perd plus son répertoire de sortie : la génération retombe sur l'entité courante au lieu d'écrire nulle part.
 
-### Documents
+### Modèles PDF
 
-* Correction des avertissements PHP 8 à la génération d'un document.
+* Les aides PDF passent en `protected`, ce qui cassait trois modèles de modules ; `drawTable()` et le découpage des pages remontent dans `SaturneDocumentModel`, où les modules peuvent les réutiliser.
+* Déclaration de la propriété `$height` sur `SaturneDocumentModel`.
 
-## Comparaison des versions [23.1.0](https://github.com/Evarisk/Saturne/compare/23.1.0...23.1.1) et 23.1.1
+### Interface
+
+* Les infobulles posent leur libellé en texte au lieu de le concaténer dans du HTML, et la variante multiligne reste bornée à la fenêtre.
+* Les listes génériques ne partagent plus leurs colonnes entre objets différents.
+* Un tableau de bord sans graphique masqué ne déclenche plus d'avertissement.
+* Correction des avertissements PHP 8 dans l'affichage des médias.
+
+### Traductions
+
+* Le domaine `errors` est chargé avant l'affichage : les messages d'événement ne perdent plus leurs paramètres, ils s'affichaient jusqu'ici amputés.
+* `ErrorFileNotFound` du cœur n'est plus masqué par une clé du socle.
+
+### Qualité et intégration continue
+
+* La chaîne de build des assets passe de gulp 4 à sass et esbuild, avec un ordre de concaténation du JavaScript indépendant de la machine.
+* Les assets sont vérifiés sur les pull requests, et les contrôles qualité se déclenchent désormais sur toute pull request, y compris sur la branche de maintenance.
+
+## Comparaison des versions [23.1.1](https://github.com/Evarisk/Saturne/compare/23.1.1...23.2.0) et 23.2.0

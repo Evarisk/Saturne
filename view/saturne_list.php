@@ -66,7 +66,13 @@ $massaction = GETPOST('massaction', 'alpha');
 $toselect                                   = [];
 [$confirm, $contextpage, $optioncss, $mode] = ['', '', '', ''];
 $listParameters                             = saturne_load_list_parameters(basename(dirname(__FILE__)));
-$listParameters['contextpage']              = GETPOSTISSET('contextpage') ? GETPOST('contextpage', 'aZ') : $objectMetadata['hook_name_list'] . '_saturne';
+// The context of this page always holds an underscore, so it must be read back with a filter that keeps
+// it : with 'aZ' it comes back empty and the page falls back on PHP_SELF, a key shared by every object
+// type served here, so the column selection saved for one object type applies to all the others
+$listParameters['contextpage']              = GETPOSTISSET('contextpage') ? GETPOST('contextpage', 'aZ09') : '';
+if (empty($listParameters['contextpage'])) {
+    $listParameters['contextpage'] = $objectMetadata['hook_name_list'] . '_saturne';
+}
 foreach ($listParameters as $listParameterKey => $listParameter) {
     $$listParameterKey = $listParameter;
 }

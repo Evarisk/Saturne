@@ -237,7 +237,9 @@ class SaturneDashboard
         }
 
         print '<div class="add-graph-box" id="add-graph-box" style="margin-top: 10px; ' . (!empty($dashboards['disabledGraphs']) ? '' : 'display:none') . '">';
-        print Form::selectarray('disabledGraph', $dashboards['disabledGraphs'], -1, $langs->trans('ChooseBoxToAddGraph'), 0, 0, 'data-item-type="graph" data-id-refresh="graph-dashboard" data-id-load="add-graph-box"', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint', 0, 'hidden selected');
+        // The key is only set when a data source declares a disabled graph; the div above already
+        // guards on it, this one used to read it raw
+        print Form::selectarray('disabledGraph', $dashboards['disabledGraphs'] ?? [], -1, $langs->trans('ChooseBoxToAddGraph'), 0, 0, 'data-item-type="graph" data-id-refresh="graph-dashboard" data-id-load="add-graph-box"', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint', 0, 'hidden selected');
         if (!empty($conf->use_javascript_ajax)) {
             include_once DOL_DOCUMENT_ROOT . '/core/lib/ajax.lib.php';
             print ajax_combobox('disabledGraph');
