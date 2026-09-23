@@ -181,6 +181,11 @@ abstract class SaturneDocuments extends SaturneObject
             $modelPath .= $objectType . 'document/';
         }
 
+        $modele = $this->checkDocumentTemplate($modele);
+        if (!dol_strlen($modele)) {
+            return -1;
+        }
+
         $result = $this->commonGenerateDocument($modelPath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
 
         // Fallback for Saturne modules: if doc generator wasn't found in the first path, try the 'document' suffixed path
@@ -209,6 +214,111 @@ abstract class SaturneDocuments extends SaturneObject
         }
 
         return $result;
+    }
+
+    /**
+     * Check the template carried by a model key and return a key usable by commonGenerateDocument()
+     *
+     * A model key is either 'modelname' for a native generator, or 'modelname:/full/path/of/template.odt' for an ODT one.
+     * That path is sent by the request, so it is checked against the template directories the module declares.
+     * Dolibarr 24 also refuses every template stored outside DOL_DATA_ROOT/ecm and DOL_DATA_ROOT/doctemplates -
+     * commonGenerateDocument() then answers BadDirForTemplateFile - while Saturne modules ship theirs in their own
+     * directory : the selected template is mirrored under DOL_DATA_ROOT/doctemplates to keep the generation working
+     *
+     * @param  string $modele Model key asked for the generation
+     * @return string         Model key to pass to commonGenerateDocument(), empty if the template is not allowed
+     */
+    protected function checkDocumentTemplate(string $modele): string
+    {
+        global $langs;
+
+        // Load Dolibarr libraries
+        require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+
+        $modelData = explode(':', $modele, 2);
+        if (!isset($modelData[1]) || !dol_strlen($modelData[1])) {
+            return $modele;
+        }
+
+        $modelName    = $modelData[0];
+        $documentType = preg_replace('/_(custom_)?odt$/', '', $modelName);
+
+        $templatePath = realpath($modelData[1]);
+        $templatePath = $templatePath !== false ? strtr($templatePath, DIRECTORY_SEPARATOR, '/') : '';
+
+        $isAllowed = false;
+        if (dol_strlen($templatePath) > 0) {
+            foreach ($this->getDocumentTemplateDirs($documentType) as $templateDir) {
+                if (strpos($templatePath, $templateDir) === 0) {
+                    $isAllowed = true;
+                    break;
+                }
+            }
+        }
+        if (!$isAllowed) {
+            $langs->load('saturne@saturne');
+            $this->error    = $langs->trans('ErrorTemplateFileNotAllowed', $modelData[1]);
+            $this->errors[] = $this->error;
+            dol_syslog('SaturneDocuments::checkDocumentTemplate refused template file ' . $modelData[1], LOG_WARNING);
+            return '';
+        }
+
+        // Dolibarr 24 only reads a template stored under DOL_DATA_ROOT/ecm or DOL_DATA_ROOT/doctemplates : mirror the
+        // ones shipped inside the module there, and refresh the copy as soon as the file of the module changes
+        $dataRoot = rtrim(strtr(DOL_DATA_ROOT, DIRECTORY_SEPARATOR, '/'), '/');
+        if (version_compare(DOL_VERSION, '24.0.0', '>=') && strpos($templatePath, $dataRoot . '/ecm/') !== 0 && strpos($templatePath, $dataRoot . '/doctemplates/') !== 0) {
+            $mirrorDir  = $dataRoot . '/doctemplates/' . $this->module . '/' . $documentType;
+            $mirrorPath = $mirrorDir . '/' . basename($templatePath);
+            if (!dol_is_file($mirrorPath) || filesize($mirrorPath) != filesize($templatePath) || filemtime($mirrorPath) < filemtime($templatePath)) {
+                dol_mkdir($mirrorDir);
+                if (dol_copy($templatePath, $mirrorPath, '0', 1) < 1) {
+                    $this->error    = $langs->trans('ErrorFailToCopyFile', $templatePath, $mirrorPath);
+                    $this->errors[] = $this->error;
+                    return '';
+                }
+            }
+            $templatePath = $mirrorPath;
+        }
+
+        return $modelName . ':' . $templatePath;
+    }
+
+    /**
+     * Get the directories a document template of the module can be read from
+     *
+     * @param  string   $documentType Document type of the model asked for the generation
+     * @return string[]               Existing absolute directories, slash ended
+     */
+    protected function getDocumentTemplateDirs(string $documentType): array
+    {
+        $dirs = [
+            dol_buildpath('/' . $this->module . '/documents/doctemplates/'),
+            DOL_DATA_ROOT . '/ecm/' . $this->module . '/',
+            DOL_DATA_ROOT . '/doctemplates/' . $this->module . '/'
+        ];
+
+        // The module declares where its templates live, the custom ones included
+        $constPrefix = dol_strtoupper($this->module . '_' . $documentType);
+        foreach (['_ADDON_ODT_PATH', '_CUSTOM_ADDON_ODT_PATH', '_SPECIMEN_ADDON_ODT_PATH'] as $constSuffix) {
+            $constValue = getDolGlobalString($constPrefix . $constSuffix);
+            foreach (explode(',', preg_replace('/[\r\n]+/', ',', $constValue)) as $dir) {
+                $dirs[] = str_replace(['DOL_DATA_ROOT', 'DOL_DOCUMENT_ROOT'], [DOL_DATA_ROOT, DOL_DOCUMENT_ROOT], trim($dir));
+            }
+        }
+
+        $templateDirs = [];
+        foreach ($dirs as $dir) {
+            if (!dol_strlen($dir)) {
+                continue;
+            }
+            $realDir = realpath($dir);
+            if ($realDir === false) {
+                continue;
+            }
+            $templateDirs[] = rtrim(strtr($realDir, DIRECTORY_SEPARATOR, '/'), '/') . '/';
+        }
+
+        return $templateDirs;
     }
 
     /**

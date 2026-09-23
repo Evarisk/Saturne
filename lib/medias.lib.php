@@ -77,6 +77,9 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
 
         $moduleImageNumberPerPageConf = strtoupper($moduleName) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
         for ($i = (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf); $i < ($conf->global->$moduleImageNumberPerPageConf + (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf)); $i++) {
+            if (empty($filearray[$i])) {
+                break;
+            }
             $fileName = $filearray[$i]['name'];
             if (image_format_supported($fileName) >= 0) {
                 $nbphoto++;
@@ -201,7 +204,7 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
         }
         $favoriteExists = 0;
         foreach ($filearray as $file) {
-            if ($file['name'] == $object->$favorite_field) {
+            if ($file['name'] == (is_object($object) ? $object->$favorite_field : '')) {
                 $favoriteExists = 1;
             }
         }
@@ -213,7 +216,7 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 
             // A favorite media that no longer exists in the folder must not fall back on another file,
             // it would show a media unrelated to the object
-            if (($show_only_favorite && ($object->$favorite_field == $fileName || empty($object->$favorite_field))) || !$show_only_favorite) {
+            if (($show_only_favorite && ((is_object($object) ? $object->$favorite_field : '') == $fileName || empty((is_object($object) ? $object->$favorite_field : '')))) || !$show_only_favorite) {
                 if ($showdiv) {
                     $return .= '<div class="media-container">';
                 }
@@ -296,18 +299,18 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
                         if ($usesharelink) {
                             if ($showThumb) {
                                 $return .= '<!-- Show thumb file -->';
-                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $morecss . ' photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/custom/saturne/utils/viewimage.php?modulepart=' . $modulepart . '&entity=' . $object->entity . '&file=' . urlencode($pdirthumb . $photo_vignette) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . $object->id . '" loading="lazy" decoding="async">';
+                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $morecss . ' photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/custom/saturne/utils/viewimage.php?modulepart=' . $modulepart . '&entity=' . (is_object($object) ? $object->entity : $conf->entity) . '&file=' . urlencode($pdirthumb . $photo_vignette) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
                             } else {
                                 $return .= '<!-- Show original file -->';
-                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $morecss . ' photowithmargin" src="' . DOL_URL_ROOT . '/custom/saturne/utils/viewimage.php?modulepart=' . $modulepart . '&entity=' . $object->entity . '&file=' . urlencode($pdir . $photo) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . $object->id . '" loading="lazy" decoding="async">';
+                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $morecss . ' photowithmargin" src="' . DOL_URL_ROOT . '/custom/saturne/utils/viewimage.php?modulepart=' . $modulepart . '&entity=' . (is_object($object) ? $object->entity : $conf->entity) . '&file=' . urlencode($pdir . $photo) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
                             }
                         } else {
                             if ($showThumb) {
                                 $return .= '<!-- Show thumb file -->';
-                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $morecss . '"  src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdirthumb . $photo_vignette) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . $object->id . '" loading="lazy" decoding="async">';
+                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $morecss . '"  src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdirthumb . $photo_vignette) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
                             } else {
                                 $return .= '<!-- Show original file -->';
-                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $morecss . ' photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . $object->id . '" loading="lazy" decoding="async">';
+                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $morecss . ' photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
                             }
                         }
 
@@ -320,8 +323,8 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
                         }
                         if ($showaction) {
                             $return .= '<br>';
-                            if ($photo_vignette && (image_format_supported($photo) > 0) && ($object->imgWidth > $maxWidth || $object->imgHeight > $maxHeight)) {
-                                $return .= '<a href="' . $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&amp;action=addthumb&amp;file=' . urlencode($pdir . $viewfilename) . '">' . img_picto($langs->trans('GenerateThumb'), 'refresh') . '&nbsp;&nbsp;</a>';
+                            if ($photo_vignette && (image_format_supported($photo) > 0) && ((is_object($object) ? $object->imgWidth : 0) > $maxWidth || (is_object($object) ? $object->imgHeight : 0) > $maxHeight)) {
+                                $return .= '<a href="' . $_SERVER['PHP_SELF'] . '?id=' . (is_object($object) ? $object->id : 0) . '&amp;action=addthumb&amp;file=' . urlencode($pdir . $viewfilename) . '">' . img_picto($langs->trans('GenerateThumb'), 'refresh') . '&nbsp;&nbsp;</a>';
                             }
                         }
                         $return .= "\n";
@@ -338,7 +341,7 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 
                     if (empty($size)) {
                         // Format origine
-                        $return .= '<img class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" data-object-id="' . $object->id . '" loading="lazy" decoding="async">';
+                        $return .= '<img class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
                         if ($showfilename) {
                             $return .= '<br>' . $viewfilename;
                         }
@@ -356,7 +359,7 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
                         }
                         $widthName  = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_' . strtoupper($size);
                         $heightName = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_' . strtoupper($size);
-                        $return .= '<img width="' . $conf->global->$widthName . '" height="' . $conf->global->$heightName . '" class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" data-object-id="' . $object->id . '" loading="lazy" decoding="async">';
+                        $return .= '<img width="' . $conf->global->$widthName . '" height="' . $conf->global->$heightName . '" class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
                         if ($showfilename) {
                             $return .= '<br>' . $viewfilename;
                         }
@@ -364,10 +367,10 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
                 }
 
                 if ($show_favorite_button) {
-                    $favorite = (($object->$favorite_field == '' || $favoriteExists == 0) && $i == 0) ? 'favorite' : ($object->$favorite_field == $photo ? 'favorite' : '');
+                    $favorite = (((is_object($object) ? $object->$favorite_field : '') == '' || $favoriteExists == 0) && $i == 0) ? 'favorite' : ((is_object($object) ? $object->$favorite_field : '') == $photo ? 'favorite' : '');
                     $return .=
-                        '<div class="wpeo-button button-square-50 button-blue ' . $object->element . ' media-gallery-favorite ' . $favorite . '" value="' . $object->id . '">
-							<input class="element-linked-id" type="hidden" value="' . ($object->id > 0 ? $object->id : 0) . '">
+                        '<div class="wpeo-button button-square-50 button-blue ' . (is_object($object) ? $object->element : '') . ' media-gallery-favorite ' . $favorite . '" value="' . (is_object($object) ? $object->id : 0) . '">
+							<input class="element-linked-id" type="hidden" value="' . ((is_object($object) ? $object->id : 0) > 0 ? (is_object($object) ? $object->id : 0) : 0) . '">
 							<input class="filename" type="hidden" value="' . $photo . '">
 							<i class="' . ($favorite == 'favorite' ? 'fas' : 'far') . ' fa-star button-icon"></i>
 						</div>';
@@ -381,8 +384,8 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
                     ];
                     require __DIR__ . '/../core/tpl/utils/confirmation_view.tpl.php';
                     $return .=
-                        '<div class="wpeo-button button-square-50 button-grey ' . $object->element . ' media-gallery-unlink" value="' . $object->id . '">
-							<input class="element-linked-id" type="hidden" value="' . ($object->id > 0 ? $object->id : 0) . '">
+                        '<div class="wpeo-button button-square-50 button-grey ' . (is_object($object) ? $object->element : '') . ' media-gallery-unlink" value="' . (is_object($object) ? $object->id : 0) . '">
+							<input class="element-linked-id" type="hidden" value="' . ((is_object($object) ? $object->id : 0) > 0 ? (is_object($object) ? $object->id : 0) : 0) . '">
 							<input class="filename" type="hidden" value="' . $photo . '">
 							<i class="fas fa-unlink button-icon"></i>
 						</div>';
@@ -394,8 +397,8 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
                     (getDolGlobalString('AI_API_SERVICE') && getDolGlobalString('AI_API_' . dol_strtoupper(getDolGlobalString('AI_API_SERVICE')) . '_KEY') && getDolGlobalString('AI_API_' . dol_strtoupper(getDolGlobalString('AI_API_SERVICE')) . '_URL'))
                 ) {
                     $return .=
-                        '<div class="wpeo-button button-square-50 button-blue ' . $object->element . ' media-gallery-ai" value="' . $object->id . '">
-							<input class="element-linked-id" type="hidden" value="' . ($object->id > 0 ? $object->id : 0) . '">
+                        '<div class="wpeo-button button-square-50 button-blue ' . (is_object($object) ? $object->element : '') . ' media-gallery-ai" value="' . (is_object($object) ? $object->id : 0) . '">
+							<input class="element-linked-id" type="hidden" value="' . ((is_object($object) ? $object->id : 0) > 0 ? (is_object($object) ? $object->id : 0) : 0) . '">
 							<input class="filename" type="hidden" value="' . $photo . '">
 							<i class="fas fa-magic button-icon"></i>
 						</div>';

@@ -92,10 +92,14 @@ if ($action == 'update_settings_config') {
 }
 
 if ($action == 'set_ticket_mail_models') {
-    // Email template (Modèle d'email) used to build each ticket creation email. Empty = keep Dolibarr default content.
+    // Email template (Modèle d'email) used to build each ticket notification email. Empty = keep Dolibarr default content.
     dolibarr_set_const($db, 'SATURNE_TICKET_CREATE_MAIL_MODEL_ADMIN', GETPOST('ticket_mail_model_admin', 'restricthtml'), 'chaine', 0, '', $conf->entity);
     dolibarr_set_const($db, 'SATURNE_TICKET_CREATE_MAIL_MODEL_CUSTOMER', GETPOST('ticket_mail_model_customer', 'restricthtml'), 'chaine', 0, '', $conf->entity);
     dolibarr_set_const($db, 'SATURNE_TICKET_CREATE_MAIL_MODEL_ASSIGNEE', GETPOST('ticket_mail_model_assignee', 'restricthtml'), 'chaine', 0, '', $conf->entity);
+    dolibarr_set_const($db, 'SATURNE_TICKET_CLOSE_MAIL_MODEL_ADMIN', GETPOST('ticket_mail_model_close_admin', 'restricthtml'), 'chaine', 0, '', $conf->entity);
+    dolibarr_set_const($db, 'SATURNE_TICKET_CLOSE_MAIL_MODEL_CUSTOMER', GETPOST('ticket_mail_model_close_customer', 'restricthtml'), 'chaine', 0, '', $conf->entity);
+    dolibarr_set_const($db, 'SATURNE_TICKET_ASSIGNED_MAIL_MODEL_ASSIGNEE', GETPOST('ticket_mail_model_assigned_assignee', 'restricthtml'), 'chaine', 0, '', $conf->entity);
+    dolibarr_set_const($db, 'SATURNE_TICKET_ASSIGNED_MAIL_MODEL_CUSTOMER', GETPOST('ticket_mail_model_assigned_customer', 'restricthtml'), 'chaine', 0, '', $conf->entity);
 
     setEventMessage($langs->trans('SavedConfig'));
     header('Location: ' . $_SERVER['PHP_SELF']);
@@ -226,10 +230,11 @@ print '</div>';
 print '</form>';
 
 /*
- * Ticket creation email templates
- * Each ticket creation email (admin / customer / assignee) can be built from an "Email template"
- * (Modèle d'email, type "ticket") instead of Dolibarr's hardcoded content. Leave empty to keep the
- * default content. Templates are managed in Home > Setup > Emails > Email templates.
+ * Ticket notification email templates
+ * Dolibarr builds its ticket notification emails in PHP, so their layout cannot be changed from the
+ * interface. Each of them can be replaced here by an "Email template" (Modèle d'email, type "ticket").
+ * Leave a line empty to keep Dolibarr's own content. Templates are managed in
+ * Home > Setup > Emails > Email templates.
  */
 if (isModEnabled('ticket')) {
     $langs->load('ticket');
@@ -251,7 +256,26 @@ if (isModEnabled('ticket')) {
         }
     }
 
-    print load_fiche_titre($langs->transnoentities('TicketCreateMailModelTitle'), '', '');
+    // Each row: language key of the label, language key of the description, POST field, config constant.
+    $ticketMailModelSections = [
+        'TicketMailModelCreateSection' => [
+            ['TicketCreateMailModelAdmin', 'TicketCreateMailModelAdminDescription', 'ticket_mail_model_admin', 'SATURNE_TICKET_CREATE_MAIL_MODEL_ADMIN'],
+            ['TicketCreateMailModelCustomer', 'TicketCreateMailModelCustomerDescription', 'ticket_mail_model_customer', 'SATURNE_TICKET_CREATE_MAIL_MODEL_CUSTOMER'],
+            ['TicketCreateMailModelAssignee', 'TicketCreateMailModelAssigneeDescription', 'ticket_mail_model_assignee', 'SATURNE_TICKET_CREATE_MAIL_MODEL_ASSIGNEE'],
+        ],
+        'TicketMailModelCloseSection' => [
+            ['TicketCloseMailModelAdmin', 'TicketCloseMailModelAdminDescription', 'ticket_mail_model_close_admin', 'SATURNE_TICKET_CLOSE_MAIL_MODEL_ADMIN'],
+            ['TicketCloseMailModelCustomer', 'TicketCloseMailModelCustomerDescription', 'ticket_mail_model_close_customer', 'SATURNE_TICKET_CLOSE_MAIL_MODEL_CUSTOMER'],
+        ],
+        'TicketMailModelAssignedSection' => [
+            ['TicketAssignedMailModelAssignee', 'TicketAssignedMailModelAssigneeDescription', 'ticket_mail_model_assigned_assignee', 'SATURNE_TICKET_ASSIGNED_MAIL_MODEL_ASSIGNEE'],
+            ['TicketAssignedMailModelCustomer', 'TicketAssignedMailModelCustomerDescription', 'ticket_mail_model_assigned_customer', 'SATURNE_TICKET_ASSIGNED_MAIL_MODEL_CUSTOMER'],
+        ],
+    ];
+
+    print load_fiche_titre($langs->transnoentities('TicketMailModelTitle'), '', '');
+
+    print '<span class="opacitymedium">' . $langs->transnoentities('TicketMailModelIntro') . '</span><br><br>';
 
     print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '" name="ticket_mail_models_form">';
     print '<input type="hidden" name="token" value="' . newToken() . '">';
@@ -264,25 +288,20 @@ if (isModEnabled('ticket')) {
     print '<td class="center">' . $langs->transnoentities('TicketCreateMailModelColumn') . '</td>';
     print '</tr>';
 
-    // Admin notification email
-    print '<tr class="oddeven"><td>' . $langs->transnoentities('TicketCreateMailModelAdmin') . '</td>';
-    print '<td>' . $langs->transnoentities('TicketCreateMailModelAdminDescription') . '</td>';
-    print '<td class="center">' . $form::selectarray('ticket_mail_model_admin', $ticketMailModels, getDolGlobalString('SATURNE_TICKET_CREATE_MAIL_MODEL_ADMIN')) . '</td>';
-    print '</tr>';
+    foreach ($ticketMailModelSections as $sectionKey => $sectionRows) {
+        print '<tr class="liste_titre"><td colspan="3">' . $langs->transnoentities($sectionKey) . '</td></tr>';
 
-    // Customer notification email
-    print '<tr class="oddeven"><td>' . $langs->transnoentities('TicketCreateMailModelCustomer') . '</td>';
-    print '<td>' . $langs->transnoentities('TicketCreateMailModelCustomerDescription') . '</td>';
-    print '<td class="center">' . $form::selectarray('ticket_mail_model_customer', $ticketMailModels, getDolGlobalString('SATURNE_TICKET_CREATE_MAIL_MODEL_CUSTOMER')) . '</td>';
-    print '</tr>';
+        foreach ($sectionRows as $row) {
+            list($labelKey, $descriptionKey, $fieldName, $constName) = $row;
 
-    // Assignee notification email
-    print '<tr class="oddeven"><td>' . $langs->transnoentities('TicketCreateMailModelAssignee') . '</td>';
-    print '<td>' . $langs->transnoentities('TicketCreateMailModelAssigneeDescription') . '</td>';
-    print '<td class="center">' . $form::selectarray('ticket_mail_model_assignee', $ticketMailModels, getDolGlobalString('SATURNE_TICKET_CREATE_MAIL_MODEL_ASSIGNEE')) . '</td>';
-    print '</tr>';
+            print '<tr class="oddeven"><td>' . $langs->transnoentities($labelKey) . '</td>';
+            print '<td>' . $langs->transnoentities($descriptionKey) . '</td>';
+            print '<td class="center">' . $form::selectarray($fieldName, $ticketMailModels, getDolGlobalString($constName)) . '</td>';
+            print '</tr>';
+        }
+    }
 
-    // Available substitution variables help
+    // How templates are written, and the substitution variables they accept
     print '<tr class="oddeven"><td colspan="3">';
     print $form->textwithpicto($langs->transnoentities('TicketCreateMailModelVariables'), $langs->transnoentities('TicketCreateMailModelVariablesHelp'));
     print '</td></tr>';
