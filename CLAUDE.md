@@ -54,11 +54,19 @@ htdocs/custom/saturne/
 └── build-assets.js # Build des assets (les modules l'appellent avec --module)
 ```
 
-**Child module entry point** (`{module}.main.inc.php`):
+**Child module entry point** (`{module}.main.inc.php`) — **two attempts**, module at the Dolibarr root or in `custom/`:
 ```php
-$moduleName = 'DigiQuali';
+$moduleName          = 'DigiQuali';
 $moduleNameLowerCase = strtolower($moduleName);
-require_once __DIR__ . '/../saturne/saturne.main.inc.php';
+$moduleNameUpperCase = strtoupper($moduleName);
+
+if (file_exists(__DIR__ . '/../saturne/saturne.main.inc.php')) {
+    require_once __DIR__ . '/../saturne/saturne.main.inc.php';
+} elseif (file_exists(__DIR__ . '/../../saturne/saturne.main.inc.php')) {
+    require_once __DIR__ . '/../../saturne/saturne.main.inc.php';
+} else {
+    die('Include of saturne main fails');
+}
 ```
 
 **Class inheritance**:
@@ -128,6 +136,33 @@ $object = new MyObject($db);
 $object->fetch($id);
 saturne_header(0, '', $title, $help_url);
 require_once __DIR__ . '/../../saturne/core/tpl/banner_actions.tpl.php';
+```
+
+**Entry-point bootstrap — Dolistore rule** — every PHP file reachable by URL (`view/`, `ajax/`, `admin/`, `webhook/`, the module index, `manifest.json.php`) and every script shipped in the zip loads its environment with **at least two attempts**: one for the module at the Dolibarr root, one for the module in `custom/`. A single `require` gets the **whole zip refused** by the Dolistore package checker, which names the offending file:
+
+> L'appel de main.inc.php ou master.inc.php dans le fichier "…" ne suit pas les bonnes pratiques. Il faut avoir au moins (minimum) 2 tentatives …
+
+```php
+// GOOD — one level deep (ajax/, view/, admin/)
+if (file_exists('../mymodule.main.inc.php')) {
+    require_once __DIR__ . '/../mymodule.main.inc.php';
+} elseif (file_exists('../../mymodule.main.inc.php')) {
+    require_once __DIR__ . '/../../mymodule.main.inc.php';
+} else {
+    die('Include of mymodule main fails');
+}
+
+// BAD — refused by the Dolistore, and skips $moduleNameLowerCase
+require_once __DIR__ . '/../../saturne/saturne.main.inc.php';
+```
+
+Always go through `{module}.main.inc.php`, never straight to `saturne.main.inc.php`: that bootstrap sets `$moduleNameLowerCase` before chaining to Saturne, which chains to `main.inc.php`. Add one `../` per extra directory level — `view/frontend/` starts at `../../`, the module root at `./`. The checker counts `require`/`include` lines, so the two branches are what it reads: a `file_exists` alone does not count. The relative `file_exists` tests read the working directory, which the web server sets to the file's own folder; in a CLI script, put `__DIR__ .` in the tests too.
+
+**Module's own classes and libs** — `dol_include_once`, path **without** `/custom`; it searches both document roots. `DOL_DOCUMENT_ROOT . '/custom/mymodule/…'` is the second pattern the same checker refuses. Core Dolibarr classes keep `DOL_DOCUMENT_ROOT`.
+```php
+dol_include_once('/mymodule/class/myobject.class.php');            // GOOD
+require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php'; // GOOD, core class
+require_once DOL_DOCUMENT_ROOT . '/custom/mymodule/class/…';       // BAD
 ```
 
 **Security rules** — always:
@@ -523,7 +558,8 @@ Shows the modifier-class architecture used across all Saturne components:
 - **Don't copy a build script** into each module — use `build-assets.js` of saturne with `--module`
 - **Test install/uninstall** on a clean Dolibarr instance before opening a PR
 - **`.min` files are auto-generated** — conflicts on them = recompile, don't hand-merge
-- `$moduleNameLowerCase` must be set before `saturne.main.inc.php` is required
+- `$moduleNameLowerCase` must be set before `saturne.main.inc.php` is required — one more reason to enter through `{module}.main.inc.php`
+- **Dolistore refuses the zip** on a single-attempt `main.inc.php` include or on a module class pulled from `DOL_DOCUMENT_ROOT` — see *Entry-point bootstrap* in §5, and check a new entry point before tagging
 
 ---
 

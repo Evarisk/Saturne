@@ -1,52 +1,23 @@
-# [Saturne] [23.2.0] - Transfert d'entité et documents fiabilisés
+# [Saturne] [23.2.1] - Dolibarr 24 - Contrôles sur les branches de maintenance
 
-Description : Cette version apporte l'export et l'import d'une entité vers une installation Dolibarr mono-entité, une page de maintenance pour les documents restés sans fichier, et des modèles d'email pour les tickets. Elle rétablit surtout la génération de documents sur Dolibarr 24, qui était complètement bloquée, et corrige une série de défauts qui laissaient des lignes mortes en base ou cassaient les modèles PDF des modules.
-
-## Nouvelles fonctionnalités et innovations
-
-### Transfert d'entité
-
-* Export d'une entité complète — tables, champs personnalisés et documents — et import dans un Dolibarr mono-entité. Les modules absents de l'installation cible sont signalés avant l'import plutôt que découverts après.
-* L'export suit les périmètres `core` et `full`, lit la liste des modules réellement actifs sur l'entité exportée, et l'import supporte une cible dont les colonnes diffèrent de la source.
-
-### Maintenance
-
-* Nouvelle page d'administration listant les documents dont la ligne en base ne désigne aucun fichier. Une génération interrompue avant que le fichier soit nommé laissait une ligne morte qui avait consommé une référence du compteur ; ces lignes se suppriment maintenant depuis l'interface.
-* La page annonce explicitement la portée du nettoyage : toutes les entités si vous êtes super-administrateur sur l'entité maître, l'entité courante sinon.
-
-### Tickets
-
-* Modèles d'email pour les messages de clôture et de prise en charge d'un ticket.
+Description : Cette version déclare le socle **compatible Dolibarr 24** et fait tourner la chaîne qualité sur les **branches de maintenance**, qui en étaient privées. Elle écrit aussi, dans le guide du socle, les deux règles du contrôle de paquet du Dolistore sur lesquelles les modules butaient à chaque livraison.
 
 ## Améliorations & corrections
 
-### Génération de documents
+### Compatibilité
 
-* **Dolibarr 24 : la génération de documents est réparée.** Le cœur y refuse tout modèle stocké hors de `documents/ecm` et `documents/doctemplates`, ce qui est le cas de tous les modèles livrés avec les modules, et ne transmet plus ses paramètres au générateur. Toute génération répondait `BadDirForTemplateFile` ou perdait son objet source.
-* Le chemin du modèle choisi est désormais vérifié contre les répertoires de modèles déclarés par le module. Un fichier quelconque du serveur ne peut plus servir de modèle.
-* Une génération qui échoue ne laisse plus de ligne orpheline en base.
-* Un objet appartenant à une autre entité ne perd plus son répertoire de sortie : la génération retombe sur l'entité courante au lieu d'écrire nulle part.
+* Le module déclare **Dolibarr 23 au minimum et 24 au maximum**. `need_dolibarr_version` est la borne qui compte : c'est elle qui autorise ou bloque l'activation.
 
-### Modèles PDF
+### Intégration continue
 
-* Les aides PDF passent en `protected`, ce qui cassait trois modèles de modules ; `drawTable()` et le découpage des pages remontent dans `SaturneDocumentModel`, où les modules peuvent les réutiliser.
-* Déclaration de la propriété `$height` sur `SaturneDocumentModel`.
+* Le workflow qualité ne se déclenchait sur **aucune** des branches de maintenance : une pull request visant `23.0` ne lançait rien du tout, filtre de chemins ou pas. Les déclencheurs couvrent désormais ces branches par un motif, qui évite d'y revenir à chaque nouvelle ligne.
 
-### Interface
+### Guide du socle
 
-* Les infobulles posent leur libellé en texte au lieu de le concaténer dans du HTML, et la variante multiligne reste bornée à la fenêtre.
-* Les listes génériques ne partagent plus leurs colonnes entre objets différents.
-* Un tableau de bord sans graphique masqué ne déclenche plus d'avertissement.
-* Correction des avertissements PHP 8 dans l'affichage des médias.
+* Le `CLAUDE.md` porte désormais les deux règles du contrôle de paquet du Dolistore : le bootstrap `main.inc.php` **à deux tentatives** sur tout point d'entrée, et les classes du module incluses par `dol_include_once` plutôt que `DOL_DOCUMENT_ROOT`. Elles n'étaient écrites nulle part et revenaient à chaque nouveau fichier — l'exemple de `{module}.main.inc.php` du guide montrait lui-même la forme fautive.
 
-### Traductions
+## Comparaison des versions [23.2.0](https://github.com/Evarisk/Saturne/compare/23.2.0...23.2.1) et 23.2.1
 
-* Le domaine `errors` est chargé avant l'affichage : les messages d'événement ne perdent plus leurs paramètres, ils s'affichaient jusqu'ici amputés.
-* `ErrorFileNotFound` du cœur n'est plus masqué par une clé du socle.
-
-### Qualité et intégration continue
-
-* La chaîne de build des assets passe de gulp 4 à sass et esbuild, avec un ordre de concaténation du JavaScript indépendant de la machine.
-* Les assets sont vérifiés sur les pull requests, et les contrôles qualité se déclenchent désormais sur toute pull request, y compris sur la branche de maintenance.
-
-## Comparaison des versions [23.1.1](https://github.com/Evarisk/Saturne/compare/23.1.1...23.2.0) et 23.2.0
+* [#1663] [Doc] add: la règle du Dolistore sur le bootstrap des points d'entrée [`03eb798`](https://github.com/Evarisk/Saturne/commit/03eb798)
+* [#1661] [Module] rework: bornes de version Dolibarr 23 minimum, 24 maximum [`ee59249`](https://github.com/Evarisk/Saturne/commit/ee59249)
+* [#1658] [CI] fix: déclencher les contrôles sur les branches de maintenance [`2d332a8`](https://github.com/Evarisk/Saturne/commit/2d332a8)
