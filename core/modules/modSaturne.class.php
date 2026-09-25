@@ -76,7 +76,7 @@ class modSaturne extends DolibarrModules
         $this->editor_url  = 'https://evarisk.com/';
 
         // Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
-        $this->version = '23.2.0';
+        $this->version = '23.2.1';
 
         // Url to the file with your last numberversion of this module
         //$this->url_last_version = 'http://www.example.com/versionmodule.txt';
@@ -177,7 +177,7 @@ class modSaturne extends DolibarrModules
         // Prerequisites
         $this->phpmin = [7, 4]; // Minimum version of PHP required by module
         $this->need_dolibarr_version = [23, 0]; // Minimum version of Dolibarr required by module
-        $this->max_dolibarr_version = [23, 0]; // Maximum version of Dolibarr supported by module
+        $this->max_dolibarr_version = [24, 0]; // Maximum version of Dolibarr supported by module
 
         // Messages at activation
         $this->warnings_activation = []; // Warning to show when we activate module. array('always'='text') or array('FR'='textfr','MX'='textmx'...)
