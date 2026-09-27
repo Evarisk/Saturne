@@ -254,7 +254,11 @@
           .selected-icon { display: none; color: var(--color-primary, #007bff); background: #fff; border-radius: 3px; box-shadow: 0 0 0 1px #fff; }
           .unselected-icon { display: block; opacity: 0.7; }
         }
+      
+
     }
+    
+
     
     &.clicked-photo .photo-image {
       border: 3px solid var(--color-primary, #007bff) !important;
