@@ -254,38 +254,6 @@
           .selected-icon { display: none; color: var(--color-primary, #007bff); background: #fff; border-radius: 3px; box-shadow: 0 0 0 1px #fff; }
           .unselected-icon { display: block; opacity: 0.7; }
         }
-      
-      .open-media-editor {
-        position: absolute;
-        display: inline-block;
-        top: 1em;
-        left: 1em;
-        z-index: 900;
-        width: 25px;
-        height: 25px;
-        line-height: 25px;
-        background: rgba(255, 255, 255, 0.8);
-        border-radius: 50%;
-        color: #333;
-        transition: all 0.2s ease-out;
-        text-align: center;
-        opacity: 0;
-        cursor: pointer;
-
-        &:hover {
-          transform: scale(1.1);
-          background: #fff;
-        }
-
-        i {
-          line-height: 25px;
-          font-size: 12px;
-        }
-      }
-    }
-    
-    &:hover .photo-image .open-media-editor {
-      opacity: 1;
     }
     
     &.clicked-photo .photo-image {
