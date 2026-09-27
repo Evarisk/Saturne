@@ -365,7 +365,6 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
                 <div class="modal-close"><i class="fas fa-times"></i></div>
             </div>
         </div>
-        </div>
         <!-- Modal-Content -->
         <div class="modal-content" id="#modalMediaGalleryContent">
             <div class="messageSuccessSendPhoto notice hidden">
