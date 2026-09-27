@@ -3,7 +3,14 @@
 .wpeo-modal.modal-photo {
 
   .modal-container {
-    max-height: 650px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .modal-content {
+    overflow-y: auto;
+    flex-grow: 1;
+    min-height: 0;
   }
 
   &.modal-active {
