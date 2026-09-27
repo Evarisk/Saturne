@@ -306,7 +306,9 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 	let token = window.saturne.toolbox.getToken();
 
 	$('#progressBar').width(0)
-	$('#progressBarContainer').attr('style', 'display:block')
+	$('#progressBarContainer').attr('style', 'display:block');
+	$('#progressBarContainer .upload-filename').text('Préparation de l\'envoi...');
+	$('#progressBarContainer .upload-count').text('0 / ' + totalCount);
 
 	window.saturne.loader.display($('#progressBarContainer'));
 
@@ -328,6 +330,8 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 				$('#progressBar').animate({
 					width: progress + '%'
 				}, 1);
+				$('#progressBarContainer .upload-filename').text(file.name);
+				$('#progressBarContainer .upload-count').text(requestCompleted + ' / ' + totalCount);
 				if ($(resp).find('.error-medias').length) {
 					let errorMessage = $(resp).find('.error-medias').val()
 					let decodedErrorMessage = JSON.parse(errorMessage)

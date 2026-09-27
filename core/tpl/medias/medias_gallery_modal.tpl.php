@@ -388,7 +388,13 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
                 
             </div>
             <div id="progressBarContainer" style="display: none;">
-                <div id="progressBar"></div>
+                <div id="progressBarText">
+                    <span class="upload-filename"></span>
+                    <span class="upload-count"></span>
+                </div>
+                <div id="progressBarTrack">
+                    <div id="progressBar"></div>
+                </div>
             </div>
             <div class="ecm-photo-list-content">
                 <?php
