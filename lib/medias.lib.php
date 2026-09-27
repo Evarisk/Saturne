@@ -116,12 +116,12 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
                                 $fullpath           = $path . '/' . urlencode($shownFileName) . '&entity=' . $conf->entity;
                                 print '<input class="filename" type="hidden" value="' . $fileName . '">';
                                 
-                                  print '<a class="open-media-editor" data-filepath="' . htmlspecialchars($relativepath) . '" data-filename="' . htmlspecialchars($fileName) . '"><i class="fas fa-2x fa-pen"></i></a>';
+                                  print '<div class="photo-selector"><i class="far fa-circle unselected-icon"></i><i class="fas fa-check-circle selected-icon"></i></div>';
                                 print '<img class="photo photo' . $j . '" width="' . $maxWidth . '" height="' . $maxHeight . '" data-src="' . $fullpath . '" loading="lazy">';
                             } else {
                                 print '<input type="hidden" class="fullname" data-fullname="' . $filearray[$i]['fullname'] . '">';
                                 print '<i class="clicked-photo-preview regenerate-thumbs fas fa-redo"></i>';
-                                  print '<a class="open-media-editor" data-filepath="' . htmlspecialchars($relativepath) . '" data-filename="' . htmlspecialchars($fileName) . '"><i class="fas fa-pen"></i></a>';
+                                  print '<div class="photo-selector"><i class="far fa-circle unselected-icon"></i><i class="fas fa-check-circle selected-icon"></i></div>';
                                 print '<img class="photo photo' . $j . '" width="' . $maxWidth . '" height="' . $maxHeight . '" data-src="' . DOL_URL_ROOT . '/public/theme/common/nophoto.png" loading="lazy">';
                             } ?>
                         </figure>

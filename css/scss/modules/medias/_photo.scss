@@ -30,6 +30,9 @@
       .photo-image .photo {
         opacity: 0.8;
       }
+        .photo-selector {
+          display: block;
+        }
     }
 
     &.clicked-photo {
@@ -238,6 +241,19 @@
       max-width: none !important;
       height: 180px;
       border: 0 !important;
+
+        .photo-selector {
+          display: none;
+          position: absolute;
+          top: 10px;
+          left: 10px;
+          z-index: 2;
+          color: #fff;
+          font-size: 1.8rem;
+          text-shadow: 0 0 3px rgba(0,0,0,0.5);
+          .selected-icon { display: none; color: var(--color-primary, #007bff); background: #fff; border-radius: 50%; box-shadow: 0 0 0 2px #fff; margin: 2px; }
+          .unselected-icon { display: block; opacity: 0.8; }
+        }
       
       .open-media-editor {
         position: absolute;
@@ -275,6 +291,11 @@
     &.clicked-photo .photo-image {
       border: 3px solid var(--color-primary, #007bff) !important;
     }
+      &.clicked-photo .photo-selector {
+        display: block;
+        .selected-icon { display: block; }
+        .unselected-icon { display: none; }
+      }
   }
 }
 
