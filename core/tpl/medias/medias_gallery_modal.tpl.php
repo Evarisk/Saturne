@@ -57,12 +57,16 @@ if (!(isset($error) && $error) && $subaction == 'uploadPhoto' && ! empty($conf->
         $error = 0;
         if (empty($_FILES['userfile']['tmp_name'][$key])) {
             $error++;
+            $maxUploadSizeMo = round($conf->global->MAIN_UPLOAD_DOC / 1024, 1);
+            $linkToSettings = '<a href="' . DOL_URL_ROOT . '/admin/security_file.php?mainmenu=home&leftmenu=setup_security" target="_blank" style="text-decoration: underline;">' . $langs->trans("Setup") . '</a>';
+            $errorMessage = $langs->transnoentitiesnoconv('ErrorThisFileSizeTooLarge', (string) ($_FILES['userfile']['name'][$key] ?? '')) . ' (' . $maxUploadSizeMo . ' Mo) - ' . $linkToSettings;
+            
             if ($_FILES['userfile']['error'][$key] == 1 || $_FILES['userfile']['error'][$key] == 2) {
-                setEventMessages($langs->transnoentitiesnoconv('ErrorThisFileSizeTooLarge', (string) ($_FILES['userfile']['name'][$key] ?? '')), null, 'errors');
-                $submitFileErrorText = array('message' => $langs->transnoentitiesnoconv('ErrorThisFileSizeTooLarge', (string) ($_FILES['userfile']['name'][$key] ?? '')), 'code' => '1337');
+                setEventMessages($errorMessage, null, 'errors');
+                $submitFileErrorText = array('message' => $errorMessage, 'code' => '1337');
             } else {
-                setEventMessages($langs->transnoentitiesnoconv("ErrorThisFileSizeTooLarge", (string) ($_FILES['userfile']['name'][$key] ?? ''), $langs->transnoentitiesnoconv("File")), null, 'errors');
-                $submitFileErrorText = array('message' => $langs->transnoentitiesnoconv('ErrorThisFileSizeTooLarge', (string) ($_FILES['userfile']['name'][$key] ?? '')), 'code' => '1337');
+                setEventMessages($errorMessage, null, 'errors');
+                $submitFileErrorText = array('message' => $errorMessage, 'code' => '1337');
             }
         }
 
