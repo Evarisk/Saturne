@@ -355,6 +355,8 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 								$('.messageErrorSendPhoto').find('.notice-subtitle').html(textToShow)
 								$('.messageErrorSendPhoto').removeClass('hidden');
 							} else {
+                                let successMessage = totalCount > 1 ? totalCount + " médias ajoutés avec succès" : "1 média ajouté avec succès";
+                                $('.messageSuccessSendPhoto').find('.notice-title').html(successMessage);
 								$('.messageSuccessSendPhoto').removeClass('hidden');
 							}
 							mediaGallery.attr('data-from-id', objectId);
