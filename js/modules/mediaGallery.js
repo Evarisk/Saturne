@@ -61,7 +61,7 @@ window.saturne.mediaGallery.event = function() {
   $(document).on( 'click', '.delete-photo', window.saturne.mediaGallery.deletePhoto);
   $( document ).on( 'change', '#add_media_to_gallery', window.saturne.mediaGallery.sendPhoto );
   $( document ).on( 'click', '.clicked-photo-preview', window.saturne.mediaGallery.previewPhoto );
-  $( document ).on( 'input', '.form-element #search_in_gallery', window.saturne.mediaGallery.handleSearch );
+  $( document ).on( 'input', '#search_in_gallery', window.saturne.mediaGallery.handleSearch );
   $( document ).on( 'click', '.media-gallery-unlink', window.saturne.mediaGallery.unlinkFile );
   $( document ).on( 'click', '.media-gallery-favorite', window.saturne.mediaGallery.addToFavorite );
   $( document ).on( 'change', '.fast-upload', window.saturne.mediaGallery.fastUpload );
