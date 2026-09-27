@@ -76,13 +76,26 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
         }
 
         $moduleImageNumberPerPageConf = strtoupper($moduleName) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
-        for ($i = (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf); $i < ($conf->global->$moduleImageNumberPerPageConf + (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf)); $i++) {
+        $limit = !empty($conf->global->$moduleImageNumberPerPageConf) ? $conf->global->$moduleImageNumberPerPageConf : 50;
+        $currentDate = '';
+        for ($i = (($offset - 1) * $limit); $i < ($limit + (($offset - 1) * $limit)); $i++) {
             if (empty($filearray[$i])) {
                 break;
             }
             $fileName = $filearray[$i]['name'];
             if (image_format_supported($fileName) >= 0) {
                 $nbphoto++;
+                $fileDate = dol_print_date($filearray[$i]['date'], 'day');
+                if ($fileDate != $currentDate) {
+                    print '<div class="media-date-header-container" style="width: 100%;"><h3 class="media-date-header">' . $fileDate . '</h3></div>';
+                    $currentDate = $fileDate;
+                }
+                $fileDate = dol_print_date($filearray[$i]['date'], 'day');
+                if ($fileDate != $currentDate) {
+                    print '<div class="media-date-group">';
+                    print '<h3 class="media-date-header">' . $fileDate . '</h3>';
+                    $currentDate = $fileDate;
+                }
 
                 if ($size == 'mini' || $size == 'small') {   // Format vignette
                     $relativepath = $moduleName . '/medias/thumbs';
@@ -109,10 +122,12 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
                                 $fullpath           = $path . '/' . urlencode($shownFileName) . '&entity=' . $conf->entity;
                                 print '<input class="filename" type="hidden" value="' . $fileName . '">';
                                 print '<a class="clicked-photo-preview" href="' . $advancedPreviewUrl . '"><i class="fas fa-2x fa-search-plus"></i></a>';
+                                  print '<a class="open-media-editor" data-filepath="' . htmlspecialchars($relativepath) . '" data-filename="' . htmlspecialchars($fileName) . '"><i class="fas fa-2x fa-pen"></i></a>';
                                 print '<img class="photo photo' . $j . '" width="' . $maxWidth . '" height="' . $maxHeight . '" data-src="' . $fullpath . '" loading="lazy">';
                             } else {
                                 print '<input type="hidden" class="fullname" data-fullname="' . $filearray[$i]['fullname'] . '">';
                                 print '<i class="clicked-photo-preview regenerate-thumbs fas fa-redo"></i>';
+                                  print '<a class="open-media-editor" data-filepath="' . htmlspecialchars($relativepath) . '" data-filename="' . htmlspecialchars($fileName) . '"><i class="fas fa-pen"></i></a>';
                                 print '<img class="photo photo' . $j . '" width="' . $maxWidth . '" height="' . $maxHeight . '" data-src="' . DOL_URL_ROOT . '/public/theme/common/nophoto.png" loading="lazy">';
                             } ?>
                         </figure>
@@ -224,7 +239,18 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
                 $return .= '<input hidden class="file-path" value="' . $filePath . '">';
                 $return .= '<input hidden class="file-name" value="' . $fileName . '">';
                 if (image_format_supported($fileName) >= 0) {
-                    $nbphoto++;
+                $nbphoto++;
+                $fileDate = dol_print_date($filearray[$i]['date'], 'day');
+                if ($fileDate != $currentDate) {
+                    print '<div class="media-date-header-container" style="width: 100%;"><h3 class="media-date-header">' . $fileDate . '</h3></div>';
+                    $currentDate = $fileDate;
+                }
+                $fileDate = dol_print_date($filearray[$i]['date'], 'day');
+                if ($fileDate != $currentDate) {
+                    print '<div class="media-date-group">';
+                    print '<h3 class="media-date-header">' . $fileDate . '</h3>';
+                    $currentDate = $fileDate;
+                }
                     $photo        = $fileName;
                     $viewfilename = $fileName;
 

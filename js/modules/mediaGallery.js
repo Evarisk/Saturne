@@ -30,6 +30,9 @@
  * @version 1.0.0
  */
 window.saturne.mediaGallery = {};
+window.saturne.mediaGallery.currentOffset = 1;
+window.saturne.mediaGallery.isLoading = false;
+window.saturne.mediaGallery.hasMore = true;
 
 /**
  * La méthode appelée automatiquement par la bibliothèque Saturne
@@ -62,7 +65,15 @@ window.saturne.mediaGallery.event = function() {
   $( document ).on( 'click', '.media-gallery-unlink', window.saturne.mediaGallery.unlinkFile );
   $( document ).on( 'click', '.media-gallery-favorite', window.saturne.mediaGallery.addToFavorite );
   $( document ).on( 'change', '.fast-upload', window.saturne.mediaGallery.fastUpload );
-  $( document ).on( 'click', '.select-page', window.saturne.mediaGallery.selectPage );
+  // $( document ).on( 'click', '.select-page', window.saturne.mediaGallery.selectPage );
+    $( document ).on( 'scroll', '.modal-content', window.saturne.mediaGallery.onScroll );
+    
+    // Reset offset when modal opens
+    $( document ).on('click', '.open-media-gallery', function() {
+        window.saturne.mediaGallery.currentOffset = 1;
+        window.saturne.mediaGallery.isLoading = false;
+        window.saturne.mediaGallery.hasMore = true;
+    });
   $( document ).on( 'click', '.toggle-today-medias', window.saturne.mediaGallery.toggleTodayMedias );
   $( document ).on( 'click', '.toggle-unlinked-medias', window.saturne.mediaGallery.toggleUnlinkedMedias );
   $(document).on('click', '.regenerate-thumbs', window.saturne.mediaGallery.regenerateThumbs);
@@ -866,3 +877,45 @@ window.saturne.mediaGallery.readFileAI = function(e) {
 };
 
 /* jshint ignore:end */
+
+/**
+ * Infinite scroll
+ */
+window.saturne.mediaGallery.onScroll = function( event ) {
+    let container = $(this);
+    if (container.scrollTop() + container.innerHeight() >= container[0].scrollHeight - 100) {
+        if (!window.saturne.mediaGallery.isLoading && window.saturne.mediaGallery.hasMore) {
+            window.saturne.mediaGallery.isLoading = true;
+            window.saturne.mediaGallery.currentOffset++;
+            
+            let token = window.saturne.toolbox.getToken();
+            let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+            
+            // Show a mini loader at the bottom if needed
+            
+            $.ajax({
+                url: document.URL + querySeparator + "subaction=pagination" + "&token=" + token,
+                type: "POST",
+                data: JSON.stringify({
+                    offset: window.saturne.mediaGallery.currentOffset,
+                    pagesCounter: 999
+                }),
+                processData: false,
+                contentType: 'application/json',
+                success: function ( resp ) {
+                    let newItems = $(resp).find('.ecm-photo-list').children();
+                    if (newItems.length > 0) {
+                        $('.ecm-photo-list').append(newItems);
+                        window.saturne.modal.loadLazyImages();
+                        window.saturne.mediaGallery.isLoading = false;
+                    } else {
+                        window.saturne.mediaGallery.hasMore = false;
+                    }
+                },
+                error: function () {
+                    window.saturne.mediaGallery.isLoading = false;
+                }
+            });
+        }
+    }
+};

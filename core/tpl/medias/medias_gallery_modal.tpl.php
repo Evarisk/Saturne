@@ -323,9 +323,48 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
 <div class="wpeo-modal modal-photo" id="media_gallery" data-id="<?php echo (isset($object) && $object) ? $object->id : 0 ?>">
     <div class="modal-container wpeo-modal-event">
         <!-- Modal-Header -->
-        <div class="modal-header">
+        <div class="modal-header media-gallery-header">
             <h2 class="modal-title"><?php echo $langs->trans('MediaGallery')?></h2>
-            <div class="modal-close"><i class="fas fa-2x fa-times"></i></div>
+            
+            <div class="media-gallery-search-container">
+                <div class="wpeo-autocomplete">
+                    <label class="autocomplete-label" for="search_in_gallery">
+                        <i class="autocomplete-icon-before fas fa-search"></i>
+                        <input id="search_in_gallery" placeholder="<?php echo $langs->trans('Search') . '...' ?>" class="autocomplete-search-input" type="text" />
+                    </label>
+                </div>
+            </div>
+
+            <div class="media-gallery-actions">
+                <!-- Toggle Unlinked -->
+                <?php if (getDolGlobalInt('SATURNE_MEDIA_GALLERY_SHOW_ALL_MEDIA_INFOS')): ?>
+                    <span class="media-header-action" title="<?php echo dol_escape_htmltag($langs->trans('ShowOnlyUnlinkedMedias')); ?>">
+                        <?php if (isset($user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS) && $user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS): ?>
+                            <span id="del_unlinked_medias" value="0" class="linkobject toggle-unlinked-medias"><i class="fas fa-link" style="color:var(--color-primary);"></i></span>
+                        <?php else: ?>
+                            <span id="set_unlinked_medias" value="1" class="linkobject toggle-unlinked-medias"><i class="fas fa-link" style="color:#aaa;"></i></span>
+                        <?php endif; ?>
+                    </span>
+                <?php endif; ?>
+                
+                <!-- Toggle Today -->
+                <span class="media-header-action" title="<?php echo dol_escape_htmltag($langs->trans('ShowOnlyMediasAddedToday')); ?>">
+                    <?php if (isset($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS) && $user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS): ?>
+                        <span id="del_today_medias" value="0" class="linkobject toggle-today-medias"><i class="fas fa-calendar-day" style="color:var(--color-primary);"></i></span>
+                    <?php else: ?>
+                        <span id="set_today_medias" value="1" class="linkobject toggle-today-medias"><i class="fas fa-calendar-day" style="color:#aaa;"></i></span>
+                    <?php endif; ?>
+                </span>
+
+                <label for="add_media_to_gallery" class="media-add-btn" title="<?php echo dol_escape_htmltag($langs->trans('AddFile')); ?>">
+                    <i class="fas fa-plus"></i>
+                </label>
+                <input type="hidden" name="token" value="<?php echo newToken(); ?>">
+                <input type="file" id="add_media_to_gallery" class="hidden" name="userfile[]" multiple accept="image/*" style="display:none;">
+                
+                <div class="modal-close"><i class="fas fa-times"></i></div>
+            </div>
+        </div>
         </div>
         <!-- Modal-Content -->
         <div class="modal-content" id="#modalMediaGalleryContent">
@@ -346,24 +385,7 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
                     <div class="notice-close"><i class="fas fa-times"></i></div>
                 </div>
             </div>
-            <div class="wpeo-gridlayout grid-3">
-                <div class="modal-add-media">
-                    <input type="hidden" name="token" value="<?php echo newToken(); ?>">
-                    <strong><?php echo $langs->trans('AddFile'); ?></strong>
-                    <input type="file" id="add_media_to_gallery" class="flat minwidth400 maxwidth200onsmartphone" name="userfile[]" multiple accept='image/*'>
-                    <div class="underbanner clearboth"></div>
-                </div>
-                <div class="form-element">
-                    <span class="form-label"><strong><?php print $langs->trans('SearchFile') ?></strong></span>
-                    <div class="form-field-container">
-                        <div class="wpeo-autocomplete">
-                            <label class="autocomplete-label" for="media-gallery-search">
-                                <i class="autocomplete-icon-before fas fa-search"></i>
-                                <input id="search_in_gallery" placeholder="<?php echo $langs->trans('Search') . '...' ?>" class="autocomplete-search-input" type="text" />
-                            </label>
-                        </div>
-                    </div>
-                </div>
+            
                 <div>
                     <div>
                         <?php
@@ -396,28 +418,7 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
         </div>
         <!-- Modal-Footer -->
         <div class="modal-footer">
-            <?php
-            $filearray                    = dol_dir_list($conf->ecm->multidir_output[$conf->entity] . '/' . $moduleNameLowerCase . '/medias/', "files", 0, '', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC);
-            $moduleImageNumberPerPageConf = strtoupper($moduleNameLowerCase) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
-            if (isset($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS) && $user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS == 1) {
-                $yesterdayTimeStamp = dol_time_plus_duree(dol_now(), -1, 'd');
-                $filearray = array_filter($filearray, function ($file) use ($yesterdayTimeStamp) {
-                    return $file['date'] > $yesterdayTimeStamp;
-                });
-            }
-            if (getDolGlobalInt('SATURNE_MEDIA_GALLERY_SHOW_ALL_MEDIA_INFOS')) {
-                $filearray = array_filter($filearray, function ($file) use ($conf, $moduleNameLowerCase) {
-                    $regexFormattedFileName = preg_quote($file['name'], '/');
-                    $fileArrays             = dol_dir_list($conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1], 'files', 1, $regexFormattedFileName, '.odt|.pdf|barcode|_mini|_medium|_small|_large');
-
-                    return count($fileArrays) == 0;
-                });
-            }
-            $allMediasNumber = count($filearray);
-            $pagesCounter    = $conf->global->$moduleImageNumberPerPageConf ? ceil($allMediasNumber / ($conf->global->$moduleImageNumberPerPageConf ?: 1)) : 1;
-            $page_array      = saturne_load_pagination($pagesCounter, $loadedPageArray ?? [], $offset ?? 0);
-
-            print saturne_show_pagination($pagesCounter, $page_array, $offset ?? 0); ?>
+            
             <div class="save-photo wpeo-button button-blue button-disable" value="">
                 <span><?php echo $langs->trans('Add'); ?></span>
             </div>

@@ -139,3 +139,107 @@
     margin-bottom: 1em;
   }
 }
+
+/* New Gallery Styles */
+.media-gallery-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+.media-gallery-search-container {
+  flex-grow: 1;
+  min-width: 250px;
+}
+.media-gallery-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.media-header-action {
+  cursor: pointer;
+  font-size: 1.2em;
+}
+.media-add-btn {
+  background: var(--color-primary, #007bff);
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  
+  &:hover {
+    opacity: 0.8;
+  }
+}
+.media-date-header-container {
+  width: 100%;
+  margin-top: 15px;
+  margin-bottom: 5px;
+}
+.media-date-header {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #eee;
+}
+.ecm-photo-list {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 4px !important;
+  
+  .clickable-photo {
+    flex-grow: 1;
+    width: auto !important;
+    max-width: 100%;
+    
+    .photo-image {
+      max-width: none !important;
+      height: 180px;
+      border: 0 !important;
+      
+      .open-media-editor {
+        position: absolute;
+        display: inline-block;
+        top: 1em;
+        left: 1em;
+        z-index: 900;
+        width: 25px;
+        height: 25px;
+        line-height: 25px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        color: #333;
+        transition: all 0.2s ease-out;
+        text-align: center;
+        opacity: 0;
+        cursor: pointer;
+
+        &:hover {
+          transform: scale(1.1);
+          background: #fff;
+        }
+
+        i {
+          line-height: 25px;
+          font-size: 12px;
+        }
+      }
+    }
+    
+    &:hover .photo-image .open-media-editor {
+      opacity: 1;
+    }
+    
+    &.clicked-photo .photo-image {
+      border: 3px solid var(--color-primary, #007bff) !important;
+    }
+  }
+}
