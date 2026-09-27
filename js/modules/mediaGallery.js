@@ -73,6 +73,7 @@ window.saturne.mediaGallery.event = function() {
         window.saturne.mediaGallery.currentOffset = 1;
         window.saturne.mediaGallery.isLoading = false;
         window.saturne.mediaGallery.hasMore = true;
+        setTimeout(window.saturne.mediaGallery.checkFill, 800); // Wait for modal to render
     });
   $( document ).on( 'click', '.toggle-today-medias', window.saturne.mediaGallery.toggleTodayMedias );
   $( document ).on( 'click', '.toggle-unlinked-medias', window.saturne.mediaGallery.toggleUnlinkedMedias );
