@@ -708,7 +708,11 @@ window.saturne.mediaGallery.selectPage = function( event ) {
 			mediaGallery.find('.modal-options').attr('data-from-subtype', objectSubtype)
 			mediaGallery.find('.modal-options').attr('data-from-subdir', objectSubdir)
       window.saturne.modal.loadLazyImages();
-		},
+		}
+        window.saturne.mediaGallery.currentOffset = 1;
+        window.saturne.mediaGallery.hasMore = true;
+        window.saturne.mediaGallery.isLoading = false;
+        setTimeout(window.saturne.mediaGallery.checkFill, 200);,
 		error: function ( ) {
 		}
 	})
@@ -742,6 +746,10 @@ window.saturne.mediaGallery.toggleTodayMedias = function( event ) {
       $('.ecm-photo-list-content').replaceWith($(resp).find('.ecm-photo-list-content'))
       
       window.saturne.modal.loadLazyImages();
+        window.saturne.mediaGallery.currentOffset = 1;
+        window.saturne.mediaGallery.hasMore = true;
+        window.saturne.mediaGallery.isLoading = false;
+        setTimeout(window.saturne.mediaGallery.checkFill, 200);
     },
     error: function ( ) {
     }
@@ -776,6 +784,10 @@ window.saturne.mediaGallery.toggleUnlinkedMedias = function( event ) {
       $('.ecm-photo-list-content').replaceWith($(resp).find('.ecm-photo-list-content'))
       
       window.saturne.modal.loadLazyImages();
+        window.saturne.mediaGallery.currentOffset = 1;
+        window.saturne.mediaGallery.hasMore = true;
+        window.saturne.mediaGallery.isLoading = false;
+        setTimeout(window.saturne.mediaGallery.checkFill, 200);
     },
     error: function ( ) {
     }
