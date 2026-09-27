@@ -90,12 +90,6 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
                     print '<div class="media-date-header-container" style="width: 100%;"><h3 class="media-date-header">' . $fileDate . '</h3></div>';
                     $currentDate = $fileDate;
                 }
-                $fileDate = dol_print_date($filearray[$i]['date'], 'day');
-                if ($fileDate != $currentDate) {
-                    print '<div class="media-date-group">';
-                    print '<h3 class="media-date-header">' . $fileDate . '</h3>';
-                    $currentDate = $fileDate;
-                }
 
                 if ($size == 'mini' || $size == 'small') {   // Format vignette
                     $relativepath = $moduleName . '/medias/thumbs';
@@ -239,18 +233,7 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
                 $return .= '<input hidden class="file-path" value="' . $filePath . '">';
                 $return .= '<input hidden class="file-name" value="' . $fileName . '">';
                 if (image_format_supported($fileName) >= 0) {
-                $nbphoto++;
-                $fileDate = dol_print_date($filearray[$i]['date'], 'day');
-                if ($fileDate != $currentDate) {
-                    print '<div class="media-date-header-container" style="width: 100%;"><h3 class="media-date-header">' . $fileDate . '</h3></div>';
-                    $currentDate = $fileDate;
-                }
-                $fileDate = dol_print_date($filearray[$i]['date'], 'day');
-                if ($fileDate != $currentDate) {
-                    print '<div class="media-date-group">';
-                    print '<h3 class="media-date-header">' . $fileDate . '</h3>';
-                    $currentDate = $fileDate;
-                }
+                    $nbphoto++;
                     $photo        = $fileName;
                     $viewfilename = $fileName;
 
