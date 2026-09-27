@@ -59,7 +59,7 @@ window.saturne.mediaGallery.event = function() {
   $( document ).on( 'click', '.clickable-photo', window.saturne.mediaGallery.selectPhoto );
   $( document ).on( 'click', '.save-photo', window.saturne.mediaGallery.savePhoto );
   $(document).on( 'click', '.delete-photo', window.saturne.mediaGallery.deletePhoto);
-  $( document ).on( 'change', '.flat.minwidth400.maxwidth200onsmartphone', window.saturne.mediaGallery.sendPhoto );
+  $( document ).on( 'change', '#add_media_to_gallery', window.saturne.mediaGallery.sendPhoto );
   $( document ).on( 'click', '.clicked-photo-preview', window.saturne.mediaGallery.previewPhoto );
   $( document ).on( 'input', '.form-element #search_in_gallery', window.saturne.mediaGallery.handleSearch );
   $( document ).on( 'click', '.media-gallery-unlink', window.saturne.mediaGallery.unlinkFile );
@@ -723,7 +723,7 @@ window.saturne.mediaGallery.toggleTodayMedias = function( event ) {
   let toggleValue = $(this).attr('value')
 
   window.saturne.loader.display($('.ecm-photo-list-content'))
-  window.saturne.loader.display($('.wpeo-pagination'))
+  
 
   $.ajax({
     url: document.URL + querySeparator + "subaction=toggleTodayMedias&toggle_today_medias=" + toggleValue + "&token=" + token,
@@ -733,7 +733,7 @@ window.saturne.mediaGallery.toggleTodayMedias = function( event ) {
     success: function ( resp ) {
       $('.toggle-today-medias').replaceWith($(resp).find('.toggle-today-medias'))
       $('.ecm-photo-list-content').replaceWith($(resp).find('.ecm-photo-list-content'))
-      $('.wpeo-pagination').replaceWith($(resp).find('.wpeo-pagination'))
+      
       window.saturne.modal.loadLazyImages();
     },
     error: function ( ) {
@@ -757,7 +757,7 @@ window.saturne.mediaGallery.toggleUnlinkedMedias = function( event ) {
   let toggleValue = $(this).attr('value')
 
   window.saturne.loader.display($('.ecm-photo-list-content'))
-  window.saturne.loader.display($('.wpeo-pagination'))
+  
 
   $.ajax({
     url: document.URL + querySeparator + "subaction=toggleUnlinkedMedias&toggle_unlinked_medias=" + toggleValue + "&token=" + token,
@@ -767,7 +767,7 @@ window.saturne.mediaGallery.toggleUnlinkedMedias = function( event ) {
     success: function ( resp ) {
       $('.toggle-unlinked-medias').replaceWith($(resp).find('.toggle-unlinked-medias'))
       $('.ecm-photo-list-content').replaceWith($(resp).find('.ecm-photo-list-content'))
-      $('.wpeo-pagination').replaceWith($(resp).find('.wpeo-pagination'))
+      
       window.saturne.modal.loadLazyImages();
     },
     error: function ( ) {

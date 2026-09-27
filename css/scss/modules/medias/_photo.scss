@@ -183,12 +183,13 @@
   margin-bottom: 5px;
 }
 .media-date-header {
-  font-size: 1.1em;
-  font-weight: 600;
-  color: #333;
+  font-size: 0.9em;
+  font-weight: normal;
+  color: #888;
   margin: 0;
   padding-bottom: 5px;
-  border-bottom: 1px solid #eee;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 .ecm-photo-list {
   display: flex !important;

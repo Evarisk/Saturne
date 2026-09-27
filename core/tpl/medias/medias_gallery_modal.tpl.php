@@ -324,7 +324,7 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
     <div class="modal-container wpeo-modal-event">
         <!-- Modal-Header -->
         <div class="modal-header media-gallery-header">
-            <h2 class="modal-title"><?php echo $langs->trans('MediaGallery')?></h2>
+            <h2 class="modal-title"><?php echo $langs->trans('Medias')?></h2>
             
             <div class="media-gallery-search-container">
                 <div class="wpeo-autocomplete">
@@ -385,25 +385,7 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
                 </div>
             </div>
             
-                <div>
-                    <div>
-                        <?php
-                        if (getDolGlobalInt('SATURNE_MEDIA_GALLERY_SHOW_ALL_MEDIA_INFOS')) {
-                            print img_picto($langs->trans('Link'), 'link') . ' ' . $form->textwithpicto($langs->trans('UnlinkedMedias'), $langs->trans('ShowOnlyUnlinkedMedias'));
-                            if (isset($user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS) && $user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS) {
-                                print '<span id="del_unlinked_medias" value="0" class="valignmiddle linkobject toggle-unlinked-medias ' . (!empty($user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS) ? '' : 'hideobject') . '">' . img_picto($langs->trans('Enabled'), 'switch_on') . '</span>';
-                            } else {
-                                print '<span id="set_unlinked_medias" value="1" class="valignmiddle linkobject toggle-unlinked-medias ' . (!empty($user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS) ? 'hideobject' : '') . '">' . img_picto($langs->trans('Disabled'), 'switch_off') . '</span>';
-                            }
-                        }
-                        print img_picto($langs->trans('Calendar'), 'calendar') . ' ' . $form->textwithpicto($langs->trans('Today'), $langs->trans('ShowOnlyMediasAddedToday'));
-                        if (isset($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS) && $user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS) {
-                            print '<span id="del_today_medias" value="0" class="valignmiddle linkobject toggle-today-medias ' . (!empty($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS) ? '' : 'hideobject') . '">' . img_picto($langs->trans('Enabled'), 'switch_on') . '</span>';
-                        } else {
-                            print '<span id="set_today_medias" value="1" class="valignmiddle linkobject toggle-today-medias ' . (!empty($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS) ? 'hideobject' : '') . '">' . img_picto($langs->trans('Disabled'), 'switch_off') . '</span>';
-                        } ?>
-                    </div>
-                </div>
+                
             </div>
             <div id="progressBarContainer" style="display: none;">
                 <div id="progressBar"></div>
