@@ -78,7 +78,10 @@ window.saturne.mediaGallery.event = function() {
  * @return {void}
  */
 window.saturne.mediaGallery.selectPhoto = function( event ) {
-	let photoID = $(this).attr('value');
+    if (!$(event.target).closest('.photo-selector').length) {
+        return;
+    }
+    let photoID = $(this).attr('value');
 	let parent = $(this).closest('.modal-content')
 
 	if ($(this).hasClass('clicked-photo')) {
