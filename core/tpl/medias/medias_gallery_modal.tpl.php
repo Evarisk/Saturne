@@ -385,8 +385,6 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
                 </div>
             </div>
             
-                
-            </div>
             <div id="progressBarContainer" style="display: none;">
                 <div id="progressBarText">
                     <span class="upload-filename"></span>
