@@ -274,3 +274,20 @@
     }
   }
 }
+
+/* Fix for phantom dash under search icon */
+.media-gallery-search-container {
+  .autocomplete-label, .wpeo-autocomplete {
+    border: none !important;
+    box-shadow: none !important;
+    text-decoration: none !important;
+    &::after, &::before {
+      display: none !important;
+    }
+  }
+  .autocomplete-icon-before {
+    border: none !important;
+    text-decoration: none !important;
+    box-shadow: none !important;
+  }
+}
