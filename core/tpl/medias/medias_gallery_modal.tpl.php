@@ -328,7 +328,14 @@ require_once __DIR__ . '/media_editor_modal.tpl.php'; ?>
     <div class="modal-container wpeo-modal-event">
         <!-- Modal-Header -->
         <div class="modal-header media-gallery-header">
-            <h2 class="modal-title"><?php echo $langs->trans('Medias')?></h2>
+                        <div class="media-gallery-title-wrapper" style="display: flex; flex-direction: column; align-items: center; margin-right: 10px;">
+                <h2 class="modal-title" style="text-transform: none; margin-bottom: 0; line-height: 1;"><?php echo $langs->trans('Medias')?></h2>
+                <?php
+                $maxUploadSizeMo = round($conf->global->MAIN_UPLOAD_DOC / 1024, 1);
+                $linkToSettings = DOL_URL_ROOT . '/admin/security_file.php?mainmenu=home&leftmenu=setup_security';
+                ?>
+                <a href="<?php echo $linkToSettings; ?>" target="_blank" class="media-gallery-max-size" style="font-size: 0.65rem; color: #888; text-decoration: none; margin-top: 2px;">(<?php echo $maxUploadSizeMo; ?> Mo)</a>
+            </div>
             
             <div class="media-gallery-search-container">
                 <div class="wpeo-autocomplete">
