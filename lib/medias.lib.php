@@ -85,7 +85,7 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
             $fileName = $filearray[$i]['name'];
             if (image_format_supported($fileName) >= 0) {
                 $nbphoto++;
-                $fileDate = dol_print_date($filearray[$i]['date'], 'day');
+                $fileDate = dol_print_date($filearray[$i]['date'], '%a %d %b');
                 if ($fileDate != $currentDate) {
                     print '<div class="media-date-header-container" style="width: 100%;"><h3 class="media-date-header">' . $fileDate . '</h3></div>';
                     $currentDate = $fileDate;
