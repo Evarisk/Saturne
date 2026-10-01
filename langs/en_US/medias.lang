@@ -89,3 +89,24 @@ AIAnalyseImage	= Image analysis: %s
 
 # Multi-upload
 ValidateAll = Validate all
+
+# Agenda
+MediaAddedToLibraryTrigger=Media added to the library: %s
+MediaLinkedTrigger=Media assigned: %s
+SetPhotoAsFavorite=Display this photo on the record
+
+# Pending medias
+Gallery=Gallery
+PendingMedias=Pending
+NoPendingMedia=No pending media: every one of them is assigned to a record
+SelectAMediaToPreview=Select a media to preview it
+SelectedMedias=selected
+AddADescription=Add a description
+SelectAnObjectType=Pick a type first
+AssignSelectedMedias=Assign
+AllMedias=All medias
+AssignedTo=Assigned to
+ViewDetails=Details
+ViewLargeIcons=Large icons
+ViewCompactList=Compact list
+UnlinkMediaFromRecord=Unlink this media from the record
