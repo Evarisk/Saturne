@@ -64,6 +64,8 @@
     &__left {
         display: flex;
         align-items: center;
+        // Holds the free space so the header buttons stay right whichever of them is shown
+        margin-right: auto;
     }
 
     &__icon {
@@ -86,13 +88,39 @@
         }
     }
 
+    &__favorite {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        margin: 0 4px 0 0;
+        padding: 0;
+        background: none;
+        border: none;
+        border-radius: 8px;
+        color: #f1c40f;
+        font-size: 17px;
+        line-height: 1;
+        cursor: pointer;
+        transition: background-color 0.15s, color 0.15s, transform 0.1s;
+
+        &:hover {
+            background: rgba(241, 196, 15, 0.14);
+        }
+
+        &:active {
+            transform: scale(0.92);
+        }
+    }
+
     &__delete {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         width: 34px;
         height: 34px;
-        margin: 0 4px 0 auto;
+        margin: 0 4px 0 0;
         padding: 0;
         background: none;
         border: none;

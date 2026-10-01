@@ -51,6 +51,7 @@ window.saturne.photoEditor._startCX      = 0;
 window.saturne.photoEditor._startCY      = 0;
 window.saturne.photoEditor._seqCounter   = 1;
 window.saturne.photoEditor._onSave       = null;
+window.saturne.photoEditor._favorite     = null;
 window.saturne.photoEditor._onSaveAll    = null;
 window.saturne.photoEditor._onDelete     = null;
 window.saturne.photoEditor._urls         = [];
@@ -204,10 +205,7 @@ window.saturne.photoEditor.event = function() {
     } else {
       pe._currentIndex = nextIndex;
       pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
-        var badge = document.getElementById('saturne-photo-index-badge');
-        if (badge) {
-          badge.textContent = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
-        }
+        pe._syncNavControls();
       });
     }
   });
@@ -223,10 +221,7 @@ window.saturne.photoEditor.event = function() {
     } else {
       pe._currentIndex = nextIndex;
       pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
-        var badge = document.getElementById('saturne-photo-index-badge');
-        if (badge) {
-          badge.textContent = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
-        }
+        pe._syncNavControls();
       });
     }
   });
@@ -256,6 +251,24 @@ window.saturne.photoEditor.event = function() {
   });
 
   // OK — save then close
+  // Star: record which media the object displays, without closing the editor
+  var btnFavorite = document.getElementById('saturne-btn-favorite-photo');
+  if (btnFavorite) {
+    btnFavorite.addEventListener('click', function() {
+      var pe = window.saturne.photoEditor;
+
+      if (!pe._favorite || typeof pe._favorite.onSelect !== 'function') {
+        return;
+      }
+
+      var url = pe._urls[pe._currentIndex] || '';
+
+      pe._favorite.current = pe._fileNameOf(url);
+      pe._favorite.onSelect(url, pe._favorite.current);
+      pe._syncFavoriteButton();
+    });
+  }
+
   var btnOk = document.getElementById('saturne-btn-ok-photo');
   btnOk.addEventListener('click', function() {
     var activeText = document.getElementById('saturne-floating-text-input');
@@ -263,12 +276,15 @@ window.saturne.photoEditor.event = function() {
       activeText.blur();
     }
     var onSave = window.saturne.photoEditor._onSave;
+    // An edited media is written back under its own name, so its bytes have to keep matching
+    // its extension: a PNG source must come back as a PNG
+    var mime = window.saturne.photoEditor._sourceMimeType();
     // Close synchronously first so onSave can safely re-open the editor (e.g. sequential multi-file)
     window.saturne.photoEditor._close();
     if (typeof onSave === 'function') {
       canvas.toBlob(function(blob) {
         onSave(blob);
-      }, 'image/jpeg', 0.85);
+      }, mime, 0.85);
     }
   });
 
@@ -383,7 +399,7 @@ window.saturne.photoEditor.event = function() {
  * @param   {Function} onSave Callback receiving a Blob on validate
  * @returns {void}
  */
-window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex, onDelete, onSaveAll) {
+window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex, onDelete, onSaveAll, favorite) {
   var modal = window.saturne.photoEditor._modal;
   if (!modal) {
     return;
@@ -393,6 +409,7 @@ window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex, onDele
   pe._onSave         = onSave || null;
   pe._onSaveAll      = onSaveAll || null;
   pe._onDelete       = onDelete || null;
+  pe._favorite       = favorite || null;
   pe._historyStack   = [];
   pe._urls           = Array.isArray(urlOrUrls) ? urlOrUrls : [urlOrUrls];
   pe._currentIndex   = (typeof startIndex === 'number') ? startIndex : 0;
@@ -407,6 +424,83 @@ window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex, onDele
   pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
     modal.style.display = 'flex';
   });
+};
+
+/**
+ * Resolve the mime type the current media must be written back as
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @returns {string} Mime type to encode the canvas with
+ */
+window.saturne.photoEditor._sourceMimeType = function() {
+  var pe     = window.saturne.photoEditor;
+  var source = (pe._urls && pe._urls[pe._currentIndex]) || '';
+
+  try {
+    source = decodeURIComponent(source);
+  } catch (e) {
+    // A malformed escape sequence only means the name cannot be read: fall back on JPEG
+  }
+
+  return /\.png(\?|&|$)/i.test(source) ? 'image/png' : 'image/jpeg';
+};
+
+/**
+ * Resolve the filename carried by a Dolibarr file URL (document.php or viewimage.php)
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param   {string}      url File URL holding a `file` query parameter
+ * @returns {string|null}     Filename, or null when the URL carries none
+ */
+window.saturne.photoEditor._fileNameOf = function(url) {
+  var params   = new URLSearchParams((url || '').split('?')[1] || '');
+  var filePath = decodeURIComponent(params.get('file') || '');
+
+  return filePath.split('/').pop() || null;
+};
+
+/**
+ * Show or hide the star that picks which media the record displays
+ *
+ * Picking one only makes sense when the set holds several medias, and when the caller wired a
+ * handler able to record the choice.
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @returns {void}
+ */
+window.saturne.photoEditor._syncFavoriteButton = function() {
+  var pe  = window.saturne.photoEditor;
+  var btn = document.getElementById('saturne-btn-favorite-photo');
+
+  if (!btn) {
+    return;
+  }
+
+  var usable = pe._favorite && typeof pe._favorite.onSelect === 'function' && pe._urls.length > 1;
+
+  btn.style.display = usable ? 'inline-flex' : 'none';
+
+  if (!usable) {
+    return;
+  }
+
+  var icon      = btn.querySelector('i');
+  var current   = pe._fileNameOf(pe._urls[pe._currentIndex] || '');
+  var isDisplayed = pe._favorite.current && pe._favorite.current === current;
+
+  icon.className = isDisplayed ? 'fas fa-star' : 'far fa-star';
 };
 
 /**
@@ -457,6 +551,8 @@ window.saturne.photoEditor._syncNavControls = function() {
   var btnNextEl = document.getElementById('saturne-btn-next-photo');
   var badge     = document.getElementById('saturne-photo-index-badge');
   var multiple  = pe._urls.length > 1;
+
+  pe._syncFavoriteButton();
 
   if (btnPrevEl) {
     btnPrevEl.style.display = multiple ? 'flex' : 'none';

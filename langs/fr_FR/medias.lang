@@ -91,3 +91,24 @@ AIAnalyseImage	= Analyse de l'image: %s
 # Multi-upload
 ValidateAll = Tout valider
 Medias = Médias
+
+# Agenda
+MediaAddedToLibraryTrigger=Média(s) ajouté(s) à la bibliothèque : %s
+MediaLinkedTrigger=Média(s) affecté(s) : %s
+SetPhotoAsFavorite=Afficher cette photo sur la fiche
+
+# Medias en attente
+Gallery=Galerie
+PendingMedias=En attente
+NoPendingMedia=Aucun média en attente : tous sont affectés à un élément
+SelectAMediaToPreview=Sélectionnez un média pour l'afficher
+SelectedMedias=sélectionné(s)
+AddADescription=Ajouter une description
+SelectAnObjectType=Choisissez d'abord un type
+AssignSelectedMedias=Affecter
+AllMedias=Tous les médias
+AssignedTo=Affecté à
+ViewDetails=Détails
+ViewLargeIcons=Grandes icônes
+ViewCompactList=Liste compacte
+UnlinkMediaFromRecord=Délier ce média de cet élément (il reste dans la bibliothèque)

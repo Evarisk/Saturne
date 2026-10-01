@@ -54,9 +54,11 @@ window.saturne.mediaGallery.init = function() {
 window.saturne.mediaGallery.event = function() {
 	// Photos
   $( document ).on( 'click', '.clickable-photo', window.saturne.mediaGallery.selectPhoto );
+  $( document ).on( 'click', '.open-media-editor', window.saturne.mediaGallery.openPhotoEditor );
   $( document ).on( 'click', '.save-photo', window.saturne.mediaGallery.savePhoto );
   $(document).on( 'click', '.delete-photo', window.saturne.mediaGallery.deletePhoto);
-  $( document ).on( 'change', '.flat.minwidth400.maxwidth200onsmartphone', window.saturne.mediaGallery.sendPhoto );
+  // The gallery add button carries its own id, the class selector only matches the older markup
+  $( document ).on( 'change', '.flat.minwidth400.maxwidth200onsmartphone, #add_media_to_gallery', window.saturne.mediaGallery.sendPhoto );
   $( document ).on( 'click', '.clicked-photo-preview', window.saturne.mediaGallery.previewPhoto );
   $( document ).on( 'input', '#search_in_gallery', window.saturne.mediaGallery.handleSearch );
   $( document ).on( 'click', '.media-gallery-unlink', window.saturne.mediaGallery.unlinkFile );
@@ -97,6 +99,91 @@ window.saturne.mediaGallery.selectPhoto = function( event ) {
     parent.closest('.modal-container').find('.delete-photo').removeClass('button-disable');
     parent.find('.clickable-photo'+photoID).addClass('clicked-photo');
 	}
+};
+
+/**
+ * Open the photo editor on the media that was clicked in the gallery
+ *
+ * The whole gallery is handed over so the editor arrows walk through it, and the editor
+ * starts on the media that was clicked.
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param  {Object} event Click event
+ * @return {void}
+ */
+window.saturne.mediaGallery.openPhotoEditor = function( event ) {
+  event.preventDefault();
+  event.stopPropagation();
+
+  var image      = $(this);
+  var images     = image.closest('.modal-container').find('.open-media-editor[data-fullsrc]');
+  var urls       = [];
+  var startIndex = 0;
+
+  images.each(function( index ) {
+    urls.push($(this).data('fullsrc'));
+    if (this === image[0]) {
+      startIndex = index;
+    }
+  });
+
+  if (!urls.length) {
+    return;
+  }
+
+  window.saturne.photoEditor.open(urls, function( blob ) {
+    var edited = images.eq(window.saturne.photoEditor._currentIndex);
+    window.saturne.mediaGallery.replacePhoto(blob, edited.data('filename'));
+  }, startIndex, null);
+};
+
+/**
+ * Send an edited media back under its own name so it replaces the original
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param  {Blob}   blob     Edited image
+ * @param  {string} filename Name of the media being replaced
+ * @return {void}
+ */
+window.saturne.mediaGallery.replacePhoto = function( blob, filename ) {
+  if (!filename) {
+    return;
+  }
+
+  var mediaGallery   = $('#media_gallery');
+  var token          = window.saturne.toolbox.getToken();
+  var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+  var formData       = new FormData();
+
+  formData.append('userfile[]', new File([blob], filename, { type: blob.type || 'image/jpeg', lastModified: Date.now() }), filename);
+  formData.append('overwritemedia', '1');
+
+  window.saturne.loader.display(mediaGallery.find('.ecm-photo-list-content'));
+
+  $.ajax({
+    url        : document.URL + querySeparator + 'subaction=uploadPhoto&token=' + token,
+    type       : 'POST',
+    data       : formData,
+    processData: false,
+    contentType: false,
+    success    : function( resp ) {
+      mediaGallery.html($(resp).find('#media_gallery').children()).promise().done(function() {
+        // The media keeps its URL, only its content changed: the cache would serve the old one
+        mediaGallery.find('.open-media-editor').each(function() {
+          var img = $(this);
+          img.attr('data-src', img.attr('data-src') + '&edited=' + Date.now());
+        });
+        window.saturne.modal.loadLazyImages();
+      });
+    },
+    error      : function() {
+      $('.wpeo-loader').removeClass('wpeo-loader');
+    }
+  });
 };
 
 /**

@@ -1,0 +1,448 @@
+// Pending medias: the library entries no object uses yet, listed rather than tiled so a name, a
+// date and a description can be read at a glance, with the media itself shown beside the list.
+
+.saturne-media-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.saturne-media-tab {
+    padding: 8px 16px;
+    border-bottom: 2px solid transparent;
+    color: #64748b;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+
+    i {
+        margin-right: 6px;
+    }
+
+    &:hover {
+        color: var(--color-primary);
+    }
+
+    &.active {
+        border-bottom-color: var(--color-primary);
+        color: var(--color-primary);
+        font-weight: 600;
+    }
+}
+
+// The gallery footer acts on the grid selection, which the pending list does not share
+.modal-container.pending-tab-active > .modal-footer {
+    display: none;
+}
+
+.saturne-pending {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+
+    &-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 48px 16px;
+        color: #64748b;
+
+        i {
+            color: #22c55e;
+            font-size: 2rem;
+        }
+    }
+
+    &-body {
+        display: flex;
+        flex: 1;
+        gap: 16px;
+        min-height: 0;
+    }
+
+    &-list {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        min-width: 0;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    &-head,
+    &-row {
+        display: grid;
+        grid-template-columns: 30px 48px minmax(110px, 1.6fr) 110px 75px minmax(110px, 1.2fr) minmax(120px, 1.6fr);
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+    }
+
+    &-head {
+        border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc;
+        color: #475569;
+        font-size: 0.78rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    &-rows {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+    }
+
+    &-row {
+        border-bottom: 1px solid #f1f5f9;
+        cursor: pointer;
+        transition: background-color 0.12s;
+
+        &:hover {
+            background: #f8fafc;
+        }
+
+        &.selected {
+            background: rgba(0, 110, 180, 0.08);
+        }
+    }
+
+    &-thumb {
+        display: block;
+        width: 40px;
+        height: 40px;
+        border-radius: 4px;
+        object-fit: cover;
+        background: #f1f5f9;
+    }
+
+    &-col-name {
+        overflow: hidden;
+        font-size: 0.86rem;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &-col-date,
+    &-col-size {
+        color: #64748b;
+        font-size: 0.8rem;
+    }
+
+    &-col-records {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        overflow: hidden;
+    }
+
+    // One badge per record holding the media, the type is carried by its picto and its title
+    &-record {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        max-width: 100%;
+        padding: 2px 7px;
+        border-radius: 10px;
+        background: #eef2f7;
+        color: #475569;
+        font-size: 0.76rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &-norecord {
+        color: #cbd5e1;
+    }
+
+    &-description {
+        width: 100%;
+        padding: 4px 8px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        background: transparent;
+        font-size: 0.84rem;
+        transition: border-color 0.15s, background-color 0.4s;
+
+        &:hover {
+            border-color: #e2e8f0;
+        }
+
+        &:focus {
+            border-color: var(--color-primary);
+            background: #fff;
+            outline: none;
+        }
+
+        // Fades out on its own, so a save is felt without a message to dismiss
+        &-saved {
+            background: rgba(34, 197, 94, 0.18);
+        }
+    }
+
+    &-preview {
+        display: flex;
+        flex: 0 0 260px;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background: #f8fafc;
+
+        &-placeholder {
+            color: #94a3b8;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        &-image {
+            display: none;
+            max-width: 100%;
+            max-height: 320px;
+            border-radius: 6px;
+            object-fit: contain;
+
+            &[src] {
+                display: block;
+            }
+        }
+
+        &-name {
+            color: #475569;
+            font-size: 0.8rem;
+            text-align: center;
+            word-break: break-all;
+        }
+    }
+
+    &-footer {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-top: 12px;
+        border-top: 1px solid #e2e8f0;
+        margin-top: 12px;
+    }
+
+    &-counter {
+        margin-right: auto;
+        color: #475569;
+        font-size: 0.85rem;
+    }
+
+    // A record name runs long: the select is bounded and the name is cut rather than pushing
+    // the assign button out of the footer
+    &-object-type,
+    &-object {
+        max-width: 260px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &-object-type {
+        min-width: 170px;
+    }
+
+    &-object {
+        min-width: 200px;
+    }
+
+    // select2 renders the type list itself, it has to follow the same bounds
+    .select2-container {
+        max-width: 260px;
+    }
+}
+
+@media screen and (max-width: 1000px) {
+    .saturne-pending {
+        &-body {
+            flex-direction: column;
+        }
+
+        &-preview {
+            flex: 0 0 auto;
+        }
+
+        &-head,
+        &-row {
+            grid-template-columns: 30px 48px minmax(0, 1fr) minmax(0, 1fr);
+        }
+
+        &-col-date,
+        &-col-size,
+        &-col-records {
+            display: none;
+        }
+    }
+}
+
+// Display modes of the list, the way a file explorer offers them. Only the layout changes: every
+// mode keeps the same rows, so selection, description and assignment work the same in all of them.
+.saturne-pending {
+    &-toolbar {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 8px;
+    }
+
+    &-modes {
+        display: inline-flex;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+    }
+
+    &-mode {
+        padding: 5px 10px;
+        border-right: 1px solid #e2e8f0;
+        color: #94a3b8;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: background-color 0.15s, color 0.15s;
+
+        &:last-child {
+            border-right: none;
+        }
+
+        &:hover {
+            background: #f8fafc;
+            color: var(--color-primary);
+        }
+
+        &.active {
+            background: var(--color-primary);
+            color: #fff;
+        }
+    }
+}
+
+// Large icons: the media leads, the rest of the row follows underneath
+.saturne-pending.mode-tiles {
+    .saturne-pending-head {
+        display: none;
+    }
+
+    .saturne-pending-rows {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 12px;
+        padding: 12px;
+    }
+
+    .saturne-pending-row {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 10px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+
+        &.selected {
+            border-color: var(--color-primary);
+        }
+    }
+
+    .saturne-pending-col-check {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        z-index: 1;
+    }
+
+    .saturne-pending-col-thumb {
+        display: block;
+    }
+
+    .saturne-pending-thumb {
+        width: 100%;
+        height: 120px;
+        border-radius: 6px;
+    }
+
+    .saturne-pending-col-name {
+        // A tile is narrow and a media name is not: cut it rather than let it run over its neighbour
+        max-width: 100%;
+        min-width: 0;
+        font-size: 0.82rem;
+        font-weight: 600;
+    }
+
+    .saturne-pending-col-date,
+    .saturne-pending-col-size {
+        display: none;
+    }
+
+    .saturne-pending-col-records {
+        min-height: 20px;
+    }
+}
+
+// Compact: as many names as possible on screen, the rest steps aside
+.saturne-pending.mode-compact {
+    .saturne-pending-head,
+    .saturne-pending-row {
+        grid-template-columns: 30px 28px minmax(140px, 2fr) 110px minmax(110px, 1.4fr);
+        padding: 2px 10px;
+    }
+
+    .saturne-pending-thumb {
+        width: 22px;
+        height: 22px;
+    }
+
+    .saturne-pending-col-size,
+    .saturne-pending-col-records {
+        display: none;
+    }
+
+    .saturne-pending-description {
+        padding: 2px 6px;
+        font-size: 0.8rem;
+    }
+}
+
+// The modal is narrower than the media page. Rather than resize it, which made switching tabs
+// jump, the list gives up the columns it can do without and keeps a smaller preview.
+.wpeo-modal .saturne-pending {
+    &-preview {
+        flex: 0 0 180px;
+    }
+
+    &-head,
+    &-row {
+        grid-template-columns: 30px 44px minmax(90px, 1.2fr) 75px minmax(70px, 0.8fr) minmax(110px, 1.6fr);
+    }
+
+    &-col-date {
+        display: none;
+    }
+}
+
+// Taking a media off a record is not deleting it: the icon stays discreet until the badge is hovered
+.saturne-pending-record {
+    .saturne-pending-unlink {
+        margin-left: 2px;
+        opacity: 0;
+        color: #94a3b8;
+        font-size: 0.68rem;
+        cursor: pointer;
+        transition: opacity 0.15s, color 0.15s;
+
+        &:hover {
+            color: #e05353;
+        }
+    }
+
+    &:hover .saturne-pending-unlink {
+        opacity: 1;
+    }
+}

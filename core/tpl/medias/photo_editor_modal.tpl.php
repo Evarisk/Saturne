@@ -27,6 +27,14 @@
  *   - onSave {Function} Callback receiving a Blob when the user validates.
  */
 
+
+// Rendering the editor twice would duplicate its element ids and the first one would win:
+// whoever renders it first, the host page or a clickable media, is the one that counts
+if (!empty($GLOBALS['saturnePhotoEditorModalRendered'])) {
+    return;
+}
+$GLOBALS['saturnePhotoEditorModalRendered'] = 1;
+
 ?>
 <!-- photo_editor_modal start -->
 <div id="saturne-photo-editor-modal">
@@ -41,6 +49,9 @@
                     <span id="saturne-photo-resolution-display"></span>
                 </h3>
             </div>
+            <button type="button" id="saturne-btn-favorite-photo" class="saturne-photo-editor-header__favorite" style="display: none;" title="<?php echo dol_escape_htmltag($langs->trans('SetPhotoAsFavorite')); ?>">
+                <i class="far fa-star"></i>
+            </button>
             <button type="button" id="saturne-btn-delete-photo" class="saturne-photo-editor-header__delete" style="display: none;" title="<?php echo dol_escape_htmltag($langs->trans('DeletePhoto')); ?>" data-confirm="<?php echo dol_escape_htmltag($langs->trans('DeletePhotoConfirmation')); ?>">
                 <i class="fas fa-trash"></i>
             </button>
