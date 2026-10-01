@@ -388,13 +388,51 @@ class InterfaceTicketMailModel extends DolibarrTriggers
         $substitutionarray['__TICKET_TRACK_ID__']  = (string) $object->track_id;
         $substitutionarray['__TICKET_SUBJECT__']   = (string) $object->subject;
         $substitutionarray['__TICKET_MESSAGE__']   = (string) $object->message;
-        $substitutionarray['__TICKET_TYPE__']      = (string) $langs->getLabelFromKey($this->db, 'TicketTypeShort' . $object->type_code, 'c_ticket_type', 'code', 'label', $object->type_code);
-        $substitutionarray['__TICKET_CATEGORY__']  = (string) $langs->getLabelFromKey($this->db, 'TicketCategoryShort' . $object->category_code, 'c_ticket_category', 'code', 'label', $object->category_code);
-        $substitutionarray['__TICKET_SEVERITY__']  = (string) $langs->getLabelFromKey($this->db, 'TicketSeverityShort' . $object->severity_code, 'c_ticket_severity', 'code', 'label', $object->severity_code);
+        // Guarded on the code: with an empty one, getLabelFromKey() gets the bare prefix as
+        // its key, finds no translation and hands it back — a ticket carrying no category
+        // put the literal "TicketCategoryShort" in the email
+        $substitutionarray['__TICKET_TYPE__']      = empty($object->type_code) ? '' : (string) $langs->getLabelFromKey($this->db, 'TicketTypeShort' . $object->type_code, 'c_ticket_type', 'code', 'label', $object->type_code);
+        $substitutionarray['__TICKET_CATEGORY__']  = empty($object->category_code) ? '' : (string) $langs->getLabelFromKey($this->db, 'TicketCategoryShort' . $object->category_code, 'c_ticket_category', 'code', 'label', $object->category_code);
+        $substitutionarray['__TICKET_SEVERITY__']  = empty($object->severity_code) ? '' : (string) $langs->getLabelFromKey($this->db, 'TicketSeverityShort' . $object->severity_code, 'c_ticket_severity', 'code', 'label', $object->severity_code);
         $substitutionarray['__TICKET_PUBLIC_URL__'] = dol_buildpath('/public/ticket/view.php', 2) . '?track_id=' . urlencode($object->track_id);
         $substitutionarray['__TICKET_MANAGEMENT_URL__'] = dol_buildpath('/ticket/card.php', 2) . '?track_id=' . urlencode($object->track_id);
+        $substitutionarray['__TICKET_TAGS__'] = $this->getTicketTags($object);
 
         return $substitutionarray;
+    }
+
+    /**
+     * Labels of the Dolibarr tags attached to a ticket.
+     *
+     * Not the same thing as __TICKET_CATEGORY__, which holds the label of the
+     * c_ticket_category dictionary entry. The tags are the categories of type
+     * TYPE_TICKET, the ones a register is classified with — "Registre", "Accident",
+     * "Danger grave et imminent"… and the only way a template can tell them apart.
+     *
+     * @param  Ticket $object The ticket the email refers to
+     * @return string         Comma separated labels, empty when the ticket carries none
+     */
+    private function getTicketTags($object)
+    {
+        require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+
+        $category = new Categorie($this->db);
+
+        // containing() returns the int -1 on a SQL error: counting or iterating it
+        // straight away would be a fatal TypeError on PHP 8
+        $tags = $category->containing($object->id, Categorie::TYPE_TICKET);
+        if (!is_array($tags)) {
+            return '';
+        }
+
+        $labels = array();
+        foreach ($tags as $tag) {
+            if (!empty($tag->label)) {
+                $labels[] = $tag->label;
+            }
+        }
+
+        return implode(', ', $labels);
     }
 
     /**
