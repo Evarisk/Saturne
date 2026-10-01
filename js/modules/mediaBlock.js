@@ -168,8 +168,8 @@ window.saturne.mediaBlock.blockForRecord = function(recordId) {
   return $('.linked-medias').filter(function() {
     var block = $(this);
 
-    return block.find('.fast-upload-options[data-object-id="' + recordId + '"]').length > 0
-        || block.find('.modal-options[data-from-id="' + recordId + '"]').length > 0;
+    return block.find('.fast-upload-options[data-object-id="' + recordId + '"]').length > 0 ||
+        block.find('.modal-options[data-from-id="' + recordId + '"]').length > 0;
   }).first();
 };
 

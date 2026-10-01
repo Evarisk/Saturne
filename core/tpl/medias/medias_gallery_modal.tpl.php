@@ -62,7 +62,7 @@ if (!(isset($error) && $error) && $subaction == 'uploadPhoto' && ! empty($conf->
             $maxUploadSizeMo = round($conf->global->MAIN_UPLOAD_DOC / 1024, 1);
             $linkToSettings = '<a href="' . DOL_URL_ROOT . '/admin/security_file.php?mainmenu=home&leftmenu=setup_security" target="_blank" style="text-decoration: underline;">' . $langs->trans("Setup") . '</a>';
             $errorMessage = $langs->transnoentitiesnoconv('ErrorThisFileSizeTooLarge', (string) ($_FILES['userfile']['name'][$key] ?? '')) . ' (' . $maxUploadSizeMo . ' Mo) - ' . $linkToSettings;
-            
+
             if ($_FILES['userfile']['error'][$key] == 1 || $_FILES['userfile']['error'][$key] == 2) {
                 setEventMessages($errorMessage, null, 'errors');
                 $submitFileErrorText = array('message' => $errorMessage, 'code' => '1337');
@@ -278,7 +278,6 @@ if ($subaction == 'listMediaTargets') {
             }
         }
     }
-
 }
 
 // Assign pending medias to a record, the way the gallery does for a single one
@@ -551,11 +550,11 @@ include __DIR__ . '/photo_editor_modal.tpl.php'; ?>
 
             <div class="media-gallery-actions">
                 <!-- Toggle Unlinked -->
-                <?php if (getDolGlobalInt('SATURNE_MEDIA_GALLERY_SHOW_ALL_MEDIA_INFOS')): ?>
+                <?php if (getDolGlobalInt('SATURNE_MEDIA_GALLERY_SHOW_ALL_MEDIA_INFOS')) : ?>
                     <span class="media-header-action" title="<?php echo dol_escape_htmltag($langs->trans('ShowOnlyUnlinkedMedias')); ?>">
-                        <?php if (isset($user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS) && $user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS): ?>
+                        <?php if (isset($user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS) && $user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS) : ?>
                             <span id="del_unlinked_medias" value="0" class="linkobject toggle-unlinked-medias"><i class="fas fa-link" style="color:var(--color-primary);"></i></span>
-                        <?php else: ?>
+                        <?php else : ?>
                             <span id="set_unlinked_medias" value="1" class="linkobject toggle-unlinked-medias"><i class="fas fa-link" style="color:#aaa;"></i></span>
                         <?php endif; ?>
                     </span>
@@ -563,9 +562,9 @@ include __DIR__ . '/photo_editor_modal.tpl.php'; ?>
                 
                 <!-- Toggle Today -->
                 <span class="media-header-action" title="<?php echo dol_escape_htmltag($langs->trans('ShowOnlyMediasAddedToday')); ?>">
-                    <?php if (isset($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS) && $user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS): ?>
+                    <?php if (isset($user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS) && $user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS) : ?>
                         <span id="del_today_medias" value="0" class="linkobject toggle-today-medias"><i class="fas fa-calendar-day" style="color:var(--color-primary);"></i></span>
-                    <?php else: ?>
+                    <?php else : ?>
                         <span id="set_today_medias" value="1" class="linkobject toggle-today-medias"><i class="fas fa-calendar-day" style="color:#aaa;"></i></span>
                     <?php endif; ?>
                 </span>

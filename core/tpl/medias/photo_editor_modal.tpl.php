@@ -27,7 +27,6 @@
  *   - onSave {Function} Callback receiving a Blob when the user validates.
  */
 
-
 // Rendering the editor twice would duplicate its element ids and the first one would win:
 // whoever renders it first, the host page or a clickable media, is the one that counts
 if (!empty($GLOBALS['saturnePhotoEditorModalRendered'])) {

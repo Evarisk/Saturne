@@ -117,7 +117,7 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
                                 // The editor works on the original, the thumb only feeds the tile
                                 $originalPath = DOL_URL_ROOT . '/document.php?modulepart=' . $modulepart . '&attachment=0&file=' . str_replace('/', '%2F', $moduleName . '/medias') . '/' . urlencode($fileName) . '&entity=' . $conf->entity;
                                 print '<input class="filename" type="hidden" value="' . $fileName . '">';
-                                
+
                                   print '<div class="photo-selector"><i class="far fa-square unselected-icon"></i><i class="fas fa-check-square selected-icon"></i></div>';
                                 print '<img class="photo photo' . $j . ' open-media-editor" data-filepath="' . htmlspecialchars($relativepath) . '" data-filename="' . htmlspecialchars($fileName) . '" data-fullsrc="' . dol_escape_htmltag($originalPath) . '" width="' . $maxWidth . '" height="' . $maxHeight . '" data-src="' . $fullpath . '" loading="lazy" style="cursor: pointer;">';
                             } else {
