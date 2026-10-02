@@ -1284,9 +1284,13 @@ function saturne_entity_transfer_export(DoliDB $db, array $options): array
         'dolibarr_version' => DOL_VERSION,
         'saturne_version'  => getDolGlobalString('SATURNE_VERSION'),
         'source'           => [
-            'database' => $db->database_name,
-            'prefix'   => MAIN_DB_PREFIX,
-            'entities' => array_map('intval', $options['entities'])
+            'database'      => $db->database_name,
+            'prefix'        => MAIN_DB_PREFIX,
+            'entities'      => array_map('intval', $options['entities']),
+            // The rows hold absolute paths of this server (model_pdf of the documents, some
+            // constants): the import needs both roots to point them at the target install
+            'data_root'     => DOL_DATA_ROOT,
+            'document_root' => DOL_DOCUMENT_ROOT
         ],
         'target_entity'    => (int) $options['target_entity'],
         'scope'            => $options['scope'],
@@ -1630,13 +1634,251 @@ function saturne_entity_transfer_rewrite_prefix(string $statement, string $sourc
 }
 
 /**
+ * Guess the roots of the source install from the absolute paths its rows hold, for an
+ * archive exported before the manifest carried them. A custom template of an entity N
+ * lives under <data root>/N/ecm/, a template shipped by a module under <document root>/custom/.
+ *
+ * @param  array<string> $values       Values holding paths, model_pdf of the documents mostly
+ * @param  int           $sourceEntity Entity the archive was exported from
+ * @return array<string,string>        data_root and document_root, empty when not found
+ */
+function saturne_entity_transfer_guess_roots(array $values, int $sourceEntity): array
+{
+    $roots      = ['data_root' => '', 'document_root' => ''];
+    $entityPart = ($sourceEntity > 1 ? '/' . $sourceEntity : '');
+
+    foreach ($values as $value) {
+        // A model_pdf is "<model name>:<path>", and the path of a Windows install holds a colon too
+        $path = (string) $value;
+        if (preg_match('/^[a-z0-9_]+:(.+)$/i', $path, $matches)) {
+            $path = $matches[1];
+        }
+
+        if (!preg_match('#^(?:/|[a-z]:/)#i', $path)) {
+            continue;
+        }
+
+        if ($roots['data_root'] === '' && preg_match('#^(.+?)' . preg_quote($entityPart, '#') . '/ecm/#', $path, $matches)) {
+            $roots['data_root'] = $matches[1];
+        }
+        if ($roots['document_root'] === '' && preg_match('#^(.+?)/custom/[a-z0-9_]+/#i', $path, $matches)) {
+            $roots['document_root'] = $matches[1];
+        }
+
+        if ($roots['data_root'] !== '' && $roots['document_root'] !== '') {
+            break;
+        }
+    }
+
+    return $roots;
+}
+
+/**
+ * Build the path translations from the source install to this one.
+ * The rows of an entity N write its document directory as N/ (ecm_files.filepath,
+ * last_main_doc), DOL_DATA_ROOT/N/ (constants) or <data root>/N/ (model_pdf), while the
+ * documents of the archive land at the root of the target entity.
+ *
+ * @param  array<string,mixed> $source             Source part of the manifest: entities, data_root, document_root
+ * @param  int                 $targetEntity       Entity the rows are imported into
+ * @param  string              $targetDataRoot     DOL_DATA_ROOT of this install
+ * @param  string              $targetDocumentRoot DOL_DOCUMENT_ROOT of this install
+ * @return array<string,array<string,string>>      anywhere: translations found anywhere in a value, leading: at its start only
+ */
+function saturne_entity_transfer_path_map(array $source, int $targetEntity, string $targetDataRoot, string $targetDocumentRoot): array
+{
+    $map          = ['anywhere' => [], 'leading' => []];
+    $sourceEntity = (int) (((array) ($source['entities'] ?? []))[0] ?? 0);
+    if ($sourceEntity <= 0) {
+        return $map;
+    }
+
+    $targetDataRoot = rtrim($targetDataRoot, '/');
+    $targetPart     = ($targetEntity > 1 ? '/' . $targetEntity : '');
+
+    // The entity directory only moves for an entity other than the first one: the
+    // directory of entity 1 is the root itself, shared with the global templates
+    $moveEntity = ($sourceEntity > 1 && $sourceEntity !== $targetEntity);
+
+    $sourceDataRoot = rtrim((string) ($source['data_root'] ?? ''), '/');
+    if ($sourceDataRoot !== '') {
+        $map['anywhere'][$sourceDataRoot] = $targetDataRoot;
+        if ($sourceEntity > 1) {
+            $map['anywhere'][$sourceDataRoot . '/' . $sourceEntity] = $targetDataRoot . $targetPart;
+        }
+    }
+
+    if ($moveEntity) {
+        $map['anywhere']['DOL_DATA_ROOT/' . $sourceEntity] = 'DOL_DATA_ROOT' . $targetPart;
+        $map['leading'][$sourceEntity . '/']               = ($targetEntity > 1 ? $targetEntity . '/' : '');
+    }
+
+    $sourceDocumentRoot = rtrim((string) ($source['document_root'] ?? ''), '/');
+    if ($sourceDocumentRoot !== '') {
+        $map['anywhere'][$sourceDocumentRoot] = rtrim($targetDocumentRoot, '/');
+    }
+
+    foreach ($map as $kind => $translations) {
+        $map[$kind] = array_filter($translations, function ($to, $from) {
+            return $to !== $from;
+        }, ARRAY_FILTER_USE_BOTH);
+    }
+
+    return $map;
+}
+
+/**
+ * Translate the paths held by one value.
+ * A path is only replaced as a whole: the root /srv/doc must not match /srv/documents,
+ * nor DOL_DATA_ROOT/2 the directory of entity 22.
+ *
+ * @param  string               $value   Value read from the database
+ * @param  array<string,string> $map     Source path => target path, one kind of saturne_entity_transfer_path_map()
+ * @param  bool                 $leading True to translate a path found at the start of the value only
+ * @return string                        Value pointing at this install
+ */
+function saturne_entity_transfer_relocate_path(string $value, array $map, bool $leading = false): string
+{
+    if ($value === '' || empty($map)) {
+        return $value;
+    }
+
+    // The longest path first, so the directory of an entity wins over the bare root
+    $sources = array_keys($map);
+    usort($sources, function ($a, $b) {
+        return strlen($b) - strlen($a);
+    });
+
+    $alternatives = implode('|', array_map(function ($path) {
+        return preg_quote($path, '#');
+    }, $sources));
+
+    // A leading translation ends with its slash already, the others must stop at one
+    $pattern = ($leading ? '#^(?:' . $alternatives . ')#' : '#(?:' . $alternatives . ')(?=$|/)#');
+
+    return (string) preg_replace_callback($pattern, function ($matches) use ($map) {
+        return $map[$matches[0]];
+    }, $value);
+}
+
+/**
+ * Point the paths of the imported rows at the target install: the directory of the
+ * source entity and the roots of the source server mean nothing here, and a document
+ * indexed under 22/ecm/ is not found once the files sit at the root of entity 1.
+ *
+ * @param  DoliDB                            $db           Database handler
+ * @param  array<string,mixed>               $manifest     Manifest of the export
+ * @param  int                               $targetEntity Entity the rows were imported into
+ * @param  array<string,array<string,string>> $schema       Structure of the database, as read by saturne_entity_transfer_get_schema()
+ * @return array<string,mixed>                              updated, messages
+ */
+function saturne_entity_transfer_relocate_paths(DoliDB $db, array $manifest, int $targetEntity, array $schema): array
+{
+    $result = ['updated' => 0, 'messages' => []];
+    $source = (array) ($manifest['source'] ?? []);
+
+    // An archive exported before the manifest carried the roots: the absolute paths of the
+    // documents tell where they were
+    if (empty($source['data_root']) || empty($source['document_root'])) {
+        $values = [];
+        if (isset($schema['saturne_object_documents']['model_pdf'])) {
+            $resql = $db->query('SELECT DISTINCT model_pdf FROM ' . MAIN_DB_PREFIX . 'saturne_object_documents WHERE entity = ' . $targetEntity . " AND model_pdf LIKE '%/%'");
+            if ($resql) {
+                while ($object = $db->fetch_object($resql)) {
+                    $values[] = (string) $object->model_pdf;
+                }
+                $db->free($resql);
+            }
+        }
+
+        $guessed = saturne_entity_transfer_guess_roots($values, (int) (((array) ($source['entities'] ?? []))[0] ?? 0));
+        foreach ($guessed as $key => $root) {
+            if (empty($source[$key]) && $root !== '') {
+                $source[$key]         = $root;
+                $result['messages'][] = 'The manifest does not give the ' . $key . ' of the source, read from the documents : ' . $root;
+            }
+        }
+    }
+
+    $map = saturne_entity_transfer_path_map($source, $targetEntity, DOL_DATA_ROOT, DOL_DOCUMENT_ROOT);
+    if (empty($map['anywhere']) && empty($map['leading'])) {
+        return $result;
+    }
+
+    // Absolute or DOL_DATA_ROOT based paths, and paths relative to DOL_DATA_ROOT. A
+    // last_main_doc written by the core is the filepath of its ecm_files row plus the file name
+    $columns = [
+        ['const', 'value', false],
+        ['saturne_object_documents', 'model_pdf', false],
+        ['ecm_files', 'filepath', true]
+    ];
+    foreach ($schema as $short => $tableColumns) {
+        if (isset($tableColumns['last_main_doc'])) {
+            $columns[] = [$short, 'last_main_doc', true];
+        }
+    }
+
+    // Only the tables of the archive: the rows of the target the import did not write are none of its business
+    $imported = [];
+    foreach ((array) ($manifest['tables'] ?? []) as $table) {
+        $imported[strtolower((string) ($table['short'] ?? ''))] = true;
+    }
+
+    foreach ($columns as [$short, $column, $leading]) {
+        $translations = $map[$leading ? 'leading' : 'anywhere'];
+        $primaryKey   = saturne_entity_transfer_primary_key($schema[$short] ?? []);
+
+        if (empty($translations) || !isset($schema[$short][$column]) || !isset($schema[$short]['entity']) || $primaryKey === '') {
+            continue;
+        }
+        if (!empty($imported) && !isset($imported[$short])) {
+            continue;
+        }
+
+        $filters = [];
+        foreach (array_keys($translations) as $path) {
+            $filters[] = $column . " LIKE '" . ($leading ? '' : '%') . $db->escape($db->escapeforlike($path)) . "%'";
+        }
+
+        $resql = $db->query('SELECT ' . $primaryKey . ' AS id, ' . $column . ' AS path FROM ' . MAIN_DB_PREFIX . $short . ' WHERE entity = ' . $targetEntity . ' AND (' . implode(' OR ', $filters) . ')');
+        if (!$resql) {
+            $result['messages'][] = MAIN_DB_PREFIX . $short . ' : ' . $db->lasterror();
+            continue;
+        }
+
+        $updates = [];
+        while ($object = $db->fetch_object($resql)) {
+            $relocated = saturne_entity_transfer_relocate_path((string) $object->path, $translations, $leading);
+            if ($relocated !== (string) $object->path) {
+                $updates[(int) $object->id] = $relocated;
+            }
+        }
+        $db->free($resql);
+
+        foreach ($updates as $id => $path) {
+            if ($db->query('UPDATE ' . MAIN_DB_PREFIX . $short . ' SET ' . $column . " = '" . $db->escape($path) . "' WHERE " . $primaryKey . ' = ' . $id)) {
+                $result['updated']++;
+            } else {
+                $result['messages'][] = MAIN_DB_PREFIX . $short . ' : ' . $db->lasterror();
+            }
+        }
+
+        if (!empty($updates)) {
+            $result['messages'][] = MAIN_DB_PREFIX . $short . '.' . $column . ' : ' . count($updates) . ' path(s) pointed at this install';
+        }
+    }
+
+    return $result;
+}
+
+/**
  * Replay a dump produced by saturne_entity_transfer_export().
  * Shared by scripts/import_entity.php and admin/entity_transfer.php.
  *
  * @param  DoliDB              $db      Database handler
  * @param  string              $sqlFile Path of the dump to replay
  * @param  array<string,mixed> $options manifest, purge, dry_run, stop_on_error, documents_dir, target_entity
- * @return array<string,mixed>          statements, executed, purged, errors, messages, checks
+ * @return array<string,mixed>          statements, executed, purged, errors, messages, checks, relocated
  */
 function saturne_entity_transfer_import(DoliDB $db, string $sqlFile, array $options): array
 {
@@ -1652,7 +1894,7 @@ function saturne_entity_transfer_import(DoliDB $db, string $sqlFile, array $opti
     $manifest     = $options['manifest'];
     $sourcePrefix = (string) ($manifest['source']['prefix'] ?? MAIN_DB_PREFIX);
 
-    $result = ['statements' => 0, 'executed' => 0, 'purged' => 0, 'errors' => 0, 'messages' => [], 'checks' => [], 'documents' => 0, 'extrafields' => 0];
+    $result = ['statements' => 0, 'executed' => 0, 'purged' => 0, 'errors' => 0, 'messages' => [], 'checks' => [], 'documents' => 0, 'extrafields' => 0, 'relocated' => 0];
 
     // Before anything is replayed: the INSERT of a table of extra fields names its columns,
     // they have to exist by then
@@ -1807,6 +2049,12 @@ function saturne_entity_transfer_import(DoliDB $db, string $sqlFile, array $opti
         } else {
             $result['documents'] = $copied;
         }
+    }
+
+    if (empty($options['dry_run'])) {
+        $relocated           = saturne_entity_transfer_relocate_paths($db, $manifest, (int) $options['target_entity'], $schema);
+        $result['relocated'] = $relocated['updated'];
+        $result['messages']  = array_merge($result['messages'], $relocated['messages']);
     }
 
     if (!empty($manifest['tables']) && empty($options['dry_run'])) {
