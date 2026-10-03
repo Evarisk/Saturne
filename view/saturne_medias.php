@@ -75,9 +75,14 @@ saturne_header(1, '', $title, $help_url);
 
 print load_fiche_titre($title . ' - ' . $moduleName, '', 'fontawesome_fa-images_fas_#63acdc');
 
-print '<div class="saturne-media-tabs">';
+print '<div class="saturne-media-tabs" style="display: flex; align-items: center;">';
 print '<a class="saturne-media-tab' . ($pendingOnly ? ' active' : '') . '" href="' . dol_escape_htmltag($_SERVER['PHP_SELF']) . '?module_name=' . urlencode($moduleName) . '&pending=1"><i class="fas fa-hourglass-half"></i> ' . $langs->trans('PendingMedias') . '</a>';
 print '<a class="saturne-media-tab' . ($pendingOnly ? '' : ' active') . '" href="' . dol_escape_htmltag($_SERVER['PHP_SELF']) . '?module_name=' . urlencode($moduleName) . '&pending=0"><i class="fas fa-images"></i> ' . $langs->trans('AllMedias') . '</a>';
+
+print '<div class="wpeo-button button-main open-media-gallery add-media modal-open" style="margin-left: auto; padding: 6px 12px;" title="' . dol_escape_htmltag($langs->trans("AddMedia")) . '">';
+print '<input type="hidden" class="modal-options" data-modal-to-open="media_gallery" data-from-id="0" data-from-type="' . dol_escape_htmltag($moduleNameLowerCase) . '" data-from-subtype="" data-from-subdir=""/>';
+print '<i class="fas fa-plus"></i>';
+print '</div>';
 print '</div>';
 
 // The pane keeps the markup the list view reloads itself into after an assignment
