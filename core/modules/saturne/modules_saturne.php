@@ -868,7 +868,7 @@ class SaturneDocumentModel extends CommonDocGenerator
 
         $societyName = preg_replace('/\./', '_', getDolGlobalString('MAIN_INFO_SOCIETE_NOM'));
         $date        = dol_print_date(dol_now(), 'dayxcard');
-        $newFileTmp  = $date . (dol_strlen($object->ref) > 0 ? '_' . $object->ref : '') . '_' . $objectDocumentRef . ($moreParam['hideTemplateName'] ? '' : '_' . $outputLangs->transnoentities($newFileTmp)) . '_' . (!empty($moreParam['documentName']) ? $moreParam['documentName'] : '') . $societyName . (!empty($moreParam['additionalName']) ? $moreParam['additionalName'] : '');
+        $newFileTmp  = $date . (dol_strlen($object->ref) > 0 ? '_' . $object->ref : '') . '_' . $objectDocumentRef . (!empty($moreParam['hideTemplateName']) ? '' : '_' . $outputLangs->transnoentities($newFileTmp)) . '_' . (!empty($moreParam['documentName']) ? $moreParam['documentName'] : '') . $societyName . (!empty($moreParam['additionalName']) ? $moreParam['additionalName'] : '');
 
         if (!empty($moreParam['specimen'])) {
             $newFileTmp .= '_specimen';
