@@ -392,11 +392,18 @@ window.saturne.mediaPending.assignMedias = function() {
     processData: false,
     contentType: 'application/json',
     success    : function(resp) {
-      if (typeof resp === 'string') {
+      var jsonStr = $(resp).find('#saturne-assign-medias-response').text();
+      if (jsonStr) {
+        try { resp = JSON.parse(jsonStr); } catch (e) {}
+      } else if (typeof resp === 'string') {
         try { resp = JSON.parse(resp); } catch (e) {}
       }
       if (resp && resp.message) {
-        $.jnotify(resp.message, 'mesgs');
+        if (typeof $.jnotify === 'function') {
+          $.jnotify(resp.message, {color: 'green'});
+        } else {
+          alert(resp.message);
+        }
       }
       // Assigned medias are no longer pending: the list is rebuilt rather than patched
       pending.removeClass('wpeo-loader');

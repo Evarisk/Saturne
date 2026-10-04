@@ -334,14 +334,14 @@ if ($subaction == 'assignMedias') {
                 
                 $langs->load('medias@saturne');
                 $msg = $langs->trans('Media') . ' : ' . implode(', ', $assigned) . ' ' . $langs->trans('AssignedTo') . ' ' . $targetObject->ref . ' ok';
-                echo json_encode(['success' => true, 'message' => $msg]);
+                echo '<span id="saturne-assign-medias-response" style="display:none;">' . json_encode(['success' => true, 'message' => $msg]) . '</span>';
                 exit;
             }
-            echo json_encode(['success' => true]);
+            echo '<span id="saturne-assign-medias-response" style="display:none;">' . json_encode(['success' => true]) . '</span>';
             exit;
         }
     }
-    echo json_encode(['success' => false]);
+    echo '<span id="saturne-assign-medias-response" style="display:none;">' . json_encode(['success' => false]) . '</span>';
     exit;
 }
 
