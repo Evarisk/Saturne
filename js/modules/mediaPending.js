@@ -425,33 +425,52 @@ window.saturne.mediaPending.unlinkFromRecord = function(event) {
 
   var button = $(this);
   var pane   = button.closest('.saturne-media-tab-pane');
+  var confirmMsg = button.attr('data-confirm') || button.attr('title');
 
-  if (!window.confirm(button.attr('data-confirm') || button.attr('title'))) {
-    return;
-  }
+  var dialogDiv = $('<div title="Confirmation"></div>').html(confirmMsg);
+  dialogDiv.dialog({
+    resizable: false,
+    height: "auto",
+    width: 400,
+    modal: true,
+    buttons: [
+      {
+        text: "Ok",
+        click: function() {
+          $(this).dialog("close");
 
-  var token          = window.saturne.toolbox.getToken();
-  var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+          var token          = window.saturne.toolbox.getToken();
+          var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
 
-  window.saturne.loader.display(button.closest('.saturne-pending'));
+          window.saturne.loader.display(button.closest('.saturne-pending'));
 
-  $.ajax({
-    url        : document.URL + querySeparator + 'subaction=unlinkMediaFromRecord&token=' + token,
-    type       : 'POST',
-    data       : JSON.stringify({
-      element : button.data('element'),
-      ref     : button.data('ref'),
-      filename: button.closest('.saturne-pending-row').data('filename')
-    }),
-    processData: false,
-    contentType: 'application/json',
-    success    : function() {
-      // The media may have gone back to being pending: the list is rebuilt rather than patched
-      window.saturne.mediaPending.load(pane.attr('data-loaded', '0'));
-    },
-    error      : function() {
-      $('.wpeo-loader').removeClass('wpeo-loader');
-    }
+          $.ajax({
+            url        : document.URL + querySeparator + 'subaction=unlinkMediaFromRecord&token=' + token,
+            type       : 'POST',
+            data       : JSON.stringify({
+              element : button.data('element'),
+              ref     : button.data('ref'),
+              filename: button.closest('.saturne-pending-row').data('filename')
+            }),
+            processData: false,
+            contentType: 'application/json',
+            success    : function() {
+              // The media may have gone back to being pending: the list is rebuilt rather than patched
+              window.saturne.mediaPending.load(pane.attr('data-loaded', '0'));
+            },
+            error      : function() {
+              $('.wpeo-loader').removeClass('wpeo-loader');
+            }
+          });
+        }
+      },
+      {
+        text: "Annuler",
+        click: function() {
+          $(this).dialog("close");
+        }
+      }
+    ]
   });
 };
 
