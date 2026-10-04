@@ -68,6 +68,7 @@ window.saturne.mediaPending.event = function() {
   $(document).on('change', '.saturne-pending-object-type', window.saturne.mediaPending.loadTargets);
   $(document).on('change', '.saturne-pending-object', window.saturne.mediaPending.refreshSelection);
   $(document).on('click', '.saturne-pending-assign', window.saturne.mediaPending.assignMedias);
+    $(document).on('click', '.saturne-pending-assign-current', window.saturne.mediaPending.assignMedias);
   $(document).on('change', '.saturne-pending-description', window.saturne.mediaPending.saveDescription);
 };
 
