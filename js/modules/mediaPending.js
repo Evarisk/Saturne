@@ -391,7 +391,20 @@ window.saturne.mediaPending.assignMedias = function() {
     data       : JSON.stringify({ objectType: objectType, objectId: objectId, filenames: filenames }),
     processData: false,
     contentType: 'application/json',
-    success    : function() {
+    success    : function(resp) {
+      var jsonStr = $(resp).find('#saturne-assign-medias-response').text();
+      if (jsonStr) {
+        try { resp = JSON.parse(jsonStr); } catch (e) {}
+      } else if (typeof resp === 'string') {
+        try { resp = JSON.parse(resp); } catch (e) {}
+      }
+      if (resp && resp.message) {
+        if (typeof $.jnotify === 'function') {
+          $.jnotify(resp.message, {color: 'green'});
+        } else {
+          alert(resp.message);
+        }
+      }
       // Assigned medias are no longer pending: the list is rebuilt rather than patched
       pending.removeClass('wpeo-loader');
       window.saturne.mediaPending.load(pending.closest('.saturne-media-tab-pane').attr('data-loaded', '0'));
@@ -419,33 +432,52 @@ window.saturne.mediaPending.unlinkFromRecord = function(event) {
 
   var button = $(this);
   var pane   = button.closest('.saturne-media-tab-pane');
+  var confirmMsg = button.attr('data-confirm') || button.attr('title');
 
-  if (!window.confirm(button.attr('data-confirm') || button.attr('title'))) {
-    return;
-  }
+  var dialogDiv = $('<div title="Confirmation"></div>').html(confirmMsg);
+  dialogDiv.dialog({
+    resizable: false,
+    height: "auto",
+    width: 400,
+    modal: true,
+    buttons: [
+      {
+        text: "Ok",
+        click: function() {
+          $(this).dialog("close");
 
-  var token          = window.saturne.toolbox.getToken();
-  var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+          var token          = window.saturne.toolbox.getToken();
+          var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
 
-  window.saturne.loader.display(button.closest('.saturne-pending'));
+          window.saturne.loader.display(button.closest('.saturne-pending'));
 
-  $.ajax({
-    url        : document.URL + querySeparator + 'subaction=unlinkMediaFromRecord&token=' + token,
-    type       : 'POST',
-    data       : JSON.stringify({
-      element : button.data('element'),
-      ref     : button.data('ref'),
-      filename: button.closest('.saturne-pending-row').data('filename')
-    }),
-    processData: false,
-    contentType: 'application/json',
-    success    : function() {
-      // The media may have gone back to being pending: the list is rebuilt rather than patched
-      window.saturne.mediaPending.load(pane.attr('data-loaded', '0'));
-    },
-    error      : function() {
-      $('.wpeo-loader').removeClass('wpeo-loader');
-    }
+          $.ajax({
+            url        : document.URL + querySeparator + 'subaction=unlinkMediaFromRecord&token=' + token,
+            type       : 'POST',
+            data       : JSON.stringify({
+              element : button.data('element'),
+              ref     : button.data('ref'),
+              filename: button.closest('.saturne-pending-row').data('filename')
+            }),
+            processData: false,
+            contentType: 'application/json',
+            success    : function() {
+              // The media may have gone back to being pending: the list is rebuilt rather than patched
+              window.saturne.mediaPending.load(pane.attr('data-loaded', '0'));
+            },
+            error      : function() {
+              $('.wpeo-loader').removeClass('wpeo-loader');
+            }
+          });
+        }
+      },
+      {
+        text: "Annuler",
+        click: function() {
+          $(this).dialog("close");
+        }
+      }
+    ]
   });
 };
 
