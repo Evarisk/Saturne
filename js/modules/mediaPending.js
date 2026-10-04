@@ -94,7 +94,7 @@ window.saturne.mediaPending.initTypeSelect = function(container) {
     var modal = container.closest('.wpeo-modal');
     var fromId = modal.attr('data-from-id');
     if (fromId && container.find('.saturne-pending-assign-current').length === 0) {
-      var btn = $('<div class="wpeo-button button-main saturne-pending-assign-current button-disable" style="margin-right: 5px;"><i class="fas fa-share-square"></i> Transférer dans la galerie</div>');
+      var btn = $('<div class="wpeo-button button-main saturne-pending-assign-current button-disable" style="margin-right: 5px;"><i class="fas fa-share-square"></i> Transf\u00e9rer dans la galerie</div>');
       container.find('.saturne-pending-assign').before(btn);
     }
 
