@@ -68,6 +68,7 @@ window.saturne.mediaPending.event = function() {
   $(document).on('change', '.saturne-pending-object-type', window.saturne.mediaPending.loadTargets);
   $(document).on('change', '.saturne-pending-object', window.saturne.mediaPending.refreshSelection);
   $(document).on('click', '.saturne-pending-assign', window.saturne.mediaPending.assignMedias);
+    $(document).on('click', '.saturne-pending-assign-current', window.saturne.mediaPending.assignMedias);
   $(document).on('change', '.saturne-pending-description', window.saturne.mediaPending.saveDescription);
 };
 
@@ -88,9 +89,14 @@ window.saturne.mediaPending.event = function() {
 window.saturne.mediaPending.initTypeSelect = function(container) {
   var select = container.find('.saturne-pending-object-type');
 
-  if (!select.length || typeof $.fn.select2 !== 'function' || select.hasClass('select2-hidden-accessible')) {
-    return;
-  }
+  
+
+    var modal = container.closest('.wpeo-modal');
+    var fromId = modal.attr('data-from-id');
+    if (fromId && container.find('.saturne-pending-assign-current').length === 0) {
+      var btn = $('<div class="wpeo-button button-main saturne-pending-assign-current button-disable" style="margin-right: 5px;"><i class="fas fa-share-square"></i> Transf\u00e9rer dans la galerie</div>');
+      container.find('.saturne-pending-assign').before(btn);
+    }
 
   var withPicto = function(state) {
     if (!state.id) {
@@ -312,7 +318,8 @@ window.saturne.mediaPending.refreshSelection = function() {
     counter.text(counter.data('total'));
   }
 
-  pending.find('.saturne-pending-assign').toggleClass('button-disable', !(selected > 0 && target));
+  pending.find('.saturne-pending-assign').toggleClass('button-disable', selected === 0 || !target);
+  pending.find('.saturne-pending-assign-current').toggleClass('button-disable', selected === 0);
 };
 
 /**
@@ -371,6 +378,12 @@ window.saturne.mediaPending.assignMedias = function() {
   var pending        = button.closest('.saturne-pending');
   var objectType     = pending.find('.saturne-pending-object-type').val();
   var objectId       = pending.find('.saturne-pending-object').val();
+
+  if (button.hasClass('saturne-pending-assign-current')) {
+    var modal = pending.closest('.wpeo-modal');
+    objectType = modal.attr('data-from-type');
+    objectId = modal.attr('data-from-id');
+  }
   var token          = window.saturne.toolbox.getToken();
   var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
   var filenames      = [];
