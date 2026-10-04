@@ -318,8 +318,8 @@ window.saturne.mediaPending.refreshSelection = function() {
     counter.text(counter.data('total'));
   }
 
-  
-  pending.find('.saturne-pending-assign-current').toggleClass('button-disable', !(selected > 0));
+  pending.find('.saturne-pending-assign').toggleClass('button-disable', selected === 0 || !target);
+  pending.find('.saturne-pending-assign-current').toggleClass('button-disable', selected === 0);
 };
 
 /**
@@ -377,7 +377,7 @@ window.saturne.mediaPending.assignMedias = function() {
 
   var pending        = button.closest('.saturne-pending');
   var objectType     = pending.find('.saturne-pending-object-type').val();
-  
+  var objectId       = pending.find('.saturne-pending-object').val();
 
   if (button.hasClass('saturne-pending-assign-current')) {
     var modal = pending.closest('.wpeo-modal');
