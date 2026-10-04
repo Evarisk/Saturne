@@ -331,9 +331,18 @@ if ($subaction == 'assignMedias') {
             if (!empty($assigned)) {
                 $targetObject->context['medias'] = $assigned;
                 $targetObject->call_trigger('SATURNE_MEDIA_LINK', $user);
+                
+                $langs->load('medias@saturne');
+                $msg = $langs->trans('Media') . ' : ' . implode(', ', $assigned) . ' ' . $langs->trans('AssignedTo') . ' ' . $targetObject->ref . ' ok';
+                echo json_encode(['success' => true, 'message' => $msg]);
+                exit;
             }
+            echo json_encode(['success' => true]);
+            exit;
         }
     }
+    echo json_encode(['success' => false]);
+    exit;
 }
 
 // Description of a library media, kept in the ECM index next to the file

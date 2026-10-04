@@ -391,7 +391,13 @@ window.saturne.mediaPending.assignMedias = function() {
     data       : JSON.stringify({ objectType: objectType, objectId: objectId, filenames: filenames }),
     processData: false,
     contentType: 'application/json',
-    success    : function() {
+    success    : function(resp) {
+      if (typeof resp === 'string') {
+        try { resp = JSON.parse(resp); } catch (e) {}
+      }
+      if (resp && resp.message) {
+        $.jnotify(resp.message, 'mesgs');
+      }
       // Assigned medias are no longer pending: the list is rebuilt rather than patched
       pending.removeClass('wpeo-loader');
       window.saturne.mediaPending.load(pending.closest('.saturne-media-tab-pane').attr('data-loaded', '0'));

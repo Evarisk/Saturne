@@ -937,6 +937,31 @@ function saturne_get_objects_metadata(string $type = ''): array
             'class_path'     => 'fourn/class/fournisseur.commande.class.php',
             'lib_path'       => 'core/lib/fourn.lib.php',
         ];
+    }
+
+    if (isModEnabled('expensereport')) {
+        $objectsMetadata['expensereport'] = [
+            'mainmenu'       => 'hrm',
+            'leftmenu'       => 'expensereport',
+            'langs'          => 'ExpenseReport',
+            'langfile'       => 'trips',
+            'picto'          => 'trip',
+            'color'          => '#e8bf7f',
+            'class_name'     => 'ExpenseReport',
+            'post_name'      => 'fk_expensereport',
+            'link_name'      => 'expensereport',
+            'tab_type'       => 'expensereport',
+            'table_element'  => 'expensereport',
+            'name_field'     => 'ref',
+            'hook_name_card' => 'expensereportcard',
+            'hook_name_list' => 'expensereportlist',
+            'create_url'     => 'expensereport/card.php',
+            'list_url'       => 'expensereport/list.php',
+            'defaultsort'    => 't.datec',
+            'defaultorder'   => 'DESC',
+            'class_path'     => 'expensereport/class/expensereport.class.php',
+            'lib_path'       => 'core/lib/expensereport.lib.php',
+        ];
         //$objectsMetadata['supplier_invoice'] = [
 //            'langs'      => 'SupplierInvoice',
 //            'langfile'   => 'bills',
