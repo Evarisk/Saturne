@@ -333,7 +333,7 @@ if ($subaction == 'assignMedias') {
                 $targetObject->call_trigger('SATURNE_MEDIA_LINK', $user);
                 
                 $langs->load('medias@saturne');
-                $msg = $langs->trans('Media') . ' : ' . implode(', ', $assigned) . ' ' . $langs->trans('AssignedTo') . ' ' . $targetObject->ref . ' ok';
+                $msg = $langs->trans('Medias') . ' : ' . implode(', ', $assigned) . ' ' . mb_strtolower($langs->trans('AssignedTo'), 'UTF-8') . ' ' . $targetObject->ref;
                 echo '<span id="saturne-assign-medias-response" style="display:none;">' . json_encode(['success' => true, 'message' => $msg]) . '</span>';
                 exit;
             }
