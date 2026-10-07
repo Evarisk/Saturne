@@ -143,7 +143,6 @@ class modSaturne extends DolibarrModules
             'DoliSIRH'         => 'dolisirh',
             'DigiriskDolibarr' => 'digiriskdolibarr',
             'EasyURL'          => 'easyurl',
-            'GMAO'             => 'gmao',
             'DigiKanban'       => 'digikanban',
             'DoliLetter'       => 'doliletter',
             'Priseo'           => 'priseo',
