@@ -266,8 +266,8 @@ class modSaturne extends DolibarrModules
                 'url'      => '/' . $moduleNameLowerCase . '/admin/setup.php',
                 'langs'    => $moduleNameLowerCase . '@' . $moduleNameLowerCase,
                 'position' => 2000 + $r,
-                'enabled'  => 'isModEnabled(' . $moduleNameLowerCase . ')',
-                'perms'    => '$user->hasRight(' . $moduleNameLowerCase . ', \'adminpage\', \'read\')',
+                'enabled'  => 'isModEnabled(\'' . $moduleNameLowerCase . '\')',
+                'perms'    => '$user->hasRight(\'' . $moduleNameLowerCase . '\', \'adminpage\', \'read\')',
                 'target'   => '',
                 'user'     => 2,
             ];
@@ -298,8 +298,8 @@ class modSaturne extends DolibarrModules
                 'url'      => '',
                 'langs'    => $moduleNameLowerCase . '@' . $moduleNameLowerCase,
                 'position' => 2000 + $r,
-                'enabled'  => 'isModEnabled(' . $moduleNameLowerCase . ')',
-                'perms'    => '$user->hasRight(' . $moduleNameLowerCase . ', \'read\')',
+                'enabled'  => 'isModEnabled(\'' . $moduleNameLowerCase . '\')',
+                'perms'    => '$user->hasRight(\'' . $moduleNameLowerCase . '\', \'read\')',
                 'target'   => '',
                 'user'     => 2,
             ];
