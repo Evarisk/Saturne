@@ -511,12 +511,118 @@ class SaturneSignature extends SaturneObject
     {
         $userSignatory = new self($this->db);
 
-        $result = $userSignatory->fetch(0, '', ' AND fk_object = ' . $userID . ' AND status > 0 AND object_type = "user" AND role = "UserSignature"');
+        $result = $userSignatory->fetchUserSignatory($userID);
         if ($result > 0 && dol_strlen($userSignatory->signature) > 0) {
             return $userSignatory->signature;
         }
 
         return '';
+    }
+
+    /**
+     * Fetch the active electronic signature records of a user, in every entity
+     *
+     * A user is one person whatever the entity he works in : with multicompany, filtering on the
+     * current entity gave him one signature per entity, each blind to the others
+     *
+     * @param  int                      $userID ID of the user
+     * @return array<int,SaturneObject>|int Records, the one carrying the most recent signature first, < 0 if KO
+     * @throws Exception
+     */
+    public function fetchUserSignatories(int $userID)
+    {
+        if ($userID <= 0) {
+            return [];
+        }
+
+        $signatory                       = new self($this->db);
+        $signatory->ismultientitymanaged = 0;
+
+        $filter      = ['customsql' => 't.fk_object = ' . $userID . ' AND t.status > 0 AND t.object_type = "user" AND t.role = "UserSignature"'];
+        $signatories = $signatory->fetchAll('DESC,DESC', 't.signature_date,t.rowid', 0, 0, $filter);
+        if (!is_array($signatories)) {
+            return $signatories;
+        }
+
+        return array_values($signatories);
+    }
+
+    /**
+     * Load the electronic signature record of a user, whatever the entity it was created in
+     *
+     * @param  int $userID ID of the user
+     * @return int         > 0 if OK, 0 if the user has no record, < 0 if KO
+     * @throws Exception
+     */
+    public function fetchUserSignatory(int $userID): int
+    {
+        $signatories = $this->fetchUserSignatories($userID);
+        if (!is_array($signatories)) {
+            return -1;
+        }
+        if (empty($signatories)) {
+            return 0;
+        }
+
+        return $this->fetch($signatories[0]->id);
+    }
+
+    /**
+     * Save the electronic signature of a user on his single record, shared by every entity
+     *
+     * The record is updated where it stands, and the copies that older versions left in other entities
+     * are retired so that every entity reads the same signature
+     *
+     * @param  User   $user      User that saves
+     * @param  int    $userID    ID of the user owning the signature
+     * @param  string $signature Signature as a data URL
+     * @param  int    $noTrigger 0 = launch the signed trigger, 1 = disable it
+     * @return int               > 0 if OK, < 0 if KO
+     * @throws Exception
+     */
+    public function saveUserSignature(User $user, int $userID, string $signature, int $noTrigger = 0): int
+    {
+        if ($userID <= 0 || !self::isValidSignatureData($signature)) {
+            return -1;
+        }
+
+        $signatories = $this->fetchUserSignatories($userID);
+        if (!is_array($signatories)) {
+            return -1;
+        }
+
+        if (empty($signatories)) {
+            if ($this->setSignatory($userID, 'user', 'user', [$userID], 'UserSignature', 1) <= 0) {
+                return -1;
+            }
+        } else {
+            $this->fetch($signatories[0]->id);
+            foreach (array_slice($signatories, 1) as $duplicate) {
+                $duplicate->setDeleted($user, 1);
+            }
+        }
+
+        $this->signature      = $signature;
+        $this->signature_date = dol_now();
+
+        if ($this->update($user, 1) <= 0) {
+            return -1;
+        }
+
+        return $this->setSigned($user, $noTrigger);
+    }
+
+    /**
+     * Check that a string is an image data URL, the only format the signature canvas produces
+     *
+     * The value is printed as an image source : anything else would be HTML injected in the page
+     *
+     * @param  string $signature Candidate signature
+     * @return bool              True when it is a PNG or JPEG data URL
+     */
+    public static function isValidSignatureData(string $signature): bool
+    {
+        return (bool) preg_match('#^data:image/(png|jpeg);base64,[A-Za-z0-9+/=]+$#', $signature);
     }
 
     /**

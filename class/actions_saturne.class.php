@@ -221,34 +221,47 @@ class ActionsSaturne
 
 
         if (strpos($parameters['context'], 'usercard') !== false) {
-            $id = GETPOST('id');
+            $id = GETPOSTINT('id');
+
+            // The user being created has no id yet
+            if ($id <= 0) {
+                return 0;
+            }
 
             require_once __DIR__ . '/saturnesignature.class.php';
 
             $signatory = new SaturneSignature($this->db);
 
-            $result = $signatory->fetch(0, '', ' AND fk_object = ' . $id . ' AND status > 0 AND object_type = "user" AND role = "UserSignature"');
-            if ($result <= 0) {
+            // Read in every entity : the signature belongs to the user, not to the entity he works in
+            $result = $signatory->fetchUserSignatory($id);
+            if ($result < 0) {
                 return 0;
             }
 
-            $pictoPath = dol_buildpath('/saturne/img/saturne_color.png', 1);
+            $hasSignature = $result > 0 && SaturneSignature::isValidSignatureData((string) $signatory->signature);
+            $pictoPath    = dol_buildpath('/saturne/img/saturne_color.png', 1);
 
             $out  = '<div class="signature-container" data-public-interface="false">';
             $out .= '<div class="signature-user">';
             $out .= img_picto('', $pictoPath, '', 1, 0, 0, '', 'pictoModule');
-            if (dol_strlen($signatory->signature) > 0) {
-                $out .= '<div class="signature-image"><img src="' . $signatory->signature . '" width="200px" height="100px" style="border: #0b419b solid 2px" alt=""></div>';
+            if ($hasSignature) {
+                $out .= '<div class="signature-image"><img src="' . dol_escape_htmltag($signatory->signature) . '" width="200px" height="100px" style="border: #0b419b solid 2px" alt="' . dol_escape_htmltag($langs->trans('ElectronicSignature')) . '"></div>';
+                if (!empty($signatory->signature_date)) {
+                    $out .= '<span class="opacitymedium">' . dol_escape_htmltag($langs->trans('UserSignatureDate', dol_print_date($signatory->signature_date, 'dayhour'))) . '</span>';
+                }
+            } else {
+                $out .= '<span class="opacitymedium">' . dol_escape_htmltag($langs->trans('UserSignatureNone')) . '</span>';
             }
+            // A signature is personal : only its owner can draw it, even an administrator cannot sign for him
             if ($user->id == $id) {
-                $out .= '<div class="wpeo-button button-blue button-square-50 modal-open signature-button" value="' . $signatory->id . '">';
-                $out .= '<input type="hidden" class="modal-options" data-modal-to-open="modal-signature' . $signatory->id . '" data-from-test="' . $signatory->id . '">';
-                $out .= img_picto('', 'signature', 'class="paddingright"') . $langs->trans("Sign");
+                $out .= '<div class="wpeo-button button-blue button-square-50 modal-open signature-button">';
+                $out .= '<input type="hidden" class="modal-options" data-modal-to-open="modal-signature-user">';
+                $out .= img_picto('', 'signature', 'class="paddingright"') . $langs->trans($hasSignature ? 'UserSignatureChange' : 'Sign');
                 $out .= '</div>'; ?>
 
                 <div class="modal-signature">
                     <input type="hidden" name="token" value="<?php echo newToken(); ?>">
-                    <div class="wpeo-modal modal-signature" id="modal-signature<?php echo $signatory->id; ?>">
+                    <div class="wpeo-modal modal-signature" id="modal-signature-user">
                         <div class="modal-container wpeo-modal-event">
                             <!-- Modal-Header-->
                             <div class="modal-header">
@@ -414,33 +427,44 @@ class ActionsSaturne
     {
         global $user;
 
+        if (strpos($parameters['context'], 'usercard') !== false) {
+            global $langs;
+
+            // The extrafield labels and the widget printed in the footer live in the signature domain
+            $langs->load('signature@saturne');
+        }
+
         if (strpos($parameters['context'], 'usercard') !== false && $action == 'add_signature') {
-            $id = GETPOST('id');
+            global $langs;
+
+            $id = GETPOSTINT('id');
 
             require_once __DIR__ . '/saturnesignature.class.php';
 
             $signatory = new SaturneSignature($this->db);
             $data      = json_decode(file_get_contents('php://input'), true);
+            $signature = (is_array($data) && is_string($data['signature'] ?? null)) ? $data['signature'] : '';
 
-            $result = $signatory->fetch(0, '', ' AND fk_object = ' . $id . ' AND status > 0 AND object_type = "user" AND role = "UserSignature"');
-            if ($result <= 0) {
-                $signatory->setSignatory($id, $user->element, 'user', [$id], 'UserSignature');
-            }
-
-            $signatory->signature      = $data['signature'];
-            $signatory->signature_date = dol_now();
-
-            $result = $signatory->update($user, 1);
-            if ($result > 0) {
-                // Creation signature OK
-                $signatory->setSigned($user, false);
+            // Without this check, any user could overwrite the signature of another one by changing the id
+            if ($id <= 0 || $user->id != $id) {
+                setEventMessages($langs->trans('ErrorUserSignatureNotOwner'), [], 'errors');
+                http_response_code(403);
                 exit;
-            } elseif (!empty($signatory->errors)) {
-                // Creation signature KO
-                setEventMessages('', $signatory->errors, 'errors');
-            } else {
-                setEventMessages($signatory->error, [], 'errors');
             }
+            if (!SaturneSignature::isValidSignatureData($signature)) {
+                setEventMessages($langs->trans('ErrorUserSignatureInvalid'), [], 'errors');
+                http_response_code(400);
+                exit;
+            }
+
+            if ($signatory->saveUserSignature($user, $id, $signature) > 0) {
+                setEventMessages($langs->trans('UserSignatureSaved'), []);
+                exit;
+            }
+
+            setEventMessages($signatory->error ?: $langs->trans('Error'), $signatory->errors, 'errors');
+            http_response_code(500);
+            exit;
         } elseif (strpos($parameters['context'], 'categorycard') !== false) {
             global $langs;
 
