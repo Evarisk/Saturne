@@ -148,7 +148,11 @@ window.saturne.signature.createSignature = function() {
   let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
 
   if (!window.saturne.signature.canvas.signaturePad.isEmpty()) {
-    var signature = window.saturne.signature.canvas.toDataURL();
+    // The user card signature is reused in documents : framed on the stroke it no longer ends up
+    // as a tiny scribble in the corner of an empty image
+    var signature = $(window.saturne.signature.canvas).closest('.user-signature-modal').length ?
+      window.saturne.signature.getTrimmedDataURL(window.saturne.signature.canvas) :
+      window.saturne.signature.canvas.toDataURL();
   }
 
   window.saturne.loader.display($(this));
@@ -177,6 +181,71 @@ window.saturne.signature.createSignature = function() {
       }
     }
   });
+};
+
+/**
+ * Get the signature framed on the drawn stroke, as a data URL
+ *
+ * The frame keeps the proportions of the canvas : documents resize the image to a fixed width
+ * while keeping its ratio, a frame tight on a vertical stroke would come out oversized there
+ *
+ * @memberof Saturne_Framework_Signature
+ *
+ * @since   23.2.1
+ * @version 23.2.1
+ *
+ * @param  {HTMLCanvasElement} canvas Signature canvas
+ * @return {string}                   PNG data URL
+ */
+window.saturne.signature.getTrimmedDataURL = function(canvas) {
+  let width  = canvas.width;
+  let height = canvas.height;
+  let pixels = canvas.getContext('2d').getImageData(0, 0, width, height).data;
+
+  let minX = width;
+  let minY = height;
+  let maxX = -1;
+  let maxY = -1;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (pixels[(y * width + x) * 4 + 3] > 0) {
+        minX = Math.min(minX, x);
+        maxX = Math.max(maxX, x);
+        minY = Math.min(minY, y);
+        maxY = Math.max(maxY, y);
+      }
+    }
+  }
+  if (maxX < 0) {
+    return canvas.toDataURL();
+  }
+
+  // A margin around the stroke, then the frame grows on its short side to the canvas ratio
+  let margin     = Math.round(Math.max(maxX - minX, maxY - minY) * 0.08) + 4;
+  let cropWidth  = maxX - minX + 1 + 2 * margin;
+  let cropHeight = maxY - minY + 1 + 2 * margin;
+  let ratio      = width / height;
+  // Documents enlarge the image to a fixed width : a tiny stroke must not come out pixelated
+  cropWidth = Math.max(cropWidth, Math.round(width * 0.4));
+  if (cropWidth / cropHeight < ratio) {
+    cropWidth = Math.round(cropHeight * ratio);
+  } else {
+    cropHeight = Math.round(cropWidth / ratio);
+  }
+  cropWidth  = Math.min(cropWidth, width);
+  cropHeight = Math.min(cropHeight, height);
+
+  let centerX = (minX + maxX) / 2;
+  let centerY = (minY + maxY) / 2;
+  let cropX   = Math.round(Math.min(Math.max(centerX - cropWidth / 2, 0), width - cropWidth));
+  let cropY   = Math.round(Math.min(Math.max(centerY - cropHeight / 2, 0), height - cropHeight));
+
+  let trimmed    = document.createElement('canvas');
+  trimmed.width  = cropWidth;
+  trimmed.height = cropHeight;
+  trimmed.getContext('2d').drawImage(canvas, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+
+  return trimmed.toDataURL();
 };
 
 /**
