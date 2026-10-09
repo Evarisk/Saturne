@@ -169,7 +169,13 @@ window.saturne.signature.createSignature = function() {
         window.location.reload();
       }
     },
-    error: function() {}
+    error: function() {
+      // The refusal is queued as an event message : reloading displays it, instead of leaving the
+      // loader spinning forever
+      if ($('.public-card__container').data('public-interface') !== true) {
+        window.location.reload();
+      }
+    }
   });
 };
 
