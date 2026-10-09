@@ -253,7 +253,7 @@ class ActionsSaturne
             }
             $out .= '<div class="user-signature__side">';
             if ($hasSignature && !empty($signatory->signature_date)) {
-                $out .= '<span class="user-signature__date opacitymedium">' . dol_escape_htmltag($langs->trans('UserSignatureDate', dol_print_date($signatory->signature_date, 'dayhour'))) . '</span>';
+                $out .= '<span class="user-signature__date opacitymedium">' . dol_escape_htmltag($langs->trans('UserSignatureDate', dol_print_date($signatory->signature_date, 'dayhour', 'tzuserrel'))) . '</span>';
             }
             // A signature is personal : only its owner can draw it, even an administrator cannot sign for him
             if ($user->id == $id) {
