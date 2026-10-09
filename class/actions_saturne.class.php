@@ -239,51 +239,53 @@ class ActionsSaturne
             }
 
             $hasSignature = $result > 0 && SaturneSignature::isValidSignatureData((string) $signatory->signature);
-            $pictoPath    = dol_buildpath('/saturne/img/saturne_color.png', 1);
 
-            $out  = '<div class="signature-container" data-public-interface="false">';
-            $out .= '<div class="signature-user">';
-            $out .= img_picto('', $pictoPath, '', 1, 0, 0, '', 'pictoModule');
+            $out = '<div class="user-signature">';
             if ($hasSignature) {
-                $out .= '<div class="signature-image"><img src="' . dol_escape_htmltag($signatory->signature) . '" width="200px" height="100px" style="border: #0b419b solid 2px" alt="' . dol_escape_htmltag($langs->trans('ElectronicSignature')) . '"></div>';
-                if (!empty($signatory->signature_date)) {
-                    $out .= '<span class="opacitymedium">' . dol_escape_htmltag($langs->trans('UserSignatureDate', dol_print_date($signatory->signature_date, 'dayhour'))) . '</span>';
-                }
+                $out .= '<div class="user-signature__preview">';
+                $out .= '<img src="' . dol_escape_htmltag($signatory->signature) . '" alt="' . dol_escape_htmltag($langs->trans('ElectronicSignature')) . '">';
+                $out .= '</div>';
             } else {
-                $out .= '<span class="opacitymedium">' . dol_escape_htmltag($langs->trans('UserSignatureNone')) . '</span>';
+                $out .= '<div class="user-signature__preview user-signature__preview--empty">';
+                $out .= '<i class="fas fa-signature"></i>';
+                $out .= '<span>' . dol_escape_htmltag($langs->trans('UserSignatureNone')) . '</span>';
+                $out .= '</div>';
+            }
+            $out .= '<div class="user-signature__side">';
+            if ($hasSignature && !empty($signatory->signature_date)) {
+                $out .= '<span class="user-signature__date opacitymedium">' . dol_escape_htmltag($langs->trans('UserSignatureDate', dol_print_date($signatory->signature_date, 'dayhour'))) . '</span>';
             }
             // A signature is personal : only its owner can draw it, even an administrator cannot sign for him
             if ($user->id == $id) {
-                $out .= '<div class="wpeo-button button-blue button-square-50 modal-open signature-button">';
+                $out .= '<div class="wpeo-button button-blue button-size-small modal-open user-signature__button">';
                 $out .= '<input type="hidden" class="modal-options" data-modal-to-open="modal-signature-user">';
-                $out .= img_picto('', 'signature', 'class="paddingright"') . $langs->trans($hasSignature ? 'UserSignatureChange' : 'Sign');
-                $out .= '</div>'; ?>
+                $out .= '<i class="fas fa-pen"></i><span>' . dol_escape_htmltag($langs->trans($hasSignature ? 'UserSignatureChange' : 'Sign')) . '</span>';
+                $out .= '</div>';
+            }
+            $out .= '</div>';
+            $out .= '</div>';
 
+            if ($user->id == $id) { ?>
                 <div class="modal-signature">
                     <input type="hidden" name="token" value="<?php echo newToken(); ?>">
-                    <div class="wpeo-modal modal-signature" id="modal-signature-user">
+                    <div class="wpeo-modal modal-signature user-signature-modal" id="modal-signature-user">
                         <div class="modal-container wpeo-modal-event">
-                            <!-- Modal-Header-->
                             <div class="modal-header">
-                                <h2 class="modal-title"><?php echo $langs->trans('Signature'); ?></h2>
+                                <h2 class="modal-title"><?php echo $langs->trans('ElectronicSignature'); ?></h2>
                                 <div class="modal-close"><i class="fas fa-times"></i></div>
                             </div>
-                            <!-- Modal-ADD Signature Content-->
-                            <div class="modal-content" id="#modalContent">
-                                <canvas class="canvas-container canvas-signature" style="height: 95%; width: 98%; border: #0b419b solid 2px"></canvas>
+                            <div class="modal-content">
+                                <canvas class="canvas-container canvas-signature"></canvas>
                             </div>
-                            <!-- Modal-Footer-->
                             <div class="modal-footer">
-                                <div class="signature-erase wpeo-button button-square-50 button-grey"><span><i class="fas fa-eraser"></i></span></div>
-                                <div class="signature-validate wpeo-button button-square-50 button-disable"><span><i class="fas fa-file-signature"></i></span></div>
+                                <div class="signature-erase wpeo-button button-grey"><i class="fas fa-eraser"></i> <?php echo $langs->trans('Erase'); ?></div>
+                                <div class="signature-validate wpeo-button button-disable"><i class="fas fa-check"></i> <?php echo $langs->trans('Validate'); ?></div>
                             </div>
                         </div>
                     </div>
                 </div>
-                    <?php
-            }
-            $out .= '</div></div>'; ?>
-
+                <?php
+            } ?>
             <script>
                 $('.user_extras_electronic_signature').html(<?php echo json_encode($out); ?>);
             </script>
