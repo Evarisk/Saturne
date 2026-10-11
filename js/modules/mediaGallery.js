@@ -389,14 +389,15 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 
 	window.saturne.loader.display($('#progressBarContainer'));
 
-	let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
+	let baseUrl = document.URL.split('#')[0];
+	let querySeparator = window.saturne.toolbox.getQuerySeparator(baseUrl);
 	let textToShow = '';
 
 	$.each(files, function(index, file) {
 		let formdata = new FormData();
 		formdata.append("userfile[]", file);
 		$.ajax({
-			url: document.URL + querySeparator + "subaction=uploadPhoto&token=" + token,
+			url: baseUrl + querySeparator + "subaction=uploadPhoto&token=" + token,
 			type: "POST",
 			data: formdata,
 			processData: false,
@@ -419,34 +420,54 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 					$('#progressBarContainer').find('.loader-spin').remove();
 					window.saturne.loader.display(mediaGallery.find('.ecm-photo-list-content'));
 					setTimeout(() => {
-						mediaGallery.html($(resp).find('#media_gallery').children()).promise().done( () => {
-							if (totalCount == 1) {
-								$('#media_gallery').find('.save-photo').removeClass('button-disable');
-								$('#media_gallery').find('.delete-photo').removeClass('button-disable');
-								$('#media_gallery').find('.clickable-photo0').addClass('clicked-photo');
-							}
-							if ($(resp).find('.error-medias').length) {
-								$('.messageErrorSendPhoto').find('.notice-subtitle').html(textToShow)
-								$('.messageErrorSendPhoto').removeClass('hidden');
-							} else {
-                                let successMessage = totalCount > 1 ? totalCount + " médias ajoutés avec succès" : "1 média ajouté avec succès";
-                                $('.messageSuccessSendPhoto').find('.notice-title').html(successMessage);
-								$('.messageSuccessSendPhoto').removeClass('hidden');
-							}
-                            window.saturne.mediaGallery.currentOffset = 1;
-                            window.saturne.mediaGallery.hasMore = true;
-                            window.saturne.mediaGallery.isLoading = false;
-                            setTimeout(window.saturne.mediaGallery.checkFill, 200);
-							mediaGallery.attr('data-from-id', objectId);
-							mediaGallery.attr('data-from-type', objectType);
-							mediaGallery.attr('data-from-subtype', objectSubtype);
-							mediaGallery.attr('data-from-subdir', objectSubdir);
-							mediaGallery.find('.wpeo-button').attr('value', objectId);
-              window.saturne.modal.loadLazyImages();
-						})
-					}, 800)
+						let newChildren = $(resp).find('#media_gallery').children();
+						if (newChildren.length) {
+							mediaGallery.html(newChildren).promise().done( () => {
+								if (totalCount == 1) {
+									$('#media_gallery').find('.save-photo').removeClass('button-disable');
+									$('#media_gallery').find('.delete-photo').removeClass('button-disable');
+									$('#media_gallery').find('.clickable-photo0').addClass('clicked-photo');
+								}
+								if ($(resp).find('.error-medias').length) {
+									$('.messageErrorSendPhoto').find('.notice-subtitle').html(textToShow);
+									$('.messageErrorSendPhoto').removeClass('hidden');
+								} else {
+									let successMessage = totalCount > 1 ? totalCount + " médias ajoutés avec succès" : "1 média ajouté avec succès";
+									$('.messageSuccessSendPhoto').find('.notice-title').html(successMessage);
+									$('.messageSuccessSendPhoto').removeClass('hidden');
+								}
+								window.saturne.mediaGallery.currentOffset = 1;
+								window.saturne.mediaGallery.hasMore = true;
+								window.saturne.mediaGallery.isLoading = false;
+								setTimeout(window.saturne.mediaGallery.checkFill, 200);
+								mediaGallery.attr('data-from-id', objectId);
+								mediaGallery.attr('data-from-type', objectType);
+								mediaGallery.attr('data-from-subtype', objectSubtype);
+								mediaGallery.attr('data-from-subdir', objectSubdir);
+								mediaGallery.find('.wpeo-button').attr('value', objectId);
+								window.saturne.modal.loadLazyImages();
+								$('.wpeo-loader').removeClass('wpeo-loader');
+								$('.loader-spin').remove();
+							});
+						} else {
+							$('.wpeo-loader').removeClass('wpeo-loader');
+							$('.loader-spin').remove();
+						}
+					}, 800);
 				}
 			},
+			error: function() {
+				requestCompleted++;
+				textToShow += "Erreur lors de l'envoi d'un fichier.<br>";
+				if (requestCompleted === totalCount) {
+					$('.wpeo-loader').removeClass('wpeo-loader');
+					$('#progressBarContainer').fadeOut(800);
+					$('#progressBarContainer').find('.loader-spin').remove();
+					$('.messageErrorSendPhoto').find('.notice-subtitle').html(textToShow);
+					$('.messageErrorSendPhoto').removeClass('hidden');
+					$('.ecm-photo-list-content').removeClass('wpeo-loader').find('.loader-spin').remove();
+				}
+			}
 		});
 	})
 };
@@ -803,27 +824,42 @@ window.saturne.mediaGallery.selectPage = function( event ) {
 window.saturne.mediaGallery.toggleTodayMedias = function( event ) {
 
   let token          = window.saturne.toolbox.getToken();
-  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
+  let baseUrl        = document.URL.split('#')[0];
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(baseUrl);
 
-  let toggleValue = $(this).attr('value')
+  let toggleValue = $(this).attr('value');
 
-  window.saturne.loader.display($('.ecm-photo-list-content'))
-  window.saturne.loader.display($('.wpeo-pagination'))
+  window.saturne.loader.display($('.ecm-photo-list-content'));
+  window.saturne.loader.display($('.wpeo-pagination'));
 
   $.ajax({
-    url: document.URL + querySeparator + "subaction=toggleTodayMedias&toggle_today_medias=" + toggleValue + "&token=" + token,
+    url: baseUrl + querySeparator + "subaction=toggleTodayMedias&toggle_today_medias=" + toggleValue + "&token=" + token,
     type: "POST",
     processData: false,
     contentType: false,
     success: function ( resp ) {
-      $('.toggle-today-medias').replaceWith($(resp).find('.toggle-today-medias'))
-      $('.ecm-photo-list-content').replaceWith($(resp).find('.ecm-photo-list-content'))
-      $('.wpeo-pagination').replaceWith($(resp).find('.wpeo-pagination'))
+      let newToggle = $(resp).find('.toggle-today-medias');
+      let newContent = $(resp).find('.ecm-photo-list-content');
+      let newPagination = $(resp).find('.wpeo-pagination');
+
+      if (newToggle.length) {
+        $('.toggle-today-medias').replaceWith(newToggle);
+      }
+      if (newContent.length) {
+        $('.ecm-photo-list-content').replaceWith(newContent);
+      }
+      if (newPagination.length) {
+        $('.wpeo-pagination').replaceWith(newPagination);
+      }
       window.saturne.modal.loadLazyImages();
     },
     error: function ( ) {
+    },
+    complete: function ( ) {
+      $('.wpeo-loader').removeClass('wpeo-loader');
+      $('.loader-spin').remove();
     }
-  })
+  });
 };
 
 /**
@@ -837,27 +873,42 @@ window.saturne.mediaGallery.toggleTodayMedias = function( event ) {
 window.saturne.mediaGallery.toggleUnlinkedMedias = function( event ) {
 
   let token          = window.saturne.toolbox.getToken();
-  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
+  let baseUrl        = document.URL.split('#')[0];
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(baseUrl);
 
-  let toggleValue = $(this).attr('value')
+  let toggleValue = $(this).attr('value');
 
-  window.saturne.loader.display($('.ecm-photo-list-content'))
-  window.saturne.loader.display($('.wpeo-pagination'))
+  window.saturne.loader.display($('.ecm-photo-list-content'));
+  window.saturne.loader.display($('.wpeo-pagination'));
 
   $.ajax({
-    url: document.URL + querySeparator + "subaction=toggleUnlinkedMedias&toggle_unlinked_medias=" + toggleValue + "&token=" + token,
+    url: baseUrl + querySeparator + "subaction=toggleUnlinkedMedias&toggle_unlinked_medias=" + toggleValue + "&token=" + token,
     type: "POST",
     processData: false,
     contentType: false,
     success: function ( resp ) {
-      $('.toggle-unlinked-medias').replaceWith($(resp).find('.toggle-unlinked-medias'))
-      $('.ecm-photo-list-content').replaceWith($(resp).find('.ecm-photo-list-content'))
-      $('.wpeo-pagination').replaceWith($(resp).find('.wpeo-pagination'))
+      let newToggle = $(resp).find('.toggle-unlinked-medias');
+      let newContent = $(resp).find('.ecm-photo-list-content');
+      let newPagination = $(resp).find('.wpeo-pagination');
+
+      if (newToggle.length) {
+        $('.toggle-unlinked-medias').replaceWith(newToggle);
+      }
+      if (newContent.length) {
+        $('.ecm-photo-list-content').replaceWith(newContent);
+      }
+      if (newPagination.length) {
+        $('.wpeo-pagination').replaceWith(newPagination);
+      }
       window.saturne.modal.loadLazyImages();
     },
     error: function ( ) {
+    },
+    complete: function ( ) {
+      $('.wpeo-loader').removeClass('wpeo-loader');
+      $('.loader-spin').remove();
     }
-  })
+  });
 };
 
 /**
@@ -870,13 +921,14 @@ window.saturne.mediaGallery.toggleUnlinkedMedias = function( event ) {
  */
 window.saturne.mediaGallery.regenerateThumbs = function() {
   let token          = window.saturne.toolbox.getToken();
-  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+  let baseUrl        = document.URL.split('#')[0];
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(baseUrl);
   let fullname       = $(this).closest('.photo-image').find('.fullname').attr('data-fullname');
 
   window.saturne.loader.display($(this).closest('.photo-image'));
 
   $.ajax({
-    url: document.URL + querySeparator + 'subaction=regenerate_thumbs&token=' + token,
+    url: baseUrl + querySeparator + 'subaction=regenerate_thumbs&token=' + token,
     type: 'POST',
     data: JSON.stringify({
       fullname: fullname
@@ -884,10 +936,17 @@ window.saturne.mediaGallery.regenerateThumbs = function() {
     processData: false,
     contentType: 'application/json',
     success: function(resp) {
-      $('.ecm-photo-list-content').replaceWith($(resp).find('.ecm-photo-list-content'));
+      let newContent = $(resp).find('.ecm-photo-list-content');
+      if (newContent.length) {
+        $('.ecm-photo-list-content').replaceWith(newContent);
+      }
       window.saturne.modal.loadLazyImages();
     },
-    error: function() {}
+    error: function() {},
+    complete: function() {
+      $('.wpeo-loader').removeClass('wpeo-loader');
+      $('.loader-spin').remove();
+    }
   });
 };
 
