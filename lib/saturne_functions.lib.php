@@ -550,7 +550,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
         print '<div class="arearef heightref valignmiddle centpercent' . $bannerTypeClass . '">';
 
         $modulePart   = '';
-        $bannerEntity = (is_object($object) && !empty($object->entity)) ? $object->entity : $conf->entity;
+        $bannerEntity = !empty($object->entity) ? (int) $object->entity : (int) $conf->entity;
         $baseDir      = $conf->$moduleNameLowerCase->multidir_output[$bannerEntity] ?? ($conf->$moduleNameLowerCase->dir_output ?? '');
         $subDir       = $object->element . '/' . $object->ref . '/photos/';
 
