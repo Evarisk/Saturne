@@ -496,19 +496,21 @@ if (!(isset($error) && $error) && $subaction == 'pagination') {
 }
 
 if (!(isset($error) && $error) && $subaction == 'toggleTodayMedias') {
-    $toggleValue = GETPOST('toggle_today_medias');
+    $toggleValue = GETPOSTINT('toggle_today_medias');
 
     $tabparam['SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS'] = $toggleValue;
 
     dol_set_user_param($db, $conf, $user, $tabparam);
+    $user->conf->SATURNE_MEDIA_GALLERY_SHOW_TODAY_MEDIAS = $toggleValue;
 }
 
 if (!(isset($error) && $error) && $subaction == 'toggleUnlinkedMedias') {
-    $toggleValue = GETPOST('toggle_unlinked_medias');
+    $toggleValue = GETPOSTINT('toggle_unlinked_medias');
 
     $tabparam['SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS'] = $toggleValue;
 
     dol_set_user_param($db, $conf, $user, $tabparam);
+    $user->conf->SATURNE_MEDIA_GALLERY_SHOW_UNLINKED_MEDIAS = $toggleValue;
 }
 
 if (!(isset($error) && $error) && $subaction == 'regenerate_thumbs') {
