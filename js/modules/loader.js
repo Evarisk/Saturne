@@ -69,13 +69,18 @@ window.saturne.loader.event = function() {
  * @return {void}
  */
 window.saturne.loader.display = function( element ) {
+	if ( ! element || ! element.length ) {
+		return;
+	}
 	if ( element.hasClass( 'button-progress' ) ) {
 		element.addClass( 'button-load' );
 	} else {
 		element.addClass( 'wpeo-loader' );
 		var el = $( '<span class="loader-spin"></span>' );
-		element[0].loaderElement = el;
-		element.append( element[0].loaderElement );
+		if ( element[0] ) {
+			element[0].loaderElement = el;
+		}
+		element.append( el );
 	}
 };
 
@@ -88,9 +93,13 @@ window.saturne.loader.display = function( element ) {
  * @return {void}
  */
 window.saturne.loader.remove = function( element ) {
-	if ( 0 < element.length && ! element.hasClass( 'button-progress' ) ) {
+	if ( element && 0 < element.length && ! element.hasClass( 'button-progress' ) ) {
 		element.removeClass( 'wpeo-loader' );
 
-		$( element[0].loaderElement ).remove();
+		if ( element[0] && element[0].loaderElement ) {
+			$( element[0].loaderElement ).remove();
+		} else {
+			element.find( '.loader-spin' ).remove();
+		}
 	}
 };

@@ -549,9 +549,10 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
         $bannerTypeClass = (property_exists($object, 'element_type') && dol_strlen($object->element_type)) ? ' banner-element-' . dol_string_nospecial($object->element_type) : '';
         print '<div class="arearef heightref valignmiddle centpercent' . $bannerTypeClass . '">';
 
-        $modulePart = '';
-        $baseDir    = $conf->$moduleNameLowerCase->multidir_output[$conf->entity];
-        $subDir     = $object->element . '/' . $object->ref . '/photos/';
+        $modulePart   = '';
+        $bannerEntity = (is_object($object) && !empty($object->entity)) ? $object->entity : $conf->entity;
+        $baseDir      = $conf->$moduleNameLowerCase->multidir_output[$bannerEntity] ?? ($conf->$moduleNameLowerCase->dir_output ?? '');
+        $subDir       = $object->element . '/' . $object->ref . '/photos/';
 
         $resHook = $hookmanager->executeHooks('saturneBannerTabCustomSubdir', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
         if ($resHook > 0) {

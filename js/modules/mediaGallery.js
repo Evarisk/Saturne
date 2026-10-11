@@ -822,6 +822,9 @@ window.saturne.mediaGallery.selectPage = function( event ) {
  * @return {void}
  */
 window.saturne.mediaGallery.toggleTodayMedias = function( event ) {
+  if ( event ) {
+    event.preventDefault();
+  }
 
   let token          = window.saturne.toolbox.getToken();
   let baseUrl        = document.URL.split('#')[0];
@@ -829,8 +832,12 @@ window.saturne.mediaGallery.toggleTodayMedias = function( event ) {
 
   let toggleValue = $(this).attr('value');
 
-  window.saturne.loader.display($('.ecm-photo-list-content'));
-  window.saturne.loader.display($('.wpeo-pagination'));
+  if ($('.ecm-photo-list-content').length) {
+    window.saturne.loader.display($('.ecm-photo-list-content'));
+  }
+  if ($('.wpeo-pagination').length) {
+    window.saturne.loader.display($('.wpeo-pagination'));
+  }
 
   $.ajax({
     url: baseUrl + querySeparator + "subaction=toggleTodayMedias&toggle_today_medias=" + toggleValue + "&token=" + token,
@@ -871,6 +878,9 @@ window.saturne.mediaGallery.toggleTodayMedias = function( event ) {
  * @return {void}
  */
 window.saturne.mediaGallery.toggleUnlinkedMedias = function( event ) {
+  if ( event ) {
+    event.preventDefault();
+  }
 
   let token          = window.saturne.toolbox.getToken();
   let baseUrl        = document.URL.split('#')[0];
@@ -878,8 +888,12 @@ window.saturne.mediaGallery.toggleUnlinkedMedias = function( event ) {
 
   let toggleValue = $(this).attr('value');
 
-  window.saturne.loader.display($('.ecm-photo-list-content'));
-  window.saturne.loader.display($('.wpeo-pagination'));
+  if ($('.ecm-photo-list-content').length) {
+    window.saturne.loader.display($('.ecm-photo-list-content'));
+  }
+  if ($('.wpeo-pagination').length) {
+    window.saturne.loader.display($('.wpeo-pagination'));
+  }
 
   $.ajax({
     url: baseUrl + querySeparator + "subaction=toggleUnlinkedMedias&toggle_unlinked_medias=" + toggleValue + "&token=" + token,
