@@ -404,10 +404,7 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
                 }
 
                 // ADDED_FOR_AI
-                if (
-                    isModEnabled('ai') && !empty($moreParams['useAi']) &&
-                    (getDolGlobalString('AI_API_SERVICE') && getDolGlobalString('AI_API_' . dol_strtoupper(getDolGlobalString('AI_API_SERVICE')) . '_KEY') && getDolGlobalString('AI_API_' . dol_strtoupper(getDolGlobalString('AI_API_SERVICE')) . '_URL'))
-                ) {
+                if (!empty($moreParams['useAi']) && saturne_media_ai_enabled()) {
                     $return .=
                         '<div class="wpeo-button button-square-50 button-blue ' . (is_object($object) ? $object->element : '') . ' media-gallery-ai" value="' . (is_object($object) ? $object->id : 0) . '">
 							<input class="element-linked-id" type="hidden" value="' . ((is_object($object) ? $object->id : 0) > 0 ? (is_object($object) ? $object->id : 0) : 0) . '">
@@ -852,6 +849,20 @@ function saturne_get_media_linked_elements(string $moduleName, string $fileName)
 }
 
 /**
+ * Tell whether the medias can be sent to the AI module for analysis
+ *
+ * The AI module has to be enabled, with a service picked along with its API key and endpoint.
+ *
+ * @return bool True when an analysis can be requested
+ */
+function saturne_media_ai_enabled(): bool
+{
+    $aiService = dol_strtoupper(getDolGlobalString('AI_API_SERVICE'));
+
+    return isModEnabled('ai') && !empty($aiService) && getDolGlobalString('AI_API_' . $aiService . '_KEY') !== '' && getDolGlobalString('AI_API_' . $aiService . '_URL') !== '';
+}
+
+/**
  * Render the Saturne Media Block (Photo + File + Audio) for external modules.
  *
  * Usage example:
@@ -871,6 +882,12 @@ function saturne_get_media_linked_elements(string $moduleName, string $fileName)
  *                               - file_upload_data (array)               Extra key => value POST data forwarded on document upload
  *                               - show_gallery     (bool, default true)  Show gallery of existing files
  *                               - show_upload      (bool, default true)  Show upload/delete controls
+ *                               - show_ai          (bool, default false) Show the button sending a photo to the AI
+ *                                                                        module, once that module is set up. The host
+ *                                                                        page answers subaction=readFileAI (POST
+ *                                                                        filename, module_name, sub_dir) in JSON, and
+ *                                                                        gets the answer back in the
+ *                                                                        saturne:media-analysed event
  * @return string                  HTML block string
  */
 function saturne_render_media_block(string $moduleName, string $subDir = '', string $prefix = '', string $rightString = '', array $options = []): string
@@ -884,6 +901,7 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
     $showFile    = isset($options['show_file'])    ? $options['show_file']    : false;
     $showGallery = isset($options['show_gallery']) ? $options['show_gallery'] : true;
     $showUpload  = isset($options['show_upload'])  ? $options['show_upload']  : true;
+    $showAi      = !empty($options['show_ai']) && saturne_media_ai_enabled();
 
     // A block may belong to a record rather than to the module alone. It then carries the record,
     // so the editor can tell which of its medias the record displays
@@ -915,7 +933,7 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
 
     if ($showPhoto) {
         $out .= '<div class="linked-medias medias ' . dol_escape_htmltag($containerClass) . '" id="' . $idPrefix . 'master-media-row-container-photo">';
-        $out .= '  <div class="fast-upload-options" data-from-type="' . dol_escape_htmltag($moduleNameLowerCase) . '" data-from-subtype="' . dol_escape_htmltag($containerClass) . '" data-from-subdir="' . dol_escape_htmltag($subDir) . '" data-prefix="' . dol_escape_htmltag($prefix) . '" data-rights="' . dol_escape_htmltag($rightString) . '"' . $objectAttributes . '></div>';
+        $out .= '  <div class="fast-upload-options" data-from-type="' . dol_escape_htmltag($moduleNameLowerCase) . '" data-from-subtype="' . dol_escape_htmltag($containerClass) . '" data-from-subdir="' . dol_escape_htmltag($subDir) . '" data-prefix="' . dol_escape_htmltag($prefix) . '" data-rights="' . dol_escape_htmltag($rightString) . '"' . $objectAttributes . ($showAi ? ' data-ai="1"' : '') . '></div>';
         $out .= '  <div class="saturne-media-upload-block" data-module="' . dol_escape_htmltag($moduleNameLowerCase) . '" data-subdir="' . dol_escape_htmltag($subDir) . '">';
 
         if ($showUpload) {
@@ -963,6 +981,13 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
                 $out .= '  <img src="' . $firstImg . '" />';
                 $out .= '  <span class="saturne-media-count-badge">' . $totalPhotos . '</span>';
                 $out .= '</div>';
+
+                // Analyses the photo shown on the thumbnail, the latest one; the others from the editor
+                if ($showAi) {
+                    $out .= '<button type="button" class="saturne-media-btn saturne-media-ai" data-filename="' . dol_escape_htmltag($imageFiles[0]['name']) . '" data-error="' . dol_escape_htmltag($langs->trans('ErrorImageAnalysis')) . '" title="' . dol_escape_htmltag($langs->trans('AnalyseImageWithAI')) . '">';
+                    $out .= '  <i class="fas fa-magic"></i>';
+                    $out .= '</button>';
+                }
             }
         }
 

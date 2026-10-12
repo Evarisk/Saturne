@@ -59,6 +59,7 @@ window.saturne.mediaBlock.init = function() {
 window.saturne.mediaBlock.event = function() {
   $(document).on('change', '.saturne-photo-upload', window.saturne.mediaBlock.onPhotoSelected);
   $(document).on('click', '.saturne-media-gallery .open-media-editor-as-gallery', window.saturne.mediaBlock.onGalleryClick);
+  $(document).on('click', '.saturne-media-gallery .saturne-media-ai', window.saturne.mediaBlock.onAnalyseClick);
   $(document).on('click', '.open-media-editor-linked', window.saturne.mediaBlock.onLinkedPhotoClick);
   $(document).on('change', '.saturne-file-upload', window.saturne.mediaBlock.onFileSelected);
   $(document).on('click', '.saturne-open-files-library', window.saturne.mediaBlock.onFilesLibraryOpen);
@@ -132,6 +133,91 @@ window.saturne.mediaBlock.onGalleryClick = function() {
 };
 
 /**
+ * Triggered when the user clicks the wand next to the gallery thumbnail.
+ * Has the photo shown on the thumbnail analysed by the AI module.
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @returns {void}
+ */
+window.saturne.mediaBlock.onAnalyseClick = function() {
+  var button = $(this);
+
+  window.saturne.mediaBlock.analysePhoto(button.data('filename'), button.closest('.linked-medias'), button);
+};
+
+/**
+ * Send a photo of a block to the AI module and hand the analysis over to the host page
+ *
+ * The host page answers subaction=readFileAI in JSON. Filling its own fields is up to it: the answer
+ * is broadcast as the saturne:media-analysed event, along with the block it comes from.
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param   {string} filename Name of the photo, in the folder of the block
+ * @param   {jQuery} block    The .linked-medias block owning the photo
+ * @param   {jQuery} button   Wand that asked for the analysis, showing its progress
+ * @returns {void}
+ */
+window.saturne.mediaBlock.analysePhoto = function(filename, block, button) {
+  var context = window.saturne.mediaBlock.mediaContext(block);
+
+  if (!filename || !context || context.mode !== 'module' || button.prop('disabled')) {
+    return;
+  }
+
+  var icon           = button.find('i');
+  var token          = window.saturne.toolbox.getToken();
+  var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+  var formData       = new FormData();
+
+  var onFailure = function(error) {
+    icon.attr('class', 'fas fa-times');
+    $.jnotify(button.data('error'), 'error', true);
+    if (error) {
+      console.error(error);
+    }
+  };
+
+  formData.append('filename', filename);
+  formData.append('module_name', context.module);
+  formData.append('sub_dir', context.subdir);
+
+  button.prop('disabled', true);
+  icon.attr('class', 'fas fa-circle-notch fa-spin');
+
+  $.ajax({
+    url         : document.URL + querySeparator + 'subaction=readFileAI&token=' + token,
+    type        : 'POST',
+    data        : formData,
+    processData : false,
+    contentType : false,
+    dataType    : 'json',
+    success     : function(response) {
+      if (!response || !response.success) {
+        onFailure(response && response.error);
+        return;
+      }
+
+      icon.attr('class', 'fas fa-check');
+      $(document).trigger('saturne:media-analysed', [response, block]);
+    },
+    error       : function(xhr, status, error) {
+      onFailure(error || status);
+    },
+    complete    : function() {
+      button.prop('disabled', false);
+    }
+  });
+};
+
+/**
  * Resolve the filename carried by a Dolibarr file URL (document.php or viewimage.php)
  *
  * @memberof Saturne_MediaBlock
@@ -195,7 +281,9 @@ window.saturne.mediaBlock.mediaContext = function(block) {
     var context = {
       mode  : 'module',
       module: fastUpload.data('from-type'),
-      subdir: fastUpload.data('from-subdir')
+      subdir: fastUpload.data('from-subdir'),
+      // The host page answers the analysis of its photos
+      ai    : fastUpload.data('ai') === 1
     };
 
     // A block rendered for a record also says which of its medias that record displays
@@ -257,9 +345,10 @@ window.saturne.mediaBlock.openEditor = function(urls, startIndex, block) {
     return window.saturne.mediaBlock.filenameFromUrl(urls[window.saturne.photoEditor._currentIndex] || '');
   };
 
-  var onSave   = null;
-  var onDelete = null;
-  var favorite = null;
+  var onSave    = null;
+  var onDelete  = null;
+  var favorite  = null;
+  var onAnalyse = null;
 
   if (context.mode === 'module') {
     onSave = function(blob) {
@@ -273,6 +362,12 @@ window.saturne.mediaBlock.openEditor = function(urls, startIndex, block) {
         window.saturne.mediaBlock.deletePhoto(deletedFilename, context.module, context.subdir, block);
       }
     };
+
+    if (context.ai) {
+      onAnalyse = function(url, button) {
+        window.saturne.mediaBlock.analysePhoto(window.saturne.mediaBlock.filenameFromUrl(url), block, $(button));
+      };
+    }
   } else {
     onSave = function(blob) {
       window.saturne.mediaBlock.saveObjectMedia(blob, currentFileName(), context);
@@ -288,7 +383,7 @@ window.saturne.mediaBlock.openEditor = function(urls, startIndex, block) {
     };
   }
 
-  window.saturne.photoEditor.open(urls, onSave, startIndex, onDelete, null, favorite);
+  window.saturne.photoEditor.open(urls, onSave, startIndex, onDelete, null, favorite, onAnalyse);
 };
 
 /**

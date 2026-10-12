@@ -86,6 +86,8 @@ FileDeleted               = The file has been deleted
 ErrorFileNotDeleted       = The file could not be deleted
 
 AIAnalyseImage	= Image analysis: %s
+AnalyseImageWithAI = Analyse the image with AI
+ErrorImageAnalysis = The image analysis failed
 
 # Multi-upload
 ValidateAll = Validate all

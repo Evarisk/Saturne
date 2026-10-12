@@ -90,6 +90,36 @@
         }
     }
 
+    &__ai {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        margin: 0 4px 0 0;
+        padding: 0;
+        background: none;
+        border: none;
+        border-radius: 8px;
+        color: #3498db;
+        font-size: 17px;
+        line-height: 1;
+        cursor: pointer;
+        transition: background-color 0.15s, color 0.15s, transform 0.1s;
+
+        &:hover {
+            background: rgba(52, 152, 219, 0.14);
+        }
+
+        &:active {
+            transform: scale(0.92);
+        }
+
+        &:disabled {
+            cursor: progress;
+        }
+    }
+
     &__favorite {
         display: inline-flex;
         align-items: center;

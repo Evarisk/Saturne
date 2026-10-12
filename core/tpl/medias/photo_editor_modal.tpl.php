@@ -48,6 +48,9 @@ $GLOBALS['saturnePhotoEditorModalRendered'] = 1;
                     <span id="saturne-photo-resolution-display"></span>
                 </h3>
             </div>
+            <button type="button" id="saturne-btn-ai-photo" class="saturne-photo-editor-header__ai" style="display: none;" title="<?php echo dol_escape_htmltag($langs->trans('AnalyseImageWithAI')); ?>" data-error="<?php echo dol_escape_htmltag($langs->trans('ErrorImageAnalysis')); ?>">
+                <i class="fas fa-magic"></i>
+            </button>
             <button type="button" id="saturne-btn-favorite-photo" class="saturne-photo-editor-header__favorite" style="display: none;" title="<?php echo dol_escape_htmltag($langs->trans('SetPhotoAsFavorite')); ?>">
                 <i class="far fa-star"></i>
             </button>
