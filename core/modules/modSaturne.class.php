@@ -76,7 +76,7 @@ class modSaturne extends DolibarrModules
         $this->editor_url  = 'https://evarisk.com/';
 
         // Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
-        $this->version = '23.2.1';
+        $this->version = '23.3.0';
 
         // Url to the file with your last numberversion of this module
         //$this->url_last_version = 'http://www.example.com/versionmodule.txt';
@@ -143,7 +143,6 @@ class modSaturne extends DolibarrModules
             'DoliSIRH'         => 'dolisirh',
             'DigiriskDolibarr' => 'digiriskdolibarr',
             'EasyURL'          => 'easyurl',
-            'GMAO'             => 'gmao',
             'DigiKanban'       => 'digikanban',
             'DoliLetter'       => 'doliletter',
             'Priseo'           => 'priseo',
@@ -267,8 +266,8 @@ class modSaturne extends DolibarrModules
                 'url'      => '/' . $moduleNameLowerCase . '/admin/setup.php',
                 'langs'    => $moduleNameLowerCase . '@' . $moduleNameLowerCase,
                 'position' => 2000 + $r,
-                'enabled'  => 'isModEnabled(' . $moduleNameLowerCase . ')',
-                'perms'    => '$user->hasRight(' . $moduleNameLowerCase . ', \'adminpage\', \'read\')',
+                'enabled'  => 'isModEnabled(\'' . $moduleNameLowerCase . '\')',
+                'perms'    => '$user->hasRight(\'' . $moduleNameLowerCase . '\', \'adminpage\', \'read\')',
                 'target'   => '',
                 'user'     => 2,
             ];
@@ -299,8 +298,8 @@ class modSaturne extends DolibarrModules
                 'url'      => '',
                 'langs'    => $moduleNameLowerCase . '@' . $moduleNameLowerCase,
                 'position' => 2000 + $r,
-                'enabled'  => 'isModEnabled(' . $moduleNameLowerCase . ')',
-                'perms'    => '$user->hasRight(' . $moduleNameLowerCase . ', \'read\')',
+                'enabled'  => 'isModEnabled(\'' . $moduleNameLowerCase . '\')',
+                'perms'    => '$user->hasRight(\'' . $moduleNameLowerCase . '\', \'read\')',
                 'target'   => '',
                 'user'     => 2,
             ];

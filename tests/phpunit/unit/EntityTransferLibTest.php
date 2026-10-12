@@ -116,4 +116,107 @@ class EntityTransferLibTest extends TestCase
 
         $this->assertSame($statement, saturne_entity_transfer_drop_unknown_columns($statement, ['rowid']));
     }
+
+    // ─── saturne_entity_transfer_path_map / relocate_path ────────────────────
+
+    /**
+     * Translations of an entity 22 of a Linux server imported as entity 1 of a Windows one.
+     *
+     * @return array<string,array<string,string>>
+     */
+    private function entity22Map(): array
+    {
+        $source = ['entities' => [22], 'data_root' => '/srv/source/documents', 'document_root' => '/srv/source/htdocs'];
+
+        return saturne_entity_transfer_path_map($source, 1, 'C:/wamp64/www/dolibarr/documents', 'C:/wamp64/www/dolibarr/htdocs');
+    }
+
+    public function testRelocateDropsTheEntityDirectoryOfAnEcmFilepath(): void
+    {
+        $map = $this->entity22Map();
+
+        $this->assertSame('ecm/digiriskdolibarr/riskassessmentdocument', saturne_entity_transfer_relocate_path('22/ecm/digiriskdolibarr/riskassessmentdocument', $map['leading'], true));
+        $this->assertSame('digiriskdolibarr/x/DU.odt', saturne_entity_transfer_relocate_path('22/digiriskdolibarr/x/DU.odt', $map['leading'], true));
+    }
+
+    public function testRelocateLeavesAnotherEntityAlone(): void
+    {
+        $map = $this->entity22Map();
+
+        $this->assertSame('220/ecm/x', saturne_entity_transfer_relocate_path('220/ecm/x', $map['leading'], true));
+        $this->assertSame('ecm/22/x', saturne_entity_transfer_relocate_path('ecm/22/x', $map['leading'], true));
+        $this->assertSame('DOL_DATA_ROOT/220/ecm/x', saturne_entity_transfer_relocate_path('DOL_DATA_ROOT/220/ecm/x', $map['anywhere']));
+    }
+
+    public function testRelocateRewritesTheConstantOfACustomTemplate(): void
+    {
+        $map = $this->entity22Map();
+
+        $this->assertSame('DOL_DATA_ROOT/ecm/digiriskdolibarr/riskassessmentdocument/', saturne_entity_transfer_relocate_path('DOL_DATA_ROOT/22/ecm/digiriskdolibarr/riskassessmentdocument/', $map['anywhere']));
+        $this->assertSame('DOL_DATA_ROOT/doctemplates/products', saturne_entity_transfer_relocate_path('DOL_DATA_ROOT/doctemplates/products', $map['anywhere']));
+    }
+
+    public function testRelocateRewritesTheAbsolutePathOfAModelPdf(): void
+    {
+        $map = $this->entity22Map();
+
+        $this->assertSame(
+            'riskassessmentdocument_odt:C:/wamp64/www/dolibarr/documents/ecm/digiriskdolibarr/riskassessmentdocument/template.odt',
+            saturne_entity_transfer_relocate_path('riskassessmentdocument_odt:/srv/source/documents/22/ecm/digiriskdolibarr/riskassessmentdocument/template.odt', $map['anywhere'])
+        );
+        $this->assertSame(
+            'workunitdocument_odt:C:/wamp64/www/dolibarr/htdocs/custom/digiriskdolibarr/documents/doctemplates/workunitdocument/template.odt',
+            saturne_entity_transfer_relocate_path('workunitdocument_odt:/srv/source/htdocs/custom/digiriskdolibarr/documents/doctemplates/workunitdocument/template.odt', $map['anywhere'])
+        );
+    }
+
+    public function testRelocateMatchesARootAsAWholeDirectory(): void
+    {
+        $map = $this->entity22Map();
+
+        $this->assertSame('/srv/source/documents2/x', saturne_entity_transfer_relocate_path('/srv/source/documents2/x', $map['anywhere']));
+    }
+
+    public function testPathMapKeepsTheEntityDirectoryOfATargetEntity(): void
+    {
+        $map = saturne_entity_transfer_path_map(['entities' => [22]], 3, '/t/documents', '/t/htdocs');
+
+        $this->assertSame('3/ecm/x', saturne_entity_transfer_relocate_path('22/ecm/x', $map['leading'], true));
+        $this->assertSame('DOL_DATA_ROOT/3/ecm/x', saturne_entity_transfer_relocate_path('DOL_DATA_ROOT/22/ecm/x', $map['anywhere']));
+    }
+
+    public function testPathMapOfTheFirstEntityOnlyMovesTheRoots(): void
+    {
+        $map = saturne_entity_transfer_path_map(['entities' => [1], 'data_root' => '/s/documents'], 1, '/t/documents', '/t/htdocs');
+
+        $this->assertSame([], $map['leading']);
+        $this->assertSame(['/s/documents' => '/t/documents'], $map['anywhere']);
+    }
+
+    public function testPathMapIsEmptyOnTheSameInstallAndEntity(): void
+    {
+        $map = saturne_entity_transfer_path_map(['entities' => [2], 'data_root' => '/d', 'document_root' => '/h'], 2, '/d', '/h');
+
+        $this->assertSame(['anywhere' => [], 'leading' => []], $map);
+    }
+
+    // ─── saturne_entity_transfer_guess_roots ──────────────────────────────────
+
+    public function testGuessRootsReadsTheModelPdfOfTheDocuments(): void
+    {
+        $roots = saturne_entity_transfer_guess_roots([
+            'riskassessmentdocument_odt',
+            'workunitdocument_odt:/home/client/public_html/custom/digiriskdolibarr/documents/doctemplates/workunitdocument/template.odt',
+            'riskassessmentdocument_odt:/home/client/documents/22/ecm/digiriskdolibarr/riskassessmentdocument/template.odt'
+        ], 22);
+
+        $this->assertSame(['data_root' => '/home/client/documents', 'document_root' => '/home/client/public_html'], $roots);
+    }
+
+    public function testGuessRootsReadsAWindowsPath(): void
+    {
+        $roots = saturne_entity_transfer_guess_roots(['x_odt:C:/wamp64/www/dolibarr/documents/5/ecm/y/template.odt'], 5);
+
+        $this->assertSame('C:/wamp64/www/dolibarr/documents', $roots['data_root']);
+    }
 }

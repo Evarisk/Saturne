@@ -26,10 +26,42 @@ claude "Generate release notes for version X.X.X based on git log since tag X.X.
 ### 2. Relire et ajuster
 
 - Vérifier les catégories fonctionnelles
-- Remplacer les `<!-- 📸 Ajouter une screenshot ici -->` par de vraies captures
+- Remplacer les `<!-- 📸 Ajouter une screenshot ici -->` par de vraies captures, **anonymisées** :
+  la base locale contient de vrais noms (personnes, tiers, entités). Les images s'hébergent sur une
+  branche `assets/release-X.X.X` du fork et se citent par leur URL `raw.githubusercontent.com`,
+  jamais dans le dépôt : le module part en zip chez les clients
 - Corriger les liens GitHub si nécessaire (vérifier org/repo dans les URLs)
+- Terminer par l'appel à tester sur la démo (section « Testez les nouveautés maintenant » du modèle)
 
-### 3. Commiter sur develop
+### 3. Vidéo de présentation
+
+Chaque release qui apporte une nouveauté visible a sa vidéo (30 à 60 s). Exemple : DigiBoard 23.2.0,
+https://youtu.be/-5ckexXShQo.
+
+Tout se fait dans le dépôt privé **`Evarisk/release-video`** (Remotion), dont le README détaille la
+recette :
+
+1. **Captures** — un jeu `scripts/shots/<module>-<X.X.X>.mjs` : les pages à montrer et les zones à
+   mettre en avant. Les écrans sont anonymisés avant la prise de vue et les zones relevées
+   automatiquement : la caméra et les cadres de la vidéo s'y posent sans réglage à la main.
+2. **Contrôle d'anonymisation** — `node scripts/verify-anon.mjs <jeu>` doit être vert, contexte de
+   chaque alerte relu. **Aucune vidéo ne sort sans ce contrôle.**
+3. **Scènes** — un fichier `src/release/releases/<module>-<X.X.X>.tsx` assemble les scènes du kit
+   (titre, une scène par nouveauté, améliorations, appel à la démo). Reprendre les textes de
+   `RELEASE_NOTES.md`.
+4. **Rendu** — images fixes de contrôle (`scripts/stills.mjs`), puis la vidéo et sa vignette
+   (composition `Poster-…`).
+5. **Mise en ligne** — sur la chaîne YouTube Evarisk.
+6. **Notes de version** — ajouter la vignette, cliquable vers la vidéo, en tête de `RELEASE_NOTES.md`
+   (section « La nouveauté en vidéo » du modèle).
+
+Le lien doit être dans `RELEASE_NOTES.md` **avant le tag** : le workflow publie le contenu du fichier,
+et une modification faite seulement sur la page de release est écrasée à la publication.
+
+La base de dev est souvent partagée entre plusieurs instances : un module activé pour les captures
+doit être désactivé après (`node scripts/module.mjs reset <modNom>`).
+
+### 4. Commiter sur develop
 
 ```bash
 git add RELEASE_NOTES.md
@@ -37,7 +69,7 @@ git commit -m "#ISSUE [Mod] chore: release notes X.X.X"
 git push
 ```
 
-### 4. Merger develop → main
+### 5. Merger develop → main
 
 ```bash
 git checkout main
@@ -45,14 +77,14 @@ git merge develop
 git push
 ```
 
-### 5. Tagger et pousser
+### 6. Tagger et pousser
 
 ```bash
 git tag X.X.X
 git push --tags
 ```
 
-### 6. Vérifier la CI
+### 7. Vérifier la CI
 
 Aller sur `github.com/ORG/REPO` → **Actions** → workflow `Release` doit être vert.
 
@@ -63,6 +95,8 @@ Aller sur `github.com/ORG/REPO` → **Actions** → workflow `Release` doit êtr
 - Release GitHub créée avec le contenu de `RELEASE_NOTES.md`
 - Zip `module_NOM-X.X.X.zip` attaché à la release
 - Dossier racine du zip : `nom_du_module/`
+- Vignette de la vidéo en tête des notes, qui ouvre la vidéo sur YouTube
+- Appel à tester sur la démo en fin de notes
 
 ---
 
