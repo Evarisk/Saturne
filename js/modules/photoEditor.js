@@ -385,6 +385,11 @@ window.saturne.photoEditor.event = function() {
       window.saturne.photoEditor._close();
     }
   });
+
+  // Follow the visible area while the user zooms, scrolls or turns the device
+  var viewportSource = window.visualViewport || window;
+  viewportSource.addEventListener('resize', window.saturne.photoEditor._fitToViewport);
+  viewportSource.addEventListener('scroll', window.saturne.photoEditor._fitToViewport);
 };
 
 /**
@@ -423,7 +428,49 @@ window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex, onDele
 
   pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
     modal.style.display = 'flex';
+    pe._fitToViewport();
   });
+};
+
+/**
+ * Fit the editor to the visible part of the screen
+ *
+ * The modal is fixed, so it is laid out on the layout viewport: once the page is pinch-zoomed or
+ * wider than the screen (tablets), part of it, validate buttons included, falls off the screen.
+ * The canvas container has no definite height either, so max-height: 100% never limits the canvas:
+ * a tall photo used to be cropped and to squeeze the toolbar.
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @returns {void}
+ */
+window.saturne.photoEditor._fitToViewport = function() {
+  var pe       = window.saturne.photoEditor;
+  var modal    = pe._modal;
+  var viewport = window.visualViewport;
+
+  if (!modal || modal.style.display !== 'flex') {
+    return;
+  }
+
+  if (viewport) {
+    modal.style.left   = viewport.offsetLeft + 'px';
+    modal.style.top    = viewport.offsetTop + 'px';
+    modal.style.width  = viewport.width + 'px';
+    modal.style.height = viewport.height + 'px';
+  }
+
+  // Measure the header and toolbar with the canvas out of the way, then give it the room left
+  var card        = modal.querySelector('.saturne-photo-editor-content');
+  var container   = pe._canvas.parentElement;
+  var modalStyle  = window.getComputedStyle(modal);
+  var modalHeight = modal.clientHeight - parseFloat(modalStyle.paddingTop) - parseFloat(modalStyle.paddingBottom);
+
+  pe._canvas.style.maxHeight = '0px';
+  pe._canvas.style.maxHeight = Math.max(modalHeight - (card.offsetHeight - container.offsetHeight), 150) + 'px';
 };
 
 /**
