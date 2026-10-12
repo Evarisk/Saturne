@@ -39,7 +39,8 @@
 .saturne-photo-editor-content {
     width: 100%;
     max-width: 600px;
-    max-height: 95vh;
+    // Of the modal, which photoEditor.js pins on the visible area: vh follows the whole page once zoomed
+    max-height: 100%;
     background: #ffffff;
     border-radius: 12px;
     padding: 20px;
@@ -53,6 +54,7 @@
 /* ── Header ───────────────────────────────────────────────────────────────── */
 
 .saturne-photo-editor-header {
+    flex-shrink: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -278,6 +280,7 @@
 /* ── Toolbar ──────────────────────────────────────────────────────────────── */
 
 .saturne-photo-editor-toolbar {
+    flex-shrink: 0;
     margin-top: 15px;
     display: flex;
     flex-wrap: nowrap;
@@ -318,6 +321,11 @@
     display: flex;
     gap: 4px;
     flex-shrink: 0;
+    // Cancel and validate stay in view while the tools scroll under them on a narrow screen
+    position: sticky;
+    right: 0;
+    padding-left: 4px;
+    background: #ffffff;
 }
 
 /* ── Pencil tool container ────────────────────────────────────────────────── */
@@ -370,7 +378,6 @@
     .saturne-photo-editor-content {
         padding: 10px;
         border-radius: 8px;
-        max-height: 98vh;
     }
 
     .saturne-photo-editor-toolbar {
@@ -379,9 +386,13 @@
     }
 
     .saturne-editor-btn,
-    #saturne-pencil-tool-container,
     #saturne-pencil-tool-container .saturne-tool-btn {
         width: 32px !important;
+        height: 32px !important;
+    }
+
+    // Height only: the container also holds the color picker next to the pencil
+    #saturne-pencil-tool-container {
         height: 32px !important;
     }
 }
