@@ -87,6 +87,8 @@ ErrorFileNotDeleted       = Le fichier n'a pas pu être supprimé
 
 # Analyse AI
 AIAnalyseImage	= Analyse de l'image: %s
+AnalyseImageWithAI = Analyser l'image avec l'IA
+ErrorImageAnalysis = L'analyse de l'image a échoué
 
 # Multi-upload
 ValidateAll = Tout valider

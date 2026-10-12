@@ -54,6 +54,7 @@ window.saturne.photoEditor._onSave       = null;
 window.saturne.photoEditor._favorite     = null;
 window.saturne.photoEditor._onSaveAll    = null;
 window.saturne.photoEditor._onDelete     = null;
+window.saturne.photoEditor._onAnalyse    = null;
 window.saturne.photoEditor._urls         = [];
 window.saturne.photoEditor._currentIndex = 0;
 window.saturne.photoEditor._files        = null;
@@ -269,6 +270,20 @@ window.saturne.photoEditor.event = function() {
     });
   }
 
+  // Wand: send the displayed photo to the AI module, the editor stays open
+  var btnAi = document.getElementById('saturne-btn-ai-photo');
+  if (btnAi) {
+    btnAi.addEventListener('click', function() {
+      var pe = window.saturne.photoEditor;
+
+      if (typeof pe._onAnalyse !== 'function' || !pe._urls.length) {
+        return;
+      }
+
+      pe._onAnalyse(pe._urls[pe._currentIndex], btnAi);
+    });
+  }
+
   var btnOk = document.getElementById('saturne-btn-ok-photo');
   btnOk.addEventListener('click', function() {
     var activeText = document.getElementById('saturne-floating-text-input');
@@ -404,7 +419,7 @@ window.saturne.photoEditor.event = function() {
  * @param   {Function} onSave Callback receiving a Blob on validate
  * @returns {void}
  */
-window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex, onDelete, onSaveAll, favorite) {
+window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex, onDelete, onSaveAll, favorite, onAnalyse) {
   var modal = window.saturne.photoEditor._modal;
   if (!modal) {
     return;
@@ -415,6 +430,7 @@ window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex, onDele
   pe._onSaveAll      = onSaveAll || null;
   pe._onDelete       = onDelete || null;
   pe._favorite       = favorite || null;
+  pe._onAnalyse      = onAnalyse || null;
   pe._historyStack   = [];
   pe._urls           = Array.isArray(urlOrUrls) ? urlOrUrls : [urlOrUrls];
   pe._currentIndex   = (typeof startIndex === 'number') ? startIndex : 0;
@@ -569,6 +585,12 @@ window.saturne.photoEditor._syncActionButtons = function() {
     btnDeleteEl.style.display = (typeof pe._onDelete === 'function') ? 'flex' : 'none';
   }
 
+  // The wand is only relevant when the caller can have the photo analysed
+  var btnAiEl = document.getElementById('saturne-btn-ai-photo');
+  if (btnAiEl) {
+    btnAiEl.style.display = (typeof pe._onAnalyse === 'function') ? 'inline-flex' : 'none';
+  }
+
   // The "validate all" button is only relevant when the caller wired a batch callback
   var btnOkAllEl = document.getElementById('saturne-btn-ok-all-photo');
   if (btnOkAllEl) {
@@ -598,8 +620,14 @@ window.saturne.photoEditor._syncNavControls = function() {
   var btnNextEl = document.getElementById('saturne-btn-next-photo');
   var badge     = document.getElementById('saturne-photo-index-badge');
   var multiple  = pe._urls.length > 1;
+  var btnAiEl   = document.getElementById('saturne-btn-ai-photo');
 
   pe._syncFavoriteButton();
+
+  // The outcome shown on the wand belongs to the photo it was asked for
+  if (btnAiEl && !btnAiEl.disabled) {
+    btnAiEl.querySelector('i').className = 'fas fa-magic';
+  }
 
   if (btnPrevEl) {
     btnPrevEl.style.display = multiple ? 'flex' : 'none';
