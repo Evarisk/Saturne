@@ -214,6 +214,10 @@ if ($result['documents'] > 0) {
     print '  ' . $result['documents'] . " files copied\n";
 }
 
+if (!empty($result['relocated'])) {
+    print '  ' . $result['relocated'] . " path(s) of the source entity pointed at this install\n";
+}
+
 if (!empty($result['checks'])) {
     print "\nCheck of the imported rows:\n";
     foreach ($result['checks'] as $check) {

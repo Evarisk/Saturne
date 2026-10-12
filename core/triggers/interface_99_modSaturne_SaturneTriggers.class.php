@@ -49,7 +49,7 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
         $this->name        = preg_replace('/^Interface/i', '', get_class($this));
         $this->family      = 'demo';
         $this->description = 'Saturne triggers.';
-        $this->version     = '23.2.1';
+        $this->version     = '23.3.0';
         $this->picto       = 'saturne@saturne';
     }
 
@@ -166,6 +166,13 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
                 break;
 
             // SIGNATURE
+            // MEDIA
+            case 'SATURNE_MEDIA_LINK':
+                $langs->loadLangs(['medias@saturne']);
+                $actioncomm->label = $langs->transnoentities('MediaLinkedTrigger', implode(', ', $object->context['medias'] ?? []));
+                $actioncomm->create($user);
+                break;
+
             case 'SATURNE_SIGNATURE_ADDATTENDANT':
                 $actioncomm->elementtype = $object->object_type . '@' . $objectModuleName;
                 $actioncomm->label       = $langs->transnoentities('AddAttendantTrigger', $langs->transnoentities($object->role) . ' ' . strtoupper($object->lastname) . ' ' . $object->firstname);

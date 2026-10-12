@@ -51,8 +51,10 @@ window.saturne.photoEditor._startCX      = 0;
 window.saturne.photoEditor._startCY      = 0;
 window.saturne.photoEditor._seqCounter   = 1;
 window.saturne.photoEditor._onSave       = null;
+window.saturne.photoEditor._favorite     = null;
 window.saturne.photoEditor._onSaveAll    = null;
 window.saturne.photoEditor._onDelete     = null;
+window.saturne.photoEditor._onAnalyse    = null;
 window.saturne.photoEditor._urls         = [];
 window.saturne.photoEditor._currentIndex = 0;
 window.saturne.photoEditor._files        = null;
@@ -204,10 +206,7 @@ window.saturne.photoEditor.event = function() {
     } else {
       pe._currentIndex = nextIndex;
       pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
-        var badge = document.getElementById('saturne-photo-index-badge');
-        if (badge) {
-          badge.textContent = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
-        }
+        pe._syncNavControls();
       });
     }
   });
@@ -223,10 +222,7 @@ window.saturne.photoEditor.event = function() {
     } else {
       pe._currentIndex = nextIndex;
       pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
-        var badge = document.getElementById('saturne-photo-index-badge');
-        if (badge) {
-          badge.textContent = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
-        }
+        pe._syncNavControls();
       });
     }
   });
@@ -256,6 +252,38 @@ window.saturne.photoEditor.event = function() {
   });
 
   // OK — save then close
+  // Star: record which media the object displays, without closing the editor
+  var btnFavorite = document.getElementById('saturne-btn-favorite-photo');
+  if (btnFavorite) {
+    btnFavorite.addEventListener('click', function() {
+      var pe = window.saturne.photoEditor;
+
+      if (!pe._favorite || typeof pe._favorite.onSelect !== 'function') {
+        return;
+      }
+
+      var url = pe._urls[pe._currentIndex] || '';
+
+      pe._favorite.current = pe._fileNameOf(url);
+      pe._favorite.onSelect(url, pe._favorite.current);
+      pe._syncFavoriteButton();
+    });
+  }
+
+  // Wand: send the displayed photo to the AI module, the editor stays open
+  var btnAi = document.getElementById('saturne-btn-ai-photo');
+  if (btnAi) {
+    btnAi.addEventListener('click', function() {
+      var pe = window.saturne.photoEditor;
+
+      if (typeof pe._onAnalyse !== 'function' || !pe._urls.length) {
+        return;
+      }
+
+      pe._onAnalyse(pe._urls[pe._currentIndex], btnAi);
+    });
+  }
+
   var btnOk = document.getElementById('saturne-btn-ok-photo');
   btnOk.addEventListener('click', function() {
     var activeText = document.getElementById('saturne-floating-text-input');
@@ -263,12 +291,15 @@ window.saturne.photoEditor.event = function() {
       activeText.blur();
     }
     var onSave = window.saturne.photoEditor._onSave;
+    // An edited media is written back under its own name, so its bytes have to keep matching
+    // its extension: a PNG source must come back as a PNG
+    var mime = window.saturne.photoEditor._sourceMimeType();
     // Close synchronously first so onSave can safely re-open the editor (e.g. sequential multi-file)
     window.saturne.photoEditor._close();
     if (typeof onSave === 'function') {
       canvas.toBlob(function(blob) {
         onSave(blob);
-      }, 'image/jpeg', 0.85);
+      }, mime, 0.85);
     }
   });
 
@@ -369,6 +400,11 @@ window.saturne.photoEditor.event = function() {
       window.saturne.photoEditor._close();
     }
   });
+
+  // Follow the visible area while the user zooms, scrolls or turns the device
+  var viewportSource = window.visualViewport || window;
+  viewportSource.addEventListener('resize', window.saturne.photoEditor._fitToViewport);
+  viewportSource.addEventListener('scroll', window.saturne.photoEditor._fitToViewport);
 };
 
 /**
@@ -383,7 +419,7 @@ window.saturne.photoEditor.event = function() {
  * @param   {Function} onSave Callback receiving a Blob on validate
  * @returns {void}
  */
-window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex, onDelete, onSaveAll) {
+window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex, onDelete, onSaveAll, favorite, onAnalyse) {
   var modal = window.saturne.photoEditor._modal;
   if (!modal) {
     return;
@@ -393,6 +429,8 @@ window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex, onDele
   pe._onSave         = onSave || null;
   pe._onSaveAll      = onSaveAll || null;
   pe._onDelete       = onDelete || null;
+  pe._favorite       = favorite || null;
+  pe._onAnalyse      = onAnalyse || null;
   pe._historyStack   = [];
   pe._urls           = Array.isArray(urlOrUrls) ? urlOrUrls : [urlOrUrls];
   pe._currentIndex   = (typeof startIndex === 'number') ? startIndex : 0;
@@ -406,7 +444,126 @@ window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex, onDele
 
   pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
     modal.style.display = 'flex';
+    pe._fitToViewport();
   });
+};
+
+/**
+ * Fit the editor to the visible part of the screen
+ *
+ * The modal is fixed, so it is laid out on the layout viewport: once the page is pinch-zoomed or
+ * wider than the screen (tablets), part of it, validate buttons included, falls off the screen.
+ * The canvas container has no definite height either, so max-height: 100% never limits the canvas:
+ * a tall photo used to be cropped and to squeeze the toolbar.
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @returns {void}
+ */
+window.saturne.photoEditor._fitToViewport = function() {
+  var pe       = window.saturne.photoEditor;
+  var modal    = pe._modal;
+  var viewport = window.visualViewport;
+
+  if (!modal || modal.style.display !== 'flex') {
+    return;
+  }
+
+  if (viewport) {
+    modal.style.left   = viewport.offsetLeft + 'px';
+    modal.style.top    = viewport.offsetTop + 'px';
+    modal.style.width  = viewport.width + 'px';
+    modal.style.height = viewport.height + 'px';
+  }
+
+  // Measure the header and toolbar with the canvas out of the way, then give it the room left
+  var card        = modal.querySelector('.saturne-photo-editor-content');
+  var container   = pe._canvas.parentElement;
+  var modalStyle  = window.getComputedStyle(modal);
+  var modalHeight = modal.clientHeight - parseFloat(modalStyle.paddingTop) - parseFloat(modalStyle.paddingBottom);
+
+  pe._canvas.style.maxHeight = '0px';
+  pe._canvas.style.maxHeight = Math.max(modalHeight - (card.offsetHeight - container.offsetHeight), 150) + 'px';
+};
+
+/**
+ * Resolve the mime type the current media must be written back as
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @returns {string} Mime type to encode the canvas with
+ */
+window.saturne.photoEditor._sourceMimeType = function() {
+  var pe     = window.saturne.photoEditor;
+  var source = (pe._urls && pe._urls[pe._currentIndex]) || '';
+
+  try {
+    source = decodeURIComponent(source);
+  } catch (e) {
+    // A malformed escape sequence only means the name cannot be read: fall back on JPEG
+  }
+
+  return /\.png(\?|&|$)/i.test(source) ? 'image/png' : 'image/jpeg';
+};
+
+/**
+ * Resolve the filename carried by a Dolibarr file URL (document.php or viewimage.php)
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param   {string}      url File URL holding a `file` query parameter
+ * @returns {string|null}     Filename, or null when the URL carries none
+ */
+window.saturne.photoEditor._fileNameOf = function(url) {
+  var params   = new URLSearchParams((url || '').split('?')[1] || '');
+  var filePath = decodeURIComponent(params.get('file') || '');
+
+  return filePath.split('/').pop() || null;
+};
+
+/**
+ * Show or hide the star that picks which media the record displays
+ *
+ * Picking one only makes sense when the set holds several medias, and when the caller wired a
+ * handler able to record the choice.
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @returns {void}
+ */
+window.saturne.photoEditor._syncFavoriteButton = function() {
+  var pe  = window.saturne.photoEditor;
+  var btn = document.getElementById('saturne-btn-favorite-photo');
+
+  if (!btn) {
+    return;
+  }
+
+  var usable = pe._favorite && typeof pe._favorite.onSelect === 'function' && pe._urls.length > 1;
+
+  btn.style.display = usable ? 'inline-flex' : 'none';
+
+  if (!usable) {
+    return;
+  }
+
+  var icon      = btn.querySelector('i');
+  var current   = pe._fileNameOf(pe._urls[pe._currentIndex] || '');
+  var isDisplayed = pe._favorite.current && pe._favorite.current === current;
+
+  icon.className = isDisplayed ? 'fas fa-star' : 'far fa-star';
 };
 
 /**
@@ -426,6 +583,12 @@ window.saturne.photoEditor._syncActionButtons = function() {
   var btnDeleteEl = document.getElementById('saturne-btn-delete-photo');
   if (btnDeleteEl) {
     btnDeleteEl.style.display = (typeof pe._onDelete === 'function') ? 'flex' : 'none';
+  }
+
+  // The wand is only relevant when the caller can have the photo analysed
+  var btnAiEl = document.getElementById('saturne-btn-ai-photo');
+  if (btnAiEl) {
+    btnAiEl.style.display = (typeof pe._onAnalyse === 'function') ? 'inline-flex' : 'none';
   }
 
   // The "validate all" button is only relevant when the caller wired a batch callback
@@ -457,6 +620,14 @@ window.saturne.photoEditor._syncNavControls = function() {
   var btnNextEl = document.getElementById('saturne-btn-next-photo');
   var badge     = document.getElementById('saturne-photo-index-badge');
   var multiple  = pe._urls.length > 1;
+  var btnAiEl   = document.getElementById('saturne-btn-ai-photo');
+
+  pe._syncFavoriteButton();
+
+  // The outcome shown on the wand belongs to the photo it was asked for
+  if (btnAiEl && !btnAiEl.disabled) {
+    btnAiEl.querySelector('i').className = 'fas fa-magic';
+  }
 
   if (btnPrevEl) {
     btnPrevEl.style.display = multiple ? 'flex' : 'none';

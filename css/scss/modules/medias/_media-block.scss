@@ -207,6 +207,13 @@
       display: none;
     }
   }
+
+  // Lines the thumbnail and its wand up, spaced like the buttons of the block
+  .saturne-media-gallery {
+    display: flex;
+    align-items: center;
+    gap: inherit;
+  }
 }
 
 .saturne-media-gallery {
@@ -255,6 +262,15 @@
       border: 2px solid #fff;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       box-sizing: border-box;
+    }
+  }
+
+  // Sends the photo of the thumbnail to the AI module
+  .saturne-media-ai {
+    background-color: #3498db;
+
+    &:disabled {
+      cursor: progress;
     }
   }
 }

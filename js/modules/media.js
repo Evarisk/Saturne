@@ -127,12 +127,17 @@ window.saturne.media.event = function() {
  * @memberof Saturne_Media
  *
  * @since   1.6.0
- * @version 1.6.0
+ * @version 23.2.2
  *
  * @returns {void}
  */
 window.saturne.media.initPan = function() {
   const modalContent = $('.modal-content')[0];
+  // A page can load Hammer without holding the media modal: Hammer throws on an undefined element
+  if (!modalContent) {
+    return;
+  }
+
   const hammer = new Hammer(modalContent, {
     touchAction: 'auto', // Configure touch action behavior
     recognizers: [

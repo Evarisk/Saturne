@@ -124,6 +124,12 @@ th.saturne-filter-active .saturne-col-filter-btn {
     }
 }
 
+// The date filters open their calendar from inside the popover, but the Dolibarr theme pins it
+// under it (div#ui-datepicker-div { z-index: 1010 !important }): lift it while a popover is open
+body.saturne-col-filter-open div#ui-datepicker-div {
+    z-index: 1051 !important;
+}
+
 // Category tag filter
 // --------------------------------------------------
 // Rendered inline above the list by objectfields_list_header.tpl.php and driven

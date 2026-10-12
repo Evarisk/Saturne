@@ -65,6 +65,7 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
             return !$fileExists;
         });
     }
+    $filearray = array_values($filearray);
 
     $j         = 0;
 
@@ -76,13 +77,20 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
         }
 
         $moduleImageNumberPerPageConf = strtoupper($moduleName) . '_DISPLAY_NUMBER_MEDIA_GALLERY';
-        for ($i = (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf); $i < ($conf->global->$moduleImageNumberPerPageConf + (($offset - 1) * $conf->global->$moduleImageNumberPerPageConf)); $i++) {
+        $limit = !empty($conf->global->$moduleImageNumberPerPageConf) ? $conf->global->$moduleImageNumberPerPageConf : 50;
+        $currentDate = '';
+        for ($i = (($offset - 1) * $limit); $i < ($limit + (($offset - 1) * $limit)); $i++) {
             if (empty($filearray[$i])) {
                 break;
             }
             $fileName = $filearray[$i]['name'];
             if (image_format_supported($fileName) >= 0) {
                 $nbphoto++;
+                $fileDate = ucfirst(dol_print_date($filearray[$i]['date'], '%a %d %b'));
+                if ($fileDate != $currentDate) {
+                    print '<div class="media-date-header-container" style="width: 100%;"><h3 class="media-date-header">' . $fileDate . '</h3></div>';
+                    $currentDate = $fileDate;
+                }
 
                 if ($size == 'mini' || $size == 'small') {   // Format vignette
                     $relativepath = $moduleName . '/medias/thumbs';
@@ -107,13 +115,17 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
                             if (file_exists($filearray[$i]['path'] . '/thumbs/' . $shownFileName)) {
                                 $advancedPreviewUrl = getAdvancedPreviewUrl($modulepart, $moduleName . '/medias/' . urlencode($fileName), 0, 'entity=' . $conf->entity);
                                 $fullpath           = $path . '/' . urlencode($shownFileName) . '&entity=' . $conf->entity;
+                                // The editor works on the original, the thumb only feeds the tile
+                                $originalPath = DOL_URL_ROOT . '/document.php?modulepart=' . $modulepart . '&attachment=0&file=' . str_replace('/', '%2F', $moduleName . '/medias') . '/' . urlencode($fileName) . '&entity=' . $conf->entity;
                                 print '<input class="filename" type="hidden" value="' . $fileName . '">';
-                                print '<a class="clicked-photo-preview" href="' . $advancedPreviewUrl . '"><i class="fas fa-2x fa-search-plus"></i></a>';
-                                print '<img class="photo photo' . $j . '" width="' . $maxWidth . '" height="' . $maxHeight . '" data-src="' . $fullpath . '" loading="lazy">';
+
+                                  print '<div class="photo-selector"><i class="far fa-square unselected-icon"></i><i class="fas fa-check-square selected-icon"></i></div>';
+                                print '<img class="photo photo' . $j . ' open-media-editor" data-filepath="' . htmlspecialchars($relativepath) . '" data-filename="' . htmlspecialchars($fileName) . '" data-fullsrc="' . dol_escape_htmltag($originalPath) . '" width="' . $maxWidth . '" height="' . $maxHeight . '" data-src="' . $fullpath . '" loading="lazy" style="cursor: pointer;">';
                             } else {
                                 print '<input type="hidden" class="fullname" data-fullname="' . $filearray[$i]['fullname'] . '">';
                                 print '<i class="clicked-photo-preview regenerate-thumbs fas fa-redo"></i>';
-                                print '<img class="photo photo' . $j . '" width="' . $maxWidth . '" height="' . $maxHeight . '" data-src="' . DOL_URL_ROOT . '/public/theme/common/nophoto.png" loading="lazy">';
+                                  print '<div class="photo-selector"><i class="far fa-square unselected-icon"></i><i class="fas fa-check-square selected-icon"></i></div>';
+                                print '<img class="photo photo' . $j . ' open-media-editor" data-filepath="' . htmlspecialchars($relativepath) . '" data-filename="' . htmlspecialchars($fileName) . '" width="' . $maxWidth . '" height="' . $maxHeight . '" data-src="' . DOL_URL_ROOT . '/public/theme/common/nophoto.png" loading="lazy" style="cursor: pointer;">';
                             } ?>
                         </figure>
                         <?php
@@ -185,6 +197,12 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 
     $return  = '<!-- Photo -->' . "\n";
     $nbphoto = 0;
+
+    // Medias of a same record form one set, whichever call rendered them: the banner photo and
+    // the media row are two calls, and a click on either opens every media of that record
+    $galleryId = (is_object($object) && $object->id > 0)
+        ? 'saturne-media-' . substr(md5($object->element . '|' . $object->id . '|' . $favorite_field), 0, 12)
+        : 'saturne-media-' . substr(md5($sdir . '|' . $subdir . '|' . $size), 0, 12);
 
     // Listing then sorting a whole directory to keep the single file whose name is already known
     // is a scandir per object: an element tree renders one media per GP/UT, on every page
@@ -267,15 +285,12 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
 
                         $return .= "\n";
 
+                        $mediaEntity = (is_object($object) && !empty($object->entity)) ? (int) $object->entity : (int) $conf->entity;
+
                         $relativefile = preg_replace('/^\//', '', $pdir . $photo);
                         if (empty($nolink)) {
                             $relativefile              = preg_replace("/'/", "\\'", $relativefile);
-                            $urladvanced               = getAdvancedPreviewUrl($modulepart, $relativefile, 0, 'entity=' . $conf->entity);
-                            if ($urladvanced) {
-                                $return .= '<a class="clicked-photo-preview" href="' . $urladvanced . '">';
-                            } else {
-                                $return              .= '<a href="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" class="aphoto" target="_blank">';
-                            }
+                            $return .= saturne_media_editor_link($modulepart, $pdir . $photo, $galleryId, (is_object($object) ? (int) $object->id : 0), $mediaEntity);
                         }
 
                         // The thumb is served as soon as the original does not fit in the requested box, and
@@ -299,18 +314,18 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
                         if ($usesharelink) {
                             if ($showThumb) {
                                 $return .= '<!-- Show thumb file -->';
-                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $morecss . ' photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/custom/saturne/utils/viewimage.php?modulepart=' . $modulepart . '&entity=' . (is_object($object) ? $object->entity : $conf->entity) . '&file=' . urlencode($pdirthumb . $photo_vignette) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
+                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $morecss . ' photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/custom/saturne/utils/viewimage.php?modulepart=' . $modulepart . '&entity=' . $mediaEntity . '&file=' . urlencode($pdirthumb . $photo_vignette) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
                             } else {
                                 $return .= '<!-- Show original file -->';
-                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $morecss . ' photowithmargin" src="' . DOL_URL_ROOT . '/custom/saturne/utils/viewimage.php?modulepart=' . $modulepart . '&entity=' . (is_object($object) ? $object->entity : $conf->entity) . '&file=' . urlencode($pdir . $photo) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
+                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $morecss . ' photowithmargin" src="' . DOL_URL_ROOT . '/custom/saturne/utils/viewimage.php?modulepart=' . $modulepart . '&entity=' . $mediaEntity . '&file=' . urlencode($pdir . $photo) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
                             }
                         } else {
                             if ($showThumb) {
                                 $return .= '<!-- Show thumb file -->';
-                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $morecss . '"  src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdirthumb . $photo_vignette) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
+                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $morecss . '"  src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $mediaEntity . '&file=' . urlencode($pdirthumb . $photo_vignette) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
                             } else {
                                 $return .= '<!-- Show original file -->';
-                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $morecss . ' photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
+                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $morecss . ' photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $mediaEntity . '&file=' . urlencode($pdir . $photo) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
                             }
                         }
 
@@ -339,9 +354,11 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
                         }
                     }
 
+                    $mediaEntity = (is_object($object) && !empty($object->entity)) ? (int) $object->entity : (int) $conf->entity;
+
                     if (empty($size)) {
                         // Format origine
-                        $return .= '<img class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
+                        $return .= '<img class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $mediaEntity . '&file=' . urlencode($pdir . $photo) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
                         if ($showfilename) {
                             $return .= '<br>' . $viewfilename;
                         }
@@ -350,16 +367,11 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
                     if ($size == 'large' || $size == 'medium') {
                         $relativefile = preg_replace('/^\//', '', $pdir . $photo);
                         if (empty($nolink)) {
-                            $urladvanced               = getAdvancedPreviewUrl($modulepart, $relativefile, 0, 'entity=' . $conf->entity);
-                            if ($urladvanced) {
-                                $return .= '<a class="clicked-photo-preview" href="' . $urladvanced . '">';
-                            } else {
-                                $return              .= '<a href="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" class="aphoto" target="_blank">';
-                            }
+                            $return .= saturne_media_editor_link($modulepart, $pdir . $photo, $galleryId, (is_object($object) ? (int) $object->id : 0), $mediaEntity);
                         }
                         $widthName  = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_' . strtoupper($size);
                         $heightName = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_' . strtoupper($size);
-                        $return .= '<img width="' . $conf->global->$widthName . '" height="' . $conf->global->$heightName . '" class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $conf->entity . '&file=' . urlencode($pdir . $photo) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
+                        $return .= '<img width="' . $conf->global->$widthName . '" height="' . $conf->global->$heightName . '" class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $mediaEntity . '&file=' . urlencode($pdir . $photo) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
                         if ($showfilename) {
                             $return .= '<br>' . $viewfilename;
                         }
@@ -392,10 +404,7 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
                 }
 
                 // ADDED_FOR_AI
-                if (
-                    isModEnabled('ai') && !empty($moreParams['useAi']) &&
-                    (getDolGlobalString('AI_API_SERVICE') && getDolGlobalString('AI_API_' . dol_strtoupper(getDolGlobalString('AI_API_SERVICE')) . '_KEY') && getDolGlobalString('AI_API_' . dol_strtoupper(getDolGlobalString('AI_API_SERVICE')) . '_URL'))
-                ) {
+                if (!empty($moreParams['useAi']) && saturne_media_ai_enabled()) {
                     $return .=
                         '<div class="wpeo-button button-square-50 button-blue ' . (is_object($object) ? $object->element : '') . ' media-gallery-ai" value="' . (is_object($object) ? $object->id : 0) . '">
 							<input class="element-linked-id" type="hidden" value="' . ((is_object($object) ? $object->id : 0) > 0 ? (is_object($object) ? $object->id : 0) : 0) . '">
@@ -439,7 +448,292 @@ function saturne_show_medias_linked(string $modulepart = 'ecm', string $sdir, $s
     if (is_object($object)) {
         $object->nbphoto = $nbphoto;
     }
+
+    // The editor markup lives in a template the host page does not always include:
+    // render it here so every clickable media can open it
+    if (empty($nolink) && $nbphoto > 0) {
+        $return .= saturne_photo_editor_modal();
+    }
+
     return $return;
+}
+
+/**
+ * Build the opening anchor handing a media over to the Saturne photo editor
+ *
+ * The native Dolibarr preview dialog is deliberately left aside: a click opens the module
+ * editor instead. The href keeps a direct link to the file so a middle click, or a page
+ * loaded without the editor script, still shows the original image.
+ *
+ * @param  string $modulepart Module part serving the file
+ * @param  string $file       File path relative to the module part root
+ * @param  string $galleryId  Id shared by every media of the same set, so the editor opens
+ *                            the whole set and starts on the one that was clicked
+ * @param  int    $objectId   Record the media belongs to, so a media rendered outside the media
+ *                            block can still be traced back to it
+ * @return string             Opening <a> tag
+ */
+function saturne_media_editor_link(string $modulepart, string $file, string $galleryId, int $objectId = 0, int $entity = 0): string
+{
+    global $conf;
+
+    $entity = ($entity > 0 ? $entity : (int) $conf->entity);
+    $url = DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $entity . '&file=' . urlencode($file);
+
+    return '<a class="aphoto open-media-editor-linked" href="' . dol_escape_htmltag($url) . '" data-url="' . dol_escape_htmltag($url) . '" data-gallery="' . dol_escape_htmltag($galleryId) . '" data-object-id="' . $objectId . '">';
+}
+
+/**
+ * Render the record holding a media as the link Dolibarr shows everywhere else
+ *
+ * A media folder is named after an element type, and a module names its class file after that
+ * same type, so the class is found by walking the class folder once. When no class answers for
+ * the folder, the caller falls back on a plain badge.
+ *
+ * @param  string $moduleName Module owning the record
+ * @param  string $element    Element type, as the media folder names it
+ * @param  string $ref        Reference of the record
+ * @return string             Link to the record, empty when it cannot be resolved
+ */
+function saturne_media_record_link(string $moduleName, string $element, string $ref): string
+{
+    static $renderedLinks = [];
+
+    $cacheKey = dol_strtolower($moduleName) . '|' . $element . '|' . $ref;
+
+    if (isset($renderedLinks[$cacheKey])) {
+        return $renderedLinks[$cacheKey];
+    }
+
+    $record = saturne_media_record_object($moduleName, $element, $ref);
+
+    $renderedLinks[$cacheKey] = ($record !== null && method_exists($record, 'getNomUrl')) ? $record->getNomUrl(1) : '';
+
+    return $renderedLinks[$cacheKey];
+}
+
+/**
+ * Load the record a media folder belongs to
+ *
+ * A media folder is named after an element type, and a module names its class file after that
+ * same type, so the class is found by walking the class folder once.
+ *
+ * @param  string      $moduleName Module owning the record
+ * @param  string      $element    Element type, as the media folder names it
+ * @param  string      $ref        Reference of the record
+ * @return object|null             The record, null when no class answers for that folder
+ */
+function saturne_media_record_object(string $moduleName, string $element, string $ref)
+{
+    global $db;
+
+    static $moduleClasses = [];
+
+    $moduleNameLowerCase = dol_strtolower($moduleName);
+
+    if (!isset($moduleClasses[$moduleNameLowerCase])) {
+        $classDir                            = __DIR__ . '/../../' . $moduleNameLowerCase . '/class/';
+        $moduleClasses[$moduleNameLowerCase] = dol_is_dir($classDir) ? dol_dir_list($classDir, 'files', 1, '\.class\.php$') : [];
+    }
+
+    $classKey = array_search($element . '.class.php', array_column($moduleClasses[$moduleNameLowerCase], 'name'));
+
+    if ($classKey !== false) {
+        require_once $moduleClasses[$moduleNameLowerCase][$classKey]['fullname'];
+
+        $className = ucfirst($element);
+    } else {
+        // A module also holds medias of records it does not own, such as a contract or a product:
+        // those classes live in Dolibarr itself, the objects metadata say where
+        require_once __DIR__ . '/object.lib.php';
+
+        $elementMetadata = saturne_get_objects_metadata($element);
+
+        if (empty($elementMetadata['class_name']) || empty($elementMetadata['class_path'])) {
+            return null;
+        }
+
+        dol_include_once('/' . $elementMetadata['class_path']);
+
+        $className = $elementMetadata['class_name'];
+    }
+
+    if (!class_exists($className)) {
+        return null;
+    }
+
+    $record = new $className($db);
+
+    return $record->fetch(0, $ref) > 0 ? $record : null;
+}
+
+/**
+ * List the medias of the module library
+ *
+ * A media counts as used as soon as a file of the same name sits somewhere under the module
+ * output folder, which is how the gallery already tells linked medias apart. Each entry carries
+ * what the list view shows: its name, its weight, its date and the description held by the ECM
+ * index.
+ *
+ * @param  string $moduleName  Module owning the library
+ * @param  bool   $onlyPending Keep only the medias no object uses yet
+ * @return array               Medias of the library, newest first
+ */
+function saturne_get_library_medias(string $moduleName, bool $onlyPending = true): array
+{
+    global $conf, $db;
+
+    $moduleNameLowerCase = dol_strtolower($moduleName);
+    $entity              = $conf->entity ?? 1;
+    $libraryDir          = $conf->ecm->multidir_output[$entity] . '/' . $moduleNameLowerCase . '/medias';
+
+    if (!dol_is_dir($libraryDir)) {
+        return [];
+    }
+
+    $libraryFiles = dol_dir_list($libraryDir, 'files', 0, '', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC);
+
+    // One recursive listing of the module folder answers for every media at once: it tells both
+    // which medias are still pending and which records hold the others
+    $objectDir    = $conf->$moduleNameLowerCase->multidir_output[$entity] ?? '';
+    // Thumb suffixes are anchored on the extension: a media named largeur-frigo.jpg holds _large
+    // and a loose filter would read it as a thumb, leaving it pending for ever
+    $thumbFilter  = '\.odt$|\.pdf$|barcode|(_mini|_small|_medium|_large)\.[^.]+$';
+    $objectMedias = dol_strlen($objectDir) > 0 ? dol_dir_list($objectDir, 'files', 1, '', $thumbFilter) : [];
+
+    // A media sits in <element>/<ref>/, which names the record holding it. Work folders carry no
+    // record, a media waiting there is still pending
+    $recordsByMedia = [];
+    foreach ($objectMedias as $objectMedia) {
+        $segments = explode('/', $objectMedia['relativename']);
+
+        if (count($segments) < 3 || in_array($segments[0], ['temp', 'tmp'])) {
+            continue;
+        }
+
+        $recordsByMedia[$objectMedia['name']][$segments[0] . '/' . $segments[1]] = [
+            'element' => $segments[0],
+            'ref'     => $segments[1],
+        ];
+    }
+
+    require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
+
+    $ecmFile = new EcmFiles($db);
+    $medias  = [];
+
+    foreach ($libraryFiles as $file) {
+        $records = array_values($recordsByMedia[$file['name']] ?? []);
+
+        if (image_format_supported($file['name']) < 0 || ($onlyPending && !empty($records))) {
+            continue;
+        }
+
+        $ecmFile->description = '';
+        // The index keeps the path from the documents root, the ecm/ prefix included
+        $ecmFile->fetch(0, '', 'ecm/' . $moduleNameLowerCase . '/medias/' . $file['name']);
+
+        $medias[] = [
+            'name'        => $file['name'],
+            'date'        => $file['date'],
+            'size'        => !empty($file['size']) ? $file['size'] : dol_filesize($libraryDir . '/' . $file['name']),
+            'description' => $ecmFile->description ?? '',
+            'records'     => $records,
+        ];
+    }
+
+    return $medias;
+}
+
+/**
+ * Resolve the folder holding the medias of an object
+ *
+ * An object with no reference yet keeps its medias in a temporary folder named after its
+ * numbering module, the same way the gallery does when it copies medias onto it.
+ *
+ * @param  object $object     Object owning the medias
+ * @param  string $objectType Element type of the object
+ * @param  string $subDir     Sub folder inside the object folder
+ * @return string             Absolute path of the folder
+ */
+function saturne_object_media_dir(object $object, string $objectType, string $subDir = ''): string
+{
+    global $conf, $moduleNameLowerCase;
+
+    $baseDir = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $objectType;
+
+    if (dol_strlen($object->ref) > 0) {
+        return $baseDir . '/' . $object->ref . '/' . $subDir;
+    }
+
+    $modObjectName       = dol_strtoupper($moduleNameLowerCase) . '_' . dol_strtoupper($objectType) . '_ADDON';
+    $numberingModuleName = [$objectType => getDolGlobalString($modObjectName)];
+
+    if ($numberingModuleName[$objectType] != '') {
+        list($modObject) = saturne_require_objects_mod($numberingModuleName, $moduleNameLowerCase);
+
+        return $baseDir . '/tmp/' . $modObject->prefix . '0/' . $subDir;
+    }
+
+    return $baseDir . '/tmp/' . $subDir . '/';
+}
+
+/**
+ * Record in the agenda that medias were added to the module library
+ *
+ * The gallery is a library shared by the whole module: a media added there is attached to no
+ * object yet, so there is no object to run a trigger on and the event carries no linked element.
+ * Once the media is assigned to an object, the SATURNE_MEDIA_LINK trigger records that on it.
+ *
+ * @param  string[] $fileNames Names of the medias that were added
+ * @return int                 Id of the event, 0 when there was nothing to record, < 0 on error
+ */
+function saturne_media_library_event(array $fileNames): int
+{
+    global $db, $langs, $user;
+
+    if (empty($fileNames)) {
+        return 0;
+    }
+
+    require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
+
+    $langs->loadLangs(['medias@saturne']);
+
+    $actioncomm              = new ActionComm($db);
+    $actioncomm->type_code   = 'AC_OTH_AUTO';
+    $actioncomm->code        = 'AC_SATURNE_MEDIA_ADD';
+    $actioncomm->datep       = dol_now();
+    $actioncomm->userownerid = $user->id;
+    $actioncomm->percentage  = -1;
+    $actioncomm->label       = $langs->transnoentities('MediaAddedToLibraryTrigger', implode(', ', $fileNames));
+
+    return $actioncomm->create($user);
+}
+
+/**
+ * Render the photo editor modal, at most once per request
+ *
+ * Clickable medias hand over to the Saturne editor, whose markup lives in a template that the
+ * host page does not always include. Rendering it from here keeps every caller working without
+ * a change, and the template guard stops its element ids from being duplicated.
+ *
+ * @return string Editor markup, empty once it has already been rendered
+ */
+function saturne_photo_editor_modal(): string
+{
+    global $langs;
+
+    if (!empty($GLOBALS['saturnePhotoEditorModalRendered'])) {
+        return '';
+    }
+
+    $langs->loadLangs(['medias@saturne']);
+
+    ob_start();
+    include dol_buildpath('/saturne/core/tpl/medias/photo_editor_modal.tpl.php');
+
+    return ob_get_clean();
 }
 
 /**
@@ -555,6 +849,20 @@ function saturne_get_media_linked_elements(string $moduleName, string $fileName)
 }
 
 /**
+ * Tell whether the medias can be sent to the AI module for analysis
+ *
+ * The AI module has to be enabled, with a service picked along with its API key and endpoint.
+ *
+ * @return bool True when an analysis can be requested
+ */
+function saturne_media_ai_enabled(): bool
+{
+    $aiService = dol_strtoupper(getDolGlobalString('AI_API_SERVICE'));
+
+    return isModEnabled('ai') && !empty($aiService) && getDolGlobalString('AI_API_' . $aiService . '_KEY') !== '' && getDolGlobalString('AI_API_' . $aiService . '_URL') !== '';
+}
+
+/**
  * Render the Saturne Media Block (Photo + File + Audio) for external modules.
  *
  * Usage example:
@@ -574,6 +882,12 @@ function saturne_get_media_linked_elements(string $moduleName, string $fileName)
  *                               - file_upload_data (array)               Extra key => value POST data forwarded on document upload
  *                               - show_gallery     (bool, default true)  Show gallery of existing files
  *                               - show_upload      (bool, default true)  Show upload/delete controls
+ *                               - show_ai          (bool, default false) Show the button sending a photo to the AI
+ *                                                                        module, once that module is set up. The host
+ *                                                                        page answers subaction=readFileAI (POST
+ *                                                                        filename, module_name, sub_dir) in JSON, and
+ *                                                                        gets the answer back in the
+ *                                                                        saturne:media-analysed event
  * @return string                  HTML block string
  */
 function saturne_render_media_block(string $moduleName, string $subDir = '', string $prefix = '', string $rightString = '', array $options = []): string
@@ -587,6 +901,16 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
     $showFile    = isset($options['show_file'])    ? $options['show_file']    : false;
     $showGallery = isset($options['show_gallery']) ? $options['show_gallery'] : true;
     $showUpload  = isset($options['show_upload'])  ? $options['show_upload']  : true;
+    $showAi      = !empty($options['show_ai']) && saturne_media_ai_enabled();
+
+    // A block may belong to a record rather than to the module alone. It then carries the record,
+    // so the editor can tell which of its medias the record displays
+    $linkedObject  = isset($options['object']) && is_object($options['object']) ? $options['object'] : null;
+    $objectSubtype = isset($options['object_subtype']) ? $options['object_subtype'] : 'photo';
+    $objectAttributes = '';
+    if ($linkedObject !== null && $linkedObject->id > 0) {
+        $objectAttributes = ' data-object-id="' . $linkedObject->id . '" data-object-type="' . dol_escape_htmltag($linkedObject->element) . '" data-object-subtype="' . dol_escape_htmltag($objectSubtype) . '" data-favorite="' . dol_escape_htmltag($linkedObject->$objectSubtype ?? '') . '"';
+    }
 
     $moduleNameLowerCase = dol_strtolower($moduleName);
     // Use only the last path segment as CSS class — subDir may contain slashes for deep paths
@@ -609,7 +933,7 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
 
     if ($showPhoto) {
         $out .= '<div class="linked-medias medias ' . dol_escape_htmltag($containerClass) . '" id="' . $idPrefix . 'master-media-row-container-photo">';
-        $out .= '  <div class="fast-upload-options" data-from-type="' . dol_escape_htmltag($moduleNameLowerCase) . '" data-from-subtype="' . dol_escape_htmltag($containerClass) . '" data-from-subdir="' . dol_escape_htmltag($subDir) . '" data-prefix="' . dol_escape_htmltag($prefix) . '" data-rights="' . dol_escape_htmltag($rightString) . '"></div>';
+        $out .= '  <div class="fast-upload-options" data-from-type="' . dol_escape_htmltag($moduleNameLowerCase) . '" data-from-subtype="' . dol_escape_htmltag($containerClass) . '" data-from-subdir="' . dol_escape_htmltag($subDir) . '" data-prefix="' . dol_escape_htmltag($prefix) . '" data-rights="' . dol_escape_htmltag($rightString) . '"' . $objectAttributes . ($showAi ? ' data-ai="1"' : '') . '></div>';
         $out .= '  <div class="saturne-media-upload-block" data-module="' . dol_escape_htmltag($moduleNameLowerCase) . '" data-subdir="' . dol_escape_htmltag($subDir) . '">';
 
         if ($showUpload) {
@@ -657,6 +981,13 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
                 $out .= '  <img src="' . $firstImg . '" />';
                 $out .= '  <span class="saturne-media-count-badge">' . $totalPhotos . '</span>';
                 $out .= '</div>';
+
+                // Analyses the photo shown on the thumbnail, the latest one; the others from the editor
+                if ($showAi) {
+                    $out .= '<button type="button" class="saturne-media-btn saturne-media-ai" data-filename="' . dol_escape_htmltag($imageFiles[0]['name']) . '" data-error="' . dol_escape_htmltag($langs->trans('ErrorImageAnalysis')) . '" title="' . dol_escape_htmltag($langs->trans('AnalyseImageWithAI')) . '">';
+                    $out .= '  <i class="fas fa-magic"></i>';
+                    $out .= '</button>';
+                }
             }
         }
 
