@@ -41,6 +41,11 @@ window.saturne.filter = {
 
         // Close popover when clicking outside
         $(document).off('click.saturnePopover').on('click.saturnePopover', function(e) {
+            // The datepicker redraws itself on its month arrows: the clicked node is already detached
+            // when the click bubbles here, so closest() finds nothing although the click was inside
+            if (!document.documentElement.contains(e.target)) {
+                return;
+            }
             if (!$(e.target).closest('.saturne-col-filter-popover, .saturne-col-filter-btn, .select2-container, .ui-datepicker, .ui-widget-overlay').length) {
                 window.saturne.filter.closePopover();
             }
@@ -194,6 +199,7 @@ window.saturne.filter = {
             left: btnOffset.left - ($popover.outerWidth() / 2) + 20 + 'px',
             display: 'block'
         });
+        $('body').addClass('saturne-col-filter-open');
 
         this.activePopoverTarget = $btn;
         this.activePopoverTd = $td;
@@ -333,6 +339,7 @@ window.saturne.filter = {
             }
 
             $popover.hide();
+            $('body').removeClass('saturne-col-filter-open');
             this.activePopoverTarget = null;
             this.activePopoverTd = null;
             this.activePopoverInputWrapper = null;
