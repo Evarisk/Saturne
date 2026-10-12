@@ -382,6 +382,10 @@ function saturne_get_objects_metadata(string $type = ''): array
     // 'list_url'           => Path to list page
     // 'class_path'         => Path to object class
     // 'lib_path'           => Path to object lib
+    //                         The four paths above are resolved by dol_buildpath(), which searches htdocs/ and
+    //                         then every alternative root: write 'mymodule/class/myobject.class.php', without
+    //                         'custom/', which is only the name of the default alternative root. The legacy
+    //                         'custom/mymodule/...' form keeps working while that folder is named custom/.
     // 'alias_of'           => OPTIONAL : Key of the entry this one duplicates under a legacy name,
     //                         consumers iterating on the whole array must skip it to avoid processing the object twice
 
@@ -990,10 +994,10 @@ function saturne_get_objects_metadata(string $type = ''): array
         foreach ($objectsMetadata as $objectType => $objectMetadata) {
             if ($objectType != 'context' && $objectType != 'currentcontext') {
                 if (!empty($objectMetadata['class_path'])) {
-                    require_once DOL_DOCUMENT_ROOT . '/' . $objectMetadata['class_path'];
+                    require_once dol_buildpath('/' . $objectMetadata['class_path']);
                 }
                 if (!empty($objectMetadata['lib_path'])) {
-                    require_once DOL_DOCUMENT_ROOT . '/' . $objectMetadata['lib_path'];
+                    require_once dol_buildpath('/' . $objectMetadata['lib_path']);
                 }
                 $object       = new $objectMetadata['class_name']($db);
                 $tableElement = $object->table_element;
