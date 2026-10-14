@@ -30,7 +30,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 
 // Global variables definitions
-global $action, $conf, $db, $langs, $mediaListInPage, $moduleName, $moduleNameLowerCase, $moduleNameUpperCase, $subaction, $user;
+global $action, $conf, $db, $hookmanager, $langs, $mediaListInPage, $moduleName, $moduleNameLowerCase, $moduleNameUpperCase, $subaction, $user;
 
 // Initialize technical objects
 $ecmdir  = new EcmDirectory($db);
@@ -250,17 +250,26 @@ if ($subaction == 'listMediaTargets') {
     $targetMetadata = saturne_get_objects_metadata(GETPOST('object_type', 'aZ09'));
     $targets        = [];
 
-    if (!empty($targetMetadata['table_element']) && !empty($targetMetadata['name_field'])) {
-        $nameField  = $targetMetadata['name_field'];
-        $labelField = $targetMetadata['label_field'] ?? '';
+    // A module may declare a column its table lacks (a Digirisk risk has no label): the query
+    // would fail and leave the list empty, so only the columns the table really has are read
+    $targetTable     = MAIN_DB_PREFIX . ($targetMetadata['table_element'] ?? '');
+    $targetHasColumn = function (string $column) use ($db, $targetTable): bool {
+        $resColumn = $db->DDLDescTable($targetTable, $column);
 
+        return $resColumn && $db->num_rows($resColumn) > 0;
+    };
+
+    // The name field may list several columns ('ref, label'), the first one names the record
+    $nameField  = trim(explode(',', $targetMetadata['name_field'] ?? '')[0]);
+    $labelField = trim($targetMetadata['label_field'] ?? '');
+
+    if (!empty($targetMetadata['table_element']) && dol_strlen($nameField) > 0 && $targetHasColumn($nameField)) {
         $sql  = 'SELECT t.rowid, t.' . $nameField . ' as target_name';
-        $sql .= (dol_strlen($labelField) > 0 && $labelField != $nameField) ? ', t.' . $labelField . ' as target_label' : '';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . $targetMetadata['table_element'] . ' as t';
+        $sql .= (dol_strlen($labelField) > 0 && $labelField != $nameField && $targetHasColumn($labelField)) ? ', t.' . $labelField . ' as target_label' : '';
+        $sql .= ' FROM ' . $targetTable . ' as t';
 
         // Not every table of the list is entity aware, so the scope is only added when it is
-        $entityColumn = $db->DDLDescTable(MAIN_DB_PREFIX . $targetMetadata['table_element'], 'entity');
-        if ($entityColumn && $db->num_rows($entityColumn) > 0) {
+        if ($targetHasColumn('entity')) {
             $sql .= ' WHERE t.entity IN (' . getEntity($targetMetadata['table_element']) . ')';
         }
 
@@ -298,6 +307,19 @@ if ($subaction == 'assignMedias') {
         $targetObject = new $targetClass($db);
 
         if ($targetObject->fetch($targetId) > 0) {
+            // The record picked in the list names the success message, even when its medias are
+            // kept on another one
+            $pickedObject = $targetObject;
+
+            // A module may show the medias of a record from another one: a Digirisk risk displays
+            // the photos of its last assessment, so a media copied onto the risk itself stays unseen
+            $hookmanager->initHooks(['saturnemediaassign']);
+            $parameters = ['targetType' => $targetType];
+            $reshook    = $hookmanager->executeHooks('saturneMediaAssignTarget', $parameters, $targetObject);
+            if ($reshook > 0 && isset($hookmanager->resArray['object']) && is_object($hookmanager->resArray['object'])) {
+                $targetObject = $hookmanager->resArray['object'];
+            }
+
             $libraryDir = $conf->ecm->multidir_output[$conf->entity] . '/' . $moduleNameLowerCase . '/medias';
             // The metadata key prefixes the module name, the media folder is named after the
             // element the object itself declares
@@ -329,10 +351,16 @@ if ($subaction == 'assignMedias') {
             }
 
             if (!empty($assigned)) {
+                // Lists only show the favorite media: a record left without one would keep
+                // showing no photo at all. Only a record storing a favorite has one to set.
+                if (!empty($targetObject->fields['photo']) && saturne_favorite_media_needs_update($targetObject, 'photo', $targetDir)) {
+                    $targetObject->setValueFrom('photo', $assigned[0], '', '', 'text', '', $user);
+                }
+
                 $targetObject->context['medias'] = $assigned;
                 $targetObject->call_trigger('SATURNE_MEDIA_LINK', $user);
                 $langs->load('medias@saturne');
-                $msg = $langs->trans('Medias') . ' : ' . implode(', ', $assigned) . ' ' . mb_strtolower($langs->trans('AssignedTo'), 'UTF-8') . ' ' . $targetObject->ref;
+                $msg = $langs->trans('Medias') . ' : ' . implode(', ', $assigned) . ' ' . mb_strtolower($langs->trans('AssignedTo'), 'UTF-8') . ' ' . $pickedObject->ref;
                 echo '<span id="saturne-assign-medias-response" style="display:none;">' . json_encode(['success' => true, 'message' => $msg]) . '</span>';
                 exit;
             }
