@@ -251,8 +251,8 @@
         }
     }
 
-    // Opened from the media block of a record, the medias go to that block: only its button stays
-    &.saturne-pending-to-block &-footer {
+    // Opened from a media block or a record, the medias go to it: only its Add button stays
+    &.saturne-pending-to-opener &-footer {
         .saturne-pending-object-type,
         .saturne-pending-object,
         .select2-container,

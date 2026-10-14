@@ -199,13 +199,6 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 	let mediaGallery      = $('#media_gallery')
 	let mediaGalleryModal = $(this).closest('.modal-container')
 	let filesLinked       = mediaGalleryModal.find('.clicked-photo')
-	let token             = window.saturne.toolbox.getToken();
-
-	let objectId         = mediaGallery.attr('data-from-id');
-	let objectType       = mediaGallery.attr('data-from-type')
-	let objectSubtype    = mediaGallery.attr('data-from-subtype')
-  let objectSubdir     = mediaGallery.attr('data-from-subdir')
-  let objectPhotoClass = mediaGallery.attr('data-photo-class')
 
 	// Opened from a media block: the medias are linked to its folder, the block refreshes itself
 	let fromBlock = mediaGallery.attr('data-from-block')
@@ -224,13 +217,38 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 		return
 	}
 
-	let filenames = ''
-	if (filesLinked.length > 0) {
-		filesLinked.each(function(  ) {
-			filenames += $( this ).find('.filename').val() + 'vVv'
-		});
-	}
-	window.saturne.loader.display($(this));
+	let filenames = []
+	filesLinked.each(function(  ) {
+		filenames.push($( this ).find('.filename').val())
+	});
+	window.saturne.mediaGallery.linkMediasToRecord(filenames, $(this))
+};
+
+/**
+ * Link library medias to the record that opened the gallery, then refresh what the page shows of it
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param  {string[]} filenames Names of the medias in the library
+ * @param  {jQuery}   button    Button clicked, showing the loader meanwhile
+ * @return {void}
+ */
+window.saturne.mediaGallery.linkMediasToRecord = function( filenames, button ) {
+	let mediaGallery = $('#media_gallery')
+	let token        = window.saturne.toolbox.getToken();
+
+	let objectId         = mediaGallery.attr('data-from-id');
+	let objectType       = mediaGallery.attr('data-from-type')
+	let objectSubtype    = mediaGallery.attr('data-from-subtype')
+  let objectSubdir     = mediaGallery.attr('data-from-subdir')
+  let objectPhotoClass = mediaGallery.attr('data-photo-class')
+
+	let filenamesList = ''
+	filenames.forEach(function( filename ) {
+		filenamesList += filename + 'vVv'
+	});
+	window.saturne.loader.display(button);
   if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
     if ($('.linked-medias.'+objectPhotoClass).length > 0) {
       window.saturne.loader.display($('.linked-medias.'+objectPhotoClass));
@@ -244,7 +262,7 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 		url: document.URL + querySeparator + "subaction=addFiles&token=" + token,
 		type: "POST",
 		data: JSON.stringify({
-			filenames: filenames,
+			filenames: filenamesList,
 			objectId: objectId,
 			objectType: objectType,
 			objectSubdir: objectSubdir,
@@ -258,6 +276,12 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
       if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
         $('.photo.'+objectPhotoClass).replaceWith($(resp).find('.photo.'+objectPhotoClass).first())
         $('.linked-medias.'+objectPhotoClass).replaceWith($(resp).find('.linked-medias.'+objectPhotoClass))
+        // The photo opening the gallery shows the favorite as well (a Digirisk tree, a list): it holds
+        // the class itself, without the photo one, so the line above leaves it as it was
+        let photoContainer = $(resp).find('.photo-container.'+objectPhotoClass).first()
+        if (photoContainer.length > 0) {
+          $('.photo-container.'+objectPhotoClass).replaceWith(photoContainer)
+        }
       } else {
 
         $('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
