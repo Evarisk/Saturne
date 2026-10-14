@@ -48,7 +48,7 @@ foreach ($objectsMetadata as $objectKey => $objectMetadata) {
     $elementsMetadata[$elementKey] = $objectMetadata;
 }
 ?>
-<div class="saturne-pending" data-module="<?php echo dol_escape_htmltag($moduleNameLowerCase); ?>">
+<div class="saturne-pending" data-module="<?php echo dol_escape_htmltag($moduleNameLowerCase); ?>" data-label-add-to-block="<?php echo dol_escape_htmltag($langs->trans('Add')); ?>">
     <?php if (empty($pendingMedias)) : ?>
         <div class="saturne-pending-empty">
             <i class="fas fa-check-circle"></i>

@@ -207,6 +207,23 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
   let objectSubdir     = mediaGallery.attr('data-from-subdir')
   let objectPhotoClass = mediaGallery.attr('data-photo-class')
 
+	// Opened from a media block: the medias are linked to its folder, the block refreshes itself
+	let fromBlock = mediaGallery.attr('data-from-block')
+	if (fromBlock) {
+		let blockFilenames = []
+		filesLinked.each(function() {
+			blockFilenames.push($(this).find('.filename').val())
+		})
+		if (!blockFilenames.length) {
+			return
+		}
+		window.saturne.mediaBlock.linkLibraryMedias(blockFilenames, $('#' + fromBlock))
+		mediaGallery.removeClass('modal-active')
+		filesLinked.removeClass('clicked-photo').attr('style', '')
+		mediaGalleryModal.find('.save-photo, .delete-photo').addClass('button-disable')
+		return
+	}
+
 	let filenames = ''
 	if (filesLinked.length > 0) {
 		filesLinked.each(function(  ) {

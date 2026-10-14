@@ -69,6 +69,7 @@ window.saturne.mediaPending.event = function() {
   $(document).on('change', '.saturne-pending-object', window.saturne.mediaPending.refreshSelection);
   $(document).on('click', '.saturne-pending-assign', window.saturne.mediaPending.assignMedias);
     $(document).on('click', '.saturne-pending-assign-current', window.saturne.mediaPending.assignMedias);
+  $(document).on('click', '.saturne-pending-assign-block', window.saturne.mediaPending.assignToBlock);
   $(document).on('change', '.saturne-pending-description', window.saturne.mediaPending.saveDescription);
 };
 
@@ -89,15 +90,6 @@ window.saturne.mediaPending.event = function() {
 window.saturne.mediaPending.initTypeSelect = function(container) {
   var select = container.find('.saturne-pending-object-type');
 
-  
-
-    var modal = container.closest('.wpeo-modal');
-    var fromId = modal.attr('data-from-id');
-    if (fromId && container.find('.saturne-pending-assign-current').length === 0) {
-      var btn = $('<div class="wpeo-button button-main saturne-pending-assign-current button-disable" style="margin-right: 5px;"><i class="fas fa-share-square"></i> Transf\u00e9rer dans la galerie</div>');
-      container.find('.saturne-pending-assign').before(btn);
-    }
-
   var withPicto = function(state) {
     if (!state.id) {
       return state.text;
@@ -117,6 +109,50 @@ window.saturne.mediaPending.initTypeSelect = function(container) {
     templateResult   : withPicto,
     templateSelection: withPicto
   });
+};
+
+/**
+ * Offer to send the ticked medias to whoever opened the gallery
+ *
+ * A media block opening the gallery takes them into its own folder, a record opening it has them
+ * assigned to itself. The gallery is opened from one or the other in turn, so the button follows
+ * the latest opening.
+ *
+ * @memberof Saturne_MediaPending
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param   {jQuery} container Gallery modal, or an element inside it holding the list
+ * @returns {void}
+ */
+window.saturne.mediaPending.syncCurrentTarget = function(container) {
+  var modal   = container.is('.wpeo-modal') ? container : container.closest('.wpeo-modal');
+  var pending = container.find('.saturne-pending');
+
+  if (!modal.length || !pending.length) {
+    return;
+  }
+
+  pending.find('.saturne-pending-assign-current, .saturne-pending-assign-block').remove();
+
+  // Opened from a block, the medias go to that block: picking a type and a record has no use there
+  pending.toggleClass('saturne-pending-to-block', !!modal.attr('data-from-block'));
+
+  var button = null;
+
+  if (modal.attr('data-from-block')) {
+    button = $('<div class="wpeo-button button-blue saturne-pending-assign-block button-disable"><i class="fas fa-plus"></i> </div>');
+    button.append(document.createTextNode(pending.data('label-add-to-block')));
+  } else if (modal.attr('data-from-id')) {
+    button = $('<div class="wpeo-button button-main saturne-pending-assign-current button-disable"><i class="fas fa-share-square"></i> Transférer dans la galerie</div>');
+  }
+
+  if (button) {
+    pending.find('.saturne-pending-assign').before(button);
+  }
+
+  window.saturne.mediaPending.refreshSelection.call(pending.find('.saturne-pending-counter'));
 };
 
 /**
@@ -242,6 +278,7 @@ window.saturne.mediaPending.load = function(pane) {
       pane.removeClass('wpeo-loader').html($(resp).find('.saturne-media-tab-pane[data-tab="pending"]').html()).attr('data-loaded', '1');
       pane.find('.wpeo-loader').removeClass('wpeo-loader');
       window.saturne.mediaPending.initTypeSelect(pane);
+      window.saturne.mediaPending.syncCurrentTarget(pane);
       window.saturne.mediaPending.applyMode(pane);
       window.saturne.modal.loadLazyImages();
     },
@@ -319,7 +356,7 @@ window.saturne.mediaPending.refreshSelection = function() {
   }
 
   pending.find('.saturne-pending-assign').toggleClass('button-disable', selected === 0 || !target);
-  pending.find('.saturne-pending-assign-current').toggleClass('button-disable', selected === 0);
+  pending.find('.saturne-pending-assign-current, .saturne-pending-assign-block').toggleClass('button-disable', selected === 0);
 };
 
 /**
@@ -426,6 +463,47 @@ window.saturne.mediaPending.assignMedias = function() {
       $('.wpeo-loader').removeClass('wpeo-loader');
     }
   });
+};
+
+/**
+ * Send every ticked media to the media block that opened the gallery
+ *
+ * The block may belong to a record that does not exist yet: its folder is a work folder the
+ * record creation empties, which an assignment by type and record could not reach.
+ *
+ * @memberof Saturne_MediaPending
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @returns {void}
+ */
+window.saturne.mediaPending.assignToBlock = function() {
+  var button = $(this);
+
+  if (button.hasClass('button-disable')) {
+    return;
+  }
+
+  var pending   = button.closest('.saturne-pending');
+  var modal     = pending.closest('.wpeo-modal');
+  var block     = $('#' + modal.attr('data-from-block'));
+  var filenames = [];
+
+  pending.find('.saturne-pending-select:checked').each(function() {
+    filenames.push($(this).closest('.saturne-pending-row').data('filename'));
+  });
+
+  if (!filenames.length || !block.length) {
+    return;
+  }
+
+  window.saturne.mediaBlock.linkLibraryMedias(filenames, block, function() {
+    // Built again rather than patched: the ticks go, and a media a record now holds leaves the list
+    window.saturne.mediaPending.load(pending.closest('.saturne-media-tab-pane').attr('data-loaded', '0'));
+  });
+
+  modal.removeClass('modal-active');
 };
 
 /**
