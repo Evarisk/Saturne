@@ -99,6 +99,10 @@ if ($action == 'uploadPhoto' && !empty($mediaBlockDir) && !empty($conf->global->
 
                     saturne_vignette($uploadedPath, getDolGlobalInt($confWidth), getDolGlobalInt($confHeight), '_' . $mediaBlockSize);
                 }
+
+                // The gallery lists the library: a photo taken in a block joins it, as one sent
+                // through the gallery does
+                saturne_add_media_to_library($mediaBlockModule, $uploadedPath);
             }
         }
     }
