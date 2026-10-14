@@ -92,6 +92,11 @@ window.saturne.modal.openModal = function () {
   $('#'+modalToOpen).attr('data-from-subdir', fromSubdir);
   $('#'+modalToOpen).attr('data-photo-class', photoClass);
   $('#'+modalToOpen).attr('data-from-field', fromField);
+  // A media block opens the gallery on its own: a regular opener must not inherit its target
+  $('#'+modalToOpen).removeAttr('data-from-block');
+  if (window.saturne.mediaPending) {
+    window.saturne.mediaPending.syncCurrentTarget($('#'+modalToOpen));
+  }
 
   window.saturne.modal.loadLazyImages();
 

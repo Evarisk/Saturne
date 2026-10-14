@@ -602,12 +602,13 @@ function saturne_get_library_medias(string $moduleName, bool $onlyPending = true
     $objectMedias = dol_strlen($objectDir) > 0 ? dol_dir_list($objectDir, 'files', 1, '', $thumbFilter) : [];
 
     // A media sits in <element>/<ref>/, which names the record holding it. Work folders carry no
-    // record, a media waiting there is still pending
+    // record, a media waiting there is still pending, whether the folder sits at the root of the
+    // module or under an element (<element>/tmp/, for a record being created)
     $recordsByMedia = [];
     foreach ($objectMedias as $objectMedia) {
         $segments = explode('/', $objectMedia['relativename']);
 
-        if (count($segments) < 3 || in_array($segments[0], ['temp', 'tmp'])) {
+        if (count($segments) < 3 || in_array($segments[0], ['temp', 'tmp']) || in_array($segments[1], ['temp', 'tmp'])) {
             continue;
         }
 
@@ -882,6 +883,11 @@ function saturne_media_ai_enabled(): bool
  *                               - file_upload_data (array)               Extra key => value POST data forwarded on document upload
  *                               - show_gallery     (bool, default true)  Show gallery of existing files
  *                               - show_upload      (bool, default true)  Show upload/delete controls
+ *                               - show_library     (bool, default false) The picking button opens the media library
+ *                                                                        of the module instead of the device files.
+ *                                                                        The page renders the gallery modal and
+ *                                                                        answers action=linkPhoto (POST filenames[],
+ *                                                                        module_name, sub_dir)
  *                               - show_ai          (bool, default false) Show the button sending a photo to the AI
  *                                                                        module, once that module is set up. The host
  *                                                                        page answers subaction=readFileAI (POST
@@ -901,6 +907,7 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
     $showFile    = isset($options['show_file'])    ? $options['show_file']    : false;
     $showGallery = isset($options['show_gallery']) ? $options['show_gallery'] : true;
     $showUpload  = isset($options['show_upload'])  ? $options['show_upload']  : true;
+    $showLibrary = !empty($options['show_library']);
     $showAi      = !empty($options['show_ai']) && saturne_media_ai_enabled();
 
     // A block may belong to a record rather than to the module alone. It then carries the record,
@@ -946,11 +953,19 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
             $out .= '      <input type="file" id="' . $idPrefix . 'take-photo" class="saturne-photo-upload" name="userfile[]" accept="image/*" capture="environment" data-error-not-image="' . $errorNotImage . '">';
             $out .= '    </label>';
 
-            // Picking button — no capture attribute, so existing photos can be selected, several at once.
-            $out .= '    <label for="' . $idPrefix . 'upload-media" class="saturne-upload-label saturne-upload-label-gallery" title="' . dol_escape_htmltag($langs->trans('AddPhotoFromComputer')) . '">';
-            $out .= '      <i class="fas fa-images"></i>';
-            $out .= '      <input type="file" id="' . $idPrefix . 'upload-media" class="saturne-photo-upload" name="userfile[]" accept="image/*" data-error-not-image="' . $errorNotImage . '" multiple>';
-            $out .= '    </label>';
+            if ($showLibrary) {
+                // Picking button opening the media library: a media already there is linked rather
+                // than sent again, and a new one joins the library on its way to the block
+                $out .= '    <span class="saturne-upload-label saturne-upload-label-gallery saturne-open-media-library" role="button" tabindex="0" title="' . dol_escape_htmltag($langs->trans('AddPhotoFromMediaGallery')) . '">';
+                $out .= '      <i class="fas fa-images"></i>';
+                $out .= '    </span>';
+            } else {
+                // Picking button — no capture attribute, so existing photos can be selected, several at once.
+                $out .= '    <label for="' . $idPrefix . 'upload-media" class="saturne-upload-label saturne-upload-label-gallery" title="' . dol_escape_htmltag($langs->trans('AddPhotoFromComputer')) . '">';
+                $out .= '      <i class="fas fa-images"></i>';
+                $out .= '      <input type="file" id="' . $idPrefix . 'upload-media" class="saturne-photo-upload" name="userfile[]" accept="image/*" data-error-not-image="' . $errorNotImage . '" multiple>';
+                $out .= '    </label>';
+            }
         }
 
         $out .= '    <div class="saturne-media-gallery">';
