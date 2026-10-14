@@ -647,6 +647,108 @@ function saturne_get_library_medias(string $moduleName, bool $onlyPending = true
 }
 
 /**
+ * Put a media into the module library, unless the library already holds one of that name
+ *
+ * The gallery lists the library and the pending tab tells its unused medias apart: a media sent
+ * straight to a record, by a media block or a mobile form, would be missing from both. The library
+ * keeps a copy, as it does for a media it hands over to a record. A media of the same name is taken
+ * for the same one, which is also how a record is found to hold a library media.
+ *
+ * @param  string $moduleName Module owning the library
+ * @param  string $filePath   Absolute path of the media
+ * @param  int    $entity     Entity of the library, the current one when left out
+ * @return bool               True when the media was added, false when it was already there or could not be
+ */
+function saturne_add_media_to_library(string $moduleName, string $filePath, int $entity = 0): bool
+{
+    global $conf;
+
+    $entity     = $entity > 0 ? $entity : (int) $conf->entity;
+    $fileName   = basename($filePath);
+    // The default layout stands in for the configured one while a module is being activated
+    $ecmDir     = $conf->ecm->multidir_output[$entity] ?? DOL_DATA_ROOT . ($entity > 1 ? '/' . $entity : '') . '/ecm';
+    $libraryDir = $ecmDir . '/' . dol_strtolower($moduleName) . '/medias';
+
+    if (image_format_supported($fileName) < 0 || !dol_is_file($filePath) || dol_is_file($libraryDir . '/' . $fileName)) {
+        return false;
+    }
+
+    if (!dol_is_dir($libraryDir . '/thumbs')) {
+        dol_mkdir($libraryDir . '/thumbs');
+    }
+
+    if (dol_copy($filePath, $libraryDir . '/' . $fileName, '0', 0) <= 0) {
+        return false;
+    }
+
+    // The gallery sorts and groups its medias by date: the copy keeps the date of the media, a
+    // catch up would otherwise date them all from the day it ran
+    touch(dol_osencode($libraryDir . '/' . $fileName), dol_filemtime($filePath));
+
+    // The thumbs of the record are those of the same media: copying them spares building them
+    // again, which counts when a whole module catches up
+    foreach (['mini', 'small', 'medium', 'large'] as $size) {
+        $thumbName   = saturne_get_thumb_name($fileName, $size);
+        $recordThumb = dirname($filePath) . '/thumbs/' . $thumbName;
+
+        if (!dol_is_file($recordThumb) || dol_copy($recordThumb, $libraryDir . '/thumbs/' . $thumbName, '0', 0) <= 0) {
+            saturne_vignette($libraryDir . '/' . $fileName, getDolGlobalInt('SATURNE_MEDIA_MAX_WIDTH_' . dol_strtoupper($size)), getDolGlobalInt('SATURNE_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size)), '_' . $size);
+        }
+    }
+
+    addFileIntoDatabaseIndex($libraryDir, $fileName, $libraryDir . '/' . $fileName);
+
+    return true;
+}
+
+/**
+ * Put into the module library every media its records hold and it lacks
+ *
+ * Medias sent straight to a record never went through the library, so the gallery missed them.
+ * A module catches up on them at its activation; running it again only copies what is still
+ * missing. Thumbs, work folders and generated codes stay out, like the folders the module names:
+ * personal documents have no place in a library everyone can browse.
+ *
+ * @param  string   $moduleName      Module owning the library
+ * @param  string[] $excludedFolders Folder names, at any depth, whose medias stay out of the library
+ * @return int                       Number of medias added
+ */
+function saturne_sync_media_library(string $moduleName, array $excludedFolders = []): int
+{
+    global $conf;
+
+    $moduleNameLowerCase = dol_strtolower($moduleName);
+    // A module activated from a disabled state has no configuration loaded yet: the default
+    // layout of its documents stands in
+    $objectDir           = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] ?? DOL_DATA_ROOT . ($conf->entity > 1 ? '/' . $conf->entity : '') . '/' . $moduleNameLowerCase;
+
+    if (!dol_is_dir($objectDir)) {
+        return 0;
+    }
+
+    $excludedFolders = array_merge(['thumbs', 'temp', 'tmp'], $excludedFolders);
+    // Thumb suffixes are anchored on the extension, as for the pending tab
+    $excludedFiles   = '\.odt$|\.pdf$|barcode|qrcode|(_mini|_small|_medium|_large)\.[^.]+$';
+    $added           = 0;
+
+    // Oldest first: when two records hold different medias of a same name, the first one wins
+    foreach (dol_dir_list($objectDir, 'files', 1, '', $excludedFiles, 'date', SORT_ASC) as $media) {
+        $folders = array_slice(explode('/', $media['relativename']), 0, -1);
+
+        // A record keeps its medias in <element>/<ref>/: a media above belongs to none
+        if (count($folders) < 2 || !empty(array_intersect($folders, $excludedFolders)) || image_format_supported($media['name']) < 0) {
+            continue;
+        }
+
+        if (saturne_add_media_to_library($moduleNameLowerCase, $media['fullname'])) {
+            $added++;
+        }
+    }
+
+    return $added;
+}
+
+/**
  * Resolve the folder holding the medias of an object
  *
  * An object with no reference yet keeps its medias in a temporary folder named after its
