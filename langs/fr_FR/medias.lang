@@ -114,3 +114,9 @@ ViewDetails=Détails
 ViewLargeIcons=Grandes icônes
 ViewCompactList=Liste compacte
 UnlinkMediaFromRecord=Délier ce média de cet élément (il reste dans la bibliothèque)
+
+# Synchronisation de la bibliothèque
+SyncMediaLibrary=Ajouter à la bibliothèque les photos des éléments qui n'y sont pas encore
+SyncMediaLibraryButton=Récupérer toutes les photos
+SyncMediaLibraryDone=Bibliothèque à jour : %s photo(s) ajoutée(s), dont %s homonyme(s) sous un autre nom ; %s déjà présente(s) ; %s écartée(s) (signatures, documents confidentiels, dossiers de travail)
+SyncMediaLibraryError=La synchronisation de la bibliothèque a échoué
