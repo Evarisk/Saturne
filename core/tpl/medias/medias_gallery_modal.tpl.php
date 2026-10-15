@@ -289,6 +289,16 @@ if ($subaction == 'listMediaTargets') {
     }
 }
 
+// Catch up of the library on the medias the records hold. A slice at a time: a large module would
+// outlast the time a request may run, the browser calls again until it is done
+if ($subaction == 'syncMediaLibrary' && $user->admin) {
+    $librarySettings = saturne_get_media_library_settings($moduleNameLowerCase);
+    $librarySync     = saturne_sync_media_library($moduleNameLowerCase, $librarySettings['excluded'], $librarySettings['folders'], microtime(true) + 20);
+
+    echo '<span id="saturne-sync-media-library-response" style="display:none;">' . json_encode($librarySync) . '</span>';
+    exit;
+}
+
 // Assign pending medias to a record, the way the gallery does for a single one
 if ($subaction == 'assignMedias') {
     $data = json_decode(file_get_contents('php://input'), true);
@@ -606,6 +616,13 @@ include __DIR__ . '/photo_editor_modal.tpl.php'; ?>
                         <span id="set_today_medias" value="1" class="linkobject toggle-today-medias"><i class="fas fa-calendar-day" style="color:#aaa;"></i></span>
                     <?php endif; ?>
                 </span>
+
+                <?php if ($user->admin) : ?>
+                    <!-- Catch up on the medias the records hold -->
+                    <div class="wpeo-button button-bordered button-main button-size-small button-radius-2 sync-media-library" title="<?php echo dol_escape_htmltag($langs->trans('SyncMediaLibrary')); ?>" data-label-done="<?php echo dol_escape_htmltag($langs->trans('SyncMediaLibraryDone', '%s', '%s', '%s', '%s')); ?>" data-label-error="<?php echo dol_escape_htmltag($langs->trans('SyncMediaLibraryError')); ?>">
+                        <i class="fas fa-sync-alt"></i> <?php echo $langs->trans('SyncMediaLibraryButton'); ?>
+                    </div>
+                <?php endif; ?>
 
                 <label for="add_media_to_gallery" class="media-add-btn" title="<?php echo dol_escape_htmltag($langs->trans('AddFile')); ?>">
                     <i class="fas fa-plus"></i>

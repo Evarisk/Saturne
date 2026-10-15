@@ -148,6 +148,10 @@ window.saturne.mediaBlock.onLibraryOpen = function() {
 
   window.saturne.modal.loadLazyImages();
   gallery.addClass('modal-active');
+
+  if (window.saturne.mediaGallery) {
+    window.saturne.mediaGallery.reloadIfChanged();
+  }
 };
 
 /**
@@ -925,6 +929,12 @@ window.saturne.mediaBlock.uploadPhotosDirectly = function(files, module, subdir,
  * @returns {void}
  */
 window.saturne.mediaBlock.refreshGallery = function(block, responseText) {
+  // A photo sent, linked or removed here changes the library or what it holds pending: the gallery
+  // modal, written with the page, reads it again at its next opening
+  if (window.saturne.mediaGallery) {
+    window.saturne.mediaGallery.libraryChanged = true;
+  }
+
   var $doc      = $('<div>').html(responseText);
   var blockId   = block && block.attr('id');
   var $srcBlock = blockId ? $doc.find('#' + blockId) : $();

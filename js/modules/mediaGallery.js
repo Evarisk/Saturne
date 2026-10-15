@@ -68,6 +68,7 @@ window.saturne.mediaGallery.event = function() {
   $( document ).on( 'click', '.toggle-today-medias', window.saturne.mediaGallery.toggleTodayMedias );
   $( document ).on( 'click', '.toggle-unlinked-medias', window.saturne.mediaGallery.toggleUnlinkedMedias );
   $(document).on('click', '.regenerate-thumbs', window.saturne.mediaGallery.regenerateThumbs);
+  $(document).on('click', '.sync-media-library', window.saturne.mediaGallery.syncLibrary);
   $(document).on( 'click', '.media-gallery-ai', window.saturne.mediaGallery.readFileAI);
 }
 
@@ -964,6 +965,149 @@ window.saturne.mediaGallery.toggleUnlinkedMedias = function( event ) {
       $('.loader-spin').remove();
     }
   });
+};
+
+/**
+ * Read the gallery again, on its first page, then run the callback
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param  {Function} callback Run once the gallery is read again
+ * @return {void}
+ */
+window.saturne.mediaGallery.reload = function(callback) {
+  let mediaGallery = $('#media_gallery');
+
+  window.saturne.loader.display(mediaGallery.find('.modal-content'));
+
+  // A plain reading of the page: the pagination action needs the count of pages, which a gallery
+  // on a single page does not show
+  $.ajax({
+    url: document.URL.split('#')[0],
+    type: 'GET',
+    success: function(resp) {
+      let freshGallery = $(resp).find('#media_gallery').first();
+
+      // The children only: the opener of the gallery is written on the modal itself
+      if (freshGallery.length) {
+        mediaGallery.html(freshGallery.children());
+      }
+      window.saturne.modal.loadLazyImages();
+
+      if (typeof callback === 'function') {
+        callback();
+      }
+    },
+    complete: function() {
+      $('.wpeo-loader').removeClass('wpeo-loader');
+    }
+  });
+};
+
+/**
+ * Read the gallery again when the library changed since the page was written
+ *
+ * The gallery tab comes with the page and the pending one with its first opening: a photo a media
+ * block sent since then joined the library but showed in neither tab until the page was reloaded.
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @return {void}
+ */
+window.saturne.mediaGallery.reloadIfChanged = function() {
+  if (!window.saturne.mediaGallery.libraryChanged) {
+    return;
+  }
+
+  window.saturne.mediaGallery.libraryChanged = false;
+  window.saturne.mediaGallery.reload(function() {
+    // The pending list is built again: the button it offers follows the opener of the gallery
+    if (window.saturne.mediaPending) {
+      window.saturne.mediaPending.syncCurrentTarget($('#media_gallery'));
+    }
+  });
+};
+
+/**
+ * Catch up of the library on the medias the records hold
+ *
+ * The server works a slice at a time: the browser calls again until it is done, then shows what was
+ * copied and lists the library again. Each answer comes from a page that renewed the CSRF token, the
+ * next call carries the new one.
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @return {void}
+ */
+window.saturne.mediaGallery.syncLibrary = function() {
+  let button = $(this);
+
+  if (button.hasClass('sync-running')) {
+    return;
+  }
+
+  let baseUrl        = document.URL.split('#')[0];
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(baseUrl);
+  let token          = window.saturne.toolbox.getToken();
+  let copied         = { added: 0, renamed: 0 };
+
+  button.addClass('sync-running').find('i').addClass('fa-spin');
+
+  let finish = function(message, color) {
+    button.removeClass('sync-running').find('i').removeClass('fa-spin');
+    if (typeof $.jnotify === 'function') {
+      $.jnotify(message, { color: color });
+    } else {
+      alert(message);
+    }
+  };
+
+  let step = function() {
+    $.ajax({
+      url: baseUrl + querySeparator + 'subaction=syncMediaLibrary&token=' + token,
+      type: 'POST',
+      success: function(resp) {
+        let page  = $(resp);
+        let stats = null;
+
+        try {
+          stats = JSON.parse(page.find('#saturne-sync-media-library-response').text());
+        } catch (e) {
+          finish(button.data('label-error'), 'red');
+          return;
+        }
+
+        token = page.find('input[name="token"]').first().val() || token;
+
+        // Every call goes over the whole module again: a media copied by an earlier one is now
+        // counted as present
+        if (!stats.done) {
+          copied.added   += stats.added;
+          copied.renamed += stats.renamed;
+          step();
+          return;
+        }
+
+        let added   = copied.added + stats.added;
+        let renamed = copied.renamed + stats.renamed;
+        let present = stats.present - copied.added - copied.renamed;
+        let message = button.data('label-done').replace('%s', added + renamed).replace('%s', renamed).replace('%s', present).replace('%s', stats.excluded);
+
+        finish(message, 'green');
+
+        // The library holds new medias: list it again
+        window.saturne.mediaGallery.reload();
+      },
+      error: function() {
+        finish(button.data('label-error'), 'red');
+      }
+    });
+  };
+
+  step();
 };
 
 /**
