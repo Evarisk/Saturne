@@ -568,12 +568,152 @@ function saturne_media_record_object(string $moduleName, string $element, string
 }
 
 /**
+ * Settings a module gives to its media library through the saturneMediaLibraryFolders hook
+ *
+ * A module may keep medias of its records outside its own folder (Digirisk keeps the photos of its
+ * tickets in the ticket folder of Dolibarr), and may hold folders whose medias stay out of a library
+ * everyone can browse, such as personal documents or the work folders of its forms.
+ *
+ * @param  string $moduleName Module owning the library
+ * @return array              'folders': element => absolute folder holding one <ref>/ folder per record,
+ *                            'excluded': names of the folders, at any depth, kept out of the library
+ */
+function saturne_get_media_library_settings(string $moduleName): array
+{
+    global $hookmanager;
+
+    $settings = ['folders' => [], 'excluded' => []];
+
+    if (!is_object($hookmanager)) {
+        return $settings;
+    }
+
+    $hookmanager->initHooks(['saturnemedialibrary']);
+    $parameters = ['moduleName' => dol_strtolower($moduleName)];
+    $hookmanager->executeHooks('saturneMediaLibraryFolders', $parameters);
+
+    if (is_array($hookmanager->resArray)) {
+        $settings['folders']  = (array) ($hookmanager->resArray['folders'] ?? []);
+        $settings['excluded'] = (array) ($hookmanager->resArray['excluded'] ?? []);
+    }
+
+    return $settings;
+}
+
+/**
+ * Folder of the default layout of the documents, for an entity
+ *
+ * Stands in for the configured folder of a module while it is being activated: a module activated
+ * from a disabled state has no configuration loaded yet.
+ *
+ * @param  string $folder Folder of the module in the documents
+ * @param  int    $entity Entity
+ * @return string         Absolute path of the folder
+ */
+function saturne_default_documents_dir(string $folder, int $entity): string
+{
+    return DOL_DATA_ROOT . ($entity > 1 ? '/' . $entity : '') . '/' . $folder;
+}
+
+/**
+ * Path of a file from the documents root, as the library keeps where its medias came from
+ *
+ * @param  string $filePath Absolute path of the file
+ * @return string           Path from the documents root
+ */
+function saturne_media_origin_path(string $filePath): string
+{
+    return ltrim(preg_replace('/^' . preg_quote(DOL_DATA_ROOT, '/') . '/', '', str_replace('\\', '/', $filePath)), '/');
+}
+
+/**
+ * List the medias the records of a module hold, wherever the module keeps them
+ *
+ * A record keeps its medias in <element>/<ref>/ under the module folder, or in <ref>/ under a folder
+ * the module declares for one element: the relative name starts with the element either way, so both
+ * read the same. Documents and generated codes are left out, thumbs too.
+ *
+ * @param  string $moduleName Module owning the records
+ * @param  array  $folders    Element => absolute folder holding one <ref>/ folder per record
+ * @param  int    $entity     Entity, the current one when left out
+ * @return array              Files as dol_dir_list() lists them, oldest first
+ */
+function saturne_get_record_medias(string $moduleName, array $folders = [], int $entity = 0): array
+{
+    global $conf;
+
+    $entity              = $entity > 0 ? $entity : (int) $conf->entity;
+    $moduleNameLowerCase = dol_strtolower($moduleName);
+    // Thumb suffixes are anchored on the extension: a media named largeur-frigo.jpg holds _large
+    // and a loose filter would read it as a thumb
+    $excludedFiles = '\.odt$|\.pdf$|barcode|qrcode|(_mini|_small|_medium|_large)\.[^.]+$';
+
+    $roots = ['' => $conf->$moduleNameLowerCase->multidir_output[$entity] ?? saturne_default_documents_dir($moduleNameLowerCase, $entity)];
+    foreach ($folders as $element => $folder) {
+        $roots[$element . '/'] = $folder;
+    }
+
+    $medias = [];
+    foreach ($roots as $prefix => $root) {
+        if (dol_strlen($root) == 0 || !dol_is_dir($root)) {
+            continue;
+        }
+
+        foreach (dol_dir_list($root, 'files', 1, '', $excludedFiles) as $media) {
+            $media['relativename'] = $prefix . $media['relativename'];
+            $medias[]              = $media;
+        }
+    }
+
+    usort($medias, function ($a, $b) {
+        return $a['date'] <=> $b['date'];
+    });
+
+    return $medias;
+}
+
+/**
+ * Where the library medias that came from a record were taken from: media name => path of the record
+ * media from the documents root
+ *
+ * A record media differing from the library one of the same name is kept under a free name: only the
+ * origin the ECM index keeps (fullpath_orig) ties it back to its record.
+ *
+ * @param  string $moduleName Module owning the library
+ * @param  int    $entity     Entity, the current one when left out
+ * @return array              Origins by media name
+ */
+function saturne_get_library_media_origins(string $moduleName, int $entity = 0): array
+{
+    global $conf, $db;
+
+    $entity              = $entity > 0 ? $entity : (int) $conf->entity;
+    $moduleNameLowerCase = $db->escape(dol_strtolower($moduleName));
+    $origins             = [];
+
+    // The index keeps the path from the documents root, entity folder included
+    $sql  = 'SELECT filename, fullpath_orig FROM ' . MAIN_DB_PREFIX . 'ecm_files';
+    $sql .= ' WHERE entity = ' . $entity;
+    $sql .= " AND filepath IN ('ecm/" . $moduleNameLowerCase . "/medias', '" . $entity . '/ecm/' . $moduleNameLowerCase . "/medias')";
+    $sql .= " AND fullpath_orig LIKE '%/%'";
+
+    $resql = $db->query($sql);
+    if ($resql) {
+        while ($obj = $db->fetch_object($resql)) {
+            $origins[$obj->filename] = $obj->fullpath_orig;
+        }
+    }
+
+    return $origins;
+}
+
+/**
  * List the medias of the module library
  *
- * A media counts as used as soon as a file of the same name sits somewhere under the module
- * output folder, which is how the gallery already tells linked medias apart. Each entry carries
- * what the list view shows: its name, its weight, its date and the description held by the ECM
- * index.
+ * A media counts as used as soon as a record holds a file of the same name, which is how the gallery
+ * already tells linked medias apart, or when it came from a record still holding it. Each entry
+ * carries what the list view shows: its name, its weight, its date and the description held by the
+ * ECM index.
  *
  * @param  string $moduleName  Module owning the library
  * @param  bool   $onlyPending Keep only the medias no object uses yet
@@ -593,30 +733,31 @@ function saturne_get_library_medias(string $moduleName, bool $onlyPending = true
 
     $libraryFiles = dol_dir_list($libraryDir, 'files', 0, '', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC);
 
-    // One recursive listing of the module folder answers for every media at once: it tells both
-    // which medias are still pending and which records hold the others
-    $objectDir    = $conf->$moduleNameLowerCase->multidir_output[$entity] ?? '';
-    // Thumb suffixes are anchored on the extension: a media named largeur-frigo.jpg holds _large
-    // and a loose filter would read it as a thumb, leaving it pending for ever
-    $thumbFilter  = '\.odt$|\.pdf$|barcode|(_mini|_small|_medium|_large)\.[^.]+$';
-    $objectMedias = dol_strlen($objectDir) > 0 ? dol_dir_list($objectDir, 'files', 1, '', $thumbFilter) : [];
+    // One listing of the record folders answers for every media at once: it tells both which medias
+    // are still pending and which records hold the others
+    $settings     = saturne_get_media_library_settings($moduleNameLowerCase);
+    $objectMedias = saturne_get_record_medias($moduleNameLowerCase, $settings['folders'], $entity);
+    // Work folders carry no record, a media waiting there is still pending, whether the folder sits
+    // at the root of the module or under an element (<element>/tmp/, for a record being created)
+    $workFolders  = array_merge(['temp', 'tmp'], $settings['excluded']);
 
-    // A media sits in <element>/<ref>/, which names the record holding it. Work folders carry no
-    // record, a media waiting there is still pending, whether the folder sits at the root of the
-    // module or under an element (<element>/tmp/, for a record being created)
+    // A media sits in <element>/<ref>/, which names the record holding it
     $recordsByMedia = [];
+    $recordsByPath  = [];
     foreach ($objectMedias as $objectMedia) {
         $segments = explode('/', $objectMedia['relativename']);
 
-        if (count($segments) < 3 || in_array($segments[0], ['temp', 'tmp']) || in_array($segments[1], ['temp', 'tmp'])) {
+        if (count($segments) < 3 || !empty(array_intersect(array_slice($segments, 0, 2), $workFolders))) {
             continue;
         }
 
-        $recordsByMedia[$objectMedia['name']][$segments[0] . '/' . $segments[1]] = [
-            'element' => $segments[0],
-            'ref'     => $segments[1],
-        ];
+        $record = ['element' => $segments[0], 'ref' => $segments[1]];
+
+        $recordsByMedia[$objectMedia['name']][$segments[0] . '/' . $segments[1]] = $record;
+        $recordsByPath[saturne_media_origin_path($objectMedia['fullname'])]       = $record;
     }
+
+    $origins = saturne_get_library_media_origins($moduleNameLowerCase, $entity);
 
     require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
 
@@ -624,7 +765,15 @@ function saturne_get_library_medias(string $moduleName, bool $onlyPending = true
     $medias  = [];
 
     foreach ($libraryFiles as $file) {
-        $records = array_values($recordsByMedia[$file['name']] ?? []);
+        $records = $recordsByMedia[$file['name']] ?? [];
+
+        // A media kept under a free name is tied to its record by its origin only
+        if (isset($origins[$file['name']], $recordsByPath[$origins[$file['name']]])) {
+            $record = $recordsByPath[$origins[$file['name']]];
+
+            $records[$record['element'] . '/' . $record['ref']] = $record;
+        }
+        $records = array_values($records);
 
         if (image_format_supported($file['name']) < 0 || ($onlyPending && !empty($records))) {
             continue;
@@ -647,105 +796,139 @@ function saturne_get_library_medias(string $moduleName, bool $onlyPending = true
 }
 
 /**
- * Put a media into the module library, unless the library already holds one of that name
+ * Put a media into the module library
  *
  * The gallery lists the library and the pending tab tells its unused medias apart: a media sent
  * straight to a record, by a media block or a mobile form, would be missing from both. The library
- * keeps a copy, as it does for a media it hands over to a record. A media of the same name is taken
- * for the same one, which is also how a record is found to hold a library media.
+ * keeps a copy, as it does for a media it hands over to a record, and the ECM index keeps where the
+ * copy came from. A media the library holds under its name with the same content is already there.
+ * Under a name the library gives to another image (a phone names every shot image.jpg), it is kept
+ * under a free name, which its origin ties back to its record.
  *
- * @param  string $moduleName Module owning the library
- * @param  string $filePath   Absolute path of the media
- * @param  int    $entity     Entity of the library, the current one when left out
- * @return bool               True when the media was added, false when it was already there or could not be
+ * @param  string $moduleName  Module owning the library
+ * @param  string $filePath    Absolute path of the media
+ * @param  int    $entity      Entity of the library, the current one when left out
+ * @param  bool   $keepHomonym Keep a media differing from the library one of its name under a free
+ *                             name: an edited media sent back under its own name must not come twice
+ * @return string              'added', 'renamed' when kept under a free name, 'present' when already
+ *                             there, 'error' when it could not be copied
  */
-function saturne_add_media_to_library(string $moduleName, string $filePath, int $entity = 0): bool
+function saturne_add_media_to_library(string $moduleName, string $filePath, int $entity = 0, bool $keepHomonym = true): string
 {
-    global $conf;
+    global $conf, $db;
 
-    $entity     = $entity > 0 ? $entity : (int) $conf->entity;
-    $fileName   = basename($filePath);
+    $entity              = $entity > 0 ? $entity : (int) $conf->entity;
+    $moduleNameLowerCase = dol_strtolower($moduleName);
+    $fileName            = basename($filePath);
     // The default layout stands in for the configured one while a module is being activated
-    $ecmDir     = $conf->ecm->multidir_output[$entity] ?? DOL_DATA_ROOT . ($entity > 1 ? '/' . $entity : '') . '/ecm';
-    $libraryDir = $ecmDir . '/' . dol_strtolower($moduleName) . '/medias';
+    $libraryDir          = ($conf->ecm->multidir_output[$entity] ?? saturne_default_documents_dir('ecm', $entity)) . '/' . $moduleNameLowerCase . '/medias';
+    $origin              = saturne_media_origin_path($filePath);
 
-    if (image_format_supported($fileName) < 0 || !dol_is_file($filePath) || dol_is_file($libraryDir . '/' . $fileName)) {
-        return false;
+    if (image_format_supported($fileName) < 0 || !dol_is_file($filePath)) {
+        return 'error';
+    }
+
+    $libraryName = $fileName;
+
+    if (dol_is_file($libraryDir . '/' . $fileName)) {
+        // Same name and same weight make the same media: hashing both files instead would read every
+        // photo of the module again at each catch up
+        if (dol_filesize($libraryDir . '/' . $fileName) == dol_filesize($filePath)) {
+            return 'present';
+        }
+
+        // A media kept under a free name by an earlier run is known by its origin
+        $sql  = 'SELECT rowid FROM ' . MAIN_DB_PREFIX . 'ecm_files';
+        $sql .= ' WHERE entity = ' . $entity . " AND fullpath_orig = '" . $db->escape($origin) . "'";
+        $sql .= " AND filepath LIKE '%ecm/" . $db->escape($moduleNameLowerCase) . "/medias'";
+
+        $resql = $db->query($sql);
+        if (!$keepHomonym || ($resql && $db->num_rows($resql) > 0)) {
+            return 'present';
+        }
+
+        $baseName  = pathinfo($fileName, PATHINFO_FILENAME);
+        $extension = pathinfo($fileName, PATHINFO_EXTENSION);
+        for ($i = 1; dol_is_file($libraryDir . '/' . $libraryName); $i++) {
+            $libraryName = $baseName . '-' . $i . '.' . $extension;
+        }
     }
 
     if (!dol_is_dir($libraryDir . '/thumbs')) {
         dol_mkdir($libraryDir . '/thumbs');
     }
 
-    if (dol_copy($filePath, $libraryDir . '/' . $fileName, '0', 0) <= 0) {
-        return false;
+    if (dol_copy($filePath, $libraryDir . '/' . $libraryName, '0', 0) <= 0) {
+        return 'error';
     }
 
     // The gallery sorts and groups its medias by date: the copy keeps the date of the media, a
     // catch up would otherwise date them all from the day it ran
-    touch(dol_osencode($libraryDir . '/' . $fileName), dol_filemtime($filePath));
+    touch(dol_osencode($libraryDir . '/' . $libraryName), dol_filemtime($filePath));
 
     // The thumbs of the record are those of the same media: copying them spares building them
     // again, which counts when a whole module catches up
     foreach (['mini', 'small', 'medium', 'large'] as $size) {
-        $thumbName   = saturne_get_thumb_name($fileName, $size);
-        $recordThumb = dirname($filePath) . '/thumbs/' . $thumbName;
+        $recordThumb  = dirname($filePath) . '/thumbs/' . saturne_get_thumb_name($fileName, $size);
+        $libraryThumb = $libraryDir . '/thumbs/' . saturne_get_thumb_name($libraryName, $size);
 
-        if (!dol_is_file($recordThumb) || dol_copy($recordThumb, $libraryDir . '/thumbs/' . $thumbName, '0', 0) <= 0) {
-            saturne_vignette($libraryDir . '/' . $fileName, getDolGlobalInt('SATURNE_MEDIA_MAX_WIDTH_' . dol_strtoupper($size)), getDolGlobalInt('SATURNE_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size)), '_' . $size);
+        if (!dol_is_file($recordThumb) || dol_copy($recordThumb, $libraryThumb, '0', 0) <= 0) {
+            saturne_vignette($libraryDir . '/' . $libraryName, getDolGlobalInt('SATURNE_MEDIA_MAX_WIDTH_' . dol_strtoupper($size)), getDolGlobalInt('SATURNE_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size)), '_' . $size);
         }
     }
 
-    addFileIntoDatabaseIndex($libraryDir, $fileName, $libraryDir . '/' . $fileName);
+    addFileIntoDatabaseIndex($libraryDir, $libraryName, $origin);
 
-    return true;
+    return $libraryName == $fileName ? 'added' : 'renamed';
 }
 
 /**
  * Put into the module library every media its records hold and it lacks
  *
  * Medias sent straight to a record never went through the library, so the gallery missed them.
- * A module catches up on them at its activation; running it again only copies what is still
- * missing. Thumbs, work folders and generated codes stay out, like the folders the module names:
- * personal documents have no place in a library everyone can browse.
+ * Running it again only copies what is still missing. Work folders, signatures and the folders the
+ * module names stay out: personal documents have no place in a library everyone can browse. A
+ * deadline splits a long catch up into several calls, each one going over what is already there
+ * quickly.
  *
  * @param  string   $moduleName      Module owning the library
  * @param  string[] $excludedFolders Folder names, at any depth, whose medias stay out of the library
- * @return int                       Number of medias added
+ * @param  array    $folders         Element => folder outside the module one holding its records,
+ *                                   see saturne_get_media_library_settings()
+ * @param  float    $deadline        Time (microtime) past which the catch up stops, 0 to run to the end
+ * @return array                     Number of medias by outcome ('added', 'renamed', 'present',
+ *                                   'excluded', 'error') and 'done', false when the deadline stopped it
  */
-function saturne_sync_media_library(string $moduleName, array $excludedFolders = []): int
+function saturne_sync_media_library(string $moduleName, array $excludedFolders = [], array $folders = [], float $deadline = 0): array
 {
-    global $conf;
-
-    $moduleNameLowerCase = dol_strtolower($moduleName);
-    // A module activated from a disabled state has no configuration loaded yet: the default
-    // layout of its documents stands in
-    $objectDir           = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] ?? DOL_DATA_ROOT . ($conf->entity > 1 ? '/' . $conf->entity : '') . '/' . $moduleNameLowerCase;
-
-    if (!dol_is_dir($objectDir)) {
-        return 0;
-    }
-
+    $stats           = ['added' => 0, 'renamed' => 0, 'present' => 0, 'excluded' => 0, 'error' => 0, 'done' => true];
     $excludedFolders = array_merge(['thumbs', 'temp', 'tmp'], $excludedFolders);
-    // Thumb suffixes are anchored on the extension, as for the pending tab
-    $excludedFiles   = '\.odt$|\.pdf$|barcode|qrcode|(_mini|_small|_medium|_large)\.[^.]+$';
-    $added           = 0;
 
-    // Oldest first: when two records hold different medias of a same name, the first one wins
-    foreach (dol_dir_list($objectDir, 'files', 1, '', $excludedFiles, 'date', SORT_ASC) as $media) {
-        $folders = array_slice(explode('/', $media['relativename']), 0, -1);
-
-        // A record keeps its medias in <element>/<ref>/: a media above belongs to none
-        if (count($folders) < 2 || !empty(array_intersect($folders, $excludedFolders)) || image_format_supported($media['name']) < 0) {
+    // Oldest first: when records hold different medias of a same name, the first one keeps it
+    foreach (saturne_get_record_medias($moduleName, $folders) as $media) {
+        if (image_format_supported($media['name']) < 0) {
             continue;
         }
 
-        if (saturne_add_media_to_library($moduleNameLowerCase, $media['fullname'])) {
-            $added++;
+        $folderNames = array_slice(explode('/', $media['relativename']), 0, -1);
+
+        // A record keeps its medias in <element>/<ref>/: a media above belongs to none. A signature
+        // is the mark of a person, not a media of the record
+        if (count($folderNames) < 2 || !empty(array_intersect($folderNames, $excludedFolders)) || preg_match('/signature/i', $media['relativename'])) {
+            $stats['excluded']++;
+            continue;
         }
+
+        // Each call copies at least one media: going over a large module may alone outlast the deadline
+        if ($deadline > 0 && microtime(true) > $deadline && $stats['added'] + $stats['renamed'] + $stats['error'] > 0) {
+            $stats['done'] = false;
+            break;
+        }
+
+        $stats[saturne_add_media_to_library($moduleName, $media['fullname'])]++;
     }
 
-    return $added;
+    return $stats;
 }
 
 /**

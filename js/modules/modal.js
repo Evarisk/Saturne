@@ -109,6 +109,10 @@ window.saturne.modal.openModal = function () {
 	$('#'+modalToOpen).find('.wpeo-button').attr('value', fromId);
 	$('#'+modalToOpen).addClass('modal-active');
 
+  if (modalToOpen === 'media_gallery' && window.saturne.mediaGallery) {
+    window.saturne.mediaGallery.reloadIfChanged();
+  }
+
 	$('.notice').addClass('hidden');
 };
 

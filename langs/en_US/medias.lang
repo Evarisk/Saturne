@@ -112,3 +112,9 @@ ViewDetails=Details
 ViewLargeIcons=Large icons
 ViewCompactList=Compact list
 UnlinkMediaFromRecord=Unlink this media from the record
+
+# Library catch up
+SyncMediaLibrary=Add to the library the photos of the records it does not hold yet
+SyncMediaLibraryButton=Retrieve all photos
+SyncMediaLibraryDone=Library up to date: %s photo(s) added, %s of them homonyms under another name; %s already there; %s left out (signatures, confidential documents, work folders)
+SyncMediaLibraryError=The catch up of the library failed
