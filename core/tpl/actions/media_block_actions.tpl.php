@@ -101,8 +101,8 @@ if ($action == 'uploadPhoto' && !empty($mediaBlockDir) && !empty($conf->global->
                 }
 
                 // The gallery lists the library: a photo taken in a block joins it, as one sent
-                // through the gallery does
-                saturne_add_media_to_library($mediaBlockModule, $uploadedPath);
+                // through the gallery does. An edited photo sent back under its name is the same one
+                saturne_add_media_to_library($mediaBlockModule, $uploadedPath, 0, !$allowOverwrite);
             }
         }
     }
