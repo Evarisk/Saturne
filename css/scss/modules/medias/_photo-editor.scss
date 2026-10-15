@@ -51,6 +51,78 @@
     box-sizing: border-box;
 }
 
+/* ── Delete confirmation ──────────────────────────────────────────────────── */
+
+// Asked over the editor rather than in a browser dialog: the photo about to go stays in sight
+.saturne-photo-editor-confirm {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 40;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.45);
+    box-sizing: border-box;
+
+    &.is-open {
+        display: flex;
+    }
+
+    &__card {
+        width: 100%;
+        max-width: 380px;
+        padding: 24px;
+        border-radius: 12px;
+        background: #ffffff;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+        text-align: center;
+        box-sizing: border-box;
+    }
+
+    &__icon {
+        color: #e05353;
+        font-size: 2.4rem;
+    }
+
+    &__title {
+        margin: 12px 0 16px;
+        color: #1e293b;
+        font-size: 1.15rem;
+        font-weight: 600;
+    }
+
+    &__preview {
+        display: block;
+        max-width: 100%;
+        max-height: 180px;
+        margin: 0 auto 20px;
+        border-radius: 8px;
+        object-fit: contain;
+    }
+
+    &__actions {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+
+        .wpeo-button {
+            border: none;
+
+            &:focus-visible {
+                outline: 2px solid #1e293b;
+                outline-offset: 2px;
+            }
+        }
+
+        // White on the light grey of the theme hardly reads: the way back stays plain but legible
+        .button-grey {
+            background: #e2e8f0;
+            color: #334155;
+        }
+    }
+}
+
 /* ── Header ───────────────────────────────────────────────────────────────── */
 
 .saturne-photo-editor-header {

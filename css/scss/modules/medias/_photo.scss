@@ -197,6 +197,15 @@
   cursor: pointer;
   font-size: 1.2em;
 }
+// Kept on one line in the header; the catch up runs a while, the button says so until it is done
+.sync-media-library {
+  white-space: nowrap;
+
+  &.sync-running {
+    cursor: progress;
+    opacity: 0.7;
+  }
+}
 .media-add-btn {
   background: var(--color-primary, #007bff);
   color: white;
