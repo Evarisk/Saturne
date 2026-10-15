@@ -185,13 +185,19 @@
         }
     }
 
+    // A long list runs past the screen: the preview follows the scroll so the media clicked far
+    // down stays in sight. It clears the sticky top menu of the page.
     &-preview {
+        position: sticky;
+        top: 60px;
         display: flex;
         flex: 0 0 260px;
         flex-direction: column;
+        align-self: flex-start;
         align-items: center;
         justify-content: center;
         gap: 10px;
+        min-height: 200px;
         padding: 12px;
         border: 1px solid #e2e8f0;
         border-radius: 8px;
@@ -223,13 +229,36 @@
         }
     }
 
+    // Stays at the bottom of the screen, or of the modal, while the list scrolls: the medias are
+    // ticked far down a long list and sent without scrolling back to its end
     &-footer {
+        position: sticky;
+        bottom: 0;
+        z-index: 2;
         display: flex;
         align-items: center;
         gap: 10px;
-        padding-top: 12px;
+        padding: 12px 0;
         border-top: 1px solid #e2e8f0;
         margin-top: 12px;
+        background: #ffffff;
+        box-shadow: 0 -6px 12px -10px rgba(15, 23, 42, 0.35);
+
+        // The modal footer is narrow: the selects give way, a button keeps its icon beside its label
+        .wpeo-button {
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+    }
+
+    // Opened from a media block or a record, the medias go to it: only its Add button stays
+    &.saturne-pending-to-opener &-footer {
+        .saturne-pending-object-type,
+        .saturne-pending-object,
+        .select2-container,
+        .saturne-pending-assign {
+            display: none;
+        }
     }
 
     &-counter {
@@ -267,8 +296,11 @@
             flex-direction: column;
         }
 
+        // Stacked under the list, a sticky preview would ride over the rows
         &-preview {
+            position: static;
             flex: 0 0 auto;
+            align-self: stretch;
         }
 
         &-head,
@@ -413,7 +445,9 @@
 // The modal is narrower than the media page. Rather than resize it, which made switching tabs
 // jump, the list gives up the columns it can do without and keeps a smaller preview.
 .wpeo-modal .saturne-pending {
+    // The modal content scrolls on its own, under no menu
     &-preview {
+        top: 0;
         flex: 0 0 180px;
     }
 

@@ -319,7 +319,7 @@ class SaturneDashboard
                                 $graph->setShowLegend($dashboardGraph['showlegend'] ?? 2);
                                 $graph->draw($fileName[$uniqueKey], $fileUrl[$uniqueKey]);
 
-                                print '<div class="' . ($dashboardGraph['moreCSS'] ?? '') . '" id="graph-' . $dashboardGraph['name'] . '">';
+                                print '<div class="' . ($dashboardGraph['moreCSS'] ?? '') . '" id="graph-' . ($dashboardGraph['name'] ?? '') . '">';
                                 $downloadCSV  = '<div class="flex flex-row justify-end">';
                                 $downloadCSV .= '<input type="hidden" name="graph" value="' . dol_escape_htmltag(json_encode($dashboardGraph, JSON_UNESCAPED_UNICODE)) . '">';
                                 $downloadCSV .= '<button class="wpeo-button no-load button-grey" id="export-csv" data-graph-name="' . dol_sanitizeFileName(dol_strtolower($dashboardGraph['title'])) . '">';
@@ -334,7 +334,7 @@ class SaturneDashboard
 
                                 $dashboardGraph['morehtmlright'] = ($dashboardGraph['morehtmlright'] ?? '') . $downloadCSV;
 
-                                print load_fiche_titre($dashboardGraph['title'], $dashboardGraph['morehtmlright'], $dashboardGraph['picto']);
+                                print load_fiche_titre($dashboardGraph['title'], $dashboardGraph['morehtmlright'], $dashboardGraph['picto'] ?? '');
 
                                 print $graph->show();
 
