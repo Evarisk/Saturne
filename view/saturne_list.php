@@ -105,6 +105,23 @@ if (isModEnabled('categorie')) {
     $searchCategories = GETPOST('search_category_' . $object->element . '_list', 'array');
 }
 
+// Last sort chosen by the user, for the object types asking for it: the menu and the cards link to the
+// list without any sort, so it would otherwise fall back on the default one each time it is reopened
+if (!empty($objectMetadata['remember_sort']) && !empty($user->id)) {
+    require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
+
+    $lastSortParam = 'SATURNE_LIST_SORT_' . dol_strtoupper($objectType);
+    if (GETPOSTISSET('sortfield')) {
+        $lastSort = $sortfield . '|' . $sortorder;
+        if (getDolUserString($lastSortParam) !== $lastSort) {
+            dol_set_user_param($db, $conf, $user, [$lastSortParam => $lastSort]);
+        }
+    } elseif (getDolUserString($lastSortParam) !== '') {
+        // A sort field no longer offered is dropped by the check of the sort against the select
+        [$sortfield, $sortorder] = array_pad(explode('|', getDolUserString($lastSortParam), 2), 2, '');
+    }
+}
+
 // Default sort order (if not yet defined by previous GETPOST)
 if (!$sortfield) {
     $sortfield = $objectMetadata['defaultsort'];
