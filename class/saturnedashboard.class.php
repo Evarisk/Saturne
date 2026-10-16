@@ -311,6 +311,15 @@ class SaturneDashboard
                                     $graph->SetLegend($dashboardGraphLegend[$uniqueKey]);
                                 }
                                 if (isset($dashboardGraphColor[$uniqueKey])) {
+                                    // DolGraph reads one color per series but colors come one per label: a pie with
+                                    // 2 datasets reduced to a single slice gets 1 color for 2 series (warnings in dolgraph)
+                                    $nbSeries = 0;
+                                    foreach ($graphData[$uniqueKey] as $graphDataRow) {
+                                        $nbSeries = max($nbSeries, count((array) $graphDataRow) - 1);
+                                    }
+                                    for ($colorKey = count($dashboardGraphColor[$uniqueKey]); $colorKey < $nbSeries; $colorKey++) {
+                                        $dashboardGraphColor[$uniqueKey][] = $this->getColorRange($colorKey);
+                                    }
                                     $graph->SetDataColor($dashboardGraphColor[$uniqueKey]);
                                 }
                                 $graph->SetType([$dashboardGraph['type'] ?? 'pie']);
