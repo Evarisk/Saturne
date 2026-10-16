@@ -627,8 +627,6 @@ class ActionsSaturne
             $key = $parameters['key'];
             $val = $parameters['val'];
 
-            error_log("SATURNE_HOOK: " . $key);
-
             if ($key === 'fk_opp_status' || $key === 'p.fk_opp_status' || $key === 'project.fk_opp_status') {
                 $ceElement = $object->element;
                 $ceTable   = $object->table_element;
