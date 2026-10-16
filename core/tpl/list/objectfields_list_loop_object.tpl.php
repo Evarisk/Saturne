@@ -50,6 +50,13 @@ while ($i < $iMaxInLoop) {
     // Store properties in $object
     $object->setVarsFromFetchObj($obj);
 
+    // Core classes (Propal, Commande, Project...) declare their status as fk_statut: setVarsFromFetchObj() fills
+    // only that field, while getLibStatut() and the getNomUrl() tooltip read ->status. Copied on every row,
+    // the object being reused from one row to the next
+    if (array_key_exists('fk_statut', $object->fields) && !array_key_exists('status', $object->fields)) {
+        $object->status = $object->fk_statut;
+    }
+
     /*
     $object->thirdparty = null;
     if ($obj->fk_soc > 0) {
