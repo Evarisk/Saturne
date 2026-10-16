@@ -77,9 +77,17 @@ $form = new Form($db);
 $hookmanager->initHooks([$objectType . 'admin']);
 
 // Security check - Protection if external user
-$permissiontoread = $user->rights->$moduleNameLowerCase->adminpage->read;
+$permissiontoread  = $user->rights->$moduleNameLowerCase->adminpage->read;
+$permissiontowrite = saturne_check_admin_write_access($moduleNameLowerCase);
 
 saturne_check_access($permissiontoread);
+
+/*
+ * Actions
+ */
+
+// Actions set_mod, update_mask and the switches of the module constants
+require_once __DIR__ . '/../core/tpl/actions/admin_conf_actions.tpl.php';
 
 /*
  * View
@@ -98,6 +106,9 @@ print load_fiche_titre($title, $linkback, 'title_setup');
 $preHead = $moduleNameLowerCase . '_admin_prepare_head';
 $head = $preHead();
 print dol_get_fiche_head($head, $object->element, $title, -1, $moduleNameLowerCase . '_color@' . $moduleNameLowerCase);
+
+// Warns a user allowed to read the settings but not to change them
+require_once __DIR__ . '/../core/tpl/admin/admin_write_access_notice.tpl.php';
 
 require_once __DIR__ . '/../core/tpl/admin/object/object_numbering_module_view.tpl.php';
 require_once __DIR__ . '/../core/tpl/admin/object/object_const_view.tpl.php';
