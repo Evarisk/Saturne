@@ -380,6 +380,7 @@ function saturne_get_objects_metadata(string $type = ''): array
     // 'hook_name_document' => Hook name object document from initHooks
     // 'create_url'         => Path to creation card, no need to add "?action=create"
     // 'list_url'           => Path to list page
+    // 'remember_sort'      => OPTIONAL : 1 to keep the last sort chosen by each user on the generic list
     // 'class_path'         => Path to object class
     // 'lib_path'           => Path to object lib
     //                         The four paths above are resolved by dol_buildpath(), which searches htdocs/ and
@@ -1025,6 +1026,7 @@ function saturne_get_objects_metadata(string $type = ''): array
                     'list_url'           => $objectMetadata['list_url'] ?? '',
                     'defaultsort'        => $objectMetadata['defaultsort'] ?? 't.ref',
                     'defaultorder'       => $objectMetadata['defaultorder'] ?? 'ASC',
+                    'remember_sort'      => $objectMetadata['remember_sort'] ?? 0,
                     'class_path'         => $objectMetadata['class_path'] ?? '',
                     'lib_path'           => $objectMetadata['lib_path'] ?? '',
                     'alias_of'           => $objectMetadata['alias_of'] ?? '',
