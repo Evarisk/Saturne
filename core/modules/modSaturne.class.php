@@ -126,7 +126,6 @@ class modSaturne extends DolibarrModules
                 'usercard',
                 'category',
                 'categoryindex',
-                'index',
                 'elementproperties',
                 'saturnegetobjectsmetadata'
             ],
@@ -338,11 +337,6 @@ class modSaturne extends DolibarrModules
 
         dolibarr_set_const($this->db, 'SATURNE_VERSION', $this->version, 'chaine', 0, '', $conf->entity);
         dolibarr_set_const($this->db, 'SATURNE_VERSION_DB_VERSION', $this->version, 'chaine', 0, '', $conf->entity);
-
-        require_once __DIR__ . '/../../class/saturneredirection.class.php';
-
-        $saturneRedirection = new SaturneRedirection($this->db);
-        $saturneRedirection->adaptHtAccess();
 
         // Load Saturne libraries
         require_once __DIR__ . '/../../../saturne/class/saturnemail.class.php';

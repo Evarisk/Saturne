@@ -68,6 +68,11 @@ class SaturneRedirection extends SaturneObject
     public const STATUS_VALIDATED = 1;
 
     /**
+     * @var int Length of generated short codes : 35^8 combinations, too many to be enumerated
+     */
+    public const CODE_LENGTH = 8;
+
+    /**
      * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor
      */
     public $fields = [
@@ -146,31 +151,214 @@ class SaturneRedirection extends SaturneObject
     }
 
     /**
-     * Adapt htaccess in order to redirect 404 errors to dolibarr main index
+     * Check that a short code is well formed
+     *
+     * @param  string $code Short code
+     * @return bool         True if the code can be used in a short URL : letters, digits, "-" and "_", 4 to 64 characters
      */
-    public function adaptHtAccess()
+    public static function isValidCode(string $code): bool
     {
-        $toUrl = DOL_MAIN_URL_ROOT . '/index.php?original_url=$1';
-        $redirectionLines  = "RewriteCond %{REQUEST_FILENAME} !-f" . PHP_EOL;
-        $redirectionLines .= "RewriteCond %{REQUEST_FILENAME} !-d" . PHP_EOL;
-        $redirectionLines .= "RewriteRule ^(.*)$ $toUrl" . PHP_EOL;
+        return preg_match('/^[a-z0-9_-]{4,64}$/i', $code) === 1;
+    }
 
-        if (
-            file_exists(DOL_DOCUMENT_ROOT . '/../.htaccess')
-            && is_writable(DOL_DOCUMENT_ROOT . '/../.htaccess')
-        ) {
-            $htaccessContent = file_get_contents(DOL_DOCUMENT_ROOT . '/../.htaccess');
+    /**
+     * Check that a target URL can be followed by the public entry point
+     *
+     * @param  string $url Target URL
+     * @return bool        True for an http(s) URL or a path relative to the host, never javascript: or data:
+     */
+    public static function isValidTargetUrl(string $url): bool
+    {
+        if (preg_match('#^https?://[^\s]+$#i', $url) === 1) {
+            return true;
+        }
 
-            if (!strpos($htaccessContent, $redirectionLines)) {
-                $rewriteEnginePos = strpos($htaccessContent, 'RewriteEngine on');
-                if ($rewriteEnginePos === false) {
-                    $rewriteEngineLine   = 'RewriteEngine on' . PHP_EOL;
-                    $allRedirectionLines = $rewriteEngineLine . "\n" . $redirectionLines;
-                }
+        return strpos($url, '/') === 0 && strpos($url, '//') !== 0;
+    }
 
-                $newHtaccessContent = $htaccessContent . "\n" . ($allRedirectionLines ?? $redirectionLines);
-                file_put_contents(DOL_DOCUMENT_ROOT . '/../.htaccess', $newHtaccessContent);
+    /**
+     * Build the public short URL of a code
+     *
+     * @param  string $code Short code
+     * @return string       Short URL, served without login by public/s/index.php
+     */
+    public static function getShortUrlFromCode(string $code): string
+    {
+        return dol_buildpath('/saturne/public/s/', 3) . '?' . $code;
+    }
+
+    /**
+     * Get the code of a short URL built by this instance
+     *
+     * @param  string $shortUrl Short URL
+     * @return string           Short code, empty string if the URL is not a short URL of this instance
+     */
+    public static function getCodeFromShortUrl(string $shortUrl): string
+    {
+        $prefix = self::getShortUrlFromCode('');
+        if (strpos($shortUrl, $prefix) !== 0) {
+            return '';
+        }
+
+        $code = substr($shortUrl, strlen($prefix));
+
+        return self::isValidCode($code) ? $code : '';
+    }
+
+    /**
+     * Get the short URL redirecting to a target URL, creating its code on first call
+     *
+     * @param  string $toUrl Target URL
+     * @param  User   $user  User creating the redirection
+     * @return string        Short URL, empty string on error
+     * @throws Exception
+     */
+    public function getShortUrl(string $toUrl, User $user): string
+    {
+        $result = $this->fetch(0, '', " AND t.to_url = '" . $this->db->escape($toUrl) . "' AND t.status = " . self::STATUS_VALIDATED);
+        if ($result > 0 && self::isValidCode($this->from_url)) {
+            return self::getShortUrlFromCode($this->from_url);
+        }
+
+        return $this->createShortUrl($toUrl, $user);
+    }
+
+    /**
+     * Create a new short URL, even if another one already redirects to the same target
+     *
+     * @param  string $toUrl Target URL
+     * @param  User   $user  User creating the redirection
+     * @param  string $code  Wanted code, a random one is generated when empty
+     * @return string        Short URL, empty string on error (bad target, bad or already used code)
+     * @throws Exception
+     */
+    public function createShortUrl(string $toUrl, User $user, string $code = ''): string
+    {
+        if (!self::isValidTargetUrl($toUrl)) {
+            $this->error = 'ErrorBadUrl';
+            return '';
+        }
+
+        if ($code === '') {
+            $code = $this->generateCode();
+            if ($code === '') {
+                return '';
+            }
+        } elseif (!self::isValidCode($code) || $this->isCodeUsed($code)) {
+            $this->error = 'ErrorShortCodeNotAvailable';
+            return '';
+        }
+
+        $this->from_url = $code;
+        $this->to_url   = $toUrl;
+        $this->status   = self::STATUS_VALIDATED;
+
+        if ($this->create($user, 1) <= 0) {
+            return '';
+        }
+
+        return self::getShortUrlFromCode($code);
+    }
+
+    /**
+     * Change the target of a short code, a printed QR code then leads to the new target
+     *
+     * @param  string $code  Short code
+     * @param  string $toUrl New target URL
+     * @param  User   $user  User updating the redirection
+     * @return int           1 on success, -1 on error
+     * @throws Exception
+     */
+    public function updateTargetUrl(string $code, string $toUrl, User $user): int
+    {
+        if (!self::isValidCode($code) || !self::isValidTargetUrl($toUrl)) {
+            $this->error = 'ErrorBadUrl';
+            return -1;
+        }
+
+        $result = $this->fetch(0, '', " AND t.from_url = '" . $this->db->escape($code) . "'");
+        if ($result <= 0) {
+            $this->error = 'ErrorRecordNotFound';
+            return -1;
+        }
+
+        $this->to_url = $toUrl;
+
+        return $this->update($user, 1) > 0 ? 1 : -1;
+    }
+
+    /**
+     * Get the target URL of a short code, whatever its entity, since the visitor of a public page has none
+     *
+     * @param  string $code Short code
+     * @return string       Target URL, empty string if the code is unknown or its target is not safe
+     */
+    public function fetchTargetUrl(string $code): string
+    {
+        if (!self::isValidCode($code)) {
+            return '';
+        }
+
+        $sql  = 'SELECT t.to_url FROM ' . $this->db->prefix() . $this->table_element . ' as t';
+        $sql .= " WHERE t.from_url = '" . $this->db->escape($code) . "'";
+        $sql .= ' AND t.status = ' . self::STATUS_VALIDATED;
+        $sql .= ' ORDER BY t.rowid ASC';
+        $sql .= $this->db->plimit(1);
+
+        $resql = $this->db->query($sql);
+        if (!$resql) {
+            $this->error = $this->db->lasterror();
+            return '';
+        }
+
+        $obj = $this->db->fetch_object($resql);
+        $this->db->free($resql);
+        if (!is_object($obj) || !self::isValidTargetUrl((string) $obj->to_url)) {
+            return '';
+        }
+
+        return (string) $obj->to_url;
+    }
+
+    /**
+     * Check whether a short code is already used, in any entity since codes are resolved without one
+     *
+     * @param  string $code Short code
+     * @return bool         True if used, or if the check failed
+     */
+    private function isCodeUsed(string $code): bool
+    {
+        $sql   = 'SELECT COUNT(t.rowid) as nb FROM ' . $this->db->prefix() . $this->table_element . ' as t';
+        $sql  .= " WHERE t.from_url = '" . $this->db->escape($code) . "'";
+        $resql = $this->db->query($sql);
+        if (!$resql) {
+            $this->error = $this->db->lasterror();
+            return true;
+        }
+
+        $obj = $this->db->fetch_object($resql);
+        $this->db->free($resql);
+
+        return !is_object($obj) || (int) $obj->nb > 0;
+    }
+
+    /**
+     * Generate a short code not used yet
+     *
+     * @return string Short code, empty string on error
+     */
+    private function generateCode(): string
+    {
+        require_once DOL_DOCUMENT_ROOT . '/core/lib/ticket.lib.php';
+
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            $code = generate_random_id(self::CODE_LENGTH);
+            if (!$this->isCodeUsed($code)) {
+                return $code;
             }
         }
+
+        $this->error = 'ErrorFailedToGenerateShortCode';
+        return '';
     }
 }

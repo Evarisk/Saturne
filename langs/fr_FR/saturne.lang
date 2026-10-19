@@ -78,10 +78,10 @@ DefaultPublicInterfaceUserLastName       = Utilisateur par défaut d'interface p
 
 # Redirections - Redirections
 Redirections = Redirections
-FromURL      = Depuis l'URL
+FromURL      = URL courte
 ToURL        = Vers l'URL
-FromUrlHelp  = Saisissez l'URL de départ. Par exemple, pour rediriger depuis https://www.evarisk.com/depuis/la/page, saisissez "/depuis/la/page"
-ToUrlHelp    = Saisissez l'URL de destination. Par exemple, pour rediriger vers https://www.evarisk.com/vers/la/page, saisissez "/vers/la/page"
+FromUrlHelp  = Code de l'URL courte : lettres, chiffres, « - » et « _ », de 4 à 64 caractères, pas déjà utilisé. Laissez vide pour en générer un au hasard (recommandé pour un QR code).
+ToUrlHelp    = URL de destination : l'adresse complète (https://…) ou un chemin commençant par "/"
 
 
 

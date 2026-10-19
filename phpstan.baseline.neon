@@ -286,11 +286,6 @@ parameters:
 			path: class/saturneobject.class.php
 
 		-
-			message: '#^Method SaturneRedirection\:\:adaptHtAccess\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			path: class/saturneredirection.class.php
-
-		-
 			message: '#^PHPDoc type array of property SaturneRedirection\:\:\$fields is not covariant with PHPDoc type array\<string, array\{type\: string, label\: string, langfile\?\: string, enabled\: int\<0, 2\>\|string, position\: int, notnull\?\: int, visible\: int\<\-6, 6\>\|string, alwayseditable\?\: int\<0, 1\>\|string, \.\.\.\}\> of overridden property CommonObject\:\:\$fields\.$#'
 			identifier: property.phpDocType
 			path: class/saturneredirection.class.php
