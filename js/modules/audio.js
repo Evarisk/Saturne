@@ -160,10 +160,13 @@ window.saturne.audio.onUploadProgress = function(event) {
 /**
  * Re-enable page footer buttons and refresh the audio block after upload
  *
+ * A recording the server accepted is broadcast as the saturne:audio-uploaded event, with the module and
+ * folder of its block, so the host page can act on it (e.g. have it transcribed).
+ *
  * @memberof Saturne_Audio
  *
  * @since   1.7.0
- * @version 1.7.0
+ * @version 23.5.0
  *
  * @param   {jqXHR} resp jQuery XHR response
  * @returns {void}
@@ -176,6 +179,10 @@ window.saturne.audio.onUploadComplete = function(resp) {
   var blockId = block ? block.attr('id') : null;
 
   window.saturne.audio._context = null;
+
+  if (ctx && resp.status === 200) {
+    $(document).trigger('saturne:audio-uploaded', [{module: ctx.module, subDir: ctx.subDir}]);
+  }
 
   if (!blockId) {
     if (block) {
