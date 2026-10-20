@@ -17,9 +17,9 @@
  */
 
 /**
- * \file    public/s/index.php
+ * \file    s/index.php
  * \ingroup saturne
- * \brief   Public short URL entry point : /custom/saturne/public/s/?code redirects to the target of the code
+ * \brief   Public short URL entry point : /custom/saturne/s/?code redirects to the target of the code
  */
 
 if (!defined('NOTOKENRENEWAL')) {
@@ -48,16 +48,16 @@ if (!defined('NOBROWSERNOTIF')) {
 }
 
 // Load Saturne environment
-if (file_exists('../../saturne.main.inc.php')) {
+if (file_exists('../saturne.main.inc.php')) {
+    require_once __DIR__ . '/../saturne.main.inc.php';
+} elseif (file_exists('../../saturne.main.inc.php')) {
     require_once __DIR__ . '/../../saturne.main.inc.php';
-} elseif (file_exists('../../../saturne.main.inc.php')) {
-    require_once __DIR__ . '/../../../saturne.main.inc.php';
 } else {
     die('Include of saturne main fails');
 }
 
 // Load Saturne libraries
-require_once __DIR__ . '/../../class/saturneredirection.class.php';
+require_once __DIR__ . '/../class/saturneredirection.class.php';
 
 // Global variables definitions
 global $db, $langs;

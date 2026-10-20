@@ -68,9 +68,14 @@ class SaturneRedirection extends SaturneObject
     public const STATUS_VALIDATED = 1;
 
     /**
-     * @var int Length of generated short codes : 35^8 combinations, too many to be enumerated
+     * @var int Length of generated short codes : 31^6, about 887 million combinations, too many to be enumerated
      */
-    public const CODE_LENGTH = 8;
+    public const CODE_LENGTH = 6;
+
+    /**
+     * @var string Characters of generated short codes : no i, l, o, 0 or 1, that are mistaken for each other when typed again
+     */
+    public const CODE_ALPHABET = 'abcdefghjkmnpqrstuvwxyz23456789';
 
     /**
      * @var array  Array with all fields and their property. Do not use it as a static var. It may be modified by constructor
@@ -177,32 +182,69 @@ class SaturneRedirection extends SaturneObject
     }
 
     /**
-     * Build the public short URL of a code
+     * Get the default root of short URLs : the public entry point s/index.php, served without login
      *
-     * @param  string $code Short code
-     * @return string       Short URL, served without login by public/s/index.php
+     * @return string Root URL, ending with "/"
      */
-    public static function getShortUrlFromCode(string $code): string
+    public static function getDefaultShortUrlRoot(): string
     {
-        return dol_buildpath('/saturne/public/s/', 3) . '?' . $code;
+        return dol_buildpath('/saturne/s/', 3);
     }
 
     /**
-     * Get the code of a short URL built by this instance
+     * Get the root of short URLs : SATURNE_SHORT_URL_ROOT when the server provides a shorter one, else the default one
+     *
+     * @return string Root URL
+     */
+    public static function getShortUrlRoot(): string
+    {
+        $root = getDolGlobalString('SATURNE_SHORT_URL_ROOT');
+
+        return self::isValidShortUrlRoot($root) ? $root : self::getDefaultShortUrlRoot();
+    }
+
+    /**
+     * Check that a short URL root can be used : an http(s) URL without query string, the code is appended after "?"
+     *
+     * @param  string $root Root URL
+     * @return bool         True if valid
+     */
+    public static function isValidShortUrlRoot(string $root): bool
+    {
+        return preg_match('#^https?://[^\s?\#]+$#i', $root) === 1;
+    }
+
+    /**
+     * Build the public short URL of a code
+     *
+     * @param  string $code Short code
+     * @return string       Short URL
+     */
+    public static function getShortUrlFromCode(string $code): string
+    {
+        return self::getShortUrlRoot() . '?' . $code;
+    }
+
+    /**
+     * Get the code of a short URL built by this instance, under the current root or the default one
+     *
+     * A link created before SATURNE_SHORT_URL_ROOT was set keeps working, and stays recognized
      *
      * @param  string $shortUrl Short URL
      * @return string           Short code, empty string if the URL is not a short URL of this instance
      */
     public static function getCodeFromShortUrl(string $shortUrl): string
     {
-        $prefix = self::getShortUrlFromCode('');
-        if (strpos($shortUrl, $prefix) !== 0) {
-            return '';
+        foreach (array_unique([self::getShortUrlRoot(), self::getDefaultShortUrlRoot()]) as $root) {
+            $prefix = $root . '?';
+            if (strpos($shortUrl, $prefix) === 0) {
+                $code = substr($shortUrl, strlen($prefix));
+
+                return self::isValidCode($code) ? $code : '';
+            }
         }
 
-        $code = substr($shortUrl, strlen($prefix));
-
-        return self::isValidCode($code) ? $code : '';
+        return '';
     }
 
     /**
@@ -346,13 +388,17 @@ class SaturneRedirection extends SaturneObject
      * Generate a short code not used yet
      *
      * @return string Short code, empty string on error
+     * @throws Exception
      */
     private function generateCode(): string
     {
-        require_once DOL_DOCUMENT_ROOT . '/core/lib/ticket.lib.php';
+        $maxIndex = strlen(self::CODE_ALPHABET) - 1;
 
         for ($attempt = 0; $attempt < 5; $attempt++) {
-            $code = generate_random_id(self::CODE_LENGTH);
+            $code = '';
+            for ($i = 0; $i < self::CODE_LENGTH; $i++) {
+                $code .= self::CODE_ALPHABET[random_int(0, $maxIndex)];
+            }
             if (!$this->isCodeUsed($code)) {
                 return $code;
             }
