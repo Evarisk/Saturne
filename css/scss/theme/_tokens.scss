@@ -1,0 +1,67 @@
+@use '../variable/variable' as *;
+
+/* Saturne modern theme: design tokens.
+   Same palette as the PWAs of Digirisk, DigiQuali and ReedCRM (Tailwind slate greys plus the
+   Saturne blue), so that the back office and the mobile screens look alike. */
+
+/* saturne_header() puts the saturne-theme class on the body of the logged-in back office pages of
+   every Saturne module. The public pages and the PWAs keep their own design: they never get it.
+   Module stylesheets aim at the same scope to restyle their own components. */
+$theme-scope: 'body#mainbody.saturne-theme';
+
+$theme-bg: #f1f5f9;
+$theme-surface: #ffffff;
+$theme-surface-soft: #f8fafc;
+$theme-border: #e2e8f0;
+$theme-border-soft: #eef2f6;
+$theme-border-strong: #cbd5e1;
+$theme-text: #1e293b;
+$theme-text-soft: #475569;
+$theme-muted: #64748b;
+$theme-faint: #94a3b8;
+
+$theme-primary: $color__primary;
+$theme-primary-strong: #0a6fd1;
+$theme-primary-soft: rgba(13, 138, 255, 0.1);
+$theme-navy: $color__secondary;
+$theme-success: #16a34a;
+$theme-success-soft: rgba(22, 163, 74, 0.12);
+$theme-warning: #d97706;
+$theme-warning-soft: rgba(233, 173, 79, 0.18);
+$theme-yellow: $color__yellow;
+$theme-danger: $color__red;
+$theme-danger-soft: rgba(224, 83, 83, 0.12);
+
+$theme-radius-lg: 14px;
+$theme-radius: 10px;
+$theme-radius-sm: 8px;
+$theme-radius-pill: 999px;
+
+$theme-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08);
+$theme-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(15, 23, 42, 0.06);
+$theme-shadow-hover: 0 4px 16px rgba(15, 23, 42, 0.12);
+$theme-shadow-lg: 0 20px 48px rgba(15, 23, 42, 0.22);
+$theme-ring: 0 0 0 3px rgba(13, 138, 255, 0.18);
+
+$theme-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+$theme-transition: 0.15s ease;
+
+$theme-media-large: $media__large;
+$theme-media-small: $media__small;
+
+/* Uppercase micro label, used for table headers and field labels */
+@mixin theme-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: $theme-muted;
+}
+
+/* White rounded surface */
+@mixin theme-card {
+  background: $theme-surface;
+  border: 1px solid $theme-border;
+  border-radius: $theme-radius-lg;
+  box-shadow: $theme-shadow-sm;
+}

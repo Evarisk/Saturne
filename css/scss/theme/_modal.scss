@@ -1,0 +1,139 @@
+@use 'tokens' as *;
+
+/* Saturne modern theme: Saturne modals, dropdowns, tooltips and jQuery UI dialogs */
+
+#{$theme-scope} {
+  /* ---- Modals ---- */
+
+  .wpeo-modal {
+    background: rgba(15, 23, 42, 0.55);
+
+    .modal-container {
+      border: 1px solid $theme-border;
+      box-shadow: $theme-shadow-lg;
+    }
+
+    &.modal-active {
+      backdrop-filter: blur(3px);
+    }
+
+    &.modal-active .modal-container {
+      border-radius: 18px;
+    }
+
+    .modal-container .modal-header {
+      align-items: center;
+      border-bottom: 1px solid $theme-border-soft;
+
+      .modal-title {
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        text-transform: none;
+        color: $theme-text;
+      }
+
+      .modal-close:not(.wpeo-button) {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border-radius: 50%;
+        color: $theme-faint;
+        transition: background-color $theme-transition, color $theme-transition;
+
+        &:hover {
+          background: $theme-bg;
+          color: $theme-text;
+        }
+      }
+    }
+
+    .modal-container .modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      border-top: 1px solid $theme-border-soft;
+    }
+  }
+
+  /* ---- Dropdowns ---- */
+
+  .wpeo-dropdown .saturne-dropdown-content,
+  .wpeo-dropdown .dropdown-content {
+    border: 1px solid $theme-border;
+    border-radius: $theme-radius;
+    box-shadow: $theme-shadow-hover;
+  }
+
+  .wpeo-dropdown .dropdown-item:hover {
+    background: $theme-surface-soft;
+  }
+
+  /* Dolibarr dropdowns (top right menus, list column selector) */
+  .dropdown-menu {
+    border: 1px solid $theme-border;
+    border-radius: $theme-radius;
+    box-shadow: $theme-shadow-hover;
+  }
+
+  /* ---- Tooltips ---- */
+
+  .wpeo-tooltip {
+    border-radius: $theme-radius-sm;
+    background: $theme-text;
+    font-family: $theme-font;
+    font-size: 12px;
+    box-shadow: $theme-shadow-hover;
+  }
+
+  .ui-tooltip,
+  #tiptip_content,
+  .classfortooltip + .ui-tooltip {
+    border: 1px solid $theme-border;
+    border-radius: $theme-radius;
+    box-shadow: $theme-shadow-hover;
+  }
+
+  /* ---- jQuery UI dialogs (confirmations) ---- */
+
+  .ui-dialog {
+    border: 1px solid $theme-border !important;
+    border-radius: 16px !important;
+    box-shadow: $theme-shadow-lg;
+    overflow: hidden;
+
+    .ui-dialog-titlebar {
+      border: none;
+      border-bottom: 1px solid $theme-border-soft;
+      border-radius: 0;
+      background: $theme-surface;
+      color: $theme-text;
+      font-weight: 700;
+    }
+
+    .ui-dialog-buttonpane,
+    .ui-dialog-buttonpane.ui-widget-content {
+      border-top: 1px solid $theme-border-soft;
+      background: $theme-surface-soft !important;
+    }
+
+    .ui-dialog-buttonpane button {
+      border-radius: $theme-radius;
+    }
+  }
+
+  /* eldy paints every jQuery UI widget (dialogs, datepicker, autocomplete) with --colorbackbody
+     and !important: that variable is the slate page canvas now, the widgets stay white */
+  .ui-widget-content {
+    background: $theme-surface !important;
+  }
+
+  .ui-widget-overlay {
+    background: rgba(15, 23, 42, 0.55);
+    opacity: 1;
+  }
+}

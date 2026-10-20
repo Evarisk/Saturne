@@ -1,0 +1,155 @@
+@use 'tokens' as *;
+
+/* Saturne modern theme: object banner (saturne_banner_tab / dol_banner_tab) and field tables */
+
+#{$theme-scope} {
+  div.arearef,
+  div.arearefnobottom {
+    display: flow-root;
+    box-sizing: border-box;
+    margin-bottom: 16px;
+    padding: 16px 18px;
+    @include theme-card;
+
+    .divphotoref {
+      margin-right: 16px;
+    }
+
+    .photoref,
+    .divphotoref > img,
+    .divphotoref .photowithmargin,
+    .divphotoref .photoref img {
+      border: none;
+      border-radius: $theme-radius-lg;
+      box-shadow: none;
+      background: $theme-surface-soft;
+    }
+
+    .photoref {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: $theme-primary-soft;
+
+      .fas,
+      .far,
+      .fa {
+        color: $theme-primary;
+        opacity: 1;
+      }
+    }
+
+    div.refid,
+    .refid {
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: $theme-text;
+    }
+
+    div.refidno,
+    .refidno {
+      margin-top: 4px;
+      font-size: 13px;
+      font-weight: 400;
+      color: $theme-text-soft;
+      line-height: 1.6;
+    }
+
+    .banner-ref-sep {
+      color: $theme-faint;
+    }
+
+    div.statusref {
+      margin-top: 4px;
+    }
+
+    .pagination.paginationref li:not(.litext) a,
+    .pagination.paginationref li:not(.litext) span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 30px;
+      height: 30px;
+      padding: 0;
+      border: 1px solid $theme-border;
+      border-radius: $theme-radius-sm;
+      background: $theme-surface;
+      color: $theme-text-soft;
+    }
+
+    .pagination.paginationref li:not(.litext) a:hover {
+      border-color: $theme-primary;
+      color: $theme-primary;
+    }
+
+    /* "Back to list" text link next to the arrows */
+    .pagination.paginationref li.litext a {
+      color: $theme-primary-strong;
+      font-weight: 600;
+    }
+  }
+
+  div.underbanner,
+  div.underrefbanner {
+    border-bottom: none;
+  }
+
+  /* Field tables of the cards become white cards */
+  table.border.tableforfield,
+  table.border.tableforfieldcreate,
+  table.border.tableforfieldedit,
+  div.tabBar table.border:not(.nobordernopadding):not(.tableforfield) {
+    box-sizing: border-box;
+    border: 1px solid $theme-border !important;
+    border-collapse: separate !important;
+    border-spacing: 0;
+    border-radius: $theme-radius-lg;
+    background: $theme-surface;
+    box-shadow: $theme-shadow-sm;
+
+    > tbody > tr > td {
+      padding: 9px 14px !important;
+      border-top: none !important;
+      border-bottom: 1px solid $theme-border-soft !important;
+      color: $theme-text;
+    }
+
+    > tbody > tr:last-child > td {
+      border-bottom: none !important;
+    }
+
+    > tbody > tr > td.titlefield,
+    > tbody > tr > td.titlefieldcreate,
+    > tbody > tr > td:first-child:not(:only-child) {
+      color: $theme-muted;
+      font-weight: 500;
+    }
+  }
+
+  /* A field table used as a list (attendants of saturne_attendants.php): it has a header row and no label
+     column, and the wide padding of the field rows pushed it out of the screen at 1280 px */
+  table.border.tableforfield:has(> tbody > tr.liste_titre) > tbody > tr > td {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  table.border.tableforfield:has(> tbody > tr.liste_titre) > tbody > tr > td:first-child:not(:only-child) {
+    color: $theme-text;
+    font-weight: 400;
+  }
+
+  div.fichecenter {
+    margin-bottom: 8px;
+  }
+
+  div.fichehalfleft table.tableforfield,
+  div.fichehalfright table.tableforfield {
+    margin-bottom: 12px;
+  }
+
+  /* commonfields_view.tpl.php always opens the right column: empty, it would show as a thin card */
+  div.fichehalfright > table.tableforfield:not(:has(tr)) {
+    display: none;
+  }
+}
