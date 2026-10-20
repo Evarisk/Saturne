@@ -132,8 +132,9 @@ abstract class SaturneDocuments extends SaturneObject
             $this->type = $this->element;
         }
         $this->module_name   = $this->module;
-        $this->parent_id     = $parentObject->id ?: 0;
-        $this->parent_type   = $parentObject->element_type ?: $parentObject->element ?: '';
+        // No parent object for documents not attached to one (EasyURL export) : empty() does not warn on null
+        $this->parent_id     = !empty($parentObject->id) ? $parentObject->id : 0;
+        $this->parent_type   = !empty($parentObject->element_type) ? $parentObject->element_type : (!empty($parentObject->element) ? $parentObject->element : '');
         $this->fk_user_creat = $user->id ?: 1;
 
         //$this->DocumentFillJSON($this);
