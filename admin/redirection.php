@@ -77,10 +77,11 @@ if ($resHook < 0) {
 
 if (empty($resHook)) {
     if ($action == 'add') {
-        $saturneRedirection->from_url = $fromUrl;
-        $saturneRedirection->to_url   = $toUrl;
-
-        $result = $saturneRedirection->create($user, 1);
+        // Empty code : a random one is generated, the case of QR codes
+        $result = $saturneRedirection->createShortUrl($toUrl, $user, $fromUrl) !== '' ? 1 : -1;
+        if ($result < 0 && empty($saturneRedirection->errors)) {
+            $saturneRedirection->error = $langs->trans(SaturneRedirection::isValidTargetUrl($toUrl) ? 'FromUrlHelp' : 'ToUrlHelp');
+        }
         if ($result > 0) {
             setEventMessage($langs->trans('ObjectCreated', 'redirection'));
             header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
@@ -142,19 +143,29 @@ print '</tr>';
 $redirections = $saturneRedirection->fetchAll();
 if (is_array($redirections) && !empty($redirections)) {
     foreach ($redirections as $redirection) {
-        $barcodeObject = new TCPDF2DBarcode($redirection->from_url, 'QRCODE,H');
-        $qrCodePng     = $barcodeObject->getBarcodePngData(6, 6);
-        $qrCodeBase64  = 'data:image/png;base64,' . base64_encode($qrCodePng);
+        // Redirections created before the public entry point stored a path instead of a code : no short URL for them
+        $shortUrl = SaturneRedirection::isValidCode($redirection->from_url) ? SaturneRedirection::getShortUrlFromCode($redirection->from_url) : '';
 
         print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '">';
         print '<input type="hidden" name="token" value="' . newToken() . '">';
         print '<input type="hidden" name="action" value="remove">';
         print '<tr class="oddeven"><td>';
-        print $redirection->from_url;
+        if ($shortUrl !== '') {
+            print '<a href="' . dol_escape_htmltag($shortUrl) . '" target="_blank" rel="noopener">' . dol_escape_htmltag($shortUrl) . '</a>';
+            print showValueWithClipboardCPButton($shortUrl, 0, 'none');
+        } else {
+            print dol_escape_htmltag($redirection->from_url);
+        }
         print '</td><td>';
-        print $redirection->to_url;
+        print dol_escape_htmltag($redirection->to_url);
         print '</td><td class="center">';
-        print '<img src="' . $qrCodeBase64 . '" alt="' . $langs->trans('QRCode') . '" width="100" height="100">';
+        if ($shortUrl !== '') {
+            $barcodeObject = new TCPDF2DBarcode($shortUrl, 'QRCODE,M');
+            $qrCodePng     = $barcodeObject->getBarcodePngData(6, 6);
+            $qrCodeBase64  = 'data:image/png;base64,' . base64_encode($qrCodePng);
+
+            print '<img src="' . $qrCodeBase64 . '" alt="' . $langs->trans('QRCode') . '" width="100" height="100">';
+        }
         print '</td><td class="center">';
         print '<input type="hidden" name="id" value="' . $redirection->id . '">';
         print '<button class="butAction">' . $langs->trans('Remove') . '</button>';
@@ -168,10 +179,10 @@ print '<input type="hidden" name="token" value="' . newToken() . '">';
 print '<input type="hidden" name="action" value="add">';
 
 print '<tr class="oddeven"><td>';
-print '<input type="text" class="marginrightonly minwidth300 maxwidthonsmartphone" name="from_url" placeholder="' . $langs->trans('FromURL') . '" value="' . $fromUrl . '" required>';
+print '<input type="text" class="marginrightonly minwidth300 maxwidthonsmartphone" name="from_url" placeholder="' . $langs->trans('FromURL') . '" value="' . dol_escape_htmltag($fromUrl) . '">';
 print $form->textwithpicto('', $langs->trans('FromUrlHelp'));
 print '</td><td>';
-print '<input type="text" name="to_url" class="marginrightonly minwidth300 maxwidthonsmartphone" placeholder="' . $langs->trans('ToURL') . '"  value="' . $toUrl . '" required>';
+print '<input type="text" name="to_url" class="marginrightonly minwidth300 maxwidthonsmartphone" placeholder="' . $langs->trans('ToURL') . '"  value="' . dol_escape_htmltag($toUrl) . '" required>';
 print $form->textwithpicto('', $langs->trans('ToUrlHelp'));
 print '</td><td class="center" colspan="2">';
 print '<button class="butAction">' . $langs->trans('Add') . '</button>';

@@ -78,10 +78,10 @@ DefaultPublicInterfaceUserLastName       = Default public interface user
 
 # Redirections
 Redirections = Redirections
-FromURL      = From URL
+FromURL      = Short URL
 ToURL        = To URL
-FromUrlHelp  = Enter the starting URL. For example, to redirect from https://www.evarisk.com/depuis/la/page, enter “/from/the/page”.
-ToUrlHelp    = Enter the destination URL. For example, to redirect to https://www.evarisk.com/vers/la/page, enter “/to/the/page”.
+FromUrlHelp  = Short URL code: letters, digits, "-" and "_", 4 to 64 characters, not already used. Leave empty to generate a random one (recommended for a QR code).
+ToUrlHelp    = Destination URL: the full address (https://…) or a path starting with "/"
 
 
 
