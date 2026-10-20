@@ -54,6 +54,9 @@ $action  = GETPOST('action', 'alpha');
 $fromUrl = GETPOST('from_url', 'alpha');
 $toUrl   = GETPOST('to_url', 'alpha');
 $urlRoot = GETPOST('short_url_root', 'alpha');
+$search  = trim(GETPOST('search_redirection', 'alpha'));
+$page    = max(0, GETPOSTINT('page'));
+$limit   = 25;
 
 // Initialize technical objects
 $saturneRedirection = new SaturneRedirection($db);
@@ -107,7 +110,8 @@ if (empty($resHook)) {
         }
     }
 
-    if ($action == 'remove') {
+    // Removal asks for a confirmation first (action remove): a printed QR code leading to this short URL stops working
+    if ($action == 'confirm_remove' && GETPOST('confirm', 'alpha') == 'yes') {
         $result = $saturneRedirection->fetch(GETPOSTINT('id'));
         if ($result <= 0) {
             setEventMessages($saturneRedirection->error ?: $langs->trans('ErrorObjectNotFound'), [], 'errors');
@@ -160,6 +164,31 @@ print '</form>';
 
 print load_fiche_titre($langs->trans('Configs', dol_strtolower($langs->trans('Redirections'))), '', '');
 
+if ($action == 'remove') {
+    print $form->formconfirm($_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&id=' . GETPOSTINT('id'), $langs->trans('Remove'), $langs->trans('ConfirmRemoveRedirection'), 'confirm_remove', '', 'yes', 1);
+}
+
+// Paginated list : every controlled object gets its own short URL, there may be thousands
+$param   = '&module_name=' . urlencode($moduleName) . ($search !== '' ? '&search_redirection=' . urlencode($search) : '');
+$nbTotal = $saturneRedirection->countRedirections($search);
+$offset  = $limit * $page;
+if ($nbTotal >= 0 && $offset >= $nbTotal) {
+    $page   = 0;
+    $offset = 0;
+}
+
+$redirections = $saturneRedirection->fetchAll('DESC', 't.rowid', $limit + 1, $offset, $saturneRedirection->getSearchFilter($search));
+$num          = is_array($redirections) ? count($redirections) : 0;
+
+print '<form method="GET" action="' . $_SERVER['PHP_SELF'] . '">';
+print '<input type="hidden" name="module_name" value="' . dol_escape_htmltag($moduleName) . '">';
+print_barre_liste($langs->trans('Redirections'), $page, $_SERVER['PHP_SELF'], $param, '', '', '', $num, $nbTotal, '', 0, '', '', $limit);
+print '<div class="marginbottomonly">';
+print '<input type="text" class="minwidth300" name="search_redirection" placeholder="' . dol_escape_htmltag($langs->trans('SearchRedirection')) . '" value="' . dol_escape_htmltag($search) . '">';
+print ' <button type="submit" class="button small">' . $langs->trans('Search') . '</button>';
+print '</div>';
+print '</form>';
+
 print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
 print '<td>' . $langs->trans('FromURL') . '</td>';
@@ -168,15 +197,11 @@ print '<td class="center">' . $langs->trans('QRCode') . '</td>';
 print '<td class="center">' . $langs->trans('Action') . '</td>';
 print '</tr>';
 
-$redirections = $saturneRedirection->fetchAll();
-if (is_array($redirections) && !empty($redirections)) {
-    foreach ($redirections as $redirection) {
+if ($num > 0) {
+    foreach (array_slice($redirections, 0, $limit) as $redirection) {
         // Redirections created before the public entry point stored a path instead of a code : no short URL for them
         $shortUrl = SaturneRedirection::isValidCode($redirection->from_url) ? SaturneRedirection::getShortUrlFromCode($redirection->from_url) : '';
 
-        print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '">';
-        print '<input type="hidden" name="token" value="' . newToken() . '">';
-        print '<input type="hidden" name="action" value="remove">';
         print '<tr class="oddeven"><td>';
         if ($shortUrl !== '') {
             print '<a href="' . dol_escape_htmltag($shortUrl) . '" target="_blank" rel="noopener">' . dol_escape_htmltag($shortUrl) . '</a>';
@@ -184,7 +209,7 @@ if (is_array($redirections) && !empty($redirections)) {
         } else {
             print dol_escape_htmltag($redirection->from_url);
         }
-        print '</td><td>';
+        print '</td><td class="tdoverflowmax500">';
         print dol_escape_htmltag($redirection->to_url);
         print '</td><td class="center">';
         if ($shortUrl !== '') {
@@ -195,11 +220,11 @@ if (is_array($redirections) && !empty($redirections)) {
             print '<img src="' . $qrCodeBase64 . '" alt="' . $langs->trans('QRCode') . '" width="100" height="100">';
         }
         print '</td><td class="center">';
-        print '<input type="hidden" name="id" value="' . $redirection->id . '">';
-        print '<button class="butAction">' . $langs->trans('Remove') . '</button>';
+        print '<a class="butActionDelete" href="' . $_SERVER['PHP_SELF'] . '?module_name=' . urlencode($moduleName) . '&action=remove&id=' . ((int) $redirection->id) . '&token=' . newToken() . ($search !== '' ? '&search_redirection=' . urlencode($search) : '') . '&page=' . $page . '">' . $langs->trans('Remove') . '</a>';
         print '</td></tr>';
-        print '</form>';
     }
+} else {
+    print '<tr class="oddeven"><td colspan="4"><span class="opacitymedium">' . $langs->trans('NoRecordFound') . '</span></td></tr>';
 }
 
 print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '">';

@@ -363,6 +363,51 @@ class SaturneRedirection extends SaturneObject
     }
 
     /**
+     * Get the fetchAll() filter of a search on the code or the target of the redirections
+     *
+     * @param  string                $search Searched text, empty for no filter
+     * @return array<string, string>         Filter for fetchAll()
+     */
+    public function getSearchFilter(string $search): array
+    {
+        if ($search === '') {
+            return [];
+        }
+
+        $like = "'%" . $this->db->escape($this->db->escapeforlike($search)) . "%'";
+
+        return ['customsql' => '(t.from_url LIKE ' . $like . ' OR t.to_url LIKE ' . $like . ')'];
+    }
+
+    /**
+     * Count the redirections of the current entity, for the pagination of their list
+     *
+     * @param  string $search Searched text on the code or the target, empty for all
+     * @return int            Number of redirections, -1 on error
+     */
+    public function countRedirections(string $search = ''): int
+    {
+        $filter = $this->getSearchFilter($search);
+
+        $sql  = 'SELECT COUNT(t.rowid) as nb FROM ' . $this->db->prefix() . $this->table_element . ' as t';
+        $sql .= ' WHERE t.entity IN (' . getEntity($this->element) . ')';
+        if (!empty($filter)) {
+            $sql .= ' AND ' . $filter['customsql'];
+        }
+
+        $resql = $this->db->query($sql);
+        if (!$resql) {
+            $this->error = $this->db->lasterror();
+            return -1;
+        }
+
+        $obj = $this->db->fetch_object($resql);
+        $this->db->free($resql);
+
+        return is_object($obj) ? (int) $obj->nb : 0;
+    }
+
+    /**
      * Check whether a short code is already used, in any entity since codes are resolved without one
      *
      * @param  string $code Short code
