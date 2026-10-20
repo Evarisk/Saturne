@@ -36,6 +36,7 @@ $moduleName          = GETPOST('module_name', 'alpha');
 $moduleNameLowerCase = dol_strtolower($moduleName);
 
 // Load Dolibarr libraries
+require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
 require_once TCPDF_PATH . 'tcpdf_barcodes_2d.php';
 
 // Load Module libraries
@@ -52,6 +53,7 @@ saturne_load_langs();
 $action  = GETPOST('action', 'alpha');
 $fromUrl = GETPOST('from_url', 'alpha');
 $toUrl   = GETPOST('to_url', 'alpha');
+$urlRoot = GETPOST('short_url_root', 'alpha');
 
 // Initialize technical objects
 $saturneRedirection = new SaturneRedirection($db);
@@ -76,6 +78,18 @@ if ($resHook < 0) {
 }
 
 if (empty($resHook)) {
+    // Same root for every entity : codes are resolved without one
+    if ($action == 'set_short_url_root') {
+        if ($urlRoot !== '' && !SaturneRedirection::isValidShortUrlRoot($urlRoot)) {
+            setEventMessages($langs->trans('ErrorBadShortUrlRoot'), [], 'errors');
+        } else {
+            dolibarr_set_const($db, 'SATURNE_SHORT_URL_ROOT', $urlRoot, 'chaine', 0, '', 0);
+            setEventMessages($langs->trans('SetupSaved'), []);
+            header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName);
+            exit;
+        }
+    }
+
     if ($action == 'add') {
         // Empty code : a random one is generated, the case of QR codes
         $result = $saturneRedirection->createShortUrl($toUrl, $user, $fromUrl) !== '' ? 1 : -1;
@@ -129,6 +143,20 @@ print load_fiche_titre($title, '', 'title_setup');
 $preHead = $moduleNameLowerCase . '_admin_prepare_head';
 $head    = $preHead();
 print dol_get_fiche_head($head, 'redirection', $title, -1, $moduleNameLowerCase . '_color@' . $moduleNameLowerCase);
+
+print load_fiche_titre($langs->trans('ShortUrlRoot'), '', '');
+
+print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '">';
+print '<input type="hidden" name="token" value="' . newToken() . '">';
+print '<input type="hidden" name="action" value="set_short_url_root">';
+print '<table class="noborder centpercent">';
+print '<tr class="liste_titre"><td>' . $langs->trans('Parameters') . '</td><td>' . $langs->trans('Description') . '</td><td>' . $langs->trans('Value') . '</td></tr>';
+print '<tr class="oddeven"><td>' . $langs->trans('ShortUrlRoot') . '</td>';
+print '<td>' . $langs->trans('ShortUrlRootDescription', dol_escape_htmltag(SaturneRedirection::getDefaultShortUrlRoot())) . '</td>';
+print '<td><input type="text" class="minwidth300" name="short_url_root" placeholder="' . dol_escape_htmltag(SaturneRedirection::getDefaultShortUrlRoot()) . '" value="' . dol_escape_htmltag(getDolGlobalString('SATURNE_SHORT_URL_ROOT')) . '"></td></tr>';
+print '</table>';
+print $form->buttonsSaveCancel('Save', '');
+print '</form>';
 
 print load_fiche_titre($langs->trans('Configs', dol_strtolower($langs->trans('Redirections'))), '', '');
 
