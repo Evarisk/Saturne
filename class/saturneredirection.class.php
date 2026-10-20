@@ -170,7 +170,7 @@ class SaturneRedirection extends SaturneObject
      * Check that a target URL can be followed by the public entry point
      *
      * @param  string $url Target URL
-     * @return bool        True for an http(s) URL or a path relative to the host, never javascript: or data:
+     * @return bool        True for an http(s) URL or a path in Dolibarr, never javascript: or data:
      */
     public static function isValidTargetUrl(string $url): bool
     {
@@ -179,6 +179,40 @@ class SaturneRedirection extends SaturneObject
         }
 
         return strpos($url, '/') === 0 && strpos($url, '//') !== 0;
+    }
+
+    /**
+     * Get the stored form of a target URL : a target on this instance is kept relative to the root of Dolibarr
+     *
+     * A printed QR code then survives a change of domain or of installation folder : the root is put back
+     * when redirecting. A target outside the instance is kept as it is
+     *
+     * @param  string $url Target URL
+     * @return string      Path from the root of Dolibarr ("/custom/...") or external URL
+     */
+    public static function normalizeTargetUrl(string $url): string
+    {
+        $root = DOL_MAIN_URL_ROOT . '/';
+        if (strpos($url, $root) === 0) {
+            return substr($url, strlen($root) - 1);
+        }
+
+        return $url;
+    }
+
+    /**
+     * Get the URL to redirect to from a stored target : a path is a path in Dolibarr, put back under its current root
+     *
+     * @param  string $url Stored target
+     * @return string      Absolute URL
+     */
+    public static function resolveTargetUrl(string $url): string
+    {
+        if (strpos($url, '/') === 0 && strpos($url, '//') !== 0) {
+            return DOL_MAIN_URL_ROOT . $url;
+        }
+
+        return $url;
     }
 
     /**
@@ -257,7 +291,9 @@ class SaturneRedirection extends SaturneObject
      */
     public function getShortUrl(string $toUrl, User $user): string
     {
-        $result = $this->fetch(0, '', " AND t.to_url = '" . $this->db->escape($toUrl) . "' AND t.status = " . self::STATUS_VALIDATED);
+        // Links created before targets were stored relative keep their absolute target
+        $targets = "'" . $this->db->escape(self::normalizeTargetUrl($toUrl)) . "', '" . $this->db->escape($toUrl) . "'";
+        $result  = $this->fetch(0, '', ' AND t.to_url IN (' . $targets . ') AND t.status = ' . self::STATUS_VALIDATED);
         if ($result > 0 && self::isValidCode($this->from_url)) {
             return self::getShortUrlFromCode($this->from_url);
         }
@@ -292,7 +328,7 @@ class SaturneRedirection extends SaturneObject
         }
 
         $this->from_url = $code;
-        $this->to_url   = $toUrl;
+        $this->to_url   = self::normalizeTargetUrl($toUrl);
         $this->status   = self::STATUS_VALIDATED;
 
         if ($this->create($user, 1) <= 0) {
@@ -324,7 +360,7 @@ class SaturneRedirection extends SaturneObject
             return -1;
         }
 
-        $this->to_url = $toUrl;
+        $this->to_url = self::normalizeTargetUrl($toUrl);
 
         return $this->update($user, 1) > 0 ? 1 : -1;
     }
@@ -359,7 +395,7 @@ class SaturneRedirection extends SaturneObject
             return '';
         }
 
-        return (string) $obj->to_url;
+        return self::resolveTargetUrl((string) $obj->to_url);
     }
 
     /**
