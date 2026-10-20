@@ -85,6 +85,9 @@ ToUrlHelp    = Destination URL: the full address (https://…) or a path startin
 ShortUrlRoot            = Short URL root
 ShortUrlRootDescription = Beginning of short URLs and QR codes. Empty: %s, which works everywhere without setup. For shorter, if the server allows it: add to the .htaccess of htdocs "RewriteEngine On" then "RewriteRule ^s/?$ custom/saturne/s/index.php [L,QSA]" and enter https://your-domain/s; or point a short domain to the custom/saturne/s/ folder and enter it. Links already created keep working.
 ErrorBadShortUrlRoot    = The root must be a full http(s) address, without "?".
+ConfirmRemoveRedirection = Delete this short URL? A QR code or a link already printed or sent with it will stop working.
+SearchRedirection       = Search a code or a destination URL
+ShortUrlNotFound        = This link is not or no longer valid.
 
 
 

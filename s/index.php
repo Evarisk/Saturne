@@ -70,11 +70,20 @@ $saturneRedirection = new SaturneRedirection($db);
 
 $toUrl = $saturneRedirection->fetchTargetUrl($code);
 if ($toUrl === '') {
-    $langs->load('errors');
+    // Seen on a phone after a scan: a standalone page, readable without the CSS of Dolibarr, in the language of the browser
+    $langs->load('saturne@saturne');
+
+    $message = dol_escape_htmltag($langs->transnoentities('ShortUrlNotFound'));
 
     http_response_code(404);
-    header('Content-Type: text/plain; charset=utf-8');
-    print $langs->transnoentities('ErrorRecordNotFound');
+    header('Content-Type: text/html; charset=utf-8');
+    print '<!DOCTYPE html><html lang="' . dol_escape_htmltag(substr($langs->defaultlang, 0, 2)) . '"><head><meta charset="utf-8">';
+    print '<meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">';
+    print '<title>' . $message . '</title>';
+    print '<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;';
+    print 'background:#f4f5f7;color:#333}p{max-width:20em;margin:1em;padding:1.5em;border-radius:8px;background:#fff;';
+    print 'text-align:center;font-size:1.2em;box-shadow:0 1px 4px rgba(0,0,0,.1)}</style></head>';
+    print '<body><p>' . $message . '</p></body></html>';
     exit;
 }
 
