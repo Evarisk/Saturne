@@ -210,7 +210,7 @@ if ($num > 0) {
             print dol_escape_htmltag($redirection->from_url);
         }
         print '</td><td class="tdoverflowmax500">';
-        print dol_escape_htmltag($redirection->to_url);
+        print dol_escape_htmltag(SaturneRedirection::resolveTargetUrl($redirection->to_url));
         print '</td><td class="center">';
         if ($shortUrl !== '') {
             $barcodeObject = new TCPDF2DBarcode($shortUrl, 'QRCODE,M');
