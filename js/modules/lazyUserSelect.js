@@ -41,12 +41,16 @@ window.saturne.lazyUserSelect.init = function init() {
  * a plain <select> and opens on mousedown; a select2 one announces select2:opening before its
  * dropdown queries the options.
  *
+ * Bound on the <select> only: ajax_combobox() passes the select's CSS classes as select2 theme,
+ * so its <span> container carries saturne-user-select-lazy too and the user list was appended
+ * inside the span, printed as plain text over the page.
+ *
  * @since   23.0.0
  * @version 23.0.0
  * @return  {void}
  */
 window.saturne.lazyUserSelect.event = function event() {
-  $(document).on('mousedown focus select2:opening', '.saturne-user-select-lazy', window.saturne.lazyUserSelect.fill);
+  $(document).on('mousedown focus select2:opening', 'select.saturne-user-select-lazy', window.saturne.lazyUserSelect.fill);
 };
 
 /**
