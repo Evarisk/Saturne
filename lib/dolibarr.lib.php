@@ -574,3 +574,38 @@ function saturne_flatten_wysiwyg_blocks(?string $html, bool $plainText = false):
 
     return $flattened;
 }
+
+/**
+ * Activate the modules a module depends on, to call first thing in its init()
+ *
+ * activateModule() runs init() before activating $depends, and only when init() succeeds: on an
+ * instance where a dependency was never enabled, init() would run without its tables (Saturne ones,
+ * but also llx_ticket or llx_categorie_project_task, created by the core on module activation only)
+ * and with isModEnabled() false for it. activateModule() does not refresh $conf either, hence the
+ * reload: isModEnabled() then sees the dependencies and Dolibarr does not run their init() twice
+ *
+ * @param  DolibarrModules $module Descriptor of the module being enabled
+ * @return int                     0 if OK, -1 if KO (error in $module->error)
+ */
+function saturne_activate_module_dependencies(DolibarrModules $module): int
+{
+    global $conf;
+
+    require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
+
+    $activatedModules = 0;
+    foreach ($module->depends as $dependency) {
+        $activation = activateModule($dependency);
+        if (!empty($activation['errors'])) {
+            $module->error = implode(', ', $activation['errors']);
+            return -1;
+        }
+        $activatedModules += $activation['nbmodules'];
+    }
+
+    if ($activatedModules > 0) {
+        $conf->setValues($module->db);
+    }
+
+    return 0;
+}
