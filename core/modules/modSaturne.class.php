@@ -136,7 +136,7 @@ class modSaturne extends DolibarrModules
         // Dependencies
         $modulesList = [
             'DigiQuali'        => 'digiquali',
-            'DoliMeet'         => 'dolimeet',
+            'Doliopi'          => 'doliopi',
             'DoliCar'          => 'dolicar',
             'ReedCRM'          => 'reedcrm',
             'DoliSIRH'         => 'dolisirh',
