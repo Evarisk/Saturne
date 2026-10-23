@@ -128,6 +128,8 @@ ObjectNotFound  = %s not found
 # Data
 ActionsOnObject = Events on %s
 DisplayMoreInfo = View more information
+# Core dol_print_object_info() prints trans('Creation'), a key missing from the core lang files
+Creation        = Creation
 
 # Email - Mail
 ObjectEmailDocumentLabel   = SAT_Document
