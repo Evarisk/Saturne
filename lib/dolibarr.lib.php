@@ -593,18 +593,17 @@ function saturne_activate_module_dependencies(DolibarrModules $module): int
 
     require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
 
-    $activatedModules = 0;
+    $conf->setValues($module->db);
+
     foreach ($module->depends as $dependency) {
         $activation = activateModule($dependency);
         if (!empty($activation['errors'])) {
             $module->error = implode(', ', $activation['errors']);
             return -1;
         }
-        $activatedModules += $activation['nbmodules'];
-    }
-
-    if ($activatedModules > 0) {
-        $conf->setValues($module->db);
+        if ($activation['nbmodules'] > 0) {
+            $conf->setValues($module->db);
+        }
     }
 
     return 0;
