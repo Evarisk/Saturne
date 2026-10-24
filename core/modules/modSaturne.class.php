@@ -318,6 +318,11 @@ class modSaturne extends DolibarrModules
     {
         global $conf, $langs, $user;
 
+        // Dolibarr runs init() before activating $this->depends : activate them first
+        if (saturne_activate_module_dependencies($this) < 0) {
+            return -1;
+        }
+
         // Permissions
         $this->remove($options);
 
@@ -393,7 +398,12 @@ class modSaturne extends DolibarrModules
 
         saturne_manage_extrafields($extraFieldsArrays);
 
-        return $this->_init($sql, $options);
+        $result = $this->_init($sql, $options);
+        if ($result > 0) {
+            $conf->setValues($this->db);
+        }
+
+        return $result;
     }
 
     /**
