@@ -128,6 +128,8 @@ ObjectNotFound  = %s non trouvé(e)
 # Data - Donnée
 ActionsOnObject = Événements sur %s
 DisplayMoreInfo = Afficher plus d'informations
+# dol_print_object_info() du cœur affiche trans('Creation'), clé absente des langues du cœur
+Creation        = Création
 
 # Email - Mail
 ObjectEmailDocumentLabel   = SAT_Document
