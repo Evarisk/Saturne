@@ -33,9 +33,11 @@ claude "Generate release notes for version X.X.X based on git log since tag X.X.
 - Corriger les liens GitHub si nécessaire (vérifier org/repo dans les URLs)
 - Terminer par l'appel à tester sur la démo (section « Testez les nouveautés maintenant » du modèle)
 
-### 3. Vidéo de présentation
+### 3. Vidéo de présentation (grosses nouveautés seulement)
 
-Chaque release qui apporte une nouveauté visible a sa vidéo (30 à 60 s). Exemple : DigiBoard 23.2.0,
+La vidéo (30 à 60 s) est **réservée aux grosses nouveautés** : c'est l'étape la plus lourde, et une
+release ordinaire doit pouvoir sortir toutes les une à deux semaines. Sans vidéo, retirer la section
+« La nouveauté en vidéo » des notes et passer à l'étape 4. Exemple de vidéo : DigiBoard 23.2.0,
 https://youtu.be/-5ckexXShQo.
 
 Tout se fait dans le dépôt privé **`Evarisk/release-video`** (Remotion), dont le README détaille la
@@ -95,7 +97,7 @@ Aller sur `github.com/ORG/REPO` → **Actions** → workflow `Release` doit êtr
 - Release GitHub créée avec le contenu de `RELEASE_NOTES.md`
 - Zip `module_NOM-X.X.X.zip` attaché à la release
 - Dossier racine du zip : `nom_du_module/`
-- Vignette de la vidéo en tête des notes, qui ouvre la vidéo sur YouTube
+- Pour une grosse nouveauté : vignette de la vidéo en tête des notes, qui ouvre la vidéo sur YouTube
 - Appel à tester sur la démo en fin de notes
 
 ---
