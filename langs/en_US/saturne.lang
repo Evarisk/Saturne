@@ -29,7 +29,10 @@ TutoImage           = Image
 LireModule                  = Read %s
 ReadModule                  = Read %s (read)
 ReadAdminPage               = Access the module configuration %s
+WriteAdminPage              = Change the module configuration %s
 YouDontHaveTheRightOnObject = You don't have the rights on %s
+ReadOnlyAdminAccessTitle    = Read-only configuration
+ReadOnlyAdminAccessMessage  = You can read these settings but not change them: ask an administrator for the "Change the module configuration" permission.
 
 
 
@@ -78,10 +81,16 @@ DefaultPublicInterfaceUserLastName       = Default public interface user
 
 # Redirections
 Redirections = Redirections
-FromURL      = From URL
+FromURL      = Short URL
 ToURL        = To URL
-FromUrlHelp  = Enter the starting URL. For example, to redirect from https://www.evarisk.com/depuis/la/page, enter “/from/the/page”.
-ToUrlHelp    = Enter the destination URL. For example, to redirect to https://www.evarisk.com/vers/la/page, enter “/to/the/page”.
+FromUrlHelp  = Short URL code: letters, digits, "-" and "_", 4 to 64 characters, not already used. Leave empty to generate a random one (recommended for a QR code).
+ToUrlHelp    = Destination URL: the full address (https://…), or a path in Dolibarr starting with "/" (e.g. /custom/mymodule/page.php). An address of this instance is stored as a path: the link survives a change of domain.
+ShortUrlRoot            = Short URL root
+ShortUrlRootDescription = Beginning of short URLs and QR codes. Empty: %s, which works everywhere without setup. For shorter, if the server allows it: add to the .htaccess of htdocs "RewriteEngine On" then "RewriteRule ^s/?$ custom/saturne/s/index.php [L,QSA]" and enter https://your-domain/s; or point a short domain to the custom/saturne/s/ folder and enter it. Links already created keep working.
+ErrorBadShortUrlRoot    = The root must be a full http(s) address, without "?".
+ConfirmRemoveRedirection = Delete this short URL? A QR code or a link already printed or sent with it will stop working.
+SearchRedirection       = Search a code or a destination URL
+ShortUrlNotFound        = This link is not or no longer valid.
 
 
 

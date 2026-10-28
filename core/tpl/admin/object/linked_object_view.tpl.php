@@ -23,12 +23,14 @@
  *
  * Expected variables, all prepared by the calling page :
  * $langs                      - Translate object
- * $user                       - Current user
  * $linkableObjects            - Result of saturne_filter_linkable_objects()
  * $enabledObjectTypes         - Result of saturne_get_enabled_linked_object_types()
  * $linkedObjectUsage          - Result of saturne_get_linked_object_usage()
  * $linkedObjectExtraFieldName - Extrafield name whose deletion must be confirmed
+ * $permissiontowrite          - Result of saturne_check_admin_write_access(), computed here when missing
  */
+
+$permissiontowrite = $permissiontowrite ?? saturne_check_admin_write_access();
 
 print load_fiche_titre($langs->trans('LinkableElements'), '', '');
 
@@ -38,7 +40,7 @@ print '<td>' . $langs->trans('Element') . '</td>';
 print '<td>' . $langs->trans('LinkedObjectUsage') . '</td>';
 print '<td class="center nowrap">';
 print $langs->trans('Status') . '<br>';
-if ($user->admin) {
+if ($permissiontowrite) {
     $enableAllUrl  = $_SERVER['PHP_SELF'] . '?action=toggle_all_links&value=1&token=' . newToken();
     $disableAllUrl = $_SERVER['PHP_SELF'] . '?action=toggle_all_links&value=0&token=' . newToken();
 
@@ -81,7 +83,7 @@ foreach ($linkableObjects as $objectType => $objectMetadata) {
     print '</td>';
 
     print '<td class="center">';
-    if ($user->admin) {
+    if ($permissiontowrite) {
         // The confirmation is only rendered when switching off would really destroy values.
         $confirmMessage = '';
         if ($isEnabled && $valueCount > 0) {
@@ -102,7 +104,7 @@ foreach ($linkableObjects as $objectType => $objectMetadata) {
 
 print '</table>';
 
-if ($user->admin) {
+if ($permissiontowrite) {
     $cleanUrl = $_SERVER['PHP_SELF'] . '?action=clean_unused_links&token=' . newToken();
 
     print '<div class="tabsAction">';

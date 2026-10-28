@@ -174,41 +174,6 @@ class ActionsSaturne
     }
 
     /**
-     *  Overloading the llxHeader function : replacing the parent's function with the one below
-     *
-     * @param  array $parameters Hook metadatas (context, etc...)
-     * @return int               0 < on error, 0 on success, 1 to replace standard code
-     * @throws Exception
-     */
-    public function llxHeader(array $parameters): int
-    {
-        if (strpos($parameters['context'], 'index') !== false) {
-            require_once __DIR__ . '/saturneredirection.class.php';
-
-            $saturneRedirection = new SaturneRedirection($this->db);
-
-            $originalUrl = GETPOST('original_url', 'alpha');
-
-            $redirections = $saturneRedirection->fetchAll();
-            if (is_array($redirections) && !empty($redirections)) {
-                foreach ($redirections as $redirection) {
-                    //check redirection from url, if not beginning with a / add it
-                    $urlToCheck = $redirection->from_url;
-                    if (strpos($redirection->from_url, '/') !== 0) {
-                            $urlToCheck = '/' . $redirection->from_url;
-                    }
-                    if ($urlToCheck == '/' . $originalUrl) {
-                        header('Location: ' . $redirection->to_url);
-                        exit;
-                    }
-                }
-            }
-        }
-
-        return 0;
-    }
-
-    /**
      * Overloading the printCommonFooter function : replacing the parent's function with the one below
      *
      * @param  array     $parameters Hook metadatas (context, etc...)
@@ -555,6 +520,28 @@ class ActionsSaturne
     }
 
     /**
+     * Opportunity statuses of the dictionary, read once per request
+     *
+     * The list of projects reads them for its fields, then for every row of the fk_opp_status column: the dictionary
+     * does not depend on the row. Private on purpose, so that the hook manager never takes it for a hook.
+     *
+     * @return CLeadStatus[] Statuses, empty when the dictionary cannot be read
+     */
+    private function getOppStatuses(): array
+    {
+        static $oppStatuses = null;
+
+        if ($oppStatuses === null) {
+            require_once DOL_DOCUMENT_ROOT . '/core/class/cleadstatus.class.php';
+            $leadStatus = new CLeadStatus($this->db);
+            $leadStatus->fetchAll();
+            $oppStatuses = is_array($leadStatus->records) ? $leadStatus->records : [];
+        }
+
+        return $oppStatuses;
+    }
+
+    /**
      * Add or modify fields definition for the list
      *
      * @param  array $parameters Hook metadata (context, etc...)
@@ -580,16 +567,13 @@ class ActionsSaturne
                 $object->fields['fk_opp_status']['csslist'] = 'center';
 
                 // Add arrayofkeyval to fk_opp_status so it natively renders as an inline select in Saturne
-                require_once DOL_DOCUMENT_ROOT . '/core/class/cleadstatus.class.php';
-                $leadStatus = new CLeadStatus($db);
-                $leadStatus->fetchAll();
 
                 $arrayofkeyval = [];
                 $langs->load('projects');
 
                 $arrayofkeyval[''] = '';
 
-                foreach ($leadStatus->records as $line) {
+                foreach ($this->getOppStatuses() as $line) {
                     $transLabel = $langs->trans("OppStatus" . $line->code);
                     $label = ($transLabel !== "OppStatus" . $line->code) ? $transLabel : $line->label;
                     $arrayofkeyval[$line->id] = $label;
@@ -631,16 +615,13 @@ class ActionsSaturne
                 $ceElement = $object->element;
                 $ceTable   = $object->table_element;
 
-                require_once DOL_DOCUMENT_ROOT . '/core/class/cleadstatus.class.php';
-                $leadStatus = new CLeadStatus($db);
-                $leadStatus->fetchAll();
 
                 $html = '';
                 static $saturneOppJsAdded = false;
                 if (!$saturneOppJsAdded) {
                     $saturneOppJsAdded = true;
                     $mapping = [];
-                    foreach ($leadStatus->records as $line) {
+                    foreach ($this->getOppStatuses() as $line) {
                         $mapping[$line->id] = (float) $line->percent;
                     }
                     $html .= '<script>
@@ -669,7 +650,7 @@ class ActionsSaturne
                 // Render the inline select for the row with ONLY the real statuses
                 $html .= '<select class="saturne-inline-select" data-field="fk_opp_status" data-element="' . $ceElement . '" data-id="' . $object->id . '">';
                 $html .= '<option value="0">&nbsp;</option>';
-                foreach ($leadStatus->records as $line) {
+                foreach ($this->getOppStatuses() as $line) {
                     $selected = ($object->fk_opp_status == $line->id) ? ' selected' : '';
                     $transLabel = $langs->trans("OppStatus" . $line->code);
                     $label = ($transLabel !== "OppStatus" . $line->code) ? $transLabel : $line->label;

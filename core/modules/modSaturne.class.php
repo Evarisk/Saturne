@@ -76,7 +76,7 @@ class modSaturne extends DolibarrModules
         $this->editor_url  = 'https://evarisk.com/';
 
         // Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
-        $this->version = '23.4.1';
+        $this->version = '23.6.0';
 
         // Url to the file with your last numberversion of this module
         //$this->url_last_version = 'http://www.example.com/versionmodule.txt';
@@ -126,7 +126,6 @@ class modSaturne extends DolibarrModules
                 'usercard',
                 'category',
                 'categoryindex',
-                'index',
                 'elementproperties',
                 'saturnegetobjectsmetadata'
             ],
@@ -319,6 +318,11 @@ class modSaturne extends DolibarrModules
     {
         global $conf, $langs, $user;
 
+        // Dolibarr runs init() before activating $this->depends : activate them first
+        if (saturne_activate_module_dependencies($this) < 0) {
+            return -1;
+        }
+
         // Permissions
         $this->remove($options);
 
@@ -338,11 +342,6 @@ class modSaturne extends DolibarrModules
 
         dolibarr_set_const($this->db, 'SATURNE_VERSION', $this->version, 'chaine', 0, '', $conf->entity);
         dolibarr_set_const($this->db, 'SATURNE_VERSION_DB_VERSION', $this->version, 'chaine', 0, '', $conf->entity);
-
-        require_once __DIR__ . '/../../class/saturneredirection.class.php';
-
-        $saturneRedirection = new SaturneRedirection($this->db);
-        $saturneRedirection->adaptHtAccess();
 
         // Load Saturne libraries
         require_once __DIR__ . '/../../../saturne/class/saturnemail.class.php';
@@ -399,7 +398,12 @@ class modSaturne extends DolibarrModules
 
         saturne_manage_extrafields($extraFieldsArrays);
 
-        return $this->_init($sql, $options);
+        $result = $this->_init($sql, $options);
+        if ($result > 0) {
+            $conf->setValues($this->db);
+        }
+
+        return $result;
     }
 
     /**
