@@ -73,13 +73,33 @@ $moduleVersion       = strtoupper($moduleName) . '_VERSION';
 $moduleShowPatchNote = strtoupper($moduleName) . '_SHOW_PATCH_NOTE';
 
 
-if (getDolGlobalString($moduleVersion) !== $modModule->version) {
-    $modModule->remove();
-    $modModule->init();
+$moduleUpdateNeededDolibarrVersion = '';
 
-    dolibarr_set_const($db, $moduleJustUpdated, 1, 'integer', 0, '', $conf->entity);
-    dolibarr_set_const($db, $moduleShowPatchNote, 1, 'integer', 0, '', $conf->entity);
+if (getDolGlobalString($moduleVersion) !== $modModule->version) {
+    // init() is called here without the Dolibarr version check activateModule() makes first: once remove() has run, a refused init() leaves the module disabled in this entity
+    $neededDolibarrVersion = $modModule->need_dolibarr_version ?? 0;
+    if (is_array($neededDolibarrVersion) && versioncompare(versiondolibarrarray(), $neededDolibarrVersion) < 0) {
+        $moduleUpdateNeededDolibarrVersion = versiontostring($neededDolibarrVersion);
+    } else {
+        $modModule->remove();
+        if ($modModule->init() > 0) {
+            dolibarr_set_const($db, $moduleJustUpdated, 1, 'integer', 0, '', $conf->entity);
+            dolibarr_set_const($db, $moduleShowPatchNote, 1, 'integer', 0, '', $conf->entity);
+        } else {
+            setEventMessages($langs->trans('ModuleUpdateFailed', $moduleName, $modModule->version), array_filter(array_merge([$modModule->error], (array) $modModule->errors)), 'errors');
+        }
+    }
 }
+
+if (dol_strlen($moduleUpdateNeededDolibarrVersion) > 0) : ?>
+    <div class="wpeo-notice notice-warning">
+        <div class="notice-content">
+            <div class="notice-subtitle"><strong><?php echo $langs->trans('ModuleUpdate', $moduleName); ?></strong>
+                <?php echo $langs->trans('ModuleUpdateNeedDolibarrVersion', $modModule->version, $moduleUpdateNeededDolibarrVersion, DOL_VERSION) ?>
+            </div>
+        </div>
+    </div>
+<?php endif;
 
 if (getDolGlobalInt($moduleJustUpdated) === 1) : ?>
     <div class="wpeo-notice notice-success">
