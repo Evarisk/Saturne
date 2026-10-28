@@ -604,9 +604,9 @@ class SaturneDocumentModel extends CommonDocGenerator
                     if (file_exists($val)) {
                         if (preg_match('/logo$/', $key)) {
                             // Scale the sharp _small thumbnail of the logo down into the 128x72 px box of the former
-                            // _mini one, keeping its aspect ratio
+                            // _mini one, keeping its aspect ratio. Without a logo, $val is the thumbs folder itself.
                             $ratio     = 1;
-                            $imageSize = getimagesize($val);
+                            $imageSize = is_file($val) ? getimagesize($val) : false;
                             if (is_array($imageSize) && $imageSize[0] > 0 && $imageSize[1] > 0) {
                                 $ratio = min(128 / $imageSize[0], 72 / $imageSize[1], 1);
                             }
