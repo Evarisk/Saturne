@@ -166,7 +166,7 @@ window.saturne.audio.onUploadProgress = function(event) {
  * @memberof Saturne_Audio
  *
  * @since   1.7.0
- * @version 23.5.0
+ * @version 23.7.0
  *
  * @param   {jqXHR} resp jQuery XHR response
  * @returns {void}
