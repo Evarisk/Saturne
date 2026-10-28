@@ -438,14 +438,15 @@ class SaturneSignature extends SaturneObject
      * Fetch signatory from database
      *
      * @param  string    $role        Role of resource
-     * @param  int       $fk_object   ID of object linked
+     * @param  int|null  $fk_object   ID of object linked
      * @param  string    $object_type ID of object linked
      * @return array|int
      * @throws Exception
      */
-    public function fetchSignatory(string $role, int $fk_object, string $object_type)
+    public function fetchSignatory(string $role, ?int $fk_object, string $object_type)
     {
-        $filter = ['customsql' => 'fk_object=' . $fk_object . ' AND status > 0 AND object_type="' . $object_type . '"'];
+        // An object that was never fetched carries a null id, no signatory is linked to it
+        $filter = ['customsql' => 'fk_object=' . ((int) $fk_object) . ' AND status > 0 AND object_type="' . $object_type . '"'];
         if (strlen($role)) {
             $filter['customsql'] .= ' AND role = "' . $role . '"';
             return $this->fetchAll('', '', 0, 0, $filter);
@@ -466,16 +467,289 @@ class SaturneSignature extends SaturneObject
     /**
      * Fetch signatories in database with parent ID
      *
-     * @param  int           $fk_object   ID of object linked
+     * @param  int|null      $fk_object   ID of object linked
      * @param  string        $object_type Type of object
      * @param  string        $morefilter  Filter
      * @return array|integer
      * @throws Exception
      */
-    public function fetchSignatories(int $fk_object, string $object_type, string $morefilter = '1 = 1')
+    public function fetchSignatories(?int $fk_object, string $object_type, string $morefilter = '1 = 1')
     {
-        $filter = ['customsql' => 'fk_object=' . $fk_object . ' AND ' . $morefilter . ' AND object_type="' . $object_type . '"' . ' AND status > 0'];
+        // An object that was never fetched carries a null id, no signatory is linked to it
+        $filter = ['customsql' => 'fk_object=' . ((int) $fk_object) . ' AND ' . $morefilter . ' AND object_type="' . $object_type . '"' . ' AND status > 0'];
         return $this->fetchAll('', '', 0, 0, $filter);
+    }
+
+    /**
+     * Fetch signatories in database for several parent objects at once
+     *
+     * @param  int[]         $fk_objects  IDs of objects linked
+     * @param  string        $object_type Type of object
+     * @param  string        $morefilter  Filter
+     * @return array<int, mixed>|integer
+     * @throws Exception
+     */
+    public function fetchSignatoriesOfObjects(array $fk_objects, string $object_type, string $morefilter = '1 = 1')
+    {
+        $fk_objects = array_filter(array_map('intval', $fk_objects));
+        if (empty($fk_objects)) {
+            return [];
+        }
+
+        $filter = ['customsql' => 'fk_object IN (' . implode(',', $fk_objects) . ') AND ' . $morefilter . ' AND object_type="' . $object_type . '"' . ' AND status > 0'];
+        return $this->fetchAll('', '', 0, 0, $filter);
+    }
+
+    /**
+     * Fetch the electronic signature registered on a user card
+     *
+     * @param  int    $userID ID of the user
+     * @return string         Signature as a data URL, empty when the user registered none
+     * @throws Exception
+     */
+    public function fetchUserSignature(int $userID): string
+    {
+        $userSignatory = new self($this->db);
+
+        $result = $userSignatory->fetchUserSignatory($userID);
+        if ($result > 0 && dol_strlen($userSignatory->signature) > 0) {
+            return $userSignatory->signature;
+        }
+
+        return '';
+    }
+
+    /**
+     * Fetch the active electronic signature records of a user, in every entity
+     *
+     * A user is one person whatever the entity he works in : with multicompany, filtering on the
+     * current entity gave him one signature per entity, each blind to the others
+     *
+     * @param  int                      $userID ID of the user
+     * @return array<int,SaturneObject>|int Records, the one carrying the most recent signature first, < 0 if KO
+     * @throws Exception
+     */
+    public function fetchUserSignatories(int $userID)
+    {
+        if ($userID <= 0) {
+            return [];
+        }
+
+        $signatory                       = new self($this->db);
+        $signatory->ismultientitymanaged = 0;
+
+        $filter      = ['customsql' => 't.fk_object = ' . $userID . ' AND t.status > 0 AND t.object_type = "user" AND t.role = "UserSignature"'];
+        $signatories = $signatory->fetchAll('DESC,DESC', 't.signature_date,t.rowid', 0, 0, $filter);
+        if (!is_array($signatories)) {
+            return $signatories;
+        }
+
+        return array_values($signatories);
+    }
+
+    /**
+     * Load the electronic signature record of a user, whatever the entity it was created in
+     *
+     * @param  int $userID ID of the user
+     * @return int         > 0 if OK, 0 if the user has no record, < 0 if KO
+     * @throws Exception
+     */
+    public function fetchUserSignatory(int $userID): int
+    {
+        $signatories = $this->fetchUserSignatories($userID);
+        if (!is_array($signatories)) {
+            return -1;
+        }
+        if (empty($signatories)) {
+            return 0;
+        }
+
+        return $this->fetch($signatories[0]->id);
+    }
+
+    /**
+     * Save the electronic signature of a user on his single record, shared by every entity
+     *
+     * The record is updated where it stands, and the copies that older versions left in other entities
+     * are retired so that every entity reads the same signature
+     *
+     * @param  User   $user      User that saves
+     * @param  int    $userID    ID of the user owning the signature
+     * @param  string $signature Signature as a data URL
+     * @param  int    $noTrigger 0 = launch the signed trigger, 1 = disable it
+     * @return int               > 0 if OK, < 0 if KO
+     * @throws Exception
+     */
+    public function saveUserSignature(User $user, int $userID, string $signature, int $noTrigger = 0): int
+    {
+        if ($userID <= 0 || !self::isValidSignatureData($signature)) {
+            return -1;
+        }
+
+        $signatories = $this->fetchUserSignatories($userID);
+        if (!is_array($signatories)) {
+            return -1;
+        }
+
+        if (empty($signatories)) {
+            if ($this->setSignatory($userID, 'user', 'user', [$userID], 'UserSignature', 1) <= 0) {
+                return -1;
+            }
+        } else {
+            $this->fetch($signatories[0]->id);
+            foreach (array_slice($signatories, 1) as $duplicate) {
+                $duplicate->setDeleted($user, 1);
+            }
+        }
+
+        $this->signature      = $signature;
+        $this->signature_date = dol_now();
+
+        if ($this->update($user, 1) <= 0) {
+            return -1;
+        }
+
+        return $this->setSigned($user, $noTrigger);
+    }
+
+    /**
+     * Check that a string is an image data URL, the only format the signature canvas produces
+     *
+     * The value is printed as an image source : anything else would be HTML injected in the page
+     *
+     * @param  string $signature Candidate signature
+     * @return bool              True when it is a PNG or JPEG data URL
+     */
+    public static function isValidSignatureData(string $signature): bool
+    {
+        return (bool) preg_match('#^data:image/(png|jpeg);base64,[A-Za-z0-9+/=]+$#', $signature);
+    }
+
+    /**
+     * Sign the signatory lines an attendant still has to sign on an object, with an already known signature
+     *
+     * @param  User   $user         Object user that makes the signature
+     * @param  int    $fk_object    ID of object linked
+     * @param  string $object_type  Type of object linked
+     * @param  string $element_type Type of the signatory element (user, socpeople)
+     * @param  int    $element_id   ID of the signatory element
+     * @param  string $signature    Signature as a data URL
+     * @return int                  < 0 if KO, 0 if the attendant has nothing left to sign, > 0 = number of signed lines
+     * @throws Exception
+     */
+    public function signAsElement(User $user, int $fk_object, string $object_type, string $element_type, int $element_id, string $signature): int
+    {
+        $morefilter  = 't.element_type = "' . $this->db->escape($element_type) . '" AND t.element_id = ' . $element_id;
+        $signatories = $this->fetchSignatories($fk_object, $object_type, $morefilter);
+        if (!is_array($signatories) || empty($signatories)) {
+            return 0;
+        }
+
+        $nbSigned = 0;
+        foreach ($signatories as $signatory) {
+            // An already signed line must not be overwritten, an absent attendant has nothing to sign
+            if ($signatory->status == self::STATUS_SIGNED || $signatory->attendance == self::ATTENDANCE_ABSENT) {
+                continue;
+            }
+
+            $signatory->signature      = $signature;
+            $signatory->signature_date = dol_now();
+
+            $result = $signatory->update($user, 1);
+            if ($result > 0) {
+                $result = $signatory->setSigned($user, false);
+            }
+
+            if ($result < 0) {
+                $this->error  = $signatory->error;
+                $this->errors = $signatory->errors;
+                return -1;
+            }
+
+            $nbSigned++;
+        }
+
+        return $nbSigned;
+    }
+
+    /**
+     * Sign the signatory lines a user still has to sign on an object, with an already known signature
+     *
+     * @param  User   $user        Object user that signs, only their own signatory lines are signed
+     * @param  int    $fk_object   ID of object linked
+     * @param  string $object_type Type of object linked
+     * @param  string $signature   Signature as a data URL
+     * @return int                 < 0 if KO, 0 if the user has nothing left to sign, > 0 = number of signed lines
+     * @throws Exception
+     */
+    public function signAsUser(User $user, int $fk_object, string $object_type, string $signature): int
+    {
+        return $this->signAsElement($user, $fk_object, $object_type, 'user', $user->id, $signature);
+    }
+
+    /**
+     * Sign the pending lines of the users that registered an electronic signature and asked to be signed automatically
+     *
+     * @param  User   $user        Object user that triggers the automatic signature
+     * @param  int    $fk_object   ID of object linked
+     * @param  string $object_type Type of object linked
+     * @return int                 < 0 if KO, >= 0 = number of signed lines
+     * @throws Exception
+     */
+    public function autoSignUsers(User $user, int $fk_object, string $object_type): int
+    {
+        $signatories = $this->fetchSignatories($fk_object, $object_type, 't.element_type = "user"');
+        if (!is_array($signatories) || empty($signatories)) {
+            return 0;
+        }
+
+        // A user holding several roles on the same object carries several lines, they are all signed in one call
+        $userIDs = [];
+        foreach ($signatories as $signatory) {
+            if ($signatory->status == self::STATUS_SIGNED || $signatory->attendance == self::ATTENDANCE_ABSENT) {
+                continue;
+            }
+            $userIDs[$signatory->element_id] = $signatory->element_id;
+        }
+
+        $nbSigned = 0;
+        foreach ($userIDs as $userID) {
+            if (!$this->isAutoSignatureEnabled($userID)) {
+                continue;
+            }
+
+            $signature = $this->fetchUserSignature($userID);
+            if (dol_strlen($signature) == 0) {
+                continue;
+            }
+
+            $result = $this->signAsElement($user, $fk_object, $object_type, 'user', $userID, $signature);
+            if ($result < 0) {
+                return -1;
+            }
+
+            $nbSigned += $result;
+        }
+
+        return $nbSigned;
+    }
+
+    /**
+     * Tell whether a user asked to be signed automatically on their user card
+     *
+     * @param  int  $userID ID of the user
+     * @return bool         True when the user asked for the automatic signature
+     */
+    public function isAutoSignatureEnabled(int $userID): bool
+    {
+        $signatoryUser = new User($this->db);
+        if ($signatoryUser->fetch($userID) <= 0) {
+            return false;
+        }
+
+        $signatoryUser->fetch_optionals();
+
+        return !empty($signatoryUser->array_options['options_auto_signature']);
     }
 
     /**
@@ -550,7 +824,7 @@ class SaturneSignature extends SaturneObject
         $signatoriesToDelete = $this->fetchAll('', '', 0, 0, $filter);
         if (!empty($signatoriesToDelete) && $signatoriesToDelete > 0) {
             foreach ($signatoriesToDelete as $signatoryToDelete) {
-                $signatoryToDelete->setDeleted($user, true);
+                $signatoryToDelete->setDeleted($user, 1);
             }
             return 1;
         } else {

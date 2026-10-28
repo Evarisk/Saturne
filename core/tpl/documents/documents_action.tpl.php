@@ -60,21 +60,7 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
     }
 
     if (GETPOST('forcebuilddoc')) {
-        $model      = '';
-        $modelLists = saturne_get_list_of_models($db, $object->element . 'document');
-        if (is_array($modelLists) && !empty($modelLists)) {
-            asort($modelLists);
-            $modelLists = array_filter($modelLists, 'saturne_remove_index');
-            foreach ($modelLists as $key => $modelList) {
-                $confName = dol_strtoupper($object->module . '_' . $document->element) . '_DEFAULT_MODEL';
-                if (dol_strlen(getDolGlobalString($confName)) > 0 && strpos($key, getDolGlobalString($confName)) !== false) {
-                    $model = $key;
-                }
-            }
-            if (!dol_strlen($model)) {
-                $model = key($modelLists);
-            }
-        }
+        $model = saturne_get_default_model($db, $object->module, $document->element);
     } else {
         $model = GETPOST('model', 'alpha');
     }
@@ -84,7 +70,7 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
     $moreParams['user']     = $user;
     $moreParams['zone']     = 'private';
     $constName              = get_class($object) . '::STATUS_LOCKED';
-    $moreParams['specimen'] = defined($constName) && $object->status < $object::STATUS_LOCKED;
+    $moreParams['specimen'] = 0;
 
     if (!empty($model)) {
         $parameters = ['model' => $model, 'outputlangs' => $outputLangs, 'hidedetails' => $hideDetails, 'hidedesc' => $hideDesc, 'hideref' => $hideRef, 'moreparams' => $moreParams];
@@ -99,7 +85,7 @@ if (($action == 'builddoc' || GETPOST('forcebuilddoc')) && $permissiontoadd) {
             if ($document->element != $documentType[0]) {
                 $document->element = $documentType[0];
             }
-            setEventMessages($langs->trans('FileGenerated') . ' - ' . '<a href=' . DOL_URL_ROOT . '/document.php?modulepart=' . (!empty($moreParams['modulePart']) ? $moreParams['modulePart'] : $object->module) . '&file=' . urlencode((empty($moreParams['modulePart']) ? $document->element . '/' : '') . (dol_strlen($object->ref) > 0 ? $object->ref . '/' : '') . $document->last_main_doc) . '&entity=' . $conf->entity . '"' . '>' . $document->last_main_doc . '</a>', []);
+            setEventMessages($langs->trans('FileGenerated') . ' - ' . '<a href=' . DOL_URL_ROOT . '/document.php?modulepart=' . (!empty($moreParams['modulePart']) ? $moreParams['modulePart'] : $object->module) . '&file=' . urlencode((empty($moreParams['modulePart']) ? $document->element . '/' : '') . (dol_strlen($object->ref) > 0 ? $object->ref . '/' : '') . basename($document->last_main_doc)) . '&entity=' . $conf->entity . '"' . '>' . basename($document->last_main_doc) . '</a>', []);
             $urlToRedirect = $_SERVER['REQUEST_URI'];
             $urlToRedirect = preg_replace('/#builddoc$/', '', $urlToRedirect);
             // To avoid infinite loop.

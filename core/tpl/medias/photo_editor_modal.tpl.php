@@ -27,6 +27,13 @@
  *   - onSave {Function} Callback receiving a Blob when the user validates.
  */
 
+// Rendering the editor twice would duplicate its element ids and the first one would win:
+// whoever renders it first, the host page or a clickable media, is the one that counts
+if (!empty($GLOBALS['saturnePhotoEditorModalRendered'])) {
+    return;
+}
+$GLOBALS['saturnePhotoEditorModalRendered'] = 1;
+
 ?>
 <!-- photo_editor_modal start -->
 <div id="saturne-photo-editor-modal">
@@ -41,13 +48,38 @@
                     <span id="saturne-photo-resolution-display"></span>
                 </h3>
             </div>
-            <div class="saturne-photo-editor-header__settings" title="<?php echo $langs->trans('Settings'); ?>">
-                <i class="fas fa-ellipsis-v"></i>
-                <select id="saturne-photo-size-select">
-                    <option value="hd" selected>HD (720p)</option>
-                    <option value="fullhd">Full HD (1080p)</option>
-                    <option value="full">Original (FULL)</option>
-                </select>
+            <button type="button" id="saturne-btn-ai-photo" class="saturne-photo-editor-header__ai" style="display: none;" title="<?php echo dol_escape_htmltag($langs->trans('AnalyseImageWithAI')); ?>" data-error="<?php echo dol_escape_htmltag($langs->trans('ErrorImageAnalysis')); ?>">
+                <i class="fas fa-magic"></i>
+            </button>
+            <button type="button" id="saturne-btn-favorite-photo" class="saturne-photo-editor-header__favorite" style="display: none;" title="<?php echo dol_escape_htmltag($langs->trans('SetPhotoAsFavorite')); ?>">
+                <i class="far fa-star"></i>
+            </button>
+            <button type="button" id="saturne-btn-delete-photo" class="saturne-photo-editor-header__delete" style="display: none;" title="<?php echo dol_escape_htmltag($langs->trans('DeletePhoto')); ?>">
+                <i class="fas fa-trash"></i>
+            </button>
+            <div class="saturne-photo-editor-header__settings">
+                <i class="fas fa-ellipsis-v" id="saturne-photo-settings-toggle" title="<?php echo $langs->trans('Settings'); ?>"></i>
+                <div class="saturne-photo-editor-settings-menu" id="saturne-photo-settings-menu" style="display: none;">
+                    <div class="saturne-settings-section">
+                        <span class="saturne-settings-label"><?php echo $langs->trans('Quality'); ?></span>
+                        <select id="saturne-photo-size-select">
+                            <option value="hd" selected>HD (720p)</option>
+                            <option value="fullhd">Full HD (1080p)</option>
+                            <option value="full">Original (FULL)</option>
+                        </select>
+                    </div>
+                    <div class="saturne-settings-section">
+                        <span class="saturne-settings-label"><?php echo $langs->trans('AvailableTools'); ?></span>
+                        <?php
+                        $editorTools = ['crop' => 'Crop', 'rotate' => 'Rotate', 'pencil' => 'Draw', 'text' => 'Text', 'arrow' => 'Arrow', 'rect' => 'Frame', 'blur' => 'Blur', 'sequence' => 'Sequence'];
+                        foreach ($editorTools as $toolKey => $toolLabel) : ?>
+                            <label class="saturne-settings-tool">
+                                <input type="checkbox" class="saturne-editor-tool-toggle" data-tool="<?php echo dol_escape_htmltag($toolKey); ?>" checked>
+                                <span><?php echo $langs->trans($toolLabel); ?></span>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -87,10 +119,24 @@
                 <button type="button" id="saturne-btn-cancel-photo" class="saturne-editor-btn saturne-editor-btn--cancel" title="<?php echo $langs->trans('Cancel'); ?>">
                     <i class="fas fa-times"></i>
                 </button>
+                <button type="button" id="saturne-btn-ok-all-photo" class="saturne-editor-btn saturne-editor-btn--ok" style="display: none;" title="<?php echo dol_escape_htmltag($langs->trans('ValidateAll')); ?>"><i class="fas fa-check-double"></i></button>
                 <button type="button" id="saturne-btn-ok-photo" class="saturne-editor-btn saturne-editor-btn--ok" title="OK"><i class="fas fa-check"></i></button>
             </div>
         </div>
 
+    </div>
+
+    <!-- Delete confirmation: over the editor, so the photo about to go stays in sight -->
+    <div class="saturne-photo-editor-confirm" id="saturne-photo-delete-confirm" role="dialog" aria-modal="true" aria-labelledby="saturne-photo-delete-confirm-title">
+        <div class="saturne-photo-editor-confirm__card">
+            <i class="fas fa-trash-alt saturne-photo-editor-confirm__icon"></i>
+            <div class="saturne-photo-editor-confirm__title" id="saturne-photo-delete-confirm-title"><?php echo $langs->trans('DeletePhotoConfirmation'); ?></div>
+            <img class="saturne-photo-editor-confirm__preview" id="saturne-photo-delete-confirm-preview" alt="">
+            <div class="saturne-photo-editor-confirm__actions">
+                <button type="button" id="saturne-btn-cancel-delete-photo" class="wpeo-button button-grey"><?php echo $langs->trans('Cancel'); ?></button>
+                <button type="button" id="saturne-btn-confirm-delete-photo" class="wpeo-button button-red"><i class="fas fa-trash-alt"></i> <?php echo $langs->trans('Delete'); ?></button>
+            </div>
+        </div>
     </div>
 </div>
 <!-- photo_editor_modal end -->

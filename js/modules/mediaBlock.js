@@ -58,7 +58,17 @@ window.saturne.mediaBlock.init = function() {
  */
 window.saturne.mediaBlock.event = function() {
   $(document).on('change', '.saturne-photo-upload', window.saturne.mediaBlock.onPhotoSelected);
+  $(document).on('click', '.saturne-open-media-library', window.saturne.mediaBlock.onLibraryOpen);
+  $(document).on('keydown', '.saturne-open-media-library', function(event) {
+    // Not a native button: Enter and Space are wired by hand
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      window.saturne.mediaBlock.onLibraryOpen.call(this);
+    }
+  });
   $(document).on('click', '.saturne-media-gallery .open-media-editor-as-gallery', window.saturne.mediaBlock.onGalleryClick);
+  $(document).on('click', '.saturne-media-gallery .saturne-media-ai', window.saturne.mediaBlock.onAnalyseClick);
+  $(document).on('click', '.open-media-editor-linked', window.saturne.mediaBlock.onLinkedPhotoClick);
   $(document).on('change', '.saturne-file-upload', window.saturne.mediaBlock.onFileSelected);
   $(document).on('click', '.saturne-open-files-library', window.saturne.mediaBlock.onFilesLibraryOpen);
   $(document).on('click', '.saturne-file-delete', window.saturne.mediaBlock.onFileDelete);
@@ -102,7 +112,96 @@ window.saturne.mediaBlock.onPhotoSelected = function() {
   // Reset input so the same file can be re-selected if needed
   input.val('');
 
-  window.saturne.mediaBlock.openFilesSequentially(filesArray, 0, module, subdir, block);
+  // Send all files to the editor in batch mode. The editor will return an array of
+  // modified File objects once the user clicks Validate All.
+  window.saturne.photoEditor.openBatch(filesArray, function(modifiedFiles) {
+    window.saturne.mediaBlock.uploadBatchFiles(filesArray, modifiedFiles, module, subdir, block);
+  });
+};
+
+/**
+ * Triggered when the library button of a block is clicked.
+ * Opens the media library modal, whose medias are then linked to this block.
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @returns {void}
+ */
+window.saturne.mediaBlock.onLibraryOpen = function() {
+  var block   = $(this).closest('.linked-medias');
+  var gallery = $('#media_gallery');
+
+  if (!gallery.length || !block.attr('id')) {
+    return;
+  }
+
+  // The gallery links its medias to whoever opened it: here a block, not the record of a
+  // previous opening
+  gallery.attr('data-from-block', block.attr('id'));
+
+  if (window.saturne.mediaPending) {
+    window.saturne.mediaPending.syncCurrentTarget(gallery);
+  }
+
+  window.saturne.modal.loadLazyImages();
+  gallery.addClass('modal-active');
+
+  if (window.saturne.mediaGallery) {
+    window.saturne.mediaGallery.reloadIfChanged();
+  }
+};
+
+/**
+ * Link medias of the module library to a block, then refresh its gallery.
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param   {Array}    filenames  Names of the library medias
+ * @param   {jQuery}   block      The .linked-medias block receiving them
+ * @param   {Function} onComplete Called once the block is refreshed
+ * @returns {void}
+ */
+window.saturne.mediaBlock.linkLibraryMedias = function(filenames, block, onComplete) {
+  var context = window.saturne.mediaBlock.mediaContext(block);
+
+  if (!filenames.length || !context || context.mode !== 'module') {
+    return;
+  }
+
+  var token          = window.saturne.toolbox.getToken();
+  var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+  var formData       = new FormData();
+
+  filenames.forEach(function(filename) {
+    formData.append('filenames[]', filename);
+  });
+  formData.append('module_name', context.module);
+  formData.append('sub_dir', context.subdir);
+
+  window.saturne.loader.display(block.find('.saturne-media-gallery'));
+
+  $.ajax({
+    url         : document.URL + querySeparator + 'action=linkPhoto&token=' + token,
+    type        : 'POST',
+    data        : formData,
+    processData : false,
+    contentType : false,
+    complete    : function(resp) {
+      window.saturne.mediaBlock.refreshGallery(block, resp.responseText);
+      // Only left when the answer brought no gallery to put in place of the loading one
+      window.saturne.loader.remove(block.find('.saturne-media-gallery'));
+
+      if (typeof onComplete === 'function') {
+        onComplete();
+      }
+    }
+  });
 };
 
 /**
@@ -117,24 +216,476 @@ window.saturne.mediaBlock.onPhotoSelected = function() {
  * @returns {void}
  */
 window.saturne.mediaBlock.onGalleryClick = function() {
-  var urls   = $(this).data('json');
-  var block  = $(this).closest('.linked-medias');
-  var module = block.find('.fast-upload-options').data('from-type');
-  var subdir = block.find('.fast-upload-options').data('from-subdir');
+  var urls = $(this).data('json');
 
   if (!urls || !urls.length) {
     return;
   }
 
-  window.saturne.photoEditor.open(urls, function(blob) {
-    var currentIndex     = window.saturne.photoEditor._currentIndex;
-    var originalUrl      = urls[currentIndex] || '';
-    // Extract the filename from the Dolibarr document.php URL (?file=subdir%2Fname.jpg)
-    var urlParams        = new URLSearchParams(originalUrl.split('?')[1] || '');
-    var filePath         = decodeURIComponent(urlParams.get('file') || '');
-    var originalFilename = filePath.split('/').pop() || null;
-    window.saturne.mediaBlock.uploadBlob(blob, module, subdir, block, originalFilename);
-  }, 0);
+  window.saturne.mediaBlock.openEditor(urls, 0, $(this).closest('.linked-medias'));
+};
+
+/**
+ * Triggered when the user clicks the wand next to the gallery thumbnail.
+ * Has the photo shown on the thumbnail analysed by the AI module.
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @returns {void}
+ */
+window.saturne.mediaBlock.onAnalyseClick = function() {
+  var button = $(this);
+
+  window.saturne.mediaBlock.analysePhoto(button.data('filename'), button.closest('.linked-medias'), button);
+};
+
+/**
+ * Send a photo of a block to the AI module and hand the analysis over to the host page
+ *
+ * The host page answers subaction=readFileAI in JSON. Filling its own fields is up to it: the answer
+ * is broadcast as the saturne:media-analysed event, along with the block it comes from.
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param   {string} filename Name of the photo, in the folder of the block
+ * @param   {jQuery} block    The .linked-medias block owning the photo
+ * @param   {jQuery} button   Wand that asked for the analysis, showing its progress
+ * @returns {void}
+ */
+window.saturne.mediaBlock.analysePhoto = function(filename, block, button) {
+  var context = window.saturne.mediaBlock.mediaContext(block);
+
+  if (!filename || !context || context.mode !== 'module' || button.prop('disabled')) {
+    return;
+  }
+
+  var icon           = button.find('i');
+  var token          = window.saturne.toolbox.getToken();
+  var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+  var formData       = new FormData();
+
+  var onFailure = function(error) {
+    icon.attr('class', 'fas fa-times');
+    $.jnotify(button.data('error'), 'error', true);
+    if (error) {
+      console.error(error);
+    }
+  };
+
+  formData.append('filename', filename);
+  formData.append('module_name', context.module);
+  formData.append('sub_dir', context.subdir);
+
+  button.prop('disabled', true);
+  icon.attr('class', 'fas fa-circle-notch fa-spin');
+
+  $.ajax({
+    url         : document.URL + querySeparator + 'subaction=readFileAI&token=' + token,
+    type        : 'POST',
+    data        : formData,
+    processData : false,
+    contentType : false,
+    dataType    : 'json',
+    success     : function(response) {
+      if (!response || !response.success) {
+        onFailure(response && response.error);
+        return;
+      }
+
+      icon.attr('class', 'fas fa-check');
+      $(document).trigger('saturne:media-analysed', [response, block]);
+    },
+    error       : function(xhr, status, error) {
+      onFailure(error || status);
+    },
+    complete    : function() {
+      button.prop('disabled', false);
+    }
+  });
+};
+
+/**
+ * Resolve the filename carried by a Dolibarr file URL (document.php or viewimage.php)
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param   {string}      url File URL holding a `file` query parameter
+ * @returns {string|null}     Filename, or null when the URL carries none
+ */
+window.saturne.mediaBlock.filenameFromUrl = function(url) {
+  return window.saturne.photoEditor._fileNameOf(url);
+};
+
+/**
+ * Find the media block holding the medias of a record
+ *
+ * The banner photo of a record is rendered outside its media block, so a click on it has to
+ * reach that block to know where the media can be written back.
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param   {number|string} recordId Record owning the medias
+ * @returns {jQuery}                 The block, empty when the page renders none
+ */
+window.saturne.mediaBlock.blockForRecord = function(recordId) {
+  if (!recordId) {
+    return $();
+  }
+
+  return $('.linked-medias').filter(function() {
+    var block = $(this);
+
+    return block.find('.fast-upload-options[data-object-id="' + recordId + '"]').length > 0 ||
+        block.find('.modal-options[data-from-id="' + recordId + '"]').length > 0;
+  }).first();
+};
+
+/**
+ * Resolve where the medias of a block live and how they can be written back
+ *
+ * Two markups coexist: the media block carries a module and a folder, while the older media row
+ * of a record carries the record itself. Saving takes a different route for each, and only the
+ * second one knows which media the record displays.
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param   {jQuery}      block The .linked-medias block holding the medias
+ * @returns {Object|null}       Context of the block, null when nothing can be written to
+ */
+window.saturne.mediaBlock.mediaContext = function(block) {
+  var fastUpload = block.find('.fast-upload-options');
+
+  if (fastUpload.length) {
+    var context = {
+      mode  : 'module',
+      module: fastUpload.data('from-type'),
+      subdir: fastUpload.data('from-subdir'),
+      // The host page answers the analysis of its photos
+      ai    : fastUpload.data('ai') === 1
+    };
+
+    // A block rendered for a record also says which of its medias that record displays
+    if (fastUpload.data('object-id')) {
+      context.objectId   = fastUpload.data('object-id');
+      context.objectType = fastUpload.data('object-type');
+      context.subtype    = fastUpload.data('object-subtype');
+      context.favorite   = fastUpload.data('favorite') || '';
+      context.photoClass = fastUpload.data('from-subtype') || '';
+    }
+
+    return context;
+  }
+
+  var modalOptions = block.find('.modal-options');
+
+  if (!modalOptions.length || !modalOptions.data('from-id')) {
+    return null;
+  }
+
+  return {
+    mode      : 'object',
+    objectId  : modalOptions.data('from-id'),
+    objectType: modalOptions.data('from-type'),
+    subtype   : modalOptions.data('from-subtype'),
+    subdir    : modalOptions.data('from-subdir') || '',
+    photoClass: modalOptions.data('photo-class'),
+    // Read from the media marked as favorite: the hidden input of the older markup is not
+    // always filled in by the host page
+    favorite  : block.find('.media-gallery-favorite.favorite').find('.filename').val() || ''
+  };
+};
+
+/**
+ * Open the photo editor on a set of medias, starting on one of them
+ *
+ * Saving needs the host page to handle the media actions: without a block able to take a write
+ * the editor opens read-only rather than offering buttons that would fail silently.
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param   {Array}  urls       Media URLs of the set
+ * @param   {number} startIndex Index the editor opens on
+ * @param   {jQuery} block      The .linked-medias block owning the medias
+ * @returns {void}
+ */
+window.saturne.mediaBlock.openEditor = function(urls, startIndex, block) {
+  var context = window.saturne.mediaBlock.mediaContext(block);
+
+  if (!context) {
+    window.saturne.photoEditor.open(urls, null, startIndex, null);
+    return;
+  }
+
+  var currentFileName = function() {
+    return window.saturne.mediaBlock.filenameFromUrl(urls[window.saturne.photoEditor._currentIndex] || '');
+  };
+
+  var onSave    = null;
+  var onDelete  = null;
+  var favorite  = null;
+  var onAnalyse = null;
+
+  if (context.mode === 'module') {
+    onSave = function(blob) {
+      window.saturne.mediaBlock.uploadBlob(blob, context.module, context.subdir, block, currentFileName());
+    };
+
+    onDelete = function(deletedUrl) {
+      var deletedFilename = window.saturne.mediaBlock.filenameFromUrl(deletedUrl);
+
+      if (deletedFilename) {
+        window.saturne.mediaBlock.deletePhoto(deletedFilename, context.module, context.subdir, block);
+      }
+    };
+
+    if (context.ai) {
+      onAnalyse = function(url, button) {
+        window.saturne.mediaBlock.analysePhoto(window.saturne.mediaBlock.filenameFromUrl(url), block, $(button));
+      };
+    }
+  } else {
+    onSave = function(blob) {
+      window.saturne.mediaBlock.saveObjectMedia(blob, currentFileName(), context);
+    };
+  }
+
+  if (context.objectId) {
+    favorite = {
+      current : context.favorite,
+      onSelect: function(url, filename) {
+        window.saturne.mediaBlock.setObjectFavorite(filename, context, block);
+      }
+    };
+  }
+
+  window.saturne.photoEditor.open(urls, onSave, startIndex, onDelete, null, favorite, onAnalyse);
+};
+
+/**
+ * Write an edited media back over the file it came from, in the folder of its record
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param   {Blob}   blob     Edited image
+ * @param   {string} filename Name of the media being replaced
+ * @param   {Object} context  Context returned by mediaContext()
+ * @returns {void}
+ */
+window.saturne.mediaBlock.saveObjectMedia = function(blob, filename, context) {
+  if (!filename) {
+    return;
+  }
+
+  var token          = window.saturne.toolbox.getToken();
+  var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+  var formData       = new FormData();
+
+  formData.append('userfile[]', new File([blob], filename, { type: blob.type || 'image/jpeg', lastModified: Date.now() }), filename);
+  formData.append('object_type', context.objectType);
+  formData.append('object_id', context.objectId);
+  formData.append('object_subdir', context.subdir);
+  formData.append('file_name', filename);
+
+  $.ajax({
+    url        : document.URL + querySeparator + 'subaction=editObjectMedia&token=' + token,
+    type       : 'POST',
+    data       : formData,
+    processData: false,
+    contentType: false,
+    success    : function(resp) {
+      window.saturne.mediaBlock.refreshObjectMedias(resp, context);
+    },
+    error      : function() {
+      $('.wpeo-loader').removeClass('wpeo-loader');
+    }
+  });
+};
+
+/**
+ * Record which media the record displays
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param   {string} filename Media to display
+ * @param   {Object} context  Context returned by mediaContext()
+ * @param   {jQuery} block    The .linked-medias block owning the medias
+ * @returns {void}
+ */
+window.saturne.mediaBlock.setObjectFavorite = function(filename, context, block) {
+  if (!filename) {
+    return;
+  }
+
+  var token          = window.saturne.toolbox.getToken();
+  var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+
+  block.find('.favorite-photo').val(filename);
+
+  $.ajax({
+    url        : document.URL + querySeparator + 'subaction=addToFavorite&token=' + token,
+    type       : 'POST',
+    data       : JSON.stringify({
+      filename     : filename,
+      objectSubtype: context.subtype,
+      objectType   : context.objectType,
+      objectSubdir : context.subdir,
+      objectId     : context.objectId
+    }),
+    processData: false,
+    contentType: 'application/json',
+    success    : function(resp) {
+      window.saturne.mediaBlock.refreshObjectMedias(resp, context);
+    },
+    error      : function() {
+      $('.wpeo-loader').removeClass('wpeo-loader');
+    }
+  });
+};
+
+/**
+ * Put back on the page the medias the server just rendered
+ *
+ * An edited media keeps its URL while its content changes, so the browser would serve the
+ * previous one from its cache: the thumbnails are asked for again.
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param   {string} resp    Page rendered by the server
+ * @param   {Object} context Context returned by mediaContext()
+ * @returns {void}
+ */
+window.saturne.mediaBlock.refreshObjectMedias = function(resp, context) {
+  var rendered = $(resp);
+
+  if (context.photoClass) {
+    var list = $('.linked-medias.' + context.photoClass);
+
+    if (list.length) {
+      list.html(rendered.find('.linked-medias.' + context.photoClass).children());
+    }
+  }
+
+  var banner = $('.floatleft.inline-block.valignmiddle.divphotoref');
+
+  if (banner.length) {
+    banner.replaceWith(rendered.find('.floatleft.inline-block.valignmiddle.divphotoref'));
+  }
+
+  $('.linked-medias .photo, .divphotoref .photo').each(function() {
+    var image     = $(this);
+    var attribute = image.attr('data-src') ? 'data-src' : 'src';
+    var source    = image.attr(attribute);
+
+    if (source) {
+      image.attr(attribute, source.split('&edited=')[0] + '&edited=' + Date.now());
+    }
+  });
+
+  $('.wpeo-loader').removeClass('wpeo-loader');
+  window.saturne.modal.loadLazyImages();
+};
+
+
+/**
+ * Triggered when a linked media thumbnail is clicked.
+ * Opens the Saturne editor on the whole set rather than the native Dolibarr preview dialog.
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param   {Object} event Click event
+ * @returns {void}
+ */
+window.saturne.mediaBlock.onLinkedPhotoClick = function(event) {
+  event.preventDefault();
+
+  var link       = $(this);
+  var galleryId  = link.data('gallery');
+  var siblings   = galleryId ? $('.open-media-editor-linked[data-gallery="' + galleryId + '"]') : link;
+  var urls       = [];
+  var startIndex = 0;
+
+  siblings.each(function() {
+    var url      = $(this).data('url');
+    var position = urls.indexOf(url);
+
+    // A page can render the same media twice: list it once so the editor arrows do not
+    // walk through duplicates
+    if (position === -1) {
+      position = urls.push(url) - 1;
+    }
+
+    if (this === link[0]) {
+      startIndex = position;
+    }
+  });
+
+  if (!urls.length) {
+    return;
+  }
+
+  var block = link.closest('.linked-medias');
+
+  // The banner photo is rendered outside the media row: the row of the same set is the one
+  // holding the record this media can be written back to
+  if (!block.length) {
+    block = siblings.closest('.linked-medias').first();
+  }
+
+  // The media block of a record renders no anchor of its own: reach it through the record
+  if (!block.length) {
+    block = window.saturne.mediaBlock.blockForRecord(link.data('object-id'));
+  }
+
+  // A block showing its medias as a single gallery holds the whole list: a click on the banner
+  // photo of that record then opens every one of them rather than that photo alone
+  var gallery     = block.find('.open-media-editor-as-gallery');
+  var galleryUrls = gallery.length ? gallery.data('json') : null;
+
+  if (galleryUrls && galleryUrls.length) {
+    var clicked  = window.saturne.mediaBlock.filenameFromUrl(link.data('url'));
+    var position = 0;
+
+    galleryUrls.forEach(function(url, index) {
+      if (window.saturne.mediaBlock.filenameFromUrl(url) === clicked) {
+        position = index;
+      }
+    });
+
+    window.saturne.mediaBlock.openEditor(galleryUrls, position, block);
+    return;
+  }
+
+  window.saturne.mediaBlock.openEditor(urls, startIndex, block);
 };
 
 /**
@@ -159,7 +710,7 @@ window.saturne.mediaBlock.uploadBlob = function(blob, module, subdir, block, ori
   var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
   var filename       = originalFilename || ('photo_' + new Date().getTime() + '.jpg');
   var overwrite      = originalFilename ? '1' : '0';
-  var file           = new File([blob], filename, { type: 'image/jpeg', lastModified: Date.now() });
+  var file           = new File([blob], filename, { type: blob.type || 'image/jpeg', lastModified: Date.now() });
   var formData       = new FormData();
 
   formData.append('userfile[]', file, filename);
@@ -174,16 +725,42 @@ window.saturne.mediaBlock.uploadBlob = function(blob, module, subdir, block, ori
     processData : false,
     contentType : false,
     complete    : function(resp) {
-      var $doc       = $('<div>').html(resp.responseText);
-      var blockId    = block && block.attr('id');
-      var $srcBlock  = blockId ? $doc.find('#' + blockId) : $();
-      if (!$srcBlock.length) {
-        $srcBlock = $doc.find('.linked-medias').first();
-      }
-      var $gallery   = $srcBlock.find('.saturne-media-gallery');
-      if ($gallery.length && block && block.length) {
-        block.find('.saturne-media-gallery').replaceWith($gallery);
-      }
+      window.saturne.mediaBlock.refreshGallery(block, resp.responseText);
+    }
+  });
+};
+
+/**
+ * Delete a photo from the server via AJAX and refresh the gallery section in place.
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param   {string} filename Name of the photo file to delete
+ * @param   {string} module   Module name
+ * @param   {string} subdir   Sub-directory
+ * @param   {jQuery} block    The .linked-medias block element
+ * @returns {void}
+ */
+window.saturne.mediaBlock.deletePhoto = function(filename, module, subdir, block) {
+  var token          = window.saturne.toolbox.getToken();
+  var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+  var formData       = new FormData();
+
+  formData.append('filename', filename);
+  formData.append('module_name', module);
+  formData.append('sub_dir', subdir);
+
+  $.ajax({
+    url         : document.URL + querySeparator + 'action=deletePhoto&token=' + token,
+    type        : 'POST',
+    data        : formData,
+    processData : false,
+    contentType : false,
+    complete    : function(resp) {
+      window.saturne.mediaBlock.refreshGallery(block, resp.responseText);
     }
   });
 };
@@ -209,10 +786,165 @@ window.saturne.mediaBlock.openFilesSequentially = function(files, index, module,
     return;
   }
 
-  window.saturne.photoEditor.openFile(files[index], function(blob) {
+  // Validate one: upload the edited photo then re-open the editor for the next file.
+  var onValidate = function(blob) {
     window.saturne.mediaBlock.uploadBlob(blob, module, subdir, block);
     window.saturne.mediaBlock.openFilesSequentially(files, index + 1, module, subdir, block);
+  };
+
+  // Validate all (only when more than one photo remains): upload the current edited photo,
+  // then resize + upload every remaining file without opening the editor again.
+  var onValidateAll = null;
+  if (files.length - index > 1) {
+    onValidateAll = function(blob) {
+      window.saturne.mediaBlock.uploadBlob(blob, module, subdir, block);
+      window.saturne.mediaBlock.uploadRemainingResized(files, index + 1, module, subdir, block);
+    };
+  }
+
+  window.saturne.photoEditor.openFile(files[index], onValidate, onValidateAll);
+};
+
+/**
+ * Upload an array of files in batch mode.
+ * Untouched files (which were never loaded into the canvas) are resized before uploading.
+ * Modified files (which were loaded and potentially edited) are uploaded directly.
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.1.0
+ * @version 1.0.0
+ *
+ * @param   {Array}  originalFiles Original File objects from the input
+ * @param   {Array}  modifiedFiles File objects returned by the editor
+ * @param   {string} module        Module name
+ * @param   {string} subdir        Sub-directory
+ * @param   {jQuery} block         The .linked-medias block element
+ * @returns {void}
+ */
+window.saturne.mediaBlock.uploadBatchFiles = function(originalFiles, modifiedFiles, module, subdir, block) {
+  var index = 0;
+  
+  var processNext = function() {
+    if (index >= modifiedFiles.length) {
+      return;
+    }
+    
+    var uploadAndNext = function(blob) {
+      window.saturne.mediaBlock.uploadBlob(blob, module, subdir, block);
+      index++;
+      processNext();
+    };
+    
+    if (modifiedFiles[index] === originalFiles[index]) {
+      // Untouched file, needs resizing
+      window.saturne.photoEditor.resizeFileToBlob(originalFiles[index], function(blob) {
+        uploadAndNext(blob);
+      });
+    } else {
+      // Already modified/resized by the canvas
+      uploadAndNext(modifiedFiles[index]);
+    }
+  };
+  
+  processNext();
+};
+
+/**
+ * Resize and upload the remaining files one after another, without the editor.
+ * Used by the "validate all" action of the photo editor.
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param   {Array}  files  Files to upload
+ * @param   {number} index  Current index
+ * @param   {string} module Module name
+ * @param   {string} subdir Sub-directory
+ * @param   {jQuery} block  The .linked-medias block element
+ * @returns {void}
+ */
+window.saturne.mediaBlock.uploadRemainingResized = function(files, index, module, subdir, block) {
+  if (index >= files.length) {
+    return;
+  }
+
+  window.saturne.photoEditor.resizeFileToBlob(files[index], function(blob) {
+    window.saturne.mediaBlock.uploadBlob(blob, module, subdir, block);
+    window.saturne.mediaBlock.uploadRemainingResized(files, index + 1, module, subdir, block);
   });
+};
+
+/**
+ * Upload a series of photo files directly, bypassing the editor.
+ * All selected files are sent in a single request, then the gallery is refreshed.
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param   {Array}  files  Files to upload
+ * @param   {string} module Module name
+ * @param   {string} subdir Sub-directory
+ * @param   {jQuery} block  The .linked-medias block element
+ * @returns {void}
+ */
+window.saturne.mediaBlock.uploadPhotosDirectly = function(files, module, subdir, block) {
+  var token          = window.saturne.toolbox.getToken();
+  var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+  var formData       = new FormData();
+
+  for (var i = 0; i < files.length; i++) {
+    formData.append('userfile[]', files[i], files[i].name);
+  }
+  formData.append('module_name', module);
+  formData.append('sub_dir', subdir || '');
+  formData.append('overwrite', '0');
+
+  $.ajax({
+    url         : document.URL + querySeparator + 'action=uploadPhoto&token=' + token,
+    type        : 'POST',
+    data        : formData,
+    processData : false,
+    contentType : false,
+    complete    : function(resp) {
+      window.saturne.mediaBlock.refreshGallery(block, resp.responseText);
+    }
+  });
+};
+
+/**
+ * Refresh the gallery section of a media block from an AJAX response.
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param   {jQuery} block        The .linked-medias block element
+ * @param   {string} responseText HTML response containing the refreshed block
+ * @returns {void}
+ */
+window.saturne.mediaBlock.refreshGallery = function(block, responseText) {
+  // A photo sent, linked or removed here changes the library or what it holds pending: the gallery
+  // modal, written with the page, reads it again at its next opening
+  if (window.saturne.mediaGallery) {
+    window.saturne.mediaGallery.libraryChanged = true;
+  }
+
+  var $doc      = $('<div>').html(responseText);
+  var blockId   = block && block.attr('id');
+  var $srcBlock = blockId ? $doc.find('#' + blockId) : $();
+  if (!$srcBlock.length) {
+    $srcBlock = $doc.find('.linked-medias').first();
+  }
+  var $gallery = $srcBlock.find('.saturne-media-gallery');
+  if ($gallery.length && block && block.length) {
+    block.find('.saturne-media-gallery').replaceWith($gallery);
+  }
 };
 
 /**

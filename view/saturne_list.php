@@ -66,7 +66,13 @@ $massaction = GETPOST('massaction', 'alpha');
 $toselect                                   = [];
 [$confirm, $contextpage, $optioncss, $mode] = ['', '', '', ''];
 $listParameters                             = saturne_load_list_parameters(basename(dirname(__FILE__)));
-$listParameters['contextpage']              = GETPOSTISSET('contextpage') ? GETPOST('contextpage', 'aZ') : $objectMetadata['hook_name_list'] . '_saturne';
+// The context of this page always holds an underscore, so it must be read back with a filter that keeps
+// it : with 'aZ' it comes back empty and the page falls back on PHP_SELF, a key shared by every object
+// type served here, so the column selection saved for one object type applies to all the others
+$listParameters['contextpage']              = GETPOSTISSET('contextpage') ? GETPOST('contextpage', 'aZ09') : '';
+if (empty($listParameters['contextpage'])) {
+    $listParameters['contextpage'] = $objectMetadata['hook_name_list'] . '_saturne';
+}
 foreach ($listParameters as $listParameterKey => $listParameter) {
     $$listParameterKey = $listParameter;
 }
@@ -97,6 +103,23 @@ $search_array_options = $extrafields->getOptionalsFromPost($object->table_elemen
 
 if (isModEnabled('categorie')) {
     $searchCategories = GETPOST('search_category_' . $object->element . '_list', 'array');
+}
+
+// Last sort chosen by the user, for the object types asking for it: the menu and the cards link to the
+// list without any sort, so it would otherwise fall back on the default one each time it is reopened
+if (!empty($objectMetadata['remember_sort']) && !empty($user->id)) {
+    require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
+
+    $lastSortParam = 'SATURNE_LIST_SORT_' . dol_strtoupper($objectType);
+    if (GETPOSTISSET('sortfield')) {
+        $lastSort = $sortfield . '|' . $sortorder;
+        if (getDolUserString($lastSortParam) !== $lastSort) {
+            dol_set_user_param($db, $conf, $user, [$lastSortParam => $lastSort]);
+        }
+    } elseif (getDolUserString($lastSortParam) !== '') {
+        // A sort field no longer offered is dropped by the check of the sort against the select
+        [$sortfield, $sortorder] = array_pad(explode('|', getDolUserString($lastSortParam), 2), 2, '');
+    }
 }
 
 // Default sort order (if not yet defined by previous GETPOST)
@@ -155,33 +178,10 @@ require_once DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_list_array_fields.tpl.ph
 
 // Apply the per-user column layout (order + widths) saved for this list
 $listLayoutId     = $object->element;
-$listLayout       = saturne_get_list_layout($listLayoutId);
-$listColumnWidths = $listLayout['widths'];
+$listColumnWidths = saturne_apply_list_layout($object, $arrayfields, $listLayoutId);
 
 // Per-user filter display mode: classic inline row (default) vs side filter panel
 $useSideFilterPanel = (saturne_get_list_filter_mode($listLayoutId) === 'panel');
-if (!empty($listLayout['order'])) {
-    $listColumnPos = 0;
-    foreach ($listLayout['order'] as $colKey) {
-        if (isset($object->fields[$colKey])) {
-            $object->fields[$colKey]['position'] = $listColumnPos;
-        }
-        if (isset($arrayfields['t.' . $colKey])) {
-            $arrayfields['t.' . $colKey]['position'] = $listColumnPos;
-        }
-        $listColumnPos += 10;
-    }
-    // Keep columns not present in the saved order after the ordered ones
-    foreach ($object->fields as $colKey => $fieldVal) {
-        if (!in_array($colKey, $listLayout['order'], true)) {
-            $object->fields[$colKey]['position'] = $listColumnPos;
-            if (isset($arrayfields['t.' . $colKey])) {
-                $arrayfields['t.' . $colKey]['position'] = $listColumnPos;
-            }
-            $listColumnPos += 10;
-        }
-    }
-}
 
 $object->fields = dol_sort_array($object->fields, 'position');
 $arrayfields    = dol_sort_array($arrayfields, 'position');

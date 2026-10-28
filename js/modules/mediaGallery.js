@@ -54,11 +54,13 @@ window.saturne.mediaGallery.init = function() {
 window.saturne.mediaGallery.event = function() {
 	// Photos
   $( document ).on( 'click', '.clickable-photo', window.saturne.mediaGallery.selectPhoto );
+  $( document ).on( 'click', '.open-media-editor', window.saturne.mediaGallery.openPhotoEditor );
   $( document ).on( 'click', '.save-photo', window.saturne.mediaGallery.savePhoto );
   $(document).on( 'click', '.delete-photo', window.saturne.mediaGallery.deletePhoto);
-  $( document ).on( 'change', '.flat.minwidth400.maxwidth200onsmartphone', window.saturne.mediaGallery.sendPhoto );
+  // The gallery add button carries its own id, the class selector only matches the older markup
+  $( document ).on( 'change', '.flat.minwidth400.maxwidth200onsmartphone, #add_media_to_gallery', window.saturne.mediaGallery.sendPhoto );
   $( document ).on( 'click', '.clicked-photo-preview', window.saturne.mediaGallery.previewPhoto );
-  $( document ).on( 'input', '.form-element #search_in_gallery', window.saturne.mediaGallery.handleSearch );
+  $( document ).on( 'input', '#search_in_gallery', window.saturne.mediaGallery.handleSearch );
   $( document ).on( 'click', '.media-gallery-unlink', window.saturne.mediaGallery.unlinkFile );
   $( document ).on( 'click', '.media-gallery-favorite', window.saturne.mediaGallery.addToFavorite );
   $( document ).on( 'change', '.fast-upload', window.saturne.mediaGallery.fastUpload );
@@ -66,6 +68,7 @@ window.saturne.mediaGallery.event = function() {
   $( document ).on( 'click', '.toggle-today-medias', window.saturne.mediaGallery.toggleTodayMedias );
   $( document ).on( 'click', '.toggle-unlinked-medias', window.saturne.mediaGallery.toggleUnlinkedMedias );
   $(document).on('click', '.regenerate-thumbs', window.saturne.mediaGallery.regenerateThumbs);
+  $(document).on('click', '.sync-media-library', window.saturne.mediaGallery.syncLibrary);
   $(document).on( 'click', '.media-gallery-ai', window.saturne.mediaGallery.readFileAI);
 }
 
@@ -78,7 +81,10 @@ window.saturne.mediaGallery.event = function() {
  * @return {void}
  */
 window.saturne.mediaGallery.selectPhoto = function( event ) {
-	let photoID = $(this).attr('value');
+    if (!$(event.target).closest('.photo-selector').length) {
+        return;
+    }
+    let photoID = $(this).attr('value');
 	let parent = $(this).closest('.modal-content')
 
 	if ($(this).hasClass('clicked-photo')) {
@@ -97,6 +103,91 @@ window.saturne.mediaGallery.selectPhoto = function( event ) {
 };
 
 /**
+ * Open the photo editor on the media that was clicked in the gallery
+ *
+ * The whole gallery is handed over so the editor arrows walk through it, and the editor
+ * starts on the media that was clicked.
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param  {Object} event Click event
+ * @return {void}
+ */
+window.saturne.mediaGallery.openPhotoEditor = function( event ) {
+  event.preventDefault();
+  event.stopPropagation();
+
+  var image      = $(this);
+  var images     = image.closest('.modal-container').find('.open-media-editor[data-fullsrc]');
+  var urls       = [];
+  var startIndex = 0;
+
+  images.each(function( index ) {
+    urls.push($(this).data('fullsrc'));
+    if (this === image[0]) {
+      startIndex = index;
+    }
+  });
+
+  if (!urls.length) {
+    return;
+  }
+
+  window.saturne.photoEditor.open(urls, function( blob ) {
+    var edited = images.eq(window.saturne.photoEditor._currentIndex);
+    window.saturne.mediaGallery.replacePhoto(blob, edited.data('filename'));
+  }, startIndex, null);
+};
+
+/**
+ * Send an edited media back under its own name so it replaces the original
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param  {Blob}   blob     Edited image
+ * @param  {string} filename Name of the media being replaced
+ * @return {void}
+ */
+window.saturne.mediaGallery.replacePhoto = function( blob, filename ) {
+  if (!filename) {
+    return;
+  }
+
+  var mediaGallery   = $('#media_gallery');
+  var token          = window.saturne.toolbox.getToken();
+  var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+  var formData       = new FormData();
+
+  formData.append('userfile[]', new File([blob], filename, { type: blob.type || 'image/jpeg', lastModified: Date.now() }), filename);
+  formData.append('overwritemedia', '1');
+
+  window.saturne.loader.display(mediaGallery.find('.ecm-photo-list-content'));
+
+  $.ajax({
+    url        : document.URL + querySeparator + 'subaction=uploadPhoto&token=' + token,
+    type       : 'POST',
+    data       : formData,
+    processData: false,
+    contentType: false,
+    success    : function( resp ) {
+      mediaGallery.html($(resp).find('#media_gallery').children()).promise().done(function() {
+        // The media keeps its URL, only its content changed: the cache would serve the old one
+        mediaGallery.find('.open-media-editor').each(function() {
+          var img = $(this);
+          img.attr('data-src', img.attr('data-src') + '&edited=' + Date.now());
+        });
+        window.saturne.modal.loadLazyImages();
+      });
+    },
+    error      : function() {
+      $('.wpeo-loader').removeClass('wpeo-loader');
+    }
+  });
+};
+
+/**
  * Action save photo to an object
  *
  * @since   1.0.0
@@ -109,7 +200,44 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 	let mediaGallery      = $('#media_gallery')
 	let mediaGalleryModal = $(this).closest('.modal-container')
 	let filesLinked       = mediaGalleryModal.find('.clicked-photo')
-	let token             = window.saturne.toolbox.getToken();
+
+	// Opened from a media block: the medias are linked to its folder, the block refreshes itself
+	let fromBlock = mediaGallery.attr('data-from-block')
+	if (fromBlock) {
+		let blockFilenames = []
+		filesLinked.each(function() {
+			blockFilenames.push($(this).find('.filename').val())
+		})
+		if (!blockFilenames.length) {
+			return
+		}
+		window.saturne.mediaBlock.linkLibraryMedias(blockFilenames, $('#' + fromBlock))
+		mediaGallery.removeClass('modal-active')
+		filesLinked.removeClass('clicked-photo').attr('style', '')
+		mediaGalleryModal.find('.save-photo, .delete-photo').addClass('button-disable')
+		return
+	}
+
+	let filenames = []
+	filesLinked.each(function(  ) {
+		filenames.push($( this ).find('.filename').val())
+	});
+	window.saturne.mediaGallery.linkMediasToRecord(filenames, $(this))
+};
+
+/**
+ * Link library medias to the record that opened the gallery, then refresh what the page shows of it
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param  {string[]} filenames Names of the medias in the library
+ * @param  {jQuery}   button    Button clicked, showing the loader meanwhile
+ * @return {void}
+ */
+window.saturne.mediaGallery.linkMediasToRecord = function( filenames, button ) {
+	let mediaGallery = $('#media_gallery')
+	let token        = window.saturne.toolbox.getToken();
 
 	let objectId         = mediaGallery.attr('data-from-id');
 	let objectType       = mediaGallery.attr('data-from-type')
@@ -117,13 +245,11 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
   let objectSubdir     = mediaGallery.attr('data-from-subdir')
   let objectPhotoClass = mediaGallery.attr('data-photo-class')
 
-	let filenames = ''
-	if (filesLinked.length > 0) {
-		filesLinked.each(function(  ) {
-			filenames += $( this ).find('.filename').val() + 'vVv'
-		});
-	}
-	window.saturne.loader.display($(this));
+	let filenamesList = ''
+	filenames.forEach(function( filename ) {
+		filenamesList += filename + 'vVv'
+	});
+	window.saturne.loader.display(button);
   if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
     if ($('.linked-medias.'+objectPhotoClass).length > 0) {
       window.saturne.loader.display($('.linked-medias.'+objectPhotoClass));
@@ -137,20 +263,26 @@ window.saturne.mediaGallery.savePhoto = function( event ) {
 		url: document.URL + querySeparator + "subaction=addFiles&token=" + token,
 		type: "POST",
 		data: JSON.stringify({
-			filenames: filenames,
+			filenames: filenamesList,
 			objectId: objectId,
 			objectType: objectType,
 			objectSubdir: objectSubdir,
 			objectSubtype: objectSubtype
 		}),
 		processData: false,
-		contentType: false,
+		contentType: 'application/json',
 		success: function ( resp ) {
 			$('.wpeo-loader').removeClass('wpeo-loader')
 			mediaGallery.removeClass('modal-active')
       if (typeof objectPhotoClass != 'undefined' && objectPhotoClass.length > 0) {
         $('.photo.'+objectPhotoClass).replaceWith($(resp).find('.photo.'+objectPhotoClass).first())
         $('.linked-medias.'+objectPhotoClass).replaceWith($(resp).find('.linked-medias.'+objectPhotoClass))
+        // The photo opening the gallery shows the favorite as well (a Digirisk tree, a list): it holds
+        // the class itself, without the photo one, so the line above leaves it as it was
+        let photoContainer = $(resp).find('.photo-container.'+objectPhotoClass).first()
+        if (photoContainer.length > 0) {
+          $('.photo-container.'+objectPhotoClass).replaceWith(photoContainer)
+        }
       } else {
 
         $('.linked-medias.'+objectSubtype).html($(resp).find('.linked-medias.'+objectSubtype).children())
@@ -239,7 +371,7 @@ window.saturne.mediaGallery.deleteFilesRequest = function(fileNames) {
     url: document.URL + querySeparator + 'subaction=delete_files&token=' + token,
     type: 'POST',
     processData: false,
-    contentType: false,
+    contentType: 'application/json',
     data: JSON.stringify({
       filenames: fileNames
     }),
@@ -299,14 +431,15 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 
 	window.saturne.loader.display($('#progressBarContainer'));
 
-	let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
+	let baseUrl = document.URL.split('#')[0];
+	let querySeparator = window.saturne.toolbox.getQuerySeparator(baseUrl);
 	let textToShow = '';
 
 	$.each(files, function(index, file) {
 		let formdata = new FormData();
 		formdata.append("userfile[]", file);
 		$.ajax({
-			url: document.URL + querySeparator + "subaction=uploadPhoto&token=" + token,
+			url: baseUrl + querySeparator + "subaction=uploadPhoto&token=" + token,
 			type: "POST",
 			data: formdata,
 			processData: false,
@@ -329,28 +462,54 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 					$('#progressBarContainer').find('.loader-spin').remove();
 					window.saturne.loader.display(mediaGallery.find('.ecm-photo-list-content'));
 					setTimeout(() => {
-						mediaGallery.html($(resp).find('#media_gallery').children()).promise().done( () => {
-							if (totalCount == 1) {
-								$('#media_gallery').find('.save-photo').removeClass('button-disable');
-								$('#media_gallery').find('.delete-photo').removeClass('button-disable');
-								$('#media_gallery').find('.clickable-photo0').addClass('clicked-photo');
-							}
-							if ($(resp).find('.error-medias').length) {
-								$('.messageErrorSendPhoto').find('.notice-subtitle').html(textToShow)
-								$('.messageErrorSendPhoto').removeClass('hidden');
-							} else {
-								$('.messageSuccessSendPhoto').removeClass('hidden');
-							}
-							mediaGallery.attr('data-from-id', objectId);
-							mediaGallery.attr('data-from-type', objectType);
-							mediaGallery.attr('data-from-subtype', objectSubtype);
-							mediaGallery.attr('data-from-subdir', objectSubdir);
-							mediaGallery.find('.wpeo-button').attr('value', objectId);
-              window.saturne.modal.loadLazyImages();
-						})
-					}, 800)
+						let newChildren = $(resp).find('#media_gallery').children();
+						if (newChildren.length) {
+							mediaGallery.html(newChildren).promise().done( () => {
+								if (totalCount == 1) {
+									$('#media_gallery').find('.save-photo').removeClass('button-disable');
+									$('#media_gallery').find('.delete-photo').removeClass('button-disable');
+									$('#media_gallery').find('.clickable-photo0').addClass('clicked-photo');
+								}
+								if ($(resp).find('.error-medias').length) {
+									$('.messageErrorSendPhoto').find('.notice-subtitle').html(textToShow);
+									$('.messageErrorSendPhoto').removeClass('hidden');
+								} else {
+									let successMessage = totalCount > 1 ? totalCount + " médias ajoutés avec succès" : "1 média ajouté avec succès";
+									$('.messageSuccessSendPhoto').find('.notice-title').html(successMessage);
+									$('.messageSuccessSendPhoto').removeClass('hidden');
+								}
+								window.saturne.mediaGallery.currentOffset = 1;
+								window.saturne.mediaGallery.hasMore = true;
+								window.saturne.mediaGallery.isLoading = false;
+								setTimeout(window.saturne.mediaGallery.checkFill, 200);
+								mediaGallery.attr('data-from-id', objectId);
+								mediaGallery.attr('data-from-type', objectType);
+								mediaGallery.attr('data-from-subtype', objectSubtype);
+								mediaGallery.attr('data-from-subdir', objectSubdir);
+								mediaGallery.find('.wpeo-button').attr('value', objectId);
+								window.saturne.modal.loadLazyImages();
+								$('.wpeo-loader').removeClass('wpeo-loader');
+								$('.loader-spin').remove();
+							});
+						} else {
+							$('.wpeo-loader').removeClass('wpeo-loader');
+							$('.loader-spin').remove();
+						}
+					}, 800);
 				}
 			},
+			error: function() {
+				requestCompleted++;
+				textToShow += "Erreur lors de l'envoi d'un fichier.<br>";
+				if (requestCompleted === totalCount) {
+					$('.wpeo-loader').removeClass('wpeo-loader');
+					$('#progressBarContainer').fadeOut(800);
+					$('#progressBarContainer').find('.loader-spin').remove();
+					$('.messageErrorSendPhoto').find('.notice-subtitle').html(textToShow);
+					$('.messageErrorSendPhoto').removeClass('hidden');
+					$('.ecm-photo-list-content').removeClass('wpeo-loader').find('.loader-spin').remove();
+				}
+			}
 		});
 	})
 };
@@ -612,7 +771,7 @@ window.saturne.mediaGallery.fastUpload = function( typeFrom ) {
 							objectSubdir: objectSubdir
 						}),
 						processData: false,
-						contentType: false,
+						contentType: 'application/json',
 						success: function ( resp ) {
               $('.wpeo-loader').removeClass('wpeo-loader')
               mediaGallery.removeClass('modal-active')
@@ -680,7 +839,7 @@ window.saturne.mediaGallery.selectPage = function( event ) {
 			pagesCounter: pagesCounter
 		}),
 		processData: false,
-		contentType: false,
+		contentType: 'application/json',
 		success: function ( resp ) {
 			$('.wpeo-loader').removeClass('wpeo-loader')
 			mediaGallery.html($(resp).find('#' + containerToRefresh).children());
@@ -705,29 +864,51 @@ window.saturne.mediaGallery.selectPage = function( event ) {
  * @return {void}
  */
 window.saturne.mediaGallery.toggleTodayMedias = function( event ) {
+  if ( event ) {
+    event.preventDefault();
+  }
 
   let token          = window.saturne.toolbox.getToken();
-  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
+  let baseUrl        = document.URL.split('#')[0];
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(baseUrl);
 
-  let toggleValue = $(this).attr('value')
+  let toggleValue = $(this).attr('value');
 
-  window.saturne.loader.display($('.ecm-photo-list-content'))
-  window.saturne.loader.display($('.wpeo-pagination'))
+  if ($('.ecm-photo-list-content').length) {
+    window.saturne.loader.display($('.ecm-photo-list-content'));
+  }
+  if ($('.wpeo-pagination').length) {
+    window.saturne.loader.display($('.wpeo-pagination'));
+  }
 
   $.ajax({
-    url: document.URL + querySeparator + "subaction=toggleTodayMedias&toggle_today_medias=" + toggleValue + "&token=" + token,
+    url: baseUrl + querySeparator + "subaction=toggleTodayMedias&toggle_today_medias=" + toggleValue + "&token=" + token,
     type: "POST",
     processData: false,
     contentType: false,
     success: function ( resp ) {
-      $('.toggle-today-medias').replaceWith($(resp).find('.toggle-today-medias'))
-      $('.ecm-photo-list-content').replaceWith($(resp).find('.ecm-photo-list-content'))
-      $('.wpeo-pagination').replaceWith($(resp).find('.wpeo-pagination'))
+      let newToggle = $(resp).find('.toggle-today-medias');
+      let newContent = $(resp).find('.ecm-photo-list-content');
+      let newPagination = $(resp).find('.wpeo-pagination');
+
+      if (newToggle.length) {
+        $('.toggle-today-medias').replaceWith(newToggle);
+      }
+      if (newContent.length) {
+        $('.ecm-photo-list-content').replaceWith(newContent);
+      }
+      if (newPagination.length) {
+        $('.wpeo-pagination').replaceWith(newPagination);
+      }
       window.saturne.modal.loadLazyImages();
     },
     error: function ( ) {
+    },
+    complete: function ( ) {
+      $('.wpeo-loader').removeClass('wpeo-loader');
+      $('.loader-spin').remove();
     }
-  })
+  });
 };
 
 /**
@@ -739,29 +920,194 @@ window.saturne.mediaGallery.toggleTodayMedias = function( event ) {
  * @return {void}
  */
 window.saturne.mediaGallery.toggleUnlinkedMedias = function( event ) {
+  if ( event ) {
+    event.preventDefault();
+  }
 
   let token          = window.saturne.toolbox.getToken();
-  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL)
+  let baseUrl        = document.URL.split('#')[0];
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(baseUrl);
 
-  let toggleValue = $(this).attr('value')
+  let toggleValue = $(this).attr('value');
 
-  window.saturne.loader.display($('.ecm-photo-list-content'))
-  window.saturne.loader.display($('.wpeo-pagination'))
+  if ($('.ecm-photo-list-content').length) {
+    window.saturne.loader.display($('.ecm-photo-list-content'));
+  }
+  if ($('.wpeo-pagination').length) {
+    window.saturne.loader.display($('.wpeo-pagination'));
+  }
 
   $.ajax({
-    url: document.URL + querySeparator + "subaction=toggleUnlinkedMedias&toggle_unlinked_medias=" + toggleValue + "&token=" + token,
+    url: baseUrl + querySeparator + "subaction=toggleUnlinkedMedias&toggle_unlinked_medias=" + toggleValue + "&token=" + token,
     type: "POST",
     processData: false,
     contentType: false,
     success: function ( resp ) {
-      $('.toggle-unlinked-medias').replaceWith($(resp).find('.toggle-unlinked-medias'))
-      $('.ecm-photo-list-content').replaceWith($(resp).find('.ecm-photo-list-content'))
-      $('.wpeo-pagination').replaceWith($(resp).find('.wpeo-pagination'))
+      let newToggle = $(resp).find('.toggle-unlinked-medias');
+      let newContent = $(resp).find('.ecm-photo-list-content');
+      let newPagination = $(resp).find('.wpeo-pagination');
+
+      if (newToggle.length) {
+        $('.toggle-unlinked-medias').replaceWith(newToggle);
+      }
+      if (newContent.length) {
+        $('.ecm-photo-list-content').replaceWith(newContent);
+      }
+      if (newPagination.length) {
+        $('.wpeo-pagination').replaceWith(newPagination);
+      }
       window.saturne.modal.loadLazyImages();
     },
     error: function ( ) {
+    },
+    complete: function ( ) {
+      $('.wpeo-loader').removeClass('wpeo-loader');
+      $('.loader-spin').remove();
     }
-  })
+  });
+};
+
+/**
+ * Read the gallery again, on its first page, then run the callback
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param  {Function} callback Run once the gallery is read again
+ * @return {void}
+ */
+window.saturne.mediaGallery.reload = function(callback) {
+  let mediaGallery = $('#media_gallery');
+
+  window.saturne.loader.display(mediaGallery.find('.modal-content'));
+
+  // A plain reading of the page: the pagination action needs the count of pages, which a gallery
+  // on a single page does not show
+  $.ajax({
+    url: document.URL.split('#')[0],
+    type: 'GET',
+    success: function(resp) {
+      let freshGallery = $(resp).find('#media_gallery').first();
+
+      // The children only: the opener of the gallery is written on the modal itself
+      if (freshGallery.length) {
+        mediaGallery.html(freshGallery.children());
+      }
+      window.saturne.modal.loadLazyImages();
+
+      if (typeof callback === 'function') {
+        callback();
+      }
+    },
+    complete: function() {
+      $('.wpeo-loader').removeClass('wpeo-loader');
+    }
+  });
+};
+
+/**
+ * Read the gallery again when the library changed since the page was written
+ *
+ * The gallery tab comes with the page and the pending one with its first opening: a photo a media
+ * block sent since then joined the library but showed in neither tab until the page was reloaded.
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @return {void}
+ */
+window.saturne.mediaGallery.reloadIfChanged = function() {
+  if (!window.saturne.mediaGallery.libraryChanged) {
+    return;
+  }
+
+  window.saturne.mediaGallery.libraryChanged = false;
+  window.saturne.mediaGallery.reload(function() {
+    // The pending list is built again: the button it offers follows the opener of the gallery
+    if (window.saturne.mediaPending) {
+      window.saturne.mediaPending.syncCurrentTarget($('#media_gallery'));
+    }
+  });
+};
+
+/**
+ * Catch up of the library on the medias the records hold
+ *
+ * The server works a slice at a time: the browser calls again until it is done, then shows what was
+ * copied and lists the library again. Each answer comes from a page that renewed the CSRF token, the
+ * next call carries the new one.
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @return {void}
+ */
+window.saturne.mediaGallery.syncLibrary = function() {
+  let button = $(this);
+
+  if (button.hasClass('sync-running')) {
+    return;
+  }
+
+  let baseUrl        = document.URL.split('#')[0];
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(baseUrl);
+  let token          = window.saturne.toolbox.getToken();
+  let copied         = { added: 0, renamed: 0 };
+
+  button.addClass('sync-running').find('i').addClass('fa-spin');
+
+  let finish = function(message, color) {
+    button.removeClass('sync-running').find('i').removeClass('fa-spin');
+    if (typeof $.jnotify === 'function') {
+      $.jnotify(message, { color: color });
+    } else {
+      alert(message);
+    }
+  };
+
+  let step = function() {
+    $.ajax({
+      url: baseUrl + querySeparator + 'subaction=syncMediaLibrary&token=' + token,
+      type: 'POST',
+      success: function(resp) {
+        let page  = $(resp);
+        let stats = null;
+
+        try {
+          stats = JSON.parse(page.find('#saturne-sync-media-library-response').text());
+        } catch (e) {
+          finish(button.data('label-error'), 'red');
+          return;
+        }
+
+        token = page.find('input[name="token"]').first().val() || token;
+
+        // Every call goes over the whole module again: a media copied by an earlier one is now
+        // counted as present
+        if (!stats.done) {
+          copied.added   += stats.added;
+          copied.renamed += stats.renamed;
+          step();
+          return;
+        }
+
+        let added   = copied.added + stats.added;
+        let renamed = copied.renamed + stats.renamed;
+        let present = stats.present - copied.added - copied.renamed;
+        let message = button.data('label-done').replace('%s', added + renamed).replace('%s', renamed).replace('%s', present).replace('%s', stats.excluded);
+
+        finish(message, 'green');
+
+        // The library holds new medias: list it again
+        window.saturne.mediaGallery.reload();
+      },
+      error: function() {
+        finish(button.data('label-error'), 'red');
+      }
+    });
+  };
+
+  step();
 };
 
 /**
@@ -774,24 +1120,32 @@ window.saturne.mediaGallery.toggleUnlinkedMedias = function( event ) {
  */
 window.saturne.mediaGallery.regenerateThumbs = function() {
   let token          = window.saturne.toolbox.getToken();
-  let querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+  let baseUrl        = document.URL.split('#')[0];
+  let querySeparator = window.saturne.toolbox.getQuerySeparator(baseUrl);
   let fullname       = $(this).closest('.photo-image').find('.fullname').attr('data-fullname');
 
   window.saturne.loader.display($(this).closest('.photo-image'));
 
   $.ajax({
-    url: document.URL + querySeparator + 'subaction=regenerate_thumbs&token=' + token,
+    url: baseUrl + querySeparator + 'subaction=regenerate_thumbs&token=' + token,
     type: 'POST',
     data: JSON.stringify({
       fullname: fullname
     }),
     processData: false,
-    contentType: false,
+    contentType: 'application/json',
     success: function(resp) {
-      $('.ecm-photo-list-content').replaceWith($(resp).find('.ecm-photo-list-content'));
+      let newContent = $(resp).find('.ecm-photo-list-content');
+      if (newContent.length) {
+        $('.ecm-photo-list-content').replaceWith(newContent);
+      }
       window.saturne.modal.loadLazyImages();
     },
-    error: function() {}
+    error: function() {},
+    complete: function() {
+      $('.wpeo-loader').removeClass('wpeo-loader');
+      $('.loader-spin').remove();
+    }
   });
 };
 

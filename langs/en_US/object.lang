@@ -53,7 +53,7 @@ ErrorCreateObject = Error: creation of a %s
 ErrorDeleteObject = Error: deleting a %s
 
 # Numbering modules
-SaturneGenericMaskCodes = This field consists of a prefix followed by a suffix. For example, ABC{000} will result in ABC001, ABC002, etc. You can add as many zeros as you wish.
+SaturneGenericMaskCodes = This field consists of a prefix followed by a suffix. For example, ABC{yy}{mm}-{000} will result in ABC2308-001, ABC2308-002, etc. You can use variables {yy}, {mm}, {dd} for the date and add as many zeros as you wish in the brackets {000}.
 
 # Status
 StatusDraft              = Draft (to be validated)
@@ -92,6 +92,8 @@ CloneObject             = Clone %s
 NewLabelForClone        = New %s label
 ConfirmCloneObject      = Are you sure you want to clone %s <b>%s</b>?
 DeleteObject            = Delete %s
+DeleteLineObject        = Delete %s on %s
+ConfirmDeleteLineObject = Are you sure you want to delete %s <b>%s</b> on %s?
 RemoveFileObject        = Delete the document
 ConfirmRemoveFileObject = Are you sure you want to <b>delete</b> the document %s ?<br><b> This action is irreversible. The document will be deleted forever. </b>
 ArchiveObject           = Archive %s
@@ -100,16 +102,25 @@ CloneCategories         = Clone tags/categories ?
 ClonePhotos             = Cloner les photos ?
 
 # Confirm mass box
-ConfirmMassLock              = Bulk lock confirmation
-ConfirmMassLockingQuestion   = Are you sure you want to lock the %d record(s) selected ?
-ConfirmMassArchive           = Bulk archiving confirmation
-ConfirmMassArchivingQuestion = Are you sure you want to archive the %d record(s) selected ?
+ConfirmMassLock               = Bulk lock confirmation
+ConfirmMassLockingQuestion    = Are you sure you want to lock the %d record(s) selected ?
+ConfirmMassArchive            = Bulk archiving confirmation
+ConfirmMassArchivingQuestion  = Are you sure you want to archive the %d record(s) selected ?
+ConfirmMassValidate           = Bulk validation confirmation
+ConfirmMassValidatingQuestion = Are you sure you want to validate the %d record(s) selected ?
+ConfirmMassSign               = Bulk signing confirmation
+ConfirmMassSigningQuestion    = Are you sure you want to sign the %d record(s) selected with your electronic signature ?
 
 # SetEventMessage mass action
 RecordsArchived = %d record(s) archived
 ConfirmMassUnarchive           = Bulk unarchiving confirmation
 ConfirmMassUnarchivingQuestion = Are you sure you want to unarchive the %d record(s) selected ?
 RecordsUnarchived = %d record(s) unarchived
+RecordsValidated = %d record(s) validated
+RecordsNotDraftSkipped = %d record(s) skipped because they are not in draft status
+RecordsSigned = %d record(s) signed
+RecordsSignedForAttendant = %d record(s) signed for %s
+RecordsNotSignableSkipped = %d record(s) skipped because they are not validated or you have no pending signature on them
 Unarchive = Unarchive
 Unarchived = Unarchived
 ObjectNotFound  = %s not found
@@ -117,6 +128,8 @@ ObjectNotFound  = %s not found
 # Data
 ActionsOnObject = Events on %s
 DisplayMoreInfo = View more information
+# Core dol_print_object_info() prints trans('Creation'), a key missing from the core lang files
+Creation        = Creation
 
 # Email - Mail
 ObjectEmailDocumentLabel   = SAT_Document

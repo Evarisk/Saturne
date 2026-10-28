@@ -237,7 +237,9 @@ class SaturneDashboard
         }
 
         print '<div class="add-graph-box" id="add-graph-box" style="margin-top: 10px; ' . (!empty($dashboards['disabledGraphs']) ? '' : 'display:none') . '">';
-        print Form::selectarray('disabledGraph', $dashboards['disabledGraphs'], -1, $langs->trans('ChooseBoxToAddGraph'), 0, 0, 'data-item-type="graph" data-id-refresh="graph-dashboard" data-id-load="add-graph-box"', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint', 0, 'hidden selected');
+        // The key is only set when a data source declares a disabled graph; the div above already
+        // guards on it, this one used to read it raw
+        print Form::selectarray('disabledGraph', $dashboards['disabledGraphs'] ?? [], -1, $langs->trans('ChooseBoxToAddGraph'), 0, 0, 'data-item-type="graph" data-id-refresh="graph-dashboard" data-id-load="add-graph-box"', 1, 0, 0, 'DESC', 'maxwidth300 widthcentpercentminusx hideonprint', 0, 'hidden selected');
         if (!empty($conf->use_javascript_ajax)) {
             include_once DOL_DOCUMENT_ROOT . '/core/lib/ajax.lib.php';
             print ajax_combobox('disabledGraph');
@@ -271,8 +273,9 @@ class SaturneDashboard
                             if ($nbDataset > 0) {
                                 if (is_array($dashboardGraph['labels']) && !empty($dashboardGraph['labels'])) {
                                     foreach ($dashboardGraph['labels'] as $key => $dashboardGraphLabel) {
-                                        $dashboardGraphLegend[$uniqueKey][] = $dashboardGraphLabel['label'];
-                                        if (isset($dashboardGraphLabel['color'])) {
+                                        $labelValue = is_array($dashboardGraphLabel) ? ($dashboardGraphLabel['label'] ?? '') : $dashboardGraphLabel;
+                                        $dashboardGraphLegend[$uniqueKey][] = $labelValue;
+                                        if (is_array($dashboardGraphLabel) && isset($dashboardGraphLabel['color'])) {
                                             if (dol_strlen($dashboardGraphLabel['color']) > 0) {
                                                 $dashboardGraphColor[$uniqueKey][] = $dashboardGraphLabel['color'];
                                             } else {
@@ -290,9 +293,10 @@ class SaturneDashboard
                                     if ($dashboardGraph['dataset'] >= 2) {
                                             $graphData[$uniqueKey][] = $dashboardGraph['data'][$key];
                                     } else {
+                                        $label = isset($dashboardGraph['labels'][$key]['label']) ? $dashboardGraph['labels'][$key]['label'] : (string)$key;
                                         $graphData[$uniqueKey][] = [
-                                        0 => $dashboardGraph['labels'][$key]['label'],
-                                        1 => $dashboardGraph['data'][$key]
+                                            0 => $label,
+                                            1 => $dashboardGraph['data'][$key]
                                         ];
                                     }
                                 }
@@ -307,6 +311,15 @@ class SaturneDashboard
                                     $graph->SetLegend($dashboardGraphLegend[$uniqueKey]);
                                 }
                                 if (isset($dashboardGraphColor[$uniqueKey])) {
+                                    // DolGraph reads one color per series but colors come one per label: a pie with
+                                    // 2 datasets reduced to a single slice gets 1 color for 2 series (warnings in dolgraph)
+                                    $nbSeries = 0;
+                                    foreach ($graphData[$uniqueKey] as $graphDataRow) {
+                                        $nbSeries = max($nbSeries, count((array) $graphDataRow) - 1);
+                                    }
+                                    for ($colorKey = count($dashboardGraphColor[$uniqueKey]); $colorKey < $nbSeries; $colorKey++) {
+                                        $dashboardGraphColor[$uniqueKey][] = $this->getColorRange($colorKey);
+                                    }
                                     $graph->SetDataColor($dashboardGraphColor[$uniqueKey]);
                                 }
                                 $graph->SetType([$dashboardGraph['type'] ?? 'pie']);
@@ -315,7 +328,7 @@ class SaturneDashboard
                                 $graph->setShowLegend($dashboardGraph['showlegend'] ?? 2);
                                 $graph->draw($fileName[$uniqueKey], $fileUrl[$uniqueKey]);
 
-                                print '<div class="' . ($dashboardGraph['moreCSS'] ?? '') . '" id="graph-' . $dashboardGraph['name'] . '">';
+                                print '<div class="' . ($dashboardGraph['moreCSS'] ?? '') . '" id="graph-' . ($dashboardGraph['name'] ?? '') . '">';
                                 $downloadCSV  = '<div class="flex flex-row justify-end">';
                                 $downloadCSV .= '<input type="hidden" name="graph" value="' . dol_escape_htmltag(json_encode($dashboardGraph, JSON_UNESCAPED_UNICODE)) . '">';
                                 $downloadCSV .= '<button class="wpeo-button no-load button-grey" id="export-csv" data-graph-name="' . dol_sanitizeFileName(dol_strtolower($dashboardGraph['title'])) . '">';
@@ -330,7 +343,7 @@ class SaturneDashboard
 
                                 $dashboardGraph['morehtmlright'] = ($dashboardGraph['morehtmlright'] ?? '') . $downloadCSV;
 
-                                print load_fiche_titre($dashboardGraph['title'], $dashboardGraph['morehtmlright'], $dashboardGraph['picto']);
+                                print load_fiche_titre($dashboardGraph['title'], $dashboardGraph['morehtmlright'], $dashboardGraph['picto'] ?? '');
 
                                 print $graph->show();
 
@@ -356,23 +369,29 @@ class SaturneDashboard
 
                         print load_fiche_titre($dashboardList['title'], $dashboardList['morehtmlright'], $dashboardList['picto']);
 
+                        // La colonne Ref porte le libellé de la ligne : elle n'est pas tronquée, les colonnes de valeurs le sont
+                        $refCellCss  = $conf->browser->layout == 'classic' ? 'nowraponall ' : '';
+                        $dataCellCss = $conf->browser->layout == 'classic' ? 'nowraponall tdoverflowmax200 ' : '';
+
+                        // Conteneur scrollable : sur mobile le tableau est plus large que l'écran et débordait de la page entière
+                        print '<div class="div-table-responsive-no-min">';
                         print '<table class="noborder centpercent">';
 
                         print '<tr class="liste_titre">';
                         foreach ($dashboardList['labels'] as $key => $dashboardListLabel) {
-                            print '<td class="' . ($conf->browser->layout == 'classic' ? 'nowraponall tdoverflowmax200 ' : '') . (($key != 'Ref') ? 'center' : '') . '">' . $langs->transnoentities($dashboardListLabel) . '</td>';
+                            print '<td class="' . (($key != 'Ref') ? $dataCellCss . 'center' : $refCellCss) . '">' . $langs->transnoentities($dashboardListLabel) . '</td>';
                         }
                         print '</tr>';
 
                         foreach ($dashboardList['data'] as $dashboardListDatasets) {
                             print '<tr class="oddeven">';
                             foreach ($dashboardListDatasets as $key => $dashboardGraphDataset) {
-                                print '<td class="' . ($conf->browser->layout == 'classic' ? 'nowraponall tdoverflowmax200 ' : '') . (($key != 'Ref') ? 'center ' : '') . ($dashboardGraphDataset['morecss'] ?? '') . '"' . ($dashboardGraphDataset['moreAttr'] ?? '') . '>' . $dashboardGraphDataset['value'] . '</td>';
+                                print '<td class="' . (($key != 'Ref') ? $dataCellCss . 'center ' : $refCellCss) . ($dashboardGraphDataset['morecss'] ?? '') . '"' . ($dashboardGraphDataset['moreAttr'] ?? '') . '>' . $dashboardGraphDataset['value'] . '</td>';
                             }
                             print '</tr>';
                         }
 
-                        print '</table></div>';
+                        print '</table></div></div>';
                     }
                 }
             }
@@ -380,6 +399,26 @@ class SaturneDashboard
 
         print '</div>';
         print '</form>';
+    }
+
+    /**
+     * Get the hidden input holding the options the dashboard JS needs to enhance a graph
+     *
+     * Dashboard graphs are drawn on a canvas by DolGraph, which handles neither a link per bar nor a second Y
+     * axis, so both are declared here and applied by the dashboard JS.
+     *
+     * @param  array  $options Graph options: 'links' holds the URL each bar opens, in the order of the data rows,
+     *                         'datasetLinks' the same thing per dataset when the series do not share a filter,
+     *                         and 'secondAxisDataset' the index of the dataset to move to its own Y axis
+     * @return string          Hidden input to append to the graph title, empty when no bar links anywhere
+     */
+    public static function getGraphOptionsInput(array $options): string
+    {
+        if (empty($options['links']) && empty($options['datasetLinks'])) {
+            return '';
+        }
+
+        return '<input type="hidden" class="dashboard-graph-options" value="' . dol_escape_htmltag(json_encode($options, JSON_UNESCAPED_UNICODE)) . '">';
     }
 
     /**

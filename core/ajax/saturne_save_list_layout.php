@@ -43,6 +43,7 @@ if (empty($user->id)) {
     exit;
 }
 
+
 $action = GETPOST('action', 'aZ09');
 $listId = GETPOST('list_id', 'alphanohtml');
 if (empty($listId)) {

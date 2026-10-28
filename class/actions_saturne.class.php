@@ -132,64 +132,43 @@ class ActionsSaturne
      */
     public function addHtmlHeader(array $parameters): int
     {
+        $saturne_js_path = dol_buildpath('/custom/saturne/js/saturne.min.js', 0);
+        $saturne_js_mtime = file_exists($saturne_js_path) ? filemtime($saturne_js_path) : 1;
+        $saturne_js_url = DOL_URL_ROOT . '/custom/saturne/js/saturne.min.js?v=' . $saturne_js_mtime;
+
         if (strpos($parameters['context'], 'usercard') !== false) {
             $resourcesRequired = [
                 'css'       => '/custom/saturne/css/saturne.min.css',
-                'js'        => '/custom/saturne/js/saturne.min.js',
+                'js'        => $saturne_js_url,
                 'signature' => '/custom/saturne/js/includes/signature-pad.min.js'
             ];
 
             $out  = '<!-- Includes CSS added by module saturne -->';
             $out .= '<link rel="stylesheet" type="text/css" href="' . dol_buildpath($resourcesRequired['css'], 1) . '">';
             $out .= '<!-- Includes JS added by module saturne -->';
-            $out .= '<script src="' . dol_buildpath($resourcesRequired['js'], 1) . '"></script>';
+            $out .= '<script src="' . $resourcesRequired['js'] . '"></script>';
             $out .= '<script src="' . dol_buildpath($resourcesRequired['signature'], 1) . '"></script>';
 
             $this->resprints = $out;
         } elseif (strpos($parameters['context'], 'emailtemplates')) {
             $resourcesRequired = [
-                'js'        => '/custom/saturne/js/saturne.min.js',
+                'js'        => $saturne_js_url,
             ];
 
             $out  = '<!-- Includes JS added by module saturne -->';
-            $out .= '<script src="' . dol_buildpath($resourcesRequired['js'], 1) . '"></script>';
+            $out .= '<script src="' . $resourcesRequired['js'] . '"></script>';
+
             $this->resprints = $out;
         }
 
-        return 0;
-    }
-
-    /**
-     *  Overloading the llxHeader function : replacing the parent's function with the one below
-     *
-     * @param  array $parameters Hook metadatas (context, etc...)
-     * @return int               0 < on error, 0 on success, 1 to replace standard code
-     * @throws Exception
-     */
-    public function llxHeader(array $parameters): int
-    {
-        if (strpos($parameters['context'], 'index') !== false) {
-            require_once __DIR__ . '/saturneredirection.class.php';
-
-            $saturneRedirection = new SaturneRedirection($this->db);
-
-            $originalUrl = GETPOST('original_url', 'alpha');
-
-            $redirections = $saturneRedirection->fetchAll();
-            if (is_array($redirections) && !empty($redirections)) {
-                foreach ($redirections as $redirection) {
-                    //check redirection from url, if not beginning with a / add it
-                    $urlToCheck = $redirection->from_url;
-                    if (strpos($redirection->from_url, '/') !== 0) {
-                            $urlToCheck = '/' . $redirection->from_url;
-                    }
-                    if ($urlToCheck == '/' . $originalUrl) {
-                        header('Location: ' . $redirection->to_url);
-                        exit;
-                    }
-                }
-            }
-        }
+        $out = isset($this->resprints) ? $this->resprints : '';
+        $out .= "\n" . '<!-- Config Saturne injected by addHtmlHeader -->';
+        $out .= "\n" . '<script>';
+        $out .= "\n" . 'window.saturne = window.saturne || {};';
+        $out .= "\n" . 'window.saturne.config = window.saturne.config || {};';
+        $out .= "\n" . 'window.saturne.config.enableMaxlengthCounter = ' . getDolGlobalInt('SATURNE_ENABLE_MAXLENGTH_COUNTER', 0) . ';';
+        $out .= "\n" . '</script>' . "\n";
+        $this->resprints = $out;
 
         return 0;
     }
@@ -207,60 +186,75 @@ class ActionsSaturne
 
 
         if (strpos($parameters['context'], 'usercard') !== false) {
-            $id = GETPOST('id');
+            $id = GETPOSTINT('id');
+
+            // The user being created has no id yet
+            if ($id <= 0) {
+                return 0;
+            }
 
             require_once __DIR__ . '/saturnesignature.class.php';
 
             $signatory = new SaturneSignature($this->db);
 
-            $result = $signatory->fetch(0, '', ' AND fk_object = ' . $id . ' AND status > 0 AND object_type = "user" AND role = "UserSignature"');
-            if ($result <= 0) {
+            // Read in every entity : the signature belongs to the user, not to the entity he works in
+            $result = $signatory->fetchUserSignatory($id);
+            if ($result < 0) {
                 return 0;
             }
 
-            $pictoPath = dol_buildpath('/saturne/img/saturne_color.png', 1);
+            $hasSignature = $result > 0 && SaturneSignature::isValidSignatureData((string) $signatory->signature);
 
-            $out  = '<div class="signature-container" data-public-interface="false">';
-            $out .= '<div class="signature-user">';
-            $out .= img_picto('', $pictoPath, '', 1, 0, 0, '', 'pictoModule');
-            if (dol_strlen($signatory->signature) > 0) {
-                $out .= '<div class="signature-image"><img src="' . $signatory->signature . '" width="200px" height="100px" style="border: #0b419b solid 2px" alt=""></div>';
+            $out = '<div class="user-signature">';
+            if ($hasSignature) {
+                $out .= '<div class="user-signature__preview">';
+                $out .= '<img src="' . dol_escape_htmltag($signatory->signature) . '" alt="' . dol_escape_htmltag($langs->trans('ElectronicSignature')) . '">';
+                $out .= '</div>';
+            } else {
+                $out .= '<div class="user-signature__preview user-signature__preview--empty">';
+                $out .= '<i class="fas fa-signature"></i>';
+                $out .= '<span>' . dol_escape_htmltag($langs->trans('UserSignatureNone')) . '</span>';
+                $out .= '</div>';
             }
+            $out .= '<div class="user-signature__side">';
+            if ($hasSignature && !empty($signatory->signature_date)) {
+                $out .= '<span class="user-signature__date opacitymedium">' . dol_escape_htmltag($langs->trans('UserSignatureDate', dol_print_date($signatory->signature_date, 'dayhour', 'tzuserrel'))) . '</span>';
+            }
+            // A signature is personal : only its owner can draw it, even an administrator cannot sign for him
             if ($user->id == $id) {
-                $out .= '<div class="wpeo-button button-blue button-square-50 modal-open signature-button" value="' . $signatory->id . '">';
-                $out .= '<input type="hidden" class="modal-options" data-modal-to-open="modal-signature' . $signatory->id . '" data-from-test="' . $signatory->id . '">';
-                $out .= img_picto('', 'signature', 'class="paddingright"') . $langs->trans("Sign");
-                $out .= '</div>'; ?>
+                $out .= '<div class="wpeo-button button-blue button-size-small modal-open user-signature__button">';
+                $out .= '<input type="hidden" class="modal-options" data-modal-to-open="modal-signature-user">';
+                $out .= '<i class="fas fa-pen"></i><span>' . dol_escape_htmltag($langs->trans($hasSignature ? 'UserSignatureChange' : 'Sign')) . '</span>';
+                $out .= '</div>';
+            }
+            $out .= '</div>';
+            $out .= '</div>';
 
+            if ($user->id == $id) { ?>
                 <div class="modal-signature">
                     <input type="hidden" name="token" value="<?php echo newToken(); ?>">
-                    <div class="wpeo-modal modal-signature" id="modal-signature<?php echo $signatory->id; ?>">
+                    <div class="wpeo-modal modal-signature user-signature-modal" id="modal-signature-user">
                         <div class="modal-container wpeo-modal-event">
-                            <!-- Modal-Header-->
                             <div class="modal-header">
-                                <h2 class="modal-title"><?php echo $langs->trans('Signature'); ?></h2>
+                                <h2 class="modal-title"><?php echo $langs->trans('ElectronicSignature'); ?></h2>
                                 <div class="modal-close"><i class="fas fa-times"></i></div>
                             </div>
-                            <!-- Modal-ADD Signature Content-->
-                            <div class="modal-content" id="#modalContent">
-                                <canvas class="canvas-container canvas-signature" style="height: 95%; width: 98%; border: #0b419b solid 2px"></canvas>
+                            <div class="modal-content">
+                                <canvas class="canvas-container canvas-signature"></canvas>
                             </div>
-                            <!-- Modal-Footer-->
                             <div class="modal-footer">
-                                <div class="signature-erase wpeo-button button-square-50 button-grey"><span><i class="fas fa-eraser"></i></span></div>
-                                <div class="signature-validate wpeo-button button-square-50 button-disable"><span><i class="fas fa-file-signature"></i></span></div>
+                                <div class="signature-erase wpeo-button button-grey"><i class="fas fa-eraser"></i> <?php echo $langs->trans('Erase'); ?></div>
+                                <div class="signature-validate wpeo-button button-disable"><i class="fas fa-check"></i> <?php echo $langs->trans('Validate'); ?></div>
                             </div>
                         </div>
                     </div>
                 </div>
-                    <?php
-            }
-            $out .= '</div></div>'; ?>
-
+                <?php
+            } ?>
             <script>
                 $('.user_extras_electronic_signature').html(<?php echo json_encode($out); ?>);
             </script>
-        <?php
+            <?php
         } elseif (
             strpos($_SERVER['PHP_SELF'], '/document.php') !== false ||
                     strpos($_SERVER['PHP_SELF'], '/saturne_document.php') !== false
@@ -374,7 +368,6 @@ class ActionsSaturne
                         });
                 </script>
             ";
-
         } elseif (strpos($parameters['context'], 'emailtemplates')) {
             ?>
             <script>
@@ -401,33 +394,44 @@ class ActionsSaturne
     {
         global $user;
 
+        if (strpos($parameters['context'], 'usercard') !== false) {
+            global $langs;
+
+            // The extrafield labels and the widget printed in the footer live in the signature domain
+            $langs->load('signature@saturne');
+        }
+
         if (strpos($parameters['context'], 'usercard') !== false && $action == 'add_signature') {
-            $id = GETPOST('id');
+            global $langs;
+
+            $id = GETPOSTINT('id');
 
             require_once __DIR__ . '/saturnesignature.class.php';
 
             $signatory = new SaturneSignature($this->db);
             $data      = json_decode(file_get_contents('php://input'), true);
+            $signature = (is_array($data) && is_string($data['signature'] ?? null)) ? $data['signature'] : '';
 
-            $result = $signatory->fetch(0, '', ' AND fk_object = ' . $id . ' AND status > 0 AND object_type = "user" AND role = "UserSignature"');
-            if ($result <= 0) {
-                $signatory->setSignatory($id, $user->element, 'user', [$id], 'UserSignature');
-            }
-
-            $signatory->signature      = $data['signature'];
-            $signatory->signature_date = dol_now();
-
-            $result = $signatory->update($user, true);
-            if ($result > 0) {
-                // Creation signature OK
-                $signatory->setSigned($user, false);
+            // Without this check, any user could overwrite the signature of another one by changing the id
+            if ($id <= 0 || $user->id != $id) {
+                setEventMessages($langs->trans('ErrorUserSignatureNotOwner'), [], 'errors');
+                http_response_code(403);
                 exit;
-            } elseif (!empty($signatory->errors)) {
-                // Creation signature KO
-                setEventMessages('', $signatory->errors, 'errors');
-            } else {
-                setEventMessages($signatory->error, [], 'errors');
             }
+            if (!SaturneSignature::isValidSignatureData($signature)) {
+                setEventMessages($langs->trans('ErrorUserSignatureInvalid'), [], 'errors');
+                http_response_code(400);
+                exit;
+            }
+
+            if ($signatory->saveUserSignature($user, $id, $signature) > 0) {
+                setEventMessages($langs->trans('UserSignatureSaved'), []);
+                exit;
+            }
+
+            setEventMessages($signatory->error ?: $langs->trans('Error'), $signatory->errors, 'errors');
+            http_response_code(500);
+            exit;
         } elseif (strpos($parameters['context'], 'categorycard') !== false) {
             global $langs;
 
@@ -513,5 +517,227 @@ class ActionsSaturne
         }
 
         return 0; // or return 1 to replace standard code
+    }
+
+    /**
+     * Opportunity statuses of the dictionary, read once per request
+     *
+     * The list of projects reads them for its fields, then for every row of the fk_opp_status column: the dictionary
+     * does not depend on the row. Private on purpose, so that the hook manager never takes it for a hook.
+     *
+     * @return CLeadStatus[] Statuses, empty when the dictionary cannot be read
+     */
+    private function getOppStatuses(): array
+    {
+        static $oppStatuses = null;
+
+        if ($oppStatuses === null) {
+            require_once DOL_DOCUMENT_ROOT . '/core/class/cleadstatus.class.php';
+            $leadStatus = new CLeadStatus($this->db);
+            $leadStatus->fetchAll();
+            $oppStatuses = is_array($leadStatus->records) ? $leadStatus->records : [];
+        }
+
+        return $oppStatuses;
+    }
+
+    /**
+     * Add or modify fields definition for the list
+     *
+     * @param  array $parameters Hook metadata (context, etc...)
+     * @param  object &$object    The object to process
+     * @param  string &$action    Current action
+     * @param  HookManager $hookmanager
+     * @return int               0 < on error, 0 on success, 1 to replace standard code
+     */
+    public function saturneListAddCustomFields(array $parameters, &$object, &$action, $hookmanager): int
+    {
+        global $db, $langs;
+
+        if (isset($object->element) && $object->element === 'project') {
+            // Hide the custom "Opportunité" extrafield
+            if (isset($object->fields['opportunity_details'])) {
+                $object->fields['opportunity_details']['visible'] = 0;
+            }
+
+            // Unhide standard opportunity fields if they are present
+            if (isset($object->fields['fk_opp_status'])) {
+                $object->fields['fk_opp_status']['visible'] = 1;
+                $object->fields['fk_opp_status']['searchall'] = 1;
+                $object->fields['fk_opp_status']['csslist'] = 'center';
+
+                // Add arrayofkeyval to fk_opp_status so it natively renders as an inline select in Saturne
+
+                $arrayofkeyval = [];
+                $langs->load('projects');
+
+                $arrayofkeyval[''] = '';
+
+                foreach ($this->getOppStatuses() as $line) {
+                    $transLabel = $langs->trans("OppStatus" . $line->code);
+                    $label = ($transLabel !== "OppStatus" . $line->code) ? $transLabel : $line->label;
+                    $arrayofkeyval[$line->id] = $label;
+                }
+                $object->fields['fk_opp_status']['arrayofkeyval'] = $arrayofkeyval;
+            }
+            if (isset($object->fields['opp_percent'])) {
+                $object->fields['opp_percent']['visible'] = 1;
+                $object->fields['opp_percent']['searchall'] = 1;
+                $object->fields['opp_percent']['csslist'] = 'center';
+            }
+            if (isset($object->fields['opp_amount'])) {
+                $object->fields['opp_amount']['visible'] = 1;
+                $object->fields['opp_amount']['searchall'] = 1;
+                $object->fields['opp_amount']['csslist'] = 'center';
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Custom print for field value in list
+     *
+     * @param  array $parameters Hook metadata (context, etc...)
+     * @param  object &$object    The object to process
+     * @param  string &$action    Current action
+     * @param  HookManager $hookmanager
+     * @return int               0 < on error, 0 on success, 1 to replace standard code
+     */
+    public function saturnePrintFieldListLoopObject(array $parameters, &$object, &$action, $hookmanager): int
+    {
+        global $langs, $conf, $db;
+
+        if (isset($object->element) && $object->element === 'project') {
+            $key = $parameters['key'];
+            $val = $parameters['val'];
+
+            if ($key === 'fk_opp_status' || $key === 'p.fk_opp_status' || $key === 'project.fk_opp_status') {
+                $ceElement = $object->element;
+                $ceTable   = $object->table_element;
+
+
+                $html = '';
+                static $saturneOppJsAdded = false;
+                if (!$saturneOppJsAdded) {
+                    $saturneOppJsAdded = true;
+                    $mapping = [];
+                    foreach ($this->getOppStatuses() as $line) {
+                        $mapping[$line->id] = (float) $line->percent;
+                    }
+                    $html .= '<script>
+                    window.saturneOppStatusMapping = ' . json_encode($mapping) . ';
+                    $(document).off("change.oppSync").on("change.oppSync", ".saturne-inline-select[data-field=\'fk_opp_status\']", function() {
+                        var statusId = $(this).val();
+                        if (window.saturneOppStatusMapping[statusId] !== undefined) {
+                            var newPct = window.saturneOppStatusMapping[statusId];
+                            var $tr = $(this).closest("tr");
+                            var $pctField = $tr.find(".contenteditable[data-field=\'opp_percent\']");
+                            if ($pctField.length) {
+                                $pctField.text(newPct).data("changed", true).trigger("blur");
+                                
+                                var $badge = $pctField.closest(".saturne-inline-percent");
+                                if (newPct >= 50) {
+                                    $badge.removeClass("badge-status3").addClass("badge-status4");
+                                } else {
+                                    $badge.removeClass("badge-status4").addClass("badge-status3");
+                                }
+                            }
+                        }
+                    });
+                    </script>';
+                }
+
+                // Render the inline select for the row with ONLY the real statuses
+                $html .= '<select class="saturne-inline-select" data-field="fk_opp_status" data-element="' . $ceElement . '" data-id="' . $object->id . '">';
+                $html .= '<option value="0">&nbsp;</option>';
+                foreach ($this->getOppStatuses() as $line) {
+                    $selected = ($object->fk_opp_status == $line->id) ? ' selected' : '';
+                    $transLabel = $langs->trans("OppStatus" . $line->code);
+                    $label = ($transLabel !== "OppStatus" . $line->code) ? $transLabel : $line->label;
+                    $html .= '<option value="' . $line->id . '"' . $selected . '>' . dol_escape_htmltag($label) . '</option>';
+                }
+                $html .= '</select>';
+
+                $this->results[$key] = $html;
+                return 1;
+            } elseif ($key === 'opp_percent' || $key === 'p.opp_percent' || $key === 'project.opp_percent') {
+                $ceElement = $object->element;
+                $ceTable   = $object->table_element;
+                $ceLabel   = !empty($val['label']) ? dol_escape_htmltag($val['label']) : 'Pourcentage';
+
+                $percent = (float) $object->opp_percent;
+                if ($percent > 100) {
+                    $percent = 100;
+                }
+
+                if ($percent >= 50) {
+                    $badgeClass = 'badge-status4'; // Green
+                } else {
+                    $badgeClass = 'badge-status3'; // Orange
+                }
+
+                // Colored badge container for inline editing
+                $html = '<div class="saturne-inline-percent badge ' . $badgeClass . '" style="display: inline-flex; align-items: center; justify-content: center; padding: 3px 6px;">';
+                $html .= '<div class="contenteditable" contenteditable="true" role="textbox" aria-label="' . $ceLabel . '" data-field="opp_percent" data-id="' . $object->id . '" data-element="' . $ceElement . '" data-table="' . $ceTable . '" data-type="number" data-success="Enregistré" data-error="Maximum 100%" data-validate-pattern="^(100([.,]0+)?|\d{1,2}([.,]\d+)?)$" ondblclick="event.stopPropagation();" onblur="var v=parseFloat(this.innerText.replace(\',\',\'.\')); if(v>100) this.innerText=\'100\';">';
+                $html .= price($percent, 0, '', 0, -1, -1, '');
+                $html .= '</div><span class="saturne-inline-percent-suffix" style="margin-left: 2px;">%</span>';
+                $html .= '</div>';
+
+                $this->results[$key] = $html;
+                return 1;
+            } elseif ($key === 'opp_amount' || $key === 'p.opp_amount' || $key === 'project.opp_amount') {
+                $ceElement = $object->element;
+                $ceTable   = $object->table_element;
+                $ceLabel   = !empty($val['label']) ? dol_escape_htmltag($val['label']) : 'Montant';
+
+                $currencySymbol = $langs->getCurrencySymbol($conf->currency);
+
+                $html = '<div class="saturne-inline-amount" style="display: flex; align-items: center; justify-content: center; gap: 4px;">';
+                $html .= '<div class="contenteditable" contenteditable="true" role="textbox" aria-label="' . $ceLabel . '" data-field="opp_amount" data-id="' . $object->id . '" data-element="' . $ceElement . '" data-table="' . $ceTable . '" data-type="number" data-success="Enregistré" data-error="Format invalide" ondblclick="event.stopPropagation();">';
+                $html .= price($object->opp_amount, 0, '', 0, -1, -1, '');
+                $html .= '</div>';
+                $html .= '<span class="saturne-inline-amount-suffix">' . $currencySymbol . '</span>';
+                $html .= '</div>';
+
+                $this->results[$key] = $html;
+                return 1;
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Custom print for field search input in list
+     *
+     * @param  array $parameters Hook metadata (context, etc...)
+     * @param  object &$object    The object to process
+     * @param  string &$action    Current action
+     * @param  HookManager $hookmanager
+     * @return int               0 < on error, 0 on success, 1 to replace standard code
+     */
+    public function saturnePrintFieldListSearch(array $parameters, &$object, &$action, $hookmanager): int
+    {
+        if (isset($object->element) && $object->element === 'project') {
+            $key = $parameters['key'];
+            $search = $parameters['search'];
+
+            if ($key === 'opp_percent' || $key === 'p.opp_percent' || $key === 'project.opp_percent') {
+                $searchVal = GETPOST('search_opp_percent', 'alpha');
+                if (empty($searchVal) && isset($search['opp_percent'])) {
+                    $searchVal = $search['opp_percent'];
+                }
+                $this->results[$key] = '<input type="text" class="flat maxwidth50" name="search_opp_percent" value="' . dol_escape_htmltag($searchVal) . '">';
+                return 1;
+            } elseif ($key === 'opp_amount' || $key === 'p.opp_amount' || $key === 'project.opp_amount') {
+                $searchVal = GETPOST('search_opp_amount', 'alpha');
+                if (empty($searchVal) && isset($search['opp_amount'])) {
+                    $searchVal = $search['opp_amount'];
+                }
+                $this->results[$key] = '<input type="text" class="flat maxwidth50" name="search_opp_amount" value="' . dol_escape_htmltag($searchVal) . '">';
+                return 1;
+            }
+        }
+
+        return 0;
     }
 }

@@ -65,7 +65,8 @@ $helpUrl = 'FR:Module_' . $moduleName;
 
 saturne_header(0, '', $title . ' ' . $modModule->version, $helpUrl);
 
-print load_fiche_titre($title . ' ' . $modModule->version, $morehtmlright ?? '', $moduleNameLowerCase . '_color.png@' . $moduleNameLowerCase);
+// The nogreyscale class keeps the module's colored logo visible: Dolibarr v23 applies grayscale(90%) to fiche-title pictos (see style.scss override).
+print load_fiche_titre($title . ' ' . $modModule->version, $morehtmlright ?? '', $moduleNameLowerCase . '_color.png@' . $moduleNameLowerCase, 0, '', 'nogreyscale');
 
 $moduleJustUpdated   = strtoupper($moduleName) . '_JUST_UPDATED';
 $moduleVersion       = strtoupper($moduleName) . '_VERSION';

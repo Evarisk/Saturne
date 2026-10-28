@@ -6,6 +6,9 @@ on:
         branches:
             - main
             - develop
+            # Les branches de maintenance, 23.0 aujourd'hui, 24.0 et les suivantes demain :
+            # un motif evite d'avoir a revenir ici a chaque nouvelle ligne
+            - '[0-9]+.[0-9]+'
         paths:
             - '**/*.php'
             - 'js/modules/*.js'
@@ -17,21 +20,16 @@ on:
             - 'tests/**'
             - 'composer.json'
             - 'composer.lock'
+    # Pas de filtre paths ici, contrairement a push, et c'est volontaire : une
+    # verification requise qui ne se declenche pas laisse la pull request en
+    # « Expected - Waiting for status to be reported », indefiniment. Filtrer sur les
+    # chemins reviendrait donc a bloquer toute pull request sans PHP, une note de
+    # release par exemple. Sur push le job n'est qu'informatif, le filtre y garde son sens.
     pull_request:
         branches:
             - main
             - develop
-        paths:
-            - '**/*.php'
-            - 'js/modules/*.js'
-            - '.phpcs.xml'
-            - '.jshintrc'
-            - 'phpstan.neon'
-            - 'phpstan.baseline.neon'
-            - '.phan/config.php'
-            - 'tests/**'
-            - 'composer.json'
-            - 'composer.lock'
+            - '[0-9]+.[0-9]+'
     workflow_dispatch:
 
 concurrency:
@@ -40,7 +38,11 @@ concurrency:
 
 jobs:
     quality:
-        name: PHP ${{ matrix.php }} — ${{ matrix.step }}
+        # Le nom du job est le nom du contexte cite par les verifications requises du
+        # ruleset. Interpoler la version de PHP le rendrait mouvant : passer la matrice
+        # en 8.2 renommerait les cinq contextes, ceux exiges par le ruleset ne seraient
+        # plus jamais publies et toute pull request resterait sur « Expected ».
+        name: ${{ matrix.step }}
         runs-on: ubuntu-latest
 
         strategy:
@@ -65,6 +67,7 @@ jobs:
                   ref: '23.0.0'
                   path: dolibarr-core
                   sparse-checkout: |
+                      htdocs/api/class
                       htdocs/categories/class
                       htdocs/comm/action/class
                       htdocs/comm/propal/class
@@ -80,6 +83,7 @@ jobs:
                       htdocs/core/actions_sendmails.inc.php
                       htdocs/core/actions_setnotes.inc.php
                       htdocs/core/class
+                      htdocs/core/db
                       htdocs/core/lib
                       htdocs/core/modules
                       htdocs/core/tpl
@@ -88,7 +92,12 @@ jobs:
                       htdocs/expedition/class
                       htdocs/fichinter/class
                       htdocs/fourn/class
+                      htdocs/includes/odtphp
                       htdocs/includes/parsedown
+                      htdocs/includes/restler/framework
+                      htdocs/includes/tecnickcom/tcpdf/tcpdf_barcodes_1d.php
+                      htdocs/includes/tecnickcom/tcpdf/tcpdf_barcodes_2d.php
+                      htdocs/main.inc.php
                       htdocs/mrp/class
                       htdocs/product/class
                       htdocs/product/inventory/class
@@ -112,11 +121,11 @@ jobs:
                   tools: composer:v2
                   coverage: none
 
-            - name: Set up Node 18
+            - name: Set up Node 22
               if: matrix.step == 'jshint'
               uses: actions/setup-node@v4
               with:
-                  node-version: '18'
+                  node-version: '22'
                   cache: npm
                   cache-dependency-path: htdocs/custom/saturne/package-lock.json
 
@@ -134,9 +143,14 @@ jobs:
               run: composer install --no-interaction --no-progress --prefer-dist
 
             # ── PHPCS ────────────────────────────────────────────────────────────
+            # Constrained to the 4.0 patch line: PHPCS is not in composer.lock,
+            # so an unpinned install would let a new PHPCS minor add sniffs and
+            # redden the CI with no code change. Patch releases stay allowed so
+            # a security advisory does not block the install (composer refuses
+            # to resolve an exact version once one is published against it).
             - name: Install PHPCS
               if: matrix.step == 'phpcs'
-              run: composer global require squizlabs/php_codesniffer --no-interaction
+              run: composer global require "squizlabs/php_codesniffer:~4.0.4" --no-interaction
 
             - name: Run PHPCS
               if: matrix.step == 'phpcs'

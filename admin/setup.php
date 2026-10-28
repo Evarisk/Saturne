@@ -91,6 +91,21 @@ if ($action == 'update_settings_config') {
     }
 }
 
+if ($action == 'set_ticket_mail_models') {
+    // Email template (Modèle d'email) used to build each ticket notification email. Empty = keep Dolibarr default content.
+    dolibarr_set_const($db, 'SATURNE_TICKET_CREATE_MAIL_MODEL_ADMIN', GETPOST('ticket_mail_model_admin', 'restricthtml'), 'chaine', 0, '', $conf->entity);
+    dolibarr_set_const($db, 'SATURNE_TICKET_CREATE_MAIL_MODEL_CUSTOMER', GETPOST('ticket_mail_model_customer', 'restricthtml'), 'chaine', 0, '', $conf->entity);
+    dolibarr_set_const($db, 'SATURNE_TICKET_CREATE_MAIL_MODEL_ASSIGNEE', GETPOST('ticket_mail_model_assignee', 'restricthtml'), 'chaine', 0, '', $conf->entity);
+    dolibarr_set_const($db, 'SATURNE_TICKET_CLOSE_MAIL_MODEL_ADMIN', GETPOST('ticket_mail_model_close_admin', 'restricthtml'), 'chaine', 0, '', $conf->entity);
+    dolibarr_set_const($db, 'SATURNE_TICKET_CLOSE_MAIL_MODEL_CUSTOMER', GETPOST('ticket_mail_model_close_customer', 'restricthtml'), 'chaine', 0, '', $conf->entity);
+    dolibarr_set_const($db, 'SATURNE_TICKET_ASSIGNED_MAIL_MODEL_ASSIGNEE', GETPOST('ticket_mail_model_assigned_assignee', 'restricthtml'), 'chaine', 0, '', $conf->entity);
+    dolibarr_set_const($db, 'SATURNE_TICKET_ASSIGNED_MAIL_MODEL_CUSTOMER', GETPOST('ticket_mail_model_assigned_customer', 'restricthtml'), 'chaine', 0, '', $conf->entity);
+
+    setEventMessage($langs->trans('SavedConfig'));
+    header('Location: ' . $_SERVER['PHP_SELF']);
+    exit;
+}
+
 /*
  * View
  */
@@ -213,6 +228,89 @@ print '</td></tr>';
 print '</table>';
 print '</div>';
 print '</form>';
+
+/*
+ * Ticket notification email templates
+ * Dolibarr builds its ticket notification emails in PHP, so their layout cannot be changed from the
+ * interface. Each of them can be replaced here by an "Email template" (Modèle d'email, type "ticket").
+ * Leave a line empty to keep Dolibarr's own content. Templates are managed in
+ * Home > Setup > Emails > Email templates.
+ */
+if (isModEnabled('ticket')) {
+    $langs->load('ticket');
+
+    // Build the list of email templates usable for tickets (type ticket / ticket_send / all).
+    $ticketMailModels = ['' => $langs->transnoentities('TicketCreateMailModelDefault')];
+    $sqlModels  = 'SELECT rowid, label, lang FROM ' . MAIN_DB_PREFIX . 'c_email_templates';
+    $sqlModels .= " WHERE type_template IN ('ticket', 'ticket_send', 'all')";
+    $sqlModels .= ' AND entity IN (' . getEntity('c_email_templates') . ')';
+    $sqlModels .= ' AND active = 1';
+    $sqlModels .= $db->order('position, label', 'ASC, ASC');
+    $resModels = $db->query($sqlModels);
+    if ($resModels) {
+        while ($objModel = $db->fetch_object($resModels)) {
+            if (empty($objModel->label)) {
+                continue;
+            }
+            $ticketMailModels[$objModel->label] = $objModel->label . (!empty($objModel->lang) ? ' (' . $objModel->lang . ')' : '');
+        }
+    }
+
+    // Each row: language key of the label, language key of the description, POST field, config constant.
+    $ticketMailModelSections = [
+        'TicketMailModelCreateSection' => [
+            ['TicketCreateMailModelAdmin', 'TicketCreateMailModelAdminDescription', 'ticket_mail_model_admin', 'SATURNE_TICKET_CREATE_MAIL_MODEL_ADMIN'],
+            ['TicketCreateMailModelCustomer', 'TicketCreateMailModelCustomerDescription', 'ticket_mail_model_customer', 'SATURNE_TICKET_CREATE_MAIL_MODEL_CUSTOMER'],
+            ['TicketCreateMailModelAssignee', 'TicketCreateMailModelAssigneeDescription', 'ticket_mail_model_assignee', 'SATURNE_TICKET_CREATE_MAIL_MODEL_ASSIGNEE'],
+        ],
+        'TicketMailModelCloseSection' => [
+            ['TicketCloseMailModelAdmin', 'TicketCloseMailModelAdminDescription', 'ticket_mail_model_close_admin', 'SATURNE_TICKET_CLOSE_MAIL_MODEL_ADMIN'],
+            ['TicketCloseMailModelCustomer', 'TicketCloseMailModelCustomerDescription', 'ticket_mail_model_close_customer', 'SATURNE_TICKET_CLOSE_MAIL_MODEL_CUSTOMER'],
+        ],
+        'TicketMailModelAssignedSection' => [
+            ['TicketAssignedMailModelAssignee', 'TicketAssignedMailModelAssigneeDescription', 'ticket_mail_model_assigned_assignee', 'SATURNE_TICKET_ASSIGNED_MAIL_MODEL_ASSIGNEE'],
+            ['TicketAssignedMailModelCustomer', 'TicketAssignedMailModelCustomerDescription', 'ticket_mail_model_assigned_customer', 'SATURNE_TICKET_ASSIGNED_MAIL_MODEL_CUSTOMER'],
+        ],
+    ];
+
+    print load_fiche_titre($langs->transnoentities('TicketMailModelTitle'), '', '');
+
+    print '<span class="opacitymedium">' . $langs->transnoentities('TicketMailModelIntro') . '</span><br><br>';
+
+    print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '" name="ticket_mail_models_form">';
+    print '<input type="hidden" name="token" value="' . newToken() . '">';
+    print '<input type="hidden" name="action" value="set_ticket_mail_models">';
+    print '<div class="div-table-responsive-no-min">';
+    print '<table class="noborder centpercent">';
+    print '<tr class="liste_titre">';
+    print '<td>' . $langs->trans('Name') . '</td>';
+    print '<td>' . $langs->trans('Description') . '</td>';
+    print '<td class="center">' . $langs->transnoentities('TicketCreateMailModelColumn') . '</td>';
+    print '</tr>';
+
+    foreach ($ticketMailModelSections as $sectionKey => $sectionRows) {
+        print '<tr class="liste_titre"><td colspan="3">' . $langs->transnoentities($sectionKey) . '</td></tr>';
+
+        foreach ($sectionRows as $row) {
+            list($labelKey, $descriptionKey, $fieldName, $constName) = $row;
+
+            print '<tr class="oddeven"><td>' . $langs->transnoentities($labelKey) . '</td>';
+            print '<td>' . $langs->transnoentities($descriptionKey) . '</td>';
+            print '<td class="center">' . $form::selectarray($fieldName, $ticketMailModels, getDolGlobalString($constName)) . '</td>';
+            print '</tr>';
+        }
+    }
+
+    // How templates are written, and the substitution variables they accept
+    print '<tr class="oddeven"><td colspan="3">';
+    print $form->textwithpicto($langs->transnoentities('TicketCreateMailModelVariables'), $langs->transnoentities('TicketCreateMailModelVariablesHelp'));
+    print '</td></tr>';
+
+    print '</table>';
+    print '</div>';
+    print '<div class="center"><input type="submit" class="button" value="' . $langs->trans('Save') . '"></div>';
+    print '</form>';
+}
 
 print load_fiche_titre($langs->trans('Configs', $langs->transnoentities('MediasMin')), '', '');
 

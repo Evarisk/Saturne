@@ -51,8 +51,64 @@ window.saturne.photoEditor._startCX      = 0;
 window.saturne.photoEditor._startCY      = 0;
 window.saturne.photoEditor._seqCounter   = 1;
 window.saturne.photoEditor._onSave       = null;
+window.saturne.photoEditor._favorite     = null;
+window.saturne.photoEditor._onSaveAll    = null;
+window.saturne.photoEditor._onDelete     = null;
+window.saturne.photoEditor._onAnalyse    = null;
 window.saturne.photoEditor._urls         = [];
 window.saturne.photoEditor._currentIndex = 0;
+window.saturne.photoEditor._files        = null;
+window.saturne.photoEditor._isBatchUpload = false;
+
+/**
+ * Resolve the DOM element of a given editor tool ('pencil' is wrapped in its own container).
+ *
+ * @param   {string} tool data-mode of the tool
+ * @returns {Element|null}
+ */
+window.saturne.photoEditor._toolElement = function(tool) {
+  if (tool === 'pencil') {
+    return document.getElementById('saturne-pencil-tool-container');
+  }
+  return document.querySelector('.saturne-tool-btn[data-mode="' + tool + '"]');
+};
+
+/**
+ * Read the list of tools the user chose to hide (persisted per browser).
+ *
+ * @returns {Array}
+ */
+window.saturne.photoEditor._getHiddenTools = function() {
+  try {
+    return JSON.parse(window.localStorage.getItem('saturne_photo_editor_hidden_tools') || '[]') || [];
+  } catch (e) {
+    return [];
+  }
+};
+
+/**
+ * Apply the persisted tool visibility: hide disabled tools, sync the settings checkboxes,
+ * and turn drawing off when the pencil tool is disabled.
+ *
+ * @returns {void}
+ */
+window.saturne.photoEditor._applyToolVisibility = function() {
+  var hidden  = window.saturne.photoEditor._getHiddenTools();
+  var toggles = document.querySelectorAll('.saturne-editor-tool-toggle');
+  for (var i = 0; i < toggles.length; i++) {
+    var tool     = toggles[i].getAttribute('data-tool');
+    var isHidden = hidden.indexOf(tool) !== -1;
+    toggles[i].checked = !isHidden;
+    var el = window.saturne.photoEditor._toolElement(tool);
+    if (el) {
+      el.style.display = isHidden ? 'none' : '';
+    }
+  }
+  // Disabling the pencil must actually stop drawing, not only hide the button
+  if (hidden.indexOf('pencil') !== -1 && window.saturne.photoEditor._currentMode === 'pencil') {
+    window.saturne.photoEditor._currentMode = null;
+  }
+};
 
 /**
  * Photo editor init
@@ -90,15 +146,15 @@ window.saturne.photoEditor.event = function() {
 
   var canvas       = window.saturne.photoEditor._canvas;
   var sizeSelect   = document.getElementById('saturne-photo-size-select');
-  var colorPicker  = document.getElementById('saturne-draw-color-picker');
-  var cropDiv      = document.getElementById('saturne-crop-selection');
   var btnCancel    = document.getElementById('saturne-btn-cancel-photo');
   var btnUndo      = document.getElementById('saturne-btn-undo-photo');
   var resDisplay   = document.getElementById('saturne-photo-resolution-display');
 
   // Resolution display
   function updateResDisplay() {
-    if (!resDisplay || !sizeSelect) return;
+    if (!resDisplay || !sizeSelect) {
+      return;
+    }
     var opt   = sizeSelect.options[sizeSelect.selectedIndex];
     var match = opt.text.match(/\(([^)]+)\)/);
     resDisplay.textContent = match ? '(' + match[1] + ')' : '(' + opt.text + ')';
@@ -141,22 +197,34 @@ window.saturne.photoEditor.event = function() {
 
   btnPrev.addEventListener('click', function() {
     var pe = window.saturne.photoEditor;
-    if (pe._urls.length < 2) return;
-    pe._currentIndex = (pe._currentIndex - 1 + pe._urls.length) % pe._urls.length;
-    pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
-      var badge = document.getElementById('saturne-photo-index-badge');
-      if (badge) badge.textContent = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
-    });
+    if (pe._urls.length < 2) {
+      return;
+    }
+    var nextIndex = (pe._currentIndex - 1 + pe._urls.length) % pe._urls.length;
+    if (pe._isBatchUpload) {
+      pe._saveCurrentStateAndGo(nextIndex);
+    } else {
+      pe._currentIndex = nextIndex;
+      pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
+        pe._syncNavControls();
+      });
+    }
   });
 
   btnNext.addEventListener('click', function() {
     var pe = window.saturne.photoEditor;
-    if (pe._urls.length < 2) return;
-    pe._currentIndex = (pe._currentIndex + 1) % pe._urls.length;
-    pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
-      var badge = document.getElementById('saturne-photo-index-badge');
-      if (badge) badge.textContent = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
-    });
+    if (pe._urls.length < 2) {
+      return;
+    }
+    var nextIndex = (pe._currentIndex + 1) % pe._urls.length;
+    if (pe._isBatchUpload) {
+      pe._saveCurrentStateAndGo(nextIndex);
+    } else {
+      pe._currentIndex = nextIndex;
+      pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
+        pe._syncNavControls();
+      });
+    }
   });
 
   // Undo
@@ -184,6 +252,38 @@ window.saturne.photoEditor.event = function() {
   });
 
   // OK — save then close
+  // Star: record which media the object displays, without closing the editor
+  var btnFavorite = document.getElementById('saturne-btn-favorite-photo');
+  if (btnFavorite) {
+    btnFavorite.addEventListener('click', function() {
+      var pe = window.saturne.photoEditor;
+
+      if (!pe._favorite || typeof pe._favorite.onSelect !== 'function') {
+        return;
+      }
+
+      var url = pe._urls[pe._currentIndex] || '';
+
+      pe._favorite.current = pe._fileNameOf(url);
+      pe._favorite.onSelect(url, pe._favorite.current);
+      pe._syncFavoriteButton();
+    });
+  }
+
+  // Wand: send the displayed photo to the AI module, the editor stays open
+  var btnAi = document.getElementById('saturne-btn-ai-photo');
+  if (btnAi) {
+    btnAi.addEventListener('click', function() {
+      var pe = window.saturne.photoEditor;
+
+      if (typeof pe._onAnalyse !== 'function' || !pe._urls.length) {
+        return;
+      }
+
+      pe._onAnalyse(pe._urls[pe._currentIndex], btnAi);
+    });
+  }
+
   var btnOk = document.getElementById('saturne-btn-ok-photo');
   btnOk.addEventListener('click', function() {
     var activeText = document.getElementById('saturne-floating-text-input');
@@ -191,14 +291,117 @@ window.saturne.photoEditor.event = function() {
       activeText.blur();
     }
     var onSave = window.saturne.photoEditor._onSave;
+    // An edited media is written back under its own name, so its bytes have to keep matching
+    // its extension: a PNG source must come back as a PNG
+    var mime = window.saturne.photoEditor._sourceMimeType();
     // Close synchronously first so onSave can safely re-open the editor (e.g. sequential multi-file)
     window.saturne.photoEditor._close();
     if (typeof onSave === 'function') {
       canvas.toBlob(function(blob) {
         onSave(blob);
-      }, 'image/jpeg', 0.85);
+      }, mime, 0.85);
     }
   });
+
+  // Validate all — save the current photo then let the caller process the remaining files
+  var btnOkAll = document.getElementById('saturne-btn-ok-all-photo');
+  if (btnOkAll) {
+    btnOkAll.addEventListener('click', function() {
+      var activeText = document.getElementById('saturne-floating-text-input');
+      if (activeText) {
+        activeText.blur();
+      }
+      var onSaveAll = window.saturne.photoEditor._onSaveAll;
+      var isBatch = window.saturne.photoEditor._isBatchUpload;
+      var files = window.saturne.photoEditor._files;
+      var currentIndex = window.saturne.photoEditor._currentIndex;
+      window.saturne.photoEditor._close();
+      if (typeof onSaveAll === 'function') {
+        canvas.toBlob(function(blob) {
+          if (isBatch) {
+            files[currentIndex] = new File([blob], files[currentIndex].name, { type: 'image/jpeg', lastModified: Date.now() });
+            onSaveAll(files);
+          } else {
+            onSaveAll(blob);
+          }
+        }, 'image/jpeg', 0.85);
+      }
+    });
+  }
+
+  // Delete — remove the currently displayed photo (only when a delete callback was provided),
+  // once confirmed over the editor
+  var btnDelete = document.getElementById('saturne-btn-delete-photo');
+  if (btnDelete) {
+    btnDelete.addEventListener('click', function() {
+      var pe = window.saturne.photoEditor;
+      if (typeof pe._onDelete !== 'function' || !pe._urls.length) {
+        return;
+      }
+      pe._openDeleteConfirm();
+    });
+  }
+
+  var deleteConfirm = document.getElementById('saturne-photo-delete-confirm');
+  if (deleteConfirm) {
+    document.getElementById('saturne-btn-cancel-delete-photo').addEventListener('click', window.saturne.photoEditor._closeDeleteConfirm);
+    document.getElementById('saturne-btn-confirm-delete-photo').addEventListener('click', function() {
+      var pe       = window.saturne.photoEditor;
+      var url      = pe._urls[pe._currentIndex];
+      var onDelete = pe._onDelete;
+      if (typeof onDelete !== 'function') {
+        pe._closeDeleteConfirm();
+        return;
+      }
+      // Close first so the gallery refresh from the callback is not hidden behind the editor
+      pe._close();
+      onDelete(url, pe._currentIndex);
+    });
+    // A click beside the card backs out, as on any modal
+    deleteConfirm.addEventListener('click', function(e) {
+      if (e.target === deleteConfirm) {
+        window.saturne.photoEditor._closeDeleteConfirm();
+      }
+    });
+  }
+
+  // Settings menu (the … vertical button): toggle the panel + per-tool show/hide (persisted)
+  var settingsToggle = document.getElementById('saturne-photo-settings-toggle');
+  var settingsMenu   = document.getElementById('saturne-photo-settings-menu');
+  if (settingsToggle && settingsMenu) {
+    settingsToggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      settingsMenu.style.display = (settingsMenu.style.display === 'none') ? 'block' : 'none';
+    });
+    settingsMenu.addEventListener('click', function(e) {
+      e.stopPropagation();
+    });
+    document.addEventListener('click', function() {
+      settingsMenu.style.display = 'none';
+    });
+  }
+
+  var toolToggles = document.querySelectorAll('.saturne-editor-tool-toggle');
+  toolToggles.forEach(function(toggle) {
+    toggle.addEventListener('change', function() {
+      var pe     = window.saturne.photoEditor;
+      var hidden = pe._getHiddenTools();
+      var tool   = this.getAttribute('data-tool');
+      var idx    = hidden.indexOf(tool);
+      if (this.checked && idx !== -1) {
+        hidden.splice(idx, 1);
+      } else if (!this.checked && idx === -1) {
+        hidden.push(tool);
+      }
+      try {
+        window.localStorage.setItem('saturne_photo_editor_hidden_tools', JSON.stringify(hidden));
+      } catch (e) {
+        // localStorage unavailable — keep the in-session toggle only
+      }
+      pe._applyToolVisibility();
+    });
+  });
+  window.saturne.photoEditor._applyToolVisibility();
 
   // Close on overlay click
   modal.addEventListener('click', function(e) {
@@ -207,12 +410,21 @@ window.saturne.photoEditor.event = function() {
     }
   });
 
-  // Close on Escape
+  // Close on Escape, the delete confirmation first when it is open
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && modal.style.display !== 'none') {
+      if (window.saturne.photoEditor._isDeleteConfirmOpen()) {
+        window.saturne.photoEditor._closeDeleteConfirm();
+        return;
+      }
       window.saturne.photoEditor._close();
     }
   });
+
+  // Follow the visible area while the user zooms, scrolls or turns the device
+  var viewportSource = window.visualViewport || window;
+  viewportSource.addEventListener('resize', window.saturne.photoEditor._fitToViewport);
+  viewportSource.addEventListener('scroll', window.saturne.photoEditor._fitToViewport);
 };
 
 /**
@@ -227,7 +439,7 @@ window.saturne.photoEditor.event = function() {
  * @param   {Function} onSave Callback receiving a Blob on validate
  * @returns {void}
  */
-window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex) {
+window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex, onDelete, onSaveAll, favorite, onAnalyse) {
   var modal = window.saturne.photoEditor._modal;
   if (!modal) {
     return;
@@ -235,30 +447,220 @@ window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex) {
 
   var pe             = window.saturne.photoEditor;
   pe._onSave         = onSave || null;
+  pe._onSaveAll      = onSaveAll || null;
+  pe._onDelete       = onDelete || null;
+  pe._favorite       = favorite || null;
+  pe._onAnalyse      = onAnalyse || null;
   pe._historyStack   = [];
   pe._urls           = Array.isArray(urlOrUrls) ? urlOrUrls : [urlOrUrls];
   pe._currentIndex   = (typeof startIndex === 'number') ? startIndex : 0;
 
-  var btnPrevEl = document.getElementById('saturne-btn-prev-photo');
-  var btnNextEl = document.getElementById('saturne-btn-next-photo');
-  var badge     = document.getElementById('saturne-photo-index-badge');
-  if (pe._urls.length > 1) {
-    var label = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
-    if (btnPrevEl) btnPrevEl.style.display = 'flex';
-    if (btnNextEl) btnNextEl.style.display = 'flex';
-    if (badge) {
-      badge.textContent   = label;
-      badge.style.display = 'block';
-    }
-  } else {
-    if (btnPrevEl) btnPrevEl.style.display = 'none';
-    if (btnNextEl) btnNextEl.style.display = 'none';
-    if (badge) badge.style.display = 'none';
-  }
+  pe._syncActionButtons();
+
+  // Re-apply the user's tool visibility preferences
+  pe._applyToolVisibility();
+
+  pe._syncNavControls();
 
   pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
     modal.style.display = 'flex';
+    pe._fitToViewport();
   });
+};
+
+/**
+ * Fit the editor to the visible part of the screen
+ *
+ * The modal is fixed, so it is laid out on the layout viewport: once the page is pinch-zoomed or
+ * wider than the screen (tablets), part of it, validate buttons included, falls off the screen.
+ * The canvas container has no definite height either, so max-height: 100% never limits the canvas:
+ * a tall photo used to be cropped and to squeeze the toolbar.
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @returns {void}
+ */
+window.saturne.photoEditor._fitToViewport = function() {
+  var pe       = window.saturne.photoEditor;
+  var modal    = pe._modal;
+  var viewport = window.visualViewport;
+
+  if (!modal || modal.style.display !== 'flex') {
+    return;
+  }
+
+  if (viewport) {
+    modal.style.left   = viewport.offsetLeft + 'px';
+    modal.style.top    = viewport.offsetTop + 'px';
+    modal.style.width  = viewport.width + 'px';
+    modal.style.height = viewport.height + 'px';
+  }
+
+  // Measure the header and toolbar with the canvas out of the way, then give it the room left
+  var card        = modal.querySelector('.saturne-photo-editor-content');
+  var container   = pe._canvas.parentElement;
+  var modalStyle  = window.getComputedStyle(modal);
+  var modalHeight = modal.clientHeight - parseFloat(modalStyle.paddingTop) - parseFloat(modalStyle.paddingBottom);
+
+  pe._canvas.style.maxHeight = '0px';
+  pe._canvas.style.maxHeight = Math.max(modalHeight - (card.offsetHeight - container.offsetHeight), 150) + 'px';
+};
+
+/**
+ * Resolve the mime type the current media must be written back as
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @returns {string} Mime type to encode the canvas with
+ */
+window.saturne.photoEditor._sourceMimeType = function() {
+  var pe     = window.saturne.photoEditor;
+  var source = (pe._urls && pe._urls[pe._currentIndex]) || '';
+
+  try {
+    source = decodeURIComponent(source);
+  } catch (e) {
+    // A malformed escape sequence only means the name cannot be read: fall back on JPEG
+  }
+
+  return /\.png(\?|&|$)/i.test(source) ? 'image/png' : 'image/jpeg';
+};
+
+/**
+ * Resolve the filename carried by a Dolibarr file URL (document.php or viewimage.php)
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @param   {string}      url File URL holding a `file` query parameter
+ * @returns {string|null}     Filename, or null when the URL carries none
+ */
+window.saturne.photoEditor._fileNameOf = function(url) {
+  var params   = new URLSearchParams((url || '').split('?')[1] || '');
+  var filePath = decodeURIComponent(params.get('file') || '');
+
+  return filePath.split('/').pop() || null;
+};
+
+/**
+ * Show or hide the star that picks which media the record displays
+ *
+ * Picking one only makes sense when the set holds several medias, and when the caller wired a
+ * handler able to record the choice.
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.0.0
+ * @version 1.0.0
+ *
+ * @returns {void}
+ */
+window.saturne.photoEditor._syncFavoriteButton = function() {
+  var pe  = window.saturne.photoEditor;
+  var btn = document.getElementById('saturne-btn-favorite-photo');
+
+  if (!btn) {
+    return;
+  }
+
+  var usable = pe._favorite && typeof pe._favorite.onSelect === 'function' && pe._urls.length > 1;
+
+  btn.style.display = usable ? 'inline-flex' : 'none';
+
+  if (!usable) {
+    return;
+  }
+
+  var icon      = btn.querySelector('i');
+  var current   = pe._fileNameOf(pe._urls[pe._currentIndex] || '');
+  var isDisplayed = pe._favorite.current && pe._favorite.current === current;
+
+  icon.className = isDisplayed ? 'fas fa-star' : 'far fa-star';
+};
+
+/**
+ * Show or hide the action buttons according to the callbacks the caller wired
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @returns {void}
+ */
+window.saturne.photoEditor._syncActionButtons = function() {
+  var pe = window.saturne.photoEditor;
+
+  // The delete button is only relevant when the caller wired a delete callback
+  var btnDeleteEl = document.getElementById('saturne-btn-delete-photo');
+  if (btnDeleteEl) {
+    btnDeleteEl.style.display = (typeof pe._onDelete === 'function') ? 'flex' : 'none';
+  }
+
+  // The wand is only relevant when the caller can have the photo analysed
+  var btnAiEl = document.getElementById('saturne-btn-ai-photo');
+  if (btnAiEl) {
+    btnAiEl.style.display = (typeof pe._onAnalyse === 'function') ? 'inline-flex' : 'none';
+  }
+
+  // The "validate all" button is only relevant when the caller wired a batch callback
+  var btnOkAllEl = document.getElementById('saturne-btn-ok-all-photo');
+  if (btnOkAllEl) {
+    btnOkAllEl.style.display = (typeof pe._onSaveAll === 'function') ? 'flex' : 'none';
+  }
+
+  // Hide the single validate button if we are in batch upload mode
+  var btnOkEl = document.getElementById('saturne-btn-ok-photo');
+  if (btnOkEl) {
+    btnOkEl.style.display = (pe._isBatchUpload && typeof pe._onSaveAll === 'function') ? 'none' : 'flex';
+  }
+};
+
+/**
+ * Show or hide the previous/next controls and the index badge
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @returns {void}
+ */
+window.saturne.photoEditor._syncNavControls = function() {
+  var pe        = window.saturne.photoEditor;
+  var btnPrevEl = document.getElementById('saturne-btn-prev-photo');
+  var btnNextEl = document.getElementById('saturne-btn-next-photo');
+  var badge     = document.getElementById('saturne-photo-index-badge');
+  var multiple  = pe._urls.length > 1;
+  var btnAiEl   = document.getElementById('saturne-btn-ai-photo');
+
+  pe._syncFavoriteButton();
+
+  // The outcome shown on the wand belongs to the photo it was asked for
+  if (btnAiEl && !btnAiEl.disabled) {
+    btnAiEl.querySelector('i').className = 'fas fa-magic';
+  }
+
+  if (btnPrevEl) {
+    btnPrevEl.style.display = multiple ? 'flex' : 'none';
+  }
+  if (btnNextEl) {
+    btnNextEl.style.display = multiple ? 'flex' : 'none';
+  }
+  if (badge) {
+    if (multiple) {
+      badge.textContent = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
+    }
+    badge.style.display = multiple ? 'block' : 'none';
+  }
 };
 
 window.saturne.photoEditor._loadUrlIntoCanvas = function(url, callback) {
@@ -281,7 +683,9 @@ window.saturne.photoEditor._loadUrlIntoCanvas = function(url, callback) {
     canvas.height = img.height * ratio;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    if (typeof callback === 'function') callback();
+    if (typeof callback === 'function') {
+      callback();
+    }
   };
   img.src = url;
 };
@@ -298,26 +702,181 @@ window.saturne.photoEditor._loadUrlIntoCanvas = function(url, callback) {
  * @param   {Function}  onSave Callback receiving a Blob on validate
  * @returns {void}
  */
-window.saturne.photoEditor.openFile = function(file, onSave) {
+window.saturne.photoEditor.openFile = function(file, onSave, onSaveAll) {
   var url = URL.createObjectURL(file);
   window.saturne.photoEditor.open(url, function(blob) {
     URL.revokeObjectURL(url);
     if (typeof onSave === 'function') {
       onSave(blob);
     }
-  });
+  }, 0, null, onSaveAll);
+};
+
+/**
+ * Open the photo editor in batch mode with multiple File objects
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @param   {Array}    files       Array of File objects to load
+ * @param   {Function} onSaveBatch Callback receiving an array of modified File objects on validate all
+ * @returns {void}
+ */
+window.saturne.photoEditor.openBatch = function(files, onSaveBatch) {
+  var pe = window.saturne.photoEditor;
+  var urls = [];
+  for (var i = 0; i < files.length; i++) {
+    urls.push(URL.createObjectURL(files[i]));
+  }
+  
+  pe._files = files;
+  pe._isBatchUpload = true;
+  
+  // Clean up object URLs when saving
+  var onSaveBatchWrapper = function(modifiedFiles) {
+    for (var i = 0; i < urls.length; i++) {
+      if (urls[i].indexOf('blob:') === 0) {
+        URL.revokeObjectURL(urls[i]);
+      }
+    }
+    if (typeof onSaveBatch === 'function') {
+      onSaveBatch(modifiedFiles);
+    }
+  };
+
+  pe.open(urls, null, 0, null, onSaveBatchWrapper);
+};
+
+/**
+ * Resize a File/Blob to the currently selected quality and return a JPEG Blob,
+ * without opening the editor. Mirrors _loadUrlIntoCanvas() resize logic.
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @param   {File|Blob} file     File to resize
+ * @param   {Function}  callback Called with the resized Blob
+ * @returns {void}
+ */
+window.saturne.photoEditor.resizeFileToBlob = function(file, callback) {
+  var sizeSelect = document.getElementById('saturne-photo-size-select');
+  var isFullHD   = sizeSelect && sizeSelect.value === 'fullhd';
+  var maxDim     = isFullHD ? 1920 : 1280;
+  var url        = URL.createObjectURL(file);
+  var img        = new Image();
+  img.onload = function() {
+    var ratio = 1;
+    if (img.width > maxDim || img.height > maxDim) {
+      ratio = maxDim / Math.max(img.width, img.height);
+    }
+    var canvas    = document.createElement('canvas');
+    canvas.width  = img.width  * ratio;
+    canvas.height = img.height * ratio;
+    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+    URL.revokeObjectURL(url);
+    canvas.toBlob(function(blob) {
+      if (typeof callback === 'function') {
+        callback(blob);
+      }
+    }, 'image/jpeg', 0.85);
+  };
+  img.src = url;
 };
 
 /* -------------------------------------------------------------------------
  * Private helpers
  * ---------------------------------------------------------------------- */
 
+/**
+ * Ask whether the photo on screen must be deleted, showing it in the confirmation
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @returns {void}
+ */
+window.saturne.photoEditor._openDeleteConfirm = function() {
+  var pe         = window.saturne.photoEditor;
+  var confirmBox = document.getElementById('saturne-photo-delete-confirm');
+
+  if (!confirmBox) {
+    return;
+  }
+
+  document.getElementById('saturne-photo-delete-confirm-preview').src = pe._urls[pe._currentIndex];
+  confirmBox.classList.add('is-open');
+  // Deleting cannot be undone: the safe answer is the one Enter gives
+  document.getElementById('saturne-btn-cancel-delete-photo').focus();
+};
+
+/**
+ * Put the delete confirmation away, leaving the editor as it was
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @returns {void}
+ */
+window.saturne.photoEditor._closeDeleteConfirm = function() {
+  var confirmBox = document.getElementById('saturne-photo-delete-confirm');
+
+  if (confirmBox) {
+    confirmBox.classList.remove('is-open');
+  }
+};
+
+/**
+ * Tell whether the delete confirmation is on screen
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @returns {boolean} True while the confirmation waits for an answer
+ */
+window.saturne.photoEditor._isDeleteConfirmOpen = function() {
+  var confirmBox = document.getElementById('saturne-photo-delete-confirm');
+
+  return !!confirmBox && confirmBox.classList.contains('is-open');
+};
+
 window.saturne.photoEditor._close = function() {
   var modal = window.saturne.photoEditor._modal;
   if (modal) {
     modal.style.display = 'none';
   }
-  window.saturne.photoEditor._onSave = null;
+  window.saturne.photoEditor._closeDeleteConfirm();
+  window.saturne.photoEditor._onSave    = null;
+  window.saturne.photoEditor._onSaveAll = null;
+  window.saturne.photoEditor._isBatchUpload = false;
+  window.saturne.photoEditor._files = null;
+};
+
+window.saturne.photoEditor._saveCurrentStateAndGo = function(nextIndex) {
+  var pe     = window.saturne.photoEditor;
+  var canvas = pe._canvas;
+  
+  canvas.toBlob(function(blob) {
+    var oldUrl = pe._urls[pe._currentIndex];
+    if (oldUrl.indexOf('blob:') === 0) {
+      URL.revokeObjectURL(oldUrl);
+    }
+    pe._urls[pe._currentIndex] = URL.createObjectURL(blob);
+    if (pe._files && pe._files[pe._currentIndex]) {
+      pe._files[pe._currentIndex] = new File([blob], pe._files[pe._currentIndex].name, { type: 'image/jpeg', lastModified: Date.now() });
+    }
+    
+    pe._currentIndex = nextIndex;
+    pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
+      var badge = document.getElementById('saturne-photo-index-badge');
+      if (badge) {
+        badge.textContent = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
+      }
+    });
+  }, 'image/jpeg', 0.85);
 };
 
 window.saturne.photoEditor._saveState = function() {
@@ -353,7 +912,9 @@ window.saturne.photoEditor._getPos = function(e) {
 };
 
 window.saturne.photoEditor._onMouseDown = function(e) {
-  if (e.target.id === 'saturne-floating-text-input') return;
+  if (e.target.id === 'saturne-floating-text-input') {
+    return;
+  }
   var pe   = window.saturne.photoEditor;
   var ctx  = pe._ctx;
   var canvas = pe._canvas;
@@ -395,7 +956,9 @@ window.saturne.photoEditor._onMouseDown = function(e) {
 
 window.saturne.photoEditor._onMouseMove = function(e) {
   var pe   = window.saturne.photoEditor;
-  if (!pe._isDrawing) return;
+  if (!pe._isDrawing) {
+    return;
+  }
   e.preventDefault();
   var ctx    = pe._ctx;
   var canvas = pe._canvas;
@@ -445,7 +1008,9 @@ window.saturne.photoEditor._onMouseMove = function(e) {
 
 window.saturne.photoEditor._onMouseUp = function(e) {
   var pe   = window.saturne.photoEditor;
-  if (!pe._isDrawing) return;
+  if (!pe._isDrawing) {
+    return;
+  }
   pe._isDrawing = false;
   var ctx    = pe._ctx;
   var canvas = pe._canvas;
@@ -461,31 +1026,93 @@ window.saturne.photoEditor._onMouseUp = function(e) {
     pe._drawRect(ctx, pe._startX, pe._startY, p.x, p.y, cp.value);
   } else if (mode === 'blur') {
     ctx.putImageData(pe._snapshot, 0, 0);
-    var w = p.x - pe._startX, h = p.y - pe._startY;
-    if (Math.abs(w) > 5 && Math.abs(h) > 5) {
-      pe._applyAreaBlur(ctx, pe._startX, pe._startY, w, h, 10);
-    } else {
-      pe._historyStack.pop();
-    }
+    pe._finishBlur(ctx, p);
   } else if (mode === 'sequence') {
     ctx.putImageData(pe._snapshot, 0, 0);
-    if (Math.hypot(p.x - pe._startX, p.y - pe._startY) > 20) {
-      pe._drawArrow(ctx, pe._startX, pe._startY, p.x, p.y, cp.value);
-    }
-    pe._drawSequenceCircle(ctx, pe._startX, pe._startY, pe._seqCounter, cp.value);
-    pe._seqCounter++;
+    pe._finishSequence(ctx, p, cp.value);
   } else if (mode === 'crop') {
-    document.getElementById('saturne-crop-selection').style.display = 'none';
-    var cx = Math.max(0, Math.min(p.x, canvas.width));
-    var cy = Math.max(0, Math.min(p.y, canvas.height));
-    var sx = Math.max(0, Math.min(pe._startX, canvas.width));
-    var sy = Math.max(0, Math.min(pe._startY, canvas.height));
-    var cw = Math.abs(cx - sx), ch = Math.abs(cy - sy);
-    if (cw > 20 && ch > 20) {
-      pe._applyCrop(Math.min(cx, sx), Math.min(cy, sy), cw, ch);
-    } else {
-      pe._historyStack.pop();
-    }
+    pe._finishCrop(p, canvas);
+  }
+};
+
+/**
+ * Blur the area dragged since mouse down, or drop the history entry if the
+ * area is too small to be meaningful
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param   {CanvasRenderingContext2D} ctx Canvas 2D context
+ * @param   {Object}                   p   Pointer position on the canvas
+ * @returns {void}
+ */
+window.saturne.photoEditor._finishBlur = function(ctx, p) {
+  var pe = window.saturne.photoEditor;
+  var w  = p.x - pe._startX;
+  var h  = p.y - pe._startY;
+
+  if (Math.abs(w) > 5 && Math.abs(h) > 5) {
+    pe._applyAreaBlur(ctx, pe._startX, pe._startY, w, h, 10);
+  } else {
+    pe._historyStack.pop();
+  }
+};
+
+/**
+ * Draw the next numbered step, with a leading arrow when the drag is long
+ * enough to express a direction
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param   {CanvasRenderingContext2D} ctx   Canvas 2D context
+ * @param   {Object}                   p     Pointer position on the canvas
+ * @param   {string}                   color Stroke colour
+ * @returns {void}
+ */
+window.saturne.photoEditor._finishSequence = function(ctx, p, color) {
+  var pe = window.saturne.photoEditor;
+
+  if (Math.hypot(p.x - pe._startX, p.y - pe._startY) > 20) {
+    pe._drawArrow(ctx, pe._startX, pe._startY, p.x, p.y, color);
+  }
+  pe._drawSequenceCircle(ctx, pe._startX, pe._startY, pe._seqCounter, color);
+  pe._seqCounter++;
+};
+
+/**
+ * Crop to the dragged rectangle, clamped to the canvas, or drop the history
+ * entry if the rectangle is too small
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param   {Object}            p      Pointer position on the canvas
+ * @param   {HTMLCanvasElement} canvas Edited canvas
+ * @returns {void}
+ */
+window.saturne.photoEditor._finishCrop = function(p, canvas) {
+  var pe = window.saturne.photoEditor;
+
+  document.getElementById('saturne-crop-selection').style.display = 'none';
+
+  var cx = Math.max(0, Math.min(p.x, canvas.width));
+  var cy = Math.max(0, Math.min(p.y, canvas.height));
+  var sx = Math.max(0, Math.min(pe._startX, canvas.width));
+  var sy = Math.max(0, Math.min(pe._startY, canvas.height));
+  var cw = Math.abs(cx - sx);
+  var ch = Math.abs(cy - sy);
+
+  if (cw > 20 && ch > 20) {
+    pe._applyCrop(Math.min(cx, sx), Math.min(cy, sy), cw, ch);
+  } else {
+    pe._historyStack.pop();
   }
 };
 
@@ -577,7 +1204,9 @@ window.saturne.photoEditor._drawSequenceCircle = function(ctx, x, y, num, color)
 
 window.saturne.photoEditor._addTextInput = function(canvasX, canvasY, clientX, clientY) {
   var existing = document.getElementById('saturne-floating-text-input');
-  if (existing) existing.blur();
+  if (existing) {
+    existing.blur();
+  }
 
   var canvas  = window.saturne.photoEditor._canvas;
   var ctx     = window.saturne.photoEditor._ctx;
@@ -619,7 +1248,11 @@ window.saturne.photoEditor._addTextInput = function(canvasX, canvasY, clientX, c
     this.style.height = Math.max(40, this.scrollHeight + 10) + 'px';
   });
 
-  requestAnimationFrame(function() { if (input) input.focus(); });
+  requestAnimationFrame(function() {
+    if (input) {
+      input.focus();
+    }
+  });
 
   input.addEventListener('blur', function() {
     var text = input.value;
@@ -639,6 +1272,8 @@ window.saturne.photoEditor._addTextInput = function(canvasX, canvasY, clientX, c
     } else {
       window.saturne.photoEditor._historyStack.pop();
     }
-    if (input.parentNode) input.parentNode.removeChild(input);
+    if (input.parentNode) {
+      input.parentNode.removeChild(input);
+    }
   });
 };

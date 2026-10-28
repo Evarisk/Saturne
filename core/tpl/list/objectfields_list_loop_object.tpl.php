@@ -24,10 +24,11 @@
 
 /**
  * The following vars must be defined :
- * Globals    : $conf (extrafields_list_print_fields.tpl), $db, $hookmanager
+ * Globals    : $conf (extrafields_list_print_fields.tpl), $db, $hookmanager, $langs
  * Parameters : $action, $limit, $massaction, $massActionButton, $mode
  * Objects    : $extrafields (extrafields_list_print_fields.tpl), $object
- * Variables  : $arrayfields, $arrayofselected, $num, $resql, $statusMode (optional), $totalarray
+ * Variables  : $arrayfields, $arrayofselected, $enableMassSignature (optional), $num, $resql,
+ *              $signatureDocumentType (optional), $statusMode (optional), $totalarray
  */
 
 // Loop on record
@@ -48,6 +49,13 @@ while ($i < $iMaxInLoop) {
 
     // Store properties in $object
     $object->setVarsFromFetchObj($obj);
+
+    // Core classes (Propal, Commande, Project...) declare their status as fk_statut: setVarsFromFetchObj() fills
+    // only that field, while getLibStatut() and the getNomUrl() tooltip read ->status. Copied on every row,
+    // the object being reused from one row to the next
+    if (array_key_exists('fk_statut', $object->fields) && !array_key_exists('status', $object->fields)) {
+        $object->status = $object->fk_statut;
+    }
 
     /*
     $object->thirdparty = null;
@@ -89,9 +97,19 @@ while ($i < $iMaxInLoop) {
         // Show line of result
         print '<tr data-rowid="' . $object->id . '" class="oddeven">';
 
+        // Direct link to the signature page, offered by the lists that carry signatories
+        $signatureLink = '';
+        if (!empty($enableMassSignature) && $object->status == $object::STATUS_VALIDATED && empty($object->model)) {
+            $signatureUrl   = dol_buildpath('/saturne/view/saturne_attendants.php', 1);
+            $signatureUrl  .= '?id=' . $object->id . '&module_name=' . urlencode($object->module) . '&object_type=' . urlencode($object->element);
+            $signatureUrl  .= '&document_type=' . urlencode($signatureDocumentType ?? '') . '&attendant_table_mode=simple';
+            $signatureLink  = '<a class="paddingrightonly" href="' . $signatureUrl . '" title="' . dol_escape_htmltag($langs->trans('Sign')) . '"><i class="fas fa-file-signature"></i></a>';
+        }
+
         // Action column
         if (getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
             print '<td class="nowrap center">';
+            print $signatureLink;
             // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
             if ($massActionButton || $massaction) {
                 $selected = 0;
@@ -134,9 +152,14 @@ while ($i < $iMaxInLoop) {
                 } elseif ($key == 'rowid') {
                     print $object->showOutputField($val, $key, $object->id);
                 } else {
-                    // Inline edit: auto-detect an editor per field type (always editable when the user can write)
-                    $inlineType = !empty($permissiontoadd) ? saturne_get_inline_edit_type($val, $key) : '';
-                    if ($inlineType === '' && !empty($val['contenteditable']) && $val['contenteditable'] == 1) {
+                    // Inline edit: auto-detect an editor per field type, when the user can write
+                    // and the object is still modifiable. A locked or archived object is read-only
+                    // on its card, so its fields must not be editable from the list either
+                    $isModifiable      = !method_exists($object, 'isModifiable') || $object->isModifiable();
+                    $canInlineEdit     = !empty($permissiontoadd) && $isModifiable;
+                    $isContentEditable = !empty($val['contenteditable']) && $val['contenteditable'] == 1;
+                    $inlineType        = $canInlineEdit ? saturne_get_inline_edit_type($val, $key) : '';
+                    if ($inlineType === '' && $isModifiable && $isContentEditable) {
                         $inlineType = (!empty($val['type']) && in_array($val['type'], ['date', 'datetime'])) ? 'datepicker' : 'text';
                     }
 
@@ -191,6 +214,7 @@ while ($i < $iMaxInLoop) {
         // Action column
         if (!getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
             print '<td class="nowrap center">';
+            print $signatureLink;
             // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
             if ($massActionButton || $massaction) {
                 $selected = 0;

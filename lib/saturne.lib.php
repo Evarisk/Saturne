@@ -44,6 +44,11 @@ function saturne_admin_prepare_head(): array
     $head[$h][2] = 'settings';
     $h++;
 
+    $head[$h][0] = dol_buildpath('/saturne/admin/javascripts.php', 1);
+    $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fab fa-js pictofixedwidth"></i>' . $langs->trans('Javascripts') : '<i class="fab fa-js"></i>';
+    $head[$h][2] = 'javascripts';
+    $h++;
+
     $head[$h][0] = dol_buildpath('/saturne/admin/redirection.php', 1) . '?module_name=Saturne';
     $head[$h][1] = $conf->browser->layout == 'classic' ? '<i class="fas fa-forward pictofixedwidth"></i>' . $langs->trans('Redirections') : '<i class="fas fa-forward"></i>';
     $head[$h][2] = 'redirection';
@@ -72,6 +77,16 @@ function saturne_admin_prepare_head(): array
     $head[$h][0] = dol_buildpath('/saturne/admin/media.php', 1);
     $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-photo-video pictofixedwidth"></i>' . $langs->trans('MediaLib') : '<i class="fas fa-photo-video"></i>';
     $head[$h][2] = 'media';
+    $h++;
+
+    $head[$h][0] = dol_buildpath('/saturne/admin/entity_transfer.php', 1);
+    $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-exchange-alt pictofixedwidth"></i>' . $langs->trans('EntityTransfer') : '<i class="fas fa-exchange-alt"></i>';
+    $head[$h][2] = 'entitytransfer';
+    $h++;
+
+    $head[$h][0] = dol_buildpath('/saturne/admin/maintenance.php', 1);
+    $head[$h][1] = $conf->browser->layout != 'phone' ? '<i class="fas fa-broom pictofixedwidth"></i>' . $langs->trans('Maintenance') : '<i class="fas fa-broom"></i>';
+    $head[$h][2] = 'maintenance';
     $h++;
 
     complete_head_from_modules($conf, $langs, null, $head, $h, 'saturne@saturne');

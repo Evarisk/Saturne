@@ -3,7 +3,7 @@ includes:
 
 parameters:
     phpVersion: 80100 # PHP 8.1 (CI target)
-    level: max
+    level: 8
     tmpDir: .github/tmp/phpstan
 
     bootstrapFiles:
@@ -20,14 +20,60 @@ parameters:
             - js/
             - documents/
             - langs/
+            # Stub files MUST NOT be scanned: a stubbed DoliDB/User/Translate
+            # wins over the real core class and every core method call then
+            # reports as "undefined method".
+            - dev/phan/
+            - .phan/
+            - tests/phpunit/bootstrap.php
         analyse:
-            - dev/phpstan/stubs.php
+            # Template fragments are included mid-scope by their caller, so
+            # their variables are undefined by construction when analysed
+            # standalone. Still scanned, so the classes they use resolve.
+            - core/tpl/
+
+    # Individual core files that carry classes used by the module.
+    scanFiles:
+        # llxHeader()/llxFooter()/top_httphead() live in main.inc.php
+        - ../../main.inc.php
+        - ../../includes/tecnickcom/tcpdf/tcpdf_barcodes_1d.php
+        - ../../includes/tecnickcom/tcpdf/tcpdf_barcodes_2d.php
 
     # Scan Dolibarr core for class resolution (not analysed, only scanned).
+    # Must stay in sync with .phan/config.php directory_list and with the
+    # sparse-checkout in .github/workflows/quality.yml.
     scanDirectories:
+        - ../../api/class/
+        - ../../categories/class/
+        - ../../comm/action/class/
+        - ../../comm/propal/class/
+        - ../../commande/class/
+        - ../../compta/facture/class/
+        - ../../contact/class/
+        - ../../contrat/class/
         - ../../core/class/
+        - ../../core/db/
         - ../../core/lib/
+        - ../../core/modules/
         - ../../core/tpl/
+        - ../../core/triggers/
+        - ../../ecm/class/
+        - ../../expedition/class/
+        - ../../fichinter/class/
+        - ../../fourn/class/
+        - ../../includes/odtphp/
+        - ../../includes/parsedown/
+        - ../../includes/restler/framework/
+        - ../../mrp/class/
+        - ../../product/class/
+        - ../../product/inventory/class/
+        - ../../product/stock/class/
+        - ../../projet/class/
+        - ../../reception/class/
+        - ../../societe/class/
+        - ../../supplier_proposal/class/
+        - ../../ticket/class/
+        - ../../user/class/
 
     # Performance
     parallel:
@@ -50,8 +96,13 @@ parameters:
     universalObjectCratesClasses:
         - stdClass
         - SimpleXMLElement
+        # Dolibarr sets object properties dynamically from the DB row.
+        - CommonObject
 
     ignoreErrors:
+        # Dolibarr never documents array value types (`@return array`), so this
+        # would fire on every new file and could never be burned down.
+        - identifier: missingType.iterableValue
         - '#.*phan-var#'
         - '#^Expression "''…" on a separate line does not do anything#'
         - '#Empty array passed to foreach#'

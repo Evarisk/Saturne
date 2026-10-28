@@ -1,7 +1,17 @@
 <?xml version="1.0"?>
 <ruleset name="Saturne">
     <description>PSR-12 for Saturne and modules</description>
-    <rule ref="PSR12"/>
+
+    <!-- Sniffs excluded from PSR-12 itself must sit INSIDE the <rule> element:
+         a top-level <exclude> is silently ignored by PHP_CodeSniffer. -->
+    <rule ref="PSR12">
+        <!-- Line length: not enforced, Dolibarr code is wide by nature -->
+        <exclude name="Generic.Files.LineLength"/>
+
+        <!-- Dolibarr pages include main.inc.php AND declare helpers in the same
+             file — the "no side effects" rule cannot be satisfied -->
+        <exclude name="PSR1.Files.SideEffects"/>
+    </rule>
 
     <!-- Dolibarr does not use PHP namespaces — architectural constraint -->
     <rule ref="PSR1.Classes.ClassDeclaration">
@@ -23,18 +33,22 @@
         <severity>0</severity>
     </rule>
 
-    <!-- Line length: warn only, do not block CI -->
-<!--    <rule ref="Generic.Files.LineLength">-->
-<!--        <properties>-->
-<!--            <property name="lineLimit" value="120"/>-->
-<!--            <property name="absoluteLineLimit" value="0"/>-->
-<!--        </properties>-->
-<!--    </rule>-->
-    <exclude name="Generic.Files.LineLength"/>
+    <!-- Restler routes REST methods by name; a leading underscore marks a helper
+         that must NOT be exposed as a route (see class/saturneapi.class.php) -->
+    <rule ref="PSR2.Methods.MethodDeclaration.Underscore">
+        <severity>0</severity>
+    </rule>
+
+    <!-- Empty index.php files are directory-listing guards, not code -->
+    <rule ref="Internal.NoCodeFound">
+        <severity>0</severity>
+    </rule>
 
     <file>.</file>
     <exclude-pattern>*/vendor/*</exclude-pattern>
     <exclude-pattern>*/node_modules/*</exclude-pattern>
     <exclude-pattern>*/css/*</exclude-pattern>
     <exclude-pattern>*/js/*.min.js</exclude-pattern>
+    <!-- Analyser caches (PHPStan writes its compiled container there) -->
+    <exclude-pattern>*/.github/tmp/*</exclude-pattern>
 </ruleset>

@@ -31,6 +31,20 @@ window.saturne.listColumns.resizing = null;
  */
 window.saturne.listColumns.init = function() {
     window.saturne.listColumns.event();
+    
+    var $t = window.saturne.listColumns.table();
+    if ($t.length) {
+        $t.find('thead th[data-colkey]').each(function() {
+            $(this).removeAttr('draggable');
+            $(this).find('a').attr('draggable', 'false');
+            if (!$(this).find('.saturne-col-resize').length) {
+                $(this).append('<span class="saturne-col-resize" title="Redimensionner"></span>');
+            }
+            if (!$(this).find('.saturne-col-drag-handle').length) {
+                $(this).prepend('<span class="saturne-col-drag-handle" title="Déplacer" draggable="true"><span class="fas fa-grip-vertical"></span></span>');
+            }
+        });
+    }
 };
 
 /**
@@ -39,17 +53,16 @@ window.saturne.listColumns.init = function() {
  * @return {void}
  */
 window.saturne.listColumns.event = function() {
-    $(document).on('click', '.saturne-columns-toggle', window.saturne.listColumns.toggle);
     $(document).on('click', '.saturne-columns-reset', window.saturne.listColumns.reset);
-    // Prevent sort navigation while editing columns
-    $(document).on('click', 'table.liste.saturne-columns-editing thead th a', function(e) { e.preventDefault(); });
     // Resize
     $(document).on('mousedown', '.saturne-col-resize', window.saturne.listColumns.onResizeStart);
     // Reorder
-    $(document).on('dragstart', 'table.liste.saturne-columns-editing thead th[data-colkey]', window.saturne.listColumns.onDragStart);
-    $(document).on('dragover', 'table.liste.saturne-columns-editing thead th[data-colkey]', window.saturne.listColumns.onDragOver);
-    $(document).on('drop', 'table.liste.saturne-columns-editing thead th[data-colkey]', window.saturne.listColumns.onDrop);
-    $(document).on('dragend', 'table.liste.saturne-columns-editing thead th[data-colkey]', window.saturne.listColumns.onDragEnd);
+    $(document).on('dragstart', 'table.liste thead th[data-colkey]', window.saturne.listColumns.onDragStart);
+    $(document).on('dragover', 'table.liste thead th[data-colkey]', window.saturne.listColumns.onDragOver);
+    $(document).on('dragenter', 'table.liste thead th[data-colkey]', window.saturne.listColumns.onDragEnter);
+    $(document).on('dragleave', 'table.liste thead th[data-colkey]', window.saturne.listColumns.onDragLeave);
+    $(document).on('drop', 'table.liste thead th[data-colkey]', window.saturne.listColumns.onDrop);
+    $(document).on('dragend', 'table.liste thead th[data-colkey]', window.saturne.listColumns.onDragEnd);
 };
 
 /**
@@ -72,34 +85,6 @@ window.saturne.listColumns.url = function() {
 };
 
 /**
- * Toggle column edit mode.
- *
- * @param  {Event} e Click event
- * @return {void}
- */
-window.saturne.listColumns.toggle = function(e) {
-    e.preventDefault();
-    var $t = window.saturne.listColumns.table();
-    if (!$t.length) {
-        return;
-    }
-    var entering = !$t.hasClass('saturne-columns-editing');
-    $t.toggleClass('saturne-columns-editing', entering);
-    $('.saturne-columns-controls').toggleClass('editing', entering);
-    $('.saturne-columns-toggle').toggleClass('active', entering);
-
-    if (entering) {
-        $t.find('thead th[data-colkey]').attr('draggable', 'true').each(function() {
-            if (!$(this).find('.saturne-col-resize').length) {
-                $(this).append('<span class="saturne-col-resize" title="Redimensionner"></span>');
-            }
-        });
-    } else {
-        $t.find('thead th[data-colkey]').removeAttr('draggable');
-    }
-};
-
-/**
  * Resize: pointer down on a column handle.
  *
  * @param  {Event} e Mouse event
@@ -109,9 +94,10 @@ window.saturne.listColumns.onResizeStart = function(e) {
     e.preventDefault();
     e.stopPropagation();
     var th = $(this).closest('th')[0];
+    $(this).addClass('is-resizing');
     // Disable drag while resizing this column
     $(th).attr('draggable', 'false');
-    window.saturne.listColumns.resizing = { th: th, startX: e.pageX, startW: th.offsetWidth, colkey: $(th).attr('data-colkey') };
+    window.saturne.listColumns.resizing = { th: th, handle: this, startX: e.pageX, startW: th.offsetWidth, colkey: $(th).attr('data-colkey') };
     $('body').addClass('saturne-col-resizing-active');
     $(document).on('mousemove.saturnecol', window.saturne.listColumns.onResizeMove);
     $(document).on('mouseup.saturnecol', window.saturne.listColumns.onResizeEnd);
@@ -143,6 +129,7 @@ window.saturne.listColumns.onResizeEnd = function() {
     var r = window.saturne.listColumns.resizing;
     window.saturne.listColumns.resizing = null;
     if (r) {
+        $(r.handle).removeClass('is-resizing');
         $(r.th).attr('draggable', 'true');
         window.saturne.listColumns.save();
     }
@@ -186,6 +173,42 @@ window.saturne.listColumns.onDragOver = function(e) {
         return;
     }
     e.preventDefault();
+    if (e.originalEvent.dataTransfer) {
+        e.originalEvent.dataTransfer.dropEffect = 'move';
+    }
+    
+    var rect = this.getBoundingClientRect();
+    var after = (e.originalEvent.clientX - rect.left) > (rect.width / 2);
+    $(this).removeClass('saturne-col-drag-over-left saturne-col-drag-over-right');
+    if (after) {
+        $(this).addClass('saturne-col-drag-over-right');
+    } else {
+        $(this).addClass('saturne-col-drag-over-left');
+    }
+};
+
+/**
+ * Reorder: drag enter.
+ *
+ * @param  {Event} e Drag event
+ * @return {void}
+ */
+window.saturne.listColumns.onDragEnter = function(e) {
+    var src = window.saturne.listColumns.dragSrc;
+    if (!src || src === this) {
+        return;
+    }
+    e.preventDefault();
+};
+
+/**
+ * Reorder: drag leave.
+ *
+ * @param  {Event} e Drag event
+ * @return {void}
+ */
+window.saturne.listColumns.onDragLeave = function(e) {
+    $(this).removeClass('saturne-col-drag-over-left saturne-col-drag-over-right');
 };
 
 /**
@@ -196,6 +219,7 @@ window.saturne.listColumns.onDragOver = function(e) {
  */
 window.saturne.listColumns.onDrop = function(e) {
     e.preventDefault();
+    $(this).removeClass('saturne-col-drag-over-left saturne-col-drag-over-right');
     var src = window.saturne.listColumns.dragSrc;
     if (!src || src === this) {
         return;
@@ -207,10 +231,10 @@ window.saturne.listColumns.onDrop = function(e) {
 
     if (after) { $(this).after(src); } else { $(this).before(src); }
 
-    window.saturne.listColumns.table().find('tr.oddeven').each(function() {
-        var $srcTd = $(this).find('> td[data-colkey="' + srcKey + '"]');
-        var $tgtTd = $(this).find('> td[data-colkey="' + tgtKey + '"]');
-        if ($srcTd.length && $tgtTd.length) {
+    window.saturne.listColumns.table().find('tr').each(function() {
+        var $srcTd = $(this).find('> td[data-colkey="' + srcKey + '"], > th[data-colkey="' + srcKey + '"]');
+        var $tgtTd = $(this).find('> td[data-colkey="' + tgtKey + '"], > th[data-colkey="' + tgtKey + '"]');
+        if ($srcTd.length && $tgtTd.length && $srcTd[0] !== src) {
             if (after) { $tgtTd.after($srcTd); } else { $tgtTd.before($srcTd); }
         }
     });
@@ -225,6 +249,7 @@ window.saturne.listColumns.onDrop = function(e) {
  */
 window.saturne.listColumns.onDragEnd = function() {
     $(this).removeClass('saturne-col-dragging');
+    window.saturne.listColumns.table().find('th').removeClass('saturne-col-drag-over-left saturne-col-drag-over-right');
     window.saturne.listColumns.dragSrc = null;
 };
 

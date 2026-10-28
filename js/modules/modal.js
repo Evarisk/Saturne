@@ -92,6 +92,11 @@ window.saturne.modal.openModal = function () {
   $('#'+modalToOpen).attr('data-from-subdir', fromSubdir);
   $('#'+modalToOpen).attr('data-photo-class', photoClass);
   $('#'+modalToOpen).attr('data-from-field', fromField);
+  // A media block opens the gallery on its own: a regular opener must not inherit its target
+  $('#'+modalToOpen).removeAttr('data-from-block');
+  if (window.saturne.mediaPending) {
+    window.saturne.mediaPending.syncCurrentTarget($('#'+modalToOpen));
+  }
 
   window.saturne.modal.loadLazyImages();
 
@@ -103,6 +108,10 @@ window.saturne.modal.openModal = function () {
 
 	$('#'+modalToOpen).find('.wpeo-button').attr('value', fromId);
 	$('#'+modalToOpen).addClass('modal-active');
+
+  if (modalToOpen === 'media_gallery' && window.saturne.mediaGallery) {
+    window.saturne.mediaGallery.reloadIfChanged();
+  }
 
 	$('.notice').addClass('hidden');
 };

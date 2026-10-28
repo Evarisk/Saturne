@@ -190,11 +190,10 @@ window.saturne.saturneElement.getLeftMenuCurrentUnit = function getLeftMenuCurre
   while ($parentUnit .length > 0 && !$parentUnit .hasClass('workunit-list')) {
     // Check if the current parent in the loop is a 'unit' that needs toggling
     if ($parentUnit.hasClass('unit')) {
-      // Ensure the icon is 'down' (expanded) and the unit has 'toggled' class
-      const $toggleIcon = $parentUnit.find('.toggle-icon');
-      if ($toggleIcon.hasClass('fa-chevron-right')) {
-        $toggleIcon.toggleClass('fa-chevron-right fa-chevron-down');
-      }
+      // Ensure the icon is 'down' (expanded) and the unit has 'toggled' class. Only the unit's own icon:
+      // find('.toggle-icon') also caught every nested unit and toggleClass flipped them all
+      const $toggleIcon = $parentUnit.find('> .unit-container > .toggle-unit > .toggle-icon');
+      $toggleIcon.removeClass('fa-chevron-right').addClass('fa-chevron-down');
       if (!$parentUnit.hasClass('toggled')) {
         $parentUnit.addClass('toggled');
       }
@@ -250,7 +249,11 @@ window.saturne.saturneElement.getLeftMenu = function getLeftMenu() {
   const params = new URLSearchParams(window.location.search);
   const id     = params.get('id') || params.get('fromid');
 
-  if (id) {
+  // Only pages that actually display a digiriskelement (whose id maps to a tree #unit) should
+  // expand/highlight the current unit. Other pages reuse the "id" param for a different object
+  // (e.g. the standard card uses it for the standard), which would otherwise wrongly expand the
+  // element that happens to share that id.
+  if (id && window.location.pathname.indexOf('digiriskelement') !== -1) {
     // Call the dedicated function to highlight, expand parents, and scroll to the current unit
     window.saturne.saturneElement.getLeftMenuCurrentUnit(id);
   }

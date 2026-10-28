@@ -43,17 +43,6 @@ $varsToChecks = [
 
 require_once __DIR__ . '/../../utils/saturne_check_variable.php';
 
-//$numberingModuleLabel = str_contains($object->element, 'det') ? 'NumberingModuleDet' : 'NumberingModule';
-print load_fiche_titre($langs->trans('NumberingModule'), '', '');
-
-print '<table class="noborder centpercent">';
-print '<tr class="liste_titre">';
-print '<td>' . $langs->trans('Name') . '</td>';
-print '<td>' . $langs->trans('Description') . '</td>';
-print '<td class="nowrap">' . $langs->trans('NextValue') . '</td>';
-print '<td class="center">' . $langs->trans('Status') . '</td>';
-print '</tr>';
-
 clearstatcache();
 
 if (empty($documentPath)) {
@@ -65,6 +54,10 @@ if (empty($documentPath)) {
 }
 
 $dir = dol_buildpath($path);
+
+// A document type may only group the models of the documents it builds and carry no numbering
+// module of its own: buffer the rows so the section is not headed by an empty table
+ob_start();
 if (is_dir($dir)) {
     $handle = opendir($dir);
     if (is_resource($handle)) {
@@ -116,4 +109,20 @@ if (is_dir($dir)) {
         }
     }
 }
-print '</table>';
+$numberingModuleRows = ob_get_clean();
+
+if (dol_strlen($numberingModuleRows) > 0) {
+    //$numberingModuleLabel = str_contains($object->element, 'det') ? 'NumberingModuleDet' : 'NumberingModule';
+    print load_fiche_titre($langs->trans('NumberingModule'), '', '');
+
+    print '<table class="noborder centpercent">';
+    print '<tr class="liste_titre">';
+    print '<td>' . $langs->trans('Name') . '</td>';
+    print '<td>' . $langs->trans('Description') . '</td>';
+    print '<td class="nowrap">' . $langs->trans('NextValue') . '</td>';
+    print '<td class="center">' . $langs->trans('Status') . '</td>';
+    print '</tr>';
+
+    print $numberingModuleRows;
+    print '</table>';
+}

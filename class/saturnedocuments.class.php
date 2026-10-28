@@ -132,8 +132,9 @@ abstract class SaturneDocuments extends SaturneObject
             $this->type = $this->element;
         }
         $this->module_name   = $this->module;
-        $this->parent_id     = $parentObject->id ?: 0;
-        $this->parent_type   = $parentObject->element_type ?: $parentObject->element ?: '';
+        // No parent object for documents not attached to one (EasyURL export) : empty() does not warn on null
+        $this->parent_id     = !empty($parentObject->id) ? $parentObject->id : 0;
+        $this->parent_type   = !empty($parentObject->element_type) ? $parentObject->element_type : (!empty($parentObject->element) ? $parentObject->element : '');
         $this->fk_user_creat = $user->id ?: 1;
 
         //$this->DocumentFillJSON($this);
@@ -181,7 +182,21 @@ abstract class SaturneDocuments extends SaturneObject
             $modelPath .= $objectType . 'document/';
         }
 
+        $modele = $this->checkDocumentTemplate($modele);
+        if (!dol_strlen($modele)) {
+            return -1;
+        }
+
         $result = $this->commonGenerateDocument($modelPath, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
+
+        // Fallback for Saturne modules: if doc generator wasn't found in the first path, try the 'document' suffixed path
+        if ($result <= 0 && (strpos($this->error, 'Failed to load doc generator') !== false || $this->error == 'ErrorFailedToLoadDocumentGenerator')) {
+            $modelPathFallback = 'custom/' . $baseModulePath . $this->element . 'document/';
+            $this->error = '';
+            $this->errors = [];
+            $result = $this->commonGenerateDocument($modelPathFallback, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
+        }
+
         // Need to reset $document->error because commonGenerateDocument call unwanted function dol_delete_preview
         if ($this->error == 'ErrorObjectNoSupportedByFunction') {
             $this->error = '';
@@ -189,9 +204,122 @@ abstract class SaturneDocuments extends SaturneObject
 
         if ($result > 0) {
             $this->call_trigger(strtoupper($this->type) . '_GENERATE', $moreparams['user']);
+
+            if (empty($this->last_main_doc)) {
+                if (!empty($this->result['fullpath'])) {
+                    $this->last_main_doc = basename($this->result['fullpath']);
+                } else {
+                    $this->last_main_doc = !empty($moreparams['specimen']) ? 'SPECIMEN.pdf' : '';
+                }
+            }
         }
 
         return $result;
+    }
+
+    /**
+     * Check the template carried by a model key and return a key usable by commonGenerateDocument()
+     *
+     * A model key is either 'modelname' for a native generator, or 'modelname:/full/path/of/template.odt' for an ODT one.
+     * That path is sent by the request, so it is checked against the template directories the module declares.
+     * Dolibarr 24 also refuses every template stored outside DOL_DATA_ROOT/ecm and DOL_DATA_ROOT/doctemplates -
+     * commonGenerateDocument() then answers BadDirForTemplateFile - while Saturne modules ship theirs in their own
+     * directory : the selected template is mirrored under DOL_DATA_ROOT/doctemplates to keep the generation working
+     *
+     * @param  string $modele Model key asked for the generation
+     * @return string         Model key to pass to commonGenerateDocument(), empty if the template is not allowed
+     */
+    protected function checkDocumentTemplate(string $modele): string
+    {
+        global $langs;
+
+        // Load Dolibarr libraries
+        require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+
+        $modelData = explode(':', $modele, 2);
+        if (!isset($modelData[1]) || !dol_strlen($modelData[1])) {
+            return $modele;
+        }
+
+        $modelName    = $modelData[0];
+        $documentType = preg_replace('/_(custom_)?odt$/', '', $modelName);
+
+        $templatePath = realpath($modelData[1]);
+        $templatePath = $templatePath !== false ? strtr($templatePath, DIRECTORY_SEPARATOR, '/') : '';
+
+        $isAllowed = false;
+        if (dol_strlen($templatePath) > 0) {
+            foreach ($this->getDocumentTemplateDirs($documentType) as $templateDir) {
+                if (strpos($templatePath, $templateDir) === 0) {
+                    $isAllowed = true;
+                    break;
+                }
+            }
+        }
+        if (!$isAllowed) {
+            $langs->load('saturne@saturne');
+            $this->error    = $langs->trans('ErrorTemplateFileNotAllowed', $modelData[1]);
+            $this->errors[] = $this->error;
+            dol_syslog('SaturneDocuments::checkDocumentTemplate refused template file ' . $modelData[1], LOG_WARNING);
+            return '';
+        }
+
+        // Dolibarr 24 only reads a template stored under DOL_DATA_ROOT/ecm or DOL_DATA_ROOT/doctemplates : mirror the
+        // ones shipped inside the module there, and refresh the copy as soon as the file of the module changes
+        $dataRoot = rtrim(strtr(DOL_DATA_ROOT, DIRECTORY_SEPARATOR, '/'), '/');
+        if (version_compare(DOL_VERSION, '24.0.0', '>=') && strpos($templatePath, $dataRoot . '/ecm/') !== 0 && strpos($templatePath, $dataRoot . '/doctemplates/') !== 0) {
+            $mirrorDir  = $dataRoot . '/doctemplates/' . $this->module . '/' . $documentType;
+            $mirrorPath = $mirrorDir . '/' . basename($templatePath);
+            if (!dol_is_file($mirrorPath) || filesize($mirrorPath) != filesize($templatePath) || filemtime($mirrorPath) < filemtime($templatePath)) {
+                dol_mkdir($mirrorDir);
+                if (dol_copy($templatePath, $mirrorPath, '0', 1) < 1) {
+                    $this->error    = $langs->trans('ErrorFailToCopyFile', $templatePath, $mirrorPath);
+                    $this->errors[] = $this->error;
+                    return '';
+                }
+            }
+            $templatePath = $mirrorPath;
+        }
+
+        return $modelName . ':' . $templatePath;
+    }
+
+    /**
+     * Get the directories a document template of the module can be read from
+     *
+     * @param  string   $documentType Document type of the model asked for the generation
+     * @return string[]               Existing absolute directories, slash ended
+     */
+    protected function getDocumentTemplateDirs(string $documentType): array
+    {
+        $dirs = [
+            dol_buildpath('/' . $this->module . '/documents/doctemplates/'),
+            DOL_DATA_ROOT . '/ecm/' . $this->module . '/',
+            DOL_DATA_ROOT . '/doctemplates/' . $this->module . '/'
+        ];
+
+        // The module declares where its templates live, the custom ones included
+        $constPrefix = dol_strtoupper($this->module . '_' . $documentType);
+        foreach (['_ADDON_ODT_PATH', '_CUSTOM_ADDON_ODT_PATH', '_SPECIMEN_ADDON_ODT_PATH'] as $constSuffix) {
+            $constValue = getDolGlobalString($constPrefix . $constSuffix);
+            foreach (explode(',', preg_replace('/[\r\n]+/', ',', $constValue)) as $dir) {
+                $dirs[] = str_replace(['DOL_DATA_ROOT', 'DOL_DOCUMENT_ROOT'], [DOL_DATA_ROOT, DOL_DOCUMENT_ROOT], trim($dir));
+            }
+        }
+
+        $templateDirs = [];
+        foreach ($dirs as $dir) {
+            if (!dol_strlen($dir)) {
+                continue;
+            }
+            $realDir = realpath($dir);
+            if ($realDir === false) {
+                continue;
+            }
+            $templateDirs[] = rtrim(strtr($realDir, DIRECTORY_SEPARATOR, '/'), '/') . '/';
+        }
+
+        return $templateDirs;
     }
 
     /**
@@ -200,12 +328,16 @@ abstract class SaturneDocuments extends SaturneObject
      * @param  string    $moduleNameLowerCase Module name in lowercase
      * @param  string    $fileDir             File directory
      * @param  string    $fileType            Type of file
-     * @param  int       $entity              Entity
+     * @param  int       $entity              Entity (0 = current entity)
      * @return array|int $result              Array of document or -1 if not found
      */
-    public function getLastDocument(string $moduleNameLowerCase = '', string $fileDir = '', string $fileType = '', int $entity = 1)
+    public function getLastDocument(string $moduleNameLowerCase = '', string $fileDir = '', string $fileType = '', int $entity = 0)
     {
+        global $conf;
+
         require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+
+        $entity = $entity > 0 ? $entity : $conf->entity;
 
         $fileDir   = DOL_DATA_ROOT . '/' . ($entity > 1 ? $entity . '/' : '') . $moduleNameLowerCase . '/' . $fileDir;
         $fileList  = dol_dir_list($fileDir, 'files', 0, '(\.' . $fileType .  ')', '', 'date', 'SORT_DESC', 1);
@@ -225,12 +357,14 @@ abstract class SaturneDocuments extends SaturneObject
      * @param  string $fileDir             File directory
      * @param  string $fileType            Type of file
      * @param  string $icon                Icon for download button
-     * @param  int    $entity              Entity
+     * @param  int    $entity              Entity (0 = current entity)
      * @return string                      String of html button
      */
-    public function showUrlOfLastGeneratedDocument(string $moduleNameLowerCase = '', string $fileDir = '', string $fileType = '', string $icon = 'fa-file-word', int $entity = 1): string
+    public function showUrlOfLastGeneratedDocument(string $moduleNameLowerCase = '', string $fileDir = '', string $fileType = '', string $icon = 'fa-file-word', int $entity = 0): string
     {
-        global $langs;
+        global $conf, $langs;
+
+        $entity = $entity > 0 ? $entity : $conf->entity;
 
         $out      = '';
         $document = $this->getLastDocument($moduleNameLowerCase, $fileDir, $fileType, $entity);

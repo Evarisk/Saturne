@@ -250,7 +250,7 @@ class SaturneElement extends SaturneObject
         $this->status     = self::STATUS_TRASHED;
         $this->fk_element = getDolGlobalInt(dol_strtoupper($this->module) . '_' . dol_strtoupper($this->element) . '_TRASH');
 
-        return $this->update($user, true);
+        return $this->update($user, 1);
     }
 
     /**

@@ -17,7 +17,7 @@ if ($action == 'pdfGeneration') {
             $file,
             array(
                 'PATH_TO_TMP'     => $conf->$moduleNameLowerCase->dir_temp,
-                'ZIP_PROXY'       => 'PclZipProxy', // PhpZipProxy or PclZipProxy. Got "bad compression method" error when using PhpZipProxy.
+                'ZIP_PROXY'       => getDolGlobalString('MAIN_ODF_ZIP_PROXY', 'PclZipProxy'), // PhpZipProxy or PclZipProxy. Got "bad compression method" error when using PhpZipProxy.
                 'DELIMITER_LEFT'  => '{',
                 'DELIMITER_RIGHT' => '}'
             )
@@ -39,6 +39,13 @@ if ($action == 'pdfGeneration') {
     if (! empty($conf->global->MAIN_ODT_AS_PDF) && $conf->global->$manualPdfGenerationConf > 0) {
         try {
             $odfHandler->exportAsAttachedPDF($file);
+
+            // LibreOffice exits with code 0 even when it could not load the source file,
+            // so the PDF has to be checked before announcing a success
+            if (!file_exists($upload_dir . '/' . $fileInfos['dirname'] . '/' . $pdfName)) {
+                throw new Exception('ODT to PDF conversion did not generate any file : ' . $pdfName);
+            }
+
             $documentUrl = DOL_URL_ROOT . '/document.php';
             setEventMessages($langs->trans("FileGenerated") . ' - ' . '<a href=' .  $documentUrl . '?modulepart=' . $moduleNameLowerCase . '&amp;file=' . urlencode($fileInfos['dirname'] . '/' . $pdfName) . '&entity=' . $conf->entity . '"' . '>' . $pdfName . '</a>', null);
         } catch (Exception $e) {

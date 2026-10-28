@@ -26,9 +26,15 @@ EmptyMediaGallery         = The media library is empty
 SearchFile                = Search for a file
 PhotoWellSent             = The photo has been added to the media library
 PhotoNotSent              = The photo was not sent correctly
+MediaData                 = Media setup
 ConfirmUnlinkMedia        = Are you sure you want to detach the selected media ?
+TakePhoto                 = Take a photo
 AddPhotoFromComputer      = Add a photo from device gallery
 AddPhotoFromMediaGallery  = Add a photo from media gallery
+DeletePhoto               = Delete photo
+DeletePhotoConfirmation   = Delete this photo?
+AvailableTools            = Available tools
+Quality                   = Quality
 
 # Config page
 MediaMaxWidthMini                    = Minimum media width
@@ -51,6 +57,9 @@ DisplayNumberMediaGallery            = Number of media displayed in the media li
 DisplayNumberMediaGalleryDescription = Displays 8 media (default) per page in the media library
 MediaSizeDocument                    = Media size
 MediaSizeDocumentDescription         = Selection of media size in documents
+ShowOnlyMediasAddedToday             = Only show media added today
+ShowOnlyUnlinkedMedias               = Only show media not linked to any object
+UnlinkedMedias                       = Unlinked media
 
 # Media lib admin page
 MediaLib                  = Media Library
@@ -77,3 +86,35 @@ FileDeleted               = The file has been deleted
 ErrorFileNotDeleted       = The file could not be deleted
 
 AIAnalyseImage	= Image analysis: %s
+AnalyseImageWithAI = Analyse the image with AI
+ErrorImageAnalysis = The image analysis failed
+
+# Multi-upload
+ValidateAll = Validate all
+
+# Agenda
+MediaAddedToLibraryTrigger=Media added to the library: %s
+MediaLinkedTrigger=Media assigned: %s
+SetPhotoAsFavorite=Display this photo on the record
+
+# Pending medias
+Gallery=Gallery
+PendingMedias=Pending
+NoPendingMedia=No pending media: every one of them is assigned to a record
+SelectAMediaToPreview=Select a media to preview it
+SelectedMedias=selected
+AddADescription=Add a description
+SelectAnObjectType=Pick a type first
+AssignSelectedMedias=Assign
+AllMedias=All medias
+AssignedTo=Assigned to
+ViewDetails=Details
+ViewLargeIcons=Large icons
+ViewCompactList=Compact list
+UnlinkMediaFromRecord=Unlink this media from the record
+
+# Library catch up
+SyncMediaLibrary=Add to the library the photos of the records it does not hold yet
+SyncMediaLibraryButton=Retrieve all photos
+SyncMediaLibraryDone=Library up to date: %s photo(s) added, %s of them homonyms under another name; %s already there; %s left out (signatures, confidential documents, work folders)
+SyncMediaLibraryError=The catch up of the library failed
