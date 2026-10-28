@@ -56,6 +56,12 @@ function saturne_header(int $load_media_gallery = 0, string $head = '', string $
 {
     global $moduleNameLowerCase;
 
+    // Modern back office theme (css/scss/theme): logged-in pages only, the public pages and the PWAs
+    // keep their own design
+    if (!defined('NOLOGIN') && !preg_match('/(^|\s)(template-pwa|page-public[\w-]*)(\s|$)/', $morecssonbody)) {
+        $morecssonbody = trim('saturne-theme ' . $morecssonbody);
+    }
+
     //CSS
     $cssList[]       = '/saturne/css/saturne.min.css';
     $relativeCssPath = $moduleNameLowerCase . '/css/' . $moduleNameLowerCase . '.min.css';

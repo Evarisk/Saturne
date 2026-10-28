@@ -1,0 +1,248 @@
+@use 'tokens' as *;
+
+/* Saturne modern theme: Dolibarr action buttons and Saturne wpeo-button */
+
+#{$theme-scope} {
+  /* ---- Dolibarr actions of a card (tabsAction) ---- */
+
+  div.tabsAction {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0 22px;
+  }
+
+  div.tabsAction > a.butAction,
+  div.tabsAction > a.butActionRefused,
+  div.tabsAction > a.butActionDelete,
+  div.tabsAction > span.butAction,
+  div.tabsAction > span.butActionRefused,
+  div.tabsAction > span.butActionDelete,
+  div.tabsAction > div.divButAction > .butAction,
+  div.tabsAction > div.divButAction > .butActionRefused,
+  div.tabsAction > div.divButAction > .butActionDelete,
+  div.tabsAction > .dropdown > .dropdown-toggle {
+    margin: 0 !important;
+  }
+
+  .butAction,
+  .butAction:link,
+  .butAction:visited,
+  .butAction:hover,
+  .butAction:active,
+  .butActionDelete,
+  .butActionDelete:link,
+  .butActionDelete:visited,
+  .butActionDelete:hover,
+  .butActionDelete:active,
+  .butActionRefused {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    margin: 0 4px;
+    padding: 8px 14px;
+    border: 1px solid transparent;
+    border-radius: $theme-radius;
+    font-family: $theme-font !important;
+    font-size: 13px;
+    font-weight: 600 !important;
+    line-height: 1.3;
+    letter-spacing: 0;
+    text-transform: none;
+    transition: background-color $theme-transition, box-shadow $theme-transition, transform $theme-transition;
+  }
+
+  .butAction,
+  .butAction:link,
+  .butAction:visited {
+    background: $theme-primary;
+    color: #ffffff !important;
+    box-shadow: 0 1px 2px rgba(13, 138, 255, 0.35);
+  }
+
+  .butAction:hover,
+  .dropdown-holder.open > .butAction {
+    background: $theme-primary-strong;
+    box-shadow: 0 4px 12px rgba(13, 138, 255, 0.3);
+  }
+
+  .butAction:active {
+    transform: scale(0.98);
+  }
+
+  .butActionDelete,
+  .butActionDelete:link,
+  .butActionDelete:visited,
+  .butActionDelete:hover,
+  .butActionDelete:active {
+    background: $theme-danger-soft !important;
+    color: #c53030 !important;
+    box-shadow: none;
+  }
+
+  .butActionDelete:hover {
+    background: rgba(224, 83, 83, 0.2) !important;
+  }
+
+  .butActionRefused {
+    background: $theme-surface-soft;
+    border: 1px solid $theme-border;
+    color: $theme-faint !important;
+    opacity: 1;
+  }
+
+  .butAction .fas,
+  .butAction .far,
+  .butActionRefused .fas,
+  .butActionRefused .far,
+  .butActionDelete .fas,
+  .butActionDelete .far {
+    font-size: 12px;
+  }
+
+  /* "New" buttons next to a list title */
+  a.btnTitle,
+  span.btnTitle {
+    min-width: 34px;
+    height: 34px;
+    border: 1px solid $theme-border;
+    border-radius: $theme-radius;
+    background: $theme-surface;
+    box-shadow: $theme-shadow-sm;
+    color: $theme-text-soft;
+    transition: border-color $theme-transition, color $theme-transition;
+
+    &:hover {
+      border-color: $theme-primary;
+      color: $theme-primary;
+      box-shadow: $theme-shadow-sm;
+    }
+
+    &.btnTitleSelected {
+      border-color: $theme-primary;
+      background: $theme-primary-soft;
+      color: $theme-primary;
+    }
+  }
+
+  a.btnTitle.btnTitlePlus .fa-plus-circle,
+  span.btnTitle .fa-plus-circle {
+    color: $theme-primary;
+  }
+
+  /* "+" next to a select of a create / edit form (eldy keeps it navy) */
+  a.butActionNew > span.fa-plus-circle {
+    color: $theme-primary;
+  }
+
+  a.butActionNew:hover > span.fa-plus-circle {
+    color: $theme-primary-strong;
+  }
+
+  /* ---- Submit buttons of the Dolibarr forms ---- */
+
+  input.button:not(.buttongen):not(.smallpaddingimp),
+  button.button:not(.buttongen):not(.smallpaddingimp),
+  a.button:not(.buttongen) {
+    padding: 8px 16px;
+    border: 1px solid transparent;
+    border-radius: $theme-radius;
+    background: $theme-primary;
+    color: #ffffff !important;
+    font-family: $theme-font;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: none;
+    box-shadow: 0 1px 2px rgba(13, 138, 255, 0.35);
+    transition: background-color $theme-transition;
+
+    &:hover {
+      background: $theme-primary-strong;
+      box-shadow: 0 4px 12px rgba(13, 138, 255, 0.3);
+    }
+  }
+
+  /* Some module cancel buttons only carry name="cancel" */
+  input.button.button-cancel:not(.buttongen),
+  button.button.button-cancel:not(.buttongen),
+  a.button.button-cancel:not(.buttongen),
+  input.button[name="cancel"]:not(.buttongen),
+  button.button[name="cancel"]:not(.buttongen) {
+    background: $theme-surface !important;
+    border: 1px solid $theme-border-strong;
+    color: $theme-text-soft !important;
+    box-shadow: none;
+
+    &:hover {
+      background: $theme-surface-soft !important;
+    }
+  }
+
+  /* ---- Saturne buttons ---- */
+
+  .wpeo-button {
+    border-width: 1px;
+    border-radius: $theme-radius;
+    font-weight: 600;
+    transition: background-color $theme-transition, border-color $theme-transition, box-shadow $theme-transition, color $theme-transition;
+
+    &:hover {
+      box-shadow: inset 0 -2.6em rgba(255, 255, 255, 0.14);
+    }
+
+    &.button-rounded {
+      border-radius: 50%;
+    }
+
+    &.button-grey {
+      background: $theme-surface-soft;
+      border-color: $theme-border;
+      color: $theme-text-soft;
+
+      &:hover {
+        background: $theme-bg;
+        box-shadow: none;
+        color: $theme-text;
+      }
+    }
+
+    &.button-light {
+      border-color: $theme-border;
+    }
+
+    &.button-secondary {
+      background: $theme-navy;
+      border-color: $theme-navy;
+    }
+
+    /* The Saturne green (#47e58e) carries a white label badly ("Mettre à jour" of the modals) */
+    &.button-green {
+      background: $theme-success;
+      border-color: $theme-success;
+      color: #ffffff;
+    }
+
+    &.button-transparent {
+      border-color: transparent;
+      color: $theme-faint;
+
+      &:hover {
+        background: $theme-bg;
+        color: $theme-text;
+      }
+    }
+
+    &.button-disable {
+      background: $theme-border !important;
+      border-color: $theme-border !important;
+      color: $theme-faint !important;
+    }
+
+    &.button-bordered {
+      background: $theme-surface;
+    }
+  }
+}

@@ -1,0 +1,127 @@
+@use 'tokens' as *;
+
+/* Saturne modern theme: status badges, as tinted pills (same recipe as the DigiQuali PWA) */
+
+#{$theme-scope} {
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: $theme-radius-pill;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: 1.4;
+    text-shadow: none;
+  }
+
+  /* Status dots (dolGetStatus mode 3) keep their round shape */
+  .badge.badge-dot {
+    width: 10px;
+    height: 10px;
+    padding: 0;
+    border-radius: 50%;
+  }
+
+  /* The tinted pill colours below would turn the dots into pale outlines: solid fills instead */
+  .badge.badge-dot:is(.badge-status4, .badge-status4b, .badge-status7, .badge-status11) {
+    border: none !important;
+    background: $theme-success !important;
+  }
+
+  .badge.badge-dot:is(.badge-status1, .badge-status1b, .badge-status2, .badge-status3) {
+    border: none !important;
+    background: $theme-yellow !important;
+  }
+
+  .badge.badge-dot:is(.badge-status8, .badge-status10) {
+    border: none !important;
+    background: $theme-danger !important;
+  }
+
+  .badge.badge-dot:is(.badge-status0, .badge-status5, .badge-status6, .badge-status9) {
+    border: none !important;
+    background: $theme-faint !important;
+  }
+
+  /* Draft */
+  .badge-status0 {
+    background: $theme-bg !important;
+    border: 1px solid $theme-border-strong !important;
+    color: $theme-muted !important;
+  }
+
+  /* Validated, approved, waiting for a signature (Dolibarr amber statuses) */
+  .badge-status1,
+  .badge-status1b,
+  .badge-status2,
+  .badge-status3 {
+    background: $theme-warning-soft !important;
+    border: 1px solid rgba(233, 173, 79, 0.45) !important;
+    color: #a16207 !important;
+  }
+
+  /* Done (Dolibarr green statuses) */
+  .badge-status4,
+  .badge-status4b,
+  .badge-status7,
+  .badge-status11 {
+    background: $theme-success-soft !important;
+    border: 1px solid rgba(22, 163, 74, 0.3) !important;
+    color: #15803d !important;
+  }
+
+  /* Closed, cancelled */
+  .badge-status5,
+  .badge-status6,
+  .badge-status9 {
+    background: $theme-bg !important;
+    border: 1px solid $theme-border-strong !important;
+    color: $theme-text-soft !important;
+  }
+
+  /* Refused, failed. Status 8 keeps the red of eldy: DigiQuali gives it to the "not compliant"
+     verdicts, even if most modules use it for their archived objects */
+  .badge-status8,
+  .badge-status10 {
+    background: $theme-danger-soft !important;
+    border: 1px solid rgba(224, 83, 83, 0.3) !important;
+    color: #b91c1c !important;
+  }
+
+  .badge-info,
+  .badge-secondary {
+    background: $theme-bg;
+    border: 1px solid $theme-border;
+    color: $theme-text-soft !important;
+  }
+
+  .badge-primary {
+    background: $theme-primary;
+    color: #ffffff;
+  }
+
+  .badge-danger {
+    background: $theme-danger;
+    color: #ffffff;
+  }
+
+  .badge-success {
+    background: $theme-success;
+    color: #ffffff;
+  }
+
+  .badge-warning {
+    background: $theme-yellow;
+    color: #ffffff;
+  }
+
+  /* Tags / categories */
+  ul.select2-choices li,
+  span.categtextwhite,
+  li.select2-search-choice,
+  .noborderoncategories {
+    border-radius: $theme-radius-pill !important;
+  }
+}

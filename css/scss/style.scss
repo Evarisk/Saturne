@@ -4,6 +4,9 @@
 @use "modules/modules";
 @use "page/page";
 
+// Modern back office theme, emitted after the other partials so that it wins over their rules
+@use "theme/theme";
+
 .ui-dialog.ui-corner-all.ui-widget.ui-widget-content.ui-front.ui-draggable.ui-resizable.preview-photo {
   z-index: 2100 !important;
 }

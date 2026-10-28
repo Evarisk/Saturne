@@ -1,0 +1,226 @@
+@use 'tokens' as *;
+
+/* Saturne modern theme: dashboards (Saturne infobox widgets and graphs) and notices */
+
+#{$theme-scope} {
+  /* ---- Widgets ---- */
+
+  .wpeo-infobox-container.box-flex-container {
+    gap: 16px;
+  }
+
+  .wpeo-infobox {
+    padding: 18px 20px;
+    border: 1px solid $theme-border;
+    border-radius: $theme-radius-lg;
+    box-shadow: $theme-shadow-sm;
+    transition: box-shadow $theme-transition;
+
+    &:hover {
+      box-shadow: $theme-shadow;
+    }
+
+    .wpeo-infobox__header {
+      gap: 10px;
+
+      .header__icon-container {
+        width: 36px;
+        min-width: 36px;
+        height: 36px;
+        line-height: 36px;
+        border-radius: $theme-radius;
+
+        .header__icon-background {
+          opacity: 0.12;
+        }
+
+        .header__icon {
+          font-size: 15px;
+          line-height: 36px;
+        }
+      }
+
+      .header__title {
+        font-size: 15px;
+        color: $theme-text;
+      }
+
+      .header__close {
+        color: $theme-border-strong;
+        font-size: 13px;
+
+        &:hover {
+          color: $theme-text;
+        }
+      }
+    }
+
+    .wpeo-infobox__body {
+      margin-top: 12px;
+
+      .body__row-container .body__row {
+        margin: 0;
+        padding: 7px 0;
+        border-top: 1px solid $theme-border-soft;
+
+        &:first-child {
+          border-top: none;
+        }
+
+        .row__libelle {
+          font-size: 13px;
+          color: $theme-muted;
+
+          .fa-info-circle {
+            color: $theme-faint;
+          }
+        }
+
+        /* A long label must not squeeze the value pill onto two lines */
+        .row__data-container {
+          flex-shrink: 0;
+        }
+
+        .row__data-container .row__data {
+          white-space: nowrap;
+          margin: 0;
+          padding: 2px 10px;
+          border-radius: $theme-radius-pill;
+          background: $theme-bg;
+          color: $theme-text;
+          font-size: 13px;
+          font-weight: 700;
+          font-variant-numeric: tabular-nums;
+        }
+      }
+
+      .body__content {
+        color: $theme-muted;
+      }
+    }
+  }
+
+  /* ---- Graphs ---- */
+
+  .graph-filter-container {
+    margin: 22px 0 12px;
+  }
+
+  .graph-dashboard.wpeo-grid {
+    gap: 16px;
+    /* The negative margins of wpeo-grid compensate a padding the cards no longer have */
+    margin-left: 0;
+    margin-right: 0;
+
+    /* wpeo-grid forces its own padding with !important: the card keeps its inner spacing */
+    > div {
+      box-sizing: border-box;
+      padding: 14px 18px 18px !important;
+      @include theme-card;
+    }
+
+    /* Two 50% cards plus the gap would not fit a row: one graph per row and half the page empty */
+    &.grid-2 > div {
+      width: calc(50% - 8px);
+      min-width: 0;
+    }
+
+    /* chart.js fixes the canvas width in pixels at first render: without this cap the graphs keep
+       #id-right (a table cell) wider than the screen */
+    canvas {
+      max-width: 100%;
+    }
+
+    /* Full width lists (risks by danger category, tickets by year): their wide table needs the room
+       of a thinner card, and scrolls inside it rather than widening the whole page */
+    > div:has(> .div-table-responsive-no-min) {
+      padding: 10px 8px 8px !important;
+    }
+
+    .div-table-responsive-no-min {
+      contain: inline-size;
+    }
+
+    @media (max-width: $theme-media-small) {
+      &.grid-2 > div {
+        width: 100%;
+      }
+    }
+
+    table.table-fiche-title .titre {
+      font-size: 15px;
+    }
+  }
+
+  /* ---- Notices ---- */
+
+  .wpeo-notice {
+    border: 1px solid $theme-border;
+    border-left-width: 4px;
+    border-radius: $theme-radius-lg;
+    background: $theme-surface;
+    box-shadow: $theme-shadow-sm;
+
+    .notice-title {
+      color: $theme-text;
+      font-weight: 700;
+
+      /* The notice links keep their status colour otherwise: the amber one reads badly on white */
+      a {
+        margin: 0;
+        color: inherit;
+      }
+    }
+
+    &.notice-warning .notice-title {
+      color: #a16207;
+    }
+
+    .notice-subtitle {
+      color: $theme-text-soft;
+    }
+
+    .notice-close {
+      color: $theme-faint;
+    }
+
+    &.notice-info {
+      border-color: rgba(13, 138, 255, 0.3);
+      border-left-color: $theme-primary;
+      background: linear-gradient(90deg, rgba(13, 138, 255, 0.06), $theme-surface 60%);
+    }
+
+    &.notice-success {
+      border-color: rgba(22, 163, 74, 0.3);
+      border-left-color: $theme-success;
+      background: linear-gradient(90deg, rgba(22, 163, 74, 0.06), $theme-surface 60%);
+    }
+
+    &.notice-warning {
+      border-color: rgba(233, 173, 79, 0.45);
+      border-left-color: $theme-yellow;
+      background: linear-gradient(90deg, rgba(233, 173, 79, 0.08), $theme-surface 60%);
+    }
+
+    &.notice-error {
+      border-color: rgba(224, 83, 83, 0.35);
+      border-left-color: $theme-danger;
+      background: linear-gradient(90deg, rgba(224, 83, 83, 0.06), $theme-surface 60%);
+    }
+  }
+
+  /* Dolibarr info / warning / error boxes */
+  div.info,
+  div.warning,
+  div.error {
+    border-radius: $theme-radius;
+    border-left-width: 4px;
+  }
+
+  div.info {
+    border-color: rgba(13, 138, 255, 0.3);
+    border-left-color: $theme-primary;
+    background: rgba(13, 138, 255, 0.06);
+    color: $theme-text;
+  }
+}
