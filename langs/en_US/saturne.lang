@@ -29,7 +29,10 @@ TutoImage           = Image
 LireModule                  = Read %s
 ReadModule                  = Read %s (read)
 ReadAdminPage               = Access the module configuration %s
+WriteAdminPage              = Change the module configuration %s
 YouDontHaveTheRightOnObject = You don't have the rights on %s
+ReadOnlyAdminAccessTitle    = Read-only configuration
+ReadOnlyAdminAccessMessage  = You can read these settings but not change them: ask an administrator for the "Change the module configuration" permission.
 
 
 

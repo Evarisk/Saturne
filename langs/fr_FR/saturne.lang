@@ -29,7 +29,10 @@ TutoImage           = Image
 LireModule                  = Consulter %s
 ReadModule                  = Consulter %s (read)
 ReadAdminPage               = Accéder à la configuration du module %s
+WriteAdminPage              = Modifier la configuration du module %s
 YouDontHaveTheRightOnObject = Vous n'avez pas les droits sur %s
+ReadOnlyAdminAccessTitle    = Configuration en lecture seule
+ReadOnlyAdminAccessMessage  = Vous pouvez consulter ces réglages mais pas les modifier : demandez à un administrateur le droit « Modifier la configuration du module ».
 
 
 

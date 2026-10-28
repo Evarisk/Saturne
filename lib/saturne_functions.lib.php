@@ -1474,17 +1474,26 @@ function saturne_get_nophoto_placeholder(int $size = 40): string
 /**
  * Return whether the current user may change a module setting.
  *
- * The core ajax component that writes the constants (core/ajax/constantonoff.php)
- * only answers to administrators. Without this check a read-only user is shown a
- * switch that silently does nothing, instead of the state of the setting.
+ * An administrator always may. Another user needs the adminpage->write permission of the
+ * module: a module that does not declare it keeps its settings to the administrators, while
+ * the adminpage->read permission only opens the pages.
  *
- * @return int 1 if the user may write the module settings, 0 otherwise
+ * @param  string $moduleNameLowerCase Module whose settings are written, the module of the current page by default
+ * @return int                         1 if the user may write the module settings, 0 otherwise
  */
-function saturne_check_admin_write_access(): int
+function saturne_check_admin_write_access(string $moduleNameLowerCase = ''): int
 {
     global $user;
 
-    return (int) !empty($user->admin);
+    if (!empty($user->admin)) {
+        return 1;
+    }
+
+    if (empty($moduleNameLowerCase)) {
+        $moduleNameLowerCase = (string) ($GLOBALS['moduleNameLowerCase'] ?? '');
+    }
+
+    return (int) (!empty($moduleNameLowerCase) && $user->hasRight($moduleNameLowerCase, 'adminpage', 'write'));
 }
 
 /**
@@ -1498,6 +1507,10 @@ function saturne_check_admin_write_access(): int
  * Without the write permission the switch is rendered disabled: the user reads the state
  * of the setting but cannot act on it.
  *
+ * The core ajax component (core/ajax/constantonoff.php) only answers to administrators: a user
+ * holding the adminpage->write permission of the module gets a link to the page instead,
+ * handled by core/tpl/actions/admin_conf_actions.tpl.php that the page must include.
+ *
  * @param  string   $constName         Name of the constant to switch
  * @param  int      $permissionToWrite 1 to render an active switch, 0 for a read-only one
  * @param  int|null $entity            Entity to write the constant for, current entity by default
@@ -1505,7 +1518,27 @@ function saturne_check_admin_write_access(): int
  */
 function saturne_constant_onoff(string $constName, int $permissionToWrite = 1, ?int $entity = null): string
 {
+    global $conf, $langs, $user;
+
     require_once DOL_DOCUMENT_ROOT . '/core/lib/ajax.lib.php';
+
+    if (empty($user->admin) && !empty($permissionToWrite)) {
+        // Generic setting pages of Saturne serve every module, the link keeps the module and the object it shows
+        $urlParameters = [
+            'action' => (getDolGlobalString($constName) ? 'del_' : 'set_') . $constName,
+            'token'  => newToken(),
+            'entity' => $entity ?? $conf->entity
+        ];
+        foreach (['module_name', 'object_type'] as $contextParameter) {
+            if (GETPOST($contextParameter, 'alpha') !== '') {
+                $urlParameters[$contextParameter] = GETPOST($contextParameter, 'alpha');
+            }
+        }
+
+        $statusPicto = getDolGlobalString($constName) ? img_picto($langs->trans('Enabled'), 'switch_on') : img_picto($langs->trans('Disabled'), 'switch_off');
+
+        return '<a class="reposition inline-block" href="' . $_SERVER['PHP_SELF'] . '?' . http_build_query($urlParameters) . '">' . $statusPicto . '</a>';
+    }
 
     return ajax_constantonoff($constName, [], $entity, 0, 0, 0, 2, 0, 1, '', '', 'inline-block', 0, '', empty($permissionToWrite) ? 1 : 0);
 }
