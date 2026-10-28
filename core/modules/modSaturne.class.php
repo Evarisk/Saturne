@@ -344,7 +344,7 @@ class modSaturne extends DolibarrModules
         dolibarr_set_const($this->db, 'SATURNE_VERSION_DB_VERSION', $this->version, 'chaine', 0, '', $conf->entity);
 
         // Load Saturne libraries
-        require_once __DIR__ . '/../../../saturne/class/saturnemail.class.php';
+        require_once __DIR__ . '/../../class/saturnemail.class.php';
 
         $saturneMail = new SaturneMail($this->db);
 

@@ -23,7 +23,7 @@
  */
 
 // Load Saturne libraries
-require_once __DIR__ . '/../../saturne/class/saturneobject.class.php';
+require_once __DIR__ . '/saturneobject.class.php';
 
 /**
  * Class for SaturneElement
