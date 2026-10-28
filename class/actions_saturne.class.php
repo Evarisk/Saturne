@@ -23,7 +23,7 @@
  */
 
 // Load Saturne Libraries
-require_once __DIR__ . '/../../saturne/lib/object.lib.php';
+require_once __DIR__ . '/../lib/object.lib.php';
 
 /**
  * Class ActionsSaturne

@@ -162,6 +162,19 @@ jobs:
                     --ignore=vendor,node_modules,css,js \
                     .
 
+            # PHP resout __DIR__ vers la cible d'un lien symbolique, dont le dossier ne
+            # s'appelle pas forcement « saturne » (un git clone donne « Saturne », et Linux
+            # respecte la casse). Saturne s'inclut donc par des chemins relatifs au fichier,
+            # jamais en remontant puis en redescendant par son nom.
+            - name: Inclusions de Saturne par son nom
+              if: matrix.step == 'phpcs'
+              working-directory: htdocs/custom/saturne
+              run: |
+                  if grep -rnE "(__DIR__|dirname\(__FILE__\))[^;]*['\"]/?(\.\./)+saturne/" --include='*.php' --exclude-dir=vendor --exclude-dir=node_modules .; then
+                    echo "::error::Saturne s'inclut par son nom de dossier : utiliser un chemin relatif au fichier (__DIR__ . '/../lib/...')."
+                    exit 1
+                  fi
+
             # ── JSHint ───────────────────────────────────────────────────────────
             - name: Install Node dependencies
               if: matrix.step == 'jshint'
