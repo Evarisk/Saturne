@@ -132,22 +132,22 @@ class ActionsSaturne
      */
     public function addHtmlHeader(array $parameters): int
     {
-        $saturne_js_path = dol_buildpath('/custom/saturne/js/saturne.min.js', 0);
-        $saturne_js_mtime = file_exists($saturne_js_path) ? filemtime($saturne_js_path) : 1;
-        $saturne_js_url = DOL_URL_ROOT . '/custom/saturne/js/saturne.min.js?v=' . $saturne_js_mtime;
+        require_once __DIR__ . '/../lib/asset.lib.php';
+
+        $saturne_js_url = saturne_asset_full_url('/saturne/js/saturne.min.js');
 
         if (strpos($parameters['context'], 'usercard') !== false) {
             $resourcesRequired = [
-                'css'       => '/custom/saturne/css/saturne.min.css',
+                'css'       => saturne_asset_full_url('/saturne/css/saturne.min.css'),
                 'js'        => $saturne_js_url,
-                'signature' => '/custom/saturne/js/includes/signature-pad.min.js'
+                'signature' => saturne_asset_full_url('/saturne/js/includes/signature-pad.min.js')
             ];
 
             $out  = '<!-- Includes CSS added by module saturne -->';
-            $out .= '<link rel="stylesheet" type="text/css" href="' . dol_buildpath($resourcesRequired['css'], 1) . '">';
+            $out .= '<link rel="stylesheet" type="text/css" href="' . $resourcesRequired['css'] . '">';
             $out .= '<!-- Includes JS added by module saturne -->';
             $out .= '<script src="' . $resourcesRequired['js'] . '"></script>';
-            $out .= '<script src="' . dol_buildpath($resourcesRequired['signature'], 1) . '"></script>';
+            $out .= '<script src="' . $resourcesRequired['signature'] . '"></script>';
 
             $this->resprints = $out;
         } elseif (strpos($parameters['context'], 'emailtemplates')) {
@@ -169,6 +169,21 @@ class ActionsSaturne
         $out .= "\n" . 'window.saturne.config.enableMaxlengthCounter = ' . getDolGlobalInt('SATURNE_ENABLE_MAXLENGTH_COUNTER', 0) . ';';
         $out .= "\n" . '</script>' . "\n";
         $this->resprints = $out;
+
+        return 0;
+    }
+
+    /**
+     * Overloading the llxHeader function : replacing the parent's function with the one below
+     *
+     * @param  array $parameters Hook metadatas (context, etc...)
+     * @return int               0 < on error, 0 on success, 1 to replace standard code
+     */
+    public function llxHeader(array $parameters): int
+    {
+        require_once __DIR__ . '/../lib/asset.lib.php';
+
+        saturne_version_llxheader_assets($parameters);
 
         return 0;
     }
