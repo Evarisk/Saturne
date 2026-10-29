@@ -24,6 +24,7 @@
 
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formprojet.class.php';
 
+require_once __DIR__ . '/asset.lib.php';
 require_once __DIR__ . '/medias.lib.php';
 require_once __DIR__ . '/pagination.lib.php';
 require_once __DIR__ . '/documents.lib.php';
@@ -65,12 +66,11 @@ function saturne_header(int $load_media_gallery = 0, string $head = '', string $
     }
     $cssList[] = 'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css';
 
-    $arrayofcss = array_unique(array_merge($arrayofcss ?? [], $cssList));
+    // Assets are versioned here and not only by the llxHeader hook, as public pages may reach llxHeader() without any hook context
+    $arrayofcss = array_map('saturne_htmlhead_asset_url', array_unique(array_merge($arrayofcss ?? [], $cssList)));
 
     //JS
-    $saturne_js_path = dol_buildpath('/saturne/js/saturne.min.js', 0);
-    $saturne_js_mtime = file_exists($saturne_js_path) ? filemtime($saturne_js_path) : 1;
-    $jsList[] = '/saturne/js/saturne.min.js?v=' . $saturne_js_mtime;
+    $jsList[] = '/saturne/js/saturne.min.js';
 
     if (!empty($load_media_gallery)) {
         $jsList[] = '/saturne/js/includes/signature-pad.min.js';
@@ -84,7 +84,7 @@ function saturne_header(int $load_media_gallery = 0, string $head = '', string $
     $jsList[] = 'https://cdn.jsdelivr.net/npm/flatpickr';
     $jsList[] = 'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js';
 
-    $arrayofjs = array_unique(array_merge($arrayofjs ?? [], $jsList));
+    $arrayofjs = array_map('saturne_htmlhead_asset_url', array_unique(array_merge($arrayofjs ?? [], $jsList)));
 
     llxHeader($head, $title, $help_url, $target, $disablejs, $disablehead, $arrayofjs, $arrayofcss, $morequerystring, $morecssonbody, $replacemainareaby, $disablenofollow, $disablenoindex);
 
