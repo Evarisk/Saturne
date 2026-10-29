@@ -576,6 +576,11 @@ include __DIR__ . '/photo_editor_modal.tpl.php'; ?>
 <!-- START MEDIA GALLERY MODAL -->
 <div class="wpeo-modal modal-photo" id="media_gallery" data-id="<?php echo (isset($object) && $object) ? $object->id : 0 ?>">
     <div class="modal-container wpeo-modal-event">
+        <!-- Covers the gallery while files are dragged over it: dropping them adds them to the library -->
+        <div class="media-gallery-dropzone" data-label-ignored="<?php echo dol_escape_htmltag($langs->trans('DroppedFilesNotImages', '%s')); ?>">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <span><?php echo $langs->trans('DropMediasHere'); ?></span>
+        </div>
         <!-- Modal-Header -->
         <div class="modal-header media-gallery-header">
                         <div class="media-gallery-title-wrapper" style="display: flex; flex-direction: column; align-items: center; margin-right: 10px;">

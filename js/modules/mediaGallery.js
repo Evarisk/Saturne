@@ -70,7 +70,227 @@ window.saturne.mediaGallery.event = function() {
   $(document).on('click', '.regenerate-thumbs', window.saturne.mediaGallery.regenerateThumbs);
   $(document).on('click', '.sync-media-library', window.saturne.mediaGallery.syncLibrary);
   $(document).on( 'click', '.media-gallery-ai', window.saturne.mediaGallery.readFileAI);
+  // Files dropped on the open gallery, or on the media library page, join the library. Bound twice:
+  // delegated to the open gallery, they run before the page wide handlers of the documents upload
+  // zone and keep them out of a drop meant for the gallery; bound to the document, they serve the page
+  let dropEvents = {
+    dragenter: window.saturne.mediaGallery.onDragEnter,
+    dragover : window.saturne.mediaGallery.onDragOver,
+    dragleave: window.saturne.mediaGallery.onDragLeave,
+    drop     : window.saturne.mediaGallery.onDrop
+  };
+  $(document).on(dropEvents, '#media_gallery.modal-active');
+  $(document).on(dropEvents);
 }
+
+/**
+ * Number of elements the dragged files are over
+ *
+ * Each element the pointer crosses fires its own enter and leave: the cover stays until the last
+ * one is left.
+ *
+ * @type {number}
+ */
+window.saturne.mediaGallery.dragDepth = 0;
+
+/**
+ * Cover of the place dropped files go to: the open gallery, else the media library page
+ *
+ * Empty on any other page, whose drops are left to their own handlers.
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @return {jQuery} Cover shown while files are dragged
+ */
+window.saturne.mediaGallery.getDropCover = function() {
+  let mediaGallery = $('#media_gallery.modal-active');
+
+  return mediaGallery.length ? mediaGallery.find('.media-gallery-dropzone') : $('.media-library-page-dropzone');
+};
+
+/**
+ * Show the cover when dragged files come over a place taking them
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param  {Object} event Drag event
+ * @return {void}
+ */
+window.saturne.mediaGallery.onDragEnter = function( event ) {
+  let cover = window.saturne.mediaGallery.getDropCover();
+  if (!cover.length || !window.saturne.document.isFileDrag(event)) {
+    return;
+  }
+  event.preventDefault();
+  event.stopPropagation();
+
+  window.saturne.mediaGallery.dragDepth++;
+  cover.addClass('dropzone-visible');
+};
+
+/**
+ * Let the files be dropped anywhere on that place, so the browser never opens them instead
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param  {Object} event Drag event
+ * @return {void}
+ */
+window.saturne.mediaGallery.onDragOver = function( event ) {
+  if (!window.saturne.mediaGallery.getDropCover().length || !window.saturne.document.isFileDrag(event)) {
+    return;
+  }
+  event.preventDefault();
+  event.stopPropagation();
+
+  event.originalEvent.dataTransfer.dropEffect = 'copy';
+};
+
+/**
+ * Hide the cover once the dragged files left
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param  {Object} event Drag event
+ * @return {void}
+ */
+window.saturne.mediaGallery.onDragLeave = function( event ) {
+  let cover = window.saturne.mediaGallery.getDropCover();
+  if (!cover.length || !window.saturne.document.isFileDrag(event)) {
+    return;
+  }
+  event.stopPropagation();
+
+  window.saturne.mediaGallery.dragDepth--;
+  if (window.saturne.mediaGallery.dragDepth <= 0) {
+    window.saturne.mediaGallery.dragDepth = 0;
+    cover.removeClass('dropzone-visible');
+  }
+};
+
+/**
+ * Add the dropped images to the library
+ *
+ * The library only holds images, as the add button only picks them: the other files are left out
+ * and named to the user. On the gallery the images are handed to that button, so the upload runs
+ * exactly as for files picked by hand; the media library page sends them itself.
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param  {Object} event Drop event
+ * @return {void}
+ */
+window.saturne.mediaGallery.onDrop = function( event ) {
+  let cover = window.saturne.mediaGallery.getDropCover();
+  if (!cover.length || !window.saturne.document.isFileDrag(event)) {
+    return;
+  }
+  event.preventDefault();
+  event.stopPropagation();
+
+  let images  = new window.DataTransfer();
+  let ignored = [];
+
+  window.saturne.mediaGallery.dragDepth = 0;
+  cover.removeClass('dropzone-visible');
+
+  $.each(event.originalEvent.dataTransfer.files, function( index, file ) {
+    if (file.type.indexOf('image/') === 0) {
+      images.items.add(file);
+    } else {
+      ignored.push($('<span>').text(file.name).html());
+    }
+  });
+
+  if (ignored.length && typeof $.jnotify === 'function') {
+    $.jnotify(cover.data('label-ignored').replace('%s', ignored.join(', ')), 'warning', true);
+  }
+
+  if (!images.files.length) {
+    return;
+  }
+
+  if (cover.closest('#media_gallery').length) {
+    let fileInput   = $('#add_media_to_gallery')[0];
+    fileInput.files = images.files;
+    $(fileInput).trigger('change');
+  } else {
+    window.saturne.mediaGallery.sendToLibraryPage(images.files, cover);
+  }
+};
+
+/**
+ * Send images dropped on the media library page, then list the pending medias again
+ *
+ * The page lists the library itself: the gallery is not opened for the upload, the list shows the
+ * new medias among the pending ones.
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param  {FileList} files Images to add
+ * @param  {jQuery}   cover Cover of the page, carrying the messages
+ * @return {void}
+ */
+window.saturne.mediaGallery.sendToLibraryPage = function( files, cover ) {
+  let pagePane         = $('.saturne-media-page-pane');
+  let token            = window.saturne.toolbox.getToken();
+  let baseUrl          = document.URL.split('#')[0];
+  let querySeparator   = window.saturne.toolbox.getQuerySeparator(baseUrl);
+  let requestCompleted = 0;
+  let added            = 0;
+  let errors           = [];
+
+  window.saturne.loader.display(pagePane);
+
+  $.each(files, function( index, file ) {
+    let formdata = new FormData();
+    formdata.append('userfile[]', file);
+
+    $.ajax({
+      url        : baseUrl + querySeparator + 'subaction=uploadPhoto&token=' + token,
+      type       : 'POST',
+      data       : formdata,
+      processData: false,
+      contentType: false,
+      success    : function( resp ) {
+        let error = $(resp).find('.error-medias');
+        if (error.length) {
+          errors.push(JSON.parse(error.val()).message);
+        } else {
+          added++;
+        }
+      },
+      error      : function() {
+        errors.push(cover.data('label-error'));
+      },
+      complete   : function() {
+        requestCompleted++;
+        if (requestCompleted < files.length) {
+          return;
+        }
+
+        if (typeof $.jnotify === 'function') {
+          if (added) {
+            $.jnotify(cover.data('label-done').replace('%s', added));
+          }
+          if (errors.length) {
+            $.jnotify(errors.join('<br>'), 'error', true);
+          }
+        }
+
+        // The gallery was written with the page: it reads the library again when next opened
+        window.saturne.mediaGallery.libraryChanged = true;
+        window.saturne.mediaPending.load(pagePane);
+      }
+    });
+  });
+};
 
 /**
  * Select photo
@@ -490,6 +710,12 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 								window.saturne.modal.loadLazyImages();
 								$('.wpeo-loader').removeClass('wpeo-loader');
 								$('.loader-spin').remove();
+
+								// The media library page lists the pending medias outside the gallery: the new ones are among them
+								let pagePane = $('.saturne-media-page-pane');
+								if (pagePane.length && window.saturne.mediaPending) {
+									window.saturne.mediaPending.load(pagePane);
+								}
 							});
 						} else {
 							$('.wpeo-loader').removeClass('wpeo-loader');
