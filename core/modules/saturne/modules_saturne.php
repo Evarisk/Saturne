@@ -1105,7 +1105,8 @@ class SaturneDocumentModel extends CommonDocGenerator
      */
     protected function splitTextToHeight($pdf, string $text, float $width, float $height): array
     {
-        if (dol_strlen($text) == 0 || $pdf->getStringHeight($width, $text) <= $height) {
+        // Measured with the border of the table cell, as drawTable() measures its rows
+        if (dol_strlen($text) == 0 || $pdf->getStringHeight($width, $text, false, true, null, 1) <= $height) {
             return [$text, ''];
         }
 
@@ -1115,7 +1116,7 @@ class SaturneDocumentModel extends CommonDocGenerator
         $high = dol_strlen($text);
         while ($low < $high) {
             $middle = (int) ceil(($low + $high) / 2);
-            if ($pdf->getStringHeight($width, dol_substr($text, 0, $middle)) <= $height) {
+            if ($pdf->getStringHeight($width, dol_substr($text, 0, $middle), false, true, null, 1) <= $height) {
                 $low = $middle;
             } else {
                 $high = $middle - 1;
@@ -1207,10 +1208,12 @@ class SaturneDocumentModel extends CommonDocGenerator
 
                 // Measured with the font the cell will be drawn with, and through
                 // getStringHeight() which accounts for the cell padding : the row height is also
-                // the MultiCell maximum, so an approximation would cut the text.
+                // the MultiCell maximum, so an approximation would cut the text. With the border
+                // too : MultiCell draws it, and its width widens the padding, so a height measured
+                // without it is short by a hair and the last line of the cell is dropped.
                 foreach ($texts as $key => $text) {
                     $pdf->SetFont('', $isLabel[$key] ? 'B' : '', $cellFontSize);
-                    $height = $pdf->getStringHeight($widths[$key], $text);
+                    $height = $pdf->getStringHeight($widths[$key], $text, false, true, null, 1);
 
                     if ($height > $maxHeight) {
                         $maxHeight = $height;
