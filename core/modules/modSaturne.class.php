@@ -254,6 +254,12 @@ class modSaturne extends DolibarrModules
         $this->menu = [];
         $r = 0;
 
+        // The config entry opens the first tab of the module setup: setup.php, unless the module ranks
+        // another page first
+        $moduleConfigPages = [
+            'digiriskdolibarr' => '/digiriskdolibarr/admin/config/riskassessmentdocument.php',
+        ];
+
         foreach ($modulesList as $moduleName => $moduleNameLowerCase) {
             $this->menu[$r++] = [
                 'fk_menu'  => 'fk_mainmenu=' . $moduleNameLowerCase,
@@ -262,7 +268,7 @@ class modSaturne extends DolibarrModules
                 'prefix'   => img_picto($langs->transnoentities('ModuleConfig', $moduleName), 'fontawesome_fa-cog_fas', 'class="pictofixedwidth"'),
                 'mainmenu' => $moduleNameLowerCase,
                 'leftmenu' => $moduleNameLowerCase . '_config',
-                'url'      => '/' . $moduleNameLowerCase . '/admin/setup.php',
+                'url'      => $moduleConfigPages[$moduleNameLowerCase] ?? '/' . $moduleNameLowerCase . '/admin/setup.php',
                 'langs'    => $moduleNameLowerCase . '@' . $moduleNameLowerCase,
                 'position' => 2000 + $r,
                 'enabled'  => 'isModEnabled(\'' . $moduleNameLowerCase . '\')',
