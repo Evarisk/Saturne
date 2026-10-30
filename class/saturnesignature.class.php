@@ -328,17 +328,28 @@ class SaturneSignature extends SaturneObject
      */
     public function LibStatut(int $status, int $mode = 0): string
     {
+        global $langs;
+
         if (empty($this->labelStatus) || empty($this->labelStatusShort)) {
-            global $langs;
             $this->labelStatus[self::STATUS_DELETED]           = $langs->transnoentities('Deleted');
+            $this->labelStatus[self::STATUS_DRAFT]             = $langs->transnoentities('Draft');
             $this->labelStatus[self::STATUS_REGISTERED]        = $langs->transnoentities('Registered');
             $this->labelStatus[self::STATUS_PENDING_SIGNATURE] = $langs->transnoentities('PendingSignature');
             $this->labelStatus[self::STATUS_SIGNED]            = $langs->transnoentities('Signed');
 
             $this->labelStatusShort[self::STATUS_DELETED]           = $langs->transnoentitiesnoconv('Deleted');
+            $this->labelStatusShort[self::STATUS_DRAFT]             = $langs->transnoentitiesnoconv('Draft');
             $this->labelStatusShort[self::STATUS_REGISTERED]        = $langs->transnoentitiesnoconv('Registered');
             $this->labelStatusShort[self::STATUS_PENDING_SIGNATURE] = $langs->transnoentitiesnoconv('PendingSignature');
             $this->labelStatusShort[self::STATUS_SIGNED]            = $langs->transnoentitiesnoconv('Signed');
+        }
+
+        // A status of an older version has no label: the absences of DoliMeet before its attendance rework (7 and 8)
+        // are still found on old training sessions, they read as unknown rather than raising a warning
+        if (!isset($this->labelStatus[$status], $this->labelStatusShort[$status])) {
+            $label = $langs->transnoentities('Unknown') . ' (' . $status . ')';
+
+            return dolGetStatus($label, $label, '', 'status0', $mode);
         }
 
         $statusType = 'status' . $status;
