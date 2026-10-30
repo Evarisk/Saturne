@@ -127,6 +127,11 @@ class SaturneXlsxExport
     protected int $now = 0;
 
     /**
+     * @var int Level of the output buffer opened by start(), which send() drops
+     */
+    protected int $outputBufferLevel = 0;
+
+    /**
      * Constructor
      *
      * @param DoliDB $db Database handler
@@ -172,7 +177,7 @@ class SaturneXlsxExport
         global $langs;
 
         foreach ($object->fields as $key => $field) {
-            $label = $langs->transnoentities($field['label'] ?? $key);
+            $label = $this->getPlainText($langs->transnoentities($field['label'] ?? $key));
             $start = $search[$key . '_dtstart'] ?? '';
             $end   = $search[$key . '_dtend'] ?? '';
             if (!empty($start) || !empty($end)) {
@@ -188,7 +193,7 @@ class SaturneXlsxExport
                 // A code reads as its label, a linked object as its name; any other criterion is printed as typed
                 $output = '';
                 if (!empty($field['arrayofkeyval'])) {
-                    $output = array_key_exists($value, $field['arrayofkeyval']) ? $langs->transnoentities($field['arrayofkeyval'][$value]) : '';
+                    $output = array_key_exists($value, $field['arrayofkeyval']) ? $this->getPlainText($langs->transnoentities($field['arrayofkeyval'][$value])) : '';
                 } elseif (is_numeric($value) && (int) $value > 0 && strpos($field['type'] ?? '', 'integer:') === 0) {
                     $output = $this->getPlainText($object->showOutputField($field, $key, $value));
                 }
@@ -222,7 +227,7 @@ class SaturneXlsxExport
             if (!is_array($value) && ((string) $value === '-1' || (in_array($type, ['select', 'sellist']) && (string) $value === '0'))) {
                 continue;
             }
-            $label = $langs->transnoentities($extrafields->attributes[$elementType]['label'][$key]);
+            $label = $this->getPlainText($langs->transnoentities($extrafields->attributes[$elementType]['label'][$key]));
             // A date is searched between two days
             if (is_array($value) && (array_key_exists('start', $value) || array_key_exists('end', $value))) {
                 if (!empty($value['start']) || !empty($value['end'])) {
@@ -234,6 +239,37 @@ class SaturneXlsxExport
             $output = $this->getPlainText($extrafields->showOutputField($key, $value, '', $elementType));
 
             $this->filters[$label] = $output !== '' ? $output : $value;
+        }
+    }
+
+    /**
+     * Add the category criteria of a list to the filters printed on the summary
+     *
+     * @param  array $categoryTokens Criteria: a category id, signed with - when excluded, or NOTCATEGORIZED
+     * @return void
+     */
+    public function addCategoryFilters(array $categoryTokens): void
+    {
+        global $langs;
+
+        require_once DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php';
+
+        $labels = [];
+        foreach ($categoryTokens as $categoryToken) {
+            $categoryId = ltrim((string) $categoryToken, '+-');
+            if ($categoryId === 'NOTCATEGORIZED') {
+                $label = $langs->transnoentities('NotCategorized');
+            } else {
+                $category = new Categorie($this->db);
+                if ((int) $categoryId <= 0 || $category->fetch((int) $categoryId) <= 0) {
+                    continue;
+                }
+                $label = $category->label;
+            }
+            $labels[] = strpos((string) $categoryToken, '-') === 0 ? $langs->transnoentities('XlsxExcluded', $label) : $label;
+        }
+        if (!empty($labels)) {
+            $this->filters[$langs->transnoentities('Categories')] = implode(', ', $labels);
         }
     }
 
@@ -252,6 +288,11 @@ class SaturneXlsxExport
         $this->dateFormat = strtolower($langs->transnoentities('FormatDateShortJava'));
         $this->contents   = [];
 
+        // Whatever is printed while the workbook is built, such as a PHP warning on an instance showing them,
+        // would be sent ahead of the file and break it: it is held back, then dropped by send()
+        ob_start();
+        $this->outputBufferLevel = ob_get_level();
+
         $this->spreadsheet = new Spreadsheet();
         $this->spreadsheet->getProperties()->setCreator($creator)->setTitle($title);
         $this->spreadsheet->getDefaultStyle()->getFont()->setName('Calibri')->setSize(10);
@@ -269,6 +310,10 @@ class SaturneXlsxExport
     public function send(string $fileName): void
     {
         $this->spreadsheet->setActiveSheetIndex(0);
+
+        while ($this->outputBufferLevel > 0 && ob_get_level() >= $this->outputBufferLevel) {
+            ob_end_clean();
+        }
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . dol_sanitizeFileName($fileName) . '.xlsx"');
@@ -413,6 +458,10 @@ class SaturneXlsxExport
             $sheet->setCellValueExplicit($coordinate, $cell, DataType::TYPE_NUMERIC);
         } else {
             $sheet->setCellValueExplicit($coordinate, (string) $cell, DataType::TYPE_STRING);
+            // A text of several lines reads line by line, whatever the format of its column
+            if (strpos((string) $cell, "\n") !== false) {
+                $sheet->getStyle($coordinate)->getAlignment()->setWrapText(true);
+            }
         }
     }
 
@@ -803,7 +852,15 @@ class SaturneXlsxExport
             // As a browser reads HTML: the line breaks of the source are spaces, a paragraph or a break ends a line
             // and a list item keeps its bullet
             $value = preg_replace('/[ \t\r\n]+/', ' ', $value);
+            // Neither a script nor a style is text, and a choice list reads as the option chosen in it, as an
+            // editable cell of a list prints it
+            $value = preg_replace('/<(script|style)\b.*?<\/\1\s*>/is', '', $value);
+            $value = preg_replace_callback('/<select\b.*?<\/select\s*>/is', function (array $matches): string {
+                return preg_match('/<option\b[^>]*\sselected\b[^>]*>(.*?)<\/option\s*>/is', $matches[0], $option) ? $option[1] : '';
+            }, $value);
             $value = preg_replace(['/<li\b[^>]*>/i', '/<br\s*\/?>|<\/p>|<\/div>|<\/h[1-6]>/i'], ["\n- ", "\n"], $value);
+            // A tag goes with all its attributes, a quoted one may hold a >
+            $value = preg_replace('/<\/?[a-z](?:[^>"\']|"[^"]*"|\'[^\']*\')*>/i', '', $value);
         }
         $text = str_replace(["\r\n", "\r"], "\n", dol_string_nohtmltag($value, 0));
         // Spaces around a line break and runs of empty lines are not text

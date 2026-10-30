@@ -28,6 +28,9 @@
  * Parameters : $action, $confirm, $massaction, $toselect
  * Objects    : $object
  * Variable   : $enableMassSignature (optional), $enableMassValidate (optional), $objectclass, $permissiontoadd
+ *
+ * Exposes    : $listXlsxExportAvailable, read by the list header TPL to offer the Excel export, and
+ *              $listXlsxExportBufferLevel when the export is asked, read by the list SQL TPL
  */
 
 // Validate mass action - only offered on lists that opted in with $enableMassValidate
@@ -198,4 +201,12 @@ if (($massaction == 'unarchive' || ($action == 'unarchive' && $confirm == 'yes')
             setEventMessages($langs->trans('RecordsUnarchived', $nbOk), []);
         }
     }
+}
+
+// Excel export of the whole list: the page is drawn into a buffer, which the list SQL template replaces with the
+// workbook once the page has set everything its list depends on, such as the filter of the card it is a tab of
+$listXlsxExportAvailable = true;
+if ($action == 'export_xlsx') {
+    ob_start();
+    $listXlsxExportBufferLevel = ob_get_level();
 }
