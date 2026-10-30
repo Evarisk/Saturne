@@ -962,6 +962,10 @@ class SaturneDocumentModel extends CommonDocGenerator
 
         $outputLangs->charset_output = 'UTF-8';
 
+        // The document language only knows the module keys when it is the user language itself: a
+        // language picked at generation is a fresh Translate, and every module key came out raw
+        $outputLangs->loadLangs(['main', 'saturne@saturne', $moduleNameLowerCase . '@' . $moduleNameLowerCase]);
+
         // buildDocumentFilename() returns -1 on failure, the file path otherwise. Unchecked, the
         // generation carried on with -1 as a path, still reported a success to commonGenerateDocument()
         // and fired the _GENERATE trigger for a document that was never written.
