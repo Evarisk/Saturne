@@ -331,6 +331,39 @@ JavascriptsConfig=Javascripts setup
 EnableMaxlengthCounter=Enable the character counter
 EnableMaxlengthCounterDescription=Displays a character counter below length-limited fields.
 
+# Email templates overview
+EmailTemplatesOverview                       = Templates overview
+EmailTemplatesOverviewIntro                  = All the email templates, grouped by element. Click a template to read its subject and content. The "Used by" column lists the settings that send it automatically: before disabling or deleting a template in use, change the setting first. Templates are created and edited in the "Email templates" tab.
+EmailTemplatesSearchPlaceholder              = Search: label, subject, content, setting…
+EmailTemplatesAllStatuses                    = Active and inactive
+EmailTemplatesActiveOnly                     = Active only
+EmailTemplatesInactiveOnly                   = Inactive only
+EmailTemplatesUsedOnly                       = Only those used by a setting
+EmailTemplatesExpandAll                      = Expand all
+EmailTemplatesCollapseAll                    = Collapse all
+EmailTemplatesNew                            = New template
+EmailTemplatesSummary                        = %s templates across %s elements · %s inactive · %s used by a setting
+EmailTemplatesShown                          = %s shown
+EmailTemplatesCount                          = Number of templates
+EmailTemplatesInactiveCount                  = %s inactive
+EmailTemplatesForAllElements                 = All elements
+EmailTemplatesForNoElement                   = No element
+EmailTemplatesUnavailable                    = Not offered for sending
+EmailTemplatesUnavailableHelp                = These templates are offered nowhere: their element depends on a disabled module, their type is known neither by Dolibarr nor by an enabled module, or their enabling condition is false. Dolibarr does not show them in the "Email templates" tab.
+EmailTemplatesUsedBy                         = Used by
+EmailTemplatesUsedByHelp                     = Settings (configuration constants) designating this template, by its id or its label. They send it without anyone choosing it: disabling or deleting it stops that email, or brings it back to the default content.
+EmailTemplatesDefaultHelp                    = Template preselected when an email is sent from this element
+EmailTemplatesAttachment                     = Attached document
+EmailTemplatesDuplicate                      = Duplicate
+EmailTemplatesDuplicateHelp                  = Another active template has the same label for the same element and language. A setting designating the template by its label only keeps one of them.
+EmailTemplatesAllLanguages                   = All
+EmailTemplatesEmpty                          = Empty
+EmailTemplatesContentLines                   = Content per line
+EmailTemplatesVariables                      = Variables used
+EmailTemplatesVariablesHelp                  = Replaced when sending by the data of the object sent (reference, third party, amount…). Translations __(Key)__ and constants __[NAME]__ are already resolved in the preview.
+EmailTemplatesShippedBy                      = Created by the module
+EmailTemplatesNoMatch                        = No template matches the search.
+
 # Entity transfer
 EntityTransfer                               = Entity transfer
 EntityTransferAdminOnly                      = The entity transfer is reserved to administrators: an export holds the whole database of the entity, user accounts included.

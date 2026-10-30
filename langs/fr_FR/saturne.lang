@@ -339,6 +339,39 @@ JavascriptsConfig=Configuration Javascripts
 EnableMaxlengthCounter=Activer le compteur de caracteres
 EnableMaxlengthCounterDescription=Affiche un compteur de caracteres sous les champs limites en longueur.
 
+# Email templates overview - Vue d'ensemble des modèles d'email
+EmailTemplatesOverview                       = Vue d'ensemble des modèles
+EmailTemplatesOverviewIntro                  = Tous les modèles d'email, regroupés par élément. Cliquez sur un modèle pour lire son sujet et son contenu. La colonne « Utilisé par » liste les réglages qui l'envoient automatiquement : avant de désactiver ou de supprimer un modèle utilisé, changez d'abord le réglage. La création et la modification se font dans l'onglet « Modèles des courriels ».
+EmailTemplatesSearchPlaceholder              = Rechercher : libellé, sujet, contenu, réglage…
+EmailTemplatesAllStatuses                    = Actifs et inactifs
+EmailTemplatesActiveOnly                     = Actifs seulement
+EmailTemplatesInactiveOnly                   = Inactifs seulement
+EmailTemplatesUsedOnly                       = Seulement ceux utilisés par un réglage
+EmailTemplatesExpandAll                      = Tout déplier
+EmailTemplatesCollapseAll                    = Tout replier
+EmailTemplatesNew                            = Nouveau modèle
+EmailTemplatesSummary                        = %s modèles répartis sur %s éléments · %s inactifs · %s utilisés par un réglage
+EmailTemplatesShown                          = %s affichés
+EmailTemplatesCount                          = Nombre de modèles
+EmailTemplatesInactiveCount                  = %s inactif(s)
+EmailTemplatesForAllElements                 = Tous les éléments
+EmailTemplatesForNoElement                   = Aucun élément
+EmailTemplatesUnavailable                    = Non proposés à l'envoi
+EmailTemplatesUnavailableHelp                = Ces modèles ne sont proposés nulle part : leur élément dépend d'un module désactivé, leur type n'est reconnu ni par Dolibarr ni par un module activé, ou leur condition d'activation est fausse. Dolibarr ne les affiche pas dans l'onglet « Modèles des courriels ».
+EmailTemplatesUsedBy                         = Utilisé par
+EmailTemplatesUsedByHelp                     = Réglages (constantes de configuration) qui désignent ce modèle, par son identifiant ou son libellé. Ils l'envoient sans que personne ne le choisisse : le désactiver ou le supprimer coupe cet envoi, ou le ramène au contenu par défaut.
+EmailTemplatesDefaultHelp                    = Modèle présélectionné quand on envoie un email depuis cet élément
+EmailTemplatesAttachment                     = Document joint
+EmailTemplatesDuplicate                      = Doublon
+EmailTemplatesDuplicateHelp                  = Un autre modèle actif porte le même libellé pour le même élément et la même langue. Un réglage qui désigne le modèle par son libellé n'en retient qu'un seul.
+EmailTemplatesAllLanguages                   = Toutes
+EmailTemplatesEmpty                          = Vide
+EmailTemplatesContentLines                   = Contenu par ligne
+EmailTemplatesVariables                      = Variables utilisées
+EmailTemplatesVariablesHelp                  = Remplacées à l'envoi par les données de l'objet envoyé (référence, tiers, montant…). Les traductions __(Clé)__ et les constantes __[NOM]__ sont déjà résolues dans l'aperçu.
+EmailTemplatesShippedBy                      = Créé par le module
+EmailTemplatesNoMatch                        = Aucun modèle ne correspond à la recherche.
+
 # Entity transfer - Transfert d'entite
 EntityTransfer                               = Transfert d'entité
 EntityTransferAdminOnly                      = Le transfert d'entité est réservé aux administrateurs : un export contient toute la base de l'entité, comptes utilisateurs compris.
