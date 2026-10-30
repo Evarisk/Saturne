@@ -351,7 +351,7 @@ EmailTemplatesForNoElement                   = No element
 EmailTemplatesUnavailable                    = Not offered for sending
 EmailTemplatesUnavailableHelp                = These templates are offered nowhere: their element depends on a disabled module, their type is known neither by Dolibarr nor by an enabled module, or their enabling condition is false. Dolibarr does not show them in the "Email templates" tab.
 EmailTemplatesUsedBy                         = Used by
-EmailTemplatesUsedByHelp                     = Settings (configuration constants) designating this template, by its id or its label. They send it without anyone choosing it: disabling or deleting it stops that email, or brings it back to the default content.
+EmailTemplatesUsedByHelp                     = Settings (configuration constants) designating this template, by its id or its label. They send it without anyone choosing it: disabling or deleting it stops that email, or brings it back to the default content. A setting its module does not declare is only recognized by its name (…_EMAIL_TEMPLATE…, …_MAIL_MODEL…, …_TEMPLATE_EMAIL…).
 EmailTemplatesDefaultHelp                    = Template preselected when an email is sent from this element
 EmailTemplatesAttachment                     = Attached document
 EmailTemplatesDuplicate                      = Duplicate
@@ -363,6 +363,8 @@ EmailTemplatesVariables                      = Variables used
 EmailTemplatesVariablesHelp                  = Replaced when sending by the data of the object sent (reference, third party, amount…). Translations __(Key)__ and constants __[NAME]__ are already resolved in the preview.
 EmailTemplatesShippedBy                      = Created by the module
 EmailTemplatesNoMatch                        = No template matches the search.
+EmailTemplatesSettingSignature               = Attendants · Signature link sent to one attendant
+EmailTemplatesSettingGlobalSignature         = Attendants · Signature links sent to all attendants
 
 # Entity transfer
 EntityTransfer                               = Entity transfer

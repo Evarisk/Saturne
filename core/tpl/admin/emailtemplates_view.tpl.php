@@ -125,8 +125,15 @@ foreach ($overview['groups'] as $groupKey => $group) {
         if (empty($template['usages'])) {
             print '<span class="opacitymedium">-</span>';
         }
+        // A setting with a label shows it, its constant in the tooltip, and leads to the page where it is set when known
         foreach ($template['usages'] as $usage) {
-            print '<code class="saturne-mailtpl-usage">' . dol_escape_htmltag($usage) . '</code>';
+            if ($usage['label'] === '') {
+                print '<code class="saturne-mailtpl-usage">' . dol_escape_htmltag($usage['name']) . '</code>';
+            } elseif ($usage['url'] !== '') {
+                print '<a class="saturne-mailtpl-usage saturne-mailtpl-usage--labelled classfortooltip" href="' . dol_escape_htmltag($usage['url']) . '" title="' . dol_escape_htmltag($usage['name']) . '">' . dol_escape_htmltag($usage['label']) . '</a>';
+            } else {
+                print '<span class="saturne-mailtpl-usage saturne-mailtpl-usage--labelled classfortooltip" title="' . dol_escape_htmltag($usage['name']) . '">' . dol_escape_htmltag($usage['label']) . '</span>';
+            }
         }
         print '</td>';
 
