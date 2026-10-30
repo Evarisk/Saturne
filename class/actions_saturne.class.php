@@ -125,6 +125,41 @@ class ActionsSaturne
     }
 
     /**
+     * Overloading the completeTabsHead function : replacing the parent's function with the one below
+     *
+     * Adds the email templates overview (admin/emailtemplates.php) to the email setup tabs, right before the core
+     * "Email templates" tab. Dolibarr only completes these tabs in 'remove' mode, a module descriptor cannot add one
+     *
+     * @param  array $parameters Hook metadata (context, etc...)
+     * @return int               0 < on error, 0 on success, 1 to replace standard code
+     */
+    public function completeTabsHead(array $parameters): int
+    {
+        global $langs, $user;
+
+        // The hook manager merges $this->results into the tabs: a value left by a previous hook would become a tab
+        $this->results = [];
+
+        if (($parameters['mode'] ?? '') !== 'remove' || empty($user->admin) || !is_array($parameters['head'] ?? null)) {
+            return 0;
+        }
+
+        $head = array_values($parameters['head']);
+        foreach ($head as $position => $tab) {
+            if (($tab[2] ?? '') === 'templates' && strpos($tab[0] ?? '', '/admin/mails_templates.php') !== false) {
+                $langs->load('saturne@saturne');
+                array_splice($head, $position, 0, [[dol_buildpath('/saturne/admin/emailtemplates.php', 1), $langs->trans('EmailTemplatesOverview'), 'saturneemailtemplates']]);
+
+                // 'head' is a reference to the tabs of complete_head_from_modules()
+                $parameters['head'] = $head;
+                break;
+            }
+        }
+
+        return 0;
+    }
+
+    /**
      * Overloading the addHtmlHeader function : replacing the parent's function with the one below
      *
      * @param  array $parameters Hook metadata (context, etc...)
