@@ -84,12 +84,9 @@ function saturne_email_template_elements(DoliDB $db, User $user, Translate $lang
         }
     }
 
-    // A hook manager of its own: the page context must not trigger what the modules print on the core page.
-    // 'main' too, as on the core page: some modules only register that context (doliletter)
-    $hookmanager = new HookManager($db);
-    $hookmanager->initHooks(['main', 'emailtemplates']);
-    $parameters = ['elementList' => $elements];
-    $reshook    = $hookmanager->executeHooks('emailElementlist', $parameters);
+    $hookmanager = saturne_email_template_hookmanager($db);
+    $parameters  = ['elementList' => $elements];
+    $reshook     = $hookmanager->executeHooks('emailElementlist', $parameters);
     if ($reshook == 0 && is_array($hookmanager->resArray)) {
         foreach ($hookmanager->resArray as $type => $label) {
             $elements[$type] = $label;
@@ -97,6 +94,66 @@ function saturne_email_template_elements(DoliDB $db, User $user, Translate $lang
     }
 
     return $elements;
+}
+
+/**
+ * Return the hook manager the overview calls the modules through.
+ *
+ * A hook manager of its own: the page context must not trigger what the modules print on the core page.
+ * 'main' too, as on the core page: some modules only register that context (doliletter).
+ *
+ * @param  DoliDB      $db Database handler
+ * @return HookManager     Hook manager initialized on the 'main' and 'emailtemplates' contexts
+ */
+function saturne_email_template_hookmanager(DoliDB $db): HookManager
+{
+    static $hookmanager = null;
+
+    if ($hookmanager === null) {
+        $hookmanager = new HookManager($db);
+        $hookmanager->initHooks(['main', 'emailtemplates']);
+    }
+
+    return $hookmanager;
+}
+
+/**
+ * Return the settings the modules declare as designating an email template.
+ *
+ * A module answers the saturneEmailTemplateSettings hook, in the 'emailtemplates' context, with
+ * $this->results = ['CONSTANT_NAME' => ['label' => 'What the setting sends', 'url' => 'Page setting it', 'type' => 'ticket']].
+ * A declared constant is read whatever its name, and shown by its label in the "Used by" column. 'type' is
+ * optional: the element whose templates the setting picks from, so that a template designated by its label is
+ * only looked for where getEMailTemplate() looks.
+ *
+ * @param  DoliDB $db Database handler
+ * @return array<string, array{label: string, url: string, type: string}> Label and setup page by constant name
+ */
+function saturne_email_template_declared_settings(DoliDB $db): array
+{
+    $hookmanager = saturne_email_template_hookmanager($db);
+    $parameters  = [];
+    $hookmanager->executeHooks('saturneEmailTemplateSettings', $parameters);
+
+    $settings = [];
+    foreach ((array) $hookmanager->resArray as $name => $setting) {
+        if (!is_string($name) || !preg_match('/^[A-Za-z0-9_]+$/', $name) || !is_array($setting)) {
+            continue;
+        }
+
+        // A constant declared by two modules: the hook manager merges their answers into lists, the first one wins
+        $label = $setting['label'] ?? '';
+        $url   = $setting['url'] ?? '';
+        $type  = $setting['type'] ?? '';
+
+        $settings[$name] = [
+            'label' => (string) (is_array($label) ? reset($label) : $label),
+            'url'   => (string) (is_array($url) ? reset($url) : $url),
+            'type'  => (string) (is_array($type) ? reset($type) : $type),
+        ];
+    }
+
+    return $settings;
 }
 
 /**
@@ -139,16 +196,19 @@ function saturne_email_template_fetch_all(DoliDB $db, User $user, Translate $lan
 /**
  * Return the settings (constants of the current entity) that point to each email template.
  *
- * Modules keep the template a setting sends in a constant named after it (..._EMAIL_TEMPLATE_...,
- * ..._MAIL_MODEL_..., ..._TEMPLATE_EMAIL_...), but not in one shape: the rowid, the label, "label:type"
- * or a JSON list of rowids. Every shape is read; a value naming no template is ignored, which leaves
- * out the flags sharing the naming (DOLIMEET_EMAIL_TEMPLATE_SET, MAIN_EMAIL_TEMPLATES_FOR_OBJECT_LINES).
+ * The constants the modules declare through saturneEmailTemplateSettings are read whatever their name.
+ * For the modules declaring nothing, the constant is recognized by its name (..._EMAIL_TEMPLATE_...,
+ * ..._MAIL_MODEL_..., ..._TEMPLATE_EMAIL_...). The value comes in several shapes: the rowid, the label,
+ * "label:type" or a JSON list of rowids. Every shape is read; a value naming no template is ignored, which
+ * leaves out the flags sharing the naming (DOLIMEET_EMAIL_TEMPLATE_SET, MAIN_EMAIL_TEMPLATES_FOR_OBJECT_LINES).
  *
- * @param  DoliDB                 $db        Database handler
- * @param  array<int, stdClass>   $templates Templates by rowid, from saturne_email_template_fetch_all()
- * @return array<int, string[]>              Constant names by template rowid
+ * @param  DoliDB                                            $db        Database handler
+ * @param  array<int, stdClass>                              $templates Templates by rowid, from saturne_email_template_fetch_all()
+ * @param  array<string, array{label: string, url: string, type: string}> $settings  Declared settings, from saturne_email_template_declared_settings()
+ * @param  Translate                                         $langs     Output language
+ * @return array<int, array<int, array{name: string, label: string, url: string}>> Settings by template rowid
  */
-function saturne_email_template_usages(DoliDB $db, array $templates): array
+function saturne_email_template_usages(DoliDB $db, array $templates, array $settings, Translate $langs): array
 {
     global $conf;
 
@@ -159,7 +219,12 @@ function saturne_email_template_usages(DoliDB $db, array $templates): array
 
     $sql  = 'SELECT name, value FROM ' . MAIN_DB_PREFIX . 'const';
     $sql .= ' WHERE entity IN (0, ' . ((int) $conf->entity) . ")";
-    $sql .= " AND name LIKE '%MAIL%' AND value <> ''";
+    $sql .= " AND value <> ''";
+    $sql .= " AND (name LIKE '%MAIL%'";
+    if (!empty($settings)) {
+        $sql .= " OR name IN ('" . implode("','", array_map([$db, 'escape'], array_keys($settings))) . "')";
+    }
+    $sql .= ')';
 
     $usages = [];
     $resql  = $db->query($sql);
@@ -168,13 +233,23 @@ function saturne_email_template_usages(DoliDB $db, array $templates): array
         return [];
     }
     while ($obj = $db->fetch_object($resql)) {
-        $name = (string) $obj->name;
-        if (!preg_match('/(^|_)(E?MAIL_TEMPLATE|E?MAIL_MODEL|TEMPLATE_E?MAIL)(_|$)/', $name) || preg_match('/_(SET|UPDATED)$/', $name)) {
+        $name     = (string) $obj->name;
+        $declared = isset($settings[$name]);
+        if (!$declared && (!preg_match('/(^|_)(E?MAIL_TEMPLATE|E?MAIL_MODEL|TEMPLATE_E?MAIL)(_|$)/', $name) || preg_match('/_(SET|UPDATED)$/', $name))) {
             continue;
         }
 
-        foreach (saturne_email_template_value_rowids(trim((string) $obj->value), $templates, $rowidsByLabel) as $rowid) {
-            $usages[$rowid][$name] = $name;
+        // Undeclared: Dolibarr names the translation of a setting after its constant on its setup pages
+        $label = $declared ? $settings[$name]['label'] : $langs->transnoentities($name);
+        $usage = [
+            'name'  => $name,
+            'label' => ($label !== $name ? $label : ''),
+            'url'   => ($declared ? $settings[$name]['url'] : ''),
+        ];
+
+        $element = ($declared ? $settings[$name]['type'] : '');
+        foreach (saturne_email_template_value_rowids(trim((string) $obj->value), $templates, $rowidsByLabel, $element) as $rowid) {
+            $usages[$rowid][$name] = $usage;
         }
     }
     $db->free($resql);
@@ -188,9 +263,10 @@ function saturne_email_template_usages(DoliDB $db, array $templates): array
  * @param  string                $value         Value of the constant
  * @param  array<int, stdClass>  $templates     Templates by rowid
  * @param  array<string, int[]>  $rowidsByLabel Template rowids by label
+ * @param  string                $element       Element the setting picks its template from, '' when unknown
  * @return int[]                                Rowids of the designated templates
  */
-function saturne_email_template_value_rowids(string $value, array $templates, array $rowidsByLabel): array
+function saturne_email_template_value_rowids(string $value, array $templates, array $rowidsByLabel, string $element = ''): array
 {
     if ($value === '') {
         return [];
@@ -206,16 +282,24 @@ function saturne_email_template_value_rowids(string $value, array $templates, ar
             return [];
         }
         $rowids = [];
-        array_walk_recursive($decoded, function ($item) use ($templates, $rowidsByLabel, &$rowids) {
+        array_walk_recursive($decoded, function ($item) use ($templates, $rowidsByLabel, $element, &$rowids) {
             if (is_scalar($item)) {
-                $rowids = array_merge($rowids, saturne_email_template_value_rowids(trim((string) $item), $templates, $rowidsByLabel));
+                $rowids = array_merge($rowids, saturne_email_template_value_rowids(trim((string) $item), $templates, $rowidsByLabel, $element));
             }
         });
         return array_values(array_unique($rowids));
     }
 
     if (isset($rowidsByLabel[$value])) {
-        return $rowidsByLabel[$value];
+        if ($element === '') {
+            return $rowidsByLabel[$value];
+        }
+
+        // Picked by its label among the templates of an element, where getEMailTemplate() looks: the element, its _send variant, 'all'
+        $types = [$element, $element . '_send', 'all'];
+        return array_values(array_filter($rowidsByLabel[$value], function ($rowid) use ($templates, $types) {
+            return in_array($templates[$rowid]->type_template, $types, true);
+        }));
     }
 
     // "label:type_template", the form of TICKET_NOTIFICATION_EMAIL_TEMPLATE
@@ -301,9 +385,11 @@ function saturne_email_template_overview(DoliDB $db, User $user, Translate $lang
 {
     $elements  = saturne_email_template_elements($db, $user, $langs);
     $templates = saturne_email_template_fetch_all($db, $user, $langs);
-    $usages    = saturne_email_template_usages($db, $templates);
 
+    // Before the usages: an undeclared setting is labelled by the translation of its constant
     saturne_email_template_load_langs($langs, $templates);
+
+    $usages = saturne_email_template_usages($db, $templates, saturne_email_template_declared_settings($db), $langs);
 
     // Owners, read in one query
     $owners  = [];
@@ -381,7 +467,7 @@ function saturne_email_template_overview(DoliDB $db, User $user, Translate $lang
             'contentLines' => saturne_email_template_readable((string) $template->content_lines, $langs),
             'variables'    => $variables,
             'usages'       => $templateUsages,
-            'search'       => dol_strtolower($label . ' ' . $template->label . ' ' . $type . ' ' . $topic . ' ' . implode(' ', $templateUsages) . ' ' . dol_trunc(dol_string_nohtmltag($content), 2000, 'right', 'UTF-8', 1)),
+            'search'       => dol_strtolower($label . ' ' . $template->label . ' ' . $type . ' ' . $topic . ' ' . implode(' ', array_column($templateUsages, 'name')) . ' ' . implode(' ', array_column($templateUsages, 'label')) . ' ' . dol_trunc(dol_string_nohtmltag($content), 2000, 'right', 'UTF-8', 1)),
         ];
     }
 

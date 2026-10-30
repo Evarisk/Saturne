@@ -125,6 +125,50 @@ class ActionsSaturne
     }
 
     /**
+     * Overloading the saturneEmailTemplateSettings function : replacing the parent's function with the one below
+     *
+     * Declares the Saturne settings designating an email template, shown by their label in the "Used by" column of the
+     * email templates overview (admin/emailtemplates.php). A module declares its own the same way, in the
+     * 'emailtemplates' context: ['CONSTANT_NAME' => ['label' => 'What the setting sends', 'url' => 'Page setting it',
+     * 'type' => 'Element whose templates it picks from, optional']]
+     *
+     * @param  array $parameters Hook metadata (context, etc...)
+     * @return int               0 < on error, 0 on success, 1 to replace standard code
+     */
+    public function saturneEmailTemplateSettings(array $parameters): int
+    {
+        global $langs;
+
+        $langs->loadLangs(['ticket', 'saturne@saturne']);
+
+        // Constant => [section, recipient] language keys, as on the setup page
+        $ticketSettings = [
+            'SATURNE_TICKET_CREATE_MAIL_MODEL_ADMIN'      => ['TicketMailModelCreateSection', 'TicketCreateMailModelAdmin'],
+            'SATURNE_TICKET_CREATE_MAIL_MODEL_CUSTOMER'   => ['TicketMailModelCreateSection', 'TicketCreateMailModelCustomer'],
+            'SATURNE_TICKET_CREATE_MAIL_MODEL_ASSIGNEE'   => ['TicketMailModelCreateSection', 'TicketCreateMailModelAssignee'],
+            'SATURNE_TICKET_CLOSE_MAIL_MODEL_ADMIN'       => ['TicketMailModelCloseSection', 'TicketCloseMailModelAdmin'],
+            'SATURNE_TICKET_CLOSE_MAIL_MODEL_CUSTOMER'    => ['TicketMailModelCloseSection', 'TicketCloseMailModelCustomer'],
+            'SATURNE_TICKET_ASSIGNED_MAIL_MODEL_ASSIGNEE' => ['TicketMailModelAssignedSection', 'TicketAssignedMailModelAssignee'],
+            'SATURNE_TICKET_ASSIGNED_MAIL_MODEL_CUSTOMER' => ['TicketMailModelAssignedSection', 'TicketAssignedMailModelCustomer'],
+        ];
+
+        $this->results = [];
+        foreach ($ticketSettings as $name => $labelKeys) {
+            $this->results[$name] = [
+                'label' => $langs->transnoentities('Ticket') . ' · ' . $langs->transnoentities($labelKeys[0]) . ' · ' . $langs->transnoentities($labelKeys[1]),
+                'url'   => dol_buildpath('/saturne/admin/setup.php', 1),
+                'type'  => 'ticket',
+            ];
+        }
+
+        // Written on module activation, set nowhere in the interface
+        $this->results['SATURNE_EMAIL_TEMPLATE_SIGNATURE']        = ['label' => $langs->transnoentities('EmailTemplatesSettingSignature'), 'url' => ''];
+        $this->results['SATURNE_EMAIL_TEMPLATE_GLOBAL_SIGNATURE'] = ['label' => $langs->transnoentities('EmailTemplatesSettingGlobalSignature'), 'url' => ''];
+
+        return 0;
+    }
+
+    /**
      * Overloading the completeTabsHead function : replacing the parent's function with the one below
      *
      * Adds the email templates overview (admin/emailtemplates.php) to the email setup tabs, right before the core

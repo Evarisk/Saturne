@@ -359,7 +359,7 @@ EmailTemplatesForNoElement                   = Aucun élément
 EmailTemplatesUnavailable                    = Non proposés à l'envoi
 EmailTemplatesUnavailableHelp                = Ces modèles ne sont proposés nulle part : leur élément dépend d'un module désactivé, leur type n'est reconnu ni par Dolibarr ni par un module activé, ou leur condition d'activation est fausse. Dolibarr ne les affiche pas dans l'onglet « Modèles des courriels ».
 EmailTemplatesUsedBy                         = Utilisé par
-EmailTemplatesUsedByHelp                     = Réglages (constantes de configuration) qui désignent ce modèle, par son identifiant ou son libellé. Ils l'envoient sans que personne ne le choisisse : le désactiver ou le supprimer coupe cet envoi, ou le ramène au contenu par défaut.
+EmailTemplatesUsedByHelp                     = Réglages (constantes de configuration) qui désignent ce modèle, par son identifiant ou son libellé. Ils l'envoient sans que personne ne le choisisse : le désactiver ou le supprimer coupe cet envoi, ou le ramène au contenu par défaut. Un réglage que son module ne déclare pas n'est reconnu qu'à son nom (…_EMAIL_TEMPLATE…, …_MAIL_MODEL…, …_TEMPLATE_EMAIL…).
 EmailTemplatesDefaultHelp                    = Modèle présélectionné quand on envoie un email depuis cet élément
 EmailTemplatesAttachment                     = Document joint
 EmailTemplatesDuplicate                      = Doublon
@@ -371,6 +371,8 @@ EmailTemplatesVariables                      = Variables utilisées
 EmailTemplatesVariablesHelp                  = Remplacées à l'envoi par les données de l'objet envoyé (référence, tiers, montant…). Les traductions __(Clé)__ et les constantes __[NOM]__ sont déjà résolues dans l'aperçu.
 EmailTemplatesShippedBy                      = Créé par le module
 EmailTemplatesNoMatch                        = Aucun modèle ne correspond à la recherche.
+EmailTemplatesSettingSignature               = Participants · Lien de signature envoyé à un participant
+EmailTemplatesSettingGlobalSignature         = Participants · Envoi groupé des liens de signature
 
 # Entity transfer - Transfert d'entite
 EntityTransfer                               = Transfert d'entité

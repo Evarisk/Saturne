@@ -150,6 +150,12 @@ table.saturne-mailtpl-table {
   overflow-wrap: anywhere;
 }
 
+// A setting declared with a label reads as text, not as a constant
+.saturne-mailtpl-usage--labelled {
+  font-family: inherit;
+  font-size: 0.9em;
+}
+
 .saturne-mailtpl-preview {
   > td {
     padding: 0 1em 1em;
