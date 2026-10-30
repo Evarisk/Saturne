@@ -427,3 +427,20 @@ OrphanDocumentsDeletedEntity                 = %s row(s) deleted on entity %s
 
 # Document generation
 ErrorTemplateFileNotAllowed                  = The document template '%s' is not stored in a template directory of the module.
+
+# Excel export
+XlsxExport                                   = Excel export
+XlsxExportHelp                               = Downloads every line of the list, with its filters and its sort, into an Excel workbook showing them under several views
+XlsxSummary                                  = Summary
+XlsxExportedOn                               = Exported on %s by %s
+XlsxFilters                                  = Filters
+XlsxNoFilter                                 = No filter
+XlsxSearch                                   = Search
+XlsxKeyFigures                               = Key figures
+XlsxContents                                 = Workbook contents
+XlsxSheet                                    = Sheet
+XlsxLines                                    = Lines
+XlsxShare                                    = Share
+XlsxTotal                                    = Total
+XlsxNotFilled                                = Not filled in
+XlsxMonth                                    = Month

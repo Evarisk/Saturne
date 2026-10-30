@@ -435,3 +435,20 @@ OrphanDocumentsDeletedEntity                 = %s ligne(s) supprimée(s) sur l'e
 
 # Document generation - Generation de document
 ErrorTemplateFileNotAllowed                  = Le modèle de document « %s » ne se trouve pas dans un répertoire de modèles du module.
+
+# Excel export - Export Excel
+XlsxExport                                   = Export Excel
+XlsxExportHelp                               = Télécharge toutes les lignes de la liste, avec ses filtres et son tri, dans un classeur Excel qui les présente sous plusieurs vues
+XlsxSummary                                  = Sommaire
+XlsxExportedOn                               = Exporté le %s par %s
+XlsxFilters                                  = Filtres
+XlsxNoFilter                                 = Aucun filtre
+XlsxSearch                                   = Recherche
+XlsxKeyFigures                               = Chiffres clés
+XlsxContents                                 = Contenu du classeur
+XlsxSheet                                    = Onglet
+XlsxLines                                    = Lignes
+XlsxShare                                    = Part
+XlsxTotal                                    = Total
+XlsxNotFilled                                = Non renseigné
+XlsxMonth                                    = Mois
