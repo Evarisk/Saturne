@@ -87,7 +87,7 @@ global $conf, $db, $hookmanager, $langs;
 saturne_load_langs();
 
 // Get parameters
-$trackID = GETPOST('track_id', 'alpha');
+$trackID = GETPOST('track_id', 'aZ09');
 $entity  = GETPOST('entity');
 $action  = GETPOST('action', 'aZ09');
 $source  = GETPOST('source', 'aZ09');
@@ -109,7 +109,11 @@ if (!isModEnabled('multicompany')) {
 
 $conf->setEntityValues($db, $entity);
 
-$signatory->fetch(0, '', ' AND signature_url =' . "'" . $trackID . "'");
+// The track id is the only secret of this public page: without the signatory it designates, nothing is shown
+// nor done. An empty one would load the signatories that have no link
+if (empty($trackID) || $signatory->fetch(0, '', " AND signature_url = '" . $db->escape($trackID) . "'") <= 0) {
+    accessforbidden('', 0, 0, 1);
+}
 $object->fetch($signatory->fk_object);
 
 $upload_dir = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?? 1];
