@@ -350,13 +350,14 @@ class SaturneXlsxExport
     {
         global $mysoc;
 
-        // A sheet name holds 31 characters at most, without []:*?/\, and two sheets cannot share it
-        $title     = dol_trunc(trim(str_replace(['[', ']', ':', '*', '?', '/', '\\'], ' ', $title)), 31, 'right', 'UTF-8', 1);
+        // A sheet name holds 31 characters at most, without []:*?/\, and two sheets cannot share it. Cut by
+        // dol_substr(), as dol_trunc() cuts nothing on a page setting MAIN_DISABLE_TRUNC, such as a dashboard
+        $title     = trim(dol_substr(trim(preg_replace('/\s+/u', ' ', str_replace(['[', ']', ':', '*', '?', '/', '\\'], ' ', $title))), 0, 31));
         $baseTitle = $title;
         $suffix    = 1;
         while ($this->spreadsheet->sheetNameExists($title) && $this->spreadsheet->getSheetByName($title) !== $sheet) {
             $suffix++;
-            $title = dol_trunc($baseTitle, 31 - strlen(' (' . $suffix . ')'), 'right', 'UTF-8', 1) . ' (' . $suffix . ')';
+            $title = trim(dol_substr($baseTitle, 0, 31 - strlen(' (' . $suffix . ')'))) . ' (' . $suffix . ')';
         }
         $sheet->setTitle($title);
 
@@ -444,10 +445,13 @@ class SaturneXlsxExport
             } elseif (!empty($cell['bold'])) {
                 $sheet->getStyle($coordinate)->getFont()->setBold(true);
             }
-            // A reference opens its card in Dolibarr
+            // A reference opens its card in Dolibarr; on a coloured cell, the link keeps the text colour of the cell
             if (!empty($cell['url']) && isset($cell['value']) && $cell['value'] !== '') {
                 $sheet->getCell($coordinate)->getHyperlink()->setUrl((string) $cell['url']);
-                $sheet->getStyle($coordinate)->getFont()->setUnderline(true)->getColor()->setRGB(self::LINK_COLOUR);
+                $sheet->getStyle($coordinate)->getFont()->setUnderline(true);
+                if (empty($cell['colours'])) {
+                    $sheet->getStyle($coordinate)->getFont()->getColor()->setRGB(self::LINK_COLOUR);
+                }
             }
             $cell = $cell['value'] ?? null;
         }
@@ -546,16 +550,17 @@ class SaturneXlsxExport
     /**
      * Write the key figures on the summary, each with its share when it is a part of a whole
      *
-     * @param  int   $row     First row
-     * @param  array $figures Figures: label, value, total the share is computed on, format of the value
-     * @return int            Next free row
+     * @param  int    $row     First row
+     * @param  array  $figures Figures: label, value, total the share is computed on, format of the value
+     * @param  string $title   Title of the section, the key figures by default
+     * @return int             Next free row
      */
-    public function writeSummaryKeyFigures(int $row, array $figures): int
+    public function writeSummaryKeyFigures(int $row, array $figures, string $title = ''): int
     {
         global $langs;
 
         $sheet = $this->getSummarySheet();
-        $this->writeSummarySection($row, $langs->transnoentities('XlsxKeyFigures'));
+        $this->writeSummarySection($row, $title !== '' ? $title : $langs->transnoentities('XlsxKeyFigures'));
         foreach ($figures as $figure) {
             $row++;
             $sheet->setCellValueExplicit('A' . $row, (string) $figure['label'], DataType::TYPE_STRING);
@@ -867,6 +872,45 @@ class SaturneXlsxExport
         $text = trim(preg_replace(['/[ \t]*\n[ \t]*/', '/\n{3,}/'], ["\n", "\n\n"], $text));
 
         return dol_strlen($text) > self::CELL_TEXT_MAX_LENGTH ? dol_substr($text, 0, self::CELL_TEXT_MAX_LENGTH) : $text;
+    }
+
+    /**
+     * Cell of a value printed as HTML: its text, and the URL of its link when it opens a page
+     *
+     * @param  string $html HTML of the value
+     * @return mixed        Text, or array with the text and the URL
+     */
+    public function getHtmlCell(string $html)
+    {
+        $text = $this->getPlainText($html);
+        $url  = '';
+        if ($text !== '' && preg_match('/<a\b[^>]*\shref="([^"]+)"/i', $html, $matches)) {
+            $url = $this->getAbsoluteUrl(html_entity_decode($matches[1], ENT_QUOTES, 'UTF-8'));
+        }
+
+        return $url !== '' ? ['value' => $text, 'url' => $url] : $text;
+    }
+
+    /**
+     * Full URL of a link of Dolibarr, the way a cell of the workbook opens it from outside Dolibarr
+     *
+     * @param  string $url URL, as Dolibarr prints it
+     * @return string      Full URL, empty when it does not open a page
+     */
+    public function getAbsoluteUrl(string $url): string
+    {
+        if (preg_match('/^https?:\/\//i', $url)) {
+            return $url;
+        }
+        // A link of Dolibarr starts with the path of its root: the cell needs the address of the instance before it
+        if (strpos($url, '/') !== 0) {
+            return '';
+        }
+        if (strpos($url, DOL_URL_ROOT . '/') === 0) {
+            $url = substr($url, strlen(DOL_URL_ROOT));
+        }
+
+        return DOL_MAIN_URL_ROOT . $url;
     }
 
     /**

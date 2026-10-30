@@ -101,20 +101,38 @@ class SaturneDashboard
      */
     public function show_dashboard(?array $moreParams = []): void
     {
-        global $conf, $form, $langs, $moduleNameLowerCase, $user;
+        global $conf, $dashboardXlsxExportAvailable, $dashboardXlsxExportBufferLevel, $form, $langs, $moduleNameLowerCase, $user;
 
         $width  = DolGraph::getDefaultGraphSizeForStats('width');
         $height = DolGraph::getDefaultGraphSizeForStats('height');
         $conf->global->MAIN_DISABLE_TRUNC = 1;
 
         $dashboards = $this->load_dashboard($moreParams);
+
+        $confName          = dol_strtoupper($moduleNameLowerCase) . '_DASHBOARD_CONFIG';
+        $disableWidgetList = property_exists($user->conf, $confName) ? json_decode($user->conf->$confName) : null;
+        $disableWidgetList = $disableWidgetList->widgets ?? new stdClass();
+
+        // Excel export of the whole dashboard, asked through dashboard_actions.tpl.php: the page drawn so far into
+        // its buffer gives way to the workbook
+        if (GETPOST('action', 'aZ09') == 'export_xlsx' && !empty($dashboardXlsxExportBufferLevel)) {
+            $this->exportXlsx($dashboards, $disableWidgetList, $dashboardXlsxExportBufferLevel);
+        }
+
         print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '" class="dashboard" id="dashBoardForm">';
         print '<input type="hidden" name="token" value="' . newToken() . '">';
         print '<input type="hidden" name="action" value="view">';
 
-        $confName              = dol_strtoupper($moduleNameLowerCase) . '_DASHBOARD_CONFIG';
-        $disableWidgetList     = property_exists($user->conf, $confName) ? json_decode($user->conf->$confName) : null;
-        $disableWidgetList     = $disableWidgetList->widgets ?? new stdClass();
+        if (!empty($dashboardXlsxExportAvailable)) {
+            // The export link keeps the parameters of the page, such as the object the dashboard is about
+            $exportParams = array_merge(array_diff_key($_GET, ['action' => 1, 'token' => 1]), ['action' => 'export_xlsx', 'token' => newToken()]);
+            print '<div class="flex flex-row justify-end dashboard-xlsx-export">';
+            print '<a class="wpeo-button no-load button-grey" href="' . dol_escape_htmltag($_SERVER['PHP_SELF'] . '?' . http_build_query($exportParams)) . '" title="' . dol_escape_htmltag($langs->trans('XlsxDashboardExportHelp')) . '">';
+            print img_picto('', 'fontawesome_file-excel_fas_#1D6F42_1em', 'class="paddingrightonly"') . $langs->trans('XlsxExport');
+            print '</a>';
+            print '</div>';
+        }
+
         $dashboardWidgetsArray = [];
         if (!empty($dashboards['widgets']) && is_array($dashboards['widgets'])) {
             foreach ($dashboards['widgets'] as $dashboardWidgets) {
@@ -399,6 +417,36 @@ class SaturneDashboard
 
         print '</div>';
         print '</form>';
+    }
+
+    /**
+     * Send the Excel workbook of the dashboard in place of the page, then end the request
+     *
+     * @param  array  $dashboards    Dashboard, from load_dashboard()
+     * @param  object $hiddenWidgets Widgets the user closed, by key
+     * @param  int    $bufferLevel   Level of the output buffer the page is drawn into
+     * @return void
+     */
+    protected function exportXlsx(array $dashboards, object $hiddenWidgets, int $bufferLevel): void
+    {
+        global $langs;
+
+        require_once __DIR__ . '/saturnedashboardxlsxexport.class.php';
+
+        while (ob_get_level() >= $bufferLevel && ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        // The title the page gave to its header names the dashboard
+        $export = new SaturneDashboardXlsxExport($this->db);
+        $title  = $export->getPlainText(is_string($GLOBALS['title'] ?? null) ? $GLOBALS['title'] : '');
+        if ($title === '') {
+            $title = $langs->transnoentities('Dashboard');
+        }
+
+        $export->export($dashboards, $hiddenWidgets, $title, ucfirst($this->module));
+        $this->db->close();
+        exit;
     }
 
     /**

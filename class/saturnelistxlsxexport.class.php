@@ -306,46 +306,6 @@ class SaturneListXlsxExport extends SaturneXlsxExport
     }
 
     /**
-     * Cell of a value printed as HTML: its text, and the URL of its link when it opens a card
-     *
-     * @param  string $html HTML of the value
-     * @return mixed        Text, or array with the text and the URL
-     */
-    public function getHtmlCell(string $html)
-    {
-        $text = $this->getPlainText($html);
-        $url  = $text !== '' ? $this->getLinkUrl($html) : '';
-
-        return $url !== '' ? ['value' => $text, 'url' => $url] : $text;
-    }
-
-    /**
-     * Full URL of the first link of a HTML text, the way a cell of the workbook opens it from outside Dolibarr
-     *
-     * @param  string $html HTML
-     * @return string       URL, empty when there is no link to a page
-     */
-    public function getLinkUrl(string $html): string
-    {
-        if (!preg_match('/<a\b[^>]*\shref="([^"]+)"/i', $html, $matches)) {
-            return '';
-        }
-        $url = html_entity_decode($matches[1], ENT_QUOTES, 'UTF-8');
-        if (preg_match('/^https?:\/\//i', $url)) {
-            return $url;
-        }
-        // A link of Dolibarr starts with the path of its root: the cell needs the address of the instance before it
-        if (strpos($url, '/') !== 0) {
-            return '';
-        }
-        if (strpos($url, DOL_URL_ROOT . '/') === 0) {
-            $url = substr($url, strlen(DOL_URL_ROOT));
-        }
-
-        return DOL_MAIN_URL_ROOT . $url;
-    }
-
-    /**
      * Sheet of the lines of the list, the reference kept in view when scrolling to the right
      *
      * @param  array $columns Columns, from getColumns()
