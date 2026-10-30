@@ -27,7 +27,8 @@
  * Globals    : $conf (extrafields_list_search_sql.tpl), $db, $hookmanager
  * Parameters : $action, $limit, $searchAll, $sortfield, $sortorder, $page
  * Objects    : $extrafields, $object
- * Variables  : $arrayfields, $excludeFields (optional), $offset, $search, $search_array_options (extrafields_list_search_sql.tpl), $searchCategories
+ * Variables  : $arrayfields, $excludeFields (optional), $listXlsxExportBufferLevel (list_massactions.tpl, optional), $offset,
+ *              $search, $search_array_options (extrafields_list_search_sql.tpl), $searchCategories
  *
  * Exposes    : $sqlForList — full filtered query before sort/pagination, for aggregate/KPI hooks
  */
@@ -377,7 +378,9 @@ $sql .= $db->order($sortfield, $sortorder);
 //if ($sortfield == 'days_remaining_before_next_control') {
 //    $sql .= $db->order('next_control_date', $sortorder);
 //}
-if ($limit) {
+// The Excel export asked through list_massactions.tpl.php reads every line, whatever the page shows
+$listXlsxExport = ($action == 'export_xlsx' && !empty($listXlsxExportBufferLevel));
+if ($limit && !$listXlsxExport) {
     $sql .= $db->plimit($limit + 1, $offset);
 }
 
@@ -385,6 +388,10 @@ $resql = $db->query($sql);
 if (!$resql) {
     dol_print_error($db);
     exit;
+}
+
+if ($listXlsxExport) {
+    require __DIR__ . '/objectfields_list_export_xlsx.tpl.php';
 }
 
 $num = $db->num_rows($resql);
