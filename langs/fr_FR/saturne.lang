@@ -170,6 +170,7 @@ ModuleArea                   = Bienvenue sur %s
 ModuleUpdate                 = Mise à jour de %s :
 ModuleHasBeenUpdatedTo       = %s a été mis à jour en version %s
 ModuleUpdateNeedDolibarrVersion = la version %s demande Dolibarr %s ou plus (version actuelle : %s). Mettez d'abord Dolibarr à jour : d'ici là, le module reste dans son état actuel.
+ModuleUpdateNeedSaturneVersion  = la version %s demande Saturne %s ou plus (version actuelle : %s). Mettez d'abord Saturne à jour : d'ici là, le module reste dans son état actuel.
 ModuleUpdateFailed           = La mise à jour de %s en version %s a échoué
 ModulePatchNote              = Note de mise à jour %s %s
 ShowPatchNote                = Consulter la note de mise à jour
