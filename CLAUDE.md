@@ -338,6 +338,7 @@ poste (#1607). Aucun sourcemap n'est produit.
 | **PHPStan** | Static analysis — max level | `phpstan.neon` | ✓ (quality job) |
 | **Phan** | Deep static analysis | `.phan/config.php` | ✓ (quality job) |
 | **PHPUnit** | Unit tests | `tests/phpunit/phpunittest.xml` | ✓ (quality job) |
+| **API publiée** | Appels d'un module à de l'API Saturne absente du dernier tag | `dev/ci/published-api.php` | Modules : `published-api-reusable.yml`, rouge si la PR introduit un appel, non requis |
 | **EditorConfig** | Indentation, charset, line endings consistent across all editors | `.editorconfig` | — (editor-side) |
 
 PHPCS and JSHint run **before** compilation in CI (`build-assets-reusable.yml` — `lint` job must pass before `build` job starts).
