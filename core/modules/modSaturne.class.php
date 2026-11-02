@@ -76,7 +76,7 @@ class modSaturne extends DolibarrModules
         $this->editor_url  = 'https://evarisk.com/';
 
         // Possible values for version are: 'development', 'experimental', 'dolibarr', 'dolibarr_deprecated' or a version string like 'x.y.z'
-        $this->version = '23.5.0';
+        $this->version = '23.6.0';
 
         // Url to the file with your last numberversion of this module
         //$this->url_last_version = 'http://www.example.com/versionmodule.txt';
@@ -254,6 +254,12 @@ class modSaturne extends DolibarrModules
         $this->menu = [];
         $r = 0;
 
+        // The config entry opens the first tab of the module setup: setup.php, unless the module ranks
+        // another page first
+        $moduleConfigPages = [
+            'digiriskdolibarr' => '/digiriskdolibarr/admin/config/riskassessmentdocument.php',
+        ];
+
         foreach ($modulesList as $moduleName => $moduleNameLowerCase) {
             $this->menu[$r++] = [
                 'fk_menu'  => 'fk_mainmenu=' . $moduleNameLowerCase,
@@ -262,7 +268,7 @@ class modSaturne extends DolibarrModules
                 'prefix'   => img_picto($langs->transnoentities('ModuleConfig', $moduleName), 'fontawesome_fa-cog_fas', 'class="pictofixedwidth"'),
                 'mainmenu' => $moduleNameLowerCase,
                 'leftmenu' => $moduleNameLowerCase . '_config',
-                'url'      => '/' . $moduleNameLowerCase . '/admin/setup.php',
+                'url'      => $moduleConfigPages[$moduleNameLowerCase] ?? '/' . $moduleNameLowerCase . '/admin/setup.php',
                 'langs'    => $moduleNameLowerCase . '@' . $moduleNameLowerCase,
                 'position' => 2000 + $r,
                 'enabled'  => 'isModEnabled(\'' . $moduleNameLowerCase . '\')',
@@ -318,6 +324,11 @@ class modSaturne extends DolibarrModules
     {
         global $conf, $langs, $user;
 
+        // Dolibarr runs init() before activating $this->depends : activate them first
+        if (saturne_activate_module_dependencies($this) < 0) {
+            return -1;
+        }
+
         // Permissions
         $this->remove($options);
 
@@ -339,7 +350,7 @@ class modSaturne extends DolibarrModules
         dolibarr_set_const($this->db, 'SATURNE_VERSION_DB_VERSION', $this->version, 'chaine', 0, '', $conf->entity);
 
         // Load Saturne libraries
-        require_once __DIR__ . '/../../../saturne/class/saturnemail.class.php';
+        require_once __DIR__ . '/../../class/saturnemail.class.php';
 
         $saturneMail = new SaturneMail($this->db);
 
@@ -393,7 +404,12 @@ class modSaturne extends DolibarrModules
 
         saturne_manage_extrafields($extraFieldsArrays);
 
-        return $this->_init($sql, $options);
+        $result = $this->_init($sql, $options);
+        if ($result > 0) {
+            $conf->setValues($this->db);
+        }
+
+        return $result;
     }
 
     /**

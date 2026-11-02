@@ -601,8 +601,20 @@ class SaturneDocumentModel extends CommonDocGenerator
             try {
                 if (preg_match('/photo|picto/', $key) || preg_match('/logo$/', $key)) {
                     // Image.
-                    if (file_exists($val)) {
-                        $listLines->setImage($key, $val);
+                    // Not file_exists(): without a company logo, $val is the thumbs folder itself
+                    if (is_file($val)) {
+                        if (preg_match('/logo$/', $key)) {
+                            // Scale the sharp _small thumbnail of the logo down into the 128x72 px box of the former
+                            // _mini one, keeping its aspect ratio
+                            $ratio     = 1;
+                            $imageSize = getimagesize($val);
+                            if (is_array($imageSize) && $imageSize[0] > 0 && $imageSize[1] > 0) {
+                                $ratio = min(128 / $imageSize[0], 72 / $imageSize[1], 1);
+                            }
+                            $listLines->setImage($key, $val, $ratio);
+                        } else {
+                            $listLines->setImage($key, $val);
+                        }
                     } elseif (dol_strlen($val) > 0) {
                         if ($key == 'mycompany_logo') {
                             $listLines->setVars($key, $outputLangs->transnoentities('ErrorNoSocietyLogo'), true, 'UTF-8');
@@ -950,6 +962,10 @@ class SaturneDocumentModel extends CommonDocGenerator
 
         $outputLangs->charset_output = 'UTF-8';
 
+        // The document language only knows the module keys when it is the user language itself: a
+        // language picked at generation is a fresh Translate, and every module key came out raw
+        $outputLangs->loadLangs(['main', 'saturne@saturne', $moduleNameLowerCase . '@' . $moduleNameLowerCase]);
+
         // buildDocumentFilename() returns -1 on failure, the file path otherwise. Unchecked, the
         // generation carried on with -1 as a path, still reported a success to commonGenerateDocument()
         // and fired the _GENERATE trigger for a document that was never written.
@@ -992,10 +1008,9 @@ class SaturneDocumentModel extends CommonDocGenerator
         }
 
         // Define substitution array
-        $substitutionArray          = getCommonSubstitutionArray($outputLangs, 0, null, $object);
-        $arrayObjectFromProperties  = $this->get_substitutionarray_each_var_object($object, $outputLangs);
-        $arraySoc                   = $this->get_substitutionarray_mysoc($mysoc, $outputLangs);
-        $arraySoc['mycompany_logo'] = preg_replace('/_small/', '_mini', $arraySoc['mycompany_logo']);
+        $substitutionArray         = getCommonSubstitutionArray($outputLangs, 0, null, $object);
+        $arrayObjectFromProperties = $this->get_substitutionarray_each_var_object($object, $outputLangs);
+        $arraySoc                  = $this->get_substitutionarray_mysoc($mysoc, $outputLangs);
 
         $tmpArray = array_merge($substitutionArray, $arrayObjectFromProperties, $arraySoc, $moreParam['tmparray']);
         if (isModEnabled('multicompany')) {
@@ -1094,7 +1109,8 @@ class SaturneDocumentModel extends CommonDocGenerator
      */
     protected function splitTextToHeight($pdf, string $text, float $width, float $height): array
     {
-        if (dol_strlen($text) == 0 || $pdf->getStringHeight($width, $text) <= $height) {
+        // Measured with the border of the table cell, as drawTable() measures its rows
+        if (dol_strlen($text) == 0 || $pdf->getStringHeight($width, $text, false, true, null, 1) <= $height) {
             return [$text, ''];
         }
 
@@ -1104,7 +1120,7 @@ class SaturneDocumentModel extends CommonDocGenerator
         $high = dol_strlen($text);
         while ($low < $high) {
             $middle = (int) ceil(($low + $high) / 2);
-            if ($pdf->getStringHeight($width, dol_substr($text, 0, $middle)) <= $height) {
+            if ($pdf->getStringHeight($width, dol_substr($text, 0, $middle), false, true, null, 1) <= $height) {
                 $low = $middle;
             } else {
                 $high = $middle - 1;
@@ -1196,10 +1212,12 @@ class SaturneDocumentModel extends CommonDocGenerator
 
                 // Measured with the font the cell will be drawn with, and through
                 // getStringHeight() which accounts for the cell padding : the row height is also
-                // the MultiCell maximum, so an approximation would cut the text.
+                // the MultiCell maximum, so an approximation would cut the text. With the border
+                // too : MultiCell draws it, and its width widens the padding, so a height measured
+                // without it is short by a hair and the last line of the cell is dropped.
                 foreach ($texts as $key => $text) {
                     $pdf->SetFont('', $isLabel[$key] ? 'B' : '', $cellFontSize);
-                    $height = $pdf->getStringHeight($widths[$key], $text);
+                    $height = $pdf->getStringHeight($widths[$key], $text, false, true, null, 1);
 
                     if ($height > $maxHeight) {
                         $maxHeight = $height;

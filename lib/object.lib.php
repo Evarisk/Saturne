@@ -565,7 +565,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'list_url'       => 'projet/tasks/list.php',
             'defaultsort'    => 't.datec',
             'defaultorder'   => 'DESC',
-            'class_path'     => 'custom/saturne/class/task/saturnetask.class.php',
+            'class_path'     => 'saturne/class/task/saturnetask.class.php',
             'lib_path'       => 'core/lib/project.lib.php',
         ];
         //@todo backward compatibility
@@ -766,7 +766,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'list_url'       => 'expedition/list.php',
             'defaultsort'    => 't.datec',
             'defaultorder'   => 'DESC',
-            'class_path'     => 'custom/saturne/class/dolibarrobjects/saturneexpedition.class.php',
+            'class_path'     => 'saturne/class/dolibarrobjects/saturneexpedition.class.php',
             'lib_path'       => 'core/lib/expedition.lib.php',
         ];
     }
@@ -864,7 +864,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'list_url'       => 'reception/list.php',
             'defaultsort'    => 't.datec',
             'defaultorder'   => 'DESC',
-            'class_path'     => 'custom/saturne/class/dolibarrobjects/saturnereception.class.php',
+            'class_path'     => 'saturne/class/dolibarrobjects/saturnereception.class.php',
             'lib_path'       => 'core/lib/reception.lib.php',
         ];
     }
@@ -914,7 +914,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'list_url'       => 'supplier_proposal/list.php',
             'defaultsort'    => 't.datec',
             'defaultorder'   => 'DESC',
-            'class_path'     => 'custom/saturne/class/dolibarrobjects/saturnesupplierproposal.class.php',
+            'class_path'     => 'saturne/class/dolibarrobjects/saturnesupplierproposal.class.php',
             'lib_path'       => 'core/lib/supplier_proposal.lib.php',
         ];
     }
@@ -1121,6 +1121,13 @@ function saturne_require_objects_mod(array $numberingModulesNames, string $modul
                 require_once $modPathCustomDoc2;
             } elseif (file_exists($modPathDolibarr)) {
                 require_once $modPathDolibarr;
+            } else {
+                // Some modules file their numbering modules one folder deeper (digiriskelement/accident, riskanalysis/risk...):
+                // without this lookup, getNextNumRef() only worked on pages that had preloaded the module with that folder in the key
+                $nestedModPaths = glob(dirname(__FILE__) . '/../../' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/*/' . $objectType . '/' . $numberingModulesName . '.php');
+                if (!empty($nestedModPaths)) {
+                    require_once $nestedModPaths[0];
+                }
             }
 
             $varName             = 'ref' . ucfirst($objectType) . 'Mod';

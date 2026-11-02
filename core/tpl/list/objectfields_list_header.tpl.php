@@ -28,7 +28,8 @@
  * Parameters : $action, $limit, $contextpage, $massaction, $mode, $optioncss, $page, $searchAll, $sortfield, $sortorder, $toselect
  * Objects    : $categorie, $extrafields (extrafields_list_search_param.tpl), $form, $object
  * Variables  : $arrayfields, $createUrl (optional), $enableMassSignature (optional), $enableMassValidate (optional),
- *              $fieldsToSearchAll, $formMoreParams (optional), $helpText (optional), $nbTotalOfRecords, $num,
+ *              $fieldsToSearchAll, $formMoreParams (optional), $helpText (optional), $listXlsxExportAvailable (optional),
+ *              $moreUrlParameters (optional), $nbTotalOfRecords, $num,
  *              $permissiontoadd, $resql, $search, $search_array_options (extrafields_list_search_param.tpl),
  *              $searchCategories, $sql, $title
  */
@@ -237,6 +238,20 @@ if ($displayRecordCount !== null && is_numeric($displayRecordCount)) {
     $nbTotalOfRecords = -1; // Prevent print_barre_liste from appending it again
 }
 $listTitle = $titleText . ' ' . ($cardButton ?? '');
+
+// Excel export of the whole list, offered by the lists going through list_massactions.tpl.php, which answers it. The
+// export link carries the context of the page: the card the list is a tab of, the object type of the generic list
+if (!empty($listXlsxExportAvailable) && $mode != 'pwa') {
+    require_once __DIR__ . '/../../../class/saturnexlsxexport.class.php';
+
+    $xlsxExportParams = [];
+    parse_str(ltrim($moreUrlParameters ?? '', '&'), $xlsxExportParams);
+    $xlsxExportParams = array_diff_key(array_merge($xlsxExportParams, $formMoreParams ?? []), ['action' => 1, 'token' => 1]);
+    if (!empty($objectType)) {
+        $xlsxExportParams['object_type'] = $objectType;
+    }
+    $newCardButton = SaturneXlsxExport::getListExportButton($xlsxExportParams) . ($newCardButton ?? '');
+}
 
 // Add selectedFields back to the title bar on the right, or hidden if we don't want the gear icon.
 // Since Saturne removed it to put it in the side panel, we must put it back so checkboxes exist!

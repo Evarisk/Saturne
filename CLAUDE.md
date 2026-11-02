@@ -135,7 +135,7 @@ $title  = $langs->trans('MyPage');
 $object = new MyObject($db);
 $object->fetch($id);
 saturne_header(0, '', $title, $help_url);
-require_once __DIR__ . '/../../saturne/core/tpl/banner_actions.tpl.php';
+require_once dol_buildpath('/saturne/core/tpl/banner_actions.tpl.php');
 ```
 
 **Entry-point bootstrap — Dolistore rule** — every PHP file reachable by URL (`view/`, `ajax/`, `admin/`, `webhook/`, the module index, `manifest.json.php`) and every script shipped in the zip loads its environment with **at least two attempts**: one for the module at the Dolibarr root, one for the module in `custom/`. A single `require` gets the **whole zip refused** by the Dolistore package checker, which names the offending file:
@@ -163,6 +163,14 @@ Always go through `{module}.main.inc.php`, never straight to `saturne.main.inc.p
 dol_include_once('/mymodule/class/myobject.class.php');            // GOOD
 require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php'; // GOOD, core class
 require_once DOL_DOCUMENT_ROOT . '/custom/mymodule/class/…';       // BAD
+```
+
+**Saturne's classes, libs and templates** — from a child module, through the Dolibarr paths, never relative to the file. PHP resolves `__DIR__` to the **target** of a symlink: a module installed in `htdocs/custom` by symlink looks for Saturne next to the target and dies on a fatal (Eoxia/doliletter#563). Never `dol_include_once` a template: it runs inside that function and loses the caller's variables. Only the `{module}.main.inc.php` bootstrap keeps its relative attempts — it runs before `main.inc.php`, `dol_buildpath` does not exist yet. The `Inclusions de Saturne` step of each module's lint job refuses the pattern.
+```php
+dol_include_once('/saturne/class/saturneobject.class.php');                              // GOOD, class or lib
+require_once dol_buildpath('/saturne/core/tpl/banner_actions.tpl.php');                  // GOOD, template
+$saturneAvailable = file_exists(dol_buildpath('/saturne/lib/saturne_functions.lib.php')); // GOOD, guard
+require_once __DIR__ . '/../../saturne/class/saturneobject.class.php';                   // BAD, fatal once symlinked
 ```
 
 **Security rules** — always:

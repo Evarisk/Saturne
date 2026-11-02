@@ -791,11 +791,6 @@ parameters:
 			path: lib/medias.lib.php
 
 		-
-			message: '#^Deprecated in PHP 8\.0\: Required parameter \$sdir follows optional parameter \$modulepart\.$#'
-			identifier: parameter.requiredAfterOptional
-			path: lib/medias.lib.php
-
-		-
 			message: '#^Left side of && is always true\.$#'
 			identifier: booleanAnd.leftAlwaysTrue
 			path: lib/medias.lib.php

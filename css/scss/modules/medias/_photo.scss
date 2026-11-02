@@ -222,6 +222,45 @@
     opacity: 0.8;
   }
 }
+// Covers the gallery, or the media library page, while files are dragged over it (mediaGallery.js).
+// It lets the drag events through to the elements underneath, the handlers sit on the document
+.media-gallery-dropzone {
+  display: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 3px dashed var(--color-primary, #007bff);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--color-primary, #007bff);
+  font-size: 1.2em;
+  pointer-events: none;
+
+  i {
+    font-size: 3em;
+  }
+
+  &.dropzone-visible {
+    display: flex;
+  }
+
+  // The page takes files dropped anywhere on it: its cover spans the window, the top menu included
+  &.media-library-page-dropzone {
+    position: fixed;
+    top: 1em;
+    right: 1em;
+    bottom: 1em;
+    left: 1em;
+    z-index: 1010;
+  }
+}
 .media-date-header-container {
   width: 100%;
   margin-top: 15px;

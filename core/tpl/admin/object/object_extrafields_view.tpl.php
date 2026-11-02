@@ -26,8 +26,10 @@
  * The following vars must be defined:
  * global     : $langs
  * parameters : $action, $moduleNameLowerCase, $objectType
- * variable   : $title
+ * variable   : $title, $permissiontowrite (optional, computed here when missing)
  */
+
+$permissiontowrite = $permissiontowrite ?? saturne_check_admin_write_access();
 
 // Get parameters.
 $value    = GETPOST('value', 'alpha');
@@ -46,8 +48,10 @@ $elementtype = $moduleNameLowerCase . '_' . $objectType;
  * Actions
  */
 
-// Extrafields actions.
-require_once DOL_DOCUMENT_ROOT . '/core/actions_extrafields.inc.php';
+// Extrafields actions: the core file checks no permission, the page has to
+if ($permissiontowrite) {
+    require_once DOL_DOCUMENT_ROOT . '/core/actions_extrafields.inc.php';
+}
 
 /*
  * View
@@ -61,20 +65,20 @@ print load_fiche_titre($langs->trans('Extrafields'), '', '');
 require_once DOL_DOCUMENT_ROOT . '/core/tpl/admin_extrafields_view.tpl.php';
 
 // Buttons.
-if ($action != 'create' && $action != 'edit') {
+if ($permissiontowrite && $action != 'create' && $action != 'edit') {
     print '<div class="tabsAction">';
     print '<div class="inline-block divButAction"><a class="butAction" href="' . $_SERVER['PHP_SELF'] . '?action=create&module_name=' . $moduleName . '&object_type=' . $objectType . '">' . $langs->trans('NewAttribute') . '</a></div>';
     print '</div>';
 }
 
 // Creation of an optional field.
-if ($action == 'create') {
+if ($permissiontowrite && $action == 'create') {
     print load_fiche_titre($langs->trans('NewAttribute'));
     require_once DOL_DOCUMENT_ROOT . '/core/tpl/admin_extrafields_add.tpl.php';
 }
 
 // Edition of an optional field.
-if ($action == 'edit' && !empty($attrname)) {
+if ($permissiontowrite && $action == 'edit' && !empty($attrname)) {
     print load_fiche_titre($langs->trans('FieldEdition', $attrname));
     require_once DOL_DOCUMENT_ROOT . '/core/tpl/admin_extrafields_edit.tpl.php';
 }

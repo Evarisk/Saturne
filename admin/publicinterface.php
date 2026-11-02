@@ -133,7 +133,7 @@ $preHead = $moduleNameLowerCase . '_admin_prepare_head';
 $head    = $preHead();
 print dol_get_fiche_head($head, 'publicinterface', $title, -1, $moduleNameLowerCase . '_color@' . $moduleNameLowerCase);
 
-require __DIR__ . '/../../saturne/core/tpl/admin/object/object_const_view.tpl.php';
+require __DIR__ . '/../core/tpl/admin/object/object_const_view.tpl.php';
 
 print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '">';
 print '<input type="hidden" name="token" value="' . newToken() . '">';

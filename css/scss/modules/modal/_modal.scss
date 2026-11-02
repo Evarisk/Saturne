@@ -60,8 +60,9 @@
 // Le menu haut Dolibarr (.side-nav-vert) est sticky avec un z-index de 1005, supérieur à celui de la
 // modal active (1002) : sur une fenêtre moins haute que la modal, il recouvrait l'en-tête, masquant
 // le titre et rendant la croix de fermeture incliquable. On le repasse sous l'overlay tant qu'une
-// modal est ouverte.
-body:has(.wpeo-modal.modal-active) .side-nav-vert {
+// modal est ouverte : classe tenue par window.saturne.modal.watchActiveModals(), un
+// body:has(.modal-active) coûtant un recalcul de style de toute la page à chaque ouverture.
+.side-nav-vert.saturne-under-modal {
   z-index: 1001;
 }
 

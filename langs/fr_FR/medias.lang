@@ -120,3 +120,8 @@ SyncMediaLibrary=Ajouter à la bibliothèque les photos des éléments qui n'y s
 SyncMediaLibraryButton=Récupérer toutes les photos
 SyncMediaLibraryDone=Bibliothèque à jour : %s photo(s) ajoutée(s), dont %s homonyme(s) sous un autre nom ; %s déjà présente(s) ; %s écartée(s) (signatures, documents confidentiels, dossiers de travail)
 SyncMediaLibraryError=La synchronisation de la bibliothèque a échoué
+
+# Glisser-déposer dans la bibliothèque
+DropMediasHere=Déposez vos images ici pour les ajouter à la bibliothèque
+DroppedFilesNotImages=Seules les images vont dans la bibliothèque, fichier(s) ignoré(s) : %s
+MediasAddedToLibrary=%s média(s) ajouté(s) à la bibliothèque

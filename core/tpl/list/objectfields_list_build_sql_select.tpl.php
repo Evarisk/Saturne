@@ -27,7 +27,8 @@
  * Globals    : $conf (extrafields_list_search_sql.tpl), $db, $hookmanager
  * Parameters : $action, $limit, $searchAll, $sortfield, $sortorder, $page
  * Objects    : $extrafields, $object
- * Variables  : $arrayfields, $excludeFields (optional), $offset, $search, $search_array_options (extrafields_list_search_sql.tpl), $searchCategories
+ * Variables  : $arrayfields, $excludeFields (optional), $listXlsxExportBufferLevel (list_massactions.tpl, optional), $offset,
+ *              $search, $search_array_options (extrafields_list_search_sql.tpl), $searchCategories
  *
  * Exposes    : $sqlForList — full filtered query before sort/pagination, for aggregate/KPI hooks
  */
@@ -377,7 +378,9 @@ $sql .= $db->order($sortfield, $sortorder);
 //if ($sortfield == 'days_remaining_before_next_control') {
 //    $sql .= $db->order('next_control_date', $sortorder);
 //}
-if ($limit) {
+// The Excel export asked through list_massactions.tpl.php reads every line, whatever the page shows
+$listXlsxExport = ($action == 'export_xlsx' && !empty($listXlsxExportBufferLevel));
+if ($limit && !$listXlsxExport) {
     $sql .= $db->plimit($limit + 1, $offset);
 }
 
@@ -387,11 +390,16 @@ if (!$resql) {
     exit;
 }
 
+if ($listXlsxExport) {
+    require __DIR__ . '/objectfields_list_export_xlsx.tpl.php';
+}
+
 $num = $db->num_rows($resql);
 
 // Direct jump if only one record found, out of reach once the page header has been printed : the redirect
-// would only raise a "headers already sent" warning and leave the list truncated
-if ($num == 1 && !headers_sent() && getDolGlobalInt('MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE') && $searchAll && !$page) {
+// would only raise a "headers already sent" warning and leave the list truncated. An export of the list wants
+// the record itself, not its card
+if ($num == 1 && !headers_sent() && getDolGlobalInt('MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE') && $searchAll && !$page && $action != 'export_xlsx') {
     $obj = $db->fetch_object($resql);
     $id = $obj->rowid;
     //@todo parameter

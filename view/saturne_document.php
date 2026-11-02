@@ -47,7 +47,7 @@ require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameL
 global $conf, $db, $hookmanager, $langs, $user;
 
 // Load translation files required by the page
-saturne_load_langs();
+saturne_load_langs(['other']);
 
 // Get parameters
 $id          = GETPOST('id', 'int');
@@ -155,7 +155,7 @@ if ($id > 0 || !empty($ref)) {
     // Number of files
     print '<tr><td class="titlefield">' . $langs->trans('NbOfAttachedFiles') . '</td><td colspan="3">' . count($filearray) . '</td></tr>';
     // Total size
-    print '<tr><td>' . $langs->trans('TotalSizeOfAttachedFiles') . '</td><td colspan="3">' . $totalsize . ' ' . $langs->trans('bytes') . '</td></tr>';
+    print '<tr><td>' . $langs->trans('TotalSizeOfAttachedFiles') . '</td><td colspan="3">' . dol_print_size($totalsize, 1, 1) . '</td></tr>';
     print '</table>';
     print '</div>';
 

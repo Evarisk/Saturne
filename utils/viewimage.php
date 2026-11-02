@@ -67,8 +67,8 @@ global $conf, $db;
 // Get parameters
 $file       = GETPOST('file');
 // Do not use urldecode here ($_GET are already decoded by PHP)
-$modulepart = GETPOST('modulepart', 'alpha');
-$entity     = GETPOST('entity');
+$modulepart = GETPOST('modulepart', 'aZ09');
+$entity     = GETPOSTINT('entity');
 
 if (!isModEnabled('multicompany')) {
     $entity = $conf->entity;
@@ -81,6 +81,17 @@ if (empty($modulepart) || empty($file)) {
     accessforbidden('Bad link. Bad value for parameter modulepart or file', 0, 0, 1);
 }
 
+// Security: this wrapper is served without login, only for the directories whose images the public pages
+// of the Saturne modules show. Anything else of the data directory (invoices, logs, other modules) is refused
+$publicModuleParts = ['digiquali', 'digiriskdolibarr', 'easyurl', 'category', 'produit', 'product_batch', 'mycompany'];
+if (!in_array($modulepart, $publicModuleParts, true)) {
+    accessforbidden('Error: This modulepart is not served by the public image wrapper.', 0, 0, 1);
+}
+// The company directory also holds its documents: only its logos are public, as in the viewimage.php of the core
+if ($modulepart == 'mycompany' && !preg_match('/^\/?logos\//', $file)) {
+    accessforbidden('Error: Only the logos of the company are served by the public image wrapper.', 0, 0, 1);
+}
+
 /*
  * View
  */
@@ -88,23 +99,15 @@ if (empty($modulepart) || empty($file)) {
 // Define mime type
 $type = dol_mimetype($file);
 
-// Security: This wrapper is for images. We do not allow type/html
-if (preg_match('/html/i', $type)) {
-    accessforbidden('Error: Using the image wrapper to output a file with a mime type HTML is not possible.', 0, 0, 1);
-}
-// Security: This wrapper is for images. We do not allow files ending with .noexe
-if (preg_match('/\.noexe$/i', $file)) {
-    accessforbidden('Error: Using the image wrapper to output a file ending with .noexe is not allowed.', 0, 0, 1);
-}
-
 // Security: Delete string ../ or ..\ into $file
 // Replace '... or more' with '..'
 $file = preg_replace('/\.\.+/', '..', $file);
 $file = str_replace('../', '/', $file);
 $file = str_replace('..\\', '/', $file);
 
-// Check that file is allowed for view with viewimage.php
-if (!empty($file) && !dolIsAllowedForPreview($file)) {
+// Security: images only. dolIsAllowedForPreview() also lets through PDF and plain text (logs, configuration,
+// sources), and SVG may carry scripts
+if (!in_array(dol_mimetype($file, '', 1), ['avif', 'bmp', 'gif', 'jpeg', 'png', 'tiff', 'webp'], true)) {
     accessforbidden('This file is not qualified for preview', 0, 0, 1);
 }
 

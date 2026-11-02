@@ -109,8 +109,8 @@ if ($id > 0 || !empty($ref)) {
 }
 
 // Security check - Protection if external user
-$permissiontoread = $user->rights->$moduleNameLowerCase->$objectType->read;
-$permissiontoadd  = $user->rights->$moduleNameLowerCase->$objectType->write;
+$permissiontoread = $user->hasRight($moduleNameLowerCase, $objectType, 'read');
+$permissiontoadd  = $user->hasRight($moduleNameLowerCase, $objectType, 'write');
 saturne_check_access($permissiontoread, $object);
 
 /*
@@ -189,7 +189,15 @@ if ($id > 0 || !empty($ref)) {
                 $param .= '&limit=' . urlencode($limit);
             }
 
-            print load_fiche_titre($langs->trans('ActionsOnObject', $langs->transnoentities('The' . ucfirst($object->element))), $newCardButton, '');
+            // A module can give an object its own title (AgendaTitle<Element>) when "Events on <the object>" reads as jargon.
+            // Not ActionsOn<Element>: modules still define unused keys of that name (e.g. ActionsOnAccident)
+            $agendaTitleKey = 'AgendaTitle' . ucfirst($object->element);
+            $agendaTitle    = $langs->trans($agendaTitleKey);
+            if ($agendaTitle == $agendaTitleKey) {
+                $agendaTitle = $langs->trans('ActionsOnObject', $langs->transnoentities('The' . ucfirst($object->element)));
+            }
+
+            print load_fiche_titre($agendaTitle, $newCardButton, '');
 
             // List of all actions
             $filters = [];
