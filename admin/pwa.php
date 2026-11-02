@@ -67,7 +67,7 @@ saturne_check_access($permissionToRead);
 if ($action == 'generate_QRCode') {
     $urlToEncode = GETPOST('urlToEncode');
 
-    $barcode = new TCPDF2DBarcode($urlToEncode, 'QRCODE,L');
+    $barcode = new TCPDF2DBarcode($urlToEncode, 'QRCODE,H');
 
     dol_mkdir($conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/pwa/qrcode/');
     $file = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/pwa/qrcode/' . 'barcode_' . dol_print_date(dol_now(), 'dayhourlog') . '.png';
