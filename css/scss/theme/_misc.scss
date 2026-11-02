@@ -1,0 +1,10 @@
+@use 'tokens' as *;
+
+/* Saturne modern theme: legacy EO framework widgets still used by some module pages */
+
+#{$theme-scope} {
+  .wpeo-tab .tab-list .tab-element.tab-active {
+    border-color: $theme-primary;
+    color: $theme-primary-strong;
+  }
+}

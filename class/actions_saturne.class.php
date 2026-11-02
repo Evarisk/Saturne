@@ -23,7 +23,7 @@
  */
 
 // Load Saturne Libraries
-require_once __DIR__ . '/../../saturne/lib/object.lib.php';
+require_once __DIR__ . '/../lib/object.lib.php';
 
 /**
  * Class ActionsSaturne
@@ -125,6 +125,85 @@ class ActionsSaturne
     }
 
     /**
+     * Overloading the saturneEmailTemplateSettings function : replacing the parent's function with the one below
+     *
+     * Declares the Saturne settings designating an email template, shown by their label in the "Used by" column of the
+     * email templates overview (admin/emailtemplates.php). A module declares its own the same way, in the
+     * 'emailtemplates' context: ['CONSTANT_NAME' => ['label' => 'What the setting sends', 'url' => 'Page setting it',
+     * 'type' => 'Element whose templates it picks from, optional']]
+     *
+     * @param  array $parameters Hook metadata (context, etc...)
+     * @return int               0 < on error, 0 on success, 1 to replace standard code
+     */
+    public function saturneEmailTemplateSettings(array $parameters): int
+    {
+        global $langs;
+
+        $langs->loadLangs(['ticket', 'saturne@saturne']);
+
+        // Constant => [section, recipient] language keys, as on the setup page
+        $ticketSettings = [
+            'SATURNE_TICKET_CREATE_MAIL_MODEL_ADMIN'      => ['TicketMailModelCreateSection', 'TicketCreateMailModelAdmin'],
+            'SATURNE_TICKET_CREATE_MAIL_MODEL_CUSTOMER'   => ['TicketMailModelCreateSection', 'TicketCreateMailModelCustomer'],
+            'SATURNE_TICKET_CREATE_MAIL_MODEL_ASSIGNEE'   => ['TicketMailModelCreateSection', 'TicketCreateMailModelAssignee'],
+            'SATURNE_TICKET_CLOSE_MAIL_MODEL_ADMIN'       => ['TicketMailModelCloseSection', 'TicketCloseMailModelAdmin'],
+            'SATURNE_TICKET_CLOSE_MAIL_MODEL_CUSTOMER'    => ['TicketMailModelCloseSection', 'TicketCloseMailModelCustomer'],
+            'SATURNE_TICKET_ASSIGNED_MAIL_MODEL_ASSIGNEE' => ['TicketMailModelAssignedSection', 'TicketAssignedMailModelAssignee'],
+            'SATURNE_TICKET_ASSIGNED_MAIL_MODEL_CUSTOMER' => ['TicketMailModelAssignedSection', 'TicketAssignedMailModelCustomer'],
+        ];
+
+        $this->results = [];
+        foreach ($ticketSettings as $name => $labelKeys) {
+            $this->results[$name] = [
+                'label' => $langs->transnoentities('Ticket') . ' · ' . $langs->transnoentities($labelKeys[0]) . ' · ' . $langs->transnoentities($labelKeys[1]),
+                'url'   => dol_buildpath('/saturne/admin/setup.php', 1),
+                'type'  => 'ticket',
+            ];
+        }
+
+        // Written on module activation, set nowhere in the interface
+        $this->results['SATURNE_EMAIL_TEMPLATE_SIGNATURE']        = ['label' => $langs->transnoentities('EmailTemplatesSettingSignature'), 'url' => ''];
+        $this->results['SATURNE_EMAIL_TEMPLATE_GLOBAL_SIGNATURE'] = ['label' => $langs->transnoentities('EmailTemplatesSettingGlobalSignature'), 'url' => ''];
+
+        return 0;
+    }
+
+    /**
+     * Overloading the completeTabsHead function : replacing the parent's function with the one below
+     *
+     * Adds the email templates overview (admin/emailtemplates.php) to the email setup tabs, right before the core
+     * "Email templates" tab. Dolibarr only completes these tabs in 'remove' mode, a module descriptor cannot add one
+     *
+     * @param  array $parameters Hook metadata (context, etc...)
+     * @return int               0 < on error, 0 on success, 1 to replace standard code
+     */
+    public function completeTabsHead(array $parameters): int
+    {
+        global $langs, $user;
+
+        // The hook manager merges $this->results into the tabs: a value left by a previous hook would become a tab
+        $this->results = [];
+
+        if (($parameters['mode'] ?? '') !== 'remove' || empty($user->admin) || !is_array($parameters['head'] ?? null)) {
+            return 0;
+        }
+
+        $head = array_values($parameters['head']);
+        foreach ($head as $position => $tab) {
+            if (($tab[2] ?? '') === 'templates' && strpos($tab[0] ?? '', '/admin/mails_templates.php') !== false) {
+                $langs->load('saturne@saturne');
+                array_splice($head, $position, 0, [[dol_buildpath('/saturne/admin/emailtemplates.php', 1), $langs->trans('EmailTemplatesOverview'), 'saturneemailtemplates']]);
+
+                // 'head' is a reference to the tabs of complete_head_from_modules()
+                $parameters['head'] = $head;
+                break;
+            }
+        }
+
+        return 0;
+    }
+
+    /**
      * Overloading the addHtmlHeader function : replacing the parent's function with the one below
      *
      * @param  array $parameters Hook metadata (context, etc...)
@@ -132,22 +211,22 @@ class ActionsSaturne
      */
     public function addHtmlHeader(array $parameters): int
     {
-        $saturne_js_path = dol_buildpath('/custom/saturne/js/saturne.min.js', 0);
-        $saturne_js_mtime = file_exists($saturne_js_path) ? filemtime($saturne_js_path) : 1;
-        $saturne_js_url = DOL_URL_ROOT . '/custom/saturne/js/saturne.min.js?v=' . $saturne_js_mtime;
+        require_once __DIR__ . '/../lib/asset.lib.php';
+
+        $saturne_js_url = saturne_asset_full_url('/saturne/js/saturne.min.js');
 
         if (strpos($parameters['context'], 'usercard') !== false) {
             $resourcesRequired = [
-                'css'       => '/custom/saturne/css/saturne.min.css',
+                'css'       => saturne_asset_full_url('/saturne/css/saturne.min.css'),
                 'js'        => $saturne_js_url,
-                'signature' => '/custom/saturne/js/includes/signature-pad.min.js'
+                'signature' => saturne_asset_full_url('/saturne/js/includes/signature-pad.min.js')
             ];
 
             $out  = '<!-- Includes CSS added by module saturne -->';
-            $out .= '<link rel="stylesheet" type="text/css" href="' . dol_buildpath($resourcesRequired['css'], 1) . '">';
+            $out .= '<link rel="stylesheet" type="text/css" href="' . $resourcesRequired['css'] . '">';
             $out .= '<!-- Includes JS added by module saturne -->';
             $out .= '<script src="' . $resourcesRequired['js'] . '"></script>';
-            $out .= '<script src="' . dol_buildpath($resourcesRequired['signature'], 1) . '"></script>';
+            $out .= '<script src="' . $resourcesRequired['signature'] . '"></script>';
 
             $this->resprints = $out;
         } elseif (strpos($parameters['context'], 'emailtemplates')) {
@@ -169,6 +248,21 @@ class ActionsSaturne
         $out .= "\n" . 'window.saturne.config.enableMaxlengthCounter = ' . getDolGlobalInt('SATURNE_ENABLE_MAXLENGTH_COUNTER', 0) . ';';
         $out .= "\n" . '</script>' . "\n";
         $this->resprints = $out;
+
+        return 0;
+    }
+
+    /**
+     * Overloading the llxHeader function : replacing the parent's function with the one below
+     *
+     * @param  array $parameters Hook metadatas (context, etc...)
+     * @return int               0 < on error, 0 on success, 1 to replace standard code
+     */
+    public function llxHeader(array $parameters): int
+    {
+        require_once __DIR__ . '/../lib/asset.lib.php';
+
+        saturne_version_llxheader_assets($parameters);
 
         return 0;
     }

@@ -27,6 +27,9 @@
  * Global     : $conf, $db, $langs, $moduleName, $moduleNameLowerCase, $user
  * Parameters : $action
  * Variable   : $upload_dir
+ *
+ * Exposes    : $dashboardXlsxExportAvailable, read by SaturneDashboard::show_dashboard() to offer the Excel export,
+ *              and $dashboardXlsxExportBufferLevel when the export is asked
  */
 
 // Load Dolibarr libraries
@@ -170,4 +173,12 @@ if ($action == 'generate_csv') {
         setEventMessages($langs->trans('ErrorMissingData'), [], 'errors');
     }
     $action = '';
+}
+
+// Excel export of the whole dashboard: the page is drawn into a buffer, which SaturneDashboard::show_dashboard()
+// replaces with the workbook, from the parameters the page gives the dashboard
+$dashboardXlsxExportAvailable = true;
+if ($action == 'export_xlsx') {
+    ob_start();
+    $dashboardXlsxExportBufferLevel = ob_get_level();
 }

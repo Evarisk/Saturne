@@ -829,7 +829,8 @@ abstract class SaturneObject extends CommonObject
      */
     public function getLibStatut(int $mode = 0): string
     {
-        return $this->LibStatut($this->status, $mode);
+        // Status null (object not fetched, empty column): LibStatut() is typed int, a fatal otherwise
+        return $this->LibStatut((int) $this->status, $mode);
     }
 
     /**

@@ -118,3 +118,8 @@ SyncMediaLibrary=Add to the library the photos of the records it does not hold y
 SyncMediaLibraryButton=Retrieve all photos
 SyncMediaLibraryDone=Library up to date: %s photo(s) added, %s of them homonyms under another name; %s already there; %s left out (signatures, confidential documents, work folders)
 SyncMediaLibraryError=The catch up of the library failed
+
+# Drag and drop into the library
+DropMediasHere=Drop your images here to add them to the library
+DroppedFilesNotImages=Only images go into the library, file(s) left out: %s
+MediasAddedToLibrary=%s media(s) added to the library

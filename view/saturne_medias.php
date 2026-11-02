@@ -85,6 +85,12 @@ print '<i class="fas fa-plus"></i>';
 print '</div>';
 print '</div>';
 
+// Covers the page while files are dragged over it: dropping them adds them to the library
+print '<div class="media-gallery-dropzone media-library-page-dropzone" data-label-ignored="' . dol_escape_htmltag($langs->trans('DroppedFilesNotImages', '%s')) . '" data-label-done="' . dol_escape_htmltag($langs->trans('MediasAddedToLibrary', '%s')) . '" data-label-error="' . dol_escape_htmltag($langs->trans('PhotoNotSent')) . '">';
+print '<i class="fas fa-cloud-upload-alt"></i>';
+print '<span>' . $langs->trans('DropMediasHere') . '</span>';
+print '</div>';
+
 // The pane keeps the markup the list view reloads itself into after an assignment
 print '<div class="saturne-media-tab-pane saturne-media-page-pane" data-tab="pending" data-loaded="1">';
 require __DIR__ . '/../core/tpl/medias/medias_pending_list.tpl.php';

@@ -1,0 +1,96 @@
+@use 'tokens' as *;
+
+/* Saturne modern theme: Dolibarr left menu, as a sidebar of rounded items */
+
+#{$theme-scope} {
+  > #id-container > .side-nav {
+    border-right: 1px solid $theme-border;
+    border-bottom: none;
+    background: $theme-surface;
+    box-shadow: none;
+  }
+
+  div.vmenu {
+    .blockvmenu {
+      padding: 6px 8px;
+      border: none;
+      background: transparent;
+    }
+
+    .blockvmenu + .blockvmenu {
+      border-top: 1px solid $theme-border-soft;
+    }
+
+    div.menu_titre {
+      padding: 0;
+    }
+
+    a.vmenu:link,
+    a.vmenu:visited,
+    span.vmenu,
+    a.vsmenu:link,
+    a.vsmenu:visited,
+    span.vsmenu,
+    a.help:link {
+      display: block;
+      padding: 6px 10px;
+      border-radius: $theme-radius-sm;
+      transition: background-color $theme-transition, color $theme-transition;
+    }
+
+    a.vmenu:link,
+    a.vmenu:visited,
+    span.vmenu {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: $theme-text;
+    }
+
+    a.vsmenu:link,
+    a.vsmenu:visited,
+    span.vsmenu {
+      font-size: 13px;
+      font-weight: 500;
+      color: $theme-text-soft;
+    }
+
+    a.vmenu:hover,
+    span.vmenu:hover,
+    a.vsmenu:hover {
+      background: $theme-bg;
+      color: $theme-primary-strong;
+      text-decoration: none;
+    }
+
+    /* Module menus that print a raw <i class="fas"> picto get the same colour as the Saturne ones */
+    a.vmenu .pictofixedwidth,
+    a.vsmenu .pictofixedwidth,
+    span.vmenu .pictofixedwidth,
+    a.vmenu > i.fas:first-child,
+    a.vsmenu > i.fas:first-child {
+      color: $theme-faint;
+    }
+
+    a.vmenu:hover .pictofixedwidth,
+    a.vsmenu:hover .pictofixedwidth,
+    span.vmenu:hover .pictofixedwidth,
+    a.vmenu:hover > i.fas:first-child,
+    a.vsmenu:hover > i.fas:first-child {
+      color: $theme-primary;
+    }
+
+    div.menu_contenu {
+      padding: 0;
+    }
+
+    /* The entries are blocks now: the line breaks between them would add empty lines */
+    div.menu_contenu > br {
+      display: none;
+    }
+
+    .blockvmenusearch {
+      padding: 0 8px 8px;
+      border: none;
+    }
+  }
+}

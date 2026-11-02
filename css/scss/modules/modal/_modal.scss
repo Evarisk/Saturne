@@ -60,8 +60,9 @@
 // Le menu haut Dolibarr (.side-nav-vert) est sticky avec un z-index de 1005, supérieur à celui de la
 // modal active (1002) : sur une fenêtre moins haute que la modal, il recouvrait l'en-tête, masquant
 // le titre et rendant la croix de fermeture incliquable. On le repasse sous l'overlay tant qu'une
-// modal est ouverte.
-body:has(.wpeo-modal.modal-active) .side-nav-vert {
+// modal est ouverte : classe tenue par window.saturne.modal.watchActiveModals(), un
+// body:has(.modal-active) coûtant un recalcul de style de toute la page à chaque ouverture.
+.side-nav-vert.saturne-under-modal {
   z-index: 1001;
 }
 
@@ -81,9 +82,32 @@ body:has(.wpeo-modal.modal-active) .side-nav-vert {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -60%);
+    // En-tête 10 %, contenu 78 % et pied 12 %, plus le padding-top du pied, dépassent 100 % : en bloc,
+    // le pied débordait d'1em et collait au bord inférieur. En colonne flex, les trois se resserrent
+    // pour tenir dans le conteneur. Digirisk le faisait pour toutes les modals de ses pages, par une
+    // règle .modal-container non scopée qu'il retire (Digirisk#5668). Pas d'overflow: hidden ici : il
+    // rognerait les menus déroulants et les infobulles des modals.
+    display: flex;
+    flex-direction: column;
     @media ( max-width: $media__small ) {
       padding: 1em;
     }
+  }
+
+  // .modal-content est une classe générique : d'autres feuilles de style de l'instance la stylisent
+  // (Bootstrap, patron W3Schools : fond #fefefe, bordure 1px #888, margin: auto, largeur fixe).
+  // Dans le conteneur en flex colonne de certaines modals, ces marges automatiques réduisaient le
+  // contenu à une boîte encadrée, centrée, avec ses propres barres de défilement (Digirisk#5394).
+  // On remet à leur valeur par défaut les propriétés que Saturne laisse libres, à la plus faible
+  // spécificité qui bat un .modal-content nu : les règles des modules, plus précises, gagnent encore.
+  .modal-content {
+    position: static;
+    width: auto;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
   }
 
   .modal-container {

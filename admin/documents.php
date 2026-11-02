@@ -76,7 +76,8 @@ $modulepart = GETPOST('modulepart', 'aZ09');
 $hookmanager->initHooks([$moduleNameLowerCase . 'admindocuments']);
 
 // Permissions
-$permissiontoread = $user->hasRight($moduleNameLowerCase, 'adminpage', 'read');
+$permissiontoread  = $user->hasRight($moduleNameLowerCase, 'adminpage', 'read');
+$permissiontowrite = saturne_check_admin_write_access($moduleNameLowerCase);
 
 // Security check
 saturne_check_access($permissiontoread);
@@ -93,6 +94,12 @@ if ($resHook < 0) {
 }
 
 if (empty($resHook)) {
+    // A user without the write permission may read this page, changing a setting is refused
+    if (in_array($action, ['set', 'del', 'setdoc', 'deletefile', 'setModuleOptions', 'update_documents_config'], true) && !$permissiontowrite) {
+        setEventMessages($langs->trans('ReadOnlyAdminAccessMessage'), [], 'errors');
+        $action = '';
+    }
+
     // Actions set_mod, update_mask
     require_once __DIR__ . '/../core/tpl/actions/admin_conf_actions.tpl.php';
 
@@ -116,7 +123,7 @@ if (empty($resHook)) {
         exit;
     }
 
-    if ($action == 'deletefile' && $modulepart == 'ecm' && !empty($user->admin)) {
+    if ($action == 'deletefile' && $modulepart == 'ecm' && $permissiontowrite) {
         include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
         $keyforuploaddir = GETPOST('keyforuploaddir', 'aZ09');
 
@@ -323,6 +330,9 @@ $preHead = $moduleNameLowerCase . '_admin_prepare_head';
 $head    = $preHead();
 
 print dol_get_fiche_head($head, 'documents', $title, -1, $moduleNameLowerCase . '_color@' . $moduleNameLowerCase);
+
+// Warns a user allowed to read the settings but not to change them
+require_once __DIR__ . '/../core/tpl/admin/admin_write_access_notice.tpl.php';
 print load_fiche_titre($langs->trans('Configs', $langs->trans('DocumentsMin')), '', '');
 
 print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '" name="documents_form">';
@@ -343,7 +353,7 @@ print '</td><td>';
 print $langs->trans('ManualPdfGenerationDescription');
 print '</td>';
 print '<td class="center">';
-print ajax_constantonoff(strtoupper($moduleName) . '_MANUAL_PDF_GENERATION');
+print saturne_constant_onoff(strtoupper($moduleName) . '_MANUAL_PDF_GENERATION', $permissiontowrite);
 print '</td></td><td></tr>';
 
 // Automatic PDF generation
@@ -353,7 +363,7 @@ print '</td><td>';
 print $langs->trans('AutomaticPdfGenerationDescription');
 print '</td>';
 print '<td class="center">';
-print ajax_constantonoff(strtoupper($moduleName) . '_AUTOMATIC_PDF_GENERATION');
+print saturne_constant_onoff(strtoupper($moduleName) . '_AUTOMATIC_PDF_GENERATION', $permissiontowrite);
 print '</td></td><td></tr>';
 
 // Show signature specimen
@@ -363,7 +373,7 @@ print '</td><td>';
 print $langs->trans('ShowSignatureSpecimenDescription');
 print '</td>';
 print '<td class="center">';
-print ajax_constantonoff(strtoupper($moduleName) . '_SHOW_SIGNATURE_SPECIMEN');
+print saturne_constant_onoff(strtoupper($moduleName) . '_SHOW_SIGNATURE_SPECIMEN', $permissiontowrite);
 print '</td></td><td></tr>';
 
 $vignetteType = ['mini' => 'Mini', 'small' => 'Small', 'medium' => 'Medium', 'large' => 'Large'];
@@ -375,7 +385,9 @@ print $langs->trans('MediaSizeDocumentDescription');
 print '<td class="center">';
 print Form::selectarray('vignette', $vignetteType, (!empty($conf->global->$vignetteConf) ? $conf->global->$vignetteConf : 'small'), 0, 0, 0, '', 1);
 print '</td><td class="center">';
-print '<input type="submit" class="button" name="save" value="' . $langs->trans('Save') . '">';
+if ($permissiontowrite) {
+    print '<input type="submit" class="button" name="save" value="' . $langs->trans('Save') . '">';
+}
 print '</td></tr>';
 
 $reshook = $hookmanager->executeHooks('saturneAdminAdditionalConfig', $parameters);
@@ -390,7 +402,7 @@ if (is_array($additionalConfig) && !empty($additionalConfig)) {
         print $langs->trans($configName . 'Description');
         print '</td>';
         print '<td class="center">';
-        print ajax_constantonoff($configCode);
+        print saturne_constant_onoff($configCode, $permissiontowrite);
         print '</td></td><td></tr>';
     }
 }

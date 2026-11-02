@@ -425,6 +425,13 @@ class InterfaceTicketMailModel extends DolibarrTriggers
             return '';
         }
 
+        // The creation form of the core links the tags only once the ticket is created,
+        // after TICKET_CREATE: the creation emails always found none (#1816). They are
+        // then the ones posted with the form that is creating the ticket
+        if (empty($tags)) {
+            $tags = $this->getPostedTicketTags($category);
+        }
+
         $labels = array();
         foreach ($tags as $tag) {
             if (!empty($tag->label)) {
@@ -433,6 +440,40 @@ class InterfaceTicketMailModel extends DolibarrTriggers
         }
 
         return implode(', ', $labels);
+    }
+
+    /**
+     * Ticket tags posted with the form that is creating the ticket (#1816).
+     *
+     * ticket/card.php posts them as categories[] and links them with setCategories()
+     * right after create(). Any other category id that would come with the request
+     * is dropped: only the tags of a ticket may end up in __TICKET_TAGS__.
+     *
+     * @param  Categorie $category Category object, for its map of types
+     * @return array<Categorie>    Posted ticket tags, empty when none was posted
+     */
+    private function getPostedTicketTags(Categorie $category)
+    {
+        $tags = array();
+        foreach (GETPOST('categories', 'array:int') as $postedId) {
+            $categoryId = (int) $postedId;
+            // With CATEGORIE_RECURSIV_ADD, add_type() also links the parents of a tag:
+            // they are walked up the same way, so the email names what the ticket gets
+            while ($categoryId > 0 && !isset($tags[$categoryId])) {
+                $tag = new Categorie($this->db);
+                if ($tag->fetch($categoryId) <= 0 || (int) $tag->type != $category->MAP_ID[Categorie::TYPE_TICKET]) {
+                    break;
+                }
+
+                $tags[$categoryId] = $tag;
+                $categoryId        = getDolGlobalString('CATEGORIE_RECURSIV_ADD') ? (int) $tag->fk_parent : 0;
+            }
+        }
+
+        // By id, the order containing() reads them back from the link table
+        ksort($tags);
+
+        return array_values($tags);
     }
 
     /**

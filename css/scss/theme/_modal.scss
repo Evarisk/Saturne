@@ -1,0 +1,198 @@
+@use 'tokens' as *;
+
+/* Saturne modern theme: Saturne modals, dropdowns, tooltips and jQuery UI dialogs */
+
+#{$theme-scope} {
+  /* ---- Modals ---- */
+
+  .wpeo-modal {
+    background: rgba(15, 23, 42, 0.55);
+
+    .modal-container {
+      border: 1px solid $theme-border;
+      box-shadow: $theme-shadow-lg;
+    }
+
+    &.modal-active {
+      backdrop-filter: blur(3px);
+    }
+
+    &.modal-active .modal-container {
+      border-radius: 18px;
+    }
+
+    .modal-container .modal-header {
+      align-items: center;
+      border-bottom: 1px solid $theme-border-soft;
+
+      .modal-title {
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        text-transform: none;
+        color: $theme-text;
+      }
+
+      .modal-close:not(.wpeo-button) {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border-radius: 50%;
+        color: $theme-faint;
+        transition: background-color $theme-transition, color $theme-transition;
+
+        &:hover {
+          background: $theme-bg;
+          color: $theme-text;
+        }
+      }
+    }
+
+    .modal-container .modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      border-top: 1px solid $theme-border-soft;
+    }
+  }
+
+  /* ---- Dropdowns ---- */
+
+  .wpeo-dropdown .saturne-dropdown-content,
+  .wpeo-dropdown .dropdown-content {
+    border: 1px solid $theme-border;
+    border-radius: $theme-radius;
+    box-shadow: $theme-shadow-hover;
+  }
+
+  .wpeo-dropdown .dropdown-item:hover {
+    background: $theme-surface-soft;
+  }
+
+  /* Dolibarr dropdowns (top right menus, list column selector) */
+  .dropdown-menu {
+    border: 1px solid $theme-border;
+    border-radius: $theme-radius;
+    box-shadow: $theme-shadow-hover;
+  }
+
+  /* ---- Tooltips ---- */
+
+  .wpeo-tooltip {
+    border-radius: $theme-radius-sm;
+    background: $theme-text;
+    font-family: $theme-font;
+    font-size: 12px;
+    box-shadow: $theme-shadow-hover;
+
+    /* data-color="light": Saturne gives it a dark text, which the dark background above made
+       unreadable (black on black). Light background again, arrow included */
+    &.tooltip-light {
+      background: $theme-surface;
+      color: $theme-text;
+
+      &.tooltip-top::before {
+        border-top-color: $theme-surface;
+      }
+      &.tooltip-bottom::before {
+        border-bottom-color: $theme-surface;
+      }
+      &.tooltip-left::before {
+        border-left-color: $theme-surface;
+      }
+      &.tooltip-right::before {
+        border-right-color: $theme-surface;
+      }
+    }
+  }
+
+  .ui-tooltip,
+  #tiptip_content,
+  .classfortooltip + .ui-tooltip {
+    border: 1px solid $theme-border;
+    border-radius: $theme-radius;
+    box-shadow: $theme-shadow-hover;
+  }
+
+  /* ---- jQuery UI dialogs (confirmations) ---- */
+
+  .ui-dialog {
+    border: 1px solid $theme-border !important;
+    border-radius: 16px !important;
+    box-shadow: $theme-shadow-lg;
+    overflow: hidden;
+
+    .ui-dialog-titlebar {
+      border: none;
+      border-bottom: 1px solid $theme-border-soft;
+      border-radius: 0;
+      background: $theme-surface;
+      color: $theme-text;
+      font-weight: 700;
+    }
+
+    .ui-dialog-buttonpane,
+    .ui-dialog-buttonpane.ui-widget-content {
+      border-top: 1px solid $theme-border-soft;
+      background: $theme-surface-soft !important;
+    }
+
+    .ui-dialog-buttonpane button {
+      border-radius: $theme-radius;
+    }
+  }
+
+  /* eldy paints every jQuery UI widget (dialogs, datepicker, autocomplete) with --colorbackbody
+     and !important: that variable is the slate page canvas now, the widgets stay white */
+  .ui-widget-content {
+    background: $theme-surface !important;
+  }
+
+  /* ---- Resizable jQuery UI dialogs (document preview of the magnifier) ---- */
+
+  .ui-dialog.ui-resizable {
+    /* Dolibarr 24 caps every dialog at 70% of the screen: the frame stopped growing while
+       its content kept following the mouse, and was cut by the overflow above */
+    max-width: none;
+
+    /* The rounded corners cut the corner grips: brought back inside the curve */
+    .ui-resizable-se {
+      right: 5px;
+      bottom: 5px;
+    }
+    .ui-resizable-sw {
+      left: 5px;
+      bottom: 5px;
+    }
+    .ui-resizable-ne {
+      right: 5px;
+      top: 5px;
+    }
+    .ui-resizable-nw {
+      left: 5px;
+      top: 5px;
+    }
+
+    /* jQuery UI only covers the iframes while resizing or dragging: the PDF viewer swallowed
+       the mouse, so the dialog could not shrink and kept following the mouse once released.
+       :active covers the first move, before jQuery UI adds its classes */
+    &.ui-dialog-resizing,
+    &.ui-dialog-dragging,
+    &:has(.ui-resizable-handle:active, .ui-dialog-titlebar:active) {
+      object,
+      embed,
+      iframe {
+        pointer-events: none;
+      }
+    }
+  }
+
+  .ui-widget-overlay {
+    background: rgba(15, 23, 42, 0.55);
+    opacity: 1;
+  }
+}
