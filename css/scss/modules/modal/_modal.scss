@@ -87,6 +87,22 @@
     }
   }
 
+  // .modal-content est une classe générique : d'autres feuilles de style de l'instance la stylisent
+  // (Bootstrap, patron W3Schools : fond #fefefe, bordure 1px #888, margin: auto, largeur fixe).
+  // Dans le conteneur en flex colonne de certaines modals, ces marges automatiques réduisaient le
+  // contenu à une boîte encadrée, centrée, avec ses propres barres de défilement (Digirisk#5394).
+  // On remet à leur valeur par défaut les propriétés que Saturne laisse libres, à la plus faible
+  // spécificité qui bat un .modal-content nu : les règles des modules, plus précises, gagnent encore.
+  .modal-content {
+    position: static;
+    width: auto;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+
   .modal-container {
     .modal-header {
       height: 10%;
