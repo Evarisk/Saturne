@@ -27,8 +27,8 @@
  * Globals    : $db, $langs
  * Parameters : $contextpage, $searchAll
  * Objects    : $extrafields, $object
- * Variables  : $arrayfields, $listXlsxExportBufferLevel, $resql (without its paging), $search, $search_array_options,
- *              $searchCategories, $title
+ * Variables  : $arrayfields, $listXlsxExportBufferLevel, $listXlsxExportIds (optional), $resql (without its paging), $search,
+ *              $search_array_options, $searchCategories, $title
  */
 
 require_once __DIR__ . '/../../../class/saturnelistxlsxexport.class.php';
@@ -48,6 +48,9 @@ $xlsxExport->addFieldFilters($object, $search);
 // An object without extrafields reads 0 from getOptionalsFromPost()
 $xlsxExport->addExtraFieldFilters($extrafields, $object->table_element, is_array($search_array_options ?? null) ? $search_array_options : []);
 $xlsxExport->addCategoryFilters($searchCategories ?? []);
+if (!empty($listXlsxExportIds)) {
+    $xlsxExport->filters[$langs->transnoentities('XlsxSelection')] = $langs->transnoentities('XlsxSelectedLines', count($listXlsxExportIds));
+}
 
 // A note the page adds to its title, such as a missing module, is not part of the name of the list
 $xlsxExportTitle = $xlsxExport->getPlainText(preg_replace('/<small\b.*?<\/small>/is', '', (string) ($title ?? '')));

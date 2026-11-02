@@ -27,7 +27,8 @@
  * Globals    : $conf (extrafields_list_search_sql.tpl), $db, $hookmanager
  * Parameters : $action, $limit, $searchAll, $sortfield, $sortorder, $page
  * Objects    : $extrafields, $object
- * Variables  : $arrayfields, $excludeFields (optional), $listXlsxExportBufferLevel (list_massactions.tpl, optional), $offset,
+ * Variables  : $arrayfields, $excludeFields (optional), $listXlsxExportBufferLevel and $listXlsxExportIds (list_massactions.tpl,
+ *              optional), $offset,
  *              $search, $search_array_options (extrafields_list_search_sql.tpl), $searchCategories
  *
  * Exposes    : $sqlForList — full filtered query before sort/pagination, for aggregate/KPI hooks
@@ -288,6 +289,11 @@ if ($searchAll) {
     }
 }
 
+// The Excel export of the checked lines, through the mass action, reads these lines only
+if (!empty($listXlsxExportIds)) {
+    $sql .= ' AND t.rowid IN (' . $db->sanitize(implode(',', array_map('intval', $listXlsxExportIds))) . ')';
+}
+
 // Add where from extra fields
 require_once DOL_DOCUMENT_ROOT . '/core/tpl/extrafields_list_search_sql.tpl.php';
 
@@ -379,7 +385,7 @@ $sql .= $db->order($sortfield, $sortorder);
 //    $sql .= $db->order('next_control_date', $sortorder);
 //}
 // The Excel export asked through list_massactions.tpl.php reads every line, whatever the page shows
-$listXlsxExport = ($action == 'export_xlsx' && !empty($listXlsxExportBufferLevel));
+$listXlsxExport = !empty($listXlsxExportBufferLevel);
 if ($limit && !$listXlsxExport) {
     $sql .= $db->plimit($limit + 1, $offset);
 }
@@ -399,7 +405,7 @@ $num = $db->num_rows($resql);
 // Direct jump if only one record found, out of reach once the page header has been printed : the redirect
 // would only raise a "headers already sent" warning and leave the list truncated. An export of the list wants
 // the record itself, not its card
-if ($num == 1 && !headers_sent() && getDolGlobalInt('MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE') && $searchAll && !$page && $action != 'export_xlsx') {
+if ($num == 1 && !headers_sent() && getDolGlobalInt('MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE') && $searchAll && !$page && $action != 'export_xlsx' && !$listXlsxExport) {
     $obj = $db->fetch_object($resql);
     $id = $obj->rowid;
     //@todo parameter

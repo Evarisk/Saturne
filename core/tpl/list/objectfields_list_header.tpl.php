@@ -118,6 +118,11 @@ $arrayOfMassActions += [
     'preunarchive' => '<span class="fas fa-box-open paddingrightonly"></span>' . $langs->trans('Unarchive')
 ];
 
+// Excel export of the checked lines, answered by list_massactions.tpl.php as the export of the whole list
+if (!empty($listXlsxExportAvailable) && $mode != 'pwa') {
+    $arrayOfMassActions['export_xlsx'] = '<span class="fas fa-file-excel paddingrightonly"></span>' . $langs->trans('XlsxExportSelection');
+}
+
 if (!empty($permissiontodelete)) {
     $arrayOfMassActions['predelete'] = img_picto('', 'delete', 'class="pictofixedwidth"') . $langs->trans('Delete');
 }

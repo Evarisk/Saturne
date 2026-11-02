@@ -431,6 +431,9 @@ ErrorTemplateFileNotAllowed                  = The document template '%s' is not
 # Excel export
 XlsxExport                                   = Excel export
 XlsxExportHelp                               = Downloads every line of the list, with its filters and its sort, into an Excel workbook showing them under several views
+XlsxExportSelection                          = Excel export of the selection
+XlsxSelection                                = Selection
+XlsxSelectedLines                            = %s checked lines
 XlsxSummary                                  = Summary
 XlsxExportedOn                               = Exported on %s by %s
 XlsxFilters                                  = Filters
