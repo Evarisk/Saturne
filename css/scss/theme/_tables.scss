@@ -18,28 +18,30 @@
   }
 
   /* Rounded corners carried by the corner cells, so that nothing has to be clipped
-     (dropdowns and tooltips open from inside the rows) */
+     (dropdowns and tooltips open from inside the rows).
+     Rows taken by type: a <style> or <script> can follow the last row (ticket setup page).
+     !important: the cotation cells of the dashboard tables cancel their radius inline (Risk class) */
   table.liste,
   table.noborder:not(.nobordernopadding),
   table.formdoc {
-    > tbody > tr:first-child > td:first-child,
-    > tbody > tr:first-child > th:first-child,
-    > thead > tr:first-child > th:first-child {
-      border-top-left-radius: $theme-radius-lg - 1px;
+    > tbody > tr:first-of-type > td:first-child,
+    > tbody > tr:first-of-type > th:first-child,
+    > thead > tr:first-of-type > th:first-child {
+      border-top-left-radius: $theme-radius-lg - 1px !important;
     }
 
-    > tbody > tr:first-child > td:last-child,
-    > tbody > tr:first-child > th:last-child,
-    > thead > tr:first-child > th:last-child {
-      border-top-right-radius: $theme-radius-lg - 1px;
+    > tbody > tr:first-of-type > td:last-child,
+    > tbody > tr:first-of-type > th:last-child,
+    > thead > tr:first-of-type > th:last-child {
+      border-top-right-radius: $theme-radius-lg - 1px !important;
     }
 
-    > tbody > tr:last-child > td:first-child {
-      border-bottom-left-radius: $theme-radius-lg - 1px;
+    > tbody > tr:last-of-type > td:first-child {
+      border-bottom-left-radius: $theme-radius-lg - 1px !important;
     }
 
-    > tbody > tr:last-child > td:last-child {
-      border-bottom-right-radius: $theme-radius-lg - 1px;
+    > tbody > tr:last-of-type > td:last-child {
+      border-bottom-right-radius: $theme-radius-lg - 1px !important;
     }
   }
 
@@ -65,6 +67,30 @@
     text-transform: uppercase;
     color: $theme-muted;
     opacity: 1;
+  }
+
+  /* Column titles wrap rather than being cut: Dolibarr ends them with an ellipsis past 100px */
+  table.liste th.wrapcolumntitle.liste_titre:not(.maxwidthsearch),
+  table.liste td.wrapcolumntitle.liste_titre:not(.maxwidthsearch),
+  table.liste th.wrapcolumntitle.liste_titre_sel:not(.maxwidthsearch),
+  table.liste td.wrapcolumntitle.liste_titre_sel:not(.maxwidthsearch) {
+    max-width: none;
+    overflow: visible;
+    white-space: normal;
+    text-overflow: clip;
+    line-height: 1.35;
+  }
+
+  /* Saturne lists: the filter caret is pinned to the right of the title, a wrapped title would leave it alone on a line */
+  table.liste > thead > tr.liste_titre > th[data-colkey] {
+    padding-right: 24px;
+
+    .saturne-col-filter-btn {
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+    }
   }
 
   tr.liste_titre th a,
@@ -93,6 +119,34 @@
     font-weight: 400;
     letter-spacing: normal;
     text-transform: none;
+  }
+
+  /* Filters printed above a list: the head of the card of the table, not a box of their own */
+  div.liste_titre_bydiv {
+    box-sizing: border-box;
+    margin-bottom: 0;
+    border: 1px solid $theme-border;
+    border-bottom: 0;
+    border-radius: $theme-radius-lg $theme-radius-lg 0 0;
+    background: $theme-surface-soft;
+    box-shadow: none;
+  }
+
+  table.liste.listwithfilterbefore {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+
+    > thead > tr:first-of-type > th:first-child,
+    > tbody > tr:first-of-type > td:first-child,
+    > tbody > tr:first-of-type > th:first-child {
+      border-top-left-radius: 0 !important;
+    }
+
+    > thead > tr:first-of-type > th:last-child,
+    > tbody > tr:first-of-type > td:last-child,
+    > tbody > tr:first-of-type > th:last-child {
+      border-top-right-radius: 0 !important;
+    }
   }
 
   /* Search row of the lists */

@@ -90,6 +90,41 @@
     color: #b91c1c !important;
   }
 
+  /* Status dots carry no text: the tints above leave them almost invisible, they get the plain color */
+  .badge-dot.badge-status0,
+  .badge-dot.badge-status5,
+  .badge-dot.badge-status6,
+  .badge-dot.badge-status9 {
+    background: $theme-border-strong !important;
+    border-color: $theme-border-strong !important;
+  }
+
+  .badge-dot.badge-status1,
+  .badge-dot.badge-status1b,
+  .badge-dot.badge-status2,
+  .badge-dot.badge-status3 {
+    background: $theme-warning !important;
+    border-color: $theme-warning !important;
+  }
+
+  .badge-dot.badge-status4,
+  .badge-dot.badge-status4b,
+  .badge-dot.badge-status7,
+  .badge-dot.badge-status11 {
+    background: $theme-success !important;
+    border-color: $theme-success !important;
+  }
+
+  .badge-dot.badge-status8 {
+    background: $theme-navy !important;
+    border-color: $theme-navy !important;
+  }
+
+  .badge-dot.badge-status10 {
+    background: $theme-danger !important;
+    border-color: $theme-danger !important;
+  }
+
   .badge-info,
   .badge-secondary {
     background: $theme-bg;
