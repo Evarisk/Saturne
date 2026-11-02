@@ -1319,4 +1319,75 @@ class SaturneDocumentModel extends CommonDocGenerator
             $this->_pagefooter($pdf, $object, $outputLangs, $defaultFontSize);
         }
     }
+
+    /**
+     * Draw an image as large as a box allows, its proportions kept.
+     *
+     * Given no size, TCPDF sizes an image from its pixels : a photo then spills over its box, and
+     * over the edge of the page.
+     *
+     * @param  mixed  $pdf    PDF handler, a TCPDF instance.
+     * @param  string $file   Image file.
+     * @param  float  $x      Left of the box.
+     * @param  float  $y      Top of the box.
+     * @param  float  $width  Width of the box.
+     * @param  float  $height Height of the box.
+     * @param  string $align  Horizontal position of the image in the box : L, C or R.
+     * @param  string $valign Vertical position of the image in the box : T, M or B.
+     * @return array          Left, top, width and height of the image drawn, empty when the file is not a readable image.
+     */
+    protected function drawImageInBox($pdf, string $file, float $x, float $y, float $width, float $height, string $align = 'C', string $valign = 'M'): array
+    {
+        $imageSize = is_readable($file) ? @getimagesize($file) : false;
+        if (empty($imageSize[0]) || empty($imageSize[1]) || $width <= 0 || $height <= 0) {
+            return [];
+        }
+
+        $scale       = min($width / $imageSize[0], $height / $imageSize[1]);
+        $imageWidth  = $imageSize[0] * $scale;
+        $imageHeight = $imageSize[1] * $scale;
+
+        $offsets = ['L' => 0, 'T' => 0, 'C' => 0.5, 'M' => 0.5, 'R' => 1, 'B' => 1];
+        $imageX  = $x + ($width - $imageWidth) * ($offsets[$align] ?? 0.5);
+        $imageY  = $y + ($height - $imageHeight) * ($offsets[$valign] ?? 0.5);
+
+        $pdf->Image($file, $imageX, $imageY, $imageWidth, $imageHeight);
+
+        return ['x' => $imageX, 'y' => $imageY, 'width' => $imageWidth, 'height' => $imageHeight];
+    }
+
+    /**
+     * Draw the logo of the company in the top left corner of a box, as large as the box allows.
+     *
+     * @param  mixed  $pdf       PDF handler, a TCPDF instance.
+     * @param  object $object    Object the document is about : its entity gives the logo folder.
+     * @param  float  $x         Left of the box.
+     * @param  float  $y         Top of the box.
+     * @param  float  $maxWidth  Width of the box.
+     * @param  float  $maxHeight Height of the box, the logo height of the PDF setup when not given.
+     * @return float             Height of the logo drawn, 0 without logo : what follows goes below it.
+     */
+    protected function drawCompanyLogo($pdf, $object, float $x, float $y, float $maxWidth, float $maxHeight = 0): float
+    {
+        global $conf, $mysoc;
+
+        if (getDolGlobalString('PDF_DISABLE_MYCOMPANY_LOGO') || empty($mysoc->logo)) {
+            return 0;
+        }
+
+        $logoDir = getMultidirOutput($object, 'mycompany') ?: $conf->mycompany->dir_output;
+        $logo    = $logoDir . '/logos/' . $mysoc->logo;
+        // The small thumbnail keeps the document light, as on the documents of Dolibarr itself
+        if (!getDolGlobalInt('MAIN_PDF_USE_LARGE_LOGO') && !empty($mysoc->logo_small) && is_readable($logoDir . '/logos/thumbs/' . $mysoc->logo_small)) {
+            $logo = $logoDir . '/logos/thumbs/' . $mysoc->logo_small;
+        }
+
+        if ($maxHeight <= 0) {
+            $maxHeight = getDolGlobalInt('MAIN_DOCUMENTS_LOGO_HEIGHT', 20);
+        }
+
+        $image = $this->drawImageInBox($pdf, $logo, $x, $y, $maxWidth, $maxHeight, 'L', 'T');
+
+        return $image['height'] ?? 0;
+    }
 }
