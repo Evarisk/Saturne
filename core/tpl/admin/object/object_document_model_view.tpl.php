@@ -1,5 +1,8 @@
 <?php
 
+// A user without the write permission sees which models are active but cannot switch them
+$permissiontowrite = $permissiontowrite ?? saturne_check_admin_write_access();
+
 // Type stored in the document_model table, it may differ from the object type used by the config constants
 $documentModelType = !empty($documentType) ? $documentType : $documentParentType;
 
@@ -84,11 +87,11 @@ if (is_array($filelist) && !empty($filelist)) {
                 // Active
                 print '<td class="center">';
                 if (in_array($name, $def)) {
-                    print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=del&model_name=' . $name . '&type=' . $documentModelType . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
+                    print '<a' . ($permissiontowrite ? ' class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=del&model_name=' . $name . '&type=' . $documentModelType . '&module_name=' . $moduleName . '&token=' . newToken() . '"' : '') . '>';
                     print img_picto($langs->trans('Enabled'), 'switch_on');
                     print '</a>';
                 } else {
-                    print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=set&model_name=' . $name . '&const=' . $modelScandir . '&label=' . urlencode($module->name) . '&type=' . $documentModelType . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
+                    print '<a' . ($permissiontowrite ? ' class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=set&model_name=' . $name . '&const=' . $modelScandir . '&label=' . urlencode($module->name) . '&type=' . $documentModelType . '&module_name=' . $moduleName . '&token=' . newToken() . '"' : '') . '>';
                     print img_picto($langs->trans('Disabled'), 'switch_off');
                     print '</a>';
                 }
@@ -100,7 +103,7 @@ if (is_array($filelist) && !empty($filelist)) {
                 if (getDolGlobalString($defaultModelConf) == $name) {
                     print img_picto($langs->trans('Default'), 'on');
                 } else {
-                    print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setdoc&model_name=' . $name . '&const=' . $modelScandir . '&label=' . urlencode($module->name) . '&object_type=' . $documentParentType . '&module_name=' . $moduleName . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), 'off') . '</a>';
+                    print '<a' . ($permissiontowrite ? ' class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setdoc&model_name=' . $name . '&const=' . $modelScandir . '&label=' . urlencode($module->name) . '&object_type=' . $documentParentType . '&module_name=' . $moduleName . '&token=' . newToken() . '"' : '') . '>' . img_picto($langs->trans('Disabled'), 'off') . '</a>';
                 }
                 print '</td>';
 
@@ -138,10 +141,10 @@ if (is_array($filelist) && !empty($filelist)) {
                     // Active
                     print '<td class="center">';
                     if (in_array($customName, $def)) {
-                        print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=del&model_name=' . $customName . '&type=' . $documentModelType . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
+                        print '<a' . ($permissiontowrite ? ' class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=del&model_name=' . $customName . '&type=' . $documentModelType . '&module_name=' . $moduleName . '&token=' . newToken() . '"' : '') . '>';
                         print img_picto($langs->trans('Enabled'), 'switch_on');
                     } else {
-                        print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=set&model_name=' . $customName . '&const=' . $module->custom_scandir . '&label=' . urlencode($module->custom_name) . '&type=' . $documentModelType . '&module_name=' . $moduleName . '&token=' . newToken() . '">';
+                        print '<a' . ($permissiontowrite ? ' class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=set&model_name=' . $customName . '&const=' . $module->custom_scandir . '&label=' . urlencode($module->custom_name) . '&type=' . $documentModelType . '&module_name=' . $moduleName . '&token=' . newToken() . '"' : '') . '>';
                         print img_picto($langs->trans('Disabled'), 'switch_off');
                     }
                     print '</a>';
@@ -153,7 +156,7 @@ if (is_array($filelist) && !empty($filelist)) {
                     if (getDolGlobalString($defaultModelConf) == $customName) {
                         print img_picto($langs->trans('Default'), 'on');
                     } else {
-                        print '<a class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setdoc&model_name=' . $customName . '&const=' . $module->custom_scandir . '&label=' . urlencode($module->custom_name) . '&object_type=' . $documentParentType . '&module_name=' . $moduleName . '&token=' . newToken() . '">' . img_picto($langs->trans('Disabled'), 'off') . '</a>';
+                        print '<a' . ($permissiontowrite ? ' class="reposition" href="' . $_SERVER['PHP_SELF'] . '?action=setdoc&model_name=' . $customName . '&const=' . $module->custom_scandir . '&label=' . urlencode($module->custom_name) . '&object_type=' . $documentParentType . '&module_name=' . $moduleName . '&token=' . newToken() . '"' : '') . '>' . img_picto($langs->trans('Disabled'), 'off') . '</a>';
                     }
                     print '</td><td colspan=2></td></tr>';
                 }

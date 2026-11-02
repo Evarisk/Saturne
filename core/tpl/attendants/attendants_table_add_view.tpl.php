@@ -52,9 +52,9 @@ if (($object->status == $object::STATUS_DRAFT || ($object->status == $object::ST
     print '</td>';
     print '<td class="minwidth300 widthcentpercentminusx">';
     if ($selectedCompany <= 0) {
-        print img_picto('', 'user', 'class="pictofixedwidth"') . $form->select_dolusers('', 'attendant' . (($attendantTableMode == 'advanced') ? $signatoryRole : '_') . 'user', 1, $alreadyAddedSignatories['user'], 0, '', '', $conf->entity, 0, 0, '', 0, '', 'minwidth200 widthcentpercentminusx maxwidth300') . '<br>';
+        print img_picto('', 'user', 'class="pictofixedwidth"') . $form->select_dolusers('', 'attendant' . (($attendantTableMode == 'advanced') ? $signatoryRole : '_') . 'user', 1, $alreadyAddedSignatories['user'] ?? [], 0, '', '', $conf->entity, 0, 0, '', 0, '', 'minwidth200 widthcentpercentminusx maxwidth300') . '<br>';
     }
-    print img_object('', 'contact', 'class="pictofixedwidth"') . $form->selectcontacts(($selectedCompany > 0 ? $selectedCompany : -1), GETPOST('contactID'), 'attendant' . (($attendantTableMode == 'advanced') ? $signatoryRole : '_') . 'contact', 1, $alreadyAddedSignatories['socpeople'], '', 1, 'minwidth200 widthcentpercentminusx maxwidth300');
+    print img_object('', 'contact', 'class="pictofixedwidth"') . $form->selectcontacts(($selectedCompany > 0 ? $selectedCompany : -1), GETPOST('contactID'), 'attendant' . (($attendantTableMode == 'advanced') ? $signatoryRole : '_') . 'contact', 1, $alreadyAddedSignatories['socpeople'] ?? [], '', 1, 'minwidth200 widthcentpercentminusx maxwidth300');
     if (!empty($selectedCompany) && $selectedCompany > 0 && $user->rights->societe->creer) {
         $newcardbutton = '<a href="' . DOL_URL_ROOT . '/contact/card.php?socid=' . $selectedCompany . '&action=create' . $moreparam . urlencode('&newcompany' . (($attendantTableMode == 'advanced') ? $signatoryRole : '') . '=' . GETPOST('newcompany' . (($attendantTableMode == 'advanced') ? $signatoryRole : '')) . '&contactID=&#95;&#95;ID&#95;&#95;') . '" title="' . $langs->trans('NewContact') . '"><span class="fa fa-plus-circle valignmiddle paddingleft"></span></a>';
         print $newcardbutton;

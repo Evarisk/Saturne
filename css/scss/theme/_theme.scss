@@ -1,0 +1,16 @@
+/* Saturne modern theme: back office restyle shared by every Saturne module. Every rule is scoped by
+   $theme-scope (see _tokens.scss), so that it only reaches the pages built with saturne_header(). */
+
+@use 'base';
+@use 'title';
+@use 'tabs';
+@use 'banner';
+@use 'buttons';
+@use 'tables';
+@use 'forms';
+@use 'badges';
+@use 'navigation';
+@use 'dashboard';
+@use 'modal';
+@use 'components';
+@use 'misc';
