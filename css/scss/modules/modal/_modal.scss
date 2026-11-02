@@ -82,6 +82,13 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -60%);
+    // En-tête 10 %, contenu 78 % et pied 12 %, plus le padding-top du pied, dépassent 100 % : en bloc,
+    // le pied débordait d'1em et collait au bord inférieur. En colonne flex, les trois se resserrent
+    // pour tenir dans le conteneur. Digirisk le faisait pour toutes les modals de ses pages, par une
+    // règle .modal-container non scopée qu'il retire (Digirisk#5668). Pas d'overflow: hidden ici : il
+    // rognerait les menus déroulants et les infobulles des modals.
+    display: flex;
+    flex-direction: column;
     @media ( max-width: $media__small ) {
       padding: 1em;
     }
