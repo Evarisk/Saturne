@@ -31,7 +31,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
               with:
                   fetch-depth: 0
 
@@ -77,7 +77,7 @@ jobs:
                     HEAD
 
             - name: Upload artifact
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v7
               with:
                   name: module_${{ steps.meta.outputs.module }}-${{ steps.meta.outputs.tag }}
                   path: module_${{ steps.meta.outputs.module }}-${{ steps.meta.outputs.tag }}.zip
@@ -85,7 +85,7 @@ jobs:
 
             - name: Create GitHub Release (with release notes)
               if: steps.notes.outputs.exists == 'true'
-              uses: softprops/action-gh-release@v2
+              uses: softprops/action-gh-release@v3
               with:
                   tag_name: ${{ steps.meta.outputs.tag }}
                   name: ${{ steps.meta.outputs.tag }}
@@ -94,7 +94,7 @@ jobs:
 
             - name: Create GitHub Release (auto-generated notes)
               if: steps.notes.outputs.exists == 'false'
-              uses: softprops/action-gh-release@v2
+              uses: softprops/action-gh-release@v3
               with:
                   tag_name: ${{ steps.meta.outputs.tag }}
                   name: ${{ steps.meta.outputs.tag }}
