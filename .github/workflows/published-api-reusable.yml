@@ -74,14 +74,14 @@ jobs:
             # Profondeur 2 : sur une pull request, HEAD est le commit de fusion de la PR dans sa base,
             # et son premier parent est cette base.
             - name: Checkout du module
-              uses: actions/checkout@v5
+              uses: actions/checkout@v7
               with:
                   fetch-depth: 2
                   persist-credentials: false
 
             # Le Saturne analyse et son tag publie sont lus par git dans ce clone, sans checkout du tag.
             - name: Checkout de Saturne
-              uses: actions/checkout@v5
+              uses: actions/checkout@v7
               with:
                   repository: Evarisk/Saturne
                   ref: develop
@@ -90,7 +90,7 @@ jobs:
                   persist-credentials: false
 
             - name: Checkout du controle
-              uses: actions/checkout@v5
+              uses: actions/checkout@v7
               with:
                   repository: ${{ inputs.script-repository }}
                   ref: ${{ inputs.script-ref }}
