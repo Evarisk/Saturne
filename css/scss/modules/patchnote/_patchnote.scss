@@ -8,6 +8,9 @@ div.wpeo-modal-patchnote{
     max-width: 80%;
     max-height: 80%;
     border-radius: 25px;
+    // L'en-tête a un fond et une ombre : rognés au rayon du conteneur, comme le faisait jusqu'ici une
+    // règle globale de Digirisk (Digirisk#5668)
+    overflow: hidden;
     li{
       list-style-type: circle;
       margin-left: 55px;
