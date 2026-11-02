@@ -34,6 +34,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Font;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -130,6 +131,11 @@ class SaturneXlsxExport
      * @var int Level of the output buffer opened by start(), which send() drops
      */
     protected int $outputBufferLevel = 0;
+
+    /**
+     * @var array<string, int> Index of each cell style built by applyCellStyle() in the workbook, by combination
+     */
+    protected array $cellStyleIndexes = [];
 
     /**
      * Constructor
@@ -284,9 +290,16 @@ class SaturneXlsxExport
     {
         global $langs;
 
-        $this->now        = dol_now();
-        $this->dateFormat = strtolower($langs->transnoentities('FormatDateShortJava'));
-        $this->contents   = [];
+        $this->now              = dol_now();
+        $this->dateFormat       = strtolower($langs->transnoentities('FormatDateShortJava'));
+        $this->contents         = [];
+        $this->cellStyleIndexes = [];
+
+        // A big list takes longer to write than a page is given to show: the workbook gets the time it needs, as the
+        // CSV export of the core does, when the host lets PHP change its time limit
+        if (function_exists('set_time_limit')) {
+            set_time_limit(0);
+        }
 
         // Whatever is printed while the workbook is built, such as a PHP warning on an instance showing them,
         // would be sent ahead of the file and break it: it is held back, then dropped by send()
@@ -439,22 +452,29 @@ class SaturneXlsxExport
      */
     public function writeCell(Worksheet $sheet, string $coordinate, $cell): void
     {
+        $style = [];
         if (is_array($cell)) {
             if (!empty($cell['colours'])) {
-                $sheet->getStyle($coordinate)->applyFromArray($this->getColourStyle($cell['colours'], $cell['bold'] ?? true));
+                $style['colours'] = array_values($cell['colours']);
+                $style['bold']    = (bool) ($cell['bold'] ?? true);
             } elseif (!empty($cell['bold'])) {
-                $sheet->getStyle($coordinate)->getFont()->setBold(true);
+                $style['bold'] = true;
             }
             // A reference opens its card in Dolibarr; on a coloured cell, the link keeps the text colour of the cell
             if (!empty($cell['url']) && isset($cell['value']) && $cell['value'] !== '') {
                 $sheet->getCell($coordinate)->getHyperlink()->setUrl((string) $cell['url']);
-                $sheet->getStyle($coordinate)->getFont()->setUnderline(true);
-                if (empty($cell['colours'])) {
-                    $sheet->getStyle($coordinate)->getFont()->getColor()->setRGB(self::LINK_COLOUR);
-                }
+                $style['link'] = true;
             }
             $cell = $cell['value'] ?? null;
         }
+        // A text of several lines reads line by line, whatever the format of its column
+        if (!is_int($cell) && !is_float($cell) && strpos((string) $cell, "\n") !== false) {
+            $style['wrap'] = true;
+        }
+        if (!empty($style)) {
+            $this->applyCellStyle($sheet, $coordinate, $style);
+        }
+
         if ($cell === null || $cell === '') {
             return;
         }
@@ -462,10 +482,48 @@ class SaturneXlsxExport
             $sheet->setCellValueExplicit($coordinate, $cell, DataType::TYPE_NUMERIC);
         } else {
             $sheet->setCellValueExplicit($coordinate, (string) $cell, DataType::TYPE_STRING);
-            // A text of several lines reads line by line, whatever the format of its column
-            if (strpos((string) $cell, "\n") !== false) {
-                $sheet->getStyle($coordinate)->getAlignment()->setWrapText(true);
+        }
+    }
+
+    /**
+     * Style a cell: colours, bold, link, line breaks
+     *
+     * Applying a style to a cell makes PhpSpreadsheet build it again and look it up among the styles of the workbook,
+     * which weighs on a table of thousands of lines. Each combination is built once, on its first cell, then given
+     * to the next cells by its index. A cell already styled otherwise goes the long way, so that it keeps its style.
+     *
+     * @param  Worksheet $sheet      Sheet
+     * @param  string    $coordinate Coordinate of the cell
+     * @param  array     $style      Style: colours and bold, bold, link, wrap
+     * @return void
+     */
+    protected function applyCellStyle(Worksheet $sheet, string $coordinate, array $style): void
+    {
+        $cell      = $sheet->getCell($coordinate);
+        $key       = json_encode($style);
+        $isDefault = $cell->getXfIndex() === 0;
+        if ($isDefault && isset($this->cellStyleIndexes[$key])) {
+            $cell->setXfIndex($this->cellStyleIndexes[$key]);
+            return;
+        }
+
+        $styleArray = !empty($style['colours']) ? $this->getColourStyle($style['colours'], $style['bold']) : [];
+        if (empty($style['colours']) && !empty($style['bold'])) {
+            $styleArray['font']['bold'] = true;
+        }
+        if (!empty($style['link'])) {
+            $styleArray['font']['underline'] = Font::UNDERLINE_SINGLE;
+            if (empty($style['colours'])) {
+                $styleArray['font']['color'] = ['rgb' => self::LINK_COLOUR];
             }
+        }
+        if (!empty($style['wrap'])) {
+            $styleArray['alignment']['wrapText'] = true;
+        }
+        $sheet->getStyle($coordinate)->applyFromArray($styleArray);
+
+        if ($isDefault) {
+            $this->cellStyleIndexes[$key] = $cell->getXfIndex();
         }
     }
 
