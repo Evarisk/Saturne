@@ -1,0 +1,410 @@
+@use 'tokens' as *;
+
+/* Saturne modern theme: the Saturne components shared by the modules (KPI cards, list presets,
+   column filters, inline edit, secondary sidebar, activity blocks, confirmation card, media test) */
+
+#{$theme-scope} {
+  /* The column filter popover reads these variables, which nothing defined until now */
+  --st-gray-50: #{$theme-surface-soft};
+  --st-gray-100: #{$theme-border-soft};
+  --st-gray-200: #{$theme-border};
+  --st-gray-400: #{$theme-faint};
+  --st-gray-500: #{$theme-muted};
+  --st-gray-700: #{$theme-text-soft};
+  --st-primary-color: #{$theme-primary};
+  --st-danger-color: #{$theme-danger};
+
+  /* ---- KPI cards above the lists (saturne_render_kpi_cards) ---- */
+
+  .saturne-kpi-cards {
+    gap: 10px;
+    margin: 4px 0 14px;
+  }
+
+  .saturne-kpi-card {
+    gap: 10px;
+    padding: 9px 16px 9px 12px;
+    border: 1px solid $theme-border;
+    border-left: 3px solid $theme-faint;
+    border-radius: $theme-radius;
+    background: $theme-surface;
+    box-shadow: $theme-shadow-sm;
+  }
+
+  .saturne-kpi-card-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: $theme-radius-sm;
+    background: $theme-bg;
+    color: $theme-muted;
+    font-size: 14px;
+  }
+
+  .saturne-kpi-card-value {
+    color: $theme-text;
+    font-size: 17px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .saturne-kpi-card-label {
+    @include theme-label;
+    font-size: 10.5px;
+  }
+
+  .saturne-kpi-card-blue {
+    border-left-color: $theme-primary;
+
+    .saturne-kpi-card-icon {
+      background: $theme-primary-soft;
+      color: $theme-primary;
+    }
+  }
+
+  .saturne-kpi-card-green {
+    border-left-color: $theme-success;
+
+    .saturne-kpi-card-icon {
+      background: $theme-success-soft;
+      color: $theme-success;
+    }
+  }
+
+  .saturne-kpi-card-yellow {
+    border-left-color: $theme-yellow;
+
+    .saturne-kpi-card-icon {
+      background: $theme-warning-soft;
+      color: $theme-warning;
+    }
+  }
+
+  .saturne-kpi-card-grey {
+    border-left-color: $theme-faint;
+  }
+
+  /* ---- Kanban mode of the lists (getKanbanView() cards): white rounded cards, picto tile tinted
+     with the colour of the object picto ---- */
+
+  table.liste .box-flex-container {
+    gap: 12px;
+    padding: 6px 0;
+
+    .box-flex-item {
+      margin: 0;
+    }
+
+    .info-box {
+      overflow: hidden;
+      border: 1px solid $theme-border;
+      border-radius: $theme-radius-lg;
+      background: $theme-surface;
+      box-shadow: $theme-shadow-sm;
+      transition: box-shadow $theme-transition, border-color $theme-transition;
+
+      &:hover {
+        border-color: $theme-border-strong;
+        box-shadow: $theme-shadow-hover;
+      }
+    }
+
+    .info-box-icon {
+      border-right: 1px solid $theme-border-soft;
+      background: $theme-surface-soft;
+
+      > .fas,
+      > .far,
+      > .fa {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        border-radius: $theme-radius;
+        background-color: color-mix(in srgb, currentColor 12%, transparent);
+        font-size: 18px;
+      }
+    }
+
+    .info-box-ref a {
+      font-weight: 700;
+      color: $theme-text;
+
+      &:hover {
+        color: $theme-primary-strong;
+      }
+    }
+
+    .info-box-content .opacitymedium {
+      color: $theme-muted;
+    }
+  }
+
+  /* ---- Saved views of the lists (list presets), as pills ---- */
+
+  .saturne-list-preset {
+    padding: 6px 13px;
+    border: 1px solid $theme-border;
+    border-radius: $theme-radius-pill;
+    background: $theme-surface;
+    color: $theme-text-soft;
+    font-weight: 600;
+    box-shadow: $theme-shadow-sm;
+
+    &:hover {
+      border-color: $theme-primary;
+      color: $theme-primary-strong;
+    }
+  }
+
+  .saturne-list-preset-active,
+  .saturne-list-preset-active:hover {
+    border-color: rgba(13, 138, 255, 0.35);
+    background: $theme-primary-soft;
+    color: $theme-primary-strong;
+  }
+
+  .saturne-list-preset-removable .saturne-list-preset-remove {
+    color: $theme-faint;
+
+    &:hover {
+      color: $theme-danger;
+    }
+  }
+
+  /* ---- Column filters of the lists ---- */
+
+  .saturne-col-filter-popover {
+    border: 1px solid $theme-border;
+    border-radius: $theme-radius;
+    box-shadow: $theme-shadow-hover;
+    overflow: hidden;
+
+    .popover-header .popover-input-container :is(input[type="text"], select) {
+      border-color: $theme-border-strong;
+      border-radius: $theme-radius-sm;
+
+      &:focus {
+        border-color: $theme-primary;
+        box-shadow: $theme-ring;
+      }
+    }
+  }
+
+  /* ---- Inline edit inside a list cell ---- */
+
+  .saturne-inline-select {
+    border-color: $theme-border-strong;
+    border-radius: $theme-radius-sm;
+
+    &:focus {
+      border-color: $theme-primary;
+      box-shadow: $theme-ring;
+    }
+  }
+
+  .saturne-inline-percent .saturne-inline-percent-suffix {
+    color: $theme-muted;
+  }
+
+  /* ---- Secondary sidebar (tree of saturne_more_left_menu, e.g. DigiQuali mapping) ---- */
+
+  .sidebar-secondary {
+    .sidebar-secondary__container {
+      border-right: 1px solid $theme-border;
+      background: $theme-surface;
+    }
+
+    /* The add buttons sit at the bottom of this block: the extra top padding keeps them off the
+       top bar now that the centred title line is shorter */
+    .sidebar-secondary__header .sidebar-secondary__header-top {
+      padding-top: 33px;
+    }
+
+    .sidebar-secondary__header .sidebar-secondary__header-top .linkElement {
+      align-items: center;
+      gap: 8px;
+      border-bottom-color: $theme-border;
+      color: $theme-text;
+    }
+
+    .sidebar-secondary__header .sidebar-secondary__header-toolbar .toggle-all {
+      color: $theme-muted;
+
+      &:hover {
+        color: $theme-primary;
+        opacity: 1;
+      }
+    }
+
+    .workunit-list {
+      margin: 4px 8px;
+
+      > .unit:first-child > .unit-container:first-child > .title {
+        border-top: none;
+      }
+
+      .unit {
+        border-radius: $theme-radius;
+      }
+
+      .unit-container {
+        margin-bottom: 2px;
+        border-radius: $theme-radius;
+        transition: background-color $theme-transition;
+
+        &:hover {
+          background: $theme-surface-soft;
+        }
+
+        .toggle-unit,
+        .unit-drag-handle {
+          color: $theme-faint;
+        }
+
+        .photodigiriskdolibarr {
+          border-radius: $theme-radius-sm;
+          background: $theme-bg;
+        }
+
+        .title-container {
+          .ref {
+            border-radius: 6px;
+            letter-spacing: 0.02em;
+          }
+
+          .name {
+            color: $theme-text;
+            font-weight: 500;
+          }
+
+          .linkElement:hover .name {
+            color: $theme-primary-strong;
+          }
+        }
+      }
+
+      .unit-container.active {
+        background: $theme-primary-soft;
+
+        .name {
+          color: $theme-primary-strong;
+          font-weight: 600;
+        }
+      }
+
+      .unit > .sub-list {
+        margin-left: 12px;
+        border-left: 1px dashed $theme-border;
+      }
+    }
+  }
+
+  /* ---- Activity blocks ---- */
+
+  .activity-container {
+    border: 1px solid $theme-border;
+    border-radius: $theme-radius-lg;
+    background: $theme-surface;
+    box-shadow: $theme-shadow-sm;
+    overflow: hidden;
+
+    .activity-container__header {
+      padding: 10px 14px;
+      color: $theme-text;
+      font-weight: 600;
+    }
+
+    .activity-container__body {
+      padding: 10px 14px;
+      border-top: 1px solid $theme-border-soft;
+      background: $theme-surface-soft;
+    }
+  }
+
+  /* ---- Confirmation card ---- */
+
+  .card__confirmation {
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(3px);
+
+    .confirmation-container {
+      border: 1px solid $theme-border;
+      border-radius: 18px;
+      box-shadow: $theme-shadow-lg;
+
+      .confirmation-title {
+        color: $theme-text;
+        font-weight: 700;
+      }
+
+      .confirmation-close-button {
+        color: $theme-faint;
+      }
+    }
+  }
+
+  /* ---- Upload buttons of the media block (camera, gallery, file): theme colours instead of the
+     orange and teal of the base component, which clashed with the cards ---- */
+
+  .saturne-media-upload-block .saturne-upload-label {
+    border-radius: $theme-radius;
+    background-color: $theme-primary;
+    box-shadow: 0 1px 2px rgba(13, 138, 255, 0.35);
+    transition: background-color $theme-transition, box-shadow $theme-transition;
+
+    &:hover {
+      background-color: $theme-primary-strong;
+      box-shadow: 0 4px 12px rgba(13, 138, 255, 0.3);
+    }
+  }
+
+  .saturne-upload-label-gallery {
+    background-color: $theme-navy !important;
+    box-shadow: $theme-shadow-sm !important;
+  }
+
+  .saturne-upload-label-file {
+    background-color: $theme-text-soft !important;
+    box-shadow: $theme-shadow-sm !important;
+  }
+
+  /* ---- Tabs of the media library modal, as a segmented bar like the card tabs ---- */
+
+  .saturne-media-tabs {
+    width: max-content;
+    max-width: 100%;
+    padding: 4px;
+    border: 1px solid $theme-border;
+    border-radius: $theme-radius;
+    background: $theme-surface-soft;
+  }
+
+  .saturne-media-tab {
+    padding: 7px 14px;
+    border-bottom: none;
+    border-radius: $theme-radius-sm;
+    color: $theme-text-soft;
+    font-weight: 600;
+
+    &:hover {
+      background: $theme-surface;
+      color: $theme-text;
+    }
+
+    &.active {
+      background: $theme-primary-soft;
+      color: $theme-primary-strong;
+    }
+  }
+
+  /* ---- Test blocks of the media admin page ---- */
+
+  .saturne-media-test-block {
+    margin-bottom: 22px;
+    padding: 6px 20px 20px;
+    @include theme-card;
+  }
+}

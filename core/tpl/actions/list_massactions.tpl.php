@@ -28,6 +28,10 @@
  * Parameters : $action, $confirm, $massaction, $toselect
  * Objects    : $object
  * Variable   : $enableMassSignature (optional), $enableMassValidate (optional), $objectclass, $permissiontoadd
+ *
+ * Exposes    : $listXlsxExportAvailable, read by the list header TPL to offer the Excel export, and
+ *              $listXlsxExportBufferLevel when the export is asked, with $listXlsxExportIds, the checked lines to
+ *              export through the mass action, both read by the list SQL TPL
  */
 
 // Validate mass action - only offered on lists that opted in with $enableMassValidate
@@ -198,4 +202,15 @@ if (($massaction == 'unarchive' || ($action == 'unarchive' && $confirm == 'yes')
             setEventMessages($langs->trans('RecordsUnarchived', $nbOk), []);
         }
     }
+}
+
+// Excel export of the whole list, or of the lines checked through the mass action: the page is drawn into a buffer,
+// which the list SQL template replaces with the workbook once the page has set everything its list depends on, such
+// as the filter of the card it is a tab of
+$listXlsxExportAvailable = true;
+// The checked lines only once the mass actions of the core found some, and not more than they allow
+$listXlsxExportIds = ($massaction == 'export_xlsx' && empty($error) && !empty($toselect)) ? array_map('intval', (array) $toselect) : [];
+if ($action == 'export_xlsx' || !empty($listXlsxExportIds)) {
+    ob_start();
+    $listXlsxExportBufferLevel = ob_get_level();
 }

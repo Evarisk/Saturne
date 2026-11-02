@@ -1121,6 +1121,13 @@ function saturne_require_objects_mod(array $numberingModulesNames, string $modul
                 require_once $modPathCustomDoc2;
             } elseif (file_exists($modPathDolibarr)) {
                 require_once $modPathDolibarr;
+            } else {
+                // Some modules file their numbering modules one folder deeper (digiriskelement/accident, riskanalysis/risk...):
+                // without this lookup, getNextNumRef() only worked on pages that had preloaded the module with that folder in the key
+                $nestedModPaths = glob(dirname(__FILE__) . '/../../' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/*/' . $objectType . '/' . $numberingModulesName . '.php');
+                if (!empty($nestedModPaths)) {
+                    require_once $nestedModPaths[0];
+                }
             }
 
             $varName             = 'ref' . ucfirst($objectType) . 'Mod';
