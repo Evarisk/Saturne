@@ -92,7 +92,7 @@ final class SaturnePublishedApiCheck
     /**
      * Constructor.
      *
-     * @param array<string, string> $options Options --cle=valeur de la ligne de commande
+     * @param  array<string, string> $options Options --cle=valeur de la ligne de commande
      */
     public function __construct(array $options)
     {
@@ -102,7 +102,7 @@ final class SaturnePublishedApiCheck
     /**
      * Run the check and return the process exit code.
      *
-     * @return int 0 rien d'introduit, 1 appel introduit par la PR
+     * @return int  0 rien d'introduit, 1 appel introduit par la PR
      */
     public function run(): int
     {
@@ -172,10 +172,10 @@ final class SaturnePublishedApiCheck
     /**
      * Public API present in Saturne at $ref and absent from the published tag.
      *
-     * @param  string $dir       Saturne git directory
-     * @param  string $ref       Analysed commit (develop)
-     * @param  string $published Published tag commit
-     * @return array<string, array{name: string, where: string}> Cle « sorte:nom », nom affiche et lieu de definition
+     * @param  string                                                          $dir       Saturne git directory
+     * @param  string                                                          $ref       Analysed commit (develop)
+     * @param  string                                                          $published Published tag commit
+     * @return array<string, array{name: string, where: string, file: string}>            Cle « sorte:nom », nom affiche et lieu de definition
      */
     private static function freshApi(string $dir, string $ref, string $published): array
     {
@@ -207,31 +207,31 @@ final class SaturnePublishedApiCheck
      * Collect the definitions of a tree.
      *
      * @param  SaturnePublishedApiBlobReader $reader Blob reader
-     * @param  string                        $ref    Commit
-     * @param  list<string>                  $files  PHP files of the tree
-     * @return array{function: array<string, array{name: string, where: string}>, method: array<string, array{name: string, where: string}>, methodAny: array<string, true>, class: array<string, array{name: string, where: string}>, file: array<string, array{name: string, where: string}>}
+     * @param  string $ref Commit
+     * @param  list<string> $files PHP files of the tree
+     * @return array{function: array<string, array{name: string, where: string, file: string}>, method: array<string, array{name: string, where: string, file: string}>, methodAny: array<string, true>, class: array<string, array{name: string, where: string, file: string}>, file: array<string, array{name: string, where: string, file: string}>}
      */
     private static function definitions(SaturnePublishedApiBlobReader $reader, string $ref, array $files): array
     {
         $defs = ['function' => [], 'method' => [], 'methodAny' => [], 'class' => [], 'file' => []];
         foreach ($files as $file) {
-            $defs['file'][$file] = ['name' => $file, 'where' => ''];
+            $defs['file'][$file] = ['name' => $file, 'where' => '', 'file' => $file];
             $code = $reader->read($ref, $file);
             if ($code === null) {
                 continue;
             }
             $analysis = self::analyse($code);
             foreach ($analysis['functions'] as $key => $name) {
-                $defs['function'][$key] ??= ['name' => $name . '()', 'where' => $file];
+                $defs['function'][$key] ??= ['name' => $name . '()', 'where' => $file, 'file' => $file];
             }
             foreach ($analysis['classes'] as $key => $name) {
-                $defs['class'][$key] ??= ['name' => $name, 'where' => $file];
+                $defs['class'][$key] ??= ['name' => $name, 'where' => $file, 'file' => $file];
             }
             foreach ($analysis['methods'] as $method) {
                 $key = strtolower($method['name']);
                 $defs['methodAny'][$key] = true;
                 if ($method['public']) {
-                    $defs['method'][$key] ??= ['name' => $method['name'] . '()', 'where' => $method['class'] . ', ' . $file];
+                    $defs['method'][$key] ??= ['name' => $method['name'] . '()', 'where' => $method['class'] . ', ' . $file, 'file' => $file];
                 }
             }
         }
@@ -246,9 +246,9 @@ final class SaturnePublishedApiCheck
      * Ces noms sont listes dans le resume, sans annotation ni effet sur le verdict. Un appel
      * `parent::nom()` reste compte : il vise forcement la classe mere.
      *
-     * @param  array<string, array{name: string, where: string}> $fresh    Unpublished API
+     * @param  array<string, array{name: string, where: string, file: string}> $fresh Unpublished API
      * @param  array<string, array{functions: array<string, string>, methods: list<array{name: string, class: string, public: bool}>, classes: array<string, string>, usages: list<array{kind: string, key: string, line: int, parent: bool}>, guards: array<string, true>}> $analyses Module files analyses
-     * @return array<string, string>                                        Raison par symbole
+     * @return array<string, string> Raison par symbole
      */
     private static function ambiguous(array $fresh, array $analyses): array
     {
@@ -289,14 +289,14 @@ final class SaturnePublishedApiCheck
      * A symbol is introduced when the PR raises its number of unguarded calls: a call that only moves
      * (a line rewritten, a block reindented) leaves the count unchanged and does not redden the check.
      *
-     * @param  string                                                               $dir       Module git directory
-     * @param  SaturnePublishedApiBlobReader                                        $reader    Module blob reader
-     * @param  string                                                               $base      Base commit
-     * @param  string                                                               $head      Head commit
+     * @param  string                                                              $dir       Module git directory
+     * @param  SaturnePublishedApiBlobReader                                       $reader    Module blob reader
+     * @param  string                                                              $base      Base commit
+     * @param  string                                                              $head      Head commit
      * @param  array<string, array<string, list<array{line: int, guarded: bool}>>> $headHits  Hits par fichier puis par symbole
-     * @param  array<string, array{name: string, where: string}>                    $fresh     Unpublished API
-     * @param  array<string, string>                                                $ambiguous Ambiguous method names
-     * @return array{0: array<string, int>, 1: array<string, array<int, true>>}                Symboles introduits (appels ajoutes) et lignes ajoutees par fichier
+     * @param  array<string, array{name: string, where: string, file: string}>     $fresh     Unpublished API
+     * @param  array<string, string>                                               $ambiguous Ambiguous method names
+     * @return array{0: array<string, int>, 1: array<string, array<int, true>>}               Symboles introduits (appels ajoutes) et lignes ajoutees par fichier
      */
     private static function introducedSymbols(string $dir, SaturnePublishedApiBlobReader $reader, string $base, string $head, array $headHits, array $fresh, array $ambiguous): array
     {
@@ -340,16 +340,16 @@ final class SaturnePublishedApiCheck
     /**
      * Build the Markdown report and queue the annotations.
      *
-     * @param  string                                                               $module     Module name
-     * @param  string                                                               $published  Published tag
-     * @param  string                                                               $saturneRef Analysed Saturne commit
-     * @param  array<string, array{name: string, where: string}>                    $fresh      Unpublished API
-     * @param  array<string, string>                                                $ambiguous  Ambiguous method names
+     * @param  string                                                              $module     Module name
+     * @param  string                                                              $published  Published tag
+     * @param  string                                                              $saturneRef Analysed Saturne commit
+     * @param  array<string, array{name: string, where: string, file: string}>     $fresh      Unpublished API
+     * @param  array<string, string>                                               $ambiguous  Ambiguous method names
      * @param  array<string, array<string, list<array{line: int, guarded: bool}>>> $headHits   Hits par fichier puis par symbole
-     * @param  string|null                                                          $base       Base commit, null hors PR
-     * @param  array<string, int>                                                   $introduced Symboles introduits par la PR
-     * @param  array<string, array<int, true>>                                      $addedLines Lignes ajoutees par fichier
-     * @return string                                                                           Markdown
+     * @param  string|null                                                         $base       Base commit, null hors PR
+     * @param  array<string, int>                                                  $introduced Symboles introduits par la PR
+     * @param  array<string, array<int, true>>                                     $addedLines Lignes ajoutees par fichier
+     * @return string                                                                          Markdown
      */
     private function report(string $module, string $published, string $saturneRef, array $fresh, array $ambiguous, array $headHits, ?string $base, array $introduced, array $addedLines): string
     {
@@ -416,7 +416,7 @@ final class SaturnePublishedApiCheck
         if (!empty($guarded)) {
             $md[] = '### Appels protégés';
             $md[] = '';
-            $md[] = 'Le même fichier teste leur existence (`function_exists()`, `method_exists()`, `class_exists()`, `file_exists()`…) : sans effet sur le verdict.';
+            $md[] = 'Le même fichier teste leur existence, ou celle du fichier de Saturne qui les déclare (`function_exists()`, `method_exists()`, `class_exists()`, `file_exists()`…) : sans effet sur le verdict.';
             $md[] = '';
             $md   = array_merge($md, self::table($fresh, $guarded));
             $md[] = '';
@@ -450,9 +450,9 @@ final class SaturnePublishedApiCheck
     /**
      * Markdown table of symbols and their call sites.
      *
-     * @param  array<string, array{name: string, where: string}>   $fresh   Unpublished API
-     * @param  array<string, list<array{file: string, line: int}>> $symbols Emplacements par symbole
-     * @return list<string>                                                 Lignes Markdown
+     * @param  array<string, array{name: string, where: string, file: string}> $fresh   Unpublished API
+     * @param  array<string, list<array{file: string, line: int}>>             $symbols Emplacements par symbole
+     * @return list<string>                                                             Lignes Markdown
      */
     private static function table(array $fresh, array $symbols): array
     {
@@ -486,11 +486,11 @@ final class SaturnePublishedApiCheck
     /**
      * Annotation message of a symbol.
      *
-     * @param  array<string, array{name: string, where: string}> $fresh     Unpublished API
-     * @param  string                                            $id        Symbol id
-     * @param  string                                            $published Published tag
-     * @param  int                                               $count     Number of call sites in the module
-     * @return string                                                       Message
+     * @param  array<string, array{name: string, where: string, file: string}> $fresh     Unpublished API
+     * @param  string                                                          $id        Symbol id
+     * @param  string                                                          $published Published tag
+     * @param  int                                                             $count     Number of call sites in the module
+     * @return string                                                                     Message
      */
     private static function message(array $fresh, string $id, string $published, int $count): string
     {
@@ -527,9 +527,9 @@ final class SaturnePublishedApiCheck
      * Keep the usages of a file that hit the unpublished API.
      *
      * @param  array{functions: array<string, string>, methods: list<array{name: string, class: string, public: bool}>, classes: array<string, string>, usages: list<array{kind: string, key: string, line: int, parent: bool}>, guards: array<string, true>} $analysis File analysis
-     * @param  array<string, array{name: string, where: string}> $fresh     Unpublished API
-     * @param  array<string, string>                             $ambiguous Ambiguous method names
-     * @return array<string, list<array{line: int, guarded: bool}>>         Emplacements par symbole
+     * @param  array<string, array{name: string, where: string, file: string}> $fresh Unpublished API
+     * @param  array<string, string> $ambiguous Ambiguous method names
+     * @return array<string, list<array{line: int, guarded: bool}>> Emplacements par symbole
      */
     private static function hits(array $analysis, array $fresh, array $ambiguous): array
     {
@@ -537,7 +537,10 @@ final class SaturnePublishedApiCheck
         foreach ($analysis['usages'] as $usage) {
             $id = $usage['kind'] . ':' . $usage['key'];
             if (isset($fresh[$id]) && (!isset($ambiguous[$id]) || $usage['parent'])) {
-                $hits[$id][] = ['line' => $usage['line'], 'guarded' => isset($analysis['guards'][$usage['key']])];
+                // Protege par une garde sur son nom, ou sur le fichier de Saturne qui le declare :
+                // if (file_exists(dol_buildpath('/saturne/class/x.class.php'))) { X::m(); }
+                $guarded     = isset($analysis['guards'][$usage['key']]) || isset($analysis['guards'][$fresh[$id]['file']]);
+                $hits[$id][] = ['line' => $usage['line'], 'guarded' => $guarded];
             }
         }
         return $hits;
@@ -673,7 +676,7 @@ final class SaturnePublishedApiCheck
      *
      * @param  array{functions: array<string, string>, methods: list<array{name: string, class: string, public: bool}>, classes: array<string, string>, usages: list<array{kind: string, key: string, line: int, parent: bool}>, guards: array<string, true>} $result Analysis in progress
      * @param  string $name Class name as written
-     * @param  int    $line Line
+     * @param  int $line Line
      * @return void
      */
     private static function useClass(array &$result, string $name, int $line): void
@@ -688,7 +691,7 @@ final class SaturnePublishedApiCheck
      *
      * @param  array{functions: array<string, string>, methods: list<array{name: string, class: string, public: bool}>, classes: array<string, string>, usages: list<array{kind: string, key: string, line: int, parent: bool}>, guards: array<string, true>} $result Analysis in progress
      * @param  list<array{0: int|string, 1: string, 2: int}> $tokens Significant tokens
-     * @param  int                                           $open   Index of the opening parenthesis
+     * @param  int $open Index of the opening parenthesis
      * @return void
      */
     private static function collectGuards(array &$result, array $tokens, int $open): void
@@ -832,7 +835,7 @@ final class SaturnePublishedApiBlobReader
     /**
      * Constructor.
      *
-     * @param string $dir Git directory
+     * @param  string $dir Git directory
      */
     public function __construct(string $dir)
     {
