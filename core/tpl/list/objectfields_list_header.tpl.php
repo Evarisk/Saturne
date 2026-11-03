@@ -319,7 +319,8 @@ if ($massaction == 'presign') {
     print $form->formconfirm($_SERVER['PHP_SELF'], $langs->trans('ConfirmMassSign'), $langs->trans('ConfirmMassSigningQuestion', count($toselect)), 'sign', null, '', 0, 200, 500, 1);
 }
 
-if ($massaction == 'prelock') {
+// Only on the lists that opted in: a list with its own lock mass action (DigiQuali questions) prints its own confirmation
+if ($massaction == 'prelock' && !empty($enableMassLock)) {
     print $form->formconfirm($_SERVER['PHP_SELF'], $langs->trans('ConfirmMassLock'), $langs->trans('ConfirmMassLockingQuestion', count($toselect)), 'lock', null, '', 0, 200, 500, 1);
 }
 
