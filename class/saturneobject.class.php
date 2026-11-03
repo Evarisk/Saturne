@@ -640,6 +640,10 @@ abstract class SaturneObject extends CommonObject
     {
         global $langs;
 
+        // The tooltip is fetched by core/ajax/ajaxtooltip.php, which loads no module language file: without them,
+        // the element name and the status are shown untranslated (Control, StatusDraft...)
+        $langs->loadLangs(['object@saturne', $this->module . '@' . $this->module]);
+
         $datas = [];
 
         if (getDolGlobalInt('MAIN_OPTIMIZEFORTEXTBROWSER')) {
