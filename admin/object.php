@@ -77,7 +77,7 @@ $form = new Form($db);
 $hookmanager->initHooks([$objectType . 'admin']);
 
 // Security check - Protection if external user
-$permissiontoread  = $user->rights->$moduleNameLowerCase->adminpage->read;
+$permissiontoread  = $user->hasRight($moduleNameLowerCase, 'adminpage', 'read');
 $permissiontowrite = saturne_check_admin_write_access($moduleNameLowerCase);
 
 saturne_check_access($permissiontoread);

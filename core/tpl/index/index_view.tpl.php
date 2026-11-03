@@ -34,7 +34,7 @@ $upload_dir = $conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1];
 $hookmanager->initHooks([$moduleNameLowerCase . 'index', 'globalcard']);
 
 // Security check.
-$permissiontoread = $user->rights->$moduleNameLowerCase->read;
+$permissiontoread = $user->hasRight($moduleNameLowerCase, 'read');
 saturne_check_access($permissiontoread, null, true);
 
 /*
