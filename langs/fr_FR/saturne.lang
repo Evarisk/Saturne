@@ -437,6 +437,11 @@ OrphanDocumentsDeletedEntity                 = %s ligne(s) supprimée(s) sur l'e
 # Document generation - Generation de document
 ErrorTemplateFileNotAllowed                  = Le modèle de document « %s » ne se trouve pas dans un répertoire de modèles du module.
 
+# Status filter of the lists - Filtre sur l'état des listes
+ListStatusFilterHiddenOne                    = %s masqué
+ListStatusFilterHiddenMany                   = %s masqués
+ListStatusFilterHint                         = Le filtre de la colonne « %s » est actif et masque : %s.<br>La suppression des filtres le conserve.<br>Cliquez pour afficher tous les états.
+
 # Excel export - Export Excel
 XlsxExport                                   = Export Excel
 XlsxExportHelp                               = Télécharge toutes les lignes de la liste, avec ses filtres et son tri, dans un classeur Excel qui les présente sous plusieurs vues
