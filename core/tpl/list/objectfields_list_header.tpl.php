@@ -27,8 +27,8 @@
  * Globals    : $conf, $db, $hookmanager, $langs, $user
  * Parameters : $action, $limit, $contextpage, $massaction, $mode, $optioncss, $page, $searchAll, $sortfield, $sortorder, $toselect
  * Objects    : $categorie, $extrafields (extrafields_list_search_param.tpl), $form, $object
- * Variables  : $arrayfields, $createUrl (optional), $enableMassSignature (optional), $enableMassValidate (optional),
- *              $fieldsToSearchAll, $formMoreParams (optional), $helpText (optional), $listXlsxExportAvailable (optional),
+ * Variables  : $arrayfields, $createUrl (optional), $enableMassLock (optional), $enableMassSignature (optional),
+ *              $enableMassValidate (optional), $fieldsToSearchAll, $formMoreParams (optional), $helpText (optional), $listXlsxExportAvailable (optional),
  *              $moreUrlParameters (optional), $nbTotalOfRecords, $num,
  *              $permissiontoadd, $resql, $search, $search_array_options (extrafields_list_search_param.tpl),
  *              $searchCategories, $sql, $title
@@ -108,6 +108,11 @@ if (!empty($enableMassValidate) && !empty($permissiontoadd)) {
 if (!empty($enableMassSignature) && !empty($permissiontoadd)) {
     $arrayOfMassActions['presign']       = '<span class="fas fa-file-signature paddingrightonly"></span>' . $langs->trans('Sign');
     $arrayOfMassActions['signattendant'] = '<span class="fas fa-user-edit paddingrightonly"></span>' . $langs->trans('SignForAnAttendant');
+}
+
+// Mass lock is opt-in: the list page must set $enableMassLock, the object tells which records can be locked (isLockable())
+if (!empty($enableMassLock) && !empty($permissiontoadd)) {
+    $arrayOfMassActions['prelock'] = '<span class="fas fa-lock paddingrightonly"></span>' . $langs->trans('Lock');
 }
 
 $arrayOfMassActions += [
@@ -285,6 +290,10 @@ if ($massaction == 'prevalidate') {
 
 if ($massaction == 'presign') {
     print $form->formconfirm($_SERVER['PHP_SELF'], $langs->trans('ConfirmMassSign'), $langs->trans('ConfirmMassSigningQuestion', count($toselect)), 'sign', null, '', 0, 200, 500, 1);
+}
+
+if ($massaction == 'prelock') {
+    print $form->formconfirm($_SERVER['PHP_SELF'], $langs->trans('ConfirmMassLock'), $langs->trans('ConfirmMassLockingQuestion', count($toselect)), 'lock', null, '', 0, 200, 500, 1);
 }
 
 if ($massaction == 'prearchive') {

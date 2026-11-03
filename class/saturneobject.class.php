@@ -617,6 +617,19 @@ abstract class SaturneObject extends CommonObject
     }
 
     /**
+     * Can the object be locked now?
+     *
+     * Only a validated object can be locked. An object with its own conditions (verdict, signatures...)
+     * overrides it, so that the mass lock skips what the card would not let lock.
+     *
+     * @return bool True if the object can be locked
+     */
+    public function isLockable(): bool
+    {
+        return (int) $this->status == static::STATUS_VALIDATED;
+    }
+
+    /**
      * Return array of data to show into a tooltip
      * This method must be implemented in each object class
      *
