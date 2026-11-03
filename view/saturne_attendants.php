@@ -536,7 +536,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
             foreach ($signatoriesByRole as $signatoryRole) {
                 foreach ($signatoryRole as $attendant) {
                     $signatoriesByRoleSignatureEmailURL .= $outputlangs->trans($attendant->role) . ' : ' . strtoupper($attendant->lastname) . ' ' . $attendant->firstname . '<br>';
-                    $signatureUrl = dol_buildpath('custom/saturne/public/signature/add_signature.php?track_id=' . $attendant->signature_url . '&entity=' . $conf->entity . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
+                    $signatureUrl = dol_buildpath('/saturne/public/signature/add_signature.php?track_id=' . $attendant->signature_url . '&entity=' . $conf->entity . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
                     $signatoriesByRoleSignatureEmailURL .= '<a href=' . $signatureUrl . ' target="_blank">' . $langs->transnoentities('SignatureEmailURL') . '</a><br><br>';
                 }
             }

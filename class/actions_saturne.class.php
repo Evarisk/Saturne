@@ -111,7 +111,7 @@ class ActionsSaturne
         global $user, $langs;
         if (strpos($parameters['context'], 'emailtemplates') !== false) {
             if (isModEnabled('saturne') && $user->hasRight('saturne', 'adminpage', 'read')) {
-                $pictopath = dol_buildpath('custom/saturne/img/saturne_color.png', 1);
+                $pictopath = dol_buildpath('/saturne/img/saturne_color.png', 1);
                 $picto     = img_picto('', $pictopath, '', 1, 0, 0, '', 'pictoModule');
 
                 foreach (['saturne', 'saturne_document', 'saturne_signature'] as $key) {
@@ -436,7 +436,7 @@ class ActionsSaturne
                                 params.append('action', 'toggle_favorite');
 
                                 $.ajax({
-                                    url: '" . DOL_URL_ROOT . "/custom/saturne/core/ajax/favorite.php?' + params.toString(),
+                                    url: '" . dol_buildpath('/saturne/core/ajax/favorite.php', 1) . "?' + params.toString(),
                                     method: 'POST',
                                     contentType: 'application/json charset=utf-8',
                                     success: function(response) {

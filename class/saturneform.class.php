@@ -96,7 +96,7 @@ abstract class SaturneForm
 
         $displayButton = $conf->browser->layout != 'classic' ? '<i class="fas fa-signature fa-2x"></i>' : '<i class="fas fa-signature"></i>' . ' ' . $langs->transnoentities('Sign');
         if ($object->status == $object::STATUS_VALIDATED && !$signatory->checkSignatoriesSignatures($object->id, $object->element)) {
-            print '<a class="butAction" href="' . dol_buildpath('custom/saturne/view/saturne_attendants.php?id=' . $object->id . '&module_name=' . $object->module . '&object_type=' . $object->element . '&document_type=' . $moreParams['documentType'] ?? get_class($document) . '&attendant_table_mode=simple', 3) . '">' . $displayButton . '</a>';
+            print '<a class="butAction" href="' . dol_buildpath('/saturne/view/saturne_attendants.php?id=' . $object->id . '&module_name=' . $object->module . '&object_type=' . $object->element . '&document_type=' . $moreParams['documentType'] ?? get_class($document) . '&attendant_table_mode=simple', 3) . '">' . $displayButton . '</a>';
         } elseif ($object->status < $object::STATUS_VALIDATED) {
             print '<span class="butActionRefused classfortooltip" title="' . dol_escape_htmltag($langs->transnoentities('ObjectMustBeValidatedToSign', $langs->transnoentities('The' . ucfirst($object->element)))) . '">' . $displayButton . '</span>';
         }

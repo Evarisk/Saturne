@@ -786,9 +786,9 @@ function saturne_show_category_image(Categorie $category, int $noPrint = 0, stri
             $imgHeight = ($category->imgHeight < $maxHeight) ? $category->imgHeight : $maxHeight;
 
             if ($noPrint) {
-                $out = '<div><img width="' . $imgWidth . '" height="' . $imgHeight . '" class="photo ' . $moreCSS . '" src="' . DOL_URL_ROOT . '/custom/saturne/utils/viewimage.php?modulepart=category&entity=' . $category->entity . '&file=' . urlencode($categoryPhotoDir . $filename) . '" value="' . $category->id . '" title="' . $filename . '" alt=""></div>';
+                $out = '<div><img width="' . $imgWidth . '" height="' . $imgHeight . '" class="photo ' . $moreCSS . '" src="' . dol_buildpath('/saturne/utils/viewimage.php', 1) . '?modulepart=category&entity=' . $category->entity . '&file=' . urlencode($categoryPhotoDir . $filename) . '" value="' . $category->id . '" title="' . $filename . '" alt=""></div>';
             } else {
-                print '<div><img width="' . $imgWidth . '" height="' . $imgHeight . '" class="photo ' . $moreCSS . '" src="' . DOL_URL_ROOT . '/custom/saturne/utils/viewimage.php?modulepart=category&entity=' . $category->entity . '&file=' . urlencode($categoryPhotoDir . $filename) . '" value="' . $category->id . '" title="' . $filename . '" alt=""></div>';
+                print '<div><img width="' . $imgWidth . '" height="' . $imgHeight . '" class="photo ' . $moreCSS . '" src="' . dol_buildpath('/saturne/utils/viewimage.php', 1) . '?modulepart=category&entity=' . $category->entity . '&file=' . urlencode($categoryPhotoDir . $filename) . '" value="' . $category->id . '" title="' . $filename . '" alt=""></div>';
             }
         }
     } else {
