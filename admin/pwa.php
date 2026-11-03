@@ -57,7 +57,7 @@ $form = new Form($db);
 $hookmanager->initHooks([$moduleNameLowerCase . 'pwaadmin', 'saturneadmin']);
 
 // Security check - Protection if external user
-$permissionToRead = $user->rights->$moduleNameLowerCase->adminpage->read;
+$permissionToRead = $user->hasRight($moduleNameLowerCase, 'adminpage', 'read');
 saturne_check_access($permissionToRead);
 
 /*

@@ -71,8 +71,8 @@ $extrafields->fetch_name_optionals_label($object->table_element);
 include DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php';
 
 // Security check - Protection if external user
-$permissiontoread = $user->rights->$moduleNameLowerCase->$objectType->read;
-$permissiontoadd  = (($object->status >= $object::STATUS_LOCKED) ? 0 : $user->rights->$moduleNameLowerCase->$objectType->write);
+$permissiontoread = $user->hasRight($moduleNameLowerCase, $objectType, 'read');
+$permissiontoadd  = (($object->status >= $object::STATUS_LOCKED) ? 0 : $user->hasRight($moduleNameLowerCase, $objectType, 'write'));
 $permissionnote   = $permissiontoadd;
 
 // Used by include of actions_setnotes.inc.php

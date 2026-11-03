@@ -86,9 +86,9 @@ $hookmanager->initHooks([$objectType . 'signature', $object->element . 'signatur
 include DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php'; // Must be included, not include_once. Include fetch and fetch_thirdparty but not fetch_optionals
 
 // Security check - Protection if external user
-$permissiontoread   = $user->rights->$moduleNameLowerCase->$objectType->read || $user->rights->$moduleNameLowerCase->assignedtome->$objectType;
-$permissiontoadd    = $user->rights->$moduleNameLowerCase->$objectType->write;
-$permissiontodelete = $user->rights->$moduleNameLowerCase->$objectType->delete;
+$permissiontoread   = $user->hasRight($moduleNameLowerCase, $objectType, 'read') || $user->hasRight($moduleNameLowerCase, 'assignedtome', $objectType);
+$permissiontoadd    = $user->hasRight($moduleNameLowerCase, $objectType, 'write');
+$permissiontodelete = $user->hasRight($moduleNameLowerCase, $objectType, 'delete');
 saturne_check_access($permissiontoread, null, true);
 
 /*

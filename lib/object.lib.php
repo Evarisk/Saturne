@@ -224,7 +224,7 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
         $moduleNameLowerCase = dol_strtolower($object->module);
     }
 
-    if ($user->rights->$moduleNameLowerCase->$objectType->read) {
+    if ($user->hasRight($moduleNameLowerCase, $objectType, 'read')) {
         $defaultMoreParams = [
             'parentType'         => $objectType, // Most of time, parentType is equal to objectType
             'specialName'        => $objectType,
