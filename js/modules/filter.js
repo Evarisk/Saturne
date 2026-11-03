@@ -69,7 +69,10 @@ window.saturne.filter = {
                     // Find any input/select in this specific filter cell and clear them
                     $filterCell.find('input[type="text"], input[type="number"]').val('');
                     $filterCell.find('select').each(function() {
-                        if ($(this).find('option[value="-1"]').length > 0) {
+                        // A multiple select is emptied: selecting its first option would filter on it (status: draft only)
+                        if ($(this).prop('multiple')) {
+                            $(this).val([]).trigger('change');
+                        } else if ($(this).find('option[value="-1"]').length > 0) {
                             $(this).val('-1').trigger('change');
                         } else if ($(this).find('option[value=""]').length > 0) {
                             $(this).val('').trigger('change');
@@ -136,6 +139,22 @@ window.saturne.filter = {
         this.openPopover($btn, $th, colIndex, colKey);
     },
 
+    // Centred under the caret of the column, but kept inside the window: on the last columns it overflowed the right edge
+    placePopover: function($popover, $btn) {
+        var btnOffset  = $btn.offset();
+        var margin     = 8;
+        var scrollLeft = $(window).scrollLeft();
+        // Measured from the left edge: near the right one, an absolute block shrinks to the room left
+        $popover.css('left', scrollLeft + 'px');
+        var maxLeft    = scrollLeft + $(window).width() - $popover.outerWidth() - margin;
+        var left       = btnOffset.left - ($popover.outerWidth() / 2) + 20;
+
+        $popover.css({
+            top: btnOffset.top + $btn.outerHeight() + 10 + 'px',
+            left: Math.max(scrollLeft + margin, Math.min(left, maxLeft)) + 'px'
+        });
+    },
+
     openPopover: function($btn, $th, colIndex, colKey) {
         this.closePopover(); // Ensure any existing is closed
 
@@ -193,12 +212,8 @@ window.saturne.filter = {
         $('#saturne-popover-input-wrapper').append($inputWrapper);
 
         // Position the popover under the btn
-        var btnOffset = $btn.offset();
-        $popover.css({
-            top: btnOffset.top + $btn.outerHeight() + 10 + 'px',
-            left: btnOffset.left - ($popover.outerWidth() / 2) + 20 + 'px',
-            display: 'block'
-        });
+        $popover.css('display', 'block');
+        this.placePopover($popover, $btn);
         $('body').addClass('saturne-col-filter-open');
 
         this.activePopoverTarget = $btn;
@@ -219,6 +234,8 @@ window.saturne.filter = {
                          dropdownParent: $popover
                      });
                  });
+                 // The select2 tags widen the popover: place it again
+                 window.saturne.filter.placePopover($popover, $btn);
              }, 50);
         }
 

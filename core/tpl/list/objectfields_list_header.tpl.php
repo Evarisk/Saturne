@@ -234,6 +234,33 @@ if ($mode != 'kanban' && $mode != 'pwa' && !empty($listLayoutId)) {
     }
     $filterIndicator .= '</span>';
 
+    // The status filter is not counted above: it has defaults, which "Remove filters" keeps. Name the statuses it
+    // hides, or the list is taken for complete, and offer to show them all
+    if (isset($search['status']) && is_array($search['status']) && !empty($object->fields['status']['arrayofkeyval'])) {
+        // Negative statuses (deleted) are never listed, whatever the filter
+        $listableStatuses = array_filter($object->fields['status']['arrayofkeyval'], static function ($statusKey) {
+            return $statusKey >= 0;
+        }, ARRAY_FILTER_USE_KEY);
+        $hiddenStatuses = array_diff_key($listableStatuses, array_flip($search['status']));
+        if (!empty($hiddenStatuses)) {
+            $hiddenStatusLabels = implode(', ', array_map([$langs, 'transnoentities'], $hiddenStatuses));
+
+            // Same list, filters and sort kept, every status selected
+            $showAllStatusesUrl = $_SERVER['PHP_SELF'] . '?' . ltrim(preg_replace('/&search_status\[\]=[^&]*/', '', $param), '&');
+            foreach (array_keys($listableStatuses) as $statusKey) {
+                $showAllStatusesUrl .= '&search_status[]=' . ((int) $statusKey);
+            }
+            if (!empty($sortfield)) {
+                $showAllStatusesUrl .= '&sortfield=' . urlencode($sortfield) . '&sortorder=' . urlencode($sortorder);
+            }
+
+            $statusFilterHintTitle = $langs->transnoentities('ListStatusFilterHint', $langs->transnoentities($object->fields['status']['label']), $hiddenStatusLabels);
+            $filterIndicator .= '<a class="saturne-status-filter-hint classfortooltip" href="' . dol_escape_htmltag($showAllStatusesUrl) . '" title="' . dol_escape_htmltag($statusFilterHintTitle) . '">';
+            $filterIndicator .= '<span class="fas fa-eye-slash"></span>' . dol_escape_htmltag($langs->transnoentities(count($hiddenStatuses) > 1 ? 'ListStatusFilterHiddenMany' : 'ListStatusFilterHiddenOne', $hiddenStatusLabels));
+            $filterIndicator .= '</a>';
+        }
+    }
+
     $cardButton = ($cardButton ?? '') . ' ' . $filterIndicator;
 }
 

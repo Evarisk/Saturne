@@ -28,6 +28,27 @@ th.saturne-filter-active .saturne-col-filter-btn {
     color: var(--st-primary-color);
 }
 
+// Statuses hidden by the status filter, next to the filter indicator of the list title: a link showing them all
+.saturne-status-filter-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 8px;
+    padding: 2px 8px;
+    border: 1px solid var(--st-gray-200);
+    border-radius: 12px;
+    background: var(--st-gray-50);
+    color: var(--st-gray-500);
+    font-size: 0.8em;
+    font-weight: normal;
+    vertical-align: middle;
+
+    &:hover {
+        color: var(--st-primary-color);
+        text-decoration: none;
+    }
+}
+
 // Popover Menu Container
 .saturne-col-filter-popover {
     position: absolute;
@@ -36,6 +57,8 @@ th.saturne-filter-active .saturne-col-filter-btn {
     border-radius: 6px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     min-width: 250px;
+    // Never wider than the window, filter.js keeps it inside
+    max-width: calc(100vw - 16px);
     padding: 0;
     font-size: 13px;
     border: 1px solid var(--st-gray-200);

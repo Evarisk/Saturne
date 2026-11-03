@@ -429,6 +429,11 @@ OrphanDocumentsDeletedEntity                 = %s row(s) deleted on entity %s
 # Document generation
 ErrorTemplateFileNotAllowed                  = The document template '%s' is not stored in a template directory of the module.
 
+# Status filter of the lists
+ListStatusFilterHiddenOne                    = %s hidden
+ListStatusFilterHiddenMany                   = %s hidden
+ListStatusFilterHint                         = The filter of the « %s » column is active and hides: %s.<br>Removing the filters keeps it.<br>Click to show all statuses.
+
 # Excel export
 XlsxExport                                   = Excel export
 XlsxExportHelp                               = Downloads every line of the list, with its filters and its sort, into an Excel workbook showing them under several views
