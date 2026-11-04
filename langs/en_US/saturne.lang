@@ -470,3 +470,9 @@ XlsxDashboardExportHelp                      = Downloads the whole dashboard int
 XlsxDashboardValuesSheetDescription          = Value and share of each category of the graph; a category opens the matching list
 XlsxDashboardSeriesSheetDescription          = Values of the graph, one row per category and one column per series, in the colours of the legend
 XlsxDashboardListSheetDescription            = Lines of the list of the dashboard
+
+# Inline edition of the lists
+InlineEditSaved         = Saved
+InlineEditInvalidFormat = Invalid format
+InlineEditMaxPercent    = Maximum 100%%
+InlineEditOpenCalendar  = Open the calendar
