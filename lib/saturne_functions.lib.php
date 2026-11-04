@@ -66,7 +66,7 @@ function saturne_header(int $load_media_gallery = 0, string $head = '', string $
     //CSS
     $cssList[]       = '/saturne/css/saturne.min.css';
     $relativeCssPath = $moduleNameLowerCase . '/css/' . $moduleNameLowerCase . '.min.css';
-    $absoluteCssPath = __DIR__ . '/../../' . $relativeCssPath;
+    $absoluteCssPath = dol_buildpath('/' . $relativeCssPath);
     if (file_exists($absoluteCssPath)) {
         $cssList[] = '/' . $relativeCssPath;
     }
@@ -83,7 +83,7 @@ function saturne_header(int $load_media_gallery = 0, string $head = '', string $
     }
 
     $relativeJsPath = $moduleNameLowerCase . '/js/' . $moduleNameLowerCase . '.min.js';
-    $absoluteJsPath = __DIR__ . '/../../' . $relativeJsPath;
+    $absoluteJsPath = dol_buildpath('/' . $relativeJsPath);
     if (file_exists($absoluteJsPath)) {
         $jsList[] = '/' . $relativeJsPath;
     }
@@ -255,7 +255,7 @@ function saturne_recurse_tree($moreParams, ?int $parentID = null, int $depth = 0
 {
     global $conf;
 
-    require_once __DIR__ . '/../../' . $moreParams['moduleNameLowerCase'] . '/class/' . $moreParams['objectElement'] . '.class.php';
+    require_once dol_buildpath('/' . $moreParams['moduleNameLowerCase'] . '/class/' . $moreParams['objectElement'] . '.class.php');
 
     $filter         = 't.entity IN (' . $conf->entity . ') AND t.fk_standard = ' . getDolGlobalInt(dol_strtoupper($moreParams['moduleNameLowerCase']) . '_ACTIVE_STANDARD');
     $filter        .= ' AND t.status = ' . SaturneElement::STATUS_VALIDATED;
@@ -865,7 +865,7 @@ function saturne_create_category(string $label = '', string $type = '', int $fkP
             dol_mkdir($dir);
         }
 
-        $originFile = __DIR__ . '/../../' . $moduleNameLowerCase . '/img/pictos_' . $type . '/' . $photoName;
+        $originFile = dol_buildpath('/' . $moduleNameLowerCase . '/img/pictos_' . $type . '/' . $photoName);
         dol_copy($originFile, $dir . $photoName);
         vignette($dir . $photoName, $maxwidthsmall, $maxheightsmall);
         vignette($dir . $photoName, $maxwidthmini, $maxheightmini, '_mini');

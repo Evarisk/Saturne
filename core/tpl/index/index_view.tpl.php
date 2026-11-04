@@ -13,7 +13,7 @@ if (!isset($showDashboard) || $showDashboard === true) {
 }
 
 // Load Module libraries.
-require_once __DIR__ . '/../../../../' . $moduleNameLowerCase . '/core/modules/mod' . $moduleName . '.class.php';
+require_once dol_buildpath('/' . $moduleNameLowerCase . '/core/modules/mod' . $moduleName . '.class.php');
 
 // Load translation files required by the page.
 saturne_load_langs();
