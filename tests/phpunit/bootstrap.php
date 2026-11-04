@@ -163,6 +163,9 @@ if (!class_exists('Conf')) {
         /** @var int */
         public $liste_limit = 25;
 
+        /** @var stdClass|null Paths of the install: dol_document_root lists the main root and the alternative ones */
+        public $file;
+
         public function __construct()
         {
             $this->global = new stdClass();

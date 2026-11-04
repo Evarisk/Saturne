@@ -179,7 +179,7 @@ function saturne_display_recurse_tree(array $moreParams, array $objectElementTre
                         echo saturne_get_button_component_html([
                             'id'        => 'slider',
                             'className' => 'linkElement',
-                            'href'      => dol_buildpath('custom/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_view.php?id=' . $objectElement['object']->id . '&risk_type=' . $riskType, 1), //@todo gérer le lien
+                            'href'      => dol_buildpath('/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_view.php', 1) . '?id=' . $objectElement['object']->id . '&risk_type=' . $riskType, //@todo gérer le lien
                             'spans' => [
                                 [
                                     'className' => 'ref type-' . $objectElement['object']->element_type,
@@ -198,7 +198,7 @@ function saturne_display_recurse_tree(array $moreParams, array $objectElementTre
                         <?php
                             echo saturne_get_button_component_html([
                                 'className' => 'wpeo-button button-square-40 button-secondary wpeo-tooltip-event',
-                                'href'      => dol_buildpath('custom/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_card.php?action=create&element_type=0&fk_element=' . $objectElement['object']->id, 1),
+                                'href'      => dol_buildpath('/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_card.php', 1) . '?action=create&element_type=0&fk_element=' . $objectElement['object']->id,
                                 'moreAttr'  => [
                                     'data-direction' => 'bottom',
                                     'data-color'     => 'light',
@@ -215,7 +215,7 @@ function saturne_display_recurse_tree(array $moreParams, array $objectElementTre
 
                             echo saturne_get_button_component_html([
                                 'className' => 'wpeo-button button-square-40 wpeo-tooltip-event',
-                                'href'      => dol_buildpath('custom/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_card.php?action=create&element_type=1&fk_element=' . $objectElement['object']->id, 1),
+                                'href'      => dol_buildpath('/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_card.php', 1) . '?action=create&element_type=1&fk_element=' . $objectElement['object']->id,
                                 'moreAttr'  => [
                                     'data-direction' => 'bottom',
                                     'data-color'     => 'light',
@@ -322,10 +322,10 @@ function saturne_check_access(
         // cherchait. Les modules la nomment view/<element>/<element>_list.php ; a defaut,
         // l'accueil du module prend le relais. Un objet consulte ailleurs que dans une liste,
         // comme les elements DigiRisk dans leur arborescence, passe sa propre destination
-        $moduleHome = sprintf('/custom/%1$s/%1$sindex.php?mainmenu=%1$s', $moduleNameLowerCase);
-        $objectList = sprintf('/custom/%s/view/%2$s/%2$s_list.php', $moduleNameLowerCase, $object->element);
+        $moduleHome = sprintf('/%1$s/%1$sindex.php', $moduleNameLowerCase);
+        $objectList = sprintf('/%s/view/%2$s/%2$s_list.php', $moduleNameLowerCase, $object->element);
         $listExists = dol_strlen($object->element) && file_exists(dol_buildpath($objectList, 0));
-        $urlToGo    = dol_buildpath($listExists ? $objectList : $moduleHome, 1);
+        $urlToGo    = $listExists ? dol_buildpath($objectList, 1) : dol_buildpath($moduleHome, 1) . '?mainmenu=' . $moduleNameLowerCase;
 
         header('Location: ' . (dol_strlen($notFoundUrl) ? $notFoundUrl : $urlToGo));
         exit;
@@ -335,7 +335,7 @@ function saturne_check_access(
         if ($object !== null && $object->id > 0) {
             if ($object->entity != $conf->entity) {
                 setEventMessage($langs->trans('ChangeEntityRedirection'), 'warnings');
-                $urltogo = dol_buildpath('/custom/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'index.php?mainmenu=' . $moduleNameLowerCase, 1);
+                $urltogo = dol_buildpath('/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'index.php', 1) . '?mainmenu=' . $moduleNameLowerCase;
                 header('Location: ' . $urltogo);
                 exit;
             }
