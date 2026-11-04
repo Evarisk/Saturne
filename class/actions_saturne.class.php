@@ -757,7 +757,7 @@ class ActionsSaturne
             } elseif ($key === 'opp_percent' || $key === 'p.opp_percent' || $key === 'project.opp_percent') {
                 $ceElement = $object->element;
                 $ceTable   = $object->table_element;
-                $ceLabel   = !empty($val['label']) ? dol_escape_htmltag($val['label']) : 'Pourcentage';
+                $ceLabel   = dol_escape_htmltag($langs->transnoentities(!empty($val['label']) ? $val['label'] : 'Percentage'));
 
                 $percent = (float) $object->opp_percent;
                 if ($percent > 100) {
@@ -772,7 +772,7 @@ class ActionsSaturne
 
                 // Colored badge container for inline editing
                 $html = '<div class="saturne-inline-percent badge ' . $badgeClass . '" style="display: inline-flex; align-items: center; justify-content: center; padding: 3px 6px;">';
-                $html .= '<div class="contenteditable" contenteditable="true" role="textbox" aria-label="' . $ceLabel . '" data-field="opp_percent" data-id="' . $object->id . '" data-element="' . $ceElement . '" data-table="' . $ceTable . '" data-type="number" data-success="Enregistré" data-error="Maximum 100%" data-validate-pattern="^(100([.,]0+)?|\d{1,2}([.,]\d+)?)$" ondblclick="event.stopPropagation();" onblur="var v=parseFloat(this.innerText.replace(\',\',\'.\')); if(v>100) this.innerText=\'100\';">';
+                $html .= '<div class="contenteditable" contenteditable="true" role="textbox" aria-label="' . $ceLabel . '" data-field="opp_percent" data-id="' . $object->id . '" data-element="' . $ceElement . '" data-table="' . $ceTable . '" data-type="number" data-success="' . dol_escape_htmltag($langs->transnoentities('InlineEditSaved')) . '" data-error="' . dol_escape_htmltag($langs->transnoentities('InlineEditMaxPercent')) . '" data-validate-pattern="^(100([.,]0+)?|\d{1,2}([.,]\d+)?)$" ondblclick="event.stopPropagation();" onblur="var v=parseFloat(this.innerText.replace(\',\',\'.\')); if(v>100) this.innerText=\'100\';">';
                 $html .= price($percent, 0, '', 0, -1, -1, '');
                 $html .= '</div><span class="saturne-inline-percent-suffix" style="margin-left: 2px;">%</span>';
                 $html .= '</div>';
@@ -782,12 +782,12 @@ class ActionsSaturne
             } elseif ($key === 'opp_amount' || $key === 'p.opp_amount' || $key === 'project.opp_amount') {
                 $ceElement = $object->element;
                 $ceTable   = $object->table_element;
-                $ceLabel   = !empty($val['label']) ? dol_escape_htmltag($val['label']) : 'Montant';
+                $ceLabel   = dol_escape_htmltag($langs->transnoentities(!empty($val['label']) ? $val['label'] : 'Amount'));
 
                 $currencySymbol = $langs->getCurrencySymbol($conf->currency);
 
                 $html = '<div class="saturne-inline-amount" style="display: flex; align-items: center; justify-content: center; gap: 4px;">';
-                $html .= '<div class="contenteditable" contenteditable="true" role="textbox" aria-label="' . $ceLabel . '" data-field="opp_amount" data-id="' . $object->id . '" data-element="' . $ceElement . '" data-table="' . $ceTable . '" data-type="number" data-success="Enregistré" data-error="Format invalide" ondblclick="event.stopPropagation();">';
+                $html .= '<div class="contenteditable" contenteditable="true" role="textbox" aria-label="' . $ceLabel . '" data-field="opp_amount" data-id="' . $object->id . '" data-element="' . $ceElement . '" data-table="' . $ceTable . '" data-type="number" data-success="' . dol_escape_htmltag($langs->transnoentities('InlineEditSaved')) . '" data-error="' . dol_escape_htmltag($langs->transnoentities('InlineEditInvalidFormat')) . '" ondblclick="event.stopPropagation();">';
                 $html .= price($object->opp_amount, 0, '', 0, -1, -1, '');
                 $html .= '</div>';
                 $html .= '<span class="saturne-inline-amount-suffix">' . $currencySymbol . '</span>';

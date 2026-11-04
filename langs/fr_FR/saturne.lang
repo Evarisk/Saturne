@@ -478,3 +478,9 @@ XlsxDashboardExportHelp                      = Télécharge tout le tableau de b
 XlsxDashboardValuesSheetDescription          = Valeur et part de chaque catégorie du graphique ; une catégorie ouvre la liste correspondante
 XlsxDashboardSeriesSheetDescription          = Valeurs du graphique, une ligne par catégorie et une colonne par série, aux couleurs de la légende
 XlsxDashboardListSheetDescription            = Lignes de la liste du tableau de bord
+
+# Inline edition of the lists - Edition en ligne des listes
+InlineEditSaved         = Enregistré
+InlineEditInvalidFormat = Format invalide
+InlineEditMaxPercent    = Maximum 100%%
+InlineEditOpenCalendar  = Ouvrir le calendrier
