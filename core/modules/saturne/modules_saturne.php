@@ -512,6 +512,8 @@ class SaturneDocumentModel extends CommonDocGenerator
     {
         global $conf;
 
+        require_once __DIR__ . '/../../../lib/documents.lib.php';
+
         $confName = (!$this->custom_info ? $this->scandir : $this->custom_scandir);
 
         $info = $this->description . ' . <br>';
@@ -525,9 +527,7 @@ class SaturneDocumentModel extends CommonDocGenerator
         $listOfDir   = explode(',', preg_replace('/[\r\n]+/', ',', trim($conf->global->$confName)));
         $listOfFiles = [];
         foreach ($listOfDir as $key => $tmpDir) {
-            $tmpDir = trim($tmpDir);
-            $tmpDir = preg_replace('/DOL_DATA_ROOT/', DOL_DATA_ROOT, $tmpDir);
-            $tmpDir = preg_replace('/DOL_DOCUMENT_ROOT/', DOL_DOCUMENT_ROOT, $tmpDir);
+            $tmpDir = saturne_resolve_template_dir($tmpDir);
             if (!$tmpDir) {
                 unset($listOfDir[$key]);
                 continue;
@@ -554,7 +554,7 @@ class SaturneDocumentModel extends CommonDocGenerator
             $info .= '<div class="file-generation">';
             foreach ($listOfFiles as $file) {
                 // Show list of found files
-                $path = DOL_MAIN_URL_ROOT . '/custom/' . $this->module . '/documents/temp/';
+                $path = dol_buildpath('/' . $this->module . '/documents/', 2) . 'temp/';
                 $info .= '<input type="hidden" class="template-name" value="' .  $file['name'] . '">';
                 $info .= '<input type="hidden" class="template-type" value="' . $file['level1name'] . '">';
                 $info .= '<input type="hidden" class="template-path" value="' . $path . '">';
