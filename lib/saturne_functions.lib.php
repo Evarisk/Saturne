@@ -98,6 +98,7 @@ function saturne_header(int $load_media_gallery = 0, string $head = '', string $
         <script>
             window.saturne.config = window.saturne.config || {};
             window.saturne.config.urlRoot = '<?php echo DOL_URL_ROOT; ?>';
+            window.saturne.config.saturneUrlRoot = '<?php echo dol_escape_js(dol_buildpath('/saturne', 1)); ?>';
         </script>
     <?php
 
