@@ -39,7 +39,7 @@ $moduleNameLowerCase = strtolower($moduleName);
 
 // Load Saturne libraries
 require_once __DIR__ . '/../class/saturnesignature.class.php';
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
+require_once dol_buildpath('/' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php');
 
 // Global variables definitions
 global $conf, $db, $hookmanager, $langs, $user;

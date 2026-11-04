@@ -80,8 +80,7 @@ window.saturne.listColumns.table = function() {
  * @return {String} The AJAX endpoint URL
  */
 window.saturne.listColumns.url = function() {
-    var root = (window.saturne.config && window.saturne.config.urlRoot) ? window.saturne.config.urlRoot : '';
-    return root + '/custom/saturne/core/ajax/saturne_save_list_layout.php';
+    return window.saturne.toolbox.getSaturneUrlRoot() + '/core/ajax/saturne_save_list_layout.php';
 };
 
 /**

@@ -40,7 +40,7 @@ $moduleNameLowerCase = strtolower($moduleName);
 require_once TCPDF_PATH . 'tcpdf_barcodes_2d.php';
 
 // Load Module Libraries
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '.lib.php';
+require_once dol_buildpath('/' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '.lib.php');
 
 // Global variables definitions
 global $conf, $db, $hookmanager, $langs, $user;
