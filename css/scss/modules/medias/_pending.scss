@@ -487,6 +487,20 @@ body#mainbody.saturne-theme .wpeo-modal .modal-container.pending-tab-active > .m
     }
 }
 
+// The questions of the library (trash of the gallery, unlinking in the list) come over the gallery modal
+.ui-widget-overlay.saturne-media-confirm-overlay {
+    z-index: 1010;
+}
+
+.ui-dialog.saturne-media-confirm {
+    z-index: 1011;
+}
+
+// The AI writes the description of the media shown in the preview
+.saturne-pending-describe-ai {
+    margin-top: 8px;
+}
+
 // Taking a media off a record is not deleting it: the icon stays discreet until the badge is hovered
 .saturne-pending-record {
     .saturne-pending-unlink {

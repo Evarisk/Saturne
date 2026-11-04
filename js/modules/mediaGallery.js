@@ -535,32 +535,83 @@ window.saturne.mediaGallery.linkMediasToRecord = function( filenames, button ) {
  * @return {void}
  */
 window.saturne.mediaGallery.deletePhoto = function() {
+  let mediaGallery      = $('#media_gallery');
   let mediaGalleryModal = $(this).closest('.modal-container');
   let filesLinked       = mediaGalleryModal.find('.clicked-photo');
   let fileNames = '';
-  if (filesLinked.length > 0) {
-    filesLinked.each(function() {
-      fileNames += $(this).find('.filename').val() + 'vVv'
-    });
+
+  if (!filesLinked.length) {
+    return;
   }
-  window.saturne.loader.display($(this));
-
-  $('.card__confirmation').removeAttr('style');
-  $('.card__confirmation .confirmation-title .filesLinked').text(filesLinked.length);
-
-  // One answer per question: the handlers of an earlier question, cancelled or not, would otherwise
-  // delete its own selection along with this one
-  let answered = function() {
-    $(document).off('click', '.confirmation-close').off('click', '.confirmation-delete');
-  };
-  answered();
-  $(document).on('click', '.confirmation-close', function() {
-    answered();
-    window.saturne.mediaGallery.closeConfirmation(filesLinked, mediaGalleryModal);
+  filesLinked.each(function() {
+    fileNames += $(this).find('.filename').val() + 'vVv'
   });
-  $(document).on('click', '.confirmation-delete', function() {
-    answered();
-    window.saturne.mediaGallery.deleteFilesRequest(fileNames);
+
+  // The same question box as unlinking a media in the list: each question owns its answer, so a
+  // cancelled one never deletes its selection with a later one
+  window.saturne.mediaGallery.confirm({
+    title  : mediaGallery.data('label-confirm-title'),
+    message: mediaGallery.data('label-delete-confirm').replace('%s', filesLinked.length),
+    yes    : mediaGallery.data('label-yes'),
+    no     : mediaGallery.data('label-no'),
+    onYes  : function() {
+      window.saturne.mediaGallery.deleteFilesRequest(fileNames);
+    },
+    onNo   : function() {
+      window.saturne.mediaGallery.closeConfirmation(filesLinked, mediaGalleryModal);
+    }
+  });
+};
+
+/**
+ * Ask a yes or no question about medias of the library, over the gallery when it is open
+ *
+ * Shared by the trash of the gallery and the unlinking of the list, so both read and behave the same.
+ * The box goes once answered.
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param  {Object} options title, message, yes, no (labels), onYes, onNo (callbacks)
+ * @return {void}
+ */
+window.saturne.mediaGallery.confirm = function(options) {
+  let answered = false;
+
+  $('<div></div>').attr('title', options.title).text(options.message).dialog({
+    resizable: false,
+    height   : 'auto',
+    width    : 400,
+    modal    : true,
+    // The gallery is a modal of its own, the question must come over it
+    open     : function() {
+      $(this).closest('.ui-dialog').addClass('saturne-media-confirm');
+      $('.ui-widget-overlay').last().addClass('saturne-media-confirm-overlay');
+    },
+    close    : function() {
+      if (!answered && typeof options.onNo === 'function') {
+        options.onNo();
+      }
+      $(this).dialog('destroy').remove();
+    },
+    buttons  : [
+      {
+        text : options.no,
+        click: function() {
+          $(this).dialog('close');
+        }
+      },
+      {
+        text : options.yes,
+        click: function() {
+          answered = true;
+          $(this).dialog('close');
+          if (typeof options.onYes === 'function') {
+            options.onYes();
+          }
+        }
+      }
+    ]
   });
 };
 

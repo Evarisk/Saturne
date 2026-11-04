@@ -71,6 +71,66 @@ window.saturne.mediaPending.event = function() {
   $(document).on('click', '.saturne-pending-assign-current', window.saturne.mediaPending.assignToRecord);
   $(document).on('click', '.saturne-pending-assign-block', window.saturne.mediaPending.assignToBlock);
   $(document).on('change', '.saturne-pending-description', window.saturne.mediaPending.saveDescription);
+  $(document).on('click', '.saturne-pending-describe-ai', window.saturne.mediaPending.describeWithAI);
+};
+
+/**
+ * Have the AI module describe the media shown in the preview, then put it in its description
+ *
+ * @memberof Saturne_MediaPending
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @returns {void}
+ */
+window.saturne.mediaPending.describeWithAI = function() {
+  var button  = $(this);
+  var pending = button.closest('.saturne-pending');
+  var row     = pending.find('.saturne-pending-row.selected');
+
+  if (!row.length || button.hasClass('button-disable')) {
+    return;
+  }
+
+  var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+  var notify         = function(message, success) {
+    if (typeof $.jnotify === 'function') {
+      $.jnotify(message, success ? {color: 'green'} : 'error', !success);
+    }
+  };
+
+  button.addClass('button-disable').find('i').removeClass('fa-magic').addClass('fa-circle-notch fa-spin');
+
+  $.ajax({
+    url        : document.URL + querySeparator + 'subaction=describeMediaAI&token=' + window.saturne.toolbox.getToken(),
+    type       : 'POST',
+    data       : JSON.stringify({ filename: row.data('filename') }),
+    processData: false,
+    contentType: 'application/json',
+    success    : function(resp) {
+      var answer = {};
+
+      try {
+        answer = JSON.parse($(resp).find('#saturne-describe-media-response').text());
+      } catch (e) {
+        answer = {};
+      }
+
+      if (answer.success) {
+        row.find('.saturne-pending-description').val(answer.description);
+        notify(answer.description, true);
+      } else {
+        notify(answer.error || button.data('error'), false);
+      }
+    },
+    error      : function() {
+      notify(button.data('error'), false);
+    },
+    complete   : function() {
+      button.removeClass('button-disable').find('i').removeClass('fa-circle-notch fa-spin').addClass('fa-magic');
+    }
+  });
 };
 
 /**
@@ -318,6 +378,7 @@ window.saturne.mediaPending.previewMedia = function(event) {
 
   // A small screen only shows the preview once it has a media to show
   pending.find('.saturne-pending-preview').addClass('has-media');
+  pending.find('.saturne-pending-describe-ai').removeClass('hidden');
   pending.find('.saturne-pending-preview-placeholder').addClass('hidden');
   pending.find('.saturne-pending-preview-image').attr('src', row.data('url')).removeClass('hidden');
   pending.find('.saturne-pending-preview-name').text(row.data('filename'));
@@ -577,55 +638,37 @@ window.saturne.mediaPending.unlinkFromRecord = function(event) {
   var pending    = button.closest('.saturne-pending');
   var confirmMsg = button.attr('data-confirm') || button.attr('title');
 
-  // The same words as the confirmation of the gallery, in the language of the user
-  var dialogDiv = $('<div></div>').attr('title', pending.data('label-confirm-title')).text(confirmMsg);
-  dialogDiv.dialog({
-    resizable: false,
-    height: "auto",
-    width: 400,
-    modal: true,
-    // Each question opens its own box: it goes once answered, rather than piling up in the page
-    close: function() {
-      $(this).dialog('destroy').remove();
-    },
-    buttons: [
-      {
-        text: pending.data('label-no'),
-        click: function() {
-          $(this).dialog("close");
+  // The same question box as the trash of the gallery, in the language of the user
+  window.saturne.mediaGallery.confirm({
+    title  : pending.data('label-confirm-title'),
+    message: confirmMsg,
+    yes    : pending.data('label-yes'),
+    no     : pending.data('label-no'),
+    onYes  : function() {
+      var token          = window.saturne.toolbox.getToken();
+      var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+
+      window.saturne.loader.display(button.closest('.saturne-pending'));
+
+      $.ajax({
+        url        : document.URL + querySeparator + 'subaction=unlinkMediaFromRecord&token=' + token,
+        type       : 'POST',
+        data       : JSON.stringify({
+          element : button.data('element'),
+          ref     : button.data('ref'),
+          filename: button.closest('.saturne-pending-row').data('filename')
+        }),
+        processData: false,
+        contentType: 'application/json',
+        success    : function() {
+          // The media may have gone back to being pending: the list is rebuilt rather than patched
+          window.saturne.mediaPending.load(pane.attr('data-loaded', '0'));
+        },
+        error      : function() {
+          $('.wpeo-loader').removeClass('wpeo-loader');
         }
-      },
-      {
-        text: pending.data('label-yes'),
-        click: function() {
-          $(this).dialog("close");
-
-          var token          = window.saturne.toolbox.getToken();
-          var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
-
-          window.saturne.loader.display(button.closest('.saturne-pending'));
-
-          $.ajax({
-            url        : document.URL + querySeparator + 'subaction=unlinkMediaFromRecord&token=' + token,
-            type       : 'POST',
-            data       : JSON.stringify({
-              element : button.data('element'),
-              ref     : button.data('ref'),
-              filename: button.closest('.saturne-pending-row').data('filename')
-            }),
-            processData: false,
-            contentType: 'application/json',
-            success    : function() {
-              // The media may have gone back to being pending: the list is rebuilt rather than patched
-              window.saturne.mediaPending.load(pane.attr('data-loaded', '0'));
-            },
-            error      : function() {
-              $('.wpeo-loader').removeClass('wpeo-loader');
-            }
-          });
-        }
-      }
-    ]
+      });
+    }
   });
 };
 

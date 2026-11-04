@@ -137,3 +137,6 @@ MediaAddedWithSuccess=1 média ajouté avec succès
 MediasAddedWithSuccess=%s médias ajoutés avec succès
 ErrorWhileSendingAFile=Erreur lors de l'envoi d'un fichier.
 ErrorModuleHasNoMediaLibrary=Le module %s n'a pas de bibliothèque de médias
+DescribeMediaWithAI=Décrire avec l'IA
+MediaAIDescribePrompt=Décris cette photo en une ou deux phrases courtes, en français, pour la retrouver dans une bibliothèque de médias. Réponds par la description seule.
+DeleteSelectedMediasConfirm=Supprimer le(s) %s média(s) sélectionné(s) de la bibliothèque ?

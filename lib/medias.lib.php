@@ -1408,6 +1408,56 @@ function saturne_media_ai_enabled(): bool
 }
 
 /**
+ * Describe a photo with the AI module, in a sentence or two, for the description of a library media
+ *
+ * Same service and same call as the photo reading of the ReedCRM quick creation: the API of the AI
+ * module of Dolibarr, which only speaks to ChatGPT for images.
+ *
+ * @param  string $filePath Absolute path of the photo
+ * @return array            'success' => bool, then 'description' or 'error'
+ */
+function saturne_media_ai_describe(string $filePath): array
+{
+    global $langs;
+
+    if (!saturne_media_ai_enabled() || dol_strtoupper(getDolGlobalString('AI_API_SERVICE')) !== 'CHATGPT') {
+        return ['success' => false, 'error' => $langs->transnoentities('ErrorImageAnalysis')];
+    }
+    if (!dol_is_file($filePath) || image_format_supported($filePath) < 0) {
+        return ['success' => false, 'error' => $langs->transnoentities('ErrorFileNotAnImage')];
+    }
+
+    require_once DOL_DOCUMENT_ROOT . '/core/lib/geturl.lib.php';
+
+    $endpoint = rtrim(getDolGlobalString('AI_API_CHATGPT_URL'), '/') . '/chat/completions';
+    $headers  = ['Content-Type: application/json', 'Authorization: Bearer ' . getDolGlobalString('AI_API_CHATGPT_KEY')];
+    $image    = 'data:image/' . strtolower(pathinfo($filePath, PATHINFO_EXTENSION)) . ';base64,' . base64_encode((string) file_get_contents($filePath));
+    $payload  = [
+        'model'    => 'gpt-5',
+        'messages' => [[
+            'role'    => 'user',
+            'content' => [
+                ['type' => 'text', 'text' => $langs->transnoentities('MediaAIDescribePrompt')],
+                ['type' => 'image_url', 'image_url' => ['url' => $image]],
+            ],
+        ]],
+    ];
+
+    $answer      = getURLContent($endpoint, 'POST', (string) json_encode($payload), 1, $headers);
+    $decoded     = json_decode((string) ($answer['content'] ?? ''), true);
+    $description = trim((string) ($decoded['choices'][0]['message']['content'] ?? ''));
+
+    // A refused call (wrong key, quota...) still answers in JSON, with an error instead of a choice
+    if (dol_strlen($description) == 0) {
+        $serviceError = (string) ($decoded['error']['message'] ?? '');
+
+        return ['success' => false, 'error' => $langs->transnoentities('ErrorImageAnalysis') . (dol_strlen($serviceError) > 0 ? ' : ' . $serviceError : '')];
+    }
+
+    return ['success' => true, 'description' => dol_string_nohtmltag($description, 0)];
+}
+
+/**
  * Render the Saturne Media Block (Photo + File + Audio) for external modules.
  *
  * Usage example:

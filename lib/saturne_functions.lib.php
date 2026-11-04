@@ -62,7 +62,7 @@ function saturne_header(int $load_media_gallery = 0, string $head = '', string $
     $loadLibrary = $load_media_gallery && !defined('NOLOGIN') && is_object($user) && !empty($user->id);
 
     // A call of the library list wants one piece of the page: it is answered before the page is drawn
-    if ($loadLibrary && in_array($subaction, ['pendingMedias', 'listMediaTargets', 'assignMedias', 'setMediaDescription', 'unlinkMediaFromRecord', 'syncMediaLibrary'], true)) {
+    if ($loadLibrary && in_array($subaction, ['pendingMedias', 'listMediaTargets', 'assignMedias', 'setMediaDescription', 'describeMediaAI', 'unlinkMediaFromRecord', 'syncMediaLibrary'], true)) {
         $mediaGalleryAjax = true;
         include __DIR__ . '/../core/tpl/medias/medias_gallery_modal.tpl.php';
         exit;

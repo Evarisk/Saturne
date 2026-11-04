@@ -130,6 +130,12 @@ foreach ($objectsMetadata as $objectKey => $objectMetadata) {
                 <div class="saturne-pending-preview-placeholder"><?php echo $langs->trans('SelectAMediaToPreview'); ?></div>
                 <img class="saturne-pending-preview-image" alt="">
                 <div class="saturne-pending-preview-name"></div>
+                <?php // The AI module writes the description of the media shown, as on the photos of the media blocks
+                if ($pendingCanWrite && saturne_media_ai_enabled()) : ?>
+                    <div class="wpeo-button button-grey button-radius-2 saturne-pending-describe-ai hidden" data-error="<?php echo dol_escape_htmltag($langs->trans('ErrorImageAnalysis')); ?>">
+                        <i class="fas fa-magic"></i> <?php echo $langs->trans('DescribeMediaWithAI'); ?>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
         <div class="saturne-pending-footer">

@@ -135,3 +135,6 @@ MediaAddedWithSuccess=1 media added successfully
 MediasAddedWithSuccess=%s medias added successfully
 ErrorWhileSendingAFile=Error while sending a file.
 ErrorModuleHasNoMediaLibrary=Module %s has no media library
+DescribeMediaWithAI=Describe with AI
+MediaAIDescribePrompt=Describe this photo in one or two short sentences, in English, so it can be found again in a media library. Answer with the description only.
+DeleteSelectedMediasConfirm=Delete the %s selected media(s) from the library?

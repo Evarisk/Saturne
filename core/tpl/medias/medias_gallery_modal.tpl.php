@@ -46,7 +46,7 @@ if (!$libraryCanRead) {
 }
 
 // Actions changing the library or the medias of the records ask for a right to write on the module
-if (!$libraryCanWrite && in_array($subaction, ['uploadPhoto', 'add_img', 'addFiles', 'editObjectMedia', 'assignMedias', 'setMediaDescription', 'unlinkMediaFromRecord', 'delete_files', 'unlinkFile', 'addToFavorite', 'regenerate_thumbs', 'syncMediaLibrary'], true)) {
+if (!$libraryCanWrite && in_array($subaction, ['uploadPhoto', 'add_img', 'addFiles', 'editObjectMedia', 'assignMedias', 'setMediaDescription', 'describeMediaAI', 'unlinkMediaFromRecord', 'delete_files', 'unlinkFile', 'addToFavorite', 'regenerate_thumbs', 'syncMediaLibrary'], true)) {
     $subaction = '';
 }
 
@@ -170,16 +170,35 @@ if (!(isset($error) && $error) && $subaction == 'uploadPhoto' && ! empty($conf->
             // An edited media is sent back under its own name: it must replace the original
             // instead of landing beside it as a numbered copy
             $allowOverwrite = GETPOSTINT('overwritemedia');
+            // The file is stored under its sanitized name, the one the thumbs and the agenda must use
+            $uploadedName = saturne_media_stored_name((string) $_FILES['userfile']['name'][$key]);
+            // Weight of the media before its retouch: a record copy of that weight is the same media
+            $previousSize = ($allowOverwrite && dol_is_file($uploadDir . '/' . $uploadedName)) ? dol_filesize($uploadDir . '/' . $uploadedName) : 0;
+
             $res = dol_add_file_process($uploadDir, $allowOverwrite, 1, 'userfile', '', null, '', $generatethumbs);
             if ($res > 0) {
-                // The file is stored under its sanitized name, the one the thumbs and the agenda must use
-                $uploadedName = saturne_media_stored_name((string) $_FILES['userfile']['name'][$key]);
-
                 // Create thumbs, with the same sizes as the media blocks and the records use
                 foreach (['medium', 'large'] as $size) {
                     saturne_vignette($uploadDir . '/' . $uploadedName, getDolGlobalInt('SATURNE_MEDIA_MAX_WIDTH_' . dol_strtoupper($size)), getDolGlobalInt('SATURNE_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size)), '_' . $size);
                 }
                 $result = $ecmdir->changeNbOfFiles('+');
+
+                // A media retouched in the library is retouched on the records still holding it untouched;
+                // a record that annotated its own copy keeps it, as a retouch made on a record stays there
+                if ($previousSize > 0) {
+                    $retouchSettings = saturne_get_media_library_settings($moduleNameLowerCase);
+                    foreach (saturne_get_record_medias($moduleNameLowerCase, $retouchSettings['folders']) as $recordMedia) {
+                        if ($recordMedia['name'] !== $uploadedName || dol_filesize($recordMedia['fullname']) != $previousSize) {
+                            continue;
+                        }
+
+                        if (dol_copy($uploadDir . '/' . $uploadedName, $recordMedia['fullname'], '0', 1) > 0) {
+                            foreach ($mediaSizes as $size) {
+                                saturne_vignette($recordMedia['fullname'], getDolGlobalInt('SATURNE_MEDIA_MAX_WIDTH_' . dol_strtoupper($size)), getDolGlobalInt('SATURNE_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size)), '_' . $size);
+                            }
+                        }
+                    }
+                }
 
                 // An edited media comes back under its own name: replacing a file is not adding one
                 if (empty($allowOverwrite)) {
@@ -517,6 +536,30 @@ if ($subaction == 'setMediaDescription') {
     }
 }
 
+// Description of a library media written by the AI module, kept in the ECM index as a typed one
+if ($subaction == 'describeMediaAI') {
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    $mediaName = dol_sanitizeFileName($data['filename'] ?? '');
+    $mediaPath = $conf->ecm->multidir_output[$conf->entity] . '/' . $moduleNameLowerCase . '/medias/' . $mediaName;
+    $aiAnswer  = dol_strlen($mediaName) > 0 ? saturne_media_ai_describe($mediaPath) : ['success' => false, 'error' => $langs->transnoentities('ErrorFileNotAnImage')];
+
+    if ($aiAnswer['success']) {
+        $mediaIndexed = saturne_media_library_index_path($moduleNameLowerCase);
+        if ($ecmfile->fetch(0, '', $mediaIndexed . '/' . $mediaName) <= 0) {
+            addFileIntoDatabaseIndex(dirname($mediaPath), $mediaName, $mediaPath);
+            $ecmfile->fetch(0, '', $mediaIndexed . '/' . $mediaName);
+        }
+        if ($ecmfile->id > 0) {
+            $ecmfile->description = $aiAnswer['description'];
+            $ecmfile->update($user);
+        }
+    }
+
+    print '<div class="saturne-media-ajax-answer"><span id="saturne-describe-media-response" class="hidden">' . dol_escape_htmltag(json_encode($aiAnswer)) . '</span></div>';
+    exit;
+}
+
 // Take a media off a record without touching the library copy: the media simply goes back to
 // being pending. The files are found the way the list found them, wherever the record keeps them
 // (a sub folder, a folder the module declares), so no path travels in from the browser.
@@ -724,7 +767,9 @@ include __DIR__ . '/photo_editor_modal.tpl.php'; ?>
 <div class="wpeo-modal modal-photo<?php echo !empty($mediaListInPage) ? ' media-gallery-library-page' : ''; ?>" id="media_gallery" data-id="<?php echo (isset($object) && $object) ? $object->id : 0 ?>"
      data-label-added-one="<?php echo dol_escape_htmltag($langs->trans('MediaAddedWithSuccess')); ?>"
      data-label-added-many="<?php echo dol_escape_htmltag($langs->trans('MediasAddedWithSuccess', '%s')); ?>"
-     data-label-send-error="<?php echo dol_escape_htmltag($langs->trans('ErrorWhileSendingAFile')); ?>">
+     data-label-send-error="<?php echo dol_escape_htmltag($langs->trans('ErrorWhileSendingAFile')); ?>"
+     data-label-confirm-title="<?php echo dol_escape_htmltag($langs->trans('MediaConfirmationTitle')); ?>" data-label-yes="<?php echo dol_escape_htmltag($langs->trans('Yes')); ?>" data-label-no="<?php echo dol_escape_htmltag($langs->trans('No')); ?>"
+     data-label-delete-confirm="<?php echo dol_escape_htmltag($langs->trans('DeleteSelectedMediasConfirm', '%s')); ?>">
     <div class="modal-container wpeo-modal-event">
         <!-- Covers the gallery while files are dragged over it: dropping them adds them to the library -->
         <div class="media-gallery-dropzone" data-label-ignored="<?php echo dol_escape_htmltag($langs->trans('DroppedFilesNotImages', '%s')); ?>">
