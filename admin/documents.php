@@ -286,12 +286,12 @@ if (empty($resHook)) {
 
     if ($action == 'download_template') {
         $fileName = GETPOST('filename');
-        dol_copy(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/doctemplates/' . $type . '/' . $fileName, DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $fileName);
+        dol_copy(dol_buildpath('/' . $moduleNameLowerCase . '/documents/doctemplates/' . $type . '/' . $fileName), dol_buildpath('/' . $moduleNameLowerCase . '/documents/') . 'temp/' . $fileName);
     }
 
     if ($action == 'remove_file') {
         $fileName = GETPOST('filename');
-        dol_delete_file(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $fileName);
+        dol_delete_file(dol_buildpath('/' . $moduleNameLowerCase . '/documents/') . 'temp/' . $fileName);
     }
 }
 

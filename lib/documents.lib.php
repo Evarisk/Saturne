@@ -429,6 +429,34 @@ function saturne_remove_index(string $model): string
 }
 
 /**
+ * Resolve a directory of document templates read from a *_ADDON_ODT_PATH constant
+ *
+ * The constants are written at the module activation, mostly as DOL_DOCUMENT_ROOT/custom/<module>/...
+ * A module directory missing at that place is looked up in every module root, so the templates are
+ * still found when the module lives in an alternative root
+ *
+ * @param  string $dir Directory as written in the constant
+ * @return string      Absolute directory, '' if $dir is empty
+ */
+function saturne_resolve_template_dir(string $dir): string
+{
+    $dir = trim($dir);
+    if (!dol_strlen($dir)) {
+        return '';
+    }
+
+    $resolvedDir = str_replace(['DOL_DATA_ROOT', 'DOL_DOCUMENT_ROOT'], [DOL_DATA_ROOT, DOL_DOCUMENT_ROOT], $dir);
+    if (!is_dir($resolvedDir) && preg_match('#^DOL_DOCUMENT_ROOT/[^/]+(/.+)$#', $dir, $matches)) {
+        $moduleDir = dol_buildpath($matches[1]);
+        if (is_dir($moduleDir)) {
+            $resolvedDir = $moduleDir;
+        }
+    }
+
+    return $resolvedDir;
+}
+
+/**
  * Return list of activated modules usable for document generation
  *
  * @param  DoliDB     $db                Database handler
@@ -474,9 +502,7 @@ function saturne_get_list_of_models(DoliDB $db, string $type, int $maxfilenamele
                 // Now we add models found in directories scanned
                 $listofdir = explode(',', $dirtoscan);
                 foreach ($listofdir as $key => $tmpdir) {
-                    $tmpdir = trim($tmpdir);
-                    $tmpdir = preg_replace('/DOL_DATA_ROOT/', DOL_DATA_ROOT, $tmpdir);
-                    $tmpdir = preg_replace('/DOL_DOCUMENT_ROOT/', DOL_DOCUMENT_ROOT, $tmpdir);
+                    $tmpdir = saturne_resolve_template_dir($tmpdir);
                     if (!$tmpdir) {
                         unset($listofdir[$key]);
                         continue;
