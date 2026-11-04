@@ -404,7 +404,7 @@ if ($subaction == 'syncMediaLibrary' && $user->admin) {
     $librarySettings = saturne_get_media_library_settings($moduleNameLowerCase);
     $librarySync     = saturne_sync_media_library($moduleNameLowerCase, $librarySettings['excluded'], $librarySettings['folders'], microtime(true) + 20);
 
-    echo '<span id="saturne-sync-media-library-response" style="display:none;">' . json_encode($librarySync) . '</span>';
+    echo '<span id="saturne-sync-media-library-response" class="hidden">' . json_encode($librarySync) . '</span>';
     exit;
 }
 
@@ -779,11 +779,14 @@ include __DIR__ . '/photo_editor_modal.tpl.php'; ?>
                     </div>
                 <?php endif; ?>
 
+                <?php // A reader browses the library: adding to it asks for a right to write
+                if ($libraryCanWrite) : ?>
                 <label for="add_media_to_gallery" class="media-add-btn" title="<?php echo dol_escape_htmltag($langs->trans('AddFile')); ?>">
                     <i class="fas fa-plus"></i>
                 </label>
-                <input type="hidden" name="token" value="<?php echo newToken(); ?>">
                 <input type="file" id="add_media_to_gallery" class="hidden" name="userfile[]" multiple accept="image/*" style="display:none;">
+                <?php endif; ?>
+                <input type="hidden" name="token" value="<?php echo newToken(); ?>">
                 
                 <div class="modal-close"><i class="fas fa-times"></i></div>
             </div>
@@ -847,12 +850,14 @@ include __DIR__ . '/photo_editor_modal.tpl.php'; ?>
         </div>
         <!-- Modal-Footer -->
         <div class="modal-footer">
-            <?php // On the media page no record opened the gallery: there is nothing to add the medias to
-            if (empty($mediaListInPage)) : ?>
+            <?php // On the media page no record opened the gallery: there is nothing to add the medias to.
+            // Adding and removing ask for a right to write, a reader only browses
+            if (empty($mediaListInPage) && $libraryCanWrite) : ?>
             <div class="save-photo wpeo-button button-blue button-disable" value="">
                 <span><?php echo $langs->trans('Add'); ?></span>
             </div>
             <?php endif; ?>
+            <?php if ($libraryCanWrite) : ?>
             <div class="wpeo-button button-red button-disable delete-photo">
                 <i class="fas fa-trash-alt"></i>
             </div>
@@ -863,7 +868,8 @@ include __DIR__ . '/photo_editor_modal.tpl.php'; ?>
                 'confirmationTitle' => 'DeleteFiles',
                 'buttonParams'      => ['No' => 'button-blue marginrightonly confirmation-close', 'Yes' => 'button-red confirmation-delete']
             ];
-            require __DIR__ . '/../utils/confirmation_view.tpl.php'; ?>
+            require __DIR__ . '/../utils/confirmation_view.tpl.php';
+            endif; ?>
         </div>
     </div>
 </div>

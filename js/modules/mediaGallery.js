@@ -354,10 +354,16 @@ window.saturne.mediaGallery.openPhotoEditor = function( event ) {
     return;
   }
 
+  // The editor removes a media from the library as the trash of the gallery does, for a user allowed
+  // to: the gallery offers its trash to that user only
+  var canDelete = image.closest('#media_gallery').find('.delete-photo').length > 0;
+
   window.saturne.photoEditor.open(urls, function( blob ) {
     var edited = images.eq(window.saturne.photoEditor._currentIndex);
     window.saturne.mediaGallery.replacePhoto(blob, edited.data('filename'));
-  }, startIndex, null);
+  }, startIndex, canDelete ? function( url, index ) {
+    window.saturne.mediaGallery.deleteFilesRequest(images.eq(index).data('filename') + 'vVv');
+  } : null);
 };
 
 /**
