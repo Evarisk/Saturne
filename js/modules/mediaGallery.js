@@ -541,10 +541,19 @@ window.saturne.mediaGallery.deletePhoto = function() {
 
   $('.card__confirmation').removeAttr('style');
   $('.card__confirmation .confirmation-title .filesLinked').text(filesLinked.length);
+
+  // One answer per question: the handlers of an earlier question, cancelled or not, would otherwise
+  // delete its own selection along with this one
+  let answered = function() {
+    $(document).off('click', '.confirmation-close').off('click', '.confirmation-delete');
+  };
+  answered();
   $(document).on('click', '.confirmation-close', function() {
+    answered();
     window.saturne.mediaGallery.closeConfirmation(filesLinked, mediaGalleryModal);
   });
   $(document).on('click', '.confirmation-delete', function() {
+    answered();
     window.saturne.mediaGallery.deleteFilesRequest(fileNames);
   });
 };
@@ -598,10 +607,32 @@ window.saturne.mediaGallery.deleteFilesRequest = function(fileNames) {
     success: function(resp) {
       $('#media_gallery .modal-container').replaceWith($(resp).find('#media_gallery .modal-container'));
       window.saturne.modal.loadLazyImages();
+      window.saturne.mediaGallery.reloadLibraryPage();
     },
-    error: function() {}
+    error: function() {
+      $('.wpeo-loader').removeClass('wpeo-loader');
+    }
   });
 }
+
+/**
+ * List the library again on the media page, which shows it outside the gallery
+ *
+ * A media deleted or caught up from the gallery would otherwise stay listed, or missing, until the page
+ * is loaded again.
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @return {void}
+ */
+window.saturne.mediaGallery.reloadLibraryPage = function() {
+  let pagePane = $('.saturne-media-page-pane');
+
+  if (pagePane.length && window.saturne.mediaPending) {
+    window.saturne.mediaPending.load(pagePane);
+  }
+};
 
 /**
  * Action handle search in medias
@@ -612,12 +643,13 @@ window.saturne.mediaGallery.deleteFilesRequest = function(fileNames) {
  * @return {void}
  */
 window.saturne.mediaGallery.handleSearch = function( event ) {
-	let searchQuery = $('#search_in_gallery').val()
-	let photos = $('.center.clickable-photo')
+  // Plain text, whatever the case: a name holds parentheses or dots a regular expression would read
+  let searchQuery = $('#search_in_gallery').val().trim().toLowerCase();
+  let photos      = $('.center.clickable-photo');
 
-	photos.each(function(  ) {
-		$( this ).text().trim().match(searchQuery) ? $(this).show() : $(this).hide()
-	});
+  photos.each(function() {
+    $(this).text().trim().toLowerCase().indexOf(searchQuery) !== -1 ? $(this).show() : $(this).hide();
+  });
 };
 
 /**
@@ -694,7 +726,7 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 									$('.messageErrorSendPhoto').find('.notice-subtitle').html(textToShow);
 									$('.messageErrorSendPhoto').removeClass('hidden');
 								} else {
-									let successMessage = totalCount > 1 ? totalCount + " médias ajoutés avec succès" : "1 média ajouté avec succès";
+									let successMessage = totalCount > 1 ? mediaGallery.data('label-added-many').replace('%s', totalCount) : mediaGallery.data('label-added-one');
 									$('.messageSuccessSendPhoto').find('.notice-title').html(successMessage);
 									$('.messageSuccessSendPhoto').removeClass('hidden');
 								}
@@ -726,7 +758,7 @@ window.saturne.mediaGallery.sendPhoto = function( event ) {
 			},
 			error: function() {
 				requestCompleted++;
-				textToShow += "Erreur lors de l'envoi d'un fichier.<br>";
+				textToShow += mediaGallery.data('label-send-error') + '<br>';
 				if (requestCompleted === totalCount) {
 					$('.wpeo-loader').removeClass('wpeo-loader');
 					$('#progressBarContainer').fadeOut(800);
@@ -1324,8 +1356,9 @@ window.saturne.mediaGallery.syncLibrary = function() {
 
         finish(message, 'green');
 
-        // The library holds new medias: list it again
+        // The library holds new medias: list it again, in the gallery and on the media page
         window.saturne.mediaGallery.reload();
+        window.saturne.mediaGallery.reloadLibraryPage();
       },
       error: function() {
         finish(button.data('label-error'), 'red');

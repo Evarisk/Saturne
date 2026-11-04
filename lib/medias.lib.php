@@ -521,13 +521,21 @@ function saturne_media_record_link(string $moduleName, string $element, string $
  * @param  string      $moduleName Module owning the record
  * @param  string      $element    Element type, as the media folder names it
  * @param  string      $ref        Reference of the record
- * @return object|null             The record, null when no class answers for that folder
+ * @param  bool        $classFound Set to true when a class answers for that folder, whether the record
+ *                                 still exists or not: a folder left by a deleted record is told apart
+ *                                 from a folder no class knows
+ * @return object|null             The record, null when no class answers for that folder or no record
+ *                                 holds that reference any more
  */
-function saturne_media_record_object(string $moduleName, string $element, string $ref)
+function saturne_media_record_object(string $moduleName, string $element, string $ref, bool &$classFound = false)
 {
     global $db;
 
     static $moduleClasses = [];
+    static $records       = [];
+
+    $classFound = false;
+    $recordKey  = dol_strtolower($moduleName) . '|' . $element . '|' . $ref;
 
     $moduleNameLowerCase = dol_strtolower($moduleName);
 
@@ -562,9 +570,19 @@ function saturne_media_record_object(string $moduleName, string $element, string
         return null;
     }
 
-    $record = new $className($db);
+    $classFound = true;
 
-    return $record->fetch(0, $ref) > 0 ? $record : null;
+    if (!array_key_exists($recordKey, $records)) {
+        $record = new $className($db);
+
+        // Some folders are named after the id of the record rather than its reference (the photos of a
+        // DigiQuali control, the trips of DoliCar)
+        $found = $record->fetch(0, $ref) > 0 || (preg_match('/^\d+$/', $ref) && $record->fetch((int) $ref) > 0);
+
+        $records[$recordKey] = $found ? $record : null;
+    }
+
+    return $records[$recordKey];
 }
 
 /**
@@ -576,13 +594,15 @@ function saturne_media_record_object(string $moduleName, string $element, string
  *
  * @param  string $moduleName Module owning the library
  * @return array              'folders': element => absolute folder holding one <ref>/ folder per record,
- *                            'excluded': names of the folders, at any depth, kept out of the library
+ *                            'excluded': names of the folders, at any depth, kept out of the library,
+ *                            'favorite_fields': element => field of the record naming the media it
+ *                            shows, when it is not 'photo'
  */
 function saturne_get_media_library_settings(string $moduleName): array
 {
     global $hookmanager;
 
-    $settings = ['folders' => [], 'excluded' => []];
+    $settings = ['folders' => [], 'excluded' => [], 'favorite_fields' => []];
 
     if (!is_object($hookmanager)) {
         return $settings;
@@ -593,11 +613,237 @@ function saturne_get_media_library_settings(string $moduleName): array
     $hookmanager->executeHooks('saturneMediaLibraryFolders', $parameters);
 
     if (is_array($hookmanager->resArray)) {
-        $settings['folders']  = (array) ($hookmanager->resArray['folders'] ?? []);
-        $settings['excluded'] = (array) ($hookmanager->resArray['excluded'] ?? []);
+        $settings['folders']         = (array) ($hookmanager->resArray['folders'] ?? []);
+        $settings['excluded']        = (array) ($hookmanager->resArray['excluded'] ?? []);
+        $settings['favorite_fields'] = (array) ($hookmanager->resArray['favorite_fields'] ?? []);
     }
 
     return $settings;
+}
+
+/**
+ * Menu entry a module gives to its media library, as its descriptor declares it
+ *
+ * A module has a library once its descriptor offers the library page in a menu: that entry is the only
+ * way in, so it also says who may read the library. The descriptor is read rather than the menu table,
+ * which only holds the entry in the entities where the module was activated since.
+ *
+ * @param  string     $moduleName Module owning the library
+ * @return array|null             Menu entry of the library, null when the module offers none
+ */
+function saturne_get_media_library_menu(string $moduleName): ?array
+{
+    global $db;
+
+    static $menus = [];
+
+    $moduleNameLowerCase = dol_strtolower($moduleName);
+
+    if (array_key_exists($moduleNameLowerCase, $menus)) {
+        return $menus[$moduleNameLowerCase];
+    }
+
+    $menus[$moduleNameLowerCase] = null;
+
+    $descriptorFiles = glob(dol_buildpath('/' . $moduleNameLowerCase . '/core/modules', 0) . '/mod*.class.php') ?: [];
+    foreach ($descriptorFiles as $descriptorFile) {
+        $className = basename($descriptorFile, '.class.php');
+
+        include_once $descriptorFile;
+
+        if (!class_exists($className)) {
+            continue;
+        }
+
+        $descriptor = new $className($db);
+
+        if (dol_strtolower($descriptor->rights_class ?? '') !== $moduleNameLowerCase) {
+            continue;
+        }
+
+        foreach ((array) ($descriptor->menu ?? []) as $menu) {
+            if (strpos($menu['url'] ?? '', '/saturne/view/saturne_medias.php?module_name=' . $moduleNameLowerCase) !== false) {
+                $menus[$moduleNameLowerCase] = $menu + ['module_label' => $descriptor->getName()];
+                break 2;
+            }
+        }
+    }
+
+    return $menus[$moduleNameLowerCase];
+}
+
+/**
+ * Tell whether a module has a media library
+ *
+ * Medias sent by the blocks of a module without one would pile up in a library nobody can open.
+ *
+ * @param  string $moduleName Module
+ * @return bool               True when the module offers its library in a menu
+ */
+function saturne_media_library_enabled(string $moduleName): bool
+{
+    return saturne_get_media_library_menu($moduleName) !== null;
+}
+
+/**
+ * Tell whether the user may read or change the media library of a module
+ *
+ * Reading asks for the right the menu entry of the library asks for. Changing it, adding medias, giving
+ * them to records or removing them, asks for a right to write on the module.
+ *
+ * @param  string $moduleName Module owning the library
+ * @param  string $mode       'read' or 'write'
+ * @return bool               True when allowed
+ */
+function saturne_media_library_can(string $moduleName, string $mode = 'read'): bool
+{
+    global $user;
+
+    $moduleNameLowerCase = dol_strtolower($moduleName);
+    $menu                = saturne_get_media_library_menu($moduleNameLowerCase);
+
+    if (!is_object($user) || empty($user->id) || $menu === null || !isModEnabled($moduleNameLowerCase)) {
+        return false;
+    }
+
+    if (!empty($user->admin)) {
+        return true;
+    }
+
+    $canRead = empty($menu['perms']) ? !empty($user->rights->$moduleNameLowerCase) : (bool) verifCond($menu['perms']);
+    if ($mode == 'read' || !$canRead) {
+        return $canRead;
+    }
+
+    // Any right to write on one of the objects of the module
+    $hasWriteRight = function ($rights) use (&$hasWriteRight): bool {
+        foreach ((array) $rights as $name => $value) {
+            if ((is_object($value) || is_array($value)) && $hasWriteRight($value)) {
+                return true;
+            }
+            if (in_array($name, ['write', 'creer', 'create'], true) && !empty($value) && !is_object($value)) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    return $hasWriteRight($user->rights->$moduleNameLowerCase ?? []);
+}
+
+/**
+ * Element types the medias of a library may be given to
+ *
+ * Only the records of the module, and the ones whose medias it keeps in a folder it declares (Digirisk
+ * keeps the photos of its tickets in the ticket folder of Dolibarr): a media given to a record of
+ * another module would land in a folder that module never reads.
+ *
+ * @param  string $moduleName Module owning the library
+ * @return array              Objects metadata, by key, of the types a media may be given to
+ */
+function saturne_get_media_library_targets(string $moduleName): array
+{
+    require_once __DIR__ . '/object.lib.php';
+
+    $moduleNameLowerCase = dol_strtolower($moduleName);
+    $settings            = saturne_get_media_library_settings($moduleNameLowerCase);
+    $targets             = [];
+
+    foreach (saturne_get_objects_metadata() as $objectKey => $objectMetadata) {
+        if (!empty($objectMetadata['alias_of'])) {
+            continue;
+        }
+        if (strpos($objectKey, $moduleNameLowerCase . '_') === 0 || array_key_exists($objectKey, $settings['folders'])) {
+            $targets[$objectKey] = $objectMetadata;
+        }
+    }
+
+    return $targets;
+}
+
+/**
+ * Folder holding the medias of a record of a library module
+ *
+ * A record keeps its medias in <element>/<ref>/ under the module folder, or in <ref>/ under the folder
+ * the module declares for its element. A module showing the medias of a record elsewhere (a sub folder,
+ * another record) says so through the saturneMediaAssignTarget hook.
+ *
+ * @param  string       $moduleName Module owning the library
+ * @param  CommonObject $object     Record receiving the medias
+ * @param  string       $objectKey  Key of its type in the objects metadata
+ * @return array                    'object': record that holds the medias, 'dir': their folder,
+ *                                  'favorite_field': field naming the media it shows
+ */
+function saturne_media_library_target(string $moduleName, CommonObject $object, string $objectKey): array
+{
+    global $conf, $hookmanager;
+
+    $moduleNameLowerCase = dol_strtolower($moduleName);
+    $settings            = saturne_get_media_library_settings($moduleNameLowerCase);
+    $target              = ['object' => $object, 'dir' => '', 'favorite_field' => 'photo'];
+
+    if (is_object($hookmanager)) {
+        $hookmanager->initHooks(['saturnemediaassign']);
+        $parameters = ['targetType' => $objectKey, 'moduleName' => $moduleNameLowerCase];
+        $reshook    = $hookmanager->executeHooks('saturneMediaAssignTarget', $parameters, $object);
+        if ($reshook > 0 && is_array($hookmanager->resArray)) {
+            if (isset($hookmanager->resArray['object']) && is_object($hookmanager->resArray['object'])) {
+                $target['object'] = $hookmanager->resArray['object'];
+            }
+            $target['dir']            = (string) ($hookmanager->resArray['dir'] ?? '');
+            $target['favorite_field'] = (string) ($hookmanager->resArray['favorite_field'] ?? $target['favorite_field']);
+        }
+    }
+
+    $element = $target['object']->element;
+
+    if (dol_strlen($target['dir']) == 0) {
+        if (!empty($settings['folders'][$element])) {
+            $target['dir'] = $settings['folders'][$element] . '/' . dol_sanitizeFileName($target['object']->ref);
+        } else {
+            $target['dir'] = ($conf->$moduleNameLowerCase->multidir_output[$conf->entity] ?? saturne_default_documents_dir($moduleNameLowerCase, (int) $conf->entity)) . '/' . $element . '/' . dol_sanitizeFileName($target['object']->ref);
+        }
+    }
+
+    if (!empty($settings['favorite_fields'][$element])) {
+        $target['favorite_field'] = $settings['favorite_fields'][$element];
+    }
+
+    return $target;
+}
+
+/**
+ * Name an uploaded file is stored under, the way dol_add_file_process() writes it
+ *
+ * The thumbs, the library copy and the agenda must use that name: an accent goes and the extension is
+ * lowercased, so a phone shot named IMG_0001.JPG is stored as IMG_0001.jpg.
+ *
+ * @param  string $fileName Name the browser sent
+ * @return string           Name of the stored file
+ */
+function saturne_media_stored_name(string $fileName): string
+{
+    $info = pathinfo(trim($fileName));
+
+    return dol_string_nohtmltag(dol_sanitizeFileName($info['filename'] . (!empty($info['extension']) ? '.' . strtolower($info['extension']) : '')));
+}
+
+/**
+ * Path the ECM index keeps for the medias of a library: from the documents root, so the entity folder
+ * comes first outside the main entity
+ *
+ * @param  string $moduleName Module owning the library
+ * @param  int    $entity     Entity, the current one when left out
+ * @return string             Path as llx_ecm_files.filepath holds it
+ */
+function saturne_media_library_index_path(string $moduleName, int $entity = 0): string
+{
+    global $conf;
+
+    $entity = $entity > 0 ? $entity : (int) $conf->entity;
+
+    return saturne_media_origin_path(($conf->ecm->multidir_output[$entity] ?? saturne_default_documents_dir('ecm', $entity)) . '/' . dol_strtolower($moduleName) . '/medias');
 }
 
 /**
@@ -747,7 +993,14 @@ function saturne_get_library_medias(string $moduleName, bool $onlyPending = true
     foreach ($objectMedias as $objectMedia) {
         $segments = explode('/', $objectMedia['relativename']);
 
-        if (count($segments) < 3 || !empty(array_intersect(array_slice($segments, 0, 2), $workFolders))) {
+        if (count($segments) < 3 || !empty(array_intersect(array_slice($segments, 0, -1), $workFolders))) {
+            continue;
+        }
+
+        // The folder of a deleted record, or a folder named like one, holds the media of no record: the
+        // media stays pending rather than given to a record nobody can open
+        $classFound = false;
+        if (saturne_media_record_object($moduleNameLowerCase, $segments[0], $segments[1], $classFound) === null && $classFound) {
             continue;
         }
 
@@ -761,8 +1014,9 @@ function saturne_get_library_medias(string $moduleName, bool $onlyPending = true
 
     require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmfiles.class.php';
 
-    $ecmFile = new EcmFiles($db);
-    $medias  = [];
+    $ecmFile   = new EcmFiles($db);
+    $indexPath = saturne_media_library_index_path($moduleNameLowerCase, (int) $entity);
+    $medias    = [];
 
     foreach ($libraryFiles as $file) {
         $records = $recordsByMedia[$file['name']] ?? [];
@@ -780,8 +1034,8 @@ function saturne_get_library_medias(string $moduleName, bool $onlyPending = true
         }
 
         $ecmFile->description = '';
-        // The index keeps the path from the documents root, the ecm/ prefix included
-        $ecmFile->fetch(0, '', 'ecm/' . $moduleNameLowerCase . '/medias/' . $file['name']);
+        // The index keeps the path from the documents root, the entity folder and the ecm/ prefix included
+        $ecmFile->fetch(0, '', $indexPath . '/' . $file['name']);
 
         $medias[] = [
             'name'        => $file['name'],
@@ -826,6 +1080,11 @@ function saturne_add_media_to_library(string $moduleName, string $filePath, int 
 
     if (image_format_supported($fileName) < 0 || !dol_is_file($filePath)) {
         return 'error';
+    }
+
+    // Without a library page, the copy would sit where nobody can see it, personal photos included
+    if (!saturne_media_library_enabled($moduleNameLowerCase)) {
+        return 'excluded';
     }
 
     $libraryName = $fileName;
@@ -1238,18 +1497,18 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
             $out .= '      <input type="file" id="' . $idPrefix . 'take-photo" class="saturne-photo-upload" name="userfile[]" accept="image/*" capture="environment" data-error-not-image="' . $errorNotImage . '">';
             $out .= '    </label>';
 
-            if ($showLibrary) {
-                // Picking button opening the media library: a media already there is linked rather
-                // than sent again, and a new one joins the library on its way to the block
-                $out .= '    <span class="saturne-upload-label saturne-upload-label-gallery saturne-open-media-library" role="button" tabindex="0" title="' . dol_escape_htmltag($langs->trans('AddPhotoFromMediaGallery')) . '">';
-                $out .= '      <i class="fas fa-images"></i>';
+            // Picking button — no capture attribute, so existing photos can be selected, several at once.
+            $out .= '    <label for="' . $idPrefix . 'upload-media" class="saturne-upload-label saturne-upload-label-gallery" title="' . dol_escape_htmltag($langs->trans('AddPhotoFromComputer')) . '">';
+            $out .= '      <i class="fas fa-images"></i>';
+            $out .= '      <input type="file" id="' . $idPrefix . 'upload-media" class="saturne-photo-upload" name="userfile[]" accept="image/*" data-error-not-image="' . $errorNotImage . '" multiple>';
+            $out .= '    </label>';
+
+            // The media library comes in addition to the device, as on the DigiQuali answers: a media
+            // already there is linked rather than sent again
+            if ($showLibrary && saturne_media_library_can($moduleNameLowerCase, 'read')) {
+                $out .= '    <span class="saturne-upload-label saturne-upload-label-library saturne-open-media-library" role="button" tabindex="0" title="' . dol_escape_htmltag($langs->trans('AddPhotoFromMediaGallery')) . '">';
+                $out .= '      <i class="fas fa-folder-open"></i>';
                 $out .= '    </span>';
-            } else {
-                // Picking button — no capture attribute, so existing photos can be selected, several at once.
-                $out .= '    <label for="' . $idPrefix . 'upload-media" class="saturne-upload-label saturne-upload-label-gallery" title="' . dol_escape_htmltag($langs->trans('AddPhotoFromComputer')) . '">';
-                $out .= '      <i class="fas fa-images"></i>';
-                $out .= '      <input type="file" id="' . $idPrefix . 'upload-media" class="saturne-photo-upload" name="userfile[]" accept="image/*" data-error-not-image="' . $errorNotImage . '" multiple>';
-                $out .= '    </label>';
             }
         }
 

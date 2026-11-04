@@ -30,7 +30,7 @@ MediaData                 = Configuration des médias
 ConfirmUnlinkMedia        = Êtes vous sur de vouloir détacher le media sélectionné ?
 TakePhoto                 = Prendre une photo
 AddPhotoFromComputer      = Ajouter une photo depuis la galerie de l'appareil
-AddPhotoFromMediaGallery  = Ajouter une photo depuis la galerie des médias
+AddPhotoFromMediaGallery  = Ajouter une photo depuis la bibliothèque de médias
 DeletePhoto               = Supprimer la photo
 DeletePhotoConfirmation   = Supprimer cette photo ?
 AvailableTools            = Outils disponibles
@@ -125,3 +125,15 @@ SyncMediaLibraryError=La synchronisation de la bibliothèque a échoué
 DropMediasHere=Déposez vos images ici pour les ajouter à la bibliothèque
 DroppedFilesNotImages=Seules les images vont dans la bibliothèque, fichier(s) ignoré(s) : %s
 MediasAddedToLibrary=%s média(s) ajouté(s) à la bibliothèque
+
+# Bibliothèque : affectation, droits, messages
+ObjectType=Type d'objet
+SearchARecord=Rechercher un enregistrement
+MediaConfirmationTitle=Confirmation
+MediaAssignedToRecord=Média %s affecté à %s
+MediasAssignedToRecord=Médias %s affectés à %s
+MediasNoLongerInLibrary=Les médias choisis ne sont plus dans la bibliothèque
+MediaAddedWithSuccess=1 média ajouté avec succès
+MediasAddedWithSuccess=%s médias ajoutés avec succès
+ErrorWhileSendingAFile=Erreur lors de l'envoi d'un fichier.
+ErrorModuleHasNoMediaLibrary=Le module %s n'a pas de bibliothèque de médias

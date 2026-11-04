@@ -38,6 +38,10 @@ $pendingEntity   = $conf->entity ?? 1;
 $pendingBaseUrl  = DOL_URL_ROOT . '/document.php?modulepart=ecm&attachment=0&entity=' . $pendingEntity . '&file=';
 $pendingRelative = $moduleNameLowerCase . '/medias';
 $objectsMetadata = saturne_get_objects_metadata();
+// Only the types the library may give its medias to are offered: a record of another module would never show them
+$targetsMetadata = saturne_get_media_library_targets($moduleNameLowerCase);
+// A reader browses the library, assigning, unlinking and describing need a right to write
+$pendingCanWrite = saturne_media_library_can($moduleNameLowerCase, 'write');
 
 // A media folder is named after an element type while the metadata are keyed by module and element:
 // resolving them once gives every record badge its label and its picto
@@ -48,7 +52,9 @@ foreach ($objectsMetadata as $objectKey => $objectMetadata) {
     $elementsMetadata[$elementKey] = $objectMetadata;
 }
 ?>
-<div class="saturne-pending" data-module="<?php echo dol_escape_htmltag($moduleNameLowerCase); ?>" data-label-add="<?php echo dol_escape_htmltag($langs->trans('Add')); ?>">
+<div class="saturne-pending<?php echo $pendingCanWrite ? '' : ' saturne-pending-readonly'; ?>" data-module="<?php echo dol_escape_htmltag($moduleNameLowerCase); ?>" data-label-add="<?php echo dol_escape_htmltag($langs->trans('Add')); ?>"
+     data-label-confirm-title="<?php echo dol_escape_htmltag($langs->trans('MediaConfirmationTitle')); ?>" data-label-yes="<?php echo dol_escape_htmltag($langs->trans('Yes')); ?>" data-label-no="<?php echo dol_escape_htmltag($langs->trans('No')); ?>"
+     data-label-search="<?php echo dol_escape_htmltag($langs->trans('SearchARecord')); ?>">
     <?php if (empty($pendingMedias)) : ?>
         <div class="saturne-pending-empty">
             <i class="fas fa-check-circle"></i>
@@ -106,13 +112,15 @@ foreach ($objectsMetadata as $objectKey => $objectMetadata) {
                                                 // No class answers for that folder: show the reference with a neutral icon
                                                 echo img_picto('', $recordMetadata['picto'] ?? 'fontawesome_fa-folder-open_fas_#94a3b8') . ' ' . dol_escape_htmltag($pendingRecord['ref']);
                                             } ?>
-                                            <i class="fas fa-unlink saturne-pending-unlink" data-element="<?php echo dol_escape_htmltag($pendingRecord['element']); ?>" data-ref="<?php echo dol_escape_htmltag($pendingRecord['ref']); ?>" title="<?php echo dol_escape_htmltag($langs->trans('UnlinkMediaFromRecord')); ?>"></i>
+                                            <?php if ($pendingCanWrite) : ?>
+                                                <i class="fas fa-unlink saturne-pending-unlink" data-element="<?php echo dol_escape_htmltag($pendingRecord['element']); ?>" data-ref="<?php echo dol_escape_htmltag($pendingRecord['ref']); ?>" title="<?php echo dol_escape_htmltag($langs->trans('UnlinkMediaFromRecord')); ?>"></i>
+                                            <?php endif; ?>
                                         </span>
                                     <?php endforeach;
                                 endif; ?>
                             </span>
                             <span class="saturne-pending-col-description">
-                                <input type="text" class="saturne-pending-description" value="<?php echo dol_escape_htmltag($pendingMedia['description']); ?>" placeholder="<?php echo dol_escape_htmltag($langs->trans('AddADescription')); ?>">
+                                <input type="text" class="saturne-pending-description" value="<?php echo dol_escape_htmltag($pendingMedia['description']); ?>" placeholder="<?php echo dol_escape_htmltag($langs->trans('AddADescription')); ?>"<?php echo $pendingCanWrite ? '' : ' readonly'; ?>>
                             </span>
                         </div>
                     <?php endforeach; ?>
@@ -126,26 +134,25 @@ foreach ($objectsMetadata as $objectKey => $objectMetadata) {
         </div>
         <div class="saturne-pending-footer">
             <span class="saturne-pending-counter" data-label="<?php echo dol_escape_htmltag($langs->trans('SelectedMedias')); ?>" data-total="<?php echo dol_escape_htmltag(count($pendingMedias) . ' ' . $langs->trans($pendingOnly ? 'PendingMedias' : 'AllMedias')); ?>"><?php echo count($pendingMedias) . ' ' . $langs->trans($pendingOnly ? 'PendingMedias' : 'AllMedias'); ?></span>
-            <?php // select2 of Dolibarr builds its helper selector from the name: without one it ends up
-                  // with input[aria-controls*=] and throws ?>
-            <select class="saturne-pending-object-type flat" name="saturne_pending_object_type">
-                <option value=""><?php echo $langs->trans('ObjectType'); ?></option>
-                <?php foreach ($objectsMetadata as $objectKey => $objectMetadata) :
-                    if (!empty($objectMetadata['alias_of'])) {
-                        continue;
-                    }
-                    if (!empty($objectMetadata['langfile'])) {
-                        $langs->load($objectMetadata['langfile']);
-                    } ?>
-                    <option value="<?php echo dol_escape_htmltag($objectKey); ?>" data-picto="<?php echo dol_escape_htmltag(img_picto('', $objectMetadata['picto'])); ?>"><?php echo dol_escape_htmltag($langs->trans($objectMetadata['langs'])); ?></option>
-                <?php endforeach; ?>
-            </select>
-            <select class="saturne-pending-object flat" name="saturne_pending_object" disabled>
-                <option value=""><?php echo $langs->trans('SelectAnObjectType'); ?></option>
-            </select>
-            <div class="wpeo-button button-blue saturne-pending-assign button-disable">
-                <i class="fas fa-link"></i> <?php echo $langs->trans('AssignSelectedMedias'); ?>
-            </div>
+            <?php if ($pendingCanWrite) : ?>
+                <?php // select2 of Dolibarr builds its helper selector from the name: without one it ends up
+                      // with input[aria-controls*=] and throws ?>
+                <select class="saturne-pending-object-type flat" name="saturne_pending_object_type">
+                    <option value=""><?php echo $langs->trans('ObjectType'); ?></option>
+                    <?php foreach ($targetsMetadata as $objectKey => $objectMetadata) :
+                        if (!empty($objectMetadata['langfile'])) {
+                            $langs->load($objectMetadata['langfile']);
+                        } ?>
+                        <option value="<?php echo dol_escape_htmltag($objectKey); ?>" data-picto="<?php echo dol_escape_htmltag(img_picto('', $objectMetadata['picto'])); ?>"><?php echo dol_escape_htmltag($langs->trans($objectMetadata['langs'])); ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <select class="saturne-pending-object flat" name="saturne_pending_object" disabled>
+                    <option value=""><?php echo $langs->trans('SelectAnObjectType'); ?></option>
+                </select>
+                <div class="wpeo-button button-blue saturne-pending-assign button-disable">
+                    <i class="fas fa-link"></i> <?php echo $langs->trans('AssignSelectedMedias'); ?>
+                </div>
+            <?php endif; ?>
         </div>
     <?php endif; ?>
 </div>

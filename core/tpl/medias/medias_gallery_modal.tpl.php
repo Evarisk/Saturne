@@ -30,7 +30,25 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 
 // Global variables definitions
-global $action, $conf, $db, $hookmanager, $langs, $mediaListInPage, $moduleName, $moduleNameLowerCase, $moduleNameUpperCase, $subaction, $user;
+global $action, $conf, $db, $hookmanager, $langs, $mediaGalleryAjax, $mediaListInPage, $moduleName, $moduleNameLowerCase, $moduleNameUpperCase, $subaction, $user;
+
+// The library of a module is for its logged in users only: a public page gets neither the gallery nor
+// its actions, which would let anyone read, change or remove the medias of the module
+if (defined('NOLOGIN') || !is_object($user) || empty($user->id)) {
+    return;
+}
+
+$libraryCanRead  = saturne_media_library_can($moduleNameLowerCase, 'read');
+$libraryCanWrite = saturne_media_library_can($moduleNameLowerCase, 'write');
+
+if (!$libraryCanRead) {
+    return;
+}
+
+// Actions changing the library or the medias of the records ask for a right to write on the module
+if (!$libraryCanWrite && in_array($subaction, ['uploadPhoto', 'add_img', 'addFiles', 'editObjectMedia', 'assignMedias', 'setMediaDescription', 'unlinkMediaFromRecord', 'delete_files', 'unlinkFile', 'addToFavorite', 'regenerate_thumbs', 'syncMediaLibrary'], true)) {
+    $subaction = '';
+}
 
 // Initialize technical objects
 $ecmdir  = new EcmDirectory($db);
@@ -41,6 +59,70 @@ $form = new Form($db);
 
 // Array for the sizes of thumbs
 $mediaSizes = ['mini', 'small', 'medium', 'large'];
+
+// Folders a media of a record may be found in, the browser only ever names one of them
+$mediaRecordRoots = array_values(array_filter([
+    $conf->$moduleNameLowerCase->multidir_output[$conf->entity] ?? '',
+    $conf->ecm->multidir_output[$conf->entity] . '/' . $moduleNameLowerCase,
+]));
+
+/**
+ * Tell whether a folder given by the browser lies inside the folders of the module
+ *
+ * @param  string $folder   Absolute folder
+ * @param  array  $roots    Folders the module owns
+ * @return bool             True when inside one of them
+ */
+$mediaFolderIsInside = function (string $folder, array $roots): bool {
+    $realFolder = realpath($folder);
+    if ($realFolder === false) {
+        return false;
+    }
+
+    foreach ($roots as $root) {
+        $realRoot = realpath($root);
+        if ($realRoot !== false && strpos(str_replace('\\', '/', $realFolder) . '/', str_replace('\\', '/', $realRoot) . '/') === 0) {
+            return true;
+        }
+    }
+
+    return false;
+};
+
+/**
+ * Load a record from the class name the browser sends: only a class of the module, or of a type the
+ * library gives its medias to, and a Dolibarr object at that
+ *
+ * @param  string $className Class name
+ * @param  int    $objectId  Id of the record, 0 for a record not created yet
+ * @return CommonObject|null Record, null when the class is unknown or the record missing
+ */
+$mediaLoadRecord = function (string $className, int $objectId) use ($db, $moduleNameLowerCase) {
+    $foundClass = '';
+    $classFiles = dol_dir_list(dol_buildpath('/' . $moduleNameLowerCase . '/class', 0), 'files', 1, '^' . preg_quote(dol_strtolower(basename($className)), '/') . '\.class\.php$');
+    if (!empty($classFiles)) {
+        require_once $classFiles[0]['fullname'];
+        $foundClass = $className;
+    } else {
+        foreach (saturne_get_media_library_targets($moduleNameLowerCase) as $objectMetadata) {
+            if (!empty($objectMetadata['class_name']) && dol_strtolower($objectMetadata['class_name']) === dol_strtolower($className)) {
+                if (!class_exists($objectMetadata['class_name']) && !empty($objectMetadata['class_path'])) {
+                    dol_include_once('/' . $objectMetadata['class_path']);
+                }
+                $foundClass = $objectMetadata['class_name'];
+                break;
+            }
+        }
+    }
+
+    if ($foundClass === '' || !class_exists($foundClass) || !is_subclass_of($foundClass, 'CommonObject')) {
+        return null;
+    }
+
+    $record = new $foundClass($db);
+
+    return ($objectId <= 0 || $record->fetch($objectId) > 0) ? $record : null;
+};
 
 if (!(isset($error) && $error) && $subaction == 'uploadPhoto' && ! empty($conf->global->MAIN_UPLOAD_DOC)) {
     // Define relativepath and upload_dir
@@ -57,6 +139,17 @@ if (!(isset($error) && $error) && $subaction == 'uploadPhoto' && ! empty($conf->
 
     foreach ($userfiles as $key => $userfile) {
         $error = 0;
+
+        // The library only holds images, told by their content: the drop zone and the picker already
+        // leave the other files out, a file chosen as "all files" must not slip in
+        if (!empty($_FILES['userfile']['tmp_name'][$key]) && strpos((string) (new finfo(FILEINFO_MIME_TYPE))->file($_FILES['userfile']['tmp_name'][$key]), 'image/') !== 0) {
+            $error++;
+            $errorMessage = $langs->transnoentitiesnoconv('ErrorFileNotAnImage') . ' : ' . dol_escape_htmltag((string) ($_FILES['userfile']['name'][$key] ?? ''));
+            setEventMessages($errorMessage, null, 'errors');
+            $submitFileErrorText = ['message' => $errorMessage, 'code' => '1337'];
+            continue;
+        }
+
         if (empty($_FILES['userfile']['tmp_name'][$key])) {
             $error++;
             $maxUploadSizeMo = round($conf->global->MAIN_UPLOAD_DOC / 1024, 1);
@@ -79,19 +172,18 @@ if (!(isset($error) && $error) && $subaction == 'uploadPhoto' && ! empty($conf->
             $allowOverwrite = GETPOSTINT('overwritemedia');
             $res = dol_add_file_process($uploadDir, $allowOverwrite, 1, 'userfile', '', null, '', $generatethumbs);
             if ($res > 0) {
-                $confWidthMedium  = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_MEDIUM';
-                $confHeightMedium = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_MEDIUM';
-                $confWidthLarge   = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_LARGE';
-                $confHeightLarge  = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_LARGE';
+                // The file is stored under its sanitized name, the one the thumbs and the agenda must use
+                $uploadedName = saturne_media_stored_name((string) $_FILES['userfile']['name'][$key]);
 
-                // Create thumbs
-                $imgThumbLarge  = saturne_vignette($uploadDir . '/' . $_FILES['userfile']['name'][$key], $conf->global->$confWidthLarge, $conf->global->$confHeightLarge, '_large');
-                $imgThumbMedium = saturne_vignette($uploadDir . '/' . $_FILES['userfile']['name'][$key], $conf->global->$confWidthMedium, $conf->global->$confHeightMedium, '_medium');
-                $result         = $ecmdir->changeNbOfFiles('+');
+                // Create thumbs, with the same sizes as the media blocks and the records use
+                foreach (['medium', 'large'] as $size) {
+                    saturne_vignette($uploadDir . '/' . $uploadedName, getDolGlobalInt('SATURNE_MEDIA_MAX_WIDTH_' . dol_strtoupper($size)), getDolGlobalInt('SATURNE_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size)), '_' . $size);
+                }
+                $result = $ecmdir->changeNbOfFiles('+');
 
                 // An edited media comes back under its own name: replacing a file is not adding one
                 if (empty($allowOverwrite)) {
-                    $addedMedias[] = $_FILES['userfile']['name'][$key];
+                    $addedMedias[] = $uploadedName;
                 }
             } else {
                 setEventMessages($langs->transnoentitiesnoconv("ErrorThisFileExists", (string) ($_FILES['userfile']['name'][$key] ?? ''), $langs->transnoentitiesnoconv("File")), null, 'errors');
@@ -154,13 +246,18 @@ if ($subaction == 'add_img') {
 if ($subaction == 'addFiles') {
     $data = json_decode(file_get_contents('php://input'), true);
 
-    $objectType = $data['objectType'];
-    $objectId   = $data['objectId'];
+    $objectType = dol_sanitizeFileName((string) ($data['objectType'] ?? ''));
+    $objectId   = (int) ($data['objectId'] ?? 0);
 
-    $className = $objectType;
-    $object    = new $className($db);
-    $object->fetch($objectId);
+    // The class comes from the browser: only a class of the objects metadata is instantiated, and the
+    // sub folder may not climb out of the folder of the record
+    $object = $mediaLoadRecord($objectType, $objectId);
+    $data['objectSubdir']  = str_replace('..', '', (string) ($data['objectSubdir'] ?? ''));
+    $data['objectSubtype'] = (string) ($data['objectSubtype'] ?? '');
+    $data['filenames']     = (string) ($data['filenames'] ?? '');
+}
 
+if ($subaction == 'addFiles' && $object !== null) {
     $pathToECMImg = $conf->ecm->multidir_output[$conf->entity] . '/' . $moduleNameLowerCase . '/medias';
     if (!dol_is_dir($pathToECMImg)) {
         dol_mkdir($pathToECMImg);
@@ -191,25 +288,28 @@ if ($subaction == 'addFiles') {
     }
 
     if (!empty($fileNames)) {
-        $favoriteNeedsUpdate = saturne_favorite_media_needs_update($object, $data['objectSubtype'], $pathToObjectImg);
+        // The subtype names the field holding the favorite media, a field the record really has: the
+        // answers of a DigiQuali control name their photo folder with it instead
+        $favoriteField       = (!empty($object->fields[$data['objectSubtype']]) || property_exists($object, $data['objectSubtype'])) ? $data['objectSubtype'] : '';
+        $favoriteNeedsUpdate = $favoriteField !== '' && saturne_favorite_media_needs_update($object, $favoriteField, $pathToObjectImg);
         foreach ($fileNames as $fileName) {
             $fileName = dol_sanitizeFileName($fileName);
             if ($favoriteNeedsUpdate) {
-                $object->{$data['objectSubtype']} = $fileName;
-                $favoriteNeedsUpdate             = false;
+                $object->$favoriteField = $fileName;
+                $favoriteNeedsUpdate    = false;
             }
 
             dol_copy($pathToECMImg . '/' . $fileName, $pathToObjectImg . '/' . $fileName);
 
             // Create thumbs
             foreach ($mediaSizes as $size) {
-                $confWidth  = 'SATURNE_MEDIA_MAX_WIDTH_' . dol_strtoupper($size);
-                $confHeight = 'SATURNE_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size);
-                saturne_vignette($pathToObjectImg . '/' . $fileName, $conf->global->$confWidth, $conf->global->$confHeight, '_' . $size);
+                saturne_vignette($pathToObjectImg . '/' . $fileName, getDolGlobalInt('SATURNE_MEDIA_MAX_WIDTH_' . dol_strtoupper($size)), getDolGlobalInt('SATURNE_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size)), '_' . $size);
             }
         }
         if ($objectId > 0) {
-            $object->setValueFrom($data['objectSubtype'], $object->{$data['objectSubtype']}, '', '', 'text', '', $user);
+            if ($favoriteField !== '') {
+                $object->setValueFrom($favoriteField, $object->$favoriteField, '', '', 'text', '', $user);
+            }
 
             // The medias now belong to the object: record it in its agenda
             $object->context['medias'] = $fileNames;
@@ -223,13 +323,11 @@ if ($subaction == 'addFiles') {
 if ($subaction == 'editObjectMedia' && !empty($conf->global->MAIN_UPLOAD_DOC)) {
     $objectType = GETPOST('object_type', 'aZ09');
     $objectId   = GETPOSTINT('object_id');
-    $objectSubDir = GETPOST('object_subdir', 'alphanohtml');
+    $objectSubDir = str_replace('..', '', GETPOST('object_subdir', 'alphanohtml'));
     $fileName   = dol_sanitizeFileName(GETPOST('file_name', 'alphanohtml'));
 
-    if ($objectId > 0 && class_exists($objectType) && dol_strlen($fileName) > 0 && !empty($_FILES['userfile']['tmp_name'][0])) {
-        $object = new $objectType($db);
-        $object->fetch($objectId);
-
+    $object = $objectId > 0 ? $mediaLoadRecord($objectType, $objectId) : null;
+    if ($object !== null && dol_strlen($fileName) > 0 && !empty($_FILES['userfile']['tmp_name'][0])) {
         $filePath = saturne_object_media_dir($object, $objectType, $objectSubDir) . '/' . $fileName;
 
         // Only a media already sitting there may be replaced, never a path the caller made up
@@ -247,7 +345,11 @@ if ($subaction == 'editObjectMedia' && !empty($conf->global->MAIN_UPLOAD_DOC)) {
 if ($subaction == 'listMediaTargets') {
     require_once __DIR__ . '/../../../lib/object.lib.php';
 
-    $targetMetadata = saturne_get_objects_metadata(GETPOST('object_type', 'aZ09'));
+    // Named apart from object_type, which the host pages read for their own object. Only the types a
+    // media of this library may go to are listed
+    $targetTypes    = saturne_get_media_library_targets($moduleNameLowerCase);
+    $targetMetadata = $targetTypes[GETPOST('media_target_type', 'aZ09')] ?? [];
+    $targetSearch   = trim(GETPOST('media_target_search', 'alphanohtml'));
     $targets        = [];
 
     // A module may declare a column its table lacks (a Digirisk risk has no label): the query
@@ -268,12 +370,19 @@ if ($subaction == 'listMediaTargets') {
         $sql .= (dol_strlen($labelField) > 0 && $labelField != $nameField && $targetHasColumn($labelField)) ? ', t.' . $labelField . ' as target_label' : '';
         $sql .= ' FROM ' . $targetTable . ' as t';
 
+        $sql .= ' WHERE 1 = 1';
+
         // Not every table of the list is entity aware, so the scope is only added when it is
         if ($targetHasColumn('entity')) {
-            $sql .= ' WHERE t.entity IN (' . getEntity($targetMetadata['table_element']) . ')';
+            $sql .= ' AND t.entity IN (' . getEntity($targetMetadata['table_element']) . ')';
         }
 
-        $sql .= ' ORDER BY t.rowid DESC LIMIT 300';
+        // The list shows the latest records, a search reaches the older ones
+        if (dol_strlen($targetSearch) > 0) {
+            $sql .= natural_search(array_filter(['t.' . $nameField, (dol_strlen($labelField) > 0 && $labelField != $nameField && $targetHasColumn($labelField)) ? 't.' . $labelField : '']), $targetSearch);
+        }
+
+        $sql .= ' ORDER BY t.rowid DESC LIMIT 100';
 
         $resql = $db->query($sql);
         if ($resql) {
@@ -305,10 +414,11 @@ if ($subaction == 'assignMedias') {
 
     require_once __DIR__ . '/../../../lib/object.lib.php';
 
-    $targetType     = $data['objectType'] ?? '';
+    $targetType     = (string) ($data['objectType'] ?? '');
     $targetId       = (int) ($data['objectId'] ?? 0);
-    $targetFiles    = $data['filenames'] ?? [];
-    $targetMetadata = saturne_get_objects_metadata($targetType);
+    $targetFiles    = (array) ($data['filenames'] ?? []);
+    // Only a type the library may give its medias to: a record of another module would never show them
+    $targetMetadata = saturne_get_media_library_targets($moduleNameLowerCase)[$targetType] ?? [];
 
     if ($targetId > 0 && !empty($targetFiles) && !empty($targetMetadata['class_name'])) {
         dol_include_once('/' . $targetMetadata['class_path']);
@@ -321,19 +431,14 @@ if ($subaction == 'assignMedias') {
             // kept on another one
             $pickedObject = $targetObject;
 
-            // A module may show the medias of a record from another one: a Digirisk risk displays
-            // the photos of its last assessment, so a media copied onto the risk itself stays unseen
-            $hookmanager->initHooks(['saturnemediaassign']);
-            $parameters = ['targetType' => $targetType];
-            $reshook    = $hookmanager->executeHooks('saturneMediaAssignTarget', $parameters, $targetObject);
-            if ($reshook > 0 && isset($hookmanager->resArray['object']) && is_object($hookmanager->resArray['object'])) {
-                $targetObject = $hookmanager->resArray['object'];
-            }
+            // The folder the record shows its medias from: a Digirisk risk displays the photos of its
+            // last assessment, an accident the ones of its photos/ folder
+            $libraryTarget = saturne_media_library_target($moduleNameLowerCase, $targetObject, $targetType);
+            $targetObject  = $libraryTarget['object'];
+            $targetDir     = $libraryTarget['dir'];
+            $favoriteField = $libraryTarget['favorite_field'];
 
             $libraryDir = $conf->ecm->multidir_output[$conf->entity] . '/' . $moduleNameLowerCase . '/medias';
-            // The metadata key prefixes the module name, the media folder is named after the
-            // element the object itself declares
-            $targetDir  = saturne_object_media_dir($targetObject, $targetObject->element);
 
             if (!dol_is_dir($targetDir)) {
                 dol_mkdir($targetDir);
@@ -360,25 +465,27 @@ if ($subaction == 'assignMedias') {
                 $assigned[] = $targetFile;
             }
 
+            $langs->load('medias@saturne');
+
             if (!empty($assigned)) {
                 // Lists only show the favorite media: a record left without one would keep
                 // showing no photo at all. Only a record storing a favorite has one to set.
-                if (!empty($targetObject->fields['photo']) && saturne_favorite_media_needs_update($targetObject, 'photo', $targetDir)) {
-                    $targetObject->setValueFrom('photo', $assigned[0], '', '', 'text', '', $user);
+                if (!empty($targetObject->fields[$favoriteField]) && saturne_favorite_media_needs_update($targetObject, $favoriteField, $targetDir)) {
+                    $targetObject->setValueFrom($favoriteField, $assigned[0], '', '', 'text', '', $user);
                 }
 
                 $targetObject->context['medias'] = $assigned;
                 $targetObject->call_trigger('SATURNE_MEDIA_LINK', $user);
-                $langs->load('medias@saturne');
-                $msg = $langs->trans('Medias') . ' : ' . implode(', ', $assigned) . ' ' . mb_strtolower($langs->trans('AssignedTo'), 'UTF-8') . ' ' . $pickedObject->ref;
-                echo '<span id="saturne-assign-medias-response" style="display:none;">' . json_encode(['success' => true, 'message' => $msg]) . '</span>';
+                $msg = $langs->trans(count($assigned) > 1 ? 'MediasAssignedToRecord' : 'MediaAssignedToRecord', implode(', ', $assigned), $pickedObject->ref);
+                print '<span id="saturne-assign-medias-response" class="hidden">' . dol_escape_htmltag(json_encode(['success' => true, 'message' => $msg])) . '</span>';
                 exit;
             }
-            echo '<span id="saturne-assign-medias-response" style="display:none;">' . json_encode(['success' => true]) . '</span>';
+            // A media removed from the library meanwhile is not there to copy any more
+            print '<span id="saturne-assign-medias-response" class="hidden">' . dol_escape_htmltag(json_encode(['success' => false, 'message' => $langs->trans('MediasNoLongerInLibrary')])) . '</span>';
             exit;
         }
     }
-    echo '<span id="saturne-assign-medias-response" style="display:none;">' . json_encode(['success' => false]) . '</span>';
+    print '<span id="saturne-assign-medias-response" class="hidden">' . dol_escape_htmltag(json_encode(['success' => false])) . '</span>';
     exit;
 }
 
@@ -390,19 +497,20 @@ if ($subaction == 'setMediaDescription') {
 
     if (dol_strlen($mediaName) > 0) {
         $mediaRelative = $moduleNameLowerCase . '/medias';
-        $mediaIndexed  = 'ecm/' . $mediaRelative;
+        // The index keeps the path from the documents root: the entity folder comes first outside the main entity
+        $mediaIndexed  = saturne_media_library_index_path($moduleNameLowerCase);
         $mediaPath     = $conf->ecm->multidir_output[$conf->entity] . '/' . $mediaRelative . '/' . $mediaName;
 
         if (dol_is_file($mediaPath)) {
             // A media added outside the gallery may not be indexed yet, index it before describing it
-            // The index keeps the path from the documents root, the ecm/ prefix included
             if ($ecmfile->fetch(0, '', $mediaIndexed . '/' . $mediaName) <= 0) {
                 addFileIntoDatabaseIndex($conf->ecm->multidir_output[$conf->entity] . '/' . $mediaRelative, $mediaName, $mediaPath);
                 $ecmfile->fetch(0, '', $mediaIndexed . '/' . $mediaName);
             }
 
             if ($ecmfile->id > 0) {
-                $ecmfile->description = $data['description'] ?? '';
+                // A plain text, shown back as is in the list
+                $ecmfile->description = dol_string_nohtmltag((string) ($data['description'] ?? ''), 0);
                 $ecmfile->update($user);
             }
         }
@@ -410,8 +518,8 @@ if ($subaction == 'setMediaDescription') {
 }
 
 // Take a media off a record without touching the library copy: the media simply goes back to
-// being pending. The record folder is resolved here rather than taken from the caller, so no
-// path travels in from the browser.
+// being pending. The files are found the way the list found them, wherever the record keeps them
+// (a sub folder, a folder the module declares), so no path travels in from the browser.
 if ($subaction == 'unlinkMediaFromRecord') {
     $data = json_decode(file_get_contents('php://input'), true);
 
@@ -420,11 +528,16 @@ if ($subaction == 'unlinkMediaFromRecord') {
     $unlinkFileName = dol_sanitizeFileName($data['filename'] ?? '');
 
     if (dol_strlen($unlinkElement) > 0 && dol_strlen($unlinkRef) > 0 && dol_strlen($unlinkFileName) > 0) {
-        $unlinkDir  = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/' . $unlinkElement . '/' . $unlinkRef;
-        $unlinkPath = $unlinkDir . '/' . $unlinkFileName;
+        $unlinkSettings = saturne_get_media_library_settings($moduleNameLowerCase);
+        $unlinkDirs     = [];
 
-        if (dol_is_file($unlinkPath)) {
-            dol_delete_file($unlinkPath);
+        foreach (saturne_get_record_medias($moduleNameLowerCase, $unlinkSettings['folders']) as $recordMedia) {
+            if ($recordMedia['name'] !== $unlinkFileName || strpos($recordMedia['relativename'], $unlinkElement . '/' . $unlinkRef . '/') !== 0) {
+                continue;
+            }
+
+            $unlinkDir = dirname($recordMedia['fullname']);
+            dol_delete_file($recordMedia['fullname']);
 
             foreach ($mediaSizes as $size) {
                 $unlinkThumb = $unlinkDir . '/thumbs/' . saturne_get_thumb_name($unlinkFileName, $size);
@@ -434,15 +547,23 @@ if ($subaction == 'unlinkMediaFromRecord') {
                 }
             }
 
-            // The record displayed that media: hand the role over to one it still holds
-            $unlinkRecord = saturne_media_record_object($moduleNameLowerCase, $unlinkElement, $unlinkRef);
+            $unlinkDirs[] = $unlinkDir;
+        }
 
-            if ($unlinkRecord !== null && property_exists($unlinkRecord, 'photo') && $unlinkRecord->photo == $unlinkFileName) {
-                $remainingFiles      = dol_dir_list($unlinkDir, 'files', 0, '', '(\.meta|_preview.*\.png)$');
-                $unlinkRecord->photo = !empty($remainingFiles) ? $remainingFiles[0]['name'] : '';
+        // The record displayed that media: hand the role over to one it still holds
+        $unlinkRecord  = saturne_media_record_object($moduleNameLowerCase, $unlinkElement, $unlinkRef);
+        $favoriteField = $unlinkSettings['favorite_fields'][$unlinkElement] ?? 'photo';
 
-                $unlinkRecord->setValueFrom('photo', $unlinkRecord->photo, '', '', 'text', '', $user);
+        if (!empty($unlinkDirs) && $unlinkRecord !== null && property_exists($unlinkRecord, $favoriteField) && $unlinkRecord->$favoriteField == $unlinkFileName) {
+            $remainingFiles = [];
+            foreach (dol_dir_list($unlinkDirs[0], 'files', 0, '', '(\.meta|_preview.*\.png)$', 'date', SORT_DESC) as $remainingFile) {
+                if (image_format_supported($remainingFile['name']) >= 0) {
+                    $remainingFiles[] = $remainingFile['name'];
+                }
             }
+            $unlinkRecord->$favoriteField = $remainingFiles[0] ?? '';
+
+            $unlinkRecord->setValueFrom($favoriteField, $unlinkRecord->$favoriteField, '', '', 'text', '', $user);
         }
     }
 }
@@ -458,10 +579,12 @@ if ($subaction == 'delete_files') {
     }
 
     if (!empty($fileNames)) {
+        $deleteIndexPath = saturne_media_library_index_path($moduleNameLowerCase);
+
         foreach ($fileNames as $fileName) {
             $fileName       = dol_sanitizeFileName($fileName);
             $pathToECMPhoto = $conf->ecm->multidir_output[$conf->entity] . '/' . $moduleNameLowerCase . '/medias/' . $fileName;
-            if (is_file($pathToECMPhoto)) {
+            if (dol_strlen($fileName) > 0 && is_file($pathToECMPhoto)) {
                 foreach ($mediaSizes as $size) {
                     $thumbName = $conf->ecm->multidir_output[$conf->entity] . '/' . $moduleNameLowerCase . '/medias/thumbs/' . saturne_get_thumb_name($fileName, $size);
                     if (is_file($thumbName)) {
@@ -469,6 +592,12 @@ if ($subaction == 'delete_files') {
                     }
                 }
                 unlink($pathToECMPhoto);
+
+                // Its line in the ECM index goes too: a later media of the same name would inherit its
+                // description and its origin
+                if ($ecmfile->fetch(0, '', $deleteIndexPath . '/' . $fileName) > 0) {
+                    $ecmfile->delete($user);
+                }
             }
         }
     }
@@ -477,50 +606,43 @@ if ($subaction == 'delete_files') {
 if ($subaction == 'unlinkFile') {
     $data = json_decode(file_get_contents('php://input'), true);
 
-    $fullPath = $data['filepath'] . '/' . $data['filename'];
-    if (is_file($fullPath)) {
-        unlink($fullPath);
+    // The folder comes from the browser: only a folder of the module, or one it declares for its
+    // records, may lose a file, and only the file itself, never a path
+    $unlinkFileSettings = saturne_get_media_library_settings($moduleNameLowerCase);
+    $unlinkFolder       = (string) ($data['filepath'] ?? '');
+    $unlinkFileName     = basename((string) ($data['filename'] ?? ''));
+    $unlinkAllowed      = dol_strlen($unlinkFileName) > 0 && $mediaFolderIsInside($unlinkFolder, array_merge($mediaRecordRoots, array_values($unlinkFileSettings['folders'])));
+
+    if ($unlinkAllowed && is_file($unlinkFolder . '/' . $unlinkFileName)) {
+        unlink($unlinkFolder . '/' . $unlinkFileName);
 
         foreach ($mediaSizes as $size) {
-            $thumbName = $data['filepath'] . '/thumbs/' . saturne_get_thumb_name($data['filename'], $size);
+            $thumbName = $unlinkFolder . '/thumbs/' . saturne_get_thumb_name($unlinkFileName, $size);
             if (is_file($thumbName)) {
                 unlink($thumbName);
             }
         }
     }
 
-    if ($data['objectId'] > 0) {
-        $className = $data['objectType'];
-        $object    = new $className($db);
-        $object->fetch($data['objectId']);
+    $object = ($unlinkAllowed && (int) ($data['objectId'] ?? 0) > 0) ? $mediaLoadRecord((string) ($data['objectType'] ?? ''), (int) $data['objectId']) : null;
+    $objectSubtype = (string) ($data['objectSubtype'] ?? '');
 
-        if (property_exists($object, $data['objectSubtype'])) {
-            if ($object->{$data['objectSubtype']} == $data['filename']) {
-                $fileArray = dol_dir_list($data['filepath'], 'files');
-                if (count($fileArray) > 0) {
-                    $firstFileName = array_shift($fileArray);
-                    $object->{$data['objectSubtype']} = $firstFileName['name'];
-                } else {
-                    $object->{$data['objectSubtype']} = '';
-                }
-                $object->setValueFrom($data['objectSubtype'], $object->{$data['objectSubtype']}, '', '', 'text', '', $user);
-            }
-        }
+    if ($object !== null && dol_strlen($objectSubtype) > 0 && property_exists($object, $objectSubtype) && $object->$objectSubtype == $unlinkFileName) {
+        $fileArray = dol_dir_list($unlinkFolder, 'files');
+        $object->$objectSubtype = count($fileArray) > 0 ? $fileArray[0]['name'] : '';
+        $object->setValueFrom($objectSubtype, $object->$objectSubtype, '', '', 'text', '', $user);
     }
 }
 
 if ($subaction == 'addToFavorite') {
     $data = json_decode(file_get_contents('php://input'), true);
 
-    if ($data['objectId'] > 0) {
-        $className = $data['objectType'];
-        $object    = new $className($db);
-        $object->fetch($data['objectId']);
+    $object        = (int) ($data['objectId'] ?? 0) > 0 ? $mediaLoadRecord((string) ($data['objectType'] ?? ''), (int) $data['objectId']) : null;
+    $objectSubtype = (string) ($data['objectSubtype'] ?? '');
 
-        if (property_exists($object, $data['objectSubtype'])) {
-            $object->{$data['objectSubtype']} = $data['filename'];
-            $object->setValueFrom($data['objectSubtype'], $object->{$data['objectSubtype']}, '', '', 'text', '', $user);
-        }
+    if ($object !== null && dol_strlen($objectSubtype) > 0 && property_exists($object, $objectSubtype)) {
+        $object->$objectSubtype = dol_sanitizeFileName((string) ($data['filename'] ?? ''));
+        $object->setValueFrom($objectSubtype, $object->$objectSubtype, '', '', 'text', '', $user);
     }
 }
 
@@ -554,15 +676,40 @@ if (!(isset($error) && $error) && $subaction == 'toggleUnlinkedMedias') {
 if (!(isset($error) && $error) && $subaction == 'regenerate_thumbs') {
     $data = json_decode(file_get_contents('php://input'), true);
 
-    foreach ($mediaSizes as $size) {
-        $confWidth  = 'SATURNE_MEDIA_MAX_WIDTH_' . dol_strtoupper($size);
-        $confHeight = 'SATURNE_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size);
-        saturne_vignette($data['fullname'], $conf->global->$confWidth, $conf->global->$confHeight, '_' . $size);
+    // Only a media of the module gets its thumbs built again
+    $thumbsSource = (string) ($data['fullname'] ?? '');
+    if (is_file($thumbsSource) && image_format_supported($thumbsSource) >= 0 && $mediaFolderIsInside(dirname($thumbsSource), $mediaRecordRoots)) {
+        foreach ($mediaSizes as $size) {
+            saturne_vignette($thumbsSource, getDolGlobalInt('SATURNE_MEDIA_MAX_WIDTH_' . dol_strtoupper($size)), getDolGlobalInt('SATURNE_MEDIA_MAX_HEIGHT_' . dol_strtoupper($size)), '_' . $size);
+        }
     }
 }
 
 if (!empty($submitFileErrorText) && is_array($submitFileErrorText)) {
     print '<input class="error-medias" value="' . htmlspecialchars(json_encode($submitFileErrorText)) . '">';
+}
+
+// A call of the library list asks for one piece of the page only: saturne_header() answers it before
+// drawing the page, with that piece alone
+if (!empty($mediaGalleryAjax)) {
+    print '<div class="saturne-media-ajax-answer">';
+    if ($subaction == 'pendingMedias') {
+        // The media page lists the whole library or its pending medias, the gallery only the pending ones
+        $pendingOnly = empty($mediaListInPage) || !GETPOSTISSET('pending') || GETPOSTINT('pending');
+        print '<div class="saturne-media-tab-pane" data-tab="pending" data-loaded="1">';
+        require __DIR__ . '/medias_pending_list.tpl.php';
+        print '</div>';
+    }
+    if ($subaction == 'listMediaTargets') {
+        print '<select class="saturne-pending-target-options hidden">';
+        print '<option value=""></option>';
+        foreach ($targets as $target) {
+            print '<option value="' . (int) $target['id'] . '">' . dol_escape_htmltag($target['label']) . '</option>';
+        }
+        print '</select>';
+    }
+    print '</div>';
+    exit;
 }
 
 $mediaResolutionParts = explode('-', getDolGlobalString('SATURNE_MEDIA_RESOLUTION_USED'));
@@ -574,7 +721,10 @@ require_once __DIR__ . '/media_editor_modal.tpl.php';
 include __DIR__ . '/photo_editor_modal.tpl.php'; ?>
 
 <!-- START MEDIA GALLERY MODAL -->
-<div class="wpeo-modal modal-photo" id="media_gallery" data-id="<?php echo (isset($object) && $object) ? $object->id : 0 ?>">
+<div class="wpeo-modal modal-photo<?php echo !empty($mediaListInPage) ? ' media-gallery-library-page' : ''; ?>" id="media_gallery" data-id="<?php echo (isset($object) && $object) ? $object->id : 0 ?>"
+     data-label-added-one="<?php echo dol_escape_htmltag($langs->trans('MediaAddedWithSuccess')); ?>"
+     data-label-added-many="<?php echo dol_escape_htmltag($langs->trans('MediasAddedWithSuccess', '%s')); ?>"
+     data-label-send-error="<?php echo dol_escape_htmltag($langs->trans('ErrorWhileSendingAFile')); ?>">
     <div class="modal-container wpeo-modal-event">
         <!-- Covers the gallery while files are dragged over it: dropping them adds them to the library -->
         <div class="media-gallery-dropzone" data-label-ignored="<?php echo dol_escape_htmltag($langs->trans('DroppedFilesNotImages', '%s')); ?>">
@@ -584,7 +734,7 @@ include __DIR__ . '/photo_editor_modal.tpl.php'; ?>
         <!-- Modal-Header -->
         <div class="modal-header media-gallery-header">
                         <div class="media-gallery-title-wrapper" style="display: flex; flex-direction: column; align-items: center; margin-right: 10px;">
-                <h2 class="modal-title" style="text-transform: none; margin-bottom: 0; line-height: 1;"><?php echo $langs->trans('Medias')?></h2>
+                <h2 class="modal-title" style="text-transform: none; margin-bottom: 0; line-height: 1;"><?php echo $langs->trans('MediaGallery')?></h2>
                 <?php
                 $maxUploadSizeMo = round($conf->global->MAIN_UPLOAD_DOC / 1024, 1);
                 $linkToSettings = DOL_URL_ROOT . '/admin/security_file.php?mainmenu=home&leftmenu=setup_security';
@@ -639,7 +789,7 @@ include __DIR__ . '/photo_editor_modal.tpl.php'; ?>
             </div>
         </div>
         <!-- Modal-Content -->
-        <div class="modal-content" id="#modalMediaGalleryContent">
+        <div class="modal-content" id="modalMediaGalleryContent">
             <div class="messageSuccessSendPhoto notice hidden">
                 <div class="wpeo-notice notice-success send-photo-success-notice">
                     <div class="notice-content">
@@ -667,12 +817,13 @@ include __DIR__ . '/photo_editor_modal.tpl.php'; ?>
                     <div id="progressBar"></div>
                 </div>
             </div>
+            <?php // The media page lists the pending medias itself: a single gallery tab would lead nowhere
+            if (empty($mediaListInPage)) : ?>
             <div class="saturne-media-tabs">
                 <span class="saturne-media-tab active" data-tab="gallery"><i class="fas fa-th"></i> <?php echo $langs->trans('Gallery'); ?></span>
-                <?php if (empty($mediaListInPage)) : ?>
                 <span class="saturne-media-tab" data-tab="pending"><i class="fas fa-hourglass-half"></i> <?php echo $langs->trans('PendingMedias'); ?></span>
-                <?php endif; ?>
             </div>
+            <?php endif; ?>
             <div class="saturne-media-tab-pane" data-tab="gallery">
                 <div class="ecm-photo-list-content">
                     <?php
@@ -693,24 +844,15 @@ include __DIR__ . '/photo_editor_modal.tpl.php'; ?>
             </div>
             <?php endif; ?>
 
-            <?php
-            // Records to assign to. The list asking for them may be this modal or the media page,
-            // so they are answered outside the pane the page replaces
-            if ($subaction == 'listMediaTargets') { ?>
-                <select class="saturne-pending-target-options hidden">
-                    <option value=""></option>
-                    <?php foreach ($targets as $target) : ?>
-                        <option value="<?php echo (int) $target['id']; ?>"><?php echo dol_escape_htmltag($target['label']); ?></option>
-                    <?php endforeach; ?>
-                </select>
-            <?php } ?>
         </div>
         <!-- Modal-Footer -->
         <div class="modal-footer">
-            
+            <?php // On the media page no record opened the gallery: there is nothing to add the medias to
+            if (empty($mediaListInPage)) : ?>
             <div class="save-photo wpeo-button button-blue button-disable" value="">
                 <span><?php echo $langs->trans('Add'); ?></span>
             </div>
+            <?php endif; ?>
             <div class="wpeo-button button-red button-disable delete-photo">
                 <i class="fas fa-trash-alt"></i>
             </div>

@@ -90,6 +90,12 @@ window.saturne.mediaPending.event = function() {
 window.saturne.mediaPending.initTypeSelect = function(container) {
   var select = container.find('.saturne-pending-object-type');
 
+  // Without select2 (a page that does not load it), throwing here would stop every Saturne module
+  // initialised after this one
+  if (!select.length || typeof $.fn.select2 !== 'function') {
+    return;
+  }
+
   var withPicto = function(state) {
     if (!state.id) {
       return state.text;
@@ -310,6 +316,8 @@ window.saturne.mediaPending.previewMedia = function(event) {
   pending.find('.saturne-pending-row').removeClass('selected');
   row.addClass('selected');
 
+  // A small screen only shows the preview once it has a media to show
+  pending.find('.saturne-pending-preview').addClass('has-media');
   pending.find('.saturne-pending-preview-placeholder').addClass('hidden');
   pending.find('.saturne-pending-preview-image').attr('src', row.data('url')).removeClass('hidden');
   pending.find('.saturne-pending-preview-name').text(row.data('filename'));
@@ -369,12 +377,13 @@ window.saturne.mediaPending.refreshSelection = function() {
  * @returns {void}
  */
 window.saturne.mediaPending.loadTargets = function() {
-  var pending        = $(this).closest('.saturne-pending');
-  var objectType     = $(this).val();
-  var targetSelect   = pending.find('.saturne-pending-object');
-  var token          = window.saturne.toolbox.getToken();
-  var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+  var pending      = $(this).closest('.saturne-pending');
+  var objectType   = $(this).val();
+  var targetSelect = pending.find('.saturne-pending-object');
 
+  if (targetSelect.hasClass('select2-hidden-accessible')) {
+    targetSelect.select2('destroy');
+  }
   targetSelect.prop('disabled', true).html('<option value=""></option>');
 
   if (!objectType) {
@@ -382,14 +391,30 @@ window.saturne.mediaPending.loadTargets = function() {
     return;
   }
 
-  $.ajax({
-    url    : document.URL + querySeparator + 'subaction=listMediaTargets&object_type=' + encodeURIComponent(objectType) + '&token=' + token,
-    type   : 'POST',
-    success: function(resp) {
-      targetSelect.html($(resp).find('.saturne-pending-target-options').html()).prop('disabled', false);
-    },
-    error  : function() {
-      targetSelect.prop('disabled', false);
+  // The records are searched as the user types: the list shows the latest ones, a search reaches the
+  // older ones as well
+  targetSelect.prop('disabled', false).select2({
+    width      : 'resolve',
+    placeholder: pending.data('label-search'),
+    ajax       : {
+      transport: function(params, success, failure) {
+        var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+        var url            = document.URL + querySeparator + 'subaction=listMediaTargets&media_target_type=' + encodeURIComponent(objectType) + '&media_target_search=' + encodeURIComponent((params.data && params.data.term) || '') + '&token=' + window.saturne.toolbox.getToken();
+
+        return $.ajax({ url: url, type: 'POST' }).done(success).fail(failure);
+      },
+      delay         : 250,
+      processResults: function(resp) {
+        var results = [];
+
+        $(resp).find('.saturne-pending-target-options option').each(function() {
+          if (this.value) {
+            results.push({ id: this.value, text: $(this).text() });
+          }
+        });
+
+        return { results: results };
+      }
     }
   });
 };
@@ -443,7 +468,7 @@ window.saturne.mediaPending.assignMedias = function() {
       }
       if (resp && resp.message) {
         if (typeof $.jnotify === 'function') {
-          $.jnotify(resp.message, {color: 'green'});
+          $.jnotify(resp.message, resp.success ? {color: 'green'} : 'error', !resp.success);
         } else {
           alert(resp.message);
         }
@@ -547,19 +572,31 @@ window.saturne.mediaPending.unlinkFromRecord = function(event) {
   // The row reacts to a click by previewing its media, unlinking is not that
   event.stopPropagation();
 
-  var button = $(this);
-  var pane   = button.closest('.saturne-media-tab-pane');
+  var button     = $(this);
+  var pane       = button.closest('.saturne-media-tab-pane');
+  var pending    = button.closest('.saturne-pending');
   var confirmMsg = button.attr('data-confirm') || button.attr('title');
 
-  var dialogDiv = $('<div title="Confirmation"></div>').html(confirmMsg);
+  // The same words as the confirmation of the gallery, in the language of the user
+  var dialogDiv = $('<div></div>').attr('title', pending.data('label-confirm-title')).text(confirmMsg);
   dialogDiv.dialog({
     resizable: false,
     height: "auto",
     width: 400,
     modal: true,
+    // Each question opens its own box: it goes once answered, rather than piling up in the page
+    close: function() {
+      $(this).dialog('destroy').remove();
+    },
     buttons: [
       {
-        text: "Ok",
+        text: pending.data('label-no'),
+        click: function() {
+          $(this).dialog("close");
+        }
+      },
+      {
+        text: pending.data('label-yes'),
         click: function() {
           $(this).dialog("close");
 
@@ -586,12 +623,6 @@ window.saturne.mediaPending.unlinkFromRecord = function(event) {
               $('.wpeo-loader').removeClass('wpeo-loader');
             }
           });
-        }
-      },
-      {
-        text: "Annuler",
-        click: function() {
-          $(this).dialog("close");
         }
       }
     ]

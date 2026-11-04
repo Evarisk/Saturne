@@ -55,7 +55,18 @@ require_once __DIR__ . '/dolibarr.lib.php';
  */
 function saturne_header(int $load_media_gallery = 0, string $head = '', string $title = '', string $help_url = '', string $target = '', int $disablejs = 0, int $disablehead = 0, array $arrayofjs = [], array $arrayofcss = [], string $morequerystring = '', string $morecssonbody = '', string $replacemainareaby = '', int $disablenofollow = 0, int $disablenoindex = 0)
 {
-    global $moduleNameLowerCase;
+    global $mediaGalleryAjax, $moduleNameLowerCase, $subaction, $user;
+
+    // The media library belongs to the logged in users of the module: a public page keeps what the
+    // flag also loads (the signature pad), never the library nor its actions
+    $loadLibrary = $load_media_gallery && !defined('NOLOGIN') && is_object($user) && !empty($user->id);
+
+    // A call of the library list wants one piece of the page: it is answered before the page is drawn
+    if ($loadLibrary && in_array($subaction, ['pendingMedias', 'listMediaTargets', 'assignMedias', 'setMediaDescription', 'unlinkMediaFromRecord', 'syncMediaLibrary'], true)) {
+        $mediaGalleryAjax = true;
+        include __DIR__ . '/../core/tpl/medias/medias_gallery_modal.tpl.php';
+        exit;
+    }
 
     // Modern back office theme (css/scss/theme): logged-in pages only, the public pages and the PWAs
     // keep their own design
@@ -101,7 +112,7 @@ function saturne_header(int $load_media_gallery = 0, string $head = '', string $
         </script>
     <?php
 
-    if ($load_media_gallery) {
+    if ($loadLibrary) {
         //Media gallery
         include __DIR__ . '/../core/tpl/medias/medias_gallery_modal.tpl.php';
     }
