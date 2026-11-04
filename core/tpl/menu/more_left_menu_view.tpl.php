@@ -40,7 +40,7 @@
                 <?php
                     echo saturne_get_button_component_html([
                         'className' => 'linkElement', //@tod meilleur nom de classe
-                        'href'      => dol_buildpath('custom/' . $moreParams['moduleNameLowerCase'] . '/view/' . $moreParams['moduleNameLowerCase'] . 'standard/' . $moreParams['moduleNameLowerCase'] . 'standard_card.php?id=' . getDolGlobalInt(dol_strtoupper($moreParams['moduleNameLowerCase']) . '_ACTIVE_STANDARD'), 1),
+                        'href'      => dol_buildpath('/' . $moreParams['moduleNameLowerCase'] . '/view/' . $moreParams['moduleNameLowerCase'] . 'standard/' . $moreParams['moduleNameLowerCase'] . 'standard_card.php', 1) . '?id=' . getDolGlobalInt(dol_strtoupper($moreParams['moduleNameLowerCase']) . '_ACTIVE_STANDARD'),
                         'iconClass' => 'fas fa-sitemap pictofixedwidth',
                         'spans'     => [
                             [
@@ -55,7 +55,7 @@
                         <?php
                         echo saturne_get_button_component_html([
                             'className' => 'wpeo-button button-square-40 button-secondary wpeo-tooltip-event',
-                            'href'      => dol_buildpath('custom/' . $moreParams['moduleNameLowerCase'] . '/view/' . $moreParams['objectElement'] . '/' . $moreParams['objectElement'] . '_card.php?action=create&element_type=0', 1),
+                            'href'      => dol_buildpath('/' . $moreParams['moduleNameLowerCase'] . '/view/' . $moreParams['objectElement'] . '/' . $moreParams['objectElement'] . '_card.php', 1) . '?action=create&element_type=0',
                             'moreAttr'  => [
                                 'data-direction' => 'bottom',
                                 'data-color'     => 'light',
@@ -72,7 +72,7 @@
 
                         echo saturne_get_button_component_html([
                             'className' => 'wpeo-button button-square-40 wpeo-tooltip-event',
-                            'href'      => dol_buildpath('custom/' . $moreParams['moduleNameLowerCase'] . '/view/' . $moreParams['objectElement'] . '/' . $moreParams['objectElement'] . '_card.php?action=create&element_type=1', 1),
+                            'href'      => dol_buildpath('/' . $moreParams['moduleNameLowerCase'] . '/view/' . $moreParams['objectElement'] . '/' . $moreParams['objectElement'] . '_card.php', 1) . '?action=create&element_type=1',
                             'moreAttr'  => [
                                 'data-direction' => 'bottom',
                                 'data-color'     => 'light',

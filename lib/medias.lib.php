@@ -532,7 +532,7 @@ function saturne_media_record_object(string $moduleName, string $element, string
     $moduleNameLowerCase = dol_strtolower($moduleName);
 
     if (!isset($moduleClasses[$moduleNameLowerCase])) {
-        $classDir                            = __DIR__ . '/../../' . $moduleNameLowerCase . '/class/';
+        $classDir                            = dol_buildpath('/' . $moduleNameLowerCase . '/class/');
         $moduleClasses[$moduleNameLowerCase] = dol_is_dir($classDir) ? dol_dir_list($classDir, 'files', 1, '\.class\.php$') : [];
     }
 
@@ -1104,7 +1104,7 @@ function saturne_get_media_linked_elements(string $moduleName, string $fileName)
 
     $dir                 = $conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1];
     $fileArrays          = dol_dir_list($dir, 'files', 1, $regexFormattedFileName, '.odt|.pdf|barcode|_mini|_medium|_small|_large');
-    $moduleClasses       = dol_dir_list(__DIR__ . '/../../' . $moduleNameLowerCase . '/class/', 'files', 1);
+    $moduleClasses       = dol_dir_list(dol_buildpath('/' . $moduleNameLowerCase . '/class/'), 'files', 1);
 
     $mediaLinkedElements = [];
     foreach ($fileArrays as $fileArray) {
