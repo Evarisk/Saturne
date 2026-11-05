@@ -903,17 +903,17 @@ include __DIR__ . '/photo_editor_modal.tpl.php'; ?>
             </div>
             <?php endif; ?>
             <?php if ($libraryCanWrite) : ?>
-            <div class="wpeo-button button-red button-disable delete-photo">
-                <i class="fas fa-trash-alt"></i>
-            </div>
-            <?php
-            $confirmationParams = [
-                'picto'             => 'fontawesome_fa-trash-alt_fas_#e05353',
-                'color'             => '#e05353',
-                'confirmationTitle' => 'DeleteFiles',
-                'buttonParams'      => ['No' => 'button-blue marginrightonly confirmation-close', 'Yes' => 'button-red confirmation-delete']
-            ];
-            require __DIR__ . '/../utils/confirmation_view.tpl.php';
+                <div class="wpeo-button button-red button-disable delete-photo">
+                    <i class="fas fa-trash-alt"></i>
+                </div>
+                <?php
+                $confirmationParams = [
+                    'picto'             => 'fontawesome_fa-trash-alt_fas_#e05353',
+                    'color'             => '#e05353',
+                    'confirmationTitle' => 'DeleteFiles',
+                    'buttonParams'      => ['No' => 'button-blue marginrightonly confirmation-close', 'Yes' => 'button-red confirmation-delete']
+                ];
+                require __DIR__ . '/../utils/confirmation_view.tpl.php';
             endif; ?>
         </div>
     </div>
