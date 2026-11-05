@@ -1108,9 +1108,9 @@ function saturne_require_objects_mod(array $numberingModulesNames, string $modul
                 $objectType = str_replace('_', '', $objectType);
             }
 
-            $modPathCustom   = dirname(__FILE__) . '/../../' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $objectType . '/' . $numberingModulesName . '.php';
-            $modPathCustomDoc = dirname(__FILE__) . '/../../' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $objectType . '/' . $numberingModulesName . '.php';
-            $modPathCustomDoc2 = dirname(__FILE__) . '/../../' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $objectType . 'document/' . $numberingModulesName . '.php';
+            $modPathCustom   = dol_buildpath('/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $objectType . '/' . $numberingModulesName . '.php');
+            $modPathCustomDoc = dol_buildpath('/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $objectType . '/' . $numberingModulesName . '.php');
+            $modPathCustomDoc2 = dol_buildpath('/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $objectType . 'document/' . $numberingModulesName . '.php');
             $modPathDolibarr = DOL_DOCUMENT_ROOT . '/core/modules/' . $objectType . '/' . $numberingModulesName . '.php';
 
             if (file_exists($modPathCustom)) {
@@ -1124,7 +1124,7 @@ function saturne_require_objects_mod(array $numberingModulesNames, string $modul
             } else {
                 // Some modules file their numbering modules one folder deeper (digiriskelement/accident, riskanalysis/risk...):
                 // without this lookup, getNextNumRef() only worked on pages that had preloaded the module with that folder in the key
-                $nestedModPaths = glob(dirname(__FILE__) . '/../../' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/*/' . $objectType . '/' . $numberingModulesName . '.php');
+                $nestedModPaths = glob(dol_buildpath('/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase) . '/*/' . $objectType . '/' . $numberingModulesName . '.php');
                 if (!empty($nestedModPaths)) {
                     require_once $nestedModPaths[0];
                 }

@@ -70,8 +70,8 @@ if ($user->socid) {
 // Initialize technical objects
 $object = new SaturneSchedules($db);
 
-$customClassPath = __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $elementType . '.class.php';
-$customLibPath   = __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' . $elementType . '.lib.php';
+$customClassPath = dol_buildpath('/' . $moduleNameLowerCase . '/class/' . $elementType . '.class.php');
+$customLibPath   = dol_buildpath('/' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' . $elementType . '.lib.php');
 if (isModEnabled($elementType) || is_file($customClassPath)) {
     if (is_file($customClassPath)) {
         require_once $customClassPath;

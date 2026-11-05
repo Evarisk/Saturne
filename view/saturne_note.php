@@ -38,8 +38,8 @@ $objectType = GETPOST('object_type', 'alpha');
 $moduleNameLowerCase = strtolower($moduleName);
 
 // Libraries
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' .  $objectType . '.lib.php';
+require_once dol_buildpath('/' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php');
+require_once dol_buildpath('/' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' .  $objectType . '.lib.php');
 
 // Global variables definitions
 global $conf, $db, $langs, $hookmanager, $user;
