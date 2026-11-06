@@ -34,6 +34,7 @@ if (file_exists('../saturne.main.inc.php')) {
 // Get module parameters
 $moduleName          = GETPOST('module_name', 'alpha');
 $moduleNameLowerCase = dol_strtolower($moduleName);
+$moduleNameUpperCase = dol_strtoupper($moduleName);
 
 // Load Saturne libraries
 require_once __DIR__ . '/../lib/medias.lib.php';
@@ -58,38 +59,50 @@ if (!isModEnabled($moduleNameLowerCase)) {
     accessforbidden($langs->trans('ErrorModuleNotEnabled', $moduleName));
 }
 
-// The library is shared by the whole module: reading it asks for a right on that module, the same
-// way its files are already served to anyone allowed to read it
-$permissiontoread = !empty($user->rights->$moduleNameLowerCase);
+// Only a module offering its library in a menu has one
+$libraryMenu = saturne_get_media_library_menu($moduleNameLowerCase);
+if ($libraryMenu === null) {
+    accessforbidden($langs->trans('ErrorModuleHasNoMediaLibrary', $moduleName));
+}
+
+// Reading the library asks for the right its menu entry asks for
+$permissiontoread = saturne_media_library_can($moduleNameLowerCase, 'read');
 saturne_check_access($permissiontoread);
 
 /*
  * View
  */
 
-$title    = $langs->trans('Medias');
+$title    = $langs->trans('MediaGallery');
 $help_url = '';
 
 // The gallery modal carries the actions the list sends its writes to
-saturne_header(1, '', $title, $help_url);
+saturne_header(1, '', $title . ' - ' . $libraryMenu['module_label'], $help_url);
 
-print load_fiche_titre($title . ' - ' . $moduleName, '', 'fontawesome_fa-images_fas_#63acdc');
+print load_fiche_titre($title . ' - ' . dol_escape_htmltag($libraryMenu['module_label']), '', 'fontawesome_fa-images_fas_#63acdc');
 
 print '<div class="saturne-media-tabs" style="display: flex; align-items: center;">';
 print '<a class="saturne-media-tab' . ($pendingOnly ? ' active' : '') . '" href="' . dol_escape_htmltag($_SERVER['PHP_SELF']) . '?module_name=' . urlencode($moduleName) . '&pending=1"><i class="fas fa-hourglass-half"></i> ' . $langs->trans('PendingMedias') . '</a>';
 print '<a class="saturne-media-tab' . ($pendingOnly ? '' : ' active') . '" href="' . dol_escape_htmltag($_SERVER['PHP_SELF']) . '?module_name=' . urlencode($moduleName) . '&pending=0"><i class="fas fa-images"></i> ' . $langs->trans('AllMedias') . '</a>';
 
-print '<div class="wpeo-button button-main open-media-gallery add-media modal-open" style="margin-left: auto; padding: 6px 12px;" title="' . dol_escape_htmltag($langs->trans("AddMedia")) . '">';
-print '<input type="hidden" class="modal-options" data-modal-to-open="media_gallery" data-from-id="0" data-from-type="' . dol_escape_htmltag($moduleNameLowerCase) . '" data-from-subtype="" data-from-subdir=""/>';
-print '<i class="fas fa-plus"></i>';
-print '</div>';
+// Adding medias asks for a right to write on the module, as every change of the library does
+$permissiontoadd = saturne_media_library_can($moduleNameLowerCase, 'write');
+
+if ($permissiontoadd) {
+    print '<div class="wpeo-button button-main open-media-gallery add-media modal-open" style="margin-left: auto; padding: 6px 12px;" title="' . dol_escape_htmltag($langs->trans("AddMedia")) . '">';
+    print '<input type="hidden" class="modal-options" data-modal-to-open="media_gallery" data-from-id="0" data-from-type="' . dol_escape_htmltag($moduleNameLowerCase) . '" data-from-subtype="" data-from-subdir=""/>';
+    print '<i class="fas fa-plus"></i>';
+    print '</div>';
+}
 print '</div>';
 
 // Covers the page while files are dragged over it: dropping them adds them to the library
-print '<div class="media-gallery-dropzone media-library-page-dropzone" data-label-ignored="' . dol_escape_htmltag($langs->trans('DroppedFilesNotImages', '%s')) . '" data-label-done="' . dol_escape_htmltag($langs->trans('MediasAddedToLibrary', '%s')) . '" data-label-error="' . dol_escape_htmltag($langs->trans('PhotoNotSent')) . '">';
-print '<i class="fas fa-cloud-upload-alt"></i>';
-print '<span>' . $langs->trans('DropMediasHere') . '</span>';
-print '</div>';
+if ($permissiontoadd) {
+    print '<div class="media-gallery-dropzone media-library-page-dropzone" data-label-ignored="' . dol_escape_htmltag($langs->trans('DroppedFilesNotImages', '%s')) . '" data-label-done="' . dol_escape_htmltag($langs->trans('MediasAddedToLibrary', '%s')) . '" data-label-error="' . dol_escape_htmltag($langs->trans('PhotoNotSent')) . '">';
+    print '<i class="fas fa-cloud-upload-alt"></i>';
+    print '<span>' . $langs->trans('DropMediasHere') . '</span>';
+    print '</div>';
+}
 
 // The pane keeps the markup the list view reloads itself into after an assignment
 print '<div class="saturne-media-tab-pane saturne-media-page-pane" data-tab="pending" data-loaded="1">';

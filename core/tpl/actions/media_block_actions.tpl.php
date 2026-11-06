@@ -87,7 +87,8 @@ if ($action == 'uploadPhoto' && !empty($mediaBlockDir) && !empty($conf->global->
             $uploadedNames = is_array($uploadedFiles['name']) ? $uploadedFiles['name'] : [$uploadedFiles['name']];
 
             foreach ($uploadedNames as $uploadedName) {
-                $uploadedPath = $mediaBlockDir . '/' . dol_sanitizeFileName($uploadedName);
+                // Stored as dol_add_file_process() names it: a phone shot IMG_0001.JPG becomes IMG_0001.jpg
+                $uploadedPath = $mediaBlockDir . '/' . saturne_media_stored_name((string) $uploadedName);
 
                 if (!dol_is_file($uploadedPath)) {
                     continue;

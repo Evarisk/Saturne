@@ -168,6 +168,10 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
             // SIGNATURE
             // MEDIA
             case 'SATURNE_MEDIA_LINK':
+                // The library of a module gives medias to records of its own and to ones it keeps the
+                // medias of (a Dolibarr ticket for Digirisk): the event goes to the agenda of the record,
+                // under the module that owns it, or none for a record of Dolibarr itself
+                $actioncomm->elementtype = !empty($object->module) ? $object->element . '@' . $object->module : $object->element;
                 $langs->loadLangs(['medias@saturne']);
                 $actioncomm->label = $langs->transnoentities('MediaLinkedTrigger', implode(', ', $object->context['medias'] ?? []));
                 $actioncomm->create($user);

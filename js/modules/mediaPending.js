@@ -71,6 +71,66 @@ window.saturne.mediaPending.event = function() {
   $(document).on('click', '.saturne-pending-assign-current', window.saturne.mediaPending.assignToRecord);
   $(document).on('click', '.saturne-pending-assign-block', window.saturne.mediaPending.assignToBlock);
   $(document).on('change', '.saturne-pending-description', window.saturne.mediaPending.saveDescription);
+  $(document).on('click', '.saturne-pending-describe-ai', window.saturne.mediaPending.describeWithAI);
+};
+
+/**
+ * Have the AI module describe the media shown in the preview, then put it in its description
+ *
+ * @memberof Saturne_MediaPending
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @returns {void}
+ */
+window.saturne.mediaPending.describeWithAI = function() {
+  var button  = $(this);
+  var pending = button.closest('.saturne-pending');
+  var row     = pending.find('.saturne-pending-row.selected');
+
+  if (!row.length || button.hasClass('button-disable')) {
+    return;
+  }
+
+  var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+  var notify         = function(message, success) {
+    if (typeof $.jnotify === 'function') {
+      $.jnotify(message, success ? {color: 'green'} : 'error', !success);
+    }
+  };
+
+  button.addClass('button-disable').find('i').removeClass('fa-magic').addClass('fa-circle-notch fa-spin');
+
+  $.ajax({
+    url        : document.URL + querySeparator + 'subaction=describeMediaAI&token=' + window.saturne.toolbox.getToken(),
+    type       : 'POST',
+    data       : JSON.stringify({ filename: row.data('filename') }),
+    processData: false,
+    contentType: 'application/json',
+    success    : function(resp) {
+      var answer = {};
+
+      try {
+        answer = JSON.parse($(resp).find('#saturne-describe-media-response').text());
+      } catch (e) {
+        answer = {};
+      }
+
+      if (answer.success) {
+        row.find('.saturne-pending-description').val(answer.description);
+        notify(answer.description, true);
+      } else {
+        notify(answer.error || button.data('error'), false);
+      }
+    },
+    error      : function() {
+      notify(button.data('error'), false);
+    },
+    complete   : function() {
+      button.removeClass('button-disable').find('i').removeClass('fa-circle-notch fa-spin').addClass('fa-magic');
+    }
+  });
 };
 
 /**
@@ -90,6 +150,12 @@ window.saturne.mediaPending.event = function() {
 window.saturne.mediaPending.initTypeSelect = function(container) {
   var select = container.find('.saturne-pending-object-type');
 
+  // Without select2 (a page that does not load it), throwing here would stop every Saturne module
+  // initialised after this one
+  if (!select.length || typeof $.fn.select2 !== 'function') {
+    return;
+  }
+
   var withPicto = function(state) {
     if (!state.id) {
       return state.text;
@@ -108,6 +174,37 @@ window.saturne.mediaPending.initTypeSelect = function(container) {
     width            : 'resolve',
     templateResult   : withPicto,
     templateSelection: withPicto
+  });
+
+  // Until a type is chosen, the records list is the same kind of select, disabled
+  container.find('.saturne-pending-object').each(function() {
+    window.saturne.mediaPending.initEmptyTargetSelect($(this));
+  });
+};
+
+/**
+ * Show the records list as a disabled select2, the way it looks once a type is chosen
+ *
+ * @memberof Saturne_MediaPending
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param   {jQuery} targetSelect Records list of the pending tab
+ * @returns {void}
+ */
+window.saturne.mediaPending.initEmptyTargetSelect = function(targetSelect) {
+  if (typeof $.fn.select2 !== 'function') {
+    return;
+  }
+
+  if (targetSelect.hasClass('select2-hidden-accessible')) {
+    targetSelect.select2('destroy');
+  }
+
+  targetSelect.prop('disabled', true).select2({
+    width      : 'resolve',
+    placeholder: targetSelect.closest('.saturne-pending').data('label-search')
   });
 };
 
@@ -310,6 +407,9 @@ window.saturne.mediaPending.previewMedia = function(event) {
   pending.find('.saturne-pending-row').removeClass('selected');
   row.addClass('selected');
 
+  // A small screen only shows the preview once it has a media to show
+  pending.find('.saturne-pending-preview').addClass('has-media');
+  pending.find('.saturne-pending-describe-ai').removeClass('hidden');
   pending.find('.saturne-pending-preview-placeholder').addClass('hidden');
   pending.find('.saturne-pending-preview-image').attr('src', row.data('url')).removeClass('hidden');
   pending.find('.saturne-pending-preview-name').text(row.data('filename'));
@@ -369,27 +469,45 @@ window.saturne.mediaPending.refreshSelection = function() {
  * @returns {void}
  */
 window.saturne.mediaPending.loadTargets = function() {
-  var pending        = $(this).closest('.saturne-pending');
-  var objectType     = $(this).val();
-  var targetSelect   = pending.find('.saturne-pending-object');
-  var token          = window.saturne.toolbox.getToken();
-  var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+  var pending      = $(this).closest('.saturne-pending');
+  var objectType   = $(this).val();
+  var targetSelect = pending.find('.saturne-pending-object');
 
+  if (targetSelect.hasClass('select2-hidden-accessible')) {
+    targetSelect.select2('destroy');
+  }
   targetSelect.prop('disabled', true).html('<option value=""></option>');
 
   if (!objectType) {
+    window.saturne.mediaPending.initEmptyTargetSelect(targetSelect);
     window.saturne.mediaPending.refreshSelection.call(this);
     return;
   }
 
-  $.ajax({
-    url    : document.URL + querySeparator + 'subaction=listMediaTargets&object_type=' + encodeURIComponent(objectType) + '&token=' + token,
-    type   : 'POST',
-    success: function(resp) {
-      targetSelect.html($(resp).find('.saturne-pending-target-options').html()).prop('disabled', false);
-    },
-    error  : function() {
-      targetSelect.prop('disabled', false);
+  // The records are searched as the user types: the list shows the latest ones, a search reaches the
+  // older ones as well
+  targetSelect.prop('disabled', false).select2({
+    width      : 'resolve',
+    placeholder: pending.data('label-search'),
+    ajax       : {
+      transport: function(params, success, failure) {
+        var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+        var url            = document.URL + querySeparator + 'subaction=listMediaTargets&media_target_type=' + encodeURIComponent(objectType) + '&media_target_search=' + encodeURIComponent((params.data && params.data.term) || '') + '&token=' + window.saturne.toolbox.getToken();
+
+        return $.ajax({ url: url, type: 'POST' }).done(success).fail(failure);
+      },
+      delay         : 250,
+      processResults: function(resp) {
+        var results = [];
+
+        $(resp).find('.saturne-pending-target-options option').each(function() {
+          if (this.value) {
+            results.push({ id: this.value, text: $(this).text() });
+          }
+        });
+
+        return { results: results };
+      }
     }
   });
 };
@@ -443,7 +561,7 @@ window.saturne.mediaPending.assignMedias = function() {
       }
       if (resp && resp.message) {
         if (typeof $.jnotify === 'function') {
-          $.jnotify(resp.message, {color: 'green'});
+          $.jnotify(resp.message, resp.success ? {color: 'green'} : 'error', !resp.success);
         } else {
           alert(resp.message);
         }
@@ -547,54 +665,42 @@ window.saturne.mediaPending.unlinkFromRecord = function(event) {
   // The row reacts to a click by previewing its media, unlinking is not that
   event.stopPropagation();
 
-  var button = $(this);
-  var pane   = button.closest('.saturne-media-tab-pane');
+  var button     = $(this);
+  var pane       = button.closest('.saturne-media-tab-pane');
+  var pending    = button.closest('.saturne-pending');
   var confirmMsg = button.attr('data-confirm') || button.attr('title');
 
-  var dialogDiv = $('<div title="Confirmation"></div>').html(confirmMsg);
-  dialogDiv.dialog({
-    resizable: false,
-    height: "auto",
-    width: 400,
-    modal: true,
-    buttons: [
-      {
-        text: "Ok",
-        click: function() {
-          $(this).dialog("close");
+  // The same question box as the trash of the gallery, in the language of the user
+  window.saturne.mediaGallery.confirm({
+    title  : pending.data('label-confirm-title'),
+    message: confirmMsg,
+    yes    : pending.data('label-yes'),
+    no     : pending.data('label-no'),
+    onYes  : function() {
+      var token          = window.saturne.toolbox.getToken();
+      var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
 
-          var token          = window.saturne.toolbox.getToken();
-          var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+      window.saturne.loader.display(button.closest('.saturne-pending'));
 
-          window.saturne.loader.display(button.closest('.saturne-pending'));
-
-          $.ajax({
-            url        : document.URL + querySeparator + 'subaction=unlinkMediaFromRecord&token=' + token,
-            type       : 'POST',
-            data       : JSON.stringify({
-              element : button.data('element'),
-              ref     : button.data('ref'),
-              filename: button.closest('.saturne-pending-row').data('filename')
-            }),
-            processData: false,
-            contentType: 'application/json',
-            success    : function() {
-              // The media may have gone back to being pending: the list is rebuilt rather than patched
-              window.saturne.mediaPending.load(pane.attr('data-loaded', '0'));
-            },
-            error      : function() {
-              $('.wpeo-loader').removeClass('wpeo-loader');
-            }
-          });
+      $.ajax({
+        url        : document.URL + querySeparator + 'subaction=unlinkMediaFromRecord&token=' + token,
+        type       : 'POST',
+        data       : JSON.stringify({
+          element : button.data('element'),
+          ref     : button.data('ref'),
+          filename: button.closest('.saturne-pending-row').data('filename')
+        }),
+        processData: false,
+        contentType: 'application/json',
+        success    : function() {
+          // The media may have gone back to being pending: the list is rebuilt rather than patched
+          window.saturne.mediaPending.load(pane.attr('data-loaded', '0'));
+        },
+        error      : function() {
+          $('.wpeo-loader').removeClass('wpeo-loader');
         }
-      },
-      {
-        text: "Annuler",
-        click: function() {
-          $(this).dialog("close");
-        }
-      }
-    ]
+      });
+    }
   });
 };
 

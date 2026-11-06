@@ -30,7 +30,7 @@ MediaData                 = Media setup
 ConfirmUnlinkMedia        = Are you sure you want to detach the selected media ?
 TakePhoto                 = Take a photo
 AddPhotoFromComputer      = Add a photo from device gallery
-AddPhotoFromMediaGallery  = Add a photo from media gallery
+AddPhotoFromMediaGallery  = Add a photo from the media library
 DeletePhoto               = Delete photo
 DeletePhotoConfirmation   = Delete this photo?
 AvailableTools            = Available tools
@@ -123,3 +123,18 @@ SyncMediaLibraryError=The catch up of the library failed
 DropMediasHere=Drop your images here to add them to the library
 DroppedFilesNotImages=Only images go into the library, file(s) left out: %s
 MediasAddedToLibrary=%s media(s) added to the library
+
+# Library: assignment, rights, messages
+ObjectType=Object type
+SearchARecord=Search a record
+MediaConfirmationTitle=Confirmation
+MediaAssignedToRecord=Media %s assigned to %s
+MediasAssignedToRecord=Medias %s assigned to %s
+MediasNoLongerInLibrary=The selected medias are no longer in the library
+MediaAddedWithSuccess=1 media added successfully
+MediasAddedWithSuccess=%s medias added successfully
+ErrorWhileSendingAFile=Error while sending a file.
+ErrorModuleHasNoMediaLibrary=Module %s has no media library
+DescribeMediaWithAI=Describe with AI
+MediaAIDescribePrompt=Describe this photo in one or two short sentences, in English, so it can be found again in a media library. Answer with the description only.
+DeleteSelectedMediasConfirm=Delete the %s selected media(s) from the library?

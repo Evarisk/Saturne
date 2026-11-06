@@ -289,7 +289,7 @@ ExportData = Exporter mes données
 # Data - Donnée
 SocietyAttendants   = Tiers des participants externe
 Back                = Retour
-DeleteFiles         = Êtes vous sur de vouloir supprimer les <span class="filesLinked"></span> media(s) sélectionné(s) ?
+DeleteFiles         = Êtes-vous sûr de vouloir supprimer le(s) <span class="filesLinked"></span> média(s) sélectionné(s) ?
 RecordingInProgress  = Enregistrement en cours...
 ExportGraphCSV       = Exporter le graphique en CSV
 FavoriteSaved        = Favori enregistré
