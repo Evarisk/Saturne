@@ -423,7 +423,8 @@ if ($subaction == 'syncMediaLibrary' && $user->admin) {
     $librarySettings = saturne_get_media_library_settings($moduleNameLowerCase);
     $librarySync     = saturne_sync_media_library($moduleNameLowerCase, $librarySettings['excluded'], $librarySettings['folders'], microtime(true) + 20);
 
-    echo '<span id="saturne-sync-media-library-response" class="hidden">' . json_encode($librarySync) . '</span>';
+    // Wrapped like the other short answers: the browser looks for the span inside the answer
+    echo '<div class="saturne-media-ajax-answer"><span id="saturne-sync-media-library-response" class="hidden">' . json_encode($librarySync) . '</span></div>';
     exit;
 }
 
@@ -496,15 +497,16 @@ if ($subaction == 'assignMedias') {
                 $targetObject->context['medias'] = $assigned;
                 $targetObject->call_trigger('SATURNE_MEDIA_LINK', $user);
                 $msg = $langs->trans(count($assigned) > 1 ? 'MediasAssignedToRecord' : 'MediaAssignedToRecord', implode(', ', $assigned), $pickedObject->ref);
-                print '<span id="saturne-assign-medias-response" class="hidden">' . dol_escape_htmltag(json_encode(['success' => true, 'message' => $msg])) . '</span>';
+                print '<div class="saturne-media-ajax-answer"><span id="saturne-assign-medias-response" class="hidden">' . dol_escape_htmltag(json_encode(['success' => true, 'message' => $msg])) . '</span></div>';
                 exit;
             }
             // A media removed from the library meanwhile is not there to copy any more
-            print '<span id="saturne-assign-medias-response" class="hidden">' . dol_escape_htmltag(json_encode(['success' => false, 'message' => $langs->trans('MediasNoLongerInLibrary')])) . '</span>';
+            print '<div class="saturne-media-ajax-answer"><span id="saturne-assign-medias-response" class="hidden">' . dol_escape_htmltag(json_encode(['success' => false, 'message' => $langs->trans('MediasNoLongerInLibrary')])) . '</span></div>';
             exit;
         }
     }
-    print '<span id="saturne-assign-medias-response" class="hidden">' . dol_escape_htmltag(json_encode(['success' => false])) . '</span>';
+    // Wrapped like the other short answers: the browser looks for the span inside the answer
+    print '<div class="saturne-media-ajax-answer"><span id="saturne-assign-medias-response" class="hidden">' . dol_escape_htmltag(json_encode(['success' => false])) . '</span></div>';
     exit;
 }
 

@@ -175,6 +175,37 @@ window.saturne.mediaPending.initTypeSelect = function(container) {
     templateResult   : withPicto,
     templateSelection: withPicto
   });
+
+  // Until a type is chosen, the records list is the same kind of select, disabled
+  container.find('.saturne-pending-object').each(function() {
+    window.saturne.mediaPending.initEmptyTargetSelect($(this));
+  });
+};
+
+/**
+ * Show the records list as a disabled select2, the way it looks once a type is chosen
+ *
+ * @memberof Saturne_MediaPending
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param   {jQuery} targetSelect Records list of the pending tab
+ * @returns {void}
+ */
+window.saturne.mediaPending.initEmptyTargetSelect = function(targetSelect) {
+  if (typeof $.fn.select2 !== 'function') {
+    return;
+  }
+
+  if (targetSelect.hasClass('select2-hidden-accessible')) {
+    targetSelect.select2('destroy');
+  }
+
+  targetSelect.prop('disabled', true).select2({
+    width      : 'resolve',
+    placeholder: targetSelect.closest('.saturne-pending').data('label-search')
+  });
 };
 
 /**
@@ -448,6 +479,7 @@ window.saturne.mediaPending.loadTargets = function() {
   targetSelect.prop('disabled', true).html('<option value=""></option>');
 
   if (!objectType) {
+    window.saturne.mediaPending.initEmptyTargetSelect(targetSelect);
     window.saturne.mediaPending.refreshSelection.call(this);
     return;
   }

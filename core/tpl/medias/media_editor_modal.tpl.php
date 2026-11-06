@@ -43,7 +43,7 @@
                 <div class="modal-close"><i class="fas fa-2x fa-times"></i></div>
             </div>
             <!-- Modal-Content -->
-            <div class="modal-content" id="#modalContent">
+            <div class="modal-content" id="modalMediaEditorContent">
                 <div class="canvas-container">
                     <canvas id="canvas" style="border: #0b419b solid 2px;"></canvas>
                 </div>
