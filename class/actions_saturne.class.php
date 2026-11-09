@@ -23,7 +23,7 @@
  */
 
 // Load Saturne Libraries
-require_once __DIR__ . '/../../saturne/lib/object.lib.php';
+require_once __DIR__ . '/../lib/object.lib.php';
 
 /**
  * Class ActionsSaturne
@@ -111,13 +111,92 @@ class ActionsSaturne
         global $user, $langs;
         if (strpos($parameters['context'], 'emailtemplates') !== false) {
             if (isModEnabled('saturne') && $user->hasRight('saturne', 'adminpage', 'read')) {
-                $pictopath = dol_buildpath('custom/saturne/img/saturne_color.png', 1);
+                $pictopath = dol_buildpath('/saturne/img/saturne_color.png', 1);
                 $picto     = img_picto('', $pictopath, '', 1, 0, 0, '', 'pictoModule');
 
                 foreach (['saturne', 'saturne_document', 'saturne_signature'] as $key) {
                     $value[$key] = $picto . dol_escape_htmltag($langs->trans('Saturne'));
                 }
                 $this->results = $value;
+            }
+        }
+
+        return 0;
+    }
+
+    /**
+     * Overloading the saturneEmailTemplateSettings function : replacing the parent's function with the one below
+     *
+     * Declares the Saturne settings designating an email template, shown by their label in the "Used by" column of the
+     * email templates overview (admin/emailtemplates.php). A module declares its own the same way, in the
+     * 'emailtemplates' context: ['CONSTANT_NAME' => ['label' => 'What the setting sends', 'url' => 'Page setting it',
+     * 'type' => 'Element whose templates it picks from, optional']]
+     *
+     * @param  array $parameters Hook metadata (context, etc...)
+     * @return int               0 < on error, 0 on success, 1 to replace standard code
+     */
+    public function saturneEmailTemplateSettings(array $parameters): int
+    {
+        global $langs;
+
+        $langs->loadLangs(['ticket', 'saturne@saturne']);
+
+        // Constant => [section, recipient] language keys, as on the setup page
+        $ticketSettings = [
+            'SATURNE_TICKET_CREATE_MAIL_MODEL_ADMIN'      => ['TicketMailModelCreateSection', 'TicketCreateMailModelAdmin'],
+            'SATURNE_TICKET_CREATE_MAIL_MODEL_CUSTOMER'   => ['TicketMailModelCreateSection', 'TicketCreateMailModelCustomer'],
+            'SATURNE_TICKET_CREATE_MAIL_MODEL_ASSIGNEE'   => ['TicketMailModelCreateSection', 'TicketCreateMailModelAssignee'],
+            'SATURNE_TICKET_CLOSE_MAIL_MODEL_ADMIN'       => ['TicketMailModelCloseSection', 'TicketCloseMailModelAdmin'],
+            'SATURNE_TICKET_CLOSE_MAIL_MODEL_CUSTOMER'    => ['TicketMailModelCloseSection', 'TicketCloseMailModelCustomer'],
+            'SATURNE_TICKET_ASSIGNED_MAIL_MODEL_ASSIGNEE' => ['TicketMailModelAssignedSection', 'TicketAssignedMailModelAssignee'],
+            'SATURNE_TICKET_ASSIGNED_MAIL_MODEL_CUSTOMER' => ['TicketMailModelAssignedSection', 'TicketAssignedMailModelCustomer'],
+        ];
+
+        $this->results = [];
+        foreach ($ticketSettings as $name => $labelKeys) {
+            $this->results[$name] = [
+                'label' => $langs->transnoentities('Ticket') . ' · ' . $langs->transnoentities($labelKeys[0]) . ' · ' . $langs->transnoentities($labelKeys[1]),
+                'url'   => dol_buildpath('/saturne/admin/setup.php', 1),
+                'type'  => 'ticket',
+            ];
+        }
+
+        // Written on module activation, set nowhere in the interface
+        $this->results['SATURNE_EMAIL_TEMPLATE_SIGNATURE']        = ['label' => $langs->transnoentities('EmailTemplatesSettingSignature'), 'url' => ''];
+        $this->results['SATURNE_EMAIL_TEMPLATE_GLOBAL_SIGNATURE'] = ['label' => $langs->transnoentities('EmailTemplatesSettingGlobalSignature'), 'url' => ''];
+
+        return 0;
+    }
+
+    /**
+     * Overloading the completeTabsHead function : replacing the parent's function with the one below
+     *
+     * Adds the email templates overview (admin/emailtemplates.php) to the email setup tabs, right before the core
+     * "Email templates" tab. Dolibarr only completes these tabs in 'remove' mode, a module descriptor cannot add one
+     *
+     * @param  array $parameters Hook metadata (context, etc...)
+     * @return int               0 < on error, 0 on success, 1 to replace standard code
+     */
+    public function completeTabsHead(array $parameters): int
+    {
+        global $langs, $user;
+
+        // The hook manager merges $this->results into the tabs: a value left by a previous hook would become a tab
+        $this->results = [];
+
+        if (($parameters['mode'] ?? '') !== 'remove' || empty($user->admin) || !is_array($parameters['head'] ?? null)) {
+            return 0;
+        }
+
+        $head = array_values($parameters['head']);
+        foreach ($head as $position => $tab) {
+            if (($tab[2] ?? '') === 'templates' && strpos($tab[0] ?? '', '/admin/mails_templates.php') !== false) {
+                $langs->load('saturne@saturne');
+                array_splice($head, $position, 0, [[dol_buildpath('/saturne/admin/emailtemplates.php', 1), $langs->trans('EmailTemplatesOverview'), 'saturneemailtemplates']]);
+
+                // 'head' is a reference to the tabs of complete_head_from_modules()
+                $parameters['head'] = $head;
+                break;
             }
         }
 
@@ -132,22 +211,22 @@ class ActionsSaturne
      */
     public function addHtmlHeader(array $parameters): int
     {
-        $saturne_js_path = dol_buildpath('/custom/saturne/js/saturne.min.js', 0);
-        $saturne_js_mtime = file_exists($saturne_js_path) ? filemtime($saturne_js_path) : 1;
-        $saturne_js_url = DOL_URL_ROOT . '/custom/saturne/js/saturne.min.js?v=' . $saturne_js_mtime;
+        require_once __DIR__ . '/../lib/asset.lib.php';
+
+        $saturne_js_url = saturne_asset_full_url('/saturne/js/saturne.min.js');
 
         if (strpos($parameters['context'], 'usercard') !== false) {
             $resourcesRequired = [
-                'css'       => '/custom/saturne/css/saturne.min.css',
+                'css'       => saturne_asset_full_url('/saturne/css/saturne.min.css'),
                 'js'        => $saturne_js_url,
-                'signature' => '/custom/saturne/js/includes/signature-pad.min.js'
+                'signature' => saturne_asset_full_url('/saturne/js/includes/signature-pad.min.js')
             ];
 
             $out  = '<!-- Includes CSS added by module saturne -->';
-            $out .= '<link rel="stylesheet" type="text/css" href="' . dol_buildpath($resourcesRequired['css'], 1) . '">';
+            $out .= '<link rel="stylesheet" type="text/css" href="' . $resourcesRequired['css'] . '">';
             $out .= '<!-- Includes JS added by module saturne -->';
             $out .= '<script src="' . $resourcesRequired['js'] . '"></script>';
-            $out .= '<script src="' . dol_buildpath($resourcesRequired['signature'], 1) . '"></script>';
+            $out .= '<script src="' . $resourcesRequired['signature'] . '"></script>';
 
             $this->resprints = $out;
         } elseif (strpos($parameters['context'], 'emailtemplates')) {
@@ -174,36 +253,16 @@ class ActionsSaturne
     }
 
     /**
-     *  Overloading the llxHeader function : replacing the parent's function with the one below
+     * Overloading the llxHeader function : replacing the parent's function with the one below
      *
      * @param  array $parameters Hook metadatas (context, etc...)
      * @return int               0 < on error, 0 on success, 1 to replace standard code
-     * @throws Exception
      */
     public function llxHeader(array $parameters): int
     {
-        if (strpos($parameters['context'], 'index') !== false) {
-            require_once __DIR__ . '/saturneredirection.class.php';
+        require_once __DIR__ . '/../lib/asset.lib.php';
 
-            $saturneRedirection = new SaturneRedirection($this->db);
-
-            $originalUrl = GETPOST('original_url', 'alpha');
-
-            $redirections = $saturneRedirection->fetchAll();
-            if (is_array($redirections) && !empty($redirections)) {
-                foreach ($redirections as $redirection) {
-                    //check redirection from url, if not beginning with a / add it
-                    $urlToCheck = $redirection->from_url;
-                    if (strpos($redirection->from_url, '/') !== 0) {
-                            $urlToCheck = '/' . $redirection->from_url;
-                    }
-                    if ($urlToCheck == '/' . $originalUrl) {
-                        header('Location: ' . $redirection->to_url);
-                        exit;
-                    }
-                }
-            }
-        }
+        saturne_version_llxheader_assets($parameters);
 
         return 0;
     }
@@ -378,7 +437,7 @@ class ActionsSaturne
                                 params.set('token', '" . newToken() . "');
 
                                 $.ajax({
-                                    url: '" . DOL_URL_ROOT . "/custom/saturne/core/ajax/favorite.php?' + params.toString(),
+                                    url: '" . dol_buildpath('/saturne/core/ajax/favorite.php', 1) . "?' + params.toString(),
                                     method: 'POST',
                                     contentType: 'application/json charset=utf-8',
                                     success: function(response) {
@@ -556,6 +615,28 @@ class ActionsSaturne
     }
 
     /**
+     * Opportunity statuses of the dictionary, read once per request
+     *
+     * The list of projects reads them for its fields, then for every row of the fk_opp_status column: the dictionary
+     * does not depend on the row. Private on purpose, so that the hook manager never takes it for a hook.
+     *
+     * @return CLeadStatus[] Statuses, empty when the dictionary cannot be read
+     */
+    private function getOppStatuses(): array
+    {
+        static $oppStatuses = null;
+
+        if ($oppStatuses === null) {
+            require_once DOL_DOCUMENT_ROOT . '/core/class/cleadstatus.class.php';
+            $leadStatus = new CLeadStatus($this->db);
+            $leadStatus->fetchAll();
+            $oppStatuses = is_array($leadStatus->records) ? $leadStatus->records : [];
+        }
+
+        return $oppStatuses;
+    }
+
+    /**
      * Add or modify fields definition for the list
      *
      * @param  array $parameters Hook metadata (context, etc...)
@@ -581,16 +662,13 @@ class ActionsSaturne
                 $object->fields['fk_opp_status']['csslist'] = 'center';
 
                 // Add arrayofkeyval to fk_opp_status so it natively renders as an inline select in Saturne
-                require_once DOL_DOCUMENT_ROOT . '/core/class/cleadstatus.class.php';
-                $leadStatus = new CLeadStatus($db);
-                $leadStatus->fetchAll();
 
                 $arrayofkeyval = [];
                 $langs->load('projects');
 
                 $arrayofkeyval[''] = '';
 
-                foreach ($leadStatus->records as $line) {
+                foreach ($this->getOppStatuses() as $line) {
                     $transLabel = $langs->trans("OppStatus" . $line->code);
                     $label = ($transLabel !== "OppStatus" . $line->code) ? $transLabel : $line->label;
                     $arrayofkeyval[$line->id] = $label;
@@ -628,22 +706,17 @@ class ActionsSaturne
             $key = $parameters['key'];
             $val = $parameters['val'];
 
-            error_log("SATURNE_HOOK: " . $key);
-
             if ($key === 'fk_opp_status' || $key === 'p.fk_opp_status' || $key === 'project.fk_opp_status') {
                 $ceElement = $object->element;
                 $ceTable   = $object->table_element;
 
-                require_once DOL_DOCUMENT_ROOT . '/core/class/cleadstatus.class.php';
-                $leadStatus = new CLeadStatus($db);
-                $leadStatus->fetchAll();
 
                 $html = '';
                 static $saturneOppJsAdded = false;
                 if (!$saturneOppJsAdded) {
                     $saturneOppJsAdded = true;
                     $mapping = [];
-                    foreach ($leadStatus->records as $line) {
+                    foreach ($this->getOppStatuses() as $line) {
                         $mapping[$line->id] = (float) $line->percent;
                     }
                     $html .= '<script>
@@ -672,7 +745,7 @@ class ActionsSaturne
                 // Render the inline select for the row with ONLY the real statuses
                 $html .= '<select class="saturne-inline-select" data-field="fk_opp_status" data-element="' . $ceElement . '" data-id="' . $object->id . '">';
                 $html .= '<option value="0">&nbsp;</option>';
-                foreach ($leadStatus->records as $line) {
+                foreach ($this->getOppStatuses() as $line) {
                     $selected = ($object->fk_opp_status == $line->id) ? ' selected' : '';
                     $transLabel = $langs->trans("OppStatus" . $line->code);
                     $label = ($transLabel !== "OppStatus" . $line->code) ? $transLabel : $line->label;
@@ -685,7 +758,7 @@ class ActionsSaturne
             } elseif ($key === 'opp_percent' || $key === 'p.opp_percent' || $key === 'project.opp_percent') {
                 $ceElement = $object->element;
                 $ceTable   = $object->table_element;
-                $ceLabel   = !empty($val['label']) ? dol_escape_htmltag($val['label']) : 'Pourcentage';
+                $ceLabel   = dol_escape_htmltag($langs->transnoentities(!empty($val['label']) ? $val['label'] : 'Percentage'));
 
                 $percent = (float) $object->opp_percent;
                 if ($percent > 100) {
@@ -700,7 +773,7 @@ class ActionsSaturne
 
                 // Colored badge container for inline editing
                 $html = '<div class="saturne-inline-percent badge ' . $badgeClass . '" style="display: inline-flex; align-items: center; justify-content: center; padding: 3px 6px;">';
-                $html .= '<div class="contenteditable" contenteditable="true" role="textbox" aria-label="' . $ceLabel . '" data-field="opp_percent" data-id="' . $object->id . '" data-element="' . $ceElement . '" data-table="' . $ceTable . '" data-type="number" data-success="Enregistré" data-error="Maximum 100%" data-validate-pattern="^(100([.,]0+)?|\d{1,2}([.,]\d+)?)$" ondblclick="event.stopPropagation();" onblur="var v=parseFloat(this.innerText.replace(\',\',\'.\')); if(v>100) this.innerText=\'100\';">';
+                $html .= '<div class="contenteditable" contenteditable="true" role="textbox" aria-label="' . $ceLabel . '" data-field="opp_percent" data-id="' . $object->id . '" data-element="' . $ceElement . '" data-table="' . $ceTable . '" data-type="number" data-success="' . dol_escape_htmltag($langs->transnoentities('InlineEditSaved')) . '" data-error="' . dol_escape_htmltag($langs->transnoentities('InlineEditMaxPercent')) . '" data-validate-pattern="^(100([.,]0+)?|\d{1,2}([.,]\d+)?)$" ondblclick="event.stopPropagation();" onblur="var v=parseFloat(this.innerText.replace(\',\',\'.\')); if(v>100) this.innerText=\'100\';">';
                 $html .= price($percent, 0, '', 0, -1, -1, '');
                 $html .= '</div><span class="saturne-inline-percent-suffix" style="margin-left: 2px;">%</span>';
                 $html .= '</div>';
@@ -710,12 +783,12 @@ class ActionsSaturne
             } elseif ($key === 'opp_amount' || $key === 'p.opp_amount' || $key === 'project.opp_amount') {
                 $ceElement = $object->element;
                 $ceTable   = $object->table_element;
-                $ceLabel   = !empty($val['label']) ? dol_escape_htmltag($val['label']) : 'Montant';
+                $ceLabel   = dol_escape_htmltag($langs->transnoentities(!empty($val['label']) ? $val['label'] : 'Amount'));
 
                 $currencySymbol = $langs->getCurrencySymbol($conf->currency);
 
                 $html = '<div class="saturne-inline-amount" style="display: flex; align-items: center; justify-content: center; gap: 4px;">';
-                $html .= '<div class="contenteditable" contenteditable="true" role="textbox" aria-label="' . $ceLabel . '" data-field="opp_amount" data-id="' . $object->id . '" data-element="' . $ceElement . '" data-table="' . $ceTable . '" data-type="number" data-success="Enregistré" data-error="Format invalide" ondblclick="event.stopPropagation();">';
+                $html .= '<div class="contenteditable" contenteditable="true" role="textbox" aria-label="' . $ceLabel . '" data-field="opp_amount" data-id="' . $object->id . '" data-element="' . $ceElement . '" data-table="' . $ceTable . '" data-type="number" data-success="' . dol_escape_htmltag($langs->transnoentities('InlineEditSaved')) . '" data-error="' . dol_escape_htmltag($langs->transnoentities('InlineEditInvalidFormat')) . '" ondblclick="event.stopPropagation();">';
                 $html .= price($object->opp_amount, 0, '', 0, -1, -1, '');
                 $html .= '</div>';
                 $html .= '<span class="saturne-inline-amount-suffix">' . $currencySymbol . '</span>';

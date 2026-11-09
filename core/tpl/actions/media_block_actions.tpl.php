@@ -21,8 +21,9 @@
  * \ingroup saturne
  * \brief   Actions of the media block, shared by every page rendering one
  *
- * The media block uploads and deletes over AJAX against the page that renders it. That page must
- * handle these actions and must NOT redirect while doing so, so it includes this template.
+ * The media block uploads, links library medias and deletes over AJAX against the page that renders
+ * it. That page must handle these actions and must NOT redirect while doing so, so it includes this
+ * template.
  *
  * The following vars must be defined:
  * Global     : $conf, $db, $langs, $user
@@ -98,7 +99,41 @@ if ($action == 'uploadPhoto' && !empty($mediaBlockDir) && !empty($conf->global->
 
                     saturne_vignette($uploadedPath, getDolGlobalInt($confWidth), getDolGlobalInt($confHeight), '_' . $mediaBlockSize);
                 }
+
+                // The gallery lists the library: a photo taken in a block joins it, as one sent
+                // through the gallery does. An edited photo sent back under its name is the same one
+                saturne_add_media_to_library($mediaBlockModule, $uploadedPath, 0, !$allowOverwrite);
             }
+        }
+    }
+}
+
+// Link medias of the module library to the block: they are copied, the library keeps its own
+if ($action == 'linkPhoto' && !empty($mediaBlockDir)) {
+    require_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
+
+    $mediaLibraryDir = $conf->ecm->multidir_output[$conf->entity] . '/' . $mediaBlockModule . '/medias';
+
+    foreach (GETPOST('filenames', 'array') as $mediaLibraryName) {
+        $mediaLibraryName = dol_sanitizeFileName($mediaLibraryName);
+
+        if (empty($mediaLibraryName) || image_format_supported($mediaLibraryName) < 0 || !dol_is_file($mediaLibraryDir . '/' . $mediaLibraryName)) {
+            continue;
+        }
+
+        if (!dol_is_dir($mediaBlockDir)) {
+            dol_mkdir($mediaBlockDir);
+        }
+
+        if (dol_copy($mediaLibraryDir . '/' . $mediaLibraryName, $mediaBlockDir . '/' . $mediaLibraryName) <= 0) {
+            continue;
+        }
+
+        foreach (['mini', 'small', 'medium', 'large'] as $mediaBlockSize) {
+            $confWidth  = 'SATURNE_MEDIA_MAX_WIDTH_' . dol_strtoupper($mediaBlockSize);
+            $confHeight = 'SATURNE_MEDIA_MAX_HEIGHT_' . dol_strtoupper($mediaBlockSize);
+
+            saturne_vignette($mediaBlockDir . '/' . $mediaLibraryName, getDolGlobalInt($confWidth), getDolGlobalInt($confHeight), '_' . $mediaBlockSize);
         }
     }
 }

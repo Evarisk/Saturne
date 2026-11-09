@@ -1,0 +1,106 @@
+@use 'tokens' as *;
+
+/* Saturne modern theme: page canvas, typography and Dolibarr theme variables */
+
+#{$theme-scope} {
+  /* The eldy theme reads these variables almost everywhere: overriding them here restyles
+     the native Dolibarr blocks (lists, titles, tabs, inputs) of the module pages at once */
+  --colorbackbody: #{$theme-bg};
+  --colorbacktabcard1: #{$theme-surface};
+  --colorbacktitle1: #{$theme-surface-soft};
+  --colorbacklineimpair1: #{$theme-surface};
+  --colorbacklineimpair2: #{$theme-surface};
+  --colorbacklinepair1: #{$theme-surface};
+  --colorbacklinepair2: #{$theme-surface};
+  --colorbacklinepairhover: #{$theme-surface-soft};
+  --colorbacklinepairchecked: #{$theme-primary-soft};
+  --colortopbordertitle1: #{$theme-border};
+  --colortexttitlenotab: #{$theme-text};
+  --colortexttitlenotab2: #{$theme-text};
+  --colortexttitle: #{$theme-text-soft};
+  --colortext: #{$theme-text};
+  --colortextbacktab: #{$theme-text};
+  --inputbordercolor: #{$theme-border-strong};
+  --tableforfieldcolor: #{$theme-muted};
+  --refidnocolor: #{$theme-text-soft};
+  --colorboxiconbg: #{$theme-primary-soft};
+  --colorboxstatsborder: #{$theme-border};
+
+  /* Same tokens for the module stylesheets, which are compiled apart from Saturne:
+     var(--saturne-border) and so on */
+  --saturne-bg: #{$theme-bg};
+  --saturne-surface: #{$theme-surface};
+  --saturne-surface-soft: #{$theme-surface-soft};
+  --saturne-border: #{$theme-border};
+  --saturne-border-soft: #{$theme-border-soft};
+  --saturne-border-strong: #{$theme-border-strong};
+  --saturne-text: #{$theme-text};
+  --saturne-text-soft: #{$theme-text-soft};
+  --saturne-muted: #{$theme-muted};
+  --saturne-faint: #{$theme-faint};
+  --saturne-primary: #{$theme-primary};
+  --saturne-primary-strong: #{$theme-primary-strong};
+  --saturne-primary-soft: #{$theme-primary-soft};
+  --saturne-navy: #{$theme-navy};
+  --saturne-success: #{$theme-success};
+  --saturne-success-soft: #{$theme-success-soft};
+  --saturne-warning: #{$theme-warning};
+  --saturne-warning-soft: #{$theme-warning-soft};
+  --saturne-danger: #{$theme-danger};
+  --saturne-danger-soft: #{$theme-danger-soft};
+  --saturne-radius-lg: #{$theme-radius-lg};
+  --saturne-radius: #{$theme-radius};
+  --saturne-radius-sm: #{$theme-radius-sm};
+  --saturne-radius-pill: #{$theme-radius-pill};
+  --saturne-shadow-sm: #{$theme-shadow-sm};
+  --saturne-shadow: #{$theme-shadow};
+  --saturne-shadow-hover: #{$theme-shadow-hover};
+  --saturne-shadow-lg: #{$theme-shadow-lg};
+  --saturne-ring: #{$theme-ring};
+  --saturne-font: #{$theme-font};
+
+  font-family: $theme-font;
+  color: $theme-text;
+  background-color: $theme-bg;
+  -webkit-font-smoothing: antialiased;
+
+  #id-right {
+    background: $theme-bg;
+  }
+
+  .opacitymedium {
+    color: $theme-muted;
+    opacity: 1;
+  }
+
+  ::selection {
+    background: rgba(13, 138, 255, 0.2);
+  }
+
+  /* Thin scrollbars, like the PWA */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: $theme-border-strong;
+    border: 2px solid transparent;
+    border-radius: $theme-radius-pill;
+    background-clip: padding-box;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid $theme-border;
+  }
+
+  h2 {
+    color: $theme-text;
+    letter-spacing: -0.01em;
+  }
+}

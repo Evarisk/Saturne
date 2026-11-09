@@ -132,8 +132,9 @@ abstract class SaturneDocuments extends SaturneObject
             $this->type = $this->element;
         }
         $this->module_name   = $this->module;
-        $this->parent_id     = $parentObject->id ?: 0;
-        $this->parent_type   = $parentObject->element_type ?: $parentObject->element ?: '';
+        // No parent object for documents not attached to one (EasyURL export) : empty() does not warn on null
+        $this->parent_id     = !empty($parentObject->id) ? $parentObject->id : 0;
+        $this->parent_type   = !empty($parentObject->element_type) ? $parentObject->element_type : (!empty($parentObject->element) ? $parentObject->element : '');
         $this->fk_user_creat = $user->id ?: 1;
 
         //$this->DocumentFillJSON($this);
@@ -168,8 +169,8 @@ abstract class SaturneDocuments extends SaturneObject
     {
         $baseModulePath = $this->module . '/core/modules/' . $this->module . '/' . $this->module . 'documents/';
 
-        $classFilePath = __DIR__ . '/../../' . $baseModulePath;
-        $modelPath     = 'custom/' . $baseModulePath;
+        $classFilePath = dol_buildpath('/' . $baseModulePath);
+        $modelPath     = $baseModulePath;
 
         $isPrivateZone = isset($moreparams['zone']) && $moreparams['zone'] === 'private';
         $elementPath   = $classFilePath . $this->element . '/';
@@ -190,7 +191,7 @@ abstract class SaturneDocuments extends SaturneObject
 
         // Fallback for Saturne modules: if doc generator wasn't found in the first path, try the 'document' suffixed path
         if ($result <= 0 && (strpos($this->error, 'Failed to load doc generator') !== false || $this->error == 'ErrorFailedToLoadDocumentGenerator')) {
-            $modelPathFallback = 'custom/' . $baseModulePath . $this->element . 'document/';
+            $modelPathFallback = $baseModulePath . $this->element . 'document/';
             $this->error = '';
             $this->errors = [];
             $result = $this->commonGenerateDocument($modelPathFallback, $modele, $outputlangs, $hidedetails, $hidedesc, $hideref, $moreparams);
@@ -291,6 +292,8 @@ abstract class SaturneDocuments extends SaturneObject
      */
     protected function getDocumentTemplateDirs(string $documentType): array
     {
+        require_once __DIR__ . '/../lib/documents.lib.php';
+
         $dirs = [
             dol_buildpath('/' . $this->module . '/documents/doctemplates/'),
             DOL_DATA_ROOT . '/ecm/' . $this->module . '/',
@@ -302,7 +305,7 @@ abstract class SaturneDocuments extends SaturneObject
         foreach (['_ADDON_ODT_PATH', '_CUSTOM_ADDON_ODT_PATH', '_SPECIMEN_ADDON_ODT_PATH'] as $constSuffix) {
             $constValue = getDolGlobalString($constPrefix . $constSuffix);
             foreach (explode(',', preg_replace('/[\r\n]+/', ',', $constValue)) as $dir) {
-                $dirs[] = str_replace(['DOL_DATA_ROOT', 'DOL_DOCUMENT_ROOT'], [DOL_DATA_ROOT, DOL_DOCUMENT_ROOT], trim($dir));
+                $dirs[] = saturne_resolve_template_dir($dir);
             }
         }
 

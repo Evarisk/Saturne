@@ -123,7 +123,7 @@ if ($action == 'builddoc') {
     if ($result > 0) {
         $subDir    = $isSpecimen ? '/public_specimen/' : '/';
         $sourceDir = $upload_dir . '/' . strtolower($objectType) . 'document/' . $object->ref . $subDir;
-        $tempDir   = DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/';
+        $tempDir   = dol_buildpath('/' . $moduleNameLowerCase . '/documents/') . 'temp/';
 
         if (!is_dir($tempDir)) {
             dol_mkdir($tempDir);
@@ -156,11 +156,9 @@ if ($action == 'builddoc') {
 
 // Action to remove all temp files
 if ($action == 'remove_file') {
-    // get all file names
-    $files = dol_dir_list(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/');
+    // get all file names, index.php is tracked by the module repository and must stay
+    $files = dol_dir_list(dol_buildpath('/' . $moduleNameLowerCase . '/documents/') . 'temp/', 'files', 0, '', ['^index\.php$', '^\.']);
     foreach ($files as $file) {
-        if (is_file($file['fullname'])) {
-            dol_delete_file($file['fullname']);
-        }
+        dol_delete_file($file['fullname']);
     }
 }

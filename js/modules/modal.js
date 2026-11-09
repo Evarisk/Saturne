@@ -40,6 +40,38 @@ window.saturne.modal = {};
  */
 window.saturne.modal.init = function() {
 	window.saturne.modal.event();
+	window.saturne.modal.watchActiveModals();
+};
+
+/**
+ * Passe le menu haut Dolibarr sous l'overlay tant qu'une modal est ouverte, par sa classe
+ * "saturne-under-modal" (modules/modal/_modal.scss).
+ *
+ * Un sélecteur body:has(.wpeo-modal.modal-active) le faisait en CSS, mais Chromium invalide alors, à
+ * chaque ouverture ou fermeture, tous les éléments visés par les règles :has() de la page, dont
+ * chaque icône d'une longue liste : 40 ms de recalcul de style au lieu de 8 sur la liste des risques
+ * Digirisk. La classe va sur le menu et non sur le body, dont le moindre changement de classe
+ * recalcule toute la page (180 ms sur la même liste). Les modules ouvrent aussi leurs modals en posant
+ * directement la classe modal-active : c'est elle qu'on surveille, pas openModal et closeModal.
+ *
+ * @since   23.6.0
+ * @version 23.6.0
+ *
+ * @return {void}
+ */
+window.saturne.modal.watchActiveModals = function() {
+	const sync = function() {
+		const open = document.querySelector('.wpeo-modal.modal-active') !== null;
+		document.querySelectorAll('.side-nav-vert').forEach(nav => nav.classList.toggle('saturne-under-modal', open));
+	};
+
+	new MutationObserver(function(records) {
+		if (records.some(record => record.target.classList.contains('wpeo-modal'))) {
+			sync();
+		}
+	}).observe(document.body, {subtree: true, attributes: true, attributeFilter: ['class']});
+
+	sync();
 };
 
 /**
@@ -92,6 +124,11 @@ window.saturne.modal.openModal = function () {
   $('#'+modalToOpen).attr('data-from-subdir', fromSubdir);
   $('#'+modalToOpen).attr('data-photo-class', photoClass);
   $('#'+modalToOpen).attr('data-from-field', fromField);
+  // A media block opens the gallery on its own: a regular opener must not inherit its target
+  $('#'+modalToOpen).removeAttr('data-from-block');
+  if (window.saturne.mediaPending) {
+    window.saturne.mediaPending.syncCurrentTarget($('#'+modalToOpen));
+  }
 
   window.saturne.modal.loadLazyImages();
 
@@ -103,6 +140,10 @@ window.saturne.modal.openModal = function () {
 
 	$('#'+modalToOpen).find('.wpeo-button').attr('value', fromId);
 	$('#'+modalToOpen).addClass('modal-active');
+
+  if (modalToOpen === 'media_gallery' && window.saturne.mediaGallery) {
+    window.saturne.mediaGallery.reloadIfChanged();
+  }
 
 	$('.notice').addClass('hidden');
 };

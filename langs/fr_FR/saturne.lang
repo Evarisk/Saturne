@@ -29,7 +29,10 @@ TutoImage           = Image
 LireModule                  = Consulter %s
 ReadModule                  = Consulter %s (read)
 ReadAdminPage               = Accéder à la configuration du module %s
+WriteAdminPage              = Modifier la configuration du module %s
 YouDontHaveTheRightOnObject = Vous n'avez pas les droits sur %s
+ReadOnlyAdminAccessTitle    = Configuration en lecture seule
+ReadOnlyAdminAccessMessage  = Vous pouvez consulter ces réglages mais pas les modifier : demandez à un administrateur le droit « Modifier la configuration du module ».
 
 
 
@@ -78,10 +81,16 @@ DefaultPublicInterfaceUserLastName       = Utilisateur par défaut d'interface p
 
 # Redirections - Redirections
 Redirections = Redirections
-FromURL      = Depuis l'URL
+FromURL      = URL courte
 ToURL        = Vers l'URL
-FromUrlHelp  = Saisissez l'URL de départ. Par exemple, pour rediriger depuis https://www.evarisk.com/depuis/la/page, saisissez "/depuis/la/page"
-ToUrlHelp    = Saisissez l'URL de destination. Par exemple, pour rediriger vers https://www.evarisk.com/vers/la/page, saisissez "/vers/la/page"
+FromUrlHelp  = Code de l'URL courte : lettres, chiffres, « - » et « _ », de 4 à 64 caractères, pas déjà utilisé. Laissez vide pour en générer un au hasard (recommandé pour un QR code).
+ToUrlHelp    = URL de destination : l'adresse complète (https://…), ou un chemin dans Dolibarr commençant par "/" (ex. /custom/monmodule/page.php). Une adresse de cette instance est enregistrée comme un chemin : le lien survit à un changement de domaine.
+ShortUrlRoot            = Racine des URL courtes
+ShortUrlRootDescription = Début des URL courtes et des QR codes. Vide : %s, qui marche partout sans réglage. Pour plus court, si le serveur le permet : ajoutez au .htaccess de htdocs « RewriteEngine On » puis « RewriteRule ^s/?$ custom/saturne/s/index.php [L,QSA] » et saisissez https://votre-domaine/s ; ou faites pointer un domaine court sur le dossier custom/saturne/s/ et saisissez-le. Les liens déjà créés restent valables.
+ErrorBadShortUrlRoot    = La racine doit être une adresse http(s) complète, sans « ? ».
+ConfirmRemoveRedirection = Supprimer cette URL courte ? Un QR code ou un lien déjà imprimé ou envoyé avec elle ne fonctionnera plus.
+SearchRedirection       = Rechercher un code ou une URL de destination
+ShortUrlNotFound        = Ce lien n'est pas ou plus valide.
 
 
 
@@ -160,6 +169,9 @@ GeneratePWAQRCodeDescription  = Cette option permet de générer le QRCode de l'
 ModuleArea                   = Bienvenue sur %s
 ModuleUpdate                 = Mise à jour de %s :
 ModuleHasBeenUpdatedTo       = %s a été mis à jour en version %s
+ModuleUpdateNeedDolibarrVersion = la version %s demande Dolibarr %s ou plus (version actuelle : %s). Mettez d'abord Dolibarr à jour : d'ici là, le module reste dans son état actuel.
+ModuleUpdateNeedSaturneVersion  = la version %s demande Saturne %s ou plus (version actuelle : %s). Mettez d'abord Saturne à jour : d'ici là, le module reste dans son état actuel.
+ModuleUpdateFailed           = La mise à jour de %s en version %s a échoué
 ModulePatchNote              = Note de mise à jour %s %s
 ShowPatchNote                = Consulter la note de mise à jour
 DontShowPatchNote            = Ne plus afficher la note de mise à jour
@@ -328,6 +340,41 @@ JavascriptsConfig=Configuration Javascripts
 EnableMaxlengthCounter=Activer le compteur de caracteres
 EnableMaxlengthCounterDescription=Affiche un compteur de caracteres sous les champs limites en longueur.
 
+# Email templates overview - Vue d'ensemble des modèles d'email
+EmailTemplatesOverview                       = Vue d'ensemble des modèles
+EmailTemplatesOverviewIntro                  = Tous les modèles d'email, regroupés par élément. Cliquez sur un modèle pour lire son sujet et son contenu. La colonne « Utilisé par » liste les réglages qui l'envoient automatiquement : avant de désactiver ou de supprimer un modèle utilisé, changez d'abord le réglage. La création et la modification se font dans l'onglet « Modèles des courriels ».
+EmailTemplatesSearchPlaceholder              = Rechercher : libellé, sujet, contenu, réglage…
+EmailTemplatesAllStatuses                    = Actifs et inactifs
+EmailTemplatesActiveOnly                     = Actifs seulement
+EmailTemplatesInactiveOnly                   = Inactifs seulement
+EmailTemplatesUsedOnly                       = Seulement ceux utilisés par un réglage
+EmailTemplatesExpandAll                      = Tout déplier
+EmailTemplatesCollapseAll                    = Tout replier
+EmailTemplatesNew                            = Nouveau modèle
+EmailTemplatesSummary                        = %s modèles répartis sur %s éléments · %s inactifs · %s utilisés par un réglage
+EmailTemplatesShown                          = %s affichés
+EmailTemplatesCount                          = Nombre de modèles
+EmailTemplatesInactiveCount                  = %s inactif(s)
+EmailTemplatesForAllElements                 = Tous les éléments
+EmailTemplatesForNoElement                   = Aucun élément
+EmailTemplatesUnavailable                    = Non proposés à l'envoi
+EmailTemplatesUnavailableHelp                = Ces modèles ne sont proposés nulle part : leur élément dépend d'un module désactivé, leur type n'est reconnu ni par Dolibarr ni par un module activé, ou leur condition d'activation est fausse. Dolibarr ne les affiche pas dans l'onglet « Modèles des courriels ».
+EmailTemplatesUsedBy                         = Utilisé par
+EmailTemplatesUsedByHelp                     = Réglages (constantes de configuration) qui désignent ce modèle, par son identifiant ou son libellé. Ils l'envoient sans que personne ne le choisisse : le désactiver ou le supprimer coupe cet envoi, ou le ramène au contenu par défaut. Un réglage que son module ne déclare pas n'est reconnu qu'à son nom (…_EMAIL_TEMPLATE…, …_MAIL_MODEL…, …_TEMPLATE_EMAIL…).
+EmailTemplatesDefaultHelp                    = Modèle présélectionné quand on envoie un email depuis cet élément
+EmailTemplatesAttachment                     = Document joint
+EmailTemplatesDuplicate                      = Doublon
+EmailTemplatesDuplicateHelp                  = Un autre modèle actif porte le même libellé pour le même élément et la même langue. Un réglage qui désigne le modèle par son libellé n'en retient qu'un seul.
+EmailTemplatesAllLanguages                   = Toutes
+EmailTemplatesEmpty                          = Vide
+EmailTemplatesContentLines                   = Contenu par ligne
+EmailTemplatesVariables                      = Variables utilisées
+EmailTemplatesVariablesHelp                  = Remplacées à l'envoi par les données de l'objet envoyé (référence, tiers, montant…). Les traductions __(Clé)__ et les constantes __[NOM]__ sont déjà résolues dans l'aperçu.
+EmailTemplatesShippedBy                      = Créé par le module
+EmailTemplatesNoMatch                        = Aucun modèle ne correspond à la recherche.
+EmailTemplatesSettingSignature               = Participants · Lien de signature envoyé à un participant
+EmailTemplatesSettingGlobalSignature         = Participants · Envoi groupé des liens de signature
+
 # Entity transfer - Transfert d'entite
 EntityTransfer                               = Transfert d'entité
 EntityTransferAdminOnly                      = Le transfert d'entité est réservé aux administrateurs : un export contient toute la base de l'entité, comptes utilisateurs compris.
@@ -389,3 +436,51 @@ OrphanDocumentsDeletedEntity                 = %s ligne(s) supprimée(s) sur l'e
 
 # Document generation - Generation de document
 ErrorTemplateFileNotAllowed                  = Le modèle de document « %s » ne se trouve pas dans un répertoire de modèles du module.
+
+# Status filter of the lists - Filtre sur l'état des listes
+ListStatusFilterHiddenOne                    = %s masqué
+ListStatusFilterHiddenMany                   = %s masqués
+ListStatusFilterHint                         = Le filtre de la colonne « %s » est actif et masque : %s.<br>La suppression des filtres le conserve.<br>Cliquez pour afficher tous les états.
+
+# Excel export - Export Excel
+XlsxExport                                   = Export Excel
+XlsxExportHelp                               = Télécharge toutes les lignes de la liste, avec ses filtres et son tri, dans un classeur Excel qui les présente sous plusieurs vues
+XlsxExportSelection                          = Export Excel de la sélection
+XlsxSelection                                = Sélection
+XlsxSelectedLines                            = %s lignes cochées
+XlsxSummary                                  = Sommaire
+XlsxExportedOn                               = Exporté le %s par %s
+XlsxFilters                                  = Filtres
+XlsxNoFilter                                 = Aucun filtre
+XlsxSearch                                   = Recherche
+XlsxKeyFigures                               = Chiffres clés
+XlsxContents                                 = Contenu du classeur
+XlsxSheet                                    = Onglet
+XlsxLines                                    = Lignes
+XlsxShare                                    = Part
+XlsxTotal                                    = Total
+XlsxNotFilled                                = Non renseigné
+XlsxMonth                                    = Mois
+XlsxExcluded                                 = sauf %s
+XlsxListLines                                = Lignes exportées
+XlsxListFirstCreation                        = Première création
+XlsxListLastCreation                         = Dernière création
+XlsxListByStatus                             = Répartition par statut
+XlsxListSheetDescription                     = Une ligne par enregistrement de la liste, avec les colonnes affichées, dans leur ordre
+XlsxListBy                                   = Par %s
+XlsxListBySheetDescription                   = Nombre de lignes et part du total pour chaque valeur de la colonne %s
+XlsxListCreated                              = Créées
+XlsxListByMonth                              = Par mois
+XlsxListByMonthSheetDescription              = Lignes créées chaque mois, en tout puis par statut actuel
+XlsxCategory                                 = Catégorie
+XlsxValue                                    = Valeur
+XlsxDashboardExportHelp                      = Télécharge tout le tableau de bord dans un classeur Excel : les chiffres clés, puis un onglet par graphique et par liste
+XlsxDashboardValuesSheetDescription          = Valeur et part de chaque catégorie du graphique ; une catégorie ouvre la liste correspondante
+XlsxDashboardSeriesSheetDescription          = Valeurs du graphique, une ligne par catégorie et une colonne par série, aux couleurs de la légende
+XlsxDashboardListSheetDescription            = Lignes de la liste du tableau de bord
+
+# Inline edition of the lists - Edition en ligne des listes
+InlineEditSaved         = Enregistré
+InlineEditInvalidFormat = Format invalide
+InlineEditMaxPercent    = Maximum 100%%
+InlineEditOpenCalendar  = Ouvrir le calendrier

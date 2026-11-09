@@ -1,92 +1,151 @@
-# [Saturne] [23.3.0] - La bibliothèque de médias - Signature électronique refondue
+# [Saturne] [23.7.0] - Export Excel des listes et des tableaux de bord - Nouveau design pour tous les modules
 
-Description : Toutes vos photos au même endroit, et chacune à sa place. Cette version dote le socle d'une véritable bibliothèque de médias — consultation, affectation, retouche — et refond le bloc de signature électronique de la fiche utilisateur.
+Description : Toutes les listes et tous les tableaux de bord des modules Evarisk s'exportent désormais en un **classeur Excel prêt à analyser**, et le **design moderne** de Digirisk s'étend à DigiQuali, DoliMeet, DoliCar et aux autres modules. Une vue d'ensemble des modèles d'e-mail montre enfin quel réglage envoie quel modèle, et la médiathèque accepte le glisser-déposer.
 
 ## 🎬 La nouveauté en vidéo
 
-[![La bibliothèque de médias en vidéo (37 s)](https://raw.githubusercontent.com/nicolas-eoxia/Saturne/assets/release-23.3.0/video_poster_23.3.0.jpeg)](https://github.com/Evarisk/Saturne/releases/download/23.3.0/saturne-23.3.0.mp4)
+<a href="https://github.com/Evarisk/Saturne/releases/download/23.7.0/saturne-23.7.0.mp4"><img src="https://raw.githubusercontent.com/nicolas-eoxia/Saturne/refs/heads/assets/release-23.7.0/video_poster_23.7.0.jpeg" alt="Exports Excel et nouveau design, en vidéo (59 s)"></a>
 
-*Cliquez sur l'image pour lancer la vidéo (37 s).*
+*Cliquez sur l'image pour voir la vidéo (59 s).*
 
-## 🚀 Pack nouveautés
+## Nouvelles fonctionnalités et innovations
 
-### La bibliothèque de médias
+### Export Excel de toutes les listes
 
-![La bibliothèque de médias](https://raw.githubusercontent.com/nicolas-eoxia/Saturne/assets/release-23.3.0/medias_library_23.3.0.png)
+* Un bouton **Export Excel** en haut de chaque liste des modules : contrôles, modèles et questionnaires DigiQuali, sessions DoliMeet, cartes grises DoliCar, diffusions DoliLetter, plans de prévention, permis de feu et enquêtes Digirisk… Aucun réglage à faire.
+* Le classeur reprend **toutes les lignes filtrées, toutes pages comprises**, avec les colonnes choisies à l'écran, dans leur ordre, et le tri de la liste.
+* Un onglet **Sommaire** rappelle les filtres appliqués, le nombre de lignes, la première et la dernière création et la répartition par statut. Suivent l'onglet **Liste**, puis une **répartition par colonne** (modèle, contrôleur, verdict, tiers, projet…) et un onglet **Par mois**.
+* Dans Excel, les dates et les nombres sont de vraies dates et de vrais nombres, prêts pour un filtre ou un tableau croisé. Les références et les objets liés sont des **liens vers leur fiche**.
+* Les gros exports, de plusieurs milliers de lignes, vont au bout sans être coupés par la limite de temps du serveur.
 
-**Les photos déposées dans vos modules se consultent enfin depuis une page unique.** Jusqu'ici, un média vivait dans l'objet auquel il était rattaché et nulle part ailleurs : pour savoir ce qui avait été déposé, il fallait ouvrir les fiches une par une.
+<img src="https://raw.githubusercontent.com/nicolas-eoxia/Saturne/refs/heads/assets/release-23.7.0/export-liste.png" alt="Liste des contrôles DigiQuali avec le bouton Export Excel en haut à droite">
 
-* **Tout est là, et lisible** : nom, date, poids, et les affectations de chaque photo — groupements, unités de travail — directement en face d'elle.
-* **Vue liste ou vue galerie**, au choix, avec un aperçu qui s'affiche sans quitter la page.
-* **La galerie a été repensée** dans l'esprit des galeries modernes : sélection multiple par coche, barre de progression nommée pendant l'envoi, et le poids maximal autorisé rappelé en cas de refus.
+<img src="https://raw.githubusercontent.com/nicolas-eoxia/Saturne/refs/heads/assets/release-23.7.0/classeur-sommaire.png" alt="Onglet Sommaire du classeur : filtres, chiffres clés et répartition par statut">
 
-### Les médias en attente
+### Export des seules lignes cochées
 
-![Les médias en attente d'affectation](https://raw.githubusercontent.com/nicolas-eoxia/Saturne/assets/release-23.3.0/medias_pending_23.3.0.png)
+* Nouvelle action de masse **« Export Excel de la sélection »** sur ces mêmes listes : le même classeur, réduit aux lignes cochées. Le sommaire indique le nombre de lignes sélectionnées.
 
-* **Un onglet réunit les photos qui ne sont rattachées à rien.** Elles ne se perdent plus au fond d'un dossier : on les affecte à un groupement ou à une unité de travail depuis cette page.
-* **Affectation rapide à la galerie courante**, sans passer par la fiche.
-* Les médias se **partagent vers les notes de frais** depuis la galerie, avec confirmation à l'écran.
+<img src="https://raw.githubusercontent.com/nicolas-eoxia/Saturne/refs/heads/assets/release-23.7.0/export-selection.png" alt="Trois contrôles cochés et l'action de masse « Export Excel de la sélection »">
 
-### L'éditeur photo
+### Export Excel des tableaux de bord
 
-* **Une baguette d'analyse par IA** est proposée sur chaque photo, depuis le bloc média comme depuis l'éditeur.
-* **L'éditeur reste entier et validable sur tablette**, y compris zoomée ou tenue en paysage — le bouton de validation sortait de l'écran.
+* Un bouton **Export Excel** en haut de chaque tableau de bord télécharge **tout le tableau de bord en un seul classeur**, au lieu d'un fichier CSV par graphique.
+* Le Sommaire reprend les filtres et les chiffres clés des encarts. Chaque graphique devient un onglet aux **couleurs de sa légende**, avec pour chaque catégorie le lien vers la liste filtrée correspondante. Chaque liste du tableau de bord a aussi son onglet.
+* Les encarts fermés et les graphiques vides ne sont pas exportés, comme à l'écran.
 
-### La signature électronique de la fiche utilisateur
+<img src="https://raw.githubusercontent.com/nicolas-eoxia/Saturne/refs/heads/assets/release-23.7.0/export-tableau-de-bord.png" alt="Tableau de bord DigiQuali et son bouton Export Excel">
 
-![Le bloc de signature électronique](https://raw.githubusercontent.com/nicolas-eoxia/Saturne/assets/release-23.3.0/user_signature_23.3.0.png)
+### Nouveau design pour tous les modules
 
-* **Le bloc a été repensé**, et le tracé est désormais cadré au plus près de ce qui a été dessiné.
-* **La signature est partagée entre les entités** : signée une fois, elle suit l'utilisateur partout — et **lui seul** peut la modifier.
-* La date de signature s'affiche **dans le fuseau horaire de celui qui la lit**.
+* Le **thème moderne** arrivé dans Digirisk 23.6.0 s'applique désormais à **tous les modules Evarisk** : fond gris-bleu, cartes blanches arrondies, onglets en pastilles, statuts teintés et fenêtres floutées.
+* Les pages publiques et les applications mobiles gardent leur propre design. Les pages natives de Dolibarr ne changent pas.
+
+<img src="https://raw.githubusercontent.com/nicolas-eoxia/Saturne/refs/heads/assets/release-23.7.0/theme-avant.png" width="49%" alt="Fiche d'un contrôle DigiQuali avant"> <img src="https://raw.githubusercontent.com/nicolas-eoxia/Saturne/refs/heads/assets/release-23.7.0/theme-apres.png" width="49%" alt="La même fiche avec le nouveau design">
+
+### Vue d'ensemble des modèles d'e-mail
+
+* Nouvel onglet **« Vue d'ensemble des modèles »** dans *Configuration > E-mails*, à côté de la liste de Dolibarr : les modèles sont **groupés par élément** (tickets, contrats, factures…), avec leurs libellés traduits.
+* La colonne **« Utilisé par »** montre quel réglage envoie chaque modèle. Des badges signalent le modèle par défaut, les modèles privés, ceux qui joignent un document et les doublons.
+* L'**aperçu** affiche le sujet, le contenu mis en forme et les variables utilisées. Recherche instantanée, filtre des modèles actifs ou utilisés, activation et désactivation sur place ; le crayon ouvre l'édition de Dolibarr.
+* Les modèles que Dolibarr ne propose pas à l'envoi sont regroupés à part, avec la raison.
+
+<img src="https://raw.githubusercontent.com/nicolas-eoxia/Saturne/refs/heads/assets/release-23.7.0/modeles-email.png" alt="Vue d'ensemble des modèles d'e-mail : un modèle ouvert, son aperçu et les réglages qui l'utilisent">
+
+### Médiathèque
+
+* **Glisser-déposer** : des images déposées sur la galerie ou sur la page *Bibliothèque de médias* rejoignent la bibliothèque, avec la même barre de progression qu'un ajout par le bouton « + ». Les fichiers qui ne sont pas des images sont écartés et signalés.
+
+<img src="https://raw.githubusercontent.com/nicolas-eoxia/Saturne/refs/heads/assets/release-23.7.0/mediatheque-depot.png" alt="Page Bibliothèque de médias pendant un glisser-déposer : « Déposez vos images ici pour les ajouter à la bibliothèque »">
+
+### Administration des modules
+
+* **Droit « Modifier la configuration »** : un module peut confier ses réglages à un utilisateur qui n'est pas administrateur de Dolibarr (DigiQuali le propose). Avec le seul droit de lecture, les réglages restent visibles mais désactivés.
+* **Mises à jour protégées** : un module qui demande une version plus récente de Saturne ou de Dolibarr n'est plus mis à jour à moitié. Son accueil l'indique et attend la mise à jour du socle.
+* Le bouton **Configuration** d'un module dans le menu de gauche peut ouvrir directement sa page de réglages principale : le Document unique pour Digirisk.
 
 ## Améliorations & corrections
 
-### Filtres
+### Documents
 
-* Le calendrier des filtres de date passe **au-dessus** du panneau de filtres, et la navigation de mois en mois fonctionne.
+* **Logo de la société** : il garde ses proportions dans les documents ODT et PDF et s'ajuste à son cadre. Sans logo, plus de balise `{mycompany_logo}` brute dans le document ni d'avertissement PHP.
+* Les modèles ODT sont choisis dans la **langue du document**.
+* **PDF** : la dernière ligne d'une cellule de tableau n'est plus perdue.
 
-### Médias
+### Signatures et présences
 
-* Plus de rotation sans fin au changement d'affichage, et les appels asynchrones de la bibliothèque sont sécurisés.
-* L'éditeur ne s'initialise plus quand aucune fenêtre modale n'est présente dans la page.
+* Le lien public de signature est vérifié avant l'ouverture de la page.
+* Un signataire au statut inconnu s'affiche « Inconnu », sans avertissement PHP. Les anciens signataires « absents » de DoliMeet sont convertis vers la colonne de présence.
+* Ajouter des participants fonctionne même quand aucun utilisateur ni contact n'est encore inscrit.
+* La suppression d'un fichier de signature temporaire ne retire plus la protection du dossier `documents/temp`.
 
 ### Tickets
 
-* Les **tags du ticket** sont exposés aux modèles de courriel.
+* La variable `__TICKET_TAGS__` est remplie dans les e-mails de création de ticket.
 
-### Transfert d'entité
+### Interface
 
-* À l'import, les chemins de l'entité d'origine pointent vers l'installation d'arrivée.
+* Le menu du haut passe sous une fenêtre ouverte, sur tous les navigateurs.
+* Les fenêtres des modules ne sont plus déformées par les styles d'autres modules.
+* Le pied d'une fenêtre (boutons de validation) ne déborde plus de son cadre, et la note de mise à jour garde sa mise en page.
+* Les pastilles de statut en double sont retirées, et le thème reçoit les derniers correctifs faits dans Digirisk.
+* Les feuilles de style et scripts sont rechargés après une mise à jour, sans vider le cache du navigateur.
+* Le QR code d'installation de l'application mobile se lit mieux, même abîmé ou imprimé petit.
 
-### Divers
+### Compatibilité
 
-* Le registre des objets résout ses chemins de classe et de bibliothèque par `dol_buildpath()`.
-* Les conditions d'affichage des menus échappent correctement le nom du module.
-* Plus d'avertissement PHP 8 à la génération ODT quand le nom du modèle est masqué.
-* Le changelog reprend le nom attendu par Dolibarr, `ChangeLog.md`.
+* Saturne fonctionne installé ailleurs que dans le dossier `custom/`, et retrouve les modèles de numérotation rangés dans un sous-dossier.
+* Les droits des vues Agenda et Horaires sont lus de la même façon que dans Dolibarr.
+* Un objet sans statut n'arrête plus l'affichage de son libellé.
+* Sécurité : l'accès public aux images est limité aux images des pages publiques.
 
 ## Testez les nouveautés maintenant
 
-**Allez tester la bibliothèque de médias sur la démo : [https://demodoli.digirisk.com/](https://demodoli.digirisk.com/)**
+**Allez tester les exports Excel et le nouveau design sur la démo : [https://demodoli.digirisk.com/](https://demodoli.digirisk.com/)**
 
-## Comparaison des versions [23.2.1](https://github.com/Evarisk/Saturne/compare/23.2.1...23.3.0) et 23.3.0
+## Comparaison des versions [23.6.0](https://github.com/Evarisk/Saturne/compare/23.6.0...23.7.0) et 23.7.0
 
-* #1710 [Medias] add: baguette d'analyse IA des photos dans le bloc média et l'éditeur photo
-* #1707 [Filter] fix: calendrier des filtres de date au-dessus du popover et navigation par mois
-* #1701 [Medias] fix: loader infini lors du basculement d'affichage et sécurisation des requêtes AJAX
-* #1698 [Signature] fix: date de signature de la fiche utilisateur au fuseau de l'utilisateur
-* #1696 [JS] feat: cadrer la signature de la fiche utilisateur sur le tracé
-* #1694 [Signature] style: refonte du bloc de signature électronique de la fiche utilisateur
-* #1692 [Signature] fix: signature partagée entre les entités et réservée à son propriétaire
-* #1690 [Menu] fix: échapper le nom du module dans les conditions de menu
-* #1682 [Object] fix: résoudre class_path et lib_path du registre par dol_buildpath()
-* #1680 [Media] fix: ne pas initialiser l'éditeur sans modale dans la page
-* #1678 [EntityTransfer] fix: chemins de l'entité source pointés vers l'installation cible
-* #1676 [Medias] add: page liste de la bibliothèque, médias en attente et affectation
-* #1673 [Mod] fix: renommer le changelog en ChangeLog.md
-* #1671 [Ticket] feat: exposer les tags du ticket aux modèles d'email
-* #1669 [Medias] rework: refonte de l'ergonomie de la galerie
-* #2442 [Media] fix: éditeur photo entier et validable sur tablette zoomée ou en paysage
-* #5348 [Medias] feat: bouton d'affectation rapide à la galerie courante et partage vers les notes de frais
+* [#1844] [CI] ci: contrôle « API Saturne publiée » réutilisable par la CI des modules [`9c51231b`](https://github.com/Evarisk/Saturne/commit/9c51231b)
+* [#1846] [CI] ci: retrait du workflow Generate Auto Changelog [`367a73d4`](https://github.com/Evarisk/Saturne/commit/367a73d4)
+* [#1847] [Modal] fix: modal footer overflowing its container [`99017420`](https://github.com/Evarisk/Saturne/commit/99017420)
+* [#1843] [Index] feat: ne pas mettre a jour un module qui demande un Saturne plus recent [`06bf89ff`](https://github.com/Evarisk/Saturne/commit/06bf89ff)
+* [#1841] [PDF] feat: drawImageInBox() et drawCompanyLogo(), image et logo ajustés à leur cadre [`4f17a6dd`](https://github.com/Evarisk/Saturne/commit/4f17a6dd)
+* [#1839] [Modal] fix: reset the .modal-content properties other stylesheets set [`ba1258b4`](https://github.com/Evarisk/Saturne/commit/ba1258b4)
+* [#1836] [Export] feat: action de masse, export Excel des lignes cochées [`0b98cb31`](https://github.com/Evarisk/Saturne/commit/0b98cb31)
+* [#840] [PWA] fix: QR code de la PWA en correction d'erreur H au lieu de L [`33b1de2b`](https://github.com/Evarisk/Saturne/commit/33b1de2b)
+* [#1832] [Export] feat: gros exports Excel, limite de temps de PHP et styles des cellules réutilisés [`f84e4a5a`](https://github.com/Evarisk/Saturne/commit/f84e4a5a)
+* [#1833] [SCSS] fix: règles de pastilles de statut en double retirées du thème partagé [`c61598f1`](https://github.com/Evarisk/Saturne/commit/c61598f1)
+* [#1760] [SCSS] fix: correctifs du thème Digirisk postérieurs au 20/10 reportés dans le thème partagé [`7f1a7894`](https://github.com/Evarisk/Saturne/commit/7f1a7894)
+* [#1830] [Signature] fix: convertir les anciens signataires absents vers la colonne de présence [`f9a05082`](https://github.com/Evarisk/Saturne/commit/f9a05082)
+* [#1825] [Dashboard] feat: export Excel d'un tableau de bord entier [`db720c22`](https://github.com/Evarisk/Saturne/commit/db720c22)
+* [#1826] [Signature] fix: libellé d'un signataire au statut inconnu, sans avertissement PHP [`143c4f2d`](https://github.com/Evarisk/Saturne/commit/143c4f2d)
+* [#1824] [Export] feat: export Excel générique de toutes les listes Saturne [`979cf822`](https://github.com/Evarisk/Saturne/commit/979cf822)
+* [#1816] [Ticket] fix: __TICKET_TAGS__ filled in the ticket creation emails [`e7908631`](https://github.com/Evarisk/Saturne/commit/e7908631)
+* [#1819] [Lib] fix: find numbering modules filed one folder deeper [`96d45b6f`](https://github.com/Evarisk/Saturne/commit/96d45b6f)
+* [#1817] [Email] feat: saturneEmailTemplateSettings hook, modules declare the settings designating a template [`2880f437`](https://github.com/Evarisk/Saturne/commit/2880f437)
+* [#1812] [Export] feat: classe générique d'export Excel multi-onglets [`343324f2`](https://github.com/Evarisk/Saturne/commit/343324f2)
+* [#1815] [Document] fix: modèles ODT dans la langue du document [`a0922c77`](https://github.com/Evarisk/Saturne/commit/a0922c77)
+* [#1813] [Menu] feat: landing page of the config entry per module, risk assessment document tab for digirisk [`7f7c8cff`](https://github.com/Evarisk/Saturne/commit/7f7c8cff)
+* [#1808] [Email] feat: email templates overview grouped by element, with preview and the settings using them [`b44f522a`](https://github.com/Evarisk/Saturne/commit/b44f522a)
+* [#1809] [Medias] fix: limit the public image wrapper to the images of the public pages [`fbac65c6`](https://github.com/Evarisk/Saturne/commit/fbac65c6)
+* [#1809] [Signature] fix: validate the public signature link before loading the page [`e3313963`](https://github.com/Evarisk/Saturne/commit/e3313963)
+* [#1806] [Signature] fix: remove_file keeps documents/temp/index.php [`153b2fab`](https://github.com/Evarisk/Saturne/commit/153b2fab)
+* [#1804] [PDF] fix: drawTable measures its rows with the border it draws, the last line of a cell was dropped [`4be7e026`](https://github.com/Evarisk/Saturne/commit/4be7e026)
+* [#1802] [Medias] feat: drag and drop images into the media library [`6d58ad98`](https://github.com/Evarisk/Saturne/commit/6d58ad98)
+* [#1800] [Assets] fix: version the head assets of every page through the llxHeader hook [`7fa2cf18`](https://github.com/Evarisk/Saturne/commit/7fa2cf18)
+* [#1798] [Modal] fix: the top menu goes under an open modal without body:has() [`cbfcafe3`](https://github.com/Evarisk/Saturne/commit/cbfcafe3)
+* [#1796] [Index] fix: skip the module auto-update when Dolibarr is too old, report a failed init() [`34146285`](https://github.com/Evarisk/Saturne/commit/34146285)
+* [#1794] [Saturne] fix: s'inclure par des chemins relatifs au fichier, pas par le nom du dossier [`09c9d33b`](https://github.com/Evarisk/Saturne/commit/09c9d33b)
+* [#1791] [Doc] docs: inclure Saturne par dol_include_once / dol_buildpath dans les exemples du CLAUDE.md [`e31f7100`](https://github.com/Evarisk/Saturne/commit/e31f7100)
+* [#1790] [Document] fix: plus de balise {mycompany_logo} brute dans un ODT quand la société n'a pas de logo [`db16d854`](https://github.com/Evarisk/Saturne/commit/db16d854)
+* [Document] fix: no getimagesize() warning when the company has no logo [`b7bcfd4f`](https://github.com/Evarisk/Saturne/commit/b7bcfd4f)
+* [#1743] [Audio] docs: onUploadComplete changes in 23.7.0, not 23.5.0 [`f6c78bbd`](https://github.com/Evarisk/Saturne/commit/f6c78bbd)
+* [#1788] [Objet] fix: getLibStatut() ne plante plus sur un statut null [`46b45617`](https://github.com/Evarisk/Saturne/commit/46b45617)
+* [#1786] [Doc] docs: vidéo de release réservée aux grosses nouveautés [`393dc2c2`](https://github.com/Evarisk/Saturne/commit/393dc2c2)
+* [#1781] [Attendants] fix: default to an empty exclusion list when no user or contact is added yet [`cb7c10f3`](https://github.com/Evarisk/Saturne/commit/cb7c10f3)
+* [#1760] [Header] feat: classe saturne-theme sur les pages connectées [`8d0969c2`](https://github.com/Evarisk/Saturne/commit/8d0969c2)
+* [#1760] [SCSS] feat: thème moderne partagé du back-office [`1984e26a`](https://github.com/Evarisk/Saturne/commit/1984e26a)
+* [#1743] [Audio] feat: saturne:audio-uploaded event once a voice note is saved [`37cc71e0`](https://github.com/Evarisk/Saturne/commit/37cc71e0)
+* [#1731] [View] fix: droits des vues agenda et horaires lus par hasRight() [`20bc54b8`](https://github.com/Evarisk/Saturne/commit/20bc54b8)
+* [#2332] [Admin] feat: droit adminpage->write pour modifier la configuration d'un module sans etre administrateur [`8de2b3c7`](https://github.com/Evarisk/Saturne/commit/8de2b3c7)
+* [Document] fix: keep company logo aspect ratio in ODT documents [`4b16c174`](https://github.com/Evarisk/Saturne/commit/4b16c174)

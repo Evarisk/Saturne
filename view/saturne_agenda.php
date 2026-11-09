@@ -41,8 +41,8 @@ $moduleNameLowerCase = strtolower($moduleName);
 require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
 
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' . $objectType . '.lib.php';
+require_once dol_buildpath('/' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php');
+require_once dol_buildpath('/' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' . $objectType . '.lib.php');
 
 // Global variables definitions
 global $conf, $db, $langs, $hookmanager, $user;
@@ -69,7 +69,12 @@ if (GETPOST('actioncode', 'array')) {
     $actioncode = GETPOST('actioncode', 'alpha', 3) ? GETPOST('actioncode', 'alpha', 3) : (GETPOST('actioncode') == '0' ? '0' : (empty($conf->global->AGENDA_DEFAULT_FILTER_TYPE_FOR_OBJECT) ? '' : $conf->global->AGENDA_DEFAULT_FILTER_TYPE_FOR_OBJECT));
 }
 
+// Filters of the event list drawn by show_actions_done(): it reads them all from $filters
 $searchAgendaLabel = GETPOST('search_agenda_label');
+$searchRowid       = GETPOST('search_rowid', 'alpha');
+$searchComplete    = GETPOST('search_complete', 'aZ09');
+// Owner of the events: a user id, as a string like show_actions_done() sets it itself, '' for anyone
+$searchFiltert     = (GETPOSTINT('search_filtert') > 0 ? (string) GETPOSTINT('search_filtert') : '');
 
 // Get pagination parameters
 $limit     = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : $conf->liste_limit;
@@ -109,8 +114,8 @@ if ($id > 0 || !empty($ref)) {
 }
 
 // Security check - Protection if external user
-$permissiontoread = $user->rights->$moduleNameLowerCase->$objectType->read;
-$permissiontoadd  = $user->rights->$moduleNameLowerCase->$objectType->write;
+$permissiontoread = $user->hasRight($moduleNameLowerCase, $objectType, 'read');
+$permissiontoadd  = $user->hasRight($moduleNameLowerCase, $objectType, 'write');
 saturne_check_access($permissiontoread, $object);
 
 /*
@@ -134,6 +139,9 @@ if (empty($resHook)) {
     if (GETPOST('button_removefilter_x', 'alpha') || GETPOST('button_removefilter.x', 'alpha') || GETPOST('button_removefilter', 'alpha')) { // All tests are required to be compatible with all browsers
         $actioncode          = '';
         $searchAgendaLabel = '';
+        $searchRowid       = '';
+        $searchComplete    = '';
+        $searchFiltert     = '';
     }
 
     // Actions set_thirdparty, set_project
@@ -189,13 +197,53 @@ if ($id > 0 || !empty($ref)) {
                 $param .= '&limit=' . urlencode($limit);
             }
 
-            print load_fiche_titre($langs->trans('ActionsOnObject', $langs->transnoentities('The' . ucfirst($object->element))), $newCardButton, '');
+            // This generic page only knows its object from these parameters: the sort and page links
+            // of the event list, and its filter form, must carry them or they reload it on a fatal error
+            $pageParameters = ['module_name' => $moduleName, 'object_type' => $objectType];
+            if (dol_strlen((string) $showNav)) {
+                $pageParameters['show_nav'] = (string) $showNav;
+            }
+            if (dol_strlen($handlePhoto)) {
+                $pageParameters['handle_photo'] = $handlePhoto;
+            }
+            $hiddenParameters = '';
+            foreach ($pageParameters as $parameterName => $parameterValue) {
+                $param            .= '&' . $parameterName . '=' . urlencode($parameterValue);
+                $hiddenParameters .= '<input type="hidden" name="' . $parameterName . '" value="' . dol_escape_htmltag($parameterValue) . '">';
+            }
+            foreach (['search_agenda_label' => $searchAgendaLabel, 'search_rowid' => $searchRowid, 'search_complete' => $searchComplete, 'search_filtert' => $searchFiltert] as $filterName => $filterValue) {
+                if (dol_strlen($filterValue)) {
+                    $param .= '&' . $filterName . '=' . urlencode($filterValue);
+                }
+            }
+
+            // A module can give an object its own title (AgendaTitle<Element>) when "Events on <the object>" reads as jargon.
+            // Not ActionsOn<Element>: modules still define unused keys of that name (e.g. ActionsOnAccident)
+            $agendaTitleKey = 'AgendaTitle' . ucfirst($object->element);
+            $agendaTitle    = $langs->trans($agendaTitleKey);
+            if ($agendaTitle == $agendaTitleKey) {
+                $agendaTitle = $langs->trans('ActionsOnObject', $langs->transnoentities('The' . ucfirst($object->element)));
+            }
+
+            print load_fiche_titre($agendaTitle, $newCardButton, '');
 
             // List of all actions
             $filters = [];
             $filters['search_agenda_label'] = $searchAgendaLabel;
+            $filters['search_rowid']        = $searchRowid;
+            $filters['search_complete']     = $searchComplete;
+            $filters['search_filtert']      = $searchFiltert;
 
-            show_actions_done($conf, $langs, $db, $object, null, 0, $actioncode, '', $filters, $sortfield, $sortorder, $object->module);
+            // The filter form of show_actions_done() only carries the object id
+            $actionsDone = (string) show_actions_done($conf, $langs, $db, $object, null, 1, $actioncode, '', $filters, $sortfield, $sortorder, $object->module);
+            print preg_replace_callback(
+                '/<form name="listactionsfilter"[^>]*>/',
+                function (array $matches) use ($hiddenParameters): string {
+                    return $matches[0] . $hiddenParameters;
+                },
+                $actionsDone,
+                1
+            );
         }
     }
 }

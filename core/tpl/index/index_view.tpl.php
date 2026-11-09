@@ -13,7 +13,7 @@ if (!isset($showDashboard) || $showDashboard === true) {
 }
 
 // Load Module libraries.
-require_once __DIR__ . '/../../../../' . $moduleNameLowerCase . '/core/modules/mod' . $moduleName . '.class.php';
+require_once dol_buildpath('/' . $moduleNameLowerCase . '/core/modules/mod' . $moduleName . '.class.php');
 
 // Load translation files required by the page.
 saturne_load_langs();
@@ -34,7 +34,7 @@ $upload_dir = $conf->$moduleNameLowerCase->multidir_output[$conf->entity ?? 1];
 $hookmanager->initHooks([$moduleNameLowerCase . 'index', 'globalcard']);
 
 // Security check.
-$permissiontoread = $user->rights->$moduleNameLowerCase->read;
+$permissiontoread = $user->hasRight($moduleNameLowerCase, 'read');
 saturne_check_access($permissiontoread, null, true);
 
 /*
@@ -73,13 +73,53 @@ $moduleVersion       = strtoupper($moduleName) . '_VERSION';
 $moduleShowPatchNote = strtoupper($moduleName) . '_SHOW_PATCH_NOTE';
 
 
-if (getDolGlobalString($moduleVersion) !== $modModule->version) {
-    $modModule->remove();
-    $modModule->init();
+$moduleUpdateNeededDolibarrVersion = '';
+$moduleUpdateNeededSaturneVersion  = '';
+$saturneVersion                    = '';
 
-    dolibarr_set_const($db, $moduleJustUpdated, 1, 'integer', 0, '', $conf->entity);
-    dolibarr_set_const($db, $moduleShowPatchNote, 1, 'integer', 0, '', $conf->entity);
+if (getDolGlobalString($moduleVersion) !== $modModule->version) {
+    // init() is called here without the Dolibarr version check activateModule() makes first: once remove() has run, a refused init() leaves the module disabled in this entity
+    $neededDolibarrVersion = $modModule->need_dolibarr_version ?? 0;
+    // Same for Saturne, shipped separately: the module declares in need_saturne_version the oldest one its code runs on
+    $neededSaturneVersion = $modModule->need_saturne_version ?? 0;
+    if (is_array($neededSaturneVersion)) {
+        require_once __DIR__ . '/../../modules/modSaturne.class.php';
+        $saturneVersion = (new modSaturne($db))->version;
+    }
+    if (is_array($neededDolibarrVersion) && versioncompare(versiondolibarrarray(), $neededDolibarrVersion) < 0) {
+        $moduleUpdateNeededDolibarrVersion = versiontostring($neededDolibarrVersion);
+    } elseif (is_array($neededSaturneVersion) && versioncompare(explode('.', $saturneVersion), $neededSaturneVersion) < 0) {
+        $moduleUpdateNeededSaturneVersion = versiontostring($neededSaturneVersion);
+    } else {
+        $modModule->remove();
+        if ($modModule->init() > 0) {
+            dolibarr_set_const($db, $moduleJustUpdated, 1, 'integer', 0, '', $conf->entity);
+            dolibarr_set_const($db, $moduleShowPatchNote, 1, 'integer', 0, '', $conf->entity);
+        } else {
+            setEventMessages($langs->trans('ModuleUpdateFailed', $moduleName, $modModule->version), array_filter(array_merge([$modModule->error], (array) $modModule->errors)), 'errors');
+        }
+    }
 }
+
+if (dol_strlen($moduleUpdateNeededDolibarrVersion) > 0) : ?>
+    <div class="wpeo-notice notice-warning">
+        <div class="notice-content">
+            <div class="notice-subtitle"><strong><?php echo $langs->trans('ModuleUpdate', $moduleName); ?></strong>
+                <?php echo $langs->trans('ModuleUpdateNeedDolibarrVersion', $modModule->version, $moduleUpdateNeededDolibarrVersion, DOL_VERSION) ?>
+            </div>
+        </div>
+    </div>
+<?php endif;
+
+if (dol_strlen($moduleUpdateNeededSaturneVersion) > 0) : ?>
+    <div class="wpeo-notice notice-warning">
+        <div class="notice-content">
+            <div class="notice-subtitle"><strong><?php echo $langs->trans('ModuleUpdate', $moduleName); ?></strong>
+                <?php echo $langs->trans('ModuleUpdateNeedSaturneVersion', $modModule->version, $moduleUpdateNeededSaturneVersion, $saturneVersion) ?>
+            </div>
+        </div>
+    </div>
+<?php endif;
 
 if (getDolGlobalInt($moduleJustUpdated) === 1) : ?>
     <div class="wpeo-notice notice-success">

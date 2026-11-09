@@ -58,6 +58,14 @@ window.saturne.mediaBlock.init = function() {
  */
 window.saturne.mediaBlock.event = function() {
   $(document).on('change', '.saturne-photo-upload', window.saturne.mediaBlock.onPhotoSelected);
+  $(document).on('click', '.saturne-open-media-library', window.saturne.mediaBlock.onLibraryOpen);
+  $(document).on('keydown', '.saturne-open-media-library', function(event) {
+    // Not a native button: Enter and Space are wired by hand
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      window.saturne.mediaBlock.onLibraryOpen.call(this);
+    }
+  });
   $(document).on('click', '.saturne-media-gallery .open-media-editor-as-gallery', window.saturne.mediaBlock.onGalleryClick);
   $(document).on('click', '.saturne-media-gallery .saturne-media-ai', window.saturne.mediaBlock.onAnalyseClick);
   $(document).on('click', '.open-media-editor-linked', window.saturne.mediaBlock.onLinkedPhotoClick);
@@ -108,6 +116,91 @@ window.saturne.mediaBlock.onPhotoSelected = function() {
   // modified File objects once the user clicks Validate All.
   window.saturne.photoEditor.openBatch(filesArray, function(modifiedFiles) {
     window.saturne.mediaBlock.uploadBatchFiles(filesArray, modifiedFiles, module, subdir, block);
+  });
+};
+
+/**
+ * Triggered when the library button of a block is clicked.
+ * Opens the media library modal, whose medias are then linked to this block.
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @returns {void}
+ */
+window.saturne.mediaBlock.onLibraryOpen = function() {
+  var block   = $(this).closest('.linked-medias');
+  var gallery = $('#media_gallery');
+
+  if (!gallery.length || !block.attr('id')) {
+    return;
+  }
+
+  // The gallery links its medias to whoever opened it: here a block, not the record of a
+  // previous opening
+  gallery.attr('data-from-block', block.attr('id'));
+
+  if (window.saturne.mediaPending) {
+    window.saturne.mediaPending.syncCurrentTarget(gallery);
+  }
+
+  window.saturne.modal.loadLazyImages();
+  gallery.addClass('modal-active');
+
+  if (window.saturne.mediaGallery) {
+    window.saturne.mediaGallery.reloadIfChanged();
+  }
+};
+
+/**
+ * Link medias of the module library to a block, then refresh its gallery.
+ *
+ * @memberof Saturne_MediaBlock
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param   {Array}    filenames  Names of the library medias
+ * @param   {jQuery}   block      The .linked-medias block receiving them
+ * @param   {Function} onComplete Called once the block is refreshed
+ * @returns {void}
+ */
+window.saturne.mediaBlock.linkLibraryMedias = function(filenames, block, onComplete) {
+  var context = window.saturne.mediaBlock.mediaContext(block);
+
+  if (!filenames.length || !context || context.mode !== 'module') {
+    return;
+  }
+
+  var token          = window.saturne.toolbox.getToken();
+  var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
+  var formData       = new FormData();
+
+  filenames.forEach(function(filename) {
+    formData.append('filenames[]', filename);
+  });
+  formData.append('module_name', context.module);
+  formData.append('sub_dir', context.subdir);
+
+  window.saturne.loader.display(block.find('.saturne-media-gallery'));
+
+  $.ajax({
+    url         : document.URL + querySeparator + 'action=linkPhoto&token=' + token,
+    type        : 'POST',
+    data        : formData,
+    processData : false,
+    contentType : false,
+    complete    : function(resp) {
+      window.saturne.mediaBlock.refreshGallery(block, resp.responseText);
+      // Only left when the answer brought no gallery to put in place of the loading one
+      window.saturne.loader.remove(block.find('.saturne-media-gallery'));
+
+      if (typeof onComplete === 'function') {
+        onComplete();
+      }
+    }
   });
 };
 
@@ -836,6 +929,12 @@ window.saturne.mediaBlock.uploadPhotosDirectly = function(files, module, subdir,
  * @returns {void}
  */
 window.saturne.mediaBlock.refreshGallery = function(block, responseText) {
+  // A photo sent, linked or removed here changes the library or what it holds pending: the gallery
+  // modal, written with the page, reads it again at its next opening
+  if (window.saturne.mediaGallery) {
+    window.saturne.mediaGallery.libraryChanged = true;
+  }
+
   var $doc      = $('<div>').html(responseText);
   var blockId   = block && block.attr('id');
   var $srcBlock = blockId ? $doc.find('#' + blockId) : $();

@@ -75,3 +75,8 @@ ALTER TABLE `llx_saturne_object_signature` ADD `gender` VARCHAR(10) AFTER `role`
 ALTER TABLE `llx_saturne_object_signature` ADD `civility` VARCHAR(6) AFTER `gender`;
 ALTER TABLE `llx_saturne_object_signature` ADD `job` VARCHAR(128) AFTER `lastname`;
 ALTER TABLE `llx_saturne_object_signature` ADD `json` longtext NULL AFTER `attendance`;
+
+-- 23.7.0
+-- The absences of DoliMeet before its attendance rework (old statuses 7 absent and 8 justified absent) were left
+-- with a status the code no longer knows and no attendance, so read as present: registered signatories marked absent
+UPDATE llx_saturne_object_signature SET status = 1, attendance = 2 WHERE status IN (7, 8);

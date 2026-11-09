@@ -30,6 +30,14 @@
         background-color: #f4f5f7;
     }
 
+    // A sticky cell is the containing block of the select a select2 hides, which select2 throws
+    // 10000px away with a negative margin. In the status cell (Dolibarr .parentonrightofpage, right
+    // to left) that throw goes right, into the scroll container: the list then scrolls on and on
+    // over empty space. The select is clipped anyway, leave it where it stands.
+    table.liste thead .select2-hidden-accessible {
+        margin: 0 !important;
+    }
+
     // The column-picker dropdown (Dolibarr .selectedfieldsleft) lives INSIDE its own header cell,
     // which is sticky with z-index:3 like the others; sibling header cells come later in the DOM
     // so they paint over the open dropdown (a z-index on the dropdown itself can't escape its

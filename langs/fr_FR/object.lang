@@ -121,6 +121,8 @@ RecordsNotDraftSkipped = %d enregistrement(s) ignoré(s) car ils ne sont pas au 
 RecordsSigned = %d enregistrement(s) signé(s)
 RecordsSignedForAttendant = %d enregistrement(s) signé(s) pour %s
 RecordsNotSignableSkipped = %d enregistrement(s) ignoré(s) car ils ne sont pas au statut validé ou vous n'y avez pas de signature en attente
+RecordsLocked = %d enregistrement(s) verrouillé(s)
+RecordsNotLockableSkipped = %d enregistrement(s) ignoré(s) car ils ne sont pas encore prêts à être verrouillés (statut validé et étapes de la fiche terminées)
 Unarchive = Désarchiver
 Unarchived = Désarchivé
 ObjectNotFound  = %s non trouvé(e)
@@ -128,6 +130,8 @@ ObjectNotFound  = %s non trouvé(e)
 # Data - Donnée
 ActionsOnObject = Événements sur %s
 DisplayMoreInfo = Afficher plus d'informations
+# dol_print_object_info() du cœur affiche trans('Creation'), clé absente des langues du cœur
+Creation        = Création
 
 # Email - Mail
 ObjectEmailDocumentLabel   = SAT_Document

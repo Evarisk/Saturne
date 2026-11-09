@@ -27,7 +27,12 @@
  * Global     : $db, $langs, $user,
  * Parameters : $action, $confirm, $massaction, $toselect
  * Objects    : $object
- * Variable   : $enableMassSignature (optional), $enableMassValidate (optional), $objectclass, $permissiontoadd
+ * Variable   : $enableMassLock (optional), $enableMassSignature (optional), $enableMassValidate (optional), $objectclass,
+ *              $permissiontoadd
+ *
+ * Exposes    : $listXlsxExportAvailable, read by the list header TPL to offer the Excel export, and
+ *              $listXlsxExportBufferLevel when the export is asked, with $listXlsxExportIds, the checked lines to
+ *              export through the mass action, both read by the list SQL TPL
  */
 
 // Validate mass action - only offered on lists that opted in with $enableMassValidate
@@ -139,6 +144,48 @@ if ($massaction == 'signattendant' && !empty($enableMassSignature) && $permissio
     exit;
 }
 
+// Lock mass action - only offered on lists that opted in with $enableMassLock
+$lockAsked = ($massaction == 'lock' || ($action == 'lock' && $confirm == 'yes'));
+if ($lockAsked && !empty($enableMassLock) && $permissiontoadd) {
+    if (!empty($toselect)) {
+        $nbOk      = 0;
+        $nbSkipped = 0;
+        $error     = 0;
+        foreach ($toselect as $toSelectedID) {
+            // A new object each time: a lock may leave properties behind (linked objects, next control date...)
+            $objectTmp = new $objectclass($db);
+            $result    = $objectTmp->fetch($toSelectedID);
+            if ($result > 0) {
+                // Same conditions as the lock button of the card, else a draft or unsigned object would be locked
+                if (!$objectTmp->isLockable()) {
+                    $nbSkipped++;
+                    continue;
+                }
+
+                $result = $objectTmp->setLocked($user);
+                if ($result > 0) {
+                    $nbOk++;
+                } else {
+                    setEventMessages($objectTmp->error, $objectTmp->errors, 'errors');
+                    $error++;
+                    break;
+                }
+            } else {
+                setEventMessages($objectTmp->error, $objectTmp->errors, 'errors');
+                $error++;
+                break;
+            }
+        }
+
+        if ($error == 0) {
+            setEventMessages($langs->trans('RecordsLocked', $nbOk), []);
+            if ($nbSkipped > 0) {
+                setEventMessages($langs->trans('RecordsNotLockableSkipped', $nbSkipped), [], 'warnings');
+            }
+        }
+    }
+}
+
 // Archive mass action
 if (($massaction == 'archive' || ($action == 'archive' && $confirm == 'yes')) && $permissiontoadd) {
     if (!empty($toselect)) {
@@ -198,4 +245,15 @@ if (($massaction == 'unarchive' || ($action == 'unarchive' && $confirm == 'yes')
             setEventMessages($langs->trans('RecordsUnarchived', $nbOk), []);
         }
     }
+}
+
+// Excel export of the whole list, or of the lines checked through the mass action: the page is drawn into a buffer,
+// which the list SQL template replaces with the workbook once the page has set everything its list depends on, such
+// as the filter of the card it is a tab of
+$listXlsxExportAvailable = true;
+// The checked lines only once the mass actions of the core found some, and not more than they allow
+$listXlsxExportIds = ($massaction == 'export_xlsx' && empty($error) && !empty($toselect)) ? array_map('intval', (array) $toselect) : [];
+if ($action == 'export_xlsx' || !empty($listXlsxExportIds)) {
+    ob_start();
+    $listXlsxExportBufferLevel = ob_get_level();
 }

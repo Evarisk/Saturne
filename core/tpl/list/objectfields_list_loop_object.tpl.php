@@ -50,6 +50,13 @@ while ($i < $iMaxInLoop) {
     // Store properties in $object
     $object->setVarsFromFetchObj($obj);
 
+    // Core classes (Propal, Commande, Project...) declare their status as fk_statut: setVarsFromFetchObj() fills
+    // only that field, while getLibStatut() and the getNomUrl() tooltip read ->status. Copied on every row,
+    // the object being reused from one row to the next
+    if (array_key_exists('fk_statut', $object->fields) && !array_key_exists('status', $object->fields)) {
+        $object->status = $object->fk_statut;
+    }
+
     /*
     $object->thirdparty = null;
     if ($obj->fk_soc > 0) {
@@ -166,10 +173,11 @@ while ($i < $iMaxInLoop) {
                     } elseif ($inlineType !== '' && $inlineType !== 'select') {
                         $ceElement = $object->element ?? 'unknown';
                         $ceTable   = $object->table_element ?? 'unknown';
-                        $ceLabel   = !empty($val['label']) ? dol_escape_htmltag($val['label']) : dol_escape_htmltag($key);
-                        print '<div class="contenteditable-wrap"><div class="contenteditable" contenteditable="true" role="textbox" aria-label="' . $ceLabel . '" data-field="' . $key . '" data-id="' . $object->id . '" data-element="' . $ceElement . '" data-table="' . $ceTable . '" data-type="' . $inlineType . '" data-success="Enregistré" data-error="Format invalide">';
+                        $ceLabel   = dol_escape_htmltag(!empty($val['label']) ? $langs->transnoentities($val['label']) : $key);
+                        print '<div class="contenteditable-wrap"><div class="contenteditable" contenteditable="true" role="textbox" aria-label="' . $ceLabel . '" data-field="' . $key . '" data-id="' . $object->id . '" data-element="' . $ceElement . '" data-table="' . $ceTable . '" data-type="' . $inlineType . '" data-success="' . dol_escape_htmltag($langs->transnoentities('InlineEditSaved')) . '" data-error="' . dol_escape_htmltag($langs->transnoentities('InlineEditInvalidFormat')) . '">';
                         print $object->showOutputField($val, $key, $object->$key);
-                        $calBtn = ($inlineType === 'datepicker') ? '<button class="contenteditable-cal-btn" type="button" title="Ouvrir le calendrier" aria-label="Ouvrir le calendrier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>' : '';
+                        $ceCalendar = dol_escape_htmltag($langs->transnoentities('InlineEditOpenCalendar'));
+                        $calBtn = ($inlineType === 'datepicker') ? '<button class="contenteditable-cal-btn" type="button" title="' . $ceCalendar . '" aria-label="' . $ceCalendar . '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>' : '';
                         print '</div>' . $calBtn . '</div>';
                     } else {
                         print $object->showOutputField($val, $key, $object->$key);

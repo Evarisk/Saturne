@@ -79,7 +79,7 @@ window.saturne.document.displayLoader = function(  ) {
  * @memberof Saturne_Framework_Document
  *
  * @since   1.3.0
- * @version 1.3.0
+ * @version 23.7.1
  *
  * @return {void}
  */
@@ -87,18 +87,20 @@ window.saturne.document.autoDownloadTemplate = function() {
   let token          = window.saturne.toolbox.getToken();
   let url            = document.URL.replace(/#.*$/, '');
   let querySeparator = window.saturne.toolbox.getQuerySeparator(url);
-  let element        = $(this).closest('.file-generation');
-  let type           = element.find('.template-type').attr('value');
-  let filename       = element.find('.template-name').attr('value');
+  // A single .file-generation block holds every template of the type: each button reads the
+  // hidden fields printed right before it, those of its own file
+  let $button        = $(this);
+  let type           = $button.prevAll('.template-type').first().val();
+  let filename       = $button.prevAll('.template-name').first().val();
+  let path           = $button.prevAll('.template-path').first().val();
 
   $.ajax({
-    url: url + querySeparator + 'action=download_template&filename=' + filename + '&type=' + type + '&token=' + token,
+    url: url + querySeparator + 'action=download_template&filename=' + encodeURIComponent(filename) + '&type=' + encodeURIComponent(type) + '&token=' + token,
     type: 'POST',
     success: function() {
-      let path = element.find('.template-path').attr('value');
       window.saturne.signature.download(path + filename, filename);
       $.ajax({
-        url: document.URL + querySeparator + 'action=remove_file&filename=' + filename + '&token=' + token,
+        url: url + querySeparator + 'action=remove_file&filename=' + encodeURIComponent(filename) + '&token=' + token,
         type: 'POST',
         success: function () {},
         error: function() {}

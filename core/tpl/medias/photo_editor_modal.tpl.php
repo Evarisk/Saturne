@@ -54,7 +54,7 @@ $GLOBALS['saturnePhotoEditorModalRendered'] = 1;
             <button type="button" id="saturne-btn-favorite-photo" class="saturne-photo-editor-header__favorite" style="display: none;" title="<?php echo dol_escape_htmltag($langs->trans('SetPhotoAsFavorite')); ?>">
                 <i class="far fa-star"></i>
             </button>
-            <button type="button" id="saturne-btn-delete-photo" class="saturne-photo-editor-header__delete" style="display: none;" title="<?php echo dol_escape_htmltag($langs->trans('DeletePhoto')); ?>" data-confirm="<?php echo dol_escape_htmltag($langs->trans('DeletePhotoConfirmation')); ?>">
+            <button type="button" id="saturne-btn-delete-photo" class="saturne-photo-editor-header__delete" style="display: none;" title="<?php echo dol_escape_htmltag($langs->trans('DeletePhoto')); ?>">
                 <i class="fas fa-trash"></i>
             </button>
             <div class="saturne-photo-editor-header__settings">
@@ -124,6 +124,19 @@ $GLOBALS['saturnePhotoEditorModalRendered'] = 1;
             </div>
         </div>
 
+    </div>
+
+    <!-- Delete confirmation: over the editor, so the photo about to go stays in sight -->
+    <div class="saturne-photo-editor-confirm" id="saturne-photo-delete-confirm" role="dialog" aria-modal="true" aria-labelledby="saturne-photo-delete-confirm-title">
+        <div class="saturne-photo-editor-confirm__card">
+            <i class="fas fa-trash-alt saturne-photo-editor-confirm__icon"></i>
+            <div class="saturne-photo-editor-confirm__title" id="saturne-photo-delete-confirm-title"><?php echo $langs->trans('DeletePhotoConfirmation'); ?></div>
+            <img class="saturne-photo-editor-confirm__preview" id="saturne-photo-delete-confirm-preview" alt="">
+            <div class="saturne-photo-editor-confirm__actions">
+                <button type="button" id="saturne-btn-cancel-delete-photo" class="wpeo-button button-grey"><?php echo $langs->trans('Cancel'); ?></button>
+                <button type="button" id="saturne-btn-confirm-delete-photo" class="wpeo-button button-red"><i class="fas fa-trash-alt"></i> <?php echo $langs->trans('Delete'); ?></button>
+            </div>
+        </div>
     </div>
 </div>
 <!-- photo_editor_modal end -->

@@ -224,7 +224,7 @@ function saturne_object_prepare_head(CommonObject $object, $head = [], array $mo
         $moduleNameLowerCase = dol_strtolower($object->module);
     }
 
-    if ($user->rights->$moduleNameLowerCase->$objectType->read) {
+    if ($user->hasRight($moduleNameLowerCase, $objectType, 'read')) {
         $defaultMoreParams = [
             'parentType'         => $objectType, // Most of time, parentType is equal to objectType
             'specialName'        => $objectType,
@@ -380,6 +380,7 @@ function saturne_get_objects_metadata(string $type = ''): array
     // 'hook_name_document' => Hook name object document from initHooks
     // 'create_url'         => Path to creation card, no need to add "?action=create"
     // 'list_url'           => Path to list page
+    // 'remember_sort'      => OPTIONAL : 1 to keep the last sort chosen by each user on the generic list
     // 'class_path'         => Path to object class
     // 'lib_path'           => Path to object lib
     //                         The four paths above are resolved by dol_buildpath(), which searches htdocs/ and
@@ -564,7 +565,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'list_url'       => 'projet/tasks/list.php',
             'defaultsort'    => 't.datec',
             'defaultorder'   => 'DESC',
-            'class_path'     => 'custom/saturne/class/task/saturnetask.class.php',
+            'class_path'     => 'saturne/class/task/saturnetask.class.php',
             'lib_path'       => 'core/lib/project.lib.php',
         ];
         //@todo backward compatibility
@@ -765,7 +766,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'list_url'       => 'expedition/list.php',
             'defaultsort'    => 't.datec',
             'defaultorder'   => 'DESC',
-            'class_path'     => 'custom/saturne/class/dolibarrobjects/saturneexpedition.class.php',
+            'class_path'     => 'saturne/class/dolibarrobjects/saturneexpedition.class.php',
             'lib_path'       => 'core/lib/expedition.lib.php',
         ];
     }
@@ -863,7 +864,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'list_url'       => 'reception/list.php',
             'defaultsort'    => 't.datec',
             'defaultorder'   => 'DESC',
-            'class_path'     => 'custom/saturne/class/dolibarrobjects/saturnereception.class.php',
+            'class_path'     => 'saturne/class/dolibarrobjects/saturnereception.class.php',
             'lib_path'       => 'core/lib/reception.lib.php',
         ];
     }
@@ -913,7 +914,7 @@ function saturne_get_objects_metadata(string $type = ''): array
             'list_url'       => 'supplier_proposal/list.php',
             'defaultsort'    => 't.datec',
             'defaultorder'   => 'DESC',
-            'class_path'     => 'custom/saturne/class/dolibarrobjects/saturnesupplierproposal.class.php',
+            'class_path'     => 'saturne/class/dolibarrobjects/saturnesupplierproposal.class.php',
             'lib_path'       => 'core/lib/supplier_proposal.lib.php',
         ];
     }
@@ -1025,6 +1026,7 @@ function saturne_get_objects_metadata(string $type = ''): array
                     'list_url'           => $objectMetadata['list_url'] ?? '',
                     'defaultsort'        => $objectMetadata['defaultsort'] ?? 't.ref',
                     'defaultorder'       => $objectMetadata['defaultorder'] ?? 'ASC',
+                    'remember_sort'      => $objectMetadata['remember_sort'] ?? 0,
                     'class_path'         => $objectMetadata['class_path'] ?? '',
                     'lib_path'           => $objectMetadata['lib_path'] ?? '',
                     'alias_of'           => $objectMetadata['alias_of'] ?? '',
@@ -1106,9 +1108,9 @@ function saturne_require_objects_mod(array $numberingModulesNames, string $modul
                 $objectType = str_replace('_', '', $objectType);
             }
 
-            $modPathCustom   = dirname(__FILE__) . '/../../' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $objectType . '/' . $numberingModulesName . '.php';
-            $modPathCustomDoc = dirname(__FILE__) . '/../../' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $objectType . '/' . $numberingModulesName . '.php';
-            $modPathCustomDoc2 = dirname(__FILE__) . '/../../' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $objectType . 'document/' . $numberingModulesName . '.php';
+            $modPathCustom   = dol_buildpath('/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $objectType . '/' . $numberingModulesName . '.php');
+            $modPathCustomDoc = dol_buildpath('/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $objectType . '/' . $numberingModulesName . '.php');
+            $modPathCustomDoc2 = dol_buildpath('/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $objectType . 'document/' . $numberingModulesName . '.php');
             $modPathDolibarr = DOL_DOCUMENT_ROOT . '/core/modules/' . $objectType . '/' . $numberingModulesName . '.php';
 
             if (file_exists($modPathCustom)) {
@@ -1119,6 +1121,13 @@ function saturne_require_objects_mod(array $numberingModulesNames, string $modul
                 require_once $modPathCustomDoc2;
             } elseif (file_exists($modPathDolibarr)) {
                 require_once $modPathDolibarr;
+            } else {
+                // Some modules file their numbering modules one folder deeper (digiriskelement/accident, riskanalysis/risk...):
+                // without this lookup, getNextNumRef() only worked on pages that had preloaded the module with that folder in the key
+                $nestedModPaths = glob(dol_buildpath('/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase) . '/*/' . $objectType . '/' . $numberingModulesName . '.php');
+                if (!empty($nestedModPaths)) {
+                    require_once $nestedModPaths[0];
+                }
             }
 
             $varName             = 'ref' . ucfirst($objectType) . 'Mod';

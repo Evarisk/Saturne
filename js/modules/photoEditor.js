@@ -329,7 +329,8 @@ window.saturne.photoEditor.event = function() {
     });
   }
 
-  // Delete — remove the currently displayed photo (only when a delete callback was provided)
+  // Delete — remove the currently displayed photo (only when a delete callback was provided),
+  // once confirmed over the editor
   var btnDelete = document.getElementById('saturne-btn-delete-photo');
   if (btnDelete) {
     btnDelete.addEventListener('click', function() {
@@ -337,15 +338,30 @@ window.saturne.photoEditor.event = function() {
       if (typeof pe._onDelete !== 'function' || !pe._urls.length) {
         return;
       }
-      var confirmMsg = btnDelete.getAttribute('data-confirm');
-      if (confirmMsg && !window.confirm(confirmMsg)) {
-        return;
-      }
+      pe._openDeleteConfirm();
+    });
+  }
+
+  var deleteConfirm = document.getElementById('saturne-photo-delete-confirm');
+  if (deleteConfirm) {
+    document.getElementById('saturne-btn-cancel-delete-photo').addEventListener('click', window.saturne.photoEditor._closeDeleteConfirm);
+    document.getElementById('saturne-btn-confirm-delete-photo').addEventListener('click', function() {
+      var pe       = window.saturne.photoEditor;
       var url      = pe._urls[pe._currentIndex];
       var onDelete = pe._onDelete;
+      if (typeof onDelete !== 'function') {
+        pe._closeDeleteConfirm();
+        return;
+      }
       // Close first so the gallery refresh from the callback is not hidden behind the editor
       pe._close();
       onDelete(url, pe._currentIndex);
+    });
+    // A click beside the card backs out, as on any modal
+    deleteConfirm.addEventListener('click', function(e) {
+      if (e.target === deleteConfirm) {
+        window.saturne.photoEditor._closeDeleteConfirm();
+      }
     });
   }
 
@@ -394,9 +410,13 @@ window.saturne.photoEditor.event = function() {
     }
   });
 
-  // Close on Escape
+  // Close on Escape, the delete confirmation first when it is open
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && modal.style.display !== 'none') {
+      if (window.saturne.photoEditor._isDeleteConfirmOpen()) {
+        window.saturne.photoEditor._closeDeleteConfirm();
+        return;
+      }
       window.saturne.photoEditor._close();
     }
   });
@@ -765,11 +785,70 @@ window.saturne.photoEditor.resizeFileToBlob = function(file, callback) {
  * Private helpers
  * ---------------------------------------------------------------------- */
 
+/**
+ * Ask whether the photo on screen must be deleted, showing it in the confirmation
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @returns {void}
+ */
+window.saturne.photoEditor._openDeleteConfirm = function() {
+  var pe         = window.saturne.photoEditor;
+  var confirmBox = document.getElementById('saturne-photo-delete-confirm');
+
+  if (!confirmBox) {
+    return;
+  }
+
+  document.getElementById('saturne-photo-delete-confirm-preview').src = pe._urls[pe._currentIndex];
+  confirmBox.classList.add('is-open');
+  // Deleting cannot be undone: the safe answer is the one Enter gives
+  document.getElementById('saturne-btn-cancel-delete-photo').focus();
+};
+
+/**
+ * Put the delete confirmation away, leaving the editor as it was
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @returns {void}
+ */
+window.saturne.photoEditor._closeDeleteConfirm = function() {
+  var confirmBox = document.getElementById('saturne-photo-delete-confirm');
+
+  if (confirmBox) {
+    confirmBox.classList.remove('is-open');
+  }
+};
+
+/**
+ * Tell whether the delete confirmation is on screen
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @returns {boolean} True while the confirmation waits for an answer
+ */
+window.saturne.photoEditor._isDeleteConfirmOpen = function() {
+  var confirmBox = document.getElementById('saturne-photo-delete-confirm');
+
+  return !!confirmBox && confirmBox.classList.contains('is-open');
+};
+
 window.saturne.photoEditor._close = function() {
   var modal = window.saturne.photoEditor._modal;
   if (modal) {
     modal.style.display = 'none';
   }
+  window.saturne.photoEditor._closeDeleteConfirm();
   window.saturne.photoEditor._onSave    = null;
   window.saturne.photoEditor._onSaveAll = null;
   window.saturne.photoEditor._isBatchUpload = false;

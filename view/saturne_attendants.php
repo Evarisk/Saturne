@@ -46,8 +46,8 @@ if (isModEnabled('societe')) {
 
 require_once __DIR__ . '/../class/saturnesignature.class.php';
 require_once __DIR__ . '/../class/saturnemail.class.php';
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' . $objectType . '.lib.php';
+require_once dol_buildpath('/' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php');
+require_once dol_buildpath('/' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' . $objectType . '.lib.php');
 
 // Global variables definitions
 global $conf, $db, $hookmanager, $langs, $user;
@@ -86,9 +86,9 @@ $hookmanager->initHooks([$objectType . 'signature', $object->element . 'signatur
 include DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php'; // Must be included, not include_once. Include fetch and fetch_thirdparty but not fetch_optionals
 
 // Security check - Protection if external user
-$permissiontoread   = $user->rights->$moduleNameLowerCase->$objectType->read || $user->rights->$moduleNameLowerCase->assignedtome->$objectType;
-$permissiontoadd    = $user->rights->$moduleNameLowerCase->$objectType->write;
-$permissiontodelete = $user->rights->$moduleNameLowerCase->$objectType->delete;
+$permissiontoread   = $user->hasRight($moduleNameLowerCase, $objectType, 'read') || $user->hasRight($moduleNameLowerCase, 'assignedtome', $objectType);
+$permissiontoadd    = $user->hasRight($moduleNameLowerCase, $objectType, 'write');
+$permissiontodelete = $user->hasRight($moduleNameLowerCase, $objectType, 'delete');
 saturne_check_access($permissiontoread, null, true);
 
 /*
@@ -318,7 +318,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
 
     print '<div class="fichecenter">';
 
-    $backtocard = dol_buildpath('/custom/' . $moduleNameLowerCase . '/view/' . $object->element . '/' . $object->element . '_card.php?id=' . $id, 1);
+    $backtocard = dol_buildpath('/' . $moduleNameLowerCase . '/view/' . $object->element . '/' . $object->element . '_card.php', 1) . '?id=' . $id;
 
     $parameters = ['backtocard' => $backtocard];
     $reshook    = $hookmanager->executeHooks('saturneAttendantsBackToCard', $parameters, $object); // Note that $action and $object may have been modified by some hooks
@@ -536,7 +536,7 @@ if ($id > 0 || !empty($ref) && empty($action)) {
             foreach ($signatoriesByRole as $signatoryRole) {
                 foreach ($signatoryRole as $attendant) {
                     $signatoriesByRoleSignatureEmailURL .= $outputlangs->trans($attendant->role) . ' : ' . strtoupper($attendant->lastname) . ' ' . $attendant->firstname . '<br>';
-                    $signatureUrl = dol_buildpath('custom/saturne/public/signature/add_signature.php?track_id=' . $attendant->signature_url . '&entity=' . $conf->entity . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
+                    $signatureUrl = dol_buildpath('/saturne/public/signature/add_signature.php?track_id=' . $attendant->signature_url . '&entity=' . $conf->entity . '&module_name=' . $moduleNameLowerCase . '&object_type=' . $object->element . '&document_type=' . $documentType, 3);
                     $signatoriesByRoleSignatureEmailURL .= '<a href=' . $signatureUrl . ' target="_blank">' . $langs->transnoentities('SignatureEmailURL') . '</a><br><br>';
                 }
             }

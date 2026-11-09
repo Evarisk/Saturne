@@ -24,6 +24,7 @@
 
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formprojet.class.php';
 
+require_once __DIR__ . '/asset.lib.php';
 require_once __DIR__ . '/medias.lib.php';
 require_once __DIR__ . '/pagination.lib.php';
 require_once __DIR__ . '/documents.lib.php';
@@ -56,35 +57,40 @@ function saturne_header(int $load_media_gallery = 0, string $head = '', string $
 {
     global $moduleNameLowerCase;
 
+    // Modern back office theme (css/scss/theme): logged-in pages only, the public pages and the PWAs
+    // keep their own design
+    if (!defined('NOLOGIN') && !preg_match('/(^|\s)(template-pwa|page-public[\w-]*)(\s|$)/', $morecssonbody)) {
+        $morecssonbody = trim('saturne-theme ' . $morecssonbody);
+    }
+
     //CSS
     $cssList[]       = '/saturne/css/saturne.min.css';
     $relativeCssPath = $moduleNameLowerCase . '/css/' . $moduleNameLowerCase . '.min.css';
-    $absoluteCssPath = __DIR__ . '/../../' . $relativeCssPath;
+    $absoluteCssPath = dol_buildpath('/' . $relativeCssPath);
     if (file_exists($absoluteCssPath)) {
         $cssList[] = '/' . $relativeCssPath;
     }
     $cssList[] = 'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css';
 
-    $arrayofcss = array_unique(array_merge($arrayofcss ?? [], $cssList));
+    // Assets are versioned here and not only by the llxHeader hook, as public pages may reach llxHeader() without any hook context
+    $arrayofcss = array_map('saturne_htmlhead_asset_url', array_unique(array_merge($arrayofcss ?? [], $cssList)));
 
     //JS
-    $saturne_js_path = dol_buildpath('/saturne/js/saturne.min.js', 0);
-    $saturne_js_mtime = file_exists($saturne_js_path) ? filemtime($saturne_js_path) : 1;
-    $jsList[] = '/saturne/js/saturne.min.js?v=' . $saturne_js_mtime;
+    $jsList[] = '/saturne/js/saturne.min.js';
 
     if (!empty($load_media_gallery)) {
         $jsList[] = '/saturne/js/includes/signature-pad.min.js';
     }
 
     $relativeJsPath = $moduleNameLowerCase . '/js/' . $moduleNameLowerCase . '.min.js';
-    $absoluteJsPath = __DIR__ . '/../../' . $relativeJsPath;
+    $absoluteJsPath = dol_buildpath('/' . $relativeJsPath);
     if (file_exists($absoluteJsPath)) {
         $jsList[] = '/' . $relativeJsPath;
     }
     $jsList[] = 'https://cdn.jsdelivr.net/npm/flatpickr';
     $jsList[] = 'https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js';
 
-    $arrayofjs = array_unique(array_merge($arrayofjs ?? [], $jsList));
+    $arrayofjs = array_map('saturne_htmlhead_asset_url', array_unique(array_merge($arrayofjs ?? [], $jsList)));
 
     llxHeader($head, $title, $help_url, $target, $disablejs, $disablehead, $arrayofjs, $arrayofcss, $morequerystring, $morecssonbody, $replacemainareaby, $disablenofollow, $disablenoindex);
 
@@ -92,6 +98,7 @@ function saturne_header(int $load_media_gallery = 0, string $head = '', string $
         <script>
             window.saturne.config = window.saturne.config || {};
             window.saturne.config.urlRoot = '<?php echo DOL_URL_ROOT; ?>';
+            window.saturne.config.saturneUrlRoot = '<?php echo dol_escape_js(dol_buildpath('/saturne', 1)); ?>';
         </script>
     <?php
 
@@ -173,7 +180,7 @@ function saturne_display_recurse_tree(array $moreParams, array $objectElementTre
                         echo saturne_get_button_component_html([
                             'id'        => 'slider',
                             'className' => 'linkElement',
-                            'href'      => dol_buildpath('custom/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_view.php?id=' . $objectElement['object']->id . '&risk_type=' . $riskType, 1), //@todo gérer le lien
+                            'href'      => dol_buildpath('/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_view.php', 1) . '?id=' . $objectElement['object']->id . '&risk_type=' . $riskType, //@todo gérer le lien
                             'spans' => [
                                 [
                                     'className' => 'ref type-' . $objectElement['object']->element_type,
@@ -192,7 +199,7 @@ function saturne_display_recurse_tree(array $moreParams, array $objectElementTre
                         <?php
                             echo saturne_get_button_component_html([
                                 'className' => 'wpeo-button button-square-40 button-secondary wpeo-tooltip-event',
-                                'href'      => dol_buildpath('custom/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_card.php?action=create&element_type=0&fk_element=' . $objectElement['object']->id, 1),
+                                'href'      => dol_buildpath('/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_card.php', 1) . '?action=create&element_type=0&fk_element=' . $objectElement['object']->id,
                                 'moreAttr'  => [
                                     'data-direction' => 'bottom',
                                     'data-color'     => 'light',
@@ -209,7 +216,7 @@ function saturne_display_recurse_tree(array $moreParams, array $objectElementTre
 
                             echo saturne_get_button_component_html([
                                 'className' => 'wpeo-button button-square-40 wpeo-tooltip-event',
-                                'href'      => dol_buildpath('custom/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_card.php?action=create&element_type=1&fk_element=' . $objectElement['object']->id, 1),
+                                'href'      => dol_buildpath('/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_card.php', 1) . '?action=create&element_type=1&fk_element=' . $objectElement['object']->id,
                                 'moreAttr'  => [
                                     'data-direction' => 'bottom',
                                     'data-color'     => 'light',
@@ -248,7 +255,7 @@ function saturne_recurse_tree($moreParams, ?int $parentID = null, int $depth = 0
 {
     global $conf;
 
-    require_once __DIR__ . '/../../' . $moreParams['moduleNameLowerCase'] . '/class/' . $moreParams['objectElement'] . '.class.php';
+    require_once dol_buildpath('/' . $moreParams['moduleNameLowerCase'] . '/class/' . $moreParams['objectElement'] . '.class.php');
 
     $filter         = 't.entity IN (' . $conf->entity . ') AND t.fk_standard = ' . getDolGlobalInt(dol_strtoupper($moreParams['moduleNameLowerCase']) . '_ACTIVE_STANDARD');
     $filter        .= ' AND t.status = ' . SaturneElement::STATUS_VALIDATED;
@@ -316,10 +323,10 @@ function saturne_check_access(
         // cherchait. Les modules la nomment view/<element>/<element>_list.php ; a defaut,
         // l'accueil du module prend le relais. Un objet consulte ailleurs que dans une liste,
         // comme les elements DigiRisk dans leur arborescence, passe sa propre destination
-        $moduleHome = sprintf('/custom/%1$s/%1$sindex.php?mainmenu=%1$s', $moduleNameLowerCase);
-        $objectList = sprintf('/custom/%s/view/%2$s/%2$s_list.php', $moduleNameLowerCase, $object->element);
+        $moduleHome = sprintf('/%1$s/%1$sindex.php', $moduleNameLowerCase);
+        $objectList = sprintf('/%s/view/%2$s/%2$s_list.php', $moduleNameLowerCase, $object->element);
         $listExists = dol_strlen($object->element) && file_exists(dol_buildpath($objectList, 0));
-        $urlToGo    = dol_buildpath($listExists ? $objectList : $moduleHome, 1);
+        $urlToGo    = $listExists ? dol_buildpath($objectList, 1) : dol_buildpath($moduleHome, 1) . '?mainmenu=' . $moduleNameLowerCase;
 
         header('Location: ' . (dol_strlen($notFoundUrl) ? $notFoundUrl : $urlToGo));
         exit;
@@ -329,7 +336,7 @@ function saturne_check_access(
         if ($object !== null && $object->id > 0) {
             if ($object->entity != $conf->entity) {
                 setEventMessage($langs->trans('ChangeEntityRedirection'), 'warnings');
-                $urltogo = dol_buildpath('/custom/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'index.php?mainmenu=' . $moduleNameLowerCase, 1);
+                $urltogo = dol_buildpath('/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'index.php', 1) . '?mainmenu=' . $moduleNameLowerCase;
                 header('Location: ' . $urltogo);
                 exit;
             }
@@ -780,9 +787,9 @@ function saturne_show_category_image(Categorie $category, int $noPrint = 0, stri
             $imgHeight = ($category->imgHeight < $maxHeight) ? $category->imgHeight : $maxHeight;
 
             if ($noPrint) {
-                $out = '<div><img width="' . $imgWidth . '" height="' . $imgHeight . '" class="photo ' . $moreCSS . '" src="' . DOL_URL_ROOT . '/custom/saturne/utils/viewimage.php?modulepart=category&entity=' . $category->entity . '&file=' . urlencode($categoryPhotoDir . $filename) . '" value="' . $category->id . '" title="' . $filename . '" alt=""></div>';
+                $out = '<div><img width="' . $imgWidth . '" height="' . $imgHeight . '" class="photo ' . $moreCSS . '" src="' . dol_buildpath('/saturne/utils/viewimage.php', 1) . '?modulepart=category&entity=' . $category->entity . '&file=' . urlencode($categoryPhotoDir . $filename) . '" value="' . $category->id . '" title="' . $filename . '" alt=""></div>';
             } else {
-                print '<div><img width="' . $imgWidth . '" height="' . $imgHeight . '" class="photo ' . $moreCSS . '" src="' . DOL_URL_ROOT . '/custom/saturne/utils/viewimage.php?modulepart=category&entity=' . $category->entity . '&file=' . urlencode($categoryPhotoDir . $filename) . '" value="' . $category->id . '" title="' . $filename . '" alt=""></div>';
+                print '<div><img width="' . $imgWidth . '" height="' . $imgHeight . '" class="photo ' . $moreCSS . '" src="' . dol_buildpath('/saturne/utils/viewimage.php', 1) . '?modulepart=category&entity=' . $category->entity . '&file=' . urlencode($categoryPhotoDir . $filename) . '" value="' . $category->id . '" title="' . $filename . '" alt=""></div>';
             }
         }
     } else {
@@ -858,7 +865,7 @@ function saturne_create_category(string $label = '', string $type = '', int $fkP
             dol_mkdir($dir);
         }
 
-        $originFile = __DIR__ . '/../../' . $moduleNameLowerCase . '/img/pictos_' . $type . '/' . $photoName;
+        $originFile = dol_buildpath('/' . $moduleNameLowerCase . '/img/pictos_' . $type . '/' . $photoName);
         dol_copy($originFile, $dir . $photoName);
         vignette($dir . $photoName, $maxwidthsmall, $maxheightsmall);
         vignette($dir . $photoName, $maxwidthmini, $maxheightmini, '_mini');
@@ -1474,17 +1481,26 @@ function saturne_get_nophoto_placeholder(int $size = 40): string
 /**
  * Return whether the current user may change a module setting.
  *
- * The core ajax component that writes the constants (core/ajax/constantonoff.php)
- * only answers to administrators. Without this check a read-only user is shown a
- * switch that silently does nothing, instead of the state of the setting.
+ * An administrator always may. Another user needs the adminpage->write permission of the
+ * module: a module that does not declare it keeps its settings to the administrators, while
+ * the adminpage->read permission only opens the pages.
  *
- * @return int 1 if the user may write the module settings, 0 otherwise
+ * @param  string $moduleNameLowerCase Module whose settings are written, the module of the current page by default
+ * @return int                         1 if the user may write the module settings, 0 otherwise
  */
-function saturne_check_admin_write_access(): int
+function saturne_check_admin_write_access(string $moduleNameLowerCase = ''): int
 {
     global $user;
 
-    return (int) !empty($user->admin);
+    if (!empty($user->admin)) {
+        return 1;
+    }
+
+    if (empty($moduleNameLowerCase)) {
+        $moduleNameLowerCase = (string) ($GLOBALS['moduleNameLowerCase'] ?? '');
+    }
+
+    return (int) (!empty($moduleNameLowerCase) && $user->hasRight($moduleNameLowerCase, 'adminpage', 'write'));
 }
 
 /**
@@ -1498,6 +1514,10 @@ function saturne_check_admin_write_access(): int
  * Without the write permission the switch is rendered disabled: the user reads the state
  * of the setting but cannot act on it.
  *
+ * The core ajax component (core/ajax/constantonoff.php) only answers to administrators: a user
+ * holding the adminpage->write permission of the module gets a link to the page instead,
+ * handled by core/tpl/actions/admin_conf_actions.tpl.php that the page must include.
+ *
  * @param  string   $constName         Name of the constant to switch
  * @param  int      $permissionToWrite 1 to render an active switch, 0 for a read-only one
  * @param  int|null $entity            Entity to write the constant for, current entity by default
@@ -1505,7 +1525,27 @@ function saturne_check_admin_write_access(): int
  */
 function saturne_constant_onoff(string $constName, int $permissionToWrite = 1, ?int $entity = null): string
 {
+    global $conf, $langs, $user;
+
     require_once DOL_DOCUMENT_ROOT . '/core/lib/ajax.lib.php';
+
+    if (empty($user->admin) && !empty($permissionToWrite)) {
+        // Generic setting pages of Saturne serve every module, the link keeps the module and the object it shows
+        $urlParameters = [
+            'action' => (getDolGlobalString($constName) ? 'del_' : 'set_') . $constName,
+            'token'  => newToken(),
+            'entity' => $entity ?? $conf->entity
+        ];
+        foreach (['module_name', 'object_type'] as $contextParameter) {
+            if (GETPOST($contextParameter, 'alpha') !== '') {
+                $urlParameters[$contextParameter] = GETPOST($contextParameter, 'alpha');
+            }
+        }
+
+        $statusPicto = getDolGlobalString($constName) ? img_picto($langs->trans('Enabled'), 'switch_on') : img_picto($langs->trans('Disabled'), 'switch_off');
+
+        return '<a class="reposition inline-block" href="' . $_SERVER['PHP_SELF'] . '?' . http_build_query($urlParameters) . '">' . $statusPicto . '</a>';
+    }
 
     return ajax_constantonoff($constName, [], $entity, 0, 0, 0, 2, 0, 1, '', '', 'inline-block', 0, '', empty($permissionToWrite) ? 1 : 0);
 }

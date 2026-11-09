@@ -40,7 +40,7 @@ $moduleNameLowerCase = strtolower($moduleName);
 require_once TCPDF_PATH . 'tcpdf_barcodes_2d.php';
 
 // Load Module Libraries
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '.lib.php';
+require_once dol_buildpath('/' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '.lib.php');
 
 // Global variables definitions
 global $conf, $db, $hookmanager, $langs, $user;
@@ -57,7 +57,7 @@ $form = new Form($db);
 $hookmanager->initHooks([$moduleNameLowerCase . 'pwaadmin', 'saturneadmin']);
 
 // Security check - Protection if external user
-$permissionToRead = $user->rights->$moduleNameLowerCase->adminpage->read;
+$permissionToRead = $user->hasRight($moduleNameLowerCase, 'adminpage', 'read');
 saturne_check_access($permissionToRead);
 
 /*
@@ -67,7 +67,7 @@ saturne_check_access($permissionToRead);
 if ($action == 'generate_QRCode') {
     $urlToEncode = GETPOST('urlToEncode');
 
-    $barcode = new TCPDF2DBarcode($urlToEncode, 'QRCODE,L');
+    $barcode = new TCPDF2DBarcode($urlToEncode, 'QRCODE,H');
 
     dol_mkdir($conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/pwa/qrcode/');
     $file = $conf->$moduleNameLowerCase->multidir_output[$conf->entity] . '/pwa/qrcode/' . 'barcode_' . dol_print_date(dol_now(), 'dayhourlog') . '.png';

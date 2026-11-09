@@ -27,8 +27,9 @@
  * Globals    : $conf, $db, $hookmanager, $langs, $user
  * Parameters : $action, $limit, $contextpage, $massaction, $mode, $optioncss, $page, $searchAll, $sortfield, $sortorder, $toselect
  * Objects    : $categorie, $extrafields (extrafields_list_search_param.tpl), $form, $object
- * Variables  : $arrayfields, $createUrl (optional), $enableMassSignature (optional), $enableMassValidate (optional),
- *              $fieldsToSearchAll, $formMoreParams (optional), $helpText (optional), $nbTotalOfRecords, $num,
+ * Variables  : $arrayfields, $createUrl (optional), $enableMassLock (optional), $enableMassSignature (optional),
+ *              $enableMassValidate (optional), $fieldsToSearchAll, $formMoreParams (optional), $helpText (optional), $listXlsxExportAvailable (optional),
+ *              $moreUrlParameters (optional), $nbTotalOfRecords, $num,
  *              $permissiontoadd, $resql, $search, $search_array_options (extrafields_list_search_param.tpl),
  *              $searchCategories, $sql, $title
  */
@@ -109,6 +110,11 @@ if (!empty($enableMassSignature) && !empty($permissiontoadd)) {
     $arrayOfMassActions['signattendant'] = '<span class="fas fa-user-edit paddingrightonly"></span>' . $langs->trans('SignForAnAttendant');
 }
 
+// Mass lock is opt-in: the list page must set $enableMassLock, the object tells which records can be locked (isLockable())
+if (!empty($enableMassLock) && !empty($permissiontoadd)) {
+    $arrayOfMassActions['prelock'] = '<span class="fas fa-lock paddingrightonly"></span>' . $langs->trans('Lock');
+}
+
 $arrayOfMassActions += [
     //'generate_doc'=>img_picto('', 'pdf', 'class="pictofixedwidth"').$langs->trans("ReGeneratePDF"),
     //'builddoc'=>img_picto('', 'pdf', 'class="pictofixedwidth"').$langs->trans("PDFMerge"),
@@ -116,6 +122,11 @@ $arrayOfMassActions += [
     'prearchive' => '<span class="fas fa-archive paddingrightonly"></span>' . $langs->trans('Archive'),
     'preunarchive' => '<span class="fas fa-box-open paddingrightonly"></span>' . $langs->trans('Unarchive')
 ];
+
+// Excel export of the checked lines, answered by list_massactions.tpl.php as the export of the whole list
+if (!empty($listXlsxExportAvailable) && $mode != 'pwa') {
+    $arrayOfMassActions['export_xlsx'] = '<span class="fas fa-file-excel paddingrightonly"></span>' . $langs->trans('XlsxExportSelection');
+}
 
 if (!empty($permissiontodelete)) {
     $arrayOfMassActions['predelete'] = img_picto('', 'delete', 'class="pictofixedwidth"') . $langs->trans('Delete');
@@ -223,11 +234,38 @@ if ($mode != 'kanban' && $mode != 'pwa' && !empty($listLayoutId)) {
     }
     $filterIndicator .= '</span>';
 
+    // The status filter is not counted above: it has defaults, which "Remove filters" keeps. Name the statuses it
+    // hides, or the list is taken for complete, and offer to show them all
+    if (isset($search['status']) && is_array($search['status']) && !empty($object->fields['status']['arrayofkeyval'])) {
+        // Negative statuses (deleted) are never listed, whatever the filter
+        $listableStatuses = array_filter($object->fields['status']['arrayofkeyval'], static function ($statusKey) {
+            return $statusKey >= 0;
+        }, ARRAY_FILTER_USE_KEY);
+        $hiddenStatuses = array_diff_key($listableStatuses, array_flip($search['status']));
+        if (!empty($hiddenStatuses)) {
+            $hiddenStatusLabels = implode(', ', array_map([$langs, 'transnoentities'], $hiddenStatuses));
+
+            // Same list, filters and sort kept, every status selected
+            $showAllStatusesUrl = $_SERVER['PHP_SELF'] . '?' . ltrim(preg_replace('/&search_status\[\]=[^&]*/', '', $param), '&');
+            foreach (array_keys($listableStatuses) as $statusKey) {
+                $showAllStatusesUrl .= '&search_status[]=' . ((int) $statusKey);
+            }
+            if (!empty($sortfield)) {
+                $showAllStatusesUrl .= '&sortfield=' . urlencode($sortfield) . '&sortorder=' . urlencode($sortorder);
+            }
+
+            $statusFilterHintTitle = $langs->transnoentities('ListStatusFilterHint', $langs->transnoentities($object->fields['status']['label']), $hiddenStatusLabels);
+            $filterIndicator .= '<a class="saturne-status-filter-hint classfortooltip" href="' . dol_escape_htmltag($showAllStatusesUrl) . '" title="' . dol_escape_htmltag($statusFilterHintTitle) . '">';
+            $filterIndicator .= '<span class="fas fa-eye-slash"></span>' . dol_escape_htmltag($langs->transnoentities(count($hiddenStatuses) > 1 ? 'ListStatusFilterHiddenMany' : 'ListStatusFilterHiddenOne', $hiddenStatusLabels));
+            $filterIndicator .= '</a>';
+        }
+    }
+
     $cardButton = ($cardButton ?? '') . ' ' . $filterIndicator;
 }
 
 // "New" button to create a new object
-$cardButton = ($cardButton ?? '') . ' ' . dolGetButtonTitle($langs->trans('New' . ucfirst($object->element)), $helpText ?? '', 'fa fa-plus-circle', ($createUrl ?? dol_buildpath('custom/' . $object->module . '/view/' . $object->element . '/' . $object->element . '_card.php', 1) . '?action=create' . ($moreUrlParameters ?? '')), '', $permissiontoadd);
+$cardButton = ($cardButton ?? '') . ' ' . dolGetButtonTitle($langs->trans('New' . ucfirst($object->element)), $helpText ?? '', 'fa fa-plus-circle', ($createUrl ?? dol_buildpath('/' . $object->module . '/view/' . $object->element . '/' . $object->element . '_card.php', 1) . '?action=create' . ($moreUrlParameters ?? '')), '', $permissiontoadd);
 
 // Format the title text — record count BEFORE filter indicator
 $titleText = ($conf->browser->layout == 'classic' && $mode != 'pwa') ? ($title ?? '') : '';
@@ -237,6 +275,20 @@ if ($displayRecordCount !== null && is_numeric($displayRecordCount)) {
     $nbTotalOfRecords = -1; // Prevent print_barre_liste from appending it again
 }
 $listTitle = $titleText . ' ' . ($cardButton ?? '');
+
+// Excel export of the whole list, offered by the lists going through list_massactions.tpl.php, which answers it. The
+// export link carries the context of the page: the card the list is a tab of, the object type of the generic list
+if (!empty($listXlsxExportAvailable) && $mode != 'pwa') {
+    require_once __DIR__ . '/../../../class/saturnexlsxexport.class.php';
+
+    $xlsxExportParams = [];
+    parse_str(ltrim($moreUrlParameters ?? '', '&'), $xlsxExportParams);
+    $xlsxExportParams = array_diff_key(array_merge($xlsxExportParams, $formMoreParams ?? []), ['action' => 1, 'token' => 1]);
+    if (!empty($objectType)) {
+        $xlsxExportParams['object_type'] = $objectType;
+    }
+    $newCardButton = SaturneXlsxExport::getListExportButton($xlsxExportParams) . ($newCardButton ?? '');
+}
 
 // Add selectedFields back to the title bar on the right, or hidden if we don't want the gear icon.
 // Since Saturne removed it to put it in the side panel, we must put it back so checkboxes exist!
@@ -265,6 +317,11 @@ if ($massaction == 'prevalidate') {
 
 if ($massaction == 'presign') {
     print $form->formconfirm($_SERVER['PHP_SELF'], $langs->trans('ConfirmMassSign'), $langs->trans('ConfirmMassSigningQuestion', count($toselect)), 'sign', null, '', 0, 200, 500, 1);
+}
+
+// Only on the lists that opted in: a list with its own lock mass action (DigiQuali questions) prints its own confirmation
+if ($massaction == 'prelock' && !empty($enableMassLock)) {
+    print $form->formconfirm($_SERVER['PHP_SELF'], $langs->trans('ConfirmMassLock'), $langs->trans('ConfirmMassLockingQuestion', count($toselect)), 'lock', null, '', 0, 200, 500, 1);
 }
 
 if ($massaction == 'prearchive') {
