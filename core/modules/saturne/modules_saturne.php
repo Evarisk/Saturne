@@ -887,10 +887,11 @@ class SaturneDocumentModel extends CommonDocGenerator
         }
         $newFileTmp = str_replace(' ', '_', $newFileTmp);
         $newFileTmp = $newFileTmp . '.' . $this->type;
-        // Single quotes are removed too ($includequotes = 1): the ODT to PDF conversion
-        // passes the file name through escapeshellarg() then escapeshellcmd(), which
-        // destroys the shell quoting and makes LibreOffice convert nothing
-        $fileName   = dol_sanitizeFileName($newFileTmp, '_', 1, 1);
+        // The ODT to PDF conversion passes the file name through escapeshellarg() then
+        // escapeshellcmd(), which breaks on a quote or an "&" coming from the company name or a
+        // label and makes LibreOffice convert nothing - issues #4860 and #1885
+        require_once __DIR__ . '/../../../lib/documents.lib.php';
+        $fileName   = saturne_sanitize_document_file_name($newFileTmp);
 
         $objectDocument->setValueFrom('last_main_doc', $fileName, '', null, '', '', $moreParam['user'], '', '');
         if (!empty($objectDocument->error)) {
