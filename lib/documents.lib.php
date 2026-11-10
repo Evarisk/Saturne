@@ -503,6 +503,26 @@ function saturne_remove_index(string $model): string
 }
 
 /**
+ * Make the file name of a generated document safe for the ODT to PDF conversion
+ *
+ * Odf::exportAsAttachedPDF() quotes the file name with escapeshellarg(), then passes the whole
+ * command through escapeshellcmd(), which escapes some characters even between quotes. LibreOffice
+ * then receives a path that does not exist, prints "source file could not be loaded" and still
+ * exits with code 0. dol_sanitizeFileName() removes the quote ($includequotes = 1, #4860) and the
+ * tilde; the other characters escapeshellcmd() escapes are replaced here, with the separators around
+ * them, so "Head_office_&_lab" gives "Head_office_lab". Parentheses are protected by the core
+ *
+ * @param  string $fileName File name, without its directory
+ * @return string           File name the conversion can read
+ */
+function saturne_sanitize_document_file_name(string $fileName): string
+{
+    $fileName = dol_sanitizeFileName($fileName, '_', 1, 1);
+
+    return preg_replace('/_*(?:[&#^\[\]{}]_*)+/', '_', $fileName);
+}
+
+/**
  * Resolve a directory of document templates read from a *_ADDON_ODT_PATH constant
  *
  * The constants are written at the module activation, mostly as DOL_DOCUMENT_ROOT/custom/<module>/...
