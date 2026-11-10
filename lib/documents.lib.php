@@ -24,7 +24,9 @@
 
 /**
  * Return a string to show the box with list of available documents for object.
- * This also set the property $this->numoffiles
+ *
+ * The files are listed newest first. When the Saturne JS is loaded, the box gets a search field, filters by file type,
+ * sortable columns and only shows its first rows until the user asks for more : without it, the box stays a plain list
  *
  * @param  string            $modulepart       Module the files are related to ('mymodule', 'mymodule:nameofsubmodule', 'mymodule_temp')
  * @param  string|array      $modulesubdir     Existing (so sanitized) sub-directory to scan (Example: '0/1/10', 'FA/DD/MM/YY/9999'). Use '' if file is not into subdir of module.
@@ -59,6 +61,9 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
 
     include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 
+    // The box is also printed by hooks on pages of Dolibarr, where the Saturne translations are not loaded
+    $langs->load('saturne@saturne');
+
     // Add entity in $param if not already exists
     if (! preg_match('/entity=[0-9]+/', $param)) {
         $param .= ($param ? '&' : '') . 'entity=' . (!empty($object->entity) ? $object->entity : $conf->entity);
@@ -73,6 +78,8 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
             foreach ($filedir as $fileDirSingle) {
                 $fileList = array_merge($fileList, dol_dir_list($fileDirSingle, 'files', 0, '(\.jpg|\.jpeg|\.png|\.odt|\.zip|\.pdf)', '', 'date', SORT_DESC, 1));
             }
+            // Each directory is listed newest first: once merged, the whole list is sorted again
+            $fileList = dol_sort_array($fileList, 'date', 'desc');
         } else {
             $fileList = dol_dir_list($filedir, 'files', 0, '(\.jpg|\.jpeg|\.png|\.odt|\.zip|\.pdf)', '', 'date', SORT_DESC, 1);
         }
@@ -82,10 +89,59 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
         return '';
     }
 
-    $out         = '';
-    $forname     = 'builddoc';
-    $headershown = 0;
-    $showempty   = 0;
+    // modulepart = 'nameofmodule' or 'nameofmodule:NameOfObject'. The download links need the module alone, with or
+    // without the generation allowed
+    $submodulepart = $modulepart;
+    $tmp           = explode(':', $modulepart);
+    if (!empty($tmp[1])) {
+        $modulepart    = $tmp[0];
+        $submodulepart = $tmp[1];
+    }
+    $manualPdfGeneration = getDolGlobalInt(dol_strtoupper($modulepart) . '_MANUAL_PDF_GENERATION') > 0;
+
+    $linkList = [];
+    if (!empty($filedir) && is_object($object) && $object->id > 0) {
+        require_once DOL_DOCUMENT_ROOT . '/core/class/link.class.php';
+        $link      = new Link($db);
+        $sortfield = $sortorder = null;
+        $link->fetchAll($linkList, $object->element, $object->id, $sortfield, $sortorder);
+    }
+
+    $nbFiles = count($fileList) + count($linkList);
+    if (!$genallowed && (empty($filedir) || ($nbFiles == 0 && !preg_match('/^massfilesarea/', $modulepart)))) {
+        return "\n" . '<!-- Start saturne_show_documents -->' . "\n" . '<!-- End show_document -->' . "\n";
+    }
+
+    // Number of files of each type, for the filters of the box
+    $fileTypes = [];
+    foreach ($fileList as $file) {
+        $fileType             = saturne_get_document_file_type($file['name']);
+        $fileTypes[$fileType] = ($fileTypes[$fileType] ?? 0) + 1;
+    }
+    if (!empty($linkList)) {
+        $fileTypes['link'] = count($linkList);
+    }
+    $typeOrder = ['odt', 'pdf', 'zip', 'image', 'link'];
+    uksort($fileTypes, function ($first, $second) use ($typeOrder) {
+        $firstPosition  = array_search($first, $typeOrder);
+        $secondPosition = array_search($second, $typeOrder);
+        return ($firstPosition === false ? 99 : $firstPosition) <=> ($secondPosition === false ? 99 : $secondPosition);
+    });
+
+    // Columns: name, size, date, PDF generation, actions, then one per hook completing the lines
+    $addcolumforpicto = ($delallowed || $morepicto);
+    $hookColumns      = 0;
+    if (!empty($hookmanager->hooks['formfile'])) {
+        foreach ($hookmanager->hooks['formfile'] as $moduleHook) {
+            if (method_exists($moduleHook, 'formBuilddocLineOptions')) {
+                $hookColumns++;
+            }
+        }
+    }
+    $nbColumns = 3 + ($manualPdfGeneration ? 1 : 0) + ($addcolumforpicto ? 1 : 0) + $hookColumns;
+
+    $out     = '';
+    $forname = 'builddoc';
 
     $out .= "\n" . '<!-- Start saturne_show_documents -->' . "\n";
 
@@ -93,57 +149,39 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
     if (!empty($title)) {
         $titletoshow = ($title == 'none' ? '' : $title);
     }
+    if (dol_strlen($titletoshow) && $nbFiles > 0) {
+        $titletoshow .= '<span class="badge marginleftonlyshort saturne-documents__count">' . $nbFiles . '</span>';
+    }
 
-    // Show table
+    $toolbar = '';
     if ($genallowed) {
-        $submodulepart = $modulepart;
-        // modulepart = 'nameofmodule' or 'nameofmodule:NameOfObject'
-        $tmp = explode(':', $modulepart);
-
-        if (!empty($tmp[1])) {
-            $modulepart    = $tmp[0];
-            $submodulepart = $tmp[1];
-            $moduleNameUpperCase = dol_strtoupper($modulepart);
+        $toolbar .= saturne_show_documents_generation($modulepart, $submodulepart, $param, $forname, $modelselected, $allowgenifempty, $object, $active, $tooltiptext);
+        if ($toolbar === '-1') {
+            return -1;
         }
+    }
 
-        // For normalized external modules.
-        $file = dol_buildpath('/' . $modulepart . '/core/modules/' . $modulepart . '/' . $modulepart . 'documents/' . strtolower($submodulepart) . '/modules_' . strtolower($submodulepart) . '.php');
-        if (file_exists($file)) {
-            include_once $file;
-            $class = 'ModeleODT' . $submodulepart;
-
-            if (class_exists($class)) {
-                if (preg_match('/specimen/', $param)) {
-                    $type      = strtolower($class) . 'specimen';
-                    include_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
-                    $modellist = getListOfModels($db, $type);
-                } else {
-                    $modellist = call_user_func($class . '::liste_modeles', $db, 100);
-                }
-            } else {
-                dol_print_error($db, "Bad value for modulepart '" . $modulepart . "' in saturne_show_documents");
-                return -1;
+    // Search and type filters: hidden until the Saturne JS that runs them shows them
+    if ($nbFiles > 1) {
+        $toolbar .= '<div class="saturne-documents__filters" hidden>';
+        $toolbar .= '<label class="saturne-documents__search">';
+        $toolbar .= '<i class="fas fa-search" aria-hidden="true"></i>';
+        $toolbar .= '<input type="search" class="saturne-documents__search-input" placeholder="' . dol_escape_htmltag($langs->trans('DocumentsSearchPlaceholder')) . '" aria-label="' . dol_escape_htmltag($langs->trans('DocumentsSearchPlaceholder')) . '" autocomplete="off">';
+        $toolbar .= '</label>';
+        if (count($fileTypes) > 1) {
+            $toolbar .= '<div class="saturne-documents__types" role="group" aria-label="' . dol_escape_htmltag($langs->trans('DocumentsFilterByType')) . '">';
+            $toolbar .= '<button type="button" class="saturne-documents__type saturne-documents__type--active" data-type="" aria-pressed="true">' . $langs->trans('All') . '<span class="saturne-documents__type-count">' . $nbFiles . '</span></button>';
+            foreach ($fileTypes as $fileType => $nbFilesOfType) {
+                $toolbar .= '<button type="button" class="saturne-documents__type" data-type="' . dol_escape_htmltag($fileType) . '" aria-pressed="false">' . saturne_get_document_file_type_label($fileType) . '<span class="saturne-documents__type-count">' . $nbFilesOfType . '</span></button>';
             }
-        } else {
-            if (preg_match('/specimen/', $param)) {
-                $type      = 'SaturneDocumentModelspecimen';
-                include_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
-                $modellist = getListOfModels($db, $type);
-            } else {
-                require_once __DIR__ . '/../core/modules/saturne/modules_saturne.php';
-                $saturneDocumentModel = new SaturneDocumentModel($db, $modulepart, $submodulepart);
-                $documentType = strtolower($submodulepart);
-                $modellist = $saturneDocumentModel->liste_modeles($db, $documentType, 100);
-            }
+            $toolbar .= '</div>';
         }
+        $toolbar .= '</div>';
+    }
 
-        // Set headershown to avoid to have table opened a second time later
-        $headershown = 1;
+    $out .= '<div class="saturne-documents" data-sort-storage="' . dol_escape_htmltag($modulepart . ':' . $submodulepart) . '" data-page-size="10">';
 
-        if (empty($buttonlabel)) {
-            $buttonlabel = $langs->trans('Generate');
-        }
-
+    if ($genallowed) {
         if ($conf->browser->layout == 'phone') {
             // So we switch to form after a generation
             $urlsource .= '#' . $forname . '_form';
@@ -151,266 +189,302 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
         if (empty($noform)) {
             $out .= '<form action="' . $urlsource . (empty($conf->global->MAIN_JUMP_TAG) ? '' : '#builddoc') . '" id="' . $forname . '_form" method="post">';
         }
-
         $out .= '<input type="hidden" name="action" value="builddoc">';
         $out .= '<input type="hidden" name="token" value="' . newToken() . '">';
-        $out .= load_fiche_titre($titletoshow, '', '', 0, 'builddoc');
-        $out .= '<div class="div-table-responsive-no-min">';
-        $out .= '<table class="liste formdoc noborder centpercent">';
+    }
 
-        $out .= '<tr class="liste_titre">';
+    $out .= load_fiche_titre($titletoshow, '', '', 0, 'builddoc');
+    $out .= '<div class="div-table-responsive-no-min">';
+    $out .= '<table class="liste formdoc noborder centpercent saturne-documents__table"' . ($genallowed ? '' : ' id="' . $modulepart . '_table"') . '>' . "\n";
 
-        $addcolumforpicto = ($delallowed || $morepicto);
-        $colspan          = (3 + ($addcolumforpicto ? 1 : 0));
-        $colspanmore      = 0;
-
-        $out .= '<th colspan="' . $colspan . '" class="formdoc liste_titre maxwidthonsmartphone center">';
-
-        // Model
-        if (!empty($modellist)) {
-            asort($modellist);
-            $out .= '<span class="hideonsmartphone"> <i class="fas fa-file-word"></i> </span>';
-            $modellist = array_filter($modellist, 'saturne_remove_index');
-            if (is_array($modellist)) {
-                foreach ($modellist as $key => $modellistsingle) {
-                    $arrayvalues         = preg_replace('/template_/', '', $modellistsingle);
-                    $newKey              = str_replace($object->element . 'document_custom_odt', $object->element . 'document_odt', $key);
-                    $modellists[$newKey] = $langs->trans($arrayvalues);
-                    $confName            = dol_strtoupper($modulepart . '_' . $submodulepart) . '_DEFAULT_MODEL';
-                    if (dol_strlen(getDolGlobalString($confName)) > 0 && strpos($key, getDolGlobalString($confName)) !== false) {
-                        $modelselected = $newKey;
-                    }
-                }
-            }
-
-            $morecss = 'maxwidth200';
-            if ($conf->browser->layout == 'phone') {
-                $morecss = 'maxwidth100';
-            }
-
-            $out .= $form::selectarray('model', $modellists, $modelselected, $showempty, 0, 0, '', 0, 0, 0, '', $morecss);
-
-            if ($conf->use_javascript_ajax) {
-                $out .= ajax_combobox('model');
-            }
-
-            // Button
-            if ($active) {
-                $genbutton = '<button class="wpeo-button button-square-40 button-blue wpeo-tooltip-event" id="' . $forname . '_generatebutton" name="' . $forname . '_generatebutton" type="submit" aria-label="' . $langs->trans('Generate') . '"><i class="fas fa-print button-icon"></i></button>';
-            } else {
-                $genbutton = '<i class="fas fa-exclamation-triangle pictowarning wpeo-tooltip-event" aria-label="' . $langs->trans($tooltiptext) . '"></i>';
-                $genbutton .= '<button class="wpeo-button button-square-40 button-disable" name="' . $forname . '_generatebutton"><i class="fas fa-print button-icon"></i></button>';
-            }
-
-            if (!$allowgenifempty && !is_array($modellists) && empty($modellists)) {
-                $genbutton .= ' disabled';
-            }
-            if ($allowgenifempty && !is_array($modellists) && empty($modellists) && empty($conf->dol_no_mouse_hover)) {
-                $langs->load('errors');
-                $genbutton .= ' ' . img_warning($langs->transnoentitiesnoconv('WarningNoDocumentModelActivated'));
-            }
-            if (!$allowgenifempty && !is_array($modellists) && empty($modellists) && empty($conf->dol_no_mouse_hover)) {
-                $genbutton = '';
-            }
-            if (empty($modellists) && !$showempty) {
-                $genbutton = '';
-            }
-            $out .= $genbutton;
-        } else {
-            $out .= '<div class="float">' . $langs->trans('Files') . '</div>';
-        }
-
-        if (!$active) {
-            $htmltooltip = $tooltiptext;
-            $out .= '<span class="center">';
-            $out .= $form->textwithpicto($langs->trans('Help'), $htmltooltip, 1, 'info');
-            $out .= '</span>';
-        }
+    if (dol_strlen($toolbar)) {
+        $out .= '<tr class="liste_titre saturne-documents__toolbar-row">';
+        $out .= '<th colspan="' . $nbColumns . '" class="formdoc liste_titre saturne-documents__toolbar-cell">';
+        $out .= '<div class="saturne-documents__toolbar">' . $toolbar . '</div>';
         $out .= '</th>';
-
-        if (!empty($hookmanager->hooks['formfile'])) {
-            foreach ($hookmanager->hooks['formfile'] as $moduleName) {
-                if (method_exists($moduleName, 'formBuilddocLineOptions')) {
-                    $colspanmore++;
-                    $out .= '<th></th>';
-                }
-            }
-        }
-        $manualPdfGenerationConf = $moduleNameUpperCase . '_MANUAL_PDF_GENERATION';
-        if (getDolGlobalInt($manualPdfGenerationConf) > 0) {
-            $out .= '<td></td>';
-        }
         $out .= '</tr>';
-
-        // Execute hooks
-        $parameters = ['colspan' => ($colspan + $colspanmore), 'socid' => ($GLOBALS['socid'] ?? ''), 'id' => ($GLOBALS['id'] ?? ''), 'modulepart' => $modulepart];
-        if (is_object($hookmanager)) {
-            $hookmanager->executeHooks('formBuilddocOptions', $parameters, $GLOBALS['object']);
-            $out .= $hookmanager->resPrint;
-        }
     }
 
-    // Get list of files
-    if (!empty($filedir)) {
-        $link_list = [];
-        $addcolumforpicto = ($delallowed || $morepicto);
-        $colspan          = (3 + ($addcolumforpicto ? 1 : 0));
-        $colspanmore      = 0;
-        if (is_object($object) && $object->id > 0) {
-            require_once DOL_DOCUMENT_ROOT . '/core/class/link.class.php';
-            $link      = new Link($db);
-            $sortfield = $sortorder = null;
-            $link->fetchAll($link_list, $object->element, $object->id, $sortfield, $sortorder);
+    // Execute hooks
+    if ($genallowed && is_object($hookmanager)) {
+        $parameters = ['colspan' => $nbColumns, 'socid' => ($GLOBALS['socid'] ?? ''), 'id' => ($GLOBALS['id'] ?? ''), 'modulepart' => $modulepart];
+        $hookObject = $GLOBALS['object'] ?? $object;
+        $hookmanager->executeHooks('formBuilddocOptions', $parameters, $hookObject);
+        $out .= $hookmanager->resPrint;
+    }
+
+    $out .= '<!-- documents.lib::saturne_show_documents -->' . "\n";
+
+    // Column titles, sorted by the Saturne JS
+    if ($nbFiles > 0) {
+        $out .= '<tr class="liste_titre saturne-documents__head">';
+        $out .= '<th class="saturne-documents__col-name" data-sort-key="name">' . $langs->trans('Name') . '</th>';
+        $out .= '<th class="right nowraponall hideonsmartphone" data-sort-key="size">' . $langs->trans('Size') . '</th>';
+        $out .= '<th class="right nowraponall" data-sort-key="date">' . $langs->trans('Date') . '</th>';
+        if ($manualPdfGeneration) {
+            $out .= '<th></th>';
         }
-
-        $out .= '<!-- documents.lib::saturne_show_documents -->' . "\n";
-
-        // Show title of array if not already shown
-        if ((!empty($fileList) || !empty($link_list) || preg_match('/^massfilesarea/', $modulepart)) && !$headershown) {
-            $headershown = 1;
-            $out        .= load_fiche_titre($titletoshow, '', '', 0, 'builddoc');
-            $out        .= '<div class="div-table-responsive-no-min">';
-            $out        .= '<table class="noborder centpercent" id="' . $modulepart . '_table">' . "\n";
+        if ($addcolumforpicto) {
+            $out .= '<th></th>';
         }
+        $out .= str_repeat('<th></th>', $hookColumns);
+        $out .= '</tr>' . "\n";
+    }
 
-        // Loop on each file found
-        if (is_array($fileList)) {
-            foreach ($fileList as $file) {
-                // Define relative path for download link (depends on module)
-                $relativepath = $file['name']; // Cas general
-                if (is_array($modulesubdir)) {
-                    foreach ($modulesubdir as $moduleSubDirSingle) {
-                        if (strstr($file['path'], $moduleSubDirSingle)) {
-                            $relativepath = $moduleSubDirSingle . '/' . $file['name'];
-                        }
-                    }
-                } elseif ($modulesubdir) {
-                    $relativepath = $modulesubdir . '/' . $file['name'];
-                }
+    $documenturl = DOL_URL_ROOT . '/document.php';
+    if (isset($conf->global->DOL_URL_ROOT_DOCUMENT_PHP)) {
+        $documenturl = $conf->global->DOL_URL_ROOT_DOCUMENT_PHP; // To use another wrapper
+    }
+    $tmpurlsource = preg_replace('/#[a-zA-Z0-9_]*$/', '', $urlsource);
 
-                $out .= '<tr class="oddeven">';
-
-                $documenturl = DOL_URL_ROOT . '/document.php';
-                if (isset($conf->global->DOL_URL_ROOT_DOCUMENT_PHP)) {
-                    $documenturl = $conf->global->DOL_URL_ROOT_DOCUMENT_PHP; // To use another wrapper
-                }
-
-                // Show file name with link to download
-                $out .= '<td class="minwidth200">';
-                $out .= '<a class="documentdownload paddingright" href="' . $documenturl . '?modulepart=' . $modulepart . '&amp;file=' . urlencode($relativepath) . ($param ? '&' . $param : '') . '"';
-
-                $mime = dol_mimetype($relativepath, '', 0);
-                if (preg_match('/text/', $mime)) {
-                    $out .= ' target="_blank"';
-                }
-                $out .= '>';
-                $out .= img_mime($file['name'], $langs->trans('File') . ': ' . $file['name']);
-                $out .= dol_trunc($file['name'], 150);
-                $out .= '</a>' . "\n";
-
-                // Preview
-                if (!empty($conf->use_javascript_ajax) && ($conf->browser->layout != 'phone')) {
-                    $tmparray = getAdvancedPreviewUrl($modulepart, $relativepath, 1, '&entity=' . $conf->entity);
-                    if ($tmparray && $tmparray['url']) {
-                        $out .= '<a href="' . $tmparray['url'] . '"' . ($tmparray['css'] ? ' class="' . $tmparray['css'] . '"' : '') . ($tmparray['mime'] ? ' mime="' . $tmparray['mime'] . '"' : '') . ($tmparray['target'] ? ' target="' . $tmparray['target'] . '"' : '') . '>';
-                        //$out.= img_picto('','detail');
-                        $out .= '<i class="fa fa-search-plus paddingright" style="color: gray"></i>';
-                        $out .= '</a>';
-                    }
-                }
-                $out .= '</td>';
-
-                // Show file size
-                $size = (!empty($file['size']) ? $file['size'] : dol_filesize($filedir . '/' . $file['name']));
-                $out .= '<td class="nowrap right">' . dol_print_size($size, 1, 1) . '</td>';
-
-                // Show file date
-                $date = (!empty($file['date']) ? $file['date'] : dol_filemtime($filedir . '/' . $file['name']));
-                $out .= '<td class="nowrap right">' . dol_print_date($date, 'dayhour', 'tzuser') . '</td>';
-
-                // Show pdf generation icon
-                if (getDolGlobalInt($manualPdfGenerationConf) > 0) {
-                    $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-
-                    $out .= '<td class="right">';
-
-                    if ($extension == 'odt') {
-                        $tmpurlsource = preg_replace('/#[a-zA-Z0-9_]*$/', '', $urlsource);
-                        $out .= '<a class="pdf-generation" href="' . $tmpurlsource . ((strpos($tmpurlsource, '?') === false) ? '?' : '&amp;') . 'action=pdfGeneration&amp;file=' . urlencode($relativepath) . '&token=' . newToken();
-                        $out .= ($param ? '&amp;' . $param : '');
-                        $out .= '">' . img_picto($langs->trans("PDFGeneration"), 'fontawesome_fa-file-pdf_fas_red') . '</a>';
-                        $out .= ' ' . $form->textwithpicto('', $langs->trans('PDFGenerationTooltip'));
-                    }
-
-                    $out .= '</td>';
-                }
-
-                if ($delallowed || $morepicto) {
-                    $out .= '<td class="right nowraponall">';
-                    if ($delallowed) {
-                        $tmpurlsource = preg_replace('/#[a-zA-Z0-9_]*$/', '', $urlsource);
-                        $out         .= '<a href="' . $tmpurlsource . ((strpos($tmpurlsource, '?') === false) ? '?' : '&amp;') . 'action=' . $removeaction . '&amp;file=' . urlencode($relativepath) . '&token=' . newToken();
-                        $out         .= ($param ? '&amp;' . $param : '');
-                        $out         .= '">' . img_picto($langs->trans('Delete'), 'delete') . '</a>';
-                    }
-                    if ($morepicto) {
-                        $morepicto = preg_replace('/__FILENAMEURLENCODED__/', urlencode($relativepath), $morepicto);
-                        $out      .= $morepicto;
-                    }
-                    $out .= '</td>';
-                }
-
-                if (is_object($hookmanager)) {
-                    $parameters = ['colspan' => ($colspan + $colspanmore), 'socid' => ($GLOBALS['socid'] ?? ''), 'id' => ($GLOBALS['id'] ?? ''), 'modulepart' => $modulepart, 'relativepath' => $relativepath];
-                    $res        = $hookmanager->executeHooks('formBuilddocLineOptions', $parameters, $file);
-                    if (empty($res)) {
-                        $out .= $hookmanager->resPrint; // Complete line
-                        $out .= '</tr>';
-                    } else {
-                        $out = $hookmanager->resPrint; // Replace all $out
-                    }
+    // Loop on each file found
+    foreach ($fileList as $file) {
+        // Define relative path for download link (depends on module)
+        $relativepath = $file['name']; // Cas general
+        if (is_array($modulesubdir)) {
+            foreach ($modulesubdir as $moduleSubDirSingle) {
+                if (strstr($file['path'], $moduleSubDirSingle)) {
+                    $relativepath = $moduleSubDirSingle . '/' . $file['name'];
                 }
             }
+        } elseif ($modulesubdir) {
+            $relativepath = $modulesubdir . '/' . $file['name'];
         }
 
-        // Loop on each link found
-        if (is_array($link_list)) {
-            $colspan = 2;
-            foreach ($link_list as $file) {
-                $out .= '<tr class="oddeven">';
-                $out .= '<td colspan="' . $colspan . '" class="maxwidhtonsmartphone">';
-                $out .= '<a data-ajax="false" href="' . $file->url . '" target="_blank">';
-                $out .= $file->label;
+        $size = (!empty($file['size']) ? $file['size'] : dol_filesize($file['fullname']));
+        $date = (!empty($file['date']) ? $file['date'] : dol_filemtime($file['fullname']));
+
+        $out .= '<tr class="oddeven saturne-documents__row" data-name="' . dol_escape_htmltag($file['name']) . '" data-size="' . ((int) $size) . '" data-date="' . ((int) $date) . '" data-type="' . dol_escape_htmltag(saturne_get_document_file_type($file['name'])) . '">';
+
+        // Show file name with link to download
+        $out .= '<td class="minwidth200 saturne-documents__name">';
+        $out .= '<a class="documentdownload paddingright" href="' . $documenturl . '?modulepart=' . $modulepart . '&amp;file=' . urlencode($relativepath) . ($param ? '&' . $param : '') . '"';
+
+        $mime = dol_mimetype($relativepath, '', 0);
+        if (preg_match('/text/', $mime)) {
+            $out .= ' target="_blank"';
+        }
+        $out .= '>';
+        $out .= img_mime($file['name'], $langs->trans('File') . ': ' . $file['name']);
+        $out .= dol_trunc($file['name'], 150);
+        $out .= '</a>' . "\n";
+
+        // Preview
+        if (!empty($conf->use_javascript_ajax) && ($conf->browser->layout != 'phone')) {
+            $tmparray = getAdvancedPreviewUrl($modulepart, $relativepath, 1, '&entity=' . $conf->entity);
+            if ($tmparray && $tmparray['url']) {
+                $out .= '<a href="' . $tmparray['url'] . '"' . ($tmparray['css'] ? ' class="' . $tmparray['css'] . '"' : '') . ($tmparray['mime'] ? ' mime="' . $tmparray['mime'] . '"' : '') . ($tmparray['target'] ? ' target="' . $tmparray['target'] . '"' : '') . '>';
+                $out .= '<i class="fa fa-search-plus paddingright saturne-documents__preview"></i>';
                 $out .= '</a>';
-                $out .= '</td>';
-                $out .= '<td class="right">';
-                $out .= dol_print_date($file->datea, 'dayhour');
-                $out .= '</td>';
-                if ($delallowed || $printer || $morepicto) {
-                    $out .= '<td></td>';
-                }
-                $out .= '</tr>' . "\n";
             }
         }
+        $out .= '</td>';
 
-        if (count($fileList) == 0 && count($link_list) == 0 && $headershown) {
-            $out .= '<tr><td colspan="' . (3 + ($addcolumforpicto ? 1 : 0)) . '" class="opacitymedium">' . $langs->trans('None') . '</td></tr>' . "\n";
+        $out .= '<td class="nowrap right hideonsmartphone saturne-documents__size">' . dol_print_size($size, 1, 1) . '</td>';
+        $out .= '<td class="nowrap right saturne-documents__date">' . dol_print_date($date, 'dayhour', 'tzuser') . '</td>';
+
+        // Show pdf generation icon
+        if ($manualPdfGeneration) {
+            $out .= '<td class="right nowraponall">';
+            if (pathinfo($file['name'], PATHINFO_EXTENSION) == 'odt') {
+                $out .= '<a class="pdf-generation" href="' . $tmpurlsource . ((strpos($tmpurlsource, '?') === false) ? '?' : '&amp;') . 'action=pdfGeneration&amp;file=' . urlencode($relativepath) . '&token=' . newToken();
+                $out .= ($param ? '&amp;' . $param : '');
+                $out .= '">' . img_picto($langs->trans('PDFGeneration'), 'fontawesome_fa-file-pdf_fas_red') . '</a>';
+                $out .= ' ' . $form->textwithpicto('', $langs->trans('PDFGenerationTooltip'));
+            }
+            $out .= '</td>';
+        }
+
+        if ($addcolumforpicto) {
+            $out .= '<td class="right nowraponall">';
+            if ($delallowed) {
+                $out .= '<a href="' . $tmpurlsource . ((strpos($tmpurlsource, '?') === false) ? '?' : '&amp;') . 'action=' . $removeaction . '&amp;file=' . urlencode($relativepath) . '&token=' . newToken();
+                $out .= ($param ? '&amp;' . $param : '');
+                $out .= '">' . img_picto($langs->trans('Delete'), 'delete') . '</a>';
+            }
+            if ($morepicto) {
+                $out .= preg_replace('/__FILENAMEURLENCODED__/', urlencode($relativepath), $morepicto);
+            }
+            $out .= '</td>';
+        }
+
+        $res = 0;
+        if (is_object($hookmanager)) {
+            $parameters = ['colspan' => $nbColumns, 'socid' => ($GLOBALS['socid'] ?? ''), 'id' => ($GLOBALS['id'] ?? ''), 'modulepart' => $modulepart, 'relativepath' => $relativepath];
+            $res        = $hookmanager->executeHooks('formBuilddocLineOptions', $parameters, $file);
+        }
+        if (empty($res)) {
+            // Complete line
+            $out .= (is_object($hookmanager) ? $hookmanager->resPrint : '');
+            $out .= '</tr>' . "\n";
+        } else {
+            // Replace all $out
+            $out = $hookmanager->resPrint;
         }
     }
 
-    if ($headershown) {
-        // Affiche pied du tableau
-        $out .= "</table>\n";
-        $out .= "</div>\n";
-        if ($genallowed) {
-            if (empty($noform)) {
-                $out .= '</form>' . "\n";
-            }
-        }
+    // Loop on each link found
+    foreach ($linkList as $linkFile) {
+        $out .= '<tr class="oddeven saturne-documents__row" data-name="' . dol_escape_htmltag($linkFile->label) . '" data-size="0" data-date="' . ((int) $linkFile->datea) . '" data-type="link">';
+        $out .= '<td class="minwidth200 saturne-documents__name">';
+        $out .= '<a data-ajax="false" href="' . dol_escape_htmltag($linkFile->url) . '" target="_blank" rel="noopener noreferrer">';
+        $out .= '<i class="fas fa-link paddingright saturne-documents__link-icon"></i>' . dol_escape_htmltag($linkFile->label);
+        $out .= '</a>';
+        $out .= '</td>';
+        $out .= '<td class="hideonsmartphone"></td>';
+        $out .= '<td class="nowrap right saturne-documents__date">' . dol_print_date($linkFile->datea, 'dayhour', 'tzuser') . '</td>';
+        $out .= str_repeat('<td></td>', $nbColumns - 3);
+        $out .= '</tr>' . "\n";
     }
+
+    if ($nbFiles == 0) {
+        $out .= '<tr><td colspan="' . $nbColumns . '" class="opacitymedium saturne-documents__none"><i class="far fa-folder-open paddingright"></i>' . $langs->trans('DocumentsNone') . '</td></tr>' . "\n";
+    } elseif ($nbFiles > 1) {
+        $out .= '<tr class="saturne-documents__no-match" hidden><td colspan="' . $nbColumns . '" class="opacitymedium center">' . $langs->trans('DocumentsNoMatch') . '</td></tr>' . "\n";
+        $out .= '<tr class="saturne-documents__more" hidden><td colspan="' . $nbColumns . '" class="center">';
+        $out .= '<button type="button" class="saturne-documents__more-button" data-label-more="' . dol_escape_htmltag($langs->trans('DocumentsShowMore', '%s')) . '" data-label-less="' . dol_escape_htmltag($langs->trans('DocumentsShowLess')) . '"></button>';
+        $out .= '</td></tr>' . "\n";
+    }
+
+    $out .= "</table>\n";
+    $out .= "</div>\n";
+    if ($genallowed && empty($noform)) {
+        $out .= '</form>' . "\n";
+    }
+    $out .= '</div>' . "\n";
     $out .= '<!-- End show_document -->' . "\n";
 
     return $out;
+}
+
+/**
+ * Return the model selector and the generation button of the documents box
+ *
+ * @param  string            $modulepart      Module the files are related to
+ * @param  string            $submodulepart   Document type of the module, $modulepart if it has none
+ * @param  string            $param           More param on http links (a specimen box lists the specimen models)
+ * @param  string            $forname         Name of the generation form
+ * @param  string            $modelselected   Model to preselect by default
+ * @param  int               $allowgenifempty Show a warning when no model is activated
+ * @param  CommonObject|null $object          Object when method is called from an object card
+ * @param  int               $active          0 to show the generation button disabled
+ * @param  string            $tooltiptext     Tooltip text when the generation button is disabled
+ * @return string                             HTML of the generation tools, '-1' if the module has a bad document class
+ */
+function saturne_show_documents_generation(string $modulepart, string $submodulepart, string $param, string $forname, string $modelselected, int $allowgenifempty, $object, int $active, string $tooltiptext): string
+{
+    global $conf, $db, $form, $langs;
+
+    $modellist = [];
+
+    // For normalized external modules.
+    $file = dol_buildpath('/' . $modulepart . '/core/modules/' . $modulepart . '/' . $modulepart . 'documents/' . strtolower($submodulepart) . '/modules_' . strtolower($submodulepart) . '.php');
+    if (file_exists($file)) {
+        include_once $file;
+        $class = 'ModeleODT' . $submodulepart;
+
+        if (class_exists($class)) {
+            if (preg_match('/specimen/', $param)) {
+                $type      = strtolower($class) . 'specimen';
+                include_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
+                $modellist = getListOfModels($db, $type);
+            } else {
+                $modellist = call_user_func($class . '::liste_modeles', $db, 100);
+            }
+        } else {
+            dol_print_error($db, "Bad value for modulepart '" . $modulepart . "' in saturne_show_documents");
+            return '-1';
+        }
+    } else {
+        if (preg_match('/specimen/', $param)) {
+            $type      = 'SaturneDocumentModelspecimen';
+            include_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
+            $modellist = getListOfModels($db, $type);
+        } else {
+            require_once __DIR__ . '/../core/modules/saturne/modules_saturne.php';
+            $saturneDocumentModel = new SaturneDocumentModel($db, $modulepart, $submodulepart);
+            $documentType         = strtolower($submodulepart);
+            $modellist            = $saturneDocumentModel->liste_modeles($db, $documentType, 100);
+        }
+    }
+
+    $out = '<div class="saturne-documents__generate">';
+
+    if (empty($modellist)) {
+        $out .= '<span class="saturne-documents__generate-label">' . $langs->trans('Files') . '</span>';
+    } else {
+        asort($modellist);
+        $modellist  = array_filter($modellist, 'saturne_remove_index');
+        $modellists = [];
+        $confName   = dol_strtoupper($modulepart . '_' . $submodulepart) . '_DEFAULT_MODEL';
+        foreach ($modellist as $key => $modellistsingle) {
+            $arrayvalues         = preg_replace('/template_/', '', $modellistsingle);
+            $newKey              = (is_object($object) ? str_replace($object->element . 'document_custom_odt', $object->element . 'document_odt', $key) : $key);
+            $modellists[$newKey] = $langs->trans($arrayvalues);
+            if (dol_strlen(getDolGlobalString($confName)) > 0 && strpos($key, getDolGlobalString($confName)) !== false) {
+                $modelselected = $newKey;
+            }
+        }
+
+        $out .= '<i class="fas fa-file-word saturne-documents__model-icon hideonsmartphone" aria-hidden="true"></i>';
+        $out .= $form::selectarray('model', $modellists, $modelselected, 0, 0, 0, '', 0, 0, 0, '', ($conf->browser->layout == 'phone' ? 'maxwidth100' : 'maxwidth200'));
+        if ($conf->use_javascript_ajax) {
+            $out .= ajax_combobox('model');
+        }
+
+        if (empty($modellists)) {
+            if ($allowgenifempty) {
+                $langs->load('errors');
+                $out .= img_warning($langs->transnoentitiesnoconv('WarningNoDocumentModelActivated'));
+            }
+        } elseif ($active) {
+            $out .= '<button class="wpeo-button button-square-40 button-blue wpeo-tooltip-event" id="' . $forname . '_generatebutton" name="' . $forname . '_generatebutton" type="submit" aria-label="' . dol_escape_htmltag($langs->trans('Generate')) . '"><i class="fas fa-print button-icon"></i></button>';
+        } else {
+            $out .= '<i class="fas fa-exclamation-triangle pictowarning wpeo-tooltip-event" aria-label="' . dol_escape_htmltag($langs->trans($tooltiptext)) . '"></i>';
+            $out .= '<button type="button" class="wpeo-button button-square-40 button-disable" name="' . $forname . '_generatebutton"><i class="fas fa-print button-icon"></i></button>';
+        }
+    }
+
+    if (!$active) {
+        $out .= $form->textwithpicto($langs->trans('Help'), $tooltiptext, 1, 'info');
+    }
+
+    $out .= '</div>';
+
+    return $out;
+}
+
+/**
+ * Return the type a file is filtered by in the documents box : its extension, the images grouped together
+ *
+ * @param  string $fileName File name
+ * @return string           'odt', 'pdf', 'zip', 'image'...
+ */
+function saturne_get_document_file_type(string $fileName): string
+{
+    $extension = dol_strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+
+    return (in_array($extension, ['jpg', 'jpeg', 'png']) ? 'image' : $extension);
+}
+
+/**
+ * Return the label of a file type of the documents box
+ *
+ * @param  string $fileType Type returned by saturne_get_document_file_type(), or 'link'
+ * @return string           Label
+ */
+function saturne_get_document_file_type_label(string $fileType): string
+{
+    global $langs;
+
+    if ($fileType == 'image') {
+        return $langs->trans('DocumentsTypeImage');
+    }
+    if ($fileType == 'link') {
+        return $langs->trans('Links');
+    }
+
+    return dol_escape_htmltag(dol_strtoupper($fileType));
 }
 
 /**
