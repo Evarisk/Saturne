@@ -215,6 +215,13 @@ CheckDocumentationToEnablePDFGeneration = Please refer to the documentation for 
 PDFGenerationTooltip                    = Appuyez sur ce bouton pour générer le document ODT en PDF
 PDFGeneration                           = Generating the PDF document
 NoData                                  = N/A
+DocumentsSearchPlaceholder              = Search a file
+DocumentsFilterByType                   = Filter by file type
+DocumentsTypeImage                      = Images
+DocumentsNone                           = No document yet
+DocumentsNoMatch                        = No file matches the search
+DocumentsShowMore                       = Show the %s other files
+DocumentsShowLess                       = Collapse the list
 
 
 
