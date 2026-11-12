@@ -177,6 +177,8 @@ function saturne_show_medias(string $moduleName, string $modulepart = 'ecm', str
  *                                             - useAi       (bool)   Show the AI generation button on the medias
  *                                             - hideNoPhoto (bool)   Skip the "no photo yet" placeholder: a creation
  *                                                                    form has an empty folder by construction
+ *                                             - defer_images (bool)  Load the medias only when their modal opens,
+ *                                                                    see saturne_media_image_source()
  * @return string      $return               Show medias linked
  */
 function saturne_show_medias_linked(string $modulepart, string $sdir, $size = 0, $nbmax = 0, int $nbbyrow = 5, int $showfilename = 0, int $showaction = 0, int $maxHeight = 120, int $maxWidth = 160, int $nolink = 0, int $notitle = 0, int $usesharelink = 0, string $subdir = '', object $object = null, string $favorite_field = 'photo', int $show_favorite_button = 1, int $show_unlink_button = 1, int $use_mini_format = 0, int $show_only_favorite = 0, string $morecss = '', int $showdiv = 1, array $moreParams = []): string
@@ -197,6 +199,9 @@ function saturne_show_medias_linked(string $modulepart, string $sdir, $size = 0,
 
     $return  = '<!-- Photo -->' . "\n";
     $nbphoto = 0;
+
+    // Medias rendered inside a modal wait for it to open, see saturne_media_image_source()
+    $deferImages = !empty($moreParams['defer_images']);
 
     // Medias of a same record form one set, whichever call rendered them: the banner photo and
     // the media row are two calls, and a click on either opens every media of that record
@@ -314,18 +319,18 @@ function saturne_show_medias_linked(string $modulepart, string $sdir, $size = 0,
                         if ($usesharelink) {
                             if ($showThumb) {
                                 $return .= '<!-- Show thumb file -->';
-                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $morecss . ' photowithmargin" height="' . $maxHeight . '" src="' . dol_buildpath('/saturne/utils/viewimage.php', 1) . '?modulepart=' . $modulepart . '&entity=' . $mediaEntity . '&file=' . urlencode($pdirthumb . $photo_vignette) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
+                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $morecss . ' photowithmargin" height="' . $maxHeight . '"' . saturne_media_image_source(dol_buildpath('/saturne/utils/viewimage.php', 1) . '?modulepart=' . $modulepart . '&entity=' . $mediaEntity . '&file=' . urlencode($pdirthumb . $photo_vignette), $dirthumb . $photo_vignette, $deferImages) . ' title="' . dol_escape_htmltag($alt) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
                             } else {
                                 $return .= '<!-- Show original file -->';
-                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $morecss . ' photowithmargin" src="' . dol_buildpath('/saturne/utils/viewimage.php', 1) . '?modulepart=' . $modulepart . '&entity=' . $mediaEntity . '&file=' . urlencode($pdir . $photo) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
+                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $morecss . ' photowithmargin"' . saturne_media_image_source(dol_buildpath('/saturne/utils/viewimage.php', 1) . '?modulepart=' . $modulepart . '&entity=' . $mediaEntity . '&file=' . urlencode($pdir . $photo), $dir . $photo, $deferImages) . ' title="' . dol_escape_htmltag($alt) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
                             }
                         } else {
                             if ($showThumb) {
                                 $return .= '<!-- Show thumb file -->';
-                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $morecss . '"  src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $mediaEntity . '&file=' . urlencode($pdirthumb . $photo_vignette) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
+                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $morecss . '" ' . saturne_media_image_source(DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $mediaEntity . '&file=' . urlencode($pdirthumb . $photo_vignette), $dirthumb . $photo_vignette, $deferImages) . ' title="' . dol_escape_htmltag($alt) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
                             } else {
                                 $return .= '<!-- Show original file -->';
-                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $morecss . ' photowithmargin" height="' . $maxHeight . '" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $mediaEntity . '&file=' . urlencode($pdir . $photo) . '" title="' . dol_escape_htmltag($alt) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
+                                $return .= '<img width="' . $maxWidth . '" height="' . $maxHeight . '" class="photo ' . $morecss . ' photowithmargin" height="' . $maxHeight . '"' . saturne_media_image_source(DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $mediaEntity . '&file=' . urlencode($pdir . $photo), $dir . $photo, $deferImages) . ' title="' . dol_escape_htmltag($alt) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
                             }
                         }
 
@@ -358,7 +363,7 @@ function saturne_show_medias_linked(string $modulepart, string $sdir, $size = 0,
 
                     if (empty($size)) {
                         // Format origine
-                        $return .= '<img class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $mediaEntity . '&file=' . urlencode($pdir . $photo) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
+                        $return .= '<img class="photo photowithmargin"' . saturne_media_image_source(DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $mediaEntity . '&file=' . urlencode($pdir . $photo), $dir . $photo, $deferImages) . ' data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
                         if ($showfilename) {
                             $return .= '<br>' . $viewfilename;
                         }
@@ -371,7 +376,7 @@ function saturne_show_medias_linked(string $modulepart, string $sdir, $size = 0,
                         }
                         $widthName  = $moduleNameUpperCase . '_MEDIA_MAX_WIDTH_' . strtoupper($size);
                         $heightName = $moduleNameUpperCase . '_MEDIA_MAX_HEIGHT_' . strtoupper($size);
-                        $return .= '<img width="' . $conf->global->$widthName . '" height="' . $conf->global->$heightName . '" class="photo photowithmargin" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $mediaEntity . '&file=' . urlencode($pdir . $photo) . '" data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
+                        $return .= '<img width="' . $conf->global->$widthName . '" height="' . $conf->global->$heightName . '" class="photo photowithmargin"' . saturne_media_image_source(DOL_URL_ROOT . '/viewimage.php?modulepart=' . $modulepart . '&entity=' . $mediaEntity . '&file=' . urlencode($pdir . $photo), $dir . $photo, $deferImages) . ' data-object-id="' . (is_object($object) ? $object->id : 0) . '" loading="lazy" decoding="async">';
                         if ($showfilename) {
                             $return .= '<br>' . $viewfilename;
                         }
@@ -456,6 +461,30 @@ function saturne_show_medias_linked(string $modulepart, string $sdir, $size = 0,
     }
 
     return $return;
+}
+
+/**
+ * Source attribute of a media image: cache key, and loading held back until its modal opens
+ *
+ * The cache key is the modification time of the file served. Both viewimage.php wrappers then let
+ * the browser keep the image, and an edited photo, saved under the same name, gets a new URL.
+ * A deferred image carries its URL in data-deferred-src rather than src, so the browser does not
+ * request it before window.saturne.modal.loadDeferredImages() runs, when its modal opens: a closed
+ * modal stays laid out under opacity 0, which is why loading="lazy" alone does not hold it back.
+ *
+ * @param  string $url      URL of the image, without cache key
+ * @param  string $filePath Path of the file served, empty when it is unknown
+ * @param  bool   $defer    Hold the image back until its modal opens
+ * @return string           src or data-deferred-src attribute, with its leading space
+ */
+function saturne_media_image_source(string $url, string $filePath = '', bool $defer = false): string
+{
+    $modificationTime = ($filePath !== '' && is_file($filePath)) ? filemtime($filePath) : false;
+    if ($modificationTime) {
+        $url .= (strpos($url, '?') === false ? '?' : '&') . 'cache=' . $modificationTime;
+    }
+
+    return ' ' . ($defer ? 'data-deferred-src' : 'src') . '="' . dol_escape_htmltag($url) . '"';
 }
 
 /**
@@ -1179,6 +1208,9 @@ function saturne_media_ai_enabled(): bool
  *                                                                        filename, module_name, sub_dir) in JSON, and
  *                                                                        gets the answer back in the
  *                                                                        saturne:media-analysed event
+ *                               - defer_images     (bool, default false) The block sits in a modal: its gallery
+ *                                                                        thumbnail loads only when the modal opens,
+ *                                                                        see saturne_media_image_source()
  * @return string                  HTML block string
  */
 function saturne_render_media_block(string $moduleName, string $subDir = '', string $prefix = '', string $rightString = '', array $options = []): string
@@ -1194,6 +1226,7 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
     $showUpload  = isset($options['show_upload'])  ? $options['show_upload']  : true;
     $showLibrary = !empty($options['show_library']);
     $showAi      = !empty($options['show_ai']) && saturne_media_ai_enabled();
+    $deferImages = !empty($options['defer_images']);
 
     // A block may belong to a record rather than to the module alone. It then carries the record,
     // so the editor can tell which of its medias the record displays
@@ -1275,10 +1308,33 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
                     }
                 }
                 $urlsJson = htmlspecialchars(json_encode($urls), ENT_QUOTES, 'UTF-8');
-                $firstImg = dol_escape_htmltag($urls[0]);
+
+                // The thumbnail shows the latest photo in a box of a few dozen pixels: its small thumb
+                // is enough, the originals listed above only open in the editor. A photo added outside
+                // the block may have no thumb yet, it is then generated, and the original stays the
+                // fallback when that fails
+                $previewFile = $imageFiles[0]['fullname'];
+                $previewUrl  = $urls[0];
+                $thumbFile   = getImageFileNameForSize($previewFile, '_small');
+                if (!dol_is_file($thumbFile)) {
+                    $thumbWidth  = getDolGlobalInt(dol_strtoupper($moduleName) . '_MEDIA_MAX_WIDTH_SMALL', getDolGlobalInt('SATURNE_MEDIA_MAX_WIDTH_SMALL'));
+                    $thumbHeight = getDolGlobalInt(dol_strtoupper($moduleName) . '_MEDIA_MAX_HEIGHT_SMALL', getDolGlobalInt('SATURNE_MEDIA_MAX_HEIGHT_SMALL'));
+                    if ($thumbWidth > 0 && $thumbHeight > 0) {
+                        saturne_vignette($previewFile, $thumbWidth, $thumbHeight);
+                    }
+                }
+                if (dol_is_file($thumbFile)) {
+                    $thumbPath   = (!empty($subDir) ? $subDir . '/' : '') . 'thumbs/' . basename($thumbFile);
+                    $previewFile = $thumbFile;
+                    if (!empty($conf->$moduleNameLowerCase->dir_output)) {
+                        $previewUrl = DOL_URL_ROOT . '/viewimage.php?modulepart=' . urlencode($moduleNameLowerCase) . '&entity=' . $conf->entity . '&file=' . urlencode($thumbPath);
+                    } else {
+                        $previewUrl = DOL_URL_ROOT . '/viewimage.php?modulepart=ecm&entity=' . $conf->entity . '&file=' . urlencode($moduleNameLowerCase . '/' . $thumbPath);
+                    }
+                }
 
                 $out .= '<div class="open-media-editor-as-gallery" data-json="' . $urlsJson . '">';
-                $out .= '  <img src="' . $firstImg . '" />';
+                $out .= '  <img' . saturne_media_image_source($previewUrl, $previewFile, $deferImages) . ' alt="" loading="lazy" decoding="async" />';
                 $out .= '  <span class="saturne-media-count-badge">' . $totalPhotos . '</span>';
                 $out .= '</div>';
 
