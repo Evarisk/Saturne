@@ -229,9 +229,11 @@ window.saturne.filter = {
                      if ($el.data('select2')) {
                          $el.select2('destroy');
                      }
+                     // The list opens on the body, over the popover: inside it, the overflow of the
+                     // popover cut the list to the size of the box. A click on the list stays inside
+                     // for the outside-click handler, which ignores .select2-container
                      $el.select2({
-                         width: '100%',
-                         dropdownParent: $popover
+                         width: '100%'
                      });
                  });
                  // The select2 tags widen the popover: place it again
