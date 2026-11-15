@@ -60,17 +60,21 @@ if ($action == 'uploadPhoto' && !empty($mediaBlockDir) && !empty($conf->global->
     $invalidFile   = false;
 
     if (!empty($uploadedFiles['tmp_name'])) {
-        $tmpNames = is_array($uploadedFiles['tmp_name']) ? $uploadedFiles['tmp_name'] : [$uploadedFiles['tmp_name']];
+        require_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
 
-        foreach ($tmpNames as $tmpName) {
+        $tmpNames  = is_array($uploadedFiles['tmp_name']) ? $uploadedFiles['tmp_name'] : [$uploadedFiles['tmp_name']];
+        $origNames = is_array($uploadedFiles['name']) ? $uploadedFiles['name'] : [$uploadedFiles['name']];
+
+        foreach ($tmpNames as $key => $tmpName) {
             if (empty($tmpName)) {
                 continue;
             }
 
+            $origName = (string) ($origNames[$key] ?? '');
             $finfo    = new finfo(FILEINFO_MIME_TYPE);
             $mimeType = $finfo->file($tmpName);
 
-            if (strpos($mimeType, 'image/') !== 0) {
+            if (strpos($mimeType, 'image/') !== 0 || $mimeType === 'image/svg+xml' || image_format_supported($origName) < 0) {
                 $invalidFile = true;
                 break;
             }
