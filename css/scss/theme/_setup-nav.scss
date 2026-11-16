@@ -1,0 +1,140 @@
+@use 'tokens' as *;
+
+/* Saturne modern theme: on a setup page, the sections of the tab listed on the side, the one in sight lit
+   (js/modules/setupNav.js builds the list from the titles of the page). The list is beside the content, not
+   around it: the content keeps its flow, its forms and its margins. Without the room for it (a content that
+   cannot get narrower, a small screen), the script puts the list above the content. */
+
+$setup-nav-width: 240px;
+$setup-nav-gap: 24px;
+// Below the top bar of Dolibarr, which stays on the screen
+$setup-nav-top: 68px;
+
+#{$theme-scope} {
+  div.tabBar.saturne-setup-nav-on {
+    position: relative;
+    padding-left: $setup-nav-width + $setup-nav-gap;
+
+    .saturne-setup-nav {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: $setup-nav-width;
+    }
+
+    .saturne-setup-nav__list {
+      position: sticky;
+      top: $setup-nav-top;
+      flex-direction: column;
+      max-height: calc(100vh - #{$setup-nav-top + 16px});
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+
+    // A wide table scrolls in its own box, as its wrapper is meant to: Dolibarr draws the page in a table cell,
+    // which would grow to the table and push the whole page out of the window
+    div.div-table-responsive {
+      width: 0;
+      min-width: 100%;
+    }
+  }
+
+  div.tabBar.saturne-setup-nav-top {
+    .saturne-setup-nav {
+      margin-bottom: 16px;
+    }
+
+    .saturne-setup-nav__list {
+      flex-wrap: wrap;
+    }
+
+    // In a row, a part of a section is an entry as the others
+    a.saturne-setup-nav__item--child {
+      padding: 8px 12px;
+      font-size: inherit;
+
+      &:not(.is-active):not(:hover) {
+        color: $theme-text-soft;
+      }
+
+      .saturne-setup-nav__icon {
+        flex-basis: 20px;
+        font-size: inherit;
+        opacity: 1;
+      }
+    }
+  }
+
+  .saturne-setup-nav__list {
+    display: flex;
+    gap: 2px;
+  }
+
+  a.saturne-setup-nav__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: $theme-radius-sm;
+    color: $theme-text-soft;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background $theme-transition, color $theme-transition;
+
+    &:hover {
+      background: $theme-surface-soft;
+      color: $theme-text;
+    }
+
+    &.is-active {
+      background: $theme-primary-soft;
+      color: $theme-navy;
+      font-weight: 600;
+    }
+  }
+
+  // A part of the section above: under its label, smaller
+  a.saturne-setup-nav__item--child {
+    padding: 5px 12px 5px 32px;
+    font-size: 0.92em;
+
+    &:not(.is-active):not(:hover) {
+      color: $theme-muted;
+    }
+
+    .saturne-setup-nav__icon {
+      flex-basis: 16px;
+      font-size: 0.9em;
+      opacity: 0.8;
+    }
+  }
+
+  .saturne-setup-nav__icon {
+    display: inline-flex;
+    flex: 0 0 20px;
+    align-items: center;
+    justify-content: center;
+    color: $theme-primary;
+
+    img {
+      max-width: 18px;
+      max-height: 18px;
+    }
+
+    // The coloured label of an object (GP, UT...) keeps its colours, a little smaller
+    .ref {
+      font-size: 9px !important;
+    }
+  }
+
+  // On two lines rather than cut: several titles of a page can start with the same words
+  .saturne-setup-nav__label {
+    min-width: 0;
+    line-height: 1.3;
+  }
+
+  table.saturne-setup-nav-target {
+    scroll-margin-top: $setup-nav-top;
+  }
+}
