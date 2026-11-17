@@ -370,13 +370,20 @@ function saturne_check_modules_enabled()
 /**
  * Print dol_get_fiche_head with Saturne custom enhancements
  *
- * @param CommonObject $object    Current object
- * @param string       $tabactive Tab active in navbar
- * @param string       $title     Title navbar
+ * The tabs come from <element>_prepare_head(), else <element>PrepareHead(). An object without any of them
+ * (no card of its own, or library not loaded) gets a header without tabs instead of a fatal error
+ *
+ * @param  CommonObject $object    Current object
+ * @param  string       $tabactive Tab active in navbar
+ * @param  string       $title     Title navbar
+ * @return void
  */
 function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', string $title = ''): void
 {
     global $conf;
+
+    $head  = [];
+    $picto = '';
 
     // Configuration header
     if (property_exists($object, 'element')) {
@@ -388,12 +395,19 @@ function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', st
             $element = 'task';
         }
 
-        $prepareHead = $element . '_prepare_head';
-        if (function_exists($prepareHead)) {
+        $prepareHeads = [$element . '_prepare_head', $element . 'PrepareHead'];
+        $prepareHead  = '';
+        foreach ($prepareHeads as $candidate) {
+            if (function_exists($candidate)) {
+                $prepareHead = $candidate;
+                break;
+            }
+        }
+
+        if ($prepareHead !== '') {
             $head = $prepareHead($object);
         } else {
-            $prepareHead = $element . 'PrepareHead';
-            $head = $prepareHead($object);
+            dol_syslog(__FUNCTION__ . ' no ' . implode('() nor ', $prepareHeads) . '() for ' . get_class($object) . ', header shown without tabs', LOG_WARNING);
         }
     }
     if (property_exists($object, 'picto')) {
