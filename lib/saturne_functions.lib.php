@@ -1563,3 +1563,56 @@ function saturne_constant_onoff(string $constName, int $permissionToWrite = 1, ?
 
     return ajax_constantonoff($constName, [], $entity, 0, 0, 0, 2, 0, 1, '', '', 'inline-block', 0, '', empty($permissionToWrite) ? 1 : 0);
 }
+
+/**
+ * Explain in plain words why an email could not be sent, for the person who asked to send it.
+ *
+ * CMailFile leaves a technical error, in English, followed for the PHP mail() method by a generic
+ * advice about spam and firewalls that misleads more than it helps; with SMTP the reason is only in
+ * its errors list. The cause comes first, in the words of the user, with what to do next; the raw
+ * error is kept apart as a technical detail, stripped of that advice and of its HTML, and always
+ * written to the log: the caller decides who may read it on screen.
+ *
+ * @param  CMailFile $mailfile  Email that sendfile() failed to send
+ * @param  string    $recipient Address the email was meant for
+ * @return array{cause: string, reason: string, detail: string} Cause: recipient, login or server.
+ *                                                                Plain text, nothing escaped
+ */
+function saturne_get_mail_failure(CMailFile $mailfile, string $recipient): array
+{
+    global $langs;
+
+    $phpMailAdvice = $langs->transnoentitiesnoconv('ErrorPhpMailDelivery');
+
+    $details = [];
+    foreach (array_merge([(string) $mailfile->error], (array) $mailfile->errors) as $error) {
+        // Only the HTML markup goes: an address between angle brackets stays, it tells which one was refused
+        $error = preg_replace('/<\/?(?:a|b|br|div|i|p|span|strong|u)\b[^>]*>/i', ' ', (string) $error);
+        $error = html_entity_decode($error, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $error = trim(preg_replace('/\s+/u', ' ', str_replace($phpMailAdvice, '', $error)));
+        if ($error !== '' && !in_array($error, $details)) {
+            $details[] = $error;
+        }
+    }
+    $detail = implode(' ', $details);
+    dol_syslog(__FUNCTION__ . ' email to ' . $recipient . ' not sent: ' . $detail, LOG_ERR);
+
+    // Only the address can be fixed by the person sending. A refused login is a matter of mail setup like
+    // any other failure, but naming it spares the administrator the search
+    if (preg_match('/recipient|failed for the following addresses|does not comply with RFC/i', $detail)) {
+        $cause  = 'recipient';
+        $reason = $langs->transnoentities('MailFailureRecipientRefused', $recipient);
+    } elseif (preg_match('/authenticat|username and password|password not accepted|\b535\b/i', $detail)) {
+        $cause  = 'login';
+        $reason = $langs->transnoentities('MailFailureLogin');
+    } else {
+        $cause  = 'server';
+        $reason = $langs->transnoentities('MailFailureServer');
+    }
+
+    return [
+        'cause'  => $cause,
+        'reason' => $reason,
+        'detail' => $detail
+    ];
+}
