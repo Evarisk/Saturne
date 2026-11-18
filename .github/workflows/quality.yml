@@ -90,6 +90,7 @@ jobs:
                       htdocs/core/triggers
                       htdocs/ecm/class
                       htdocs/expedition/class
+                      htdocs/exports/class
                       htdocs/fichinter/class
                       htdocs/fourn/class
                       htdocs/includes/odtphp
