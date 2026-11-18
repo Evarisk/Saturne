@@ -234,6 +234,10 @@ SendMailSubject = Email
 QHSEService     = QHSE Service
 WithKindRegards = With kind regards
 ConfigEmail     = Click on this link to go to the email configuration
+MailFailureServer           = The outgoing mail server could not deliver the message: ask an administrator to check the email setup.
+MailFailureRecipientRefused = The address %s was refused: correct it, then send the email again.
+MailFailureLogin            = The outgoing mail server refused the login or the password: ask an administrator to check the email setup.
+MailFailureTechnicalDetail  = Technical detail: %s
 
 
 

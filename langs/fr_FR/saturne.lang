@@ -234,6 +234,10 @@ SendMailSubject = Email
 QHSEService     = Service QHSE
 WithKindRegards = Bien cordialement
 ConfigEmail     = Cliquez sur ce lien pour vous rendre à la configuration des emails
+MailFailureServer           = Le serveur d'envoi des emails n'a pas pu transmettre le message : faites vérifier la configuration des emails par un administrateur.
+MailFailureRecipientRefused = L'adresse %s a été refusée : corrigez-la, puis renvoyez l'email.
+MailFailureLogin            = Le serveur d'envoi des emails a refusé l'identifiant ou le mot de passe : faites vérifier la configuration des emails par un administrateur.
+MailFailureTechnicalDetail  = Détail technique : %s
 
 
 
