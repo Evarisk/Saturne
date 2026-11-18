@@ -28,6 +28,36 @@ th.saturne-filter-active .saturne-col-filter-btn {
     color: var(--st-primary-color);
 }
 
+// Sort criterion in use on a column offering several of them, under its label
+.saturne-sortkey-caption {
+    display: block;
+    font-size: 0.85em;
+    font-weight: normal;
+    text-transform: none;
+    color: var(--st-primary-color);
+}
+
+// Statuses hidden by the status filter, next to the filter indicator of the list title: a link showing them all
+.saturne-status-filter-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 8px;
+    padding: 2px 8px;
+    border: 1px solid var(--st-gray-200);
+    border-radius: 12px;
+    background: var(--st-gray-50);
+    color: var(--st-gray-500);
+    font-size: 0.8em;
+    font-weight: normal;
+    vertical-align: middle;
+
+    &:hover {
+        color: var(--st-primary-color);
+        text-decoration: none;
+    }
+}
+
 // Popover Menu Container
 .saturne-col-filter-popover {
     position: absolute;
@@ -36,6 +66,8 @@ th.saturne-filter-active .saturne-col-filter-btn {
     border-radius: 6px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     min-width: 250px;
+    // Never wider than the window, filter.js keeps it inside
+    max-width: calc(100vw - 16px);
     padding: 0;
     font-size: 13px;
     border: 1px solid var(--st-gray-200);
@@ -105,6 +137,59 @@ th.saturne-filter-active .saturne-col-filter-btn {
             height: 1px;
             background: var(--st-gray-100);
             margin: 4px 0;
+        }
+
+        // Sort criteria of a column summing up several values (data-sortkeys)
+        .popover-section-title {
+            padding: 4px 16px 2px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--st-gray-500);
+        }
+
+        .popover-sortkey {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 12px 2px 16px;
+            color: var(--st-gray-700);
+
+            &.active .popover-sortkey-label {
+                color: var(--st-primary-color);
+                font-weight: 600;
+            }
+
+            .popover-sortkey-label {
+                flex-grow: 1;
+                margin-right: 8px;
+                white-space: nowrap;
+            }
+
+            .popover-sortkey-order {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 28px;
+                height: 26px;
+                padding: 0;
+                border: 1px solid var(--st-gray-200);
+                border-radius: 4px;
+                background: #fff;
+                color: var(--st-gray-500);
+                cursor: pointer;
+
+                &:hover {
+                    border-color: var(--st-primary-color);
+                    color: var(--st-primary-color);
+                }
+
+                &.active {
+                    border-color: var(--st-primary-color);
+                    background: var(--st-primary-color);
+                    color: #fff;
+                }
+            }
         }
     }
 

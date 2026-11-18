@@ -47,10 +47,10 @@ clearstatcache();
 
 if (empty($documentPath)) {
     $objectType = $object->element;
-    $path = '/custom/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . (!empty($objectModSubdir) ? $objectModSubdir . '/' : '') . $objectType . '/';
+    $path = '/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . (!empty($objectModSubdir) ? $objectModSubdir . '/' : '') . $objectType . '/';
 } else {
     $objectType = $documentParentType;
-    $path = '/custom/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $objectType . '/';
+    $path = '/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $objectType . '/';
 }
 
 $dir = dol_buildpath($path);

@@ -215,7 +215,7 @@ window.saturne.contentEditable.saveField = function($el, payload) {
   $el.attr('contenteditable', 'false').addClass('ce-saving');
 
   const xhr = $.ajax({
-    url: (window.saturne.config?.urlRoot || '') + '/custom/saturne/core/ajax/saturne_update_field.php',
+    url: window.saturne.toolbox.getSaturneUrlRoot() + '/core/ajax/saturne_update_field.php',
     method: 'POST',
     contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
     data: {

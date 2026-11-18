@@ -232,7 +232,7 @@ if (empty($resHook)) {
         // so its first segment is not the document type when the model carries a suffix
         $documentType = !empty($objectType) ? $objectType : explode('_', $modelName)[0];
 
-        $documentClassPath = __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . $documentType . '.class.php';
+        $documentClassPath = dol_buildpath('/' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . $documentType . '.class.php');
         if (is_file($documentClassPath)) {
             require_once $documentClassPath;
         }
@@ -247,7 +247,7 @@ if (empty($resHook)) {
         $document = new $documentType($db);
 
         // Search template files
-        $dir = __DIR__ . '/../../' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $documentType . '/';
+        $dir = dol_buildpath('/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $documentType . '/');
         $file = 'pdf_' . $modelName . '.modules.php';
         if (file_exists($dir . $file)) {
             $moreParams['user'] = $user;
@@ -286,12 +286,12 @@ if (empty($resHook)) {
 
     if ($action == 'download_template') {
         $fileName = GETPOST('filename');
-        dol_copy(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/doctemplates/' . $type . '/' . $fileName, DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $fileName);
+        dol_copy(dol_buildpath('/' . $moduleNameLowerCase . '/documents/doctemplates/' . $type . '/' . $fileName), dol_buildpath('/' . $moduleNameLowerCase . '/documents/') . 'temp/' . $fileName);
     }
 
     if ($action == 'remove_file') {
         $fileName = GETPOST('filename');
-        dol_delete_file(DOL_DOCUMENT_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/' . $fileName);
+        dol_delete_file(dol_buildpath('/' . $moduleNameLowerCase . '/documents/') . 'temp/' . $fileName);
     }
 }
 
@@ -443,7 +443,7 @@ foreach ($types as $type => $documentData) {
         $documentType       = $documentData['documentType'];
     }
 
-    require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . ((string) ($documentData['className'] ?? $documentData['documentType'])) . '.class.php';
+    require_once dol_buildpath('/' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . ((string) ($documentData['className'] ?? $documentData['documentType'])) . '.class.php');
 
     if (is_string($type) && class_exists($type)) {
         $object = new $type($db);

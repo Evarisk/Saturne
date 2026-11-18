@@ -59,7 +59,7 @@ if ($action == 'reorder_element') {
     // Resolve the element class from the (sanitized, alphanumeric) module/element pair.
     // fetchObjectByElement() can't be used here: SaturneElement-based elements are not
     // registered in getElementProperties, so it would fail to resolve the class.
-    $classFile = DOL_DOCUMENT_ROOT . '/custom/' . $module . '/class/' . $element . '.class.php';
+    $classFile = dol_buildpath('/' . $module . '/class/' . $element . '.class.php');
     if (!is_file($classFile)) {
         http_response_code(400);
         echo json_encode(['success' => false, 'error' => 'InvalidElement']);

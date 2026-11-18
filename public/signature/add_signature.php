@@ -66,18 +66,18 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 // Load Saturne libraries
 require_once __DIR__ . '/../../class/saturnesignature.class.php';
 
-if (file_exists(__DIR__ . '/../../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php')) {
-    require_once __DIR__ . '/../../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
-} elseif (file_exists(__DIR__ . '/../../../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php')) {
-    require_once __DIR__ . '/../../../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
+// The module may sit in any root of Dolibarr, next to Saturne or not: dol_buildpath() searches them all
+$objectClassPath = dol_buildpath('/' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php');
+if (file_exists($objectClassPath)) {
+    require_once $objectClassPath;
 } else {
     die('Include of ' . $moduleNameLowerCase . ' class fails');
 }
 // Load Module libraries
-// rend ce path plus lisible require_once __DIR__ . '/../../../' . $moduleNameLowerCase . '/class/'
-$fileExists = file_exists('../../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . strtolower($documentType) . '.class.php');
+$documentClassPath = dol_buildpath('/' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . strtolower($documentType) . '.class.php');
+$fileExists        = file_exists($documentClassPath);
 if ($fileExists && GETPOSTISSET('document_type')) {
-    require_once __DIR__ . '/../../../' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . strtolower($documentType) . '.class.php';
+    require_once $documentClassPath;
 }
 
 // Global variables definitions

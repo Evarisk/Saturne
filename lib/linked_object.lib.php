@@ -200,6 +200,137 @@ function saturne_get_linked_object_usage(
 }
 
 /**
+ * Map the extrafield aliases of an export dataset to their table
+ *
+ * A dataset joins each extrafields table under its own alias (… societe_extrafields as extra4 …) while a
+ * saved export model only stores alias.name : this join is the only way back from the alias to the table.
+ *
+ * @param  string                $sql      FROM and JOIN part of the dataset, see Export::array_export_sql_end
+ * @param  string                $dbPrefix Table prefix, ex. MAIN_DB_PREFIX
+ * @return array<string, string>           alias => table element, ex. ['extra4' => 'societe']
+ */
+function saturne_get_export_extrafield_aliases(string $sql, string $dbPrefix): array
+{
+    $aliases = [];
+    $matches = [];
+    $pattern = '/' . preg_quote($dbPrefix, '/') . '(\w+)_extrafields\s+(?:as\s+)?(\w+)/i';
+
+    if (preg_match_all($pattern, $sql, $matches, PREG_SET_ORDER)) {
+        foreach ($matches as $match) {
+            // Join written without alias : the next word is a keyword, not an alias.
+            if (in_array(strtolower($match[2]), ['on', 'where', 'left', 'right', 'inner', 'join', 'group', 'order'], true)) {
+                continue;
+            }
+
+            $aliases[$match[2]] = $match[1];
+        }
+    }
+
+    return $aliases;
+}
+
+/**
+ * Count the saved export models that still use the given extrafields
+ *
+ * A model of a dataset that cannot be resolved (module disabled for instance) is counted under the table '*' :
+ * nothing tells which table it points to, so the caller must assume it may be any of them.
+ *
+ * @param  array<int, array{type: string, field: string}> $exportModels     Saved models, rows of the export_model table
+ * @param  array<string, array<string, string>>           $aliasesByDataset Dataset code => saturne_get_export_extrafield_aliases()
+ * @param  string[]                                       $extraFieldNames  Extrafield names to look for, ex. ['qc_frequency']
+ * @return array<string, array<string, int>>                                name => table element (or '*') => number of models
+ */
+function saturne_count_export_model_extrafield_references(array $exportModels, array $aliasesByDataset, array $extraFieldNames): array
+{
+    $references = [];
+
+    foreach ($exportModels as $exportModel) {
+        $aliases = $aliasesByDataset[$exportModel['type']] ?? null;
+        $seen    = [];
+
+        // Same split as exports/export.php when it reloads a model : a comma inside parentheses is not a separator.
+        foreach (preg_split('/,(?! [^(]*\))/', (string) $exportModel['field']) as $field) {
+            $parts = explode('.', trim($field), 2);
+            if (count($parts) != 2 || !in_array($parts[1], $extraFieldNames, true)) {
+                continue;
+            }
+
+            if ($aliases === null) {
+                $tableElement = '*';
+            } elseif (isset($aliases[$parts[0]])) {
+                $tableElement = $aliases[$parts[0]];
+            } else {
+                // Known dataset, alias of a main table (p.qc_frequency) : not an extrafield.
+                continue;
+            }
+
+            if (isset($seen[$parts[1]][$tableElement])) {
+                continue;
+            }
+            $seen[$parts[1]][$tableElement] = true;
+
+            $references[$parts[1]][$tableElement] = ($references[$parts[1]][$tableElement] ?? 0) + 1;
+        }
+    }
+
+    return $references;
+}
+
+/**
+ * Find the extrafields still used by a saved export model
+ *
+ * A saved model keeps listing a field after the field is deleted, and every later export of it then raises one
+ * warning per exported line for that field (the SQL of Export::build_sql() skips it, the writers do not).
+ *
+ * @param  string[]                          $extraFieldNames Extrafield names to look for, ex. ['qc_frequency']
+ * @return array<string, array<string, int>>                  See saturne_count_export_model_extrafield_references()
+ */
+function saturne_get_export_model_extrafield_references(array $extraFieldNames): array
+{
+    global $db, $user;
+
+    if (empty($extraFieldNames)) {
+        return [];
+    }
+
+    $conditions = [];
+    foreach ($extraFieldNames as $extraFieldName) {
+        $conditions[] = "field LIKE '%." . $db->escape($db->escapeforlike($extraFieldName)) . "%'";
+    }
+
+    $sql   = 'SELECT type, field FROM ' . MAIN_DB_PREFIX . 'export_model WHERE ' . implode(' OR ', $conditions);
+    $resql = $db->query($sql);
+    if (!$resql) {
+        return [];
+    }
+
+    $exportModels = [];
+    while ($obj = $db->fetch_object($resql)) {
+        $exportModels[] = ['type' => $obj->type, 'field' => $obj->field];
+    }
+    $db->free($resql);
+
+    if (empty($exportModels)) {
+        return [];
+    }
+
+    $aliasesByDataset = [];
+    if (is_object($user)) {
+        require_once DOL_DOCUMENT_ROOT . '/exports/class/export.class.php';
+
+        $export = new Export($db);
+        $export->load_arrays($user);
+        foreach ($export->array_export_code as $indice => $datasetCode) {
+            $datasetSql = ($export->array_export_sql_start[$indice] ?? '') . ' ' . ($export->array_export_sql_end[$indice] ?? '');
+
+            $aliasesByDataset[$datasetCode] = saturne_get_export_extrafield_aliases($datasetSql, MAIN_DB_PREFIX);
+        }
+    }
+
+    return saturne_count_export_model_extrafield_references($exportModels, $aliasesByDataset, $extraFieldNames);
+}
+
+/**
  * Add or remove the extrafields carried by the linked objects
  *
  * Idempotent : adding an already declared extrafield and deleting an absent one are both no-ops,
@@ -209,6 +340,10 @@ function saturne_get_linked_object_usage(
  * module that no longer contributes metadata is deliberately kept : that module may simply be
  * disabled, and dropping its column would destroy data.
  *
+ * An extrafield still used by a saved export model is kept, and put back if an earlier run deleted it,
+ * even when its link is disabled : deleting it would break every later export of that model. It is
+ * listed under 'kept', and removing it from the model lets the next run delete it.
+ *
  * @param  array<int, array<string, mixed>>    $definitions        Extrafield definitions, each one holding the keys
  *                                                                 name, label, type, pos, size, default_value, param,
  *                                                                 alwayseditable, list, langfile, enabled and
@@ -217,7 +352,7 @@ function saturne_get_linked_object_usage(
  *                                                                 definition to the listed types.
  * @param  array<string, array<string, mixed>> $linkableObjects    Result of saturne_filter_linkable_objects()
  * @param  string[]                            $enabledObjectTypes Result of saturne_get_enabled_linked_object_types()
- * @return array{added: string[], deleted: string[], errors: int}  Synchronisation report
+ * @return array{added: string[], deleted: string[], kept: string[], errors: int} Synchronisation report
  */
 function saturne_sync_linked_object_extrafields(
     array $definitions,
@@ -229,13 +364,14 @@ function saturne_sync_linked_object_extrafields(
     require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
 
     $extraFields = new ExtraFields($db);
-    $report      = ['added' => [], 'deleted' => [], 'errors' => 0];
+    $report      = ['added' => [], 'deleted' => [], 'kept' => [], 'errors' => 0];
 
     $extraFieldNames = [];
     foreach ($definitions as $definition) {
         $extraFieldNames[] = $definition['name'];
     }
     $existingExtraFields = saturne_get_existing_extrafields($extraFieldNames);
+    $exportReferences    = saturne_get_export_model_extrafield_references($extraFieldNames);
 
     foreach ($definitions as $definition) {
         foreach ($linkableObjects as $objectType => $objectMetadata) {
@@ -243,10 +379,17 @@ function saturne_sync_linked_object_extrafields(
 
             $restrictedTypes = $definition['object_types'];
 
-            $isEnabled  = in_array($objectType, $enabledObjectTypes, true);
-            $isInScope  = empty($restrictedTypes) || in_array($objectType, $restrictedTypes, true);
-            $isWanted   = $isEnabled && $isInScope;
-            $isDeclared = isset($existingExtraFields[$definition['name']][$tableElement]);
+            $isEnabled    = in_array($objectType, $enabledObjectTypes, true);
+            $isInScope    = empty($restrictedTypes) || in_array($objectType, $restrictedTypes, true);
+            $isExported   = !empty($exportReferences[$definition['name']][$tableElement]);
+            $isWanted     = $isInScope && ($isEnabled || $isExported);
+            $isDeclared   = isset($existingExtraFields[$definition['name']][$tableElement]);
+            $isUnresolved = $isDeclared && !empty($exportReferences[$definition['name']]['*']);
+
+            // Kept for an export model only : wanted without its link, or not wanted but maybe exported.
+            if (($isWanted && !$isEnabled) || (!$isWanted && $isUnresolved)) {
+                $report['kept'][] = $definition['name'] . ' @ ' . $tableElement;
+            }
 
             if ($isWanted && !$isDeclared) {
                 $result = $extraFields->addExtraField(
@@ -275,7 +418,7 @@ function saturne_sync_linked_object_extrafields(
                 } else {
                     $report['errors']++;
                 }
-            } elseif (!$isWanted && $isDeclared) {
+            } elseif (!$isWanted && $isDeclared && !$isUnresolved) {
                 $result = $extraFields->delete($definition['name'], $tableElement);
 
                 if ($result >= 0) {
