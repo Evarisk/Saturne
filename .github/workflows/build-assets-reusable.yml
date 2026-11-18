@@ -44,7 +44,7 @@ jobs:
 
     steps:
       - name: Checkout calling module
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: ${{ github.repository }}
           # Checkout the branch, not the SHA: checking out a SHA leaves the runner on a
@@ -61,14 +61,14 @@ jobs:
           fetch-depth: ${{ inputs.mode == 'commit' && '0' || '1' }}
 
       - name: Checkout Saturne
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: Evarisk/Saturne
           ref: develop
           path: .saturne
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: '22'
 

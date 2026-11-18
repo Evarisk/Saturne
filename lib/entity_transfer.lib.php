@@ -139,6 +139,31 @@ function saturne_entity_transfer_entity_modules(DoliDB $db, array $entities): ar
 }
 
 /**
+ * Tell whether a module is an external one, installed in an alternative root of Dolibarr
+ * (htdocs/custom by default, or any root added to $dolibarr_main_document_root_alt), and
+ * not a core module of the main root.
+ *
+ * @param  string $module Module name, in lower case
+ * @return bool           True when the module directory sits in an alternative root
+ */
+function saturne_entity_transfer_is_external_module(string $module): bool
+{
+    global $conf;
+
+    if ($module === '') {
+        return false;
+    }
+
+    foreach ((array) ($conf->file->dol_document_root ?? []) as $rootKey => $documentRoot) {
+        if ($rootKey !== 'main' && is_dir($documentRoot . '/' . $module)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
  * List the modules holding tables of their own, so the caller can offer to take them
  * along. Their tables belong to the entity just like the Saturne ones, and an export
  * leaving them behind carries signatures and documents pointing at nothing.
@@ -168,10 +193,10 @@ function saturne_entity_transfer_modules(DoliDB $db, array $schema = [], array $
             continue;
         }
 
-        // Only the modules installed under custom/: a core module named like the prefix of a
-        // core table (user, societe, facture...) would otherwise land in the list and let the
-        // caller drag half of Dolibarr into the dump
-        if (!is_dir(DOL_DOCUMENT_ROOT . '/custom/' . $module)) {
+        // Only the external modules: a core module named like the prefix of a core table (user,
+        // societe, facture...) would otherwise land in the list and let the caller drag half of
+        // Dolibarr into the dump
+        if (!saturne_entity_transfer_is_external_module($module)) {
             continue;
         }
 

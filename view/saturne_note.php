@@ -38,8 +38,8 @@ $objectType = GETPOST('object_type', 'alpha');
 $moduleNameLowerCase = strtolower($moduleName);
 
 // Libraries
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' .  $objectType . '.lib.php';
+require_once dol_buildpath('/' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php');
+require_once dol_buildpath('/' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' .  $objectType . '.lib.php');
 
 // Global variables definitions
 global $conf, $db, $langs, $hookmanager, $user;
@@ -71,8 +71,8 @@ $extrafields->fetch_name_optionals_label($object->table_element);
 include DOL_DOCUMENT_ROOT . '/core/actions_fetchobject.inc.php';
 
 // Security check - Protection if external user
-$permissiontoread = $user->rights->$moduleNameLowerCase->$objectType->read;
-$permissiontoadd  = (($object->status >= $object::STATUS_LOCKED) ? 0 : $user->rights->$moduleNameLowerCase->$objectType->write);
+$permissiontoread = $user->hasRight($moduleNameLowerCase, $objectType, 'read');
+$permissiontoadd  = (($object->status >= $object::STATUS_LOCKED) ? 0 : $user->hasRight($moduleNameLowerCase, $objectType, 'write'));
 $permissionnote   = $permissiontoadd;
 
 // Used by include of actions_setnotes.inc.php

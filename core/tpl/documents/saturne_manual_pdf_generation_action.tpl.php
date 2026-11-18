@@ -29,16 +29,22 @@ if ($action == 'pdfGeneration') {
         return -1;
     }
 
-    $fileInfos = pathinfo($filename);
-    $pdfName   = $fileInfos['filename'] . '.pdf';
-    $pdfName   = dol_sanitizeFileName($pdfName);
+    require_once __DIR__ . '/../../../lib/documents.lib.php';
+
+    // A document named before #1885 can carry a character the conversion command breaks on ("&",
+    // quote...): LibreOffice reads nothing and the PDF never appears. It is converted from a copy
+    // written under a safe name next to it, the copy is removed afterwards
+    $fileInfos   = pathinfo($filename);
+    $safeName    = saturne_sanitize_document_file_name($fileInfos['basename']);
+    $convertFile = $upload_dir . '/' . $fileInfos['dirname'] . '/' . $safeName;
+    $pdfName     = pathinfo($safeName, PATHINFO_FILENAME) . '.pdf';
 
     $manualPdfGenerationConf = $moduleNameUpperCase . '_MANUAL_PDF_GENERATION';
 
     // Write new file
     if (! empty($conf->global->MAIN_ODT_AS_PDF) && $conf->global->$manualPdfGenerationConf > 0) {
         try {
-            $odfHandler->exportAsAttachedPDF($file);
+            $odfHandler->exportAsAttachedPDF($safeName === $fileInfos['basename'] ? $file : $convertFile);
 
             // LibreOffice exits with code 0 even when it could not load the source file,
             // so the PDF has to be checked before announcing a success
@@ -52,6 +58,10 @@ if ($action == 'pdfGeneration') {
             $error = $e->getMessage();
             setEventMessages($langs->transnoentities('FileCouldNotBeGeneratedInPDF') . '<br>' . $langs->transnoentities('CheckDocumentationToEnablePDFGeneration'), null, 'errors');
             dol_syslog($e->getMessage(), LOG_INFO);
+        }
+
+        if ($safeName !== $fileInfos['basename'] && file_exists($convertFile)) {
+            dol_delete_file($convertFile);
         }
     } else {
         try {

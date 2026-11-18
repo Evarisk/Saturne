@@ -129,7 +129,8 @@ clearstatcache();
 dol_syslog("viewimage.php return file $fullName filename = $fileName content-type = $type");
 
 // This test is to avoid error images when image is not available (for example thumbs)
-if (!dol_is_file($fullName)) {
+$fileFound = dol_is_file($fullName);
+if (!$fileFound) {
     $fullName = DOL_DOCUMENT_ROOT . '/public/theme/common/nophoto.png';
 }
 
@@ -140,6 +141,17 @@ if ($type) {
     top_httphead('image/png');
 }
 header('Content-Disposition: inline; filename="' . $fileName . '"');
+
+// A cache key in the URL lets the browser keep the image, as in the viewimage.php of the core: the Saturne
+// medias carry the modification time of their file there, so an edited photo gets a new URL. The placeholder
+// of a missing file is never kept, the file may appear under that same URL
+$cacheString = GETPOST('cache', 'aZ09');
+if (!empty($cacheString) && $fileFound && empty($GLOBALS['dolibarr_nocache'])) {
+    $cacheDelay = (is_numeric($cacheString) && (int) $cacheString > 1 && (int) $cacheString < 999999) ? (int) $cacheString : 3600;
+    header('Cache-Control: max-age=' . $cacheDelay . ', public, must-revalidate');
+    header('Pragma: cache');
+    header('Expires: ' . gmdate('D, d M Y H:i:s', time() + $cacheDelay) . ' GMT');
+}
 
 $fullPathFileOsencoded = dol_osencode($fullName);
 

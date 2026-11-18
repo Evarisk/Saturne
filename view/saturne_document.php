@@ -40,8 +40,8 @@ $moduleNameLowerCase = strtolower($moduleName);
 require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
 
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' . $objectType . '.lib.php';
+require_once dol_buildpath('/' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php');
+require_once dol_buildpath('/' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '_' . $objectType . '.lib.php');
 
 // Global variables definitions
 global $conf, $db, $hookmanager, $langs, $user;
@@ -101,8 +101,8 @@ if ($id > 0 || !empty($ref)) {
 }
 
 // Security check - Protection if external user
-$permissiontoread = $user->rights->$moduleNameLowerCase->$objectType->read;
-$permissiontoadd  = $user->rights->$moduleNameLowerCase->$objectType->write;
+$permissiontoread = $user->hasRight($moduleNameLowerCase, $objectType, 'read');
+$permissiontoadd  = $user->hasRight($moduleNameLowerCase, $objectType, 'write');
 
 saturne_check_access($permissiontoread, $object);
 

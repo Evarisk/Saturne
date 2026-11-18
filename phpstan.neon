@@ -59,6 +59,7 @@ parameters:
         - ../../core/triggers/
         - ../../ecm/class/
         - ../../expedition/class/
+        - ../../exports/class/
         - ../../fichinter/class/
         - ../../fourn/class/
         - ../../includes/odtphp/
