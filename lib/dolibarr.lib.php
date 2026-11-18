@@ -208,10 +208,11 @@ function saturne_vignette($file, $maxWidth = 160, $maxHeight = 120, $extName = '
             $extImg = (preg_match('/\.jpeg$/', $file) ? '.jpeg' : '.jpg');
             break;
         case IMAGETYPE_PNG:     // 3
-            // The libpng of the GD shipped with PHP 7 warns on every interlaced PNG ("Interlace handling should be turned on"),
-            // yet reads it: only this warning is muted, any other one still reaches the usual handler
+            // libpng warns on PNG files it still reads: every interlaced PNG with the GD shipped with PHP 7 ("Interlace
+            // handling should be turned on"), or a malformed ancillary chunk ("Incorrect bKGD chunk length"). Only these
+            // libpng warnings are muted; a libpng error and any other warning still reach the usual handler
             set_error_handler(function (int $errno, string $errstr): bool {
-                return strpos($errstr, 'libpng warning: Interlace handling') !== false;
+                return strpos($errstr, 'libpng warning:') !== false;
             }, E_WARNING);
             $img = imagecreatefrompng($filetoread);
             restore_error_handler();
