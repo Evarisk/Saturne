@@ -469,38 +469,55 @@ abstract class SaturneObject extends CommonObject
 
             // Rename directory if dir was a temporary ref
             if (preg_match('/^\(?PROV/i', $this->ref)) {
-                // Now we rename also files into index
-                $sql  = 'UPDATE ' . $this->db->prefix() . 'ecm_files';
-                $sql .= " SET filename = CONCAT('" . $this->db->escape($this->newref) . "', SUBSTR(filename, " . (strlen($this->ref) + 1) . ')),';
-                $sql .= " filepath = '" . $this->db->escape($this->element . '/' . $this->newref) . "'";
-                $sql .= " WHERE filename LIKE '" . $this->db->escape($this->ref) . "%' AND filepath = '" . $this->db->escape($this->element . '/' . $this->ref) . "' AND entity = " . $conf->entity;
+                require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 
-                $resql = $this->db->query($sql);
-                if (!$resql) {
-                    $error++;
-                    $this->error = $this->db->lasterror();
-                }
-
-                $sql  = 'UPDATE ' . $this->db->prefix() . "ecm_files set filepath = '" . $this->db->escape($this->element . '/' . $this->newref) . "'";
-                $sql .= " WHERE filepath = '" . $this->db->escape($this->element . '/' . $this->ref) . "' and entity = " . $conf->entity;
-
-                $resql = $this->db->query($sql);
-                if (!$resql) {
-                    $error++;
-                    $this->error = $this->db->lasterror();
-                }
+                // Directory of the object in the output of its module : getMultidirOutput($this) looks for the conf of the
+                // element ($conf->survey), not the one of the module ($conf->digiquali), and never found the directory
+                $moduleNameLowerCase = dol_strtolower($this->module);
+                $entity              = !empty($this->entity) ? (int) $this->entity : (int) $conf->entity;
+                $moduleOutputDir     = $conf->$moduleNameLowerCase->multidir_output[$entity] ?? '';
 
                 // We rename directory ($oldRef = old ref, $num = new ref) in order not to lose the attachments
                 $oldRef    = dol_sanitizeFileName($this->ref);
                 $newRef    = dol_sanitizeFileName($num);
-                $dirSource = getMultidirOutput($this) . '/' . $this->element . '/' . $oldRef;
-                $dirDest   = getMultidirOutput($this) . '/' . $this->element . '/' . $newRef;
-                if (!$error && file_exists($dirSource)) {
+                $dirSource = $moduleOutputDir . '/' . $this->element . '/' . $oldRef;
+                $dirDest   = $moduleOutputDir . '/' . $this->element . '/' . $newRef;
+
+                // The index follows only a directory that will move : an existing destination makes rename() fail
+                $moveDir = !empty($moduleOutputDir) && dol_is_dir($dirSource) && !file_exists($dirDest);
+                if ($moveDir) {
+                    // Paths of the index are relative to DOL_DATA_ROOT : <module>/<element>/<ref>, behind the entity beyond the first one
+                    $ecmDirSource = preg_replace('/^' . preg_quote(DOL_DATA_ROOT, '/') . '\//', '', $dirSource);
+                    $ecmDirDest   = preg_replace('/^' . preg_quote(DOL_DATA_ROOT, '/') . '\//', '', $dirDest);
+
+                    // Now we rename also files into index
+                    $sql  = 'UPDATE ' . $this->db->prefix() . 'ecm_files';
+                    $sql .= " SET filename = CONCAT('" . $this->db->escape($newRef) . "', SUBSTR(filename, " . (strlen($oldRef) + 1) . ')),';
+                    $sql .= " filepath = '" . $this->db->escape($ecmDirDest) . "'";
+                    $sql .= " WHERE filename LIKE '" . $this->db->escape($this->db->escapeforlike($oldRef)) . "%' AND filepath = '" . $this->db->escape($ecmDirSource) . "' AND entity = " . $entity;
+
+                    $resql = $this->db->query($sql);
+                    if (!$resql) {
+                        $error++;
+                        $this->error = $this->db->lasterror();
+                    }
+
+                    // Then the other files of the directory and the ones of its sub-directories (answer photos...)
+                    $sql  = 'UPDATE ' . $this->db->prefix() . 'ecm_files';
+                    $sql .= " SET filepath = CONCAT('" . $this->db->escape($ecmDirDest) . "', SUBSTR(filepath, " . (strlen($ecmDirSource) + 1) . '))';
+                    $sql .= " WHERE (filepath = '" . $this->db->escape($ecmDirSource) . "' OR filepath LIKE '" . $this->db->escape($this->db->escapeforlike($ecmDirSource)) . "/%') AND entity = " . $entity;
+
+                    $resql = $this->db->query($sql);
+                    if (!$resql) {
+                        $error++;
+                        $this->error = $this->db->lasterror();
+                    }
+                }
+
+                if (!$error && $moveDir) {
                     dol_syslog(get_class($this) . '::validate() rename dir ' . $dirSource . ' into ' . $dirDest);
 
                     if (@rename($dirSource, $dirDest)) {
-                        require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
-
                         dol_syslog('Rename ok');
 
                         // Rename docs starting with $oldRef with $newRef
