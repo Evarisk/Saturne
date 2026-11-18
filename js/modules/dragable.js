@@ -74,8 +74,9 @@ window.saturne.dragable.event = function() {
 };
 
 window.saturne.dragable.submit = function() {
-  $this = $(this);
-  $container = $this.closest('.dragable-container');
+  // Declared here: without let they were globals, shared by every sortable table of the page
+  let $this      = $(this);
+  let $container = $this.closest('.dragable-container');
 
   let action         = $container.data('action') || 'dragableSubmit';
   let loader         = $container.data('loader') || 'default';
@@ -107,7 +108,7 @@ window.saturne.dragable.submit = function() {
     },
     error: function(response) {
       if (loader !== 'none') {
-        window.saturne.loader.remove($containers);
+        window.saturne.loader.remove($container);
         if (errorMessage) {
           $.jnotify(errorMessage, {color: 'red'});
         }

@@ -600,7 +600,7 @@ window.saturne.mediaBlock.refreshObjectMedias = function(resp, context) {
 
   $('.linked-medias .photo, .divphotoref .photo').each(function() {
     var image     = $(this);
-    var attribute = image.attr('data-src') ? 'data-src' : 'src';
+    var attribute = image.attr('data-src') ? 'data-src' : (image.attr('data-deferred-src') ? 'data-deferred-src' : 'src');
     var source    = image.attr(attribute);
 
     if (source) {

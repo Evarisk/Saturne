@@ -99,6 +99,21 @@ window.saturne.toolbox.getToken = function() {
 };
 
 /**
+ * Return the URL of Saturne, resolved server side by dol_buildpath() in saturne_header():
+ * Saturne may be installed in another root than htdocs/custom
+ *
+ * @memberof Saturne_Framework_Toolbox
+ *
+ * @since   23.7.1
+ * @version 23.7.1
+ *
+ * @return {string} URL of Saturne, without trailing slash
+ */
+window.saturne.toolbox.getSaturneUrlRoot = function() {
+  return window.saturne.config?.saturneUrlRoot || '';
+};
+
+/**
  * Toggle button class name
  *
  * @memberof Saturne_Framework_Toolbox

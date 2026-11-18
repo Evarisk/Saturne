@@ -27,8 +27,8 @@
  * Globals    : $conf, $db, $hookmanager, $langs, $user
  * Parameters : $action, $limit, $contextpage, $massaction, $mode, $optioncss, $page, $searchAll, $sortfield, $sortorder, $toselect
  * Objects    : $categorie, $extrafields (extrafields_list_search_param.tpl), $form, $object
- * Variables  : $arrayfields, $createUrl (optional), $enableMassSignature (optional), $enableMassValidate (optional),
- *              $fieldsToSearchAll, $formMoreParams (optional), $helpText (optional), $listXlsxExportAvailable (optional),
+ * Variables  : $arrayfields, $createUrl (optional), $enableMassLock (optional), $enableMassSignature (optional),
+ *              $enableMassValidate (optional), $fieldsToSearchAll, $formMoreParams (optional), $helpText (optional), $listXlsxExportAvailable (optional),
  *              $moreUrlParameters (optional), $nbTotalOfRecords, $num,
  *              $permissiontoadd, $resql, $search, $search_array_options (extrafields_list_search_param.tpl),
  *              $searchCategories, $sql, $title
@@ -108,6 +108,11 @@ if (!empty($enableMassValidate) && !empty($permissiontoadd)) {
 if (!empty($enableMassSignature) && !empty($permissiontoadd)) {
     $arrayOfMassActions['presign']       = '<span class="fas fa-file-signature paddingrightonly"></span>' . $langs->trans('Sign');
     $arrayOfMassActions['signattendant'] = '<span class="fas fa-user-edit paddingrightonly"></span>' . $langs->trans('SignForAnAttendant');
+}
+
+// Mass lock is opt-in: the list page must set $enableMassLock, the object tells which records can be locked (isLockable())
+if (!empty($enableMassLock) && !empty($permissiontoadd)) {
+    $arrayOfMassActions['prelock'] = '<span class="fas fa-lock paddingrightonly"></span>' . $langs->trans('Lock');
 }
 
 $arrayOfMassActions += [
@@ -229,11 +234,38 @@ if ($mode != 'kanban' && $mode != 'pwa' && !empty($listLayoutId)) {
     }
     $filterIndicator .= '</span>';
 
+    // The status filter is not counted above: it has defaults, which "Remove filters" keeps. Name the statuses it
+    // hides, or the list is taken for complete, and offer to show them all
+    if (isset($search['status']) && is_array($search['status']) && !empty($object->fields['status']['arrayofkeyval'])) {
+        // Negative statuses (deleted) are never listed, whatever the filter
+        $listableStatuses = array_filter($object->fields['status']['arrayofkeyval'], static function ($statusKey) {
+            return $statusKey >= 0;
+        }, ARRAY_FILTER_USE_KEY);
+        $hiddenStatuses = array_diff_key($listableStatuses, array_flip($search['status']));
+        if (!empty($hiddenStatuses)) {
+            $hiddenStatusLabels = implode(', ', array_map([$langs, 'transnoentities'], $hiddenStatuses));
+
+            // Same list, filters and sort kept, every status selected
+            $showAllStatusesUrl = $_SERVER['PHP_SELF'] . '?' . ltrim(preg_replace('/&search_status\[\]=[^&]*/', '', $param), '&');
+            foreach (array_keys($listableStatuses) as $statusKey) {
+                $showAllStatusesUrl .= '&search_status[]=' . ((int) $statusKey);
+            }
+            if (!empty($sortfield)) {
+                $showAllStatusesUrl .= '&sortfield=' . urlencode($sortfield) . '&sortorder=' . urlencode($sortorder);
+            }
+
+            $statusFilterHintTitle = $langs->transnoentities('ListStatusFilterHint', $langs->transnoentities($object->fields['status']['label']), $hiddenStatusLabels);
+            $filterIndicator .= '<a class="saturne-status-filter-hint classfortooltip" href="' . dol_escape_htmltag($showAllStatusesUrl) . '" title="' . dol_escape_htmltag($statusFilterHintTitle) . '">';
+            $filterIndicator .= '<span class="fas fa-eye-slash"></span>' . dol_escape_htmltag($langs->transnoentities(count($hiddenStatuses) > 1 ? 'ListStatusFilterHiddenMany' : 'ListStatusFilterHiddenOne', $hiddenStatusLabels));
+            $filterIndicator .= '</a>';
+        }
+    }
+
     $cardButton = ($cardButton ?? '') . ' ' . $filterIndicator;
 }
 
 // "New" button to create a new object
-$cardButton = ($cardButton ?? '') . ' ' . dolGetButtonTitle($langs->trans('New' . ucfirst($object->element)), $helpText ?? '', 'fa fa-plus-circle', ($createUrl ?? dol_buildpath('custom/' . $object->module . '/view/' . $object->element . '/' . $object->element . '_card.php', 1) . '?action=create' . ($moreUrlParameters ?? '')), '', $permissiontoadd);
+$cardButton = ($cardButton ?? '') . ' ' . dolGetButtonTitle($langs->trans('New' . ucfirst($object->element)), $helpText ?? '', 'fa fa-plus-circle', ($createUrl ?? dol_buildpath('/' . $object->module . '/view/' . $object->element . '/' . $object->element . '_card.php', 1) . '?action=create' . ($moreUrlParameters ?? '')), '', $permissiontoadd);
 
 // Format the title text — record count BEFORE filter indicator
 $titleText = ($conf->browser->layout == 'classic' && $mode != 'pwa') ? ($title ?? '') : '';
@@ -285,6 +317,11 @@ if ($massaction == 'prevalidate') {
 
 if ($massaction == 'presign') {
     print $form->formconfirm($_SERVER['PHP_SELF'], $langs->trans('ConfirmMassSign'), $langs->trans('ConfirmMassSigningQuestion', count($toselect)), 'sign', null, '', 0, 200, 500, 1);
+}
+
+// Only on the lists that opted in: a list with its own lock mass action (DigiQuali questions) prints its own confirmation
+if ($massaction == 'prelock' && !empty($enableMassLock)) {
+    print $form->formconfirm($_SERVER['PHP_SELF'], $langs->trans('ConfirmMassLock'), $langs->trans('ConfirmMassLockingQuestion', count($toselect)), 'lock', null, '', 0, 200, 500, 1);
 }
 
 if ($massaction == 'prearchive') {

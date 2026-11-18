@@ -58,7 +58,10 @@ foreach ($object->fields as $key => $val) {
         if (empty($val['disablesearch'])) {
             if (!empty($val['arrayofkeyval']) && is_array($val['arrayofkeyval'])) {
                 if (empty($val['searchmulti'])) {
-                    print $form->selectarray('search_' . $key, $val['arrayofkeyval'], $search[$key] ?? '', 1, 0, 0, '', 1, 0, 0, '', 'maxwidth125' . ($key == 'status' ? ' search_status onrightofpage' : ''));
+                    // The empty key of a list made for the inline select of the rows (fk_opp_status) doubled
+                    // the empty choice that selectarray already adds
+                    $searchKeyVal = array_diff_key($val['arrayofkeyval'], ['' => '']);
+                    print $form->selectarray('search_' . $key, $searchKeyVal, $search[$key] ?? '', 1, 0, 0, '', 1, 0, 0, '', 'maxwidth125' . ($key == 'status' ? ' search_status onrightofpage' : ''));
                 } else {
                     print $form->multiselectarray('search_' . $key, $val['arrayofkeyval'], $search[$key] ?? '', 0, 0, 'maxwidth125' . ($key == 'status' ? ' search_status onrightofpage' : ''), 1, '100%');
                 }

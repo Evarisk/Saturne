@@ -46,7 +46,7 @@
         $confAutoPdf = dol_strtoupper($moduleNameLowerCase) . '_AUTOMATIC_PDF_GENERATION';
         $canServePdf = $isNativePdf || (!empty($conf->global->MAIN_ODT_AS_PDF) && getDolGlobalInt($confAutoPdf) > 0);
 
-        $path = DOL_MAIN_URL_ROOT . '/custom/' . $moduleNameLowerCase . '/documents/temp/';
+        $path = dol_buildpath('/' . $moduleNameLowerCase . '/documents/', 2) . 'temp/';
 
         $isSpecimen = 0;
         $sourceDirDoc = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?? 1] . '/' . strtolower($objectType) . 'document/' . dol_sanitizeFileName($object->ref) . '/';

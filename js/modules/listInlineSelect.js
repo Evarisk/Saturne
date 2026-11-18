@@ -58,7 +58,7 @@ window.saturne.listInlineSelect.onChange = function onChange() {
   $el.prop('disabled', true).addClass('ce-saving');
 
   $.ajax({
-    url: (window.saturne.config && window.saturne.config.urlRoot ? window.saturne.config.urlRoot : '') + '/custom/saturne/core/ajax/saturne_update_field.php',
+    url: window.saturne.toolbox.getSaturneUrlRoot() + '/core/ajax/saturne_update_field.php',
     method: 'POST',
     data: {
       action:     'update_field',

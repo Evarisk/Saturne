@@ -29,6 +29,11 @@ use PHPUnit\Framework\TestCase;
 class EntityTransferLibTest extends TestCase
 {
     /**
+     * @var string Base directory of the fake install built by a test
+     */
+    private $installDir = '';
+
+    /**
      * Load entity_transfer.lib.php once for the entire class.
      */
     public static function setUpBeforeClass(): void
@@ -218,5 +223,73 @@ class EntityTransferLibTest extends TestCase
         $roots = saturne_entity_transfer_guess_roots(['x_odt:C:/wamp64/www/dolibarr/documents/5/ecm/y/template.odt'], 5);
 
         $this->assertSame('C:/wamp64/www/dolibarr/documents', $roots['data_root']);
+    }
+
+    // ─── saturne_entity_transfer_is_external_module ───────────────────────────
+
+    public function testIsExternalModuleFindsAModuleOfEveryAlternativeRoot(): void
+    {
+        $this->buildInstall();
+
+        $this->assertTrue(saturne_entity_transfer_is_external_module('digiriskdolibarr'));
+        $this->assertTrue(saturne_entity_transfer_is_external_module('dolimeet'));
+    }
+
+    public function testIsExternalModuleLeavesTheCoreModulesOut(): void
+    {
+        $this->buildInstall();
+
+        $this->assertFalse(saturne_entity_transfer_is_external_module('user'));
+        $this->assertFalse(saturne_entity_transfer_is_external_module('unknown'));
+        $this->assertFalse(saturne_entity_transfer_is_external_module(''));
+    }
+
+    /**
+     * Remove the fake install of a test and forget its roots.
+     */
+    protected function tearDown(): void
+    {
+        global $conf;
+
+        $conf->file = null;
+
+        if ($this->installDir !== '') {
+            $this->removeDir($this->installDir);
+            $this->installDir = '';
+        }
+    }
+
+    /**
+     * Build an install whose main root holds a core module and whose two alternative roots
+     * hold a module each, and declare its roots as Dolibarr does in $conf->file.
+     */
+    private function buildInstall(): void
+    {
+        global $conf;
+
+        $this->installDir = sys_get_temp_dir() . '/saturne-entity-transfer-' . uniqid();
+        foreach (['htdocs/user', 'htdocs/custom/digiriskdolibarr', 'htdocs/custom2/dolimeet'] as $dir) {
+            mkdir($this->installDir . '/' . $dir, 0777, true);
+        }
+
+        $conf->file = new \stdClass();
+        $conf->file->dol_document_root = [
+            'main' => $this->installDir . '/htdocs',
+            'alt0' => $this->installDir . '/htdocs/custom',
+            'alt1' => $this->installDir . '/htdocs/custom2',
+        ];
+    }
+
+    /**
+     * Remove a directory tree made of directories only.
+     *
+     * @param string $dir Directory to remove
+     */
+    private function removeDir(string $dir): void
+    {
+        foreach (array_diff((array) scandir($dir), ['.', '..']) as $entry) {
+            $this->removeDir($dir . '/' . $entry);
+        }
+        rmdir($dir);
     }
 }

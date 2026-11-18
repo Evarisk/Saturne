@@ -57,7 +57,7 @@ jobs:
 
         steps:
             - name: Checkout Saturne
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
               with:
                   path: htdocs/custom/saturne
 
@@ -65,7 +65,7 @@ jobs:
             # Phan directory_list, and PHPUnit require_once chains in lib files).
             # Pinned to the latest stable release (23.0.0) for reproducibility.
             - name: Checkout Dolibarr core (sparse — all class directories needed by Phan)
-              uses: actions/checkout@v4
+              uses: actions/checkout@v7
               with:
                   repository: Dolibarr/dolibarr
                   ref: '23.0.0'
@@ -94,6 +94,7 @@ jobs:
                       htdocs/core/triggers
                       htdocs/ecm/class
                       htdocs/expedition/class
+                      htdocs/exports/class
                       htdocs/fichinter/class
                       htdocs/fourn/class
                       htdocs/includes/odtphp
@@ -129,7 +130,7 @@ jobs:
 
             - name: Set up Node 18
               if: matrix.step == 'jshint'
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v7
               with:
                   node-version: '18'
                   cache: npm
@@ -137,7 +138,7 @@ jobs:
 
             - name: Cache Composer packages
               if: matrix.step == 'phpstan' || matrix.step == 'phan' || matrix.step == 'phpunit'
-              uses: actions/cache@v4
+              uses: actions/cache@v6
               with:
                   path: htdocs/custom/saturne/vendor
                   key: composer-${{ matrix.php }}-${{ hashFiles('htdocs/custom/saturne/composer.lock') }}

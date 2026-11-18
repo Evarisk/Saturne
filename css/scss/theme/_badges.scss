@@ -124,4 +124,25 @@
   .noborderoncategories {
     border-radius: $theme-radius-pill !important;
   }
+
+  /* A tag stays on one line, sized like the status badges: wrapped in a narrow column, the pill
+     turned into a blob. A label too long is cut, the full one is in the title of the tag */
+  .noborderoncategories {
+    max-width: 100%;
+    margin-top: 2px !important;
+    margin-bottom: 2px !important;
+    padding: 3px 10px !important;
+    overflow: hidden;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  /* In a list cell, max-width: 100% does not hold: the column grows to the width of the label */
+  table.liste .noborderoncategories {
+    max-width: 220px;
+  }
 }

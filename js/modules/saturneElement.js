@@ -320,7 +320,7 @@ window.saturne.saturneElement.saveOrder = function saveOrder() {
 
   window.saturne.loader.display($list);
   $.ajax({
-    url: (window.saturne.config?.urlRoot || '') + '/custom/saturne/core/ajax/saturne_reorder_element.php',
+    url: window.saturne.toolbox.getSaturneUrlRoot() + '/core/ajax/saturne_reorder_element.php',
     method: 'POST',
     data: {
       action:   'reorder_element',

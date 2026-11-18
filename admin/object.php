@@ -54,8 +54,8 @@ $moduleNameLowerCase = strtolower($moduleName);
 // Libraries
 require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
 
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '.lib.php';
-require_once __DIR__ . '/../../' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php';
+require_once dol_buildpath('/' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '.lib.php');
+require_once dol_buildpath('/' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php');
 
 // Global variables definitions
 global $conf, $db, $hookmanager, $langs, $user;
@@ -77,7 +77,7 @@ $form = new Form($db);
 $hookmanager->initHooks([$objectType . 'admin']);
 
 // Security check - Protection if external user
-$permissiontoread  = $user->rights->$moduleNameLowerCase->adminpage->read;
+$permissiontoread  = $user->hasRight($moduleNameLowerCase, 'adminpage', 'read');
 $permissiontowrite = saturne_check_admin_write_access($moduleNameLowerCase);
 
 saturne_check_access($permissiontoread);

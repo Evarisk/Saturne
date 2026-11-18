@@ -62,7 +62,7 @@ class SaturneDashboard
      */
     public function load_dashboard(?array $moreParams = []): array
     {
-        require_once __DIR__ . '/../../' . $this->module . '/class/' . $this->module . 'dashboard.class.php';
+        require_once dol_buildpath('/' . $this->module . '/class/' . $this->module . 'dashboard.class.php');
 
         $className      = ucfirst($this->module) . 'Dashboard';
         $dashboard      = new $className($this->db);

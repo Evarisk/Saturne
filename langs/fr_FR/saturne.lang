@@ -215,6 +215,13 @@ CheckDocumentationToEnablePDFGeneration = Veuillez vous référer à la document
 PDFGenerationTooltip                    = Appuyez sur ce bouton pour générer le document ODT en PDF
 PDFGeneration                           = Génération du document PDF
 NoData                                  = N/A
+DocumentsSearchPlaceholder              = Rechercher un fichier
+DocumentsFilterByType                   = Filtrer par type de fichier
+DocumentsTypeImage                      = Images
+DocumentsNone                           = Aucun document pour le moment
+DocumentsNoMatch                        = Aucun fichier ne correspond à la recherche
+DocumentsShowMore                       = Afficher les %s autres fichiers
+DocumentsShowLess                       = Réduire la liste
 
 
 
@@ -227,6 +234,10 @@ SendMailSubject = Email
 QHSEService     = Service QHSE
 WithKindRegards = Bien cordialement
 ConfigEmail     = Cliquez sur ce lien pour vous rendre à la configuration des emails
+MailFailureServer           = Le serveur d'envoi des emails n'a pas pu transmettre le message : faites vérifier la configuration des emails par un administrateur.
+MailFailureRecipientRefused = L'adresse %s a été refusée : corrigez-la, puis renvoyez l'email.
+MailFailureLogin            = Le serveur d'envoi des emails a refusé l'identifiant ou le mot de passe : faites vérifier la configuration des emails par un administrateur.
+MailFailureTechnicalDetail  = Détail technique : %s
 
 
 
@@ -437,6 +448,11 @@ OrphanDocumentsDeletedEntity                 = %s ligne(s) supprimée(s) sur l'e
 # Document generation - Generation de document
 ErrorTemplateFileNotAllowed                  = Le modèle de document « %s » ne se trouve pas dans un répertoire de modèles du module.
 
+# Status filter of the lists - Filtre sur l'état des listes
+ListStatusFilterHiddenOne                    = %s masqué
+ListStatusFilterHiddenMany                   = %s masqués
+ListStatusFilterHint                         = Le filtre de la colonne « %s » est actif et masque : %s.<br>La suppression des filtres le conserve.<br>Cliquez pour afficher tous les états.
+
 # Excel export - Export Excel
 XlsxExport                                   = Export Excel
 XlsxExportHelp                               = Télécharge toutes les lignes de la liste, avec ses filtres et son tri, dans un classeur Excel qui les présente sous plusieurs vues
@@ -473,3 +489,9 @@ XlsxDashboardExportHelp                      = Télécharge tout le tableau de b
 XlsxDashboardValuesSheetDescription          = Valeur et part de chaque catégorie du graphique ; une catégorie ouvre la liste correspondante
 XlsxDashboardSeriesSheetDescription          = Valeurs du graphique, une ligne par catégorie et une colonne par série, aux couleurs de la légende
 XlsxDashboardListSheetDescription            = Lignes de la liste du tableau de bord
+
+# Inline edition of the lists - Edition en ligne des listes
+InlineEditSaved         = Enregistré
+InlineEditInvalidFormat = Format invalide
+InlineEditMaxPercent    = Maximum 100%%
+InlineEditOpenCalendar  = Ouvrir le calendrier

@@ -215,6 +215,13 @@ CheckDocumentationToEnablePDFGeneration = Please refer to the documentation for 
 PDFGenerationTooltip                    = Appuyez sur ce bouton pour générer le document ODT en PDF
 PDFGeneration                           = Generating the PDF document
 NoData                                  = N/A
+DocumentsSearchPlaceholder              = Search a file
+DocumentsFilterByType                   = Filter by file type
+DocumentsTypeImage                      = Images
+DocumentsNone                           = No document yet
+DocumentsNoMatch                        = No file matches the search
+DocumentsShowMore                       = Show the %s other files
+DocumentsShowLess                       = Collapse the list
 
 
 
@@ -227,6 +234,10 @@ SendMailSubject = Email
 QHSEService     = QHSE Service
 WithKindRegards = With kind regards
 ConfigEmail     = Click on this link to go to the email configuration
+MailFailureServer           = The outgoing mail server could not deliver the message: ask an administrator to check the email setup.
+MailFailureRecipientRefused = The address %s was refused: correct it, then send the email again.
+MailFailureLogin            = The outgoing mail server refused the login or the password: ask an administrator to check the email setup.
+MailFailureTechnicalDetail  = Technical detail: %s
 
 
 
@@ -429,6 +440,11 @@ OrphanDocumentsDeletedEntity                 = %s row(s) deleted on entity %s
 # Document generation
 ErrorTemplateFileNotAllowed                  = The document template '%s' is not stored in a template directory of the module.
 
+# Status filter of the lists
+ListStatusFilterHiddenOne                    = %s hidden
+ListStatusFilterHiddenMany                   = %s hidden
+ListStatusFilterHint                         = The filter of the « %s » column is active and hides: %s.<br>Removing the filters keeps it.<br>Click to show all statuses.
+
 # Excel export
 XlsxExport                                   = Excel export
 XlsxExportHelp                               = Downloads every line of the list, with its filters and its sort, into an Excel workbook showing them under several views
@@ -465,3 +481,9 @@ XlsxDashboardExportHelp                      = Downloads the whole dashboard int
 XlsxDashboardValuesSheetDescription          = Value and share of each category of the graph; a category opens the matching list
 XlsxDashboardSeriesSheetDescription          = Values of the graph, one row per category and one column per series, in the colours of the legend
 XlsxDashboardListSheetDescription            = Lines of the list of the dashboard
+
+# Inline edition of the lists
+InlineEditSaved         = Saved
+InlineEditInvalidFormat = Invalid format
+InlineEditMaxPercent    = Maximum 100%%
+InlineEditOpenCalendar  = Open the calendar

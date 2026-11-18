@@ -407,4 +407,17 @@
     padding: 6px 20px 20px;
     @include theme-card;
   }
+
+  /* ---- Documents box (saturne_show_documents) ---- */
+
+  /* The field rule of _forms.scss pads every field evenly: the search field keeps room for its icon */
+  div.fiche .saturne-documents input.saturne-documents__search-input[type="search"]:not(.select2-search__field):not(.form-field):not(.cke_source) {
+    height: 32px;
+    padding: 0 10px 0 30px;
+  }
+
+  .saturne-documents tr.saturne-documents__toolbar-row > th {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
 }

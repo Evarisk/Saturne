@@ -66,7 +66,7 @@ function saturne_header(int $load_media_gallery = 0, string $head = '', string $
     //CSS
     $cssList[]       = '/saturne/css/saturne.min.css';
     $relativeCssPath = $moduleNameLowerCase . '/css/' . $moduleNameLowerCase . '.min.css';
-    $absoluteCssPath = __DIR__ . '/../../' . $relativeCssPath;
+    $absoluteCssPath = dol_buildpath('/' . $relativeCssPath);
     if (file_exists($absoluteCssPath)) {
         $cssList[] = '/' . $relativeCssPath;
     }
@@ -83,7 +83,7 @@ function saturne_header(int $load_media_gallery = 0, string $head = '', string $
     }
 
     $relativeJsPath = $moduleNameLowerCase . '/js/' . $moduleNameLowerCase . '.min.js';
-    $absoluteJsPath = __DIR__ . '/../../' . $relativeJsPath;
+    $absoluteJsPath = dol_buildpath('/' . $relativeJsPath);
     if (file_exists($absoluteJsPath)) {
         $jsList[] = '/' . $relativeJsPath;
     }
@@ -98,6 +98,7 @@ function saturne_header(int $load_media_gallery = 0, string $head = '', string $
         <script>
             window.saturne.config = window.saturne.config || {};
             window.saturne.config.urlRoot = '<?php echo DOL_URL_ROOT; ?>';
+            window.saturne.config.saturneUrlRoot = '<?php echo dol_escape_js(dol_buildpath('/saturne', 1)); ?>';
         </script>
     <?php
 
@@ -179,7 +180,7 @@ function saturne_display_recurse_tree(array $moreParams, array $objectElementTre
                         echo saturne_get_button_component_html([
                             'id'        => 'slider',
                             'className' => 'linkElement',
-                            'href'      => dol_buildpath('custom/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_view.php?id=' . $objectElement['object']->id . '&risk_type=' . $riskType, 1), //@todo gérer le lien
+                            'href'      => dol_buildpath('/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_view.php', 1) . '?id=' . $objectElement['object']->id . '&risk_type=' . $riskType, //@todo gérer le lien
                             'spans' => [
                                 [
                                     'className' => 'ref type-' . $objectElement['object']->element_type,
@@ -198,7 +199,7 @@ function saturne_display_recurse_tree(array $moreParams, array $objectElementTre
                         <?php
                             echo saturne_get_button_component_html([
                                 'className' => 'wpeo-button button-square-40 button-secondary wpeo-tooltip-event',
-                                'href'      => dol_buildpath('custom/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_card.php?action=create&element_type=0&fk_element=' . $objectElement['object']->id, 1),
+                                'href'      => dol_buildpath('/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_card.php', 1) . '?action=create&element_type=0&fk_element=' . $objectElement['object']->id,
                                 'moreAttr'  => [
                                     'data-direction' => 'bottom',
                                     'data-color'     => 'light',
@@ -215,7 +216,7 @@ function saturne_display_recurse_tree(array $moreParams, array $objectElementTre
 
                             echo saturne_get_button_component_html([
                                 'className' => 'wpeo-button button-square-40 wpeo-tooltip-event',
-                                'href'      => dol_buildpath('custom/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_card.php?action=create&element_type=1&fk_element=' . $objectElement['object']->id, 1),
+                                'href'      => dol_buildpath('/' . $objectElement['object']->module . '/view/' . $objectElement['object']->element . '/' . $objectElement['object']->element . '_card.php', 1) . '?action=create&element_type=1&fk_element=' . $objectElement['object']->id,
                                 'moreAttr'  => [
                                     'data-direction' => 'bottom',
                                     'data-color'     => 'light',
@@ -254,7 +255,7 @@ function saturne_recurse_tree($moreParams, ?int $parentID = null, int $depth = 0
 {
     global $conf;
 
-    require_once __DIR__ . '/../../' . $moreParams['moduleNameLowerCase'] . '/class/' . $moreParams['objectElement'] . '.class.php';
+    require_once dol_buildpath('/' . $moreParams['moduleNameLowerCase'] . '/class/' . $moreParams['objectElement'] . '.class.php');
 
     $filter         = 't.entity IN (' . $conf->entity . ') AND t.fk_standard = ' . getDolGlobalInt(dol_strtoupper($moreParams['moduleNameLowerCase']) . '_ACTIVE_STANDARD');
     $filter        .= ' AND t.status = ' . SaturneElement::STATUS_VALIDATED;
@@ -322,10 +323,10 @@ function saturne_check_access(
         // cherchait. Les modules la nomment view/<element>/<element>_list.php ; a defaut,
         // l'accueil du module prend le relais. Un objet consulte ailleurs que dans une liste,
         // comme les elements DigiRisk dans leur arborescence, passe sa propre destination
-        $moduleHome = sprintf('/custom/%1$s/%1$sindex.php?mainmenu=%1$s', $moduleNameLowerCase);
-        $objectList = sprintf('/custom/%s/view/%2$s/%2$s_list.php', $moduleNameLowerCase, $object->element);
+        $moduleHome = sprintf('/%1$s/%1$sindex.php', $moduleNameLowerCase);
+        $objectList = sprintf('/%s/view/%2$s/%2$s_list.php', $moduleNameLowerCase, $object->element);
         $listExists = dol_strlen($object->element) && file_exists(dol_buildpath($objectList, 0));
-        $urlToGo    = dol_buildpath($listExists ? $objectList : $moduleHome, 1);
+        $urlToGo    = $listExists ? dol_buildpath($objectList, 1) : dol_buildpath($moduleHome, 1) . '?mainmenu=' . $moduleNameLowerCase;
 
         header('Location: ' . (dol_strlen($notFoundUrl) ? $notFoundUrl : $urlToGo));
         exit;
@@ -335,7 +336,7 @@ function saturne_check_access(
         if ($object !== null && $object->id > 0) {
             if ($object->entity != $conf->entity) {
                 setEventMessage($langs->trans('ChangeEntityRedirection'), 'warnings');
-                $urltogo = dol_buildpath('/custom/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'index.php?mainmenu=' . $moduleNameLowerCase, 1);
+                $urltogo = dol_buildpath('/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'index.php', 1) . '?mainmenu=' . $moduleNameLowerCase;
                 header('Location: ' . $urltogo);
                 exit;
             }
@@ -369,13 +370,20 @@ function saturne_check_modules_enabled()
 /**
  * Print dol_get_fiche_head with Saturne custom enhancements
  *
- * @param CommonObject $object    Current object
- * @param string       $tabactive Tab active in navbar
- * @param string       $title     Title navbar
+ * The tabs come from <element>_prepare_head(), else <element>PrepareHead(). An object without any of them
+ * (no card of its own, or library not loaded) gets a header without tabs instead of a fatal error
+ *
+ * @param  CommonObject $object    Current object
+ * @param  string       $tabactive Tab active in navbar
+ * @param  string       $title     Title navbar
+ * @return void
  */
 function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', string $title = ''): void
 {
     global $conf;
+
+    $head  = [];
+    $picto = '';
 
     // Configuration header
     if (property_exists($object, 'element')) {
@@ -387,12 +395,19 @@ function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', st
             $element = 'task';
         }
 
-        $prepareHead = $element . '_prepare_head';
-        if (function_exists($prepareHead)) {
+        $prepareHeads = [$element . '_prepare_head', $element . 'PrepareHead'];
+        $prepareHead  = '';
+        foreach ($prepareHeads as $candidate) {
+            if (function_exists($candidate)) {
+                $prepareHead = $candidate;
+                break;
+            }
+        }
+
+        if ($prepareHead !== '') {
             $head = $prepareHead($object);
         } else {
-            $prepareHead = $element . 'PrepareHead';
-            $head = $prepareHead($object);
+            dol_syslog(__FUNCTION__ . ' no ' . implode('() nor ', $prepareHeads) . '() for ' . get_class($object) . ', header shown without tabs', LOG_WARNING);
         }
     }
     if (property_exists($object, 'picto')) {
@@ -786,9 +801,9 @@ function saturne_show_category_image(Categorie $category, int $noPrint = 0, stri
             $imgHeight = ($category->imgHeight < $maxHeight) ? $category->imgHeight : $maxHeight;
 
             if ($noPrint) {
-                $out = '<div><img width="' . $imgWidth . '" height="' . $imgHeight . '" class="photo ' . $moreCSS . '" src="' . DOL_URL_ROOT . '/custom/saturne/utils/viewimage.php?modulepart=category&entity=' . $category->entity . '&file=' . urlencode($categoryPhotoDir . $filename) . '" value="' . $category->id . '" title="' . $filename . '" alt=""></div>';
+                $out = '<div><img width="' . $imgWidth . '" height="' . $imgHeight . '" class="photo ' . $moreCSS . '" src="' . dol_buildpath('/saturne/utils/viewimage.php', 1) . '?modulepart=category&entity=' . $category->entity . '&file=' . urlencode($categoryPhotoDir . $filename) . '" value="' . $category->id . '" title="' . $filename . '" alt=""></div>';
             } else {
-                print '<div><img width="' . $imgWidth . '" height="' . $imgHeight . '" class="photo ' . $moreCSS . '" src="' . DOL_URL_ROOT . '/custom/saturne/utils/viewimage.php?modulepart=category&entity=' . $category->entity . '&file=' . urlencode($categoryPhotoDir . $filename) . '" value="' . $category->id . '" title="' . $filename . '" alt=""></div>';
+                print '<div><img width="' . $imgWidth . '" height="' . $imgHeight . '" class="photo ' . $moreCSS . '" src="' . dol_buildpath('/saturne/utils/viewimage.php', 1) . '?modulepart=category&entity=' . $category->entity . '&file=' . urlencode($categoryPhotoDir . $filename) . '" value="' . $category->id . '" title="' . $filename . '" alt=""></div>';
             }
         }
     } else {
@@ -864,7 +879,7 @@ function saturne_create_category(string $label = '', string $type = '', int $fkP
             dol_mkdir($dir);
         }
 
-        $originFile = __DIR__ . '/../../' . $moduleNameLowerCase . '/img/pictos_' . $type . '/' . $photoName;
+        $originFile = dol_buildpath('/' . $moduleNameLowerCase . '/img/pictos_' . $type . '/' . $photoName);
         dol_copy($originFile, $dir . $photoName);
         vignette($dir . $photoName, $maxwidthsmall, $maxheightsmall);
         vignette($dir . $photoName, $maxwidthmini, $maxheightmini, '_mini');
@@ -1547,4 +1562,57 @@ function saturne_constant_onoff(string $constName, int $permissionToWrite = 1, ?
     }
 
     return ajax_constantonoff($constName, [], $entity, 0, 0, 0, 2, 0, 1, '', '', 'inline-block', 0, '', empty($permissionToWrite) ? 1 : 0);
+}
+
+/**
+ * Explain in plain words why an email could not be sent, for the person who asked to send it.
+ *
+ * CMailFile leaves a technical error, in English, followed for the PHP mail() method by a generic
+ * advice about spam and firewalls that misleads more than it helps; with SMTP the reason is only in
+ * its errors list. The cause comes first, in the words of the user, with what to do next; the raw
+ * error is kept apart as a technical detail, stripped of that advice and of its HTML, and always
+ * written to the log: the caller decides who may read it on screen.
+ *
+ * @param  CMailFile $mailfile  Email that sendfile() failed to send
+ * @param  string    $recipient Address the email was meant for
+ * @return array{cause: string, reason: string, detail: string} Cause: recipient, login or server.
+ *                                                                Plain text, nothing escaped
+ */
+function saturne_get_mail_failure(CMailFile $mailfile, string $recipient): array
+{
+    global $langs;
+
+    $phpMailAdvice = $langs->transnoentitiesnoconv('ErrorPhpMailDelivery');
+
+    $details = [];
+    foreach (array_merge([(string) $mailfile->error], (array) $mailfile->errors) as $error) {
+        // Only the HTML markup goes: an address between angle brackets stays, it tells which one was refused
+        $error = preg_replace('/<\/?(?:a|b|br|div|i|p|span|strong|u)\b[^>]*>/i', ' ', (string) $error);
+        $error = html_entity_decode($error, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $error = trim(preg_replace('/\s+/u', ' ', str_replace($phpMailAdvice, '', $error)));
+        if ($error !== '' && !in_array($error, $details)) {
+            $details[] = $error;
+        }
+    }
+    $detail = implode(' ', $details);
+    dol_syslog(__FUNCTION__ . ' email to ' . $recipient . ' not sent: ' . $detail, LOG_ERR);
+
+    // Only the address can be fixed by the person sending. A refused login is a matter of mail setup like
+    // any other failure, but naming it spares the administrator the search
+    if (preg_match('/recipient|failed for the following addresses|does not comply with RFC/i', $detail)) {
+        $cause  = 'recipient';
+        $reason = $langs->transnoentities('MailFailureRecipientRefused', $recipient);
+    } elseif (preg_match('/authenticat|username and password|password not accepted|\b535\b/i', $detail)) {
+        $cause  = 'login';
+        $reason = $langs->transnoentities('MailFailureLogin');
+    } else {
+        $cause  = 'server';
+        $reason = $langs->transnoentities('MailFailureServer');
+    }
+
+    return [
+        'cause'  => $cause,
+        'reason' => $reason,
+        'detail' => $detail
+    ];
 }

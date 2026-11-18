@@ -100,8 +100,8 @@ if (!empty($extrafields->attributes[$object->table_element]['label'])) {
     }
 }
 
-// Add fields from hooks
-$parameters = [];
+// Add fields from hooks. The sort lets a module select a costly criterion only when the list is sorted on it
+$parameters = ['sortfield' => $sortfield, 'sortorder' => $sortorder];
 $hookmanager->executeHooks('printFieldListSelect', $parameters, $object, $action);
 $sql .= $hookmanager->resPrint;
 $sql  = preg_replace('/,\s*$/', '', $sql);
