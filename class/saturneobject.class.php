@@ -490,10 +490,11 @@ abstract class SaturneObject extends CommonObject
      * Directories of the module output that keep the files of the object under its ref
      *
      * The one of the object (attachments, answer photos...) and, apart, the ones of the documents generated for it,
-     * each under <document type>/<ref> (see buildDocumentFilename() in modules_saturne.php) : <element>document, and
-     * any other type recorded for the object in llx_saturne_object_documents (a training session of DoliMeet also has
-     * its attendance sheets and completion certificates). A module keeping other files under the ref of its object
-     * adds their directory by overriding this method.
+     * each under <document type>/<ref> : <element>document, the type of each model declared for the object
+     * (addDocumentModel(<model>, '<element>document'), the model name without its _odt suffix : a training session of
+     * DoliMeet has its attendance sheets under attendancesheetdocument), and any other type recorded for the object in
+     * llx_saturne_object_documents. A module keeping other files under the ref of its object adds their directory by
+     * overriding this method.
      *
      * @return string[] Directories, relative to the output directory of the module, without the ref
      */
@@ -501,22 +502,25 @@ abstract class SaturneObject extends CommonObject
     {
         $refDirectories = [$this->element, $this->element . 'document'];
 
+        $sql  = 'SELECT nom AS type FROM ' . $this->db->prefix() . 'document_model';
+        $sql .= " WHERE type = '" . $this->db->escape($this->element . 'document') . "'";
         if ($this->id > 0) {
-            $sql  = 'SELECT DISTINCT type FROM ' . $this->db->prefix() . 'saturne_object_documents';
+            $sql .= ' UNION SELECT type FROM ' . $this->db->prefix() . 'saturne_object_documents';
             $sql .= ' WHERE parent_id = ' . ((int) $this->id);
             $sql .= " AND parent_type = '" . $this->db->escape($this->element) . "'";
             $sql .= " AND module_name = '" . $this->db->escape($this->module) . "'";
+        }
 
-            $resql = $this->db->query($sql);
-            if ($resql) {
-                while ($obj = $this->db->fetch_object($resql)) {
-                    // The type names a directory : nothing that could lead out of the output of the module
-                    if (preg_match('/^[a-z0-9_-]+$/i', (string) $obj->type)) {
-                        $refDirectories[] = $obj->type;
-                    }
+        $resql = $this->db->query($sql);
+        if ($resql) {
+            while ($obj = $this->db->fetch_object($resql)) {
+                // The type names a directory : nothing that could lead out of the output of the module
+                $type = preg_replace('/_odt$/', '', (string) $obj->type);
+                if (preg_match('/^[a-z0-9_-]+$/i', $type)) {
+                    $refDirectories[] = $type;
                 }
-                $this->db->free($resql);
             }
+            $this->db->free($resql);
         }
 
         return array_values(array_unique($refDirectories));
