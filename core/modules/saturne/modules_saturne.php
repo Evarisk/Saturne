@@ -794,6 +794,53 @@ class SaturneDocumentModel extends CommonDocGenerator
     }
 
     /**
+     * Fill the translation tags of the template, as the ODT models of Dolibarr do: {lang_Key}, {__(Key)__},
+     * and {__(Key|langfile)__} which loads the language file first.
+     *
+     * Only the tags found in the template are set: setting every known translation, as the core does,
+     * would search the whole document once per key, and a merged document can weigh several MB.
+     *
+     * @param  Odf       $odfHandler      Object builder odf library
+     * @param  Translate $outputLangs     Lang object to use for output
+     * @param  string    $srcTemplatePath Full path of the template: its styles.xml holds the headers and footers
+     * @return int                        Number of translation tags set
+     */
+    public function fillTranslationTags(Odf $odfHandler, Translate $outputLangs, string $srcTemplatePath = ''): int
+    {
+        $xml = (string) $odfHandler;
+        if (dol_strlen($srcTemplatePath) && class_exists('ZipArchive')) {
+            $zip = new ZipArchive();
+            if ($zip->open($srcTemplatePath) === true) {
+                $xml .= (string) $zip->getFromName('styles.xml');
+                $zip->close();
+            }
+        }
+
+        if (!preg_match_all('/\{(lang_([A-Za-z0-9_.\-]+)|__\(([A-Za-z0-9_.\-]+)(?:\|([A-Za-z0-9_@.\-]+))?\)__)\}/', $xml, $matches, PREG_SET_ORDER)) {
+            return 0;
+        }
+
+        $tags = [];
+        foreach ($matches as $match) {
+            $tags[$match[1]] = $match;
+        }
+
+        foreach ($tags as $tag => $match) {
+            if (!empty($match[4])) {
+                $outputLangs->load($match[4]);
+            }
+            $key = !empty($match[2]) ? $match[2] : $match[3];
+            try {
+                $odfHandler->setVars($tag, $outputLangs->transnoentities($key), true, 'UTF-8');
+            } catch (OdfException $e) {
+                dol_syslog($e->getMessage(), LOG_INFO);
+            }
+        }
+
+        return count($tags);
+    }
+
+    /**
      * Fill all odt tags for segments lines.
      *
      * @param  Odf       $odfHandler  Object builder odf library.
@@ -1022,7 +1069,8 @@ class SaturneDocumentModel extends CommonDocGenerator
 
         $this->fillTags($odfHandler, $outputLangs, $tmpArray, $moreParam);
 
-        // Replace labels translated
+        // Replace labels translated. After fillTags(): the tags of the segment lines are in the document once merged
+        $this->fillTranslationTags($odfHandler, $outputLangs, $srcTemplatePath);
         $tmpArray = $outputLangs->get_translations_for_substitutions();
 
         // Call the beforeODTSave hook
