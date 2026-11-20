@@ -49,7 +49,7 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
         $this->name        = preg_replace('/^Interface/i', '', get_class($this));
         $this->family      = 'demo';
         $this->description = 'Saturne triggers.';
-        $this->version     = '23.8.0';
+        $this->version     = '23.9.0';
         $this->picto       = 'saturne@saturne';
     }
 
@@ -141,7 +141,9 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
                 break;
 
             case 'SATURNE_CERTIFICATE_VALIDATE':
-                $actioncomm->label = $langs->transnoentities('ObjectValidateTrigger', $langs->transnoentities(ucfirst($object->element)), $object->ref);
+                // A validation trigger runs before the object takes its final ref, kept meanwhile in newref, as in Dolibarr core:
+                // the event is labelled with it, not with the (PROVn) one
+                $actioncomm->label = $langs->transnoentities('ObjectValidateTrigger', $langs->transnoentities(ucfirst($object->element)), !empty($object->newref) ? $object->newref : $object->ref);
                 $actioncomm->create($user);
                 break;
 

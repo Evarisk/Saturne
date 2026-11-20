@@ -81,7 +81,9 @@ class SaturneTask extends Task
      */
     public function __construct($db)
     {
-        $this->db = $db;
+        // The constructor of Task fills the status labels getLibStatut() reads: without them, the banner
+        // of a task raised an "Undefined array key" warning per label
+        parent::__construct($db);
     }
 
     /**

@@ -404,6 +404,12 @@ function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', st
             }
         }
 
+        // task_prepare_head() reads the ref of the project of the task, that the task pages of Dolibarr
+        // load beforehand: a Saturne tab on a task left it unloaded
+        if ($element == 'task' && !is_object($object->project)) {
+            $object->fetchProject();
+        }
+
         if ($prepareHead !== '') {
             $head = $prepareHead($object);
         } else {

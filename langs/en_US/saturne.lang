@@ -108,6 +108,7 @@ ErrorNoSocietyLogo          = No company logo found
 CustomODT                   = Custom ODT of documents
 ErrorWrongFileNameExtension = Error: wrong file extension %s
 ErrorFileNameCanNotBeBuilt  = The file name could not be built
+TemplateVersion             = Template version
 
 # Trigger
 ConfTrigger                 = Event configuration
