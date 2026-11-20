@@ -51,6 +51,9 @@ if (empty($moduleName) && empty($objectType)) {
 
 $moduleNameLowerCase = strtolower($moduleName);
 
+// Global variables definitions
+global $conf, $db, $hookmanager, $langs, $user;
+
 // Module and object names come from the URL or from the referer above: accept only folder and class names whose lib and
 // class files exist. Opened alone, the page required "//lib/.lib.php" and ended in a fatal error
 $moduleLibFile   = preg_match('/^[a-z0-9_]+$/', $moduleNameLowerCase) ? dol_buildpath('/' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '.lib.php') : '';
@@ -65,9 +68,6 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
 
 require_once $moduleLibFile;
 require_once $objectClassFile;
-
-// Global variables definitions
-global $conf, $db, $hookmanager, $langs, $user;
 
 // Load translation files required by the page
 saturne_load_langs(['admin']);

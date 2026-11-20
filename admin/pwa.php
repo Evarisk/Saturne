@@ -36,6 +36,9 @@ $moduleName          = GETPOST('module_name', 'alpha');
 $startUrl            = GETPOST('start_url', 'alpha');
 $moduleNameLowerCase = strtolower($moduleName);
 
+// Global variables definitions
+global $conf, $db, $hookmanager, $langs, $user;
+
 // Accept only a module folder name whose lib file exists. Opened alone, the page required "//lib/.lib.php" and ended in a
 // fatal error
 $moduleLibFile = preg_match('/^[a-z0-9_]+$/', $moduleNameLowerCase) ? dol_buildpath('/' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '.lib.php') : '';
@@ -49,9 +52,6 @@ require_once TCPDF_PATH . 'tcpdf_barcodes_2d.php';
 
 // Load Module Libraries
 require_once $moduleLibFile;
-
-// Global variables definitions
-global $conf, $db, $hookmanager, $langs, $user;
 
 // Load translation files required by the page
 saturne_load_langs();
