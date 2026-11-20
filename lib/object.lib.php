@@ -1399,6 +1399,9 @@ function saturne_recover_prov_directories(string $moduleNameLowerCase): int
     $error     = 0;
     foreach ($toRecover as $tableElement => $objectsById) {
         $sample = $prototype(reset($objectsById)['element']);
+        if ($sample === null) {
+            continue;
+        }
 
         $sql  = 'SELECT rowid, ref FROM ' . $db->prefix() . $tableElement;
         $sql .= ' WHERE rowid IN (' . implode(',', array_map('intval', array_keys($objectsById))) . ')';
@@ -1421,7 +1424,11 @@ function saturne_recover_prov_directories(string $moduleNameLowerCase): int
         $db->free($resql);
 
         foreach ($refs as $id => $ref) {
-            $object         = clone $prototype($objectsById[$id]['element']);
+            $object = $prototype($objectsById[$id]['element']);
+            if ($object === null) {
+                continue;
+            }
+            $object         = clone $object;
             $object->id     = $id;
             $object->ref    = $ref;
             $object->entity = $entity;
