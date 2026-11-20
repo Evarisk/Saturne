@@ -1095,7 +1095,7 @@ function saturne_get_specimen_object(string $objectType, string $moduleNameLower
  *
  * @param  array      $numberingModulesNames Array of numbering modules names
  * @param  string     $moduleNameLowerCase   Module name in lower case
- * @return array      $variablesToReturn     Numbering modules classes
+ * @return array      $variablesToReturn     Numbering modules classes, null for a module not found
  */
 function saturne_require_objects_mod(array $numberingModulesNames, string $moduleNameLowerCase = ''): array
 {
@@ -1131,7 +1131,8 @@ function saturne_require_objects_mod(array $numberingModulesNames, string $modul
             }
 
             $varName             = 'ref' . ucfirst($objectType) . 'Mod';
-            $$varName            = new $numberingModulesName($db);
+            // An empty or unknown name (constant missing) gives null for the caller to test, not a fatal "new ''"
+            $$varName            = (dol_strlen($numberingModulesName) && class_exists($numberingModulesName)) ? new $numberingModulesName($db) : null;
             $variablesToReturn[] = $$varName;
         }
     }

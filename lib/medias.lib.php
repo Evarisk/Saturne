@@ -1195,6 +1195,9 @@ function saturne_media_ai_enabled(): bool
  *                               - show_file        (bool, default false) Show document upload section (any file type)
  *                               - file_sub_dir     (string)              Storage/listing dir for the document section (defaults to $subDir)
  *                               - file_upload_data (array)               Extra key => value POST data forwarded on document upload
+ *                               - file_accept      (string)              Types the document picker offers (accept attribute),
+ *                                                                        office documents and archives by default. A page
+ *                                                                        that takes videos too widens it (e.g. 'video/*,.pdf')
  *                               - show_gallery     (bool, default true)  Show gallery of existing files
  *                               - show_upload      (bool, default true)  Show upload/delete controls
  *                               - show_library     (bool, default false) The picking button opens the media library
@@ -1386,9 +1389,9 @@ function saturne_render_media_block(string $moduleName, string $subDir = '', str
             $out .= '    <label for="' . $idPrefix . 'upload-file" class="saturne-upload-label saturne-upload-label-file" title="' . dol_escape_htmltag($langs->trans('AddFile')) . '">';
             $out .= '      <i class="fas fa-paperclip"></i>';
             // Listing document types keeps the camera out of the mobile file picker — an input
-            // without accept offers every source, camera included.
-            $fileAccept = '.pdf,.doc,.docx,.odt,.xls,.xlsx,.ods,.ppt,.pptx,.odp,.csv,.txt,.rtf,.zip,.rar,.7z,.eml,.msg';
-            $out .= '      <input type="file" id="' . $idPrefix . 'upload-file" class="saturne-file-upload" name="userfile[]" accept="' . $fileAccept . '" multiple>';
+            // without accept offers every source, camera included. A page may widen it (videos...)
+            $fileAccept = isset($options['file_accept']) ? (string) $options['file_accept'] : '.pdf,.doc,.docx,.odt,.xls,.xlsx,.ods,.ppt,.pptx,.odp,.csv,.txt,.rtf,.zip,.rar,.7z,.eml,.msg';
+            $out .= '      <input type="file" id="' . $idPrefix . 'upload-file" class="saturne-file-upload" name="userfile[]" accept="' . dol_escape_htmltag($fileAccept) . '" multiple>';
             $out .= '    </label>';
         }
 
