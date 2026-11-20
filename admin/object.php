@@ -38,7 +38,7 @@ $objectType = GETPOST('object_type', 'alpha');
 // If the previous action is from extrafields, the return value is PHP_SELF without querys
 // So we need to fill moduleName and objectType using the previous url (HTTP_REFERER)
 if (empty($moduleName) && empty($objectType)) {
-    $lastUrl      = $_SERVER['HTTP_REFERER'];
+    $lastUrl      = $_SERVER['HTTP_REFERER'] ?? '';
     $lastUrlArray = parse_url($lastUrl);
     if (is_array($lastUrlArray) && isset($lastUrlArray['query'])) {
         parse_str($lastUrlArray['query'], $lastUrlQuerys);
