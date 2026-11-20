@@ -416,8 +416,6 @@ abstract class SaturneObject extends CommonObject
      */
     public function validate(User $user, int $noTrigger = 0): int
     {
-        global $conf;
-
         $error = 0;
 
         // Protection
@@ -467,70 +465,9 @@ abstract class SaturneObject extends CommonObject
         if (!$error) {
             $this->oldref = $this->ref;
 
-            // Rename directory if dir was a temporary ref
-            if (preg_match('/^\(?PROV/i', $this->ref)) {
-                require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
-
-                // Directory of the object in the output of its module : getMultidirOutput($this) looks for the conf of the
-                // element ($conf->survey), not the one of the module ($conf->digiquali), and never found the directory
-                $moduleNameLowerCase = dol_strtolower($this->module);
-                $entity              = !empty($this->entity) ? (int) $this->entity : (int) $conf->entity;
-                $moduleOutputDir     = $conf->$moduleNameLowerCase->multidir_output[$entity] ?? '';
-
-                // We rename directory ($oldRef = old ref, $num = new ref) in order not to lose the attachments
-                $oldRef    = dol_sanitizeFileName($this->ref);
-                $newRef    = dol_sanitizeFileName($num);
-                $dirSource = $moduleOutputDir . '/' . $this->element . '/' . $oldRef;
-                $dirDest   = $moduleOutputDir . '/' . $this->element . '/' . $newRef;
-
-                // The index follows only a directory that will move : an existing destination makes rename() fail
-                $moveDir = !empty($moduleOutputDir) && dol_is_dir($dirSource) && !file_exists($dirDest);
-                if ($moveDir) {
-                    // Paths of the index are relative to DOL_DATA_ROOT : <module>/<element>/<ref>, behind the entity beyond the first one
-                    $ecmDirSource = preg_replace('/^' . preg_quote(DOL_DATA_ROOT, '/') . '\//', '', $dirSource);
-                    $ecmDirDest   = preg_replace('/^' . preg_quote(DOL_DATA_ROOT, '/') . '\//', '', $dirDest);
-
-                    // Now we rename also files into index
-                    $sql  = 'UPDATE ' . $this->db->prefix() . 'ecm_files';
-                    $sql .= " SET filename = CONCAT('" . $this->db->escape($newRef) . "', SUBSTR(filename, " . (strlen($oldRef) + 1) . ')),';
-                    $sql .= " filepath = '" . $this->db->escape($ecmDirDest) . "'";
-                    $sql .= " WHERE filename LIKE '" . $this->db->escape($this->db->escapeforlike($oldRef)) . "%' AND filepath = '" . $this->db->escape($ecmDirSource) . "' AND entity = " . $entity;
-
-                    $resql = $this->db->query($sql);
-                    if (!$resql) {
-                        $error++;
-                        $this->error = $this->db->lasterror();
-                    }
-
-                    // Then the other files of the directory and the ones of its sub-directories (answer photos...)
-                    $sql  = 'UPDATE ' . $this->db->prefix() . 'ecm_files';
-                    $sql .= " SET filepath = CONCAT('" . $this->db->escape($ecmDirDest) . "', SUBSTR(filepath, " . (strlen($ecmDirSource) + 1) . '))';
-                    $sql .= " WHERE (filepath = '" . $this->db->escape($ecmDirSource) . "' OR filepath LIKE '" . $this->db->escape($this->db->escapeforlike($ecmDirSource)) . "/%') AND entity = " . $entity;
-
-                    $resql = $this->db->query($sql);
-                    if (!$resql) {
-                        $error++;
-                        $this->error = $this->db->lasterror();
-                    }
-                }
-
-                if (!$error && $moveDir) {
-                    dol_syslog(get_class($this) . '::validate() rename dir ' . $dirSource . ' into ' . $dirDest);
-
-                    if (@rename($dirSource, $dirDest)) {
-                        dol_syslog('Rename ok');
-
-                        // Rename docs starting with $oldRef with $newRef
-                        $listOfFiles = dol_dir_list($dirDest, 'files', 1, '^' . preg_quote($oldRef, '/'));
-                        foreach ($listOfFiles as $fileEntry) {
-                            $dirSource = $fileEntry['name'];
-                            $dirDest   = preg_replace('/^' . preg_quote($oldRef, '/') . '/', $newRef, $dirSource);
-                            $dirSource = $fileEntry['path'] . '/' . $dirSource;
-                            $dirDest   = $fileEntry['path'] . '/' . $dirDest;
-                            @rename($dirSource, $dirDest);
-                        }
-                    }
-                }
+            // Rename directories if dir was a temporary ref : the attachments, and the documents generated while a draft
+            if (preg_match('/^\(?PROV/i', $this->ref) && $this->moveRefDirectories($this->ref, $num) < 0) {
+                $error++;
             }
         }
 
@@ -547,6 +484,135 @@ abstract class SaturneObject extends CommonObject
             $this->db->rollback();
             return -1;
         }
+    }
+
+    /**
+     * Directories of the module output that keep the files of the object under its ref
+     *
+     * The one of the object (attachments, answer photos...) and, apart, the ones of the documents generated for it,
+     * each under <document type>/<ref> : <element>document, the type of each model declared for the object
+     * (addDocumentModel(<model>, '<element>document'), the model name without its _odt suffix : a training session of
+     * DoliMeet has its attendance sheets under attendancesheetdocument), and any other type recorded for the object in
+     * llx_saturne_object_documents. A module keeping other files under the ref of its object adds their directory by
+     * overriding this method.
+     *
+     * @return string[] Directories, relative to the output directory of the module, without the ref
+     */
+    public function getRefDirectories(): array
+    {
+        $refDirectories = [$this->element, $this->element . 'document'];
+
+        $sql  = 'SELECT nom AS type FROM ' . $this->db->prefix() . 'document_model';
+        $sql .= " WHERE type = '" . $this->db->escape($this->element . 'document') . "'";
+        if ($this->id > 0) {
+            $sql .= ' UNION SELECT type FROM ' . $this->db->prefix() . 'saturne_object_documents';
+            $sql .= ' WHERE parent_id = ' . ((int) $this->id);
+            $sql .= " AND parent_type = '" . $this->db->escape($this->element) . "'";
+            $sql .= " AND module_name = '" . $this->db->escape($this->module) . "'";
+        }
+
+        $resql = $this->db->query($sql);
+        if ($resql) {
+            while ($obj = $this->db->fetch_object($resql)) {
+                // The type names a directory : nothing that could lead out of the output of the module
+                $type = preg_replace('/_odt$/', '', (string) $obj->type);
+                if (preg_match('/^[a-z0-9_-]+$/i', $type)) {
+                    $refDirectories[] = $type;
+                }
+            }
+            $this->db->free($resql);
+        }
+
+        return array_values(array_unique($refDirectories));
+    }
+
+    /**
+     * Move the directories of the object from a ref to another one, the rows of llx_ecm_files of their files with them
+     *
+     * Run by validate() when a draft takes its definitive ref in place of (PROVn), for each directory given by
+     * getRefDirectories(). A directory moves only when its destination does not exist yet : nothing is overwritten, it
+     * then stays where it is. The files named after the old ref take the new one, the others keep their name (a
+     * generated document carries the ref it was generated with). Run inside the transaction of the caller : the index
+     * is updated first, the disk once every update went through.
+     *
+     * @param  string      $oldRef Ref the files are stored under, ex. (PROV12)
+     * @param  string      $newRef Ref they go to
+     * @return int<-1,max>         Number of directories moved, -1 if KO
+     */
+    public function moveRefDirectories(string $oldRef, string $newRef): int
+    {
+        global $conf;
+
+        require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+
+        // Output of the module of the object : getMultidirOutput($this) looks for the conf of the element
+        // ($conf->survey), not the one of the module ($conf->digiquali), and never found the directory
+        $moduleNameLowerCase = dol_strtolower($this->module);
+        $entity              = !empty($this->entity) ? (int) $this->entity : (int) $conf->entity;
+        $moduleOutputDir     = $conf->$moduleNameLowerCase->multidir_output[$entity] ?? '';
+
+        $oldRef = dol_sanitizeFileName($oldRef);
+        $newRef = dol_sanitizeFileName($newRef);
+        if (empty($moduleOutputDir) || $oldRef === '' || $newRef === '' || $oldRef === $newRef) {
+            return 0;
+        }
+
+        // The index follows only a directory that will move : an existing destination makes rename() fail
+        $moves = [];
+        foreach ($this->getRefDirectories() as $refDirectory) {
+            $dirSource = $moduleOutputDir . '/' . $refDirectory . '/' . $oldRef;
+            $dirDest   = $moduleOutputDir . '/' . $refDirectory . '/' . $newRef;
+            if (!dol_is_dir($dirSource)) {
+                continue;
+            }
+            if (file_exists($dirDest)) {
+                dol_syslog(get_class($this) . '::moveRefDirectories ' . $dirDest . ' already exists, ' . $dirSource . ' is kept', LOG_WARNING);
+                continue;
+            }
+            $moves[$dirSource] = $dirDest;
+        }
+
+        foreach ($moves as $dirSource => $dirDest) {
+            // Paths of the index are relative to DOL_DATA_ROOT : <module>/<directory>/<ref>, behind the entity beyond the first one
+            $ecmDirSource = preg_replace('/^' . preg_quote(DOL_DATA_ROOT, '/') . '\//', '', $dirSource);
+            $ecmDirDest   = preg_replace('/^' . preg_quote(DOL_DATA_ROOT, '/') . '\//', '', $dirDest);
+            $inDirSource  = "(filepath = '" . $this->db->escape($ecmDirSource) . "' OR filepath LIKE '" . $this->db->escape($this->db->escapeforlike($ecmDirSource)) . "/%') AND entity = " . $entity;
+
+            // The files named after the old ref, in the directory and its sub-directories, as on the disk below
+            $sql  = 'UPDATE ' . $this->db->prefix() . 'ecm_files';
+            $sql .= " SET filename = CONCAT('" . $this->db->escape($newRef) . "', SUBSTR(filename, " . (strlen($oldRef) + 1) . '))';
+            $sql .= " WHERE filename LIKE '" . $this->db->escape($this->db->escapeforlike($oldRef)) . "%' AND " . $inDirSource;
+            if (!$this->db->query($sql)) {
+                $this->error = $this->db->lasterror();
+                return -1;
+            }
+
+            // Then the path of every file of the directory and of its sub-directories (answer photos...)
+            $sql  = 'UPDATE ' . $this->db->prefix() . 'ecm_files';
+            $sql .= " SET filepath = CONCAT('" . $this->db->escape($ecmDirDest) . "', SUBSTR(filepath, " . (strlen($ecmDirSource) + 1) . '))';
+            $sql .= ' WHERE ' . $inDirSource;
+            if (!$this->db->query($sql)) {
+                $this->error = $this->db->lasterror();
+                return -1;
+            }
+        }
+
+        foreach ($moves as $dirSource => $dirDest) {
+            dol_syslog(get_class($this) . '::moveRefDirectories rename dir ' . $dirSource . ' into ' . $dirDest);
+            if (!@rename($dirSource, $dirDest)) {
+                dol_syslog(get_class($this) . '::moveRefDirectories cannot rename ' . $dirSource . ' into ' . $dirDest, LOG_ERR);
+                continue;
+            }
+
+            // Rename docs starting with $oldRef with $newRef
+            $listOfFiles = dol_dir_list($dirDest, 'files', 1, '^' . preg_quote($oldRef, '/'));
+            foreach ($listOfFiles as $fileEntry) {
+                $fileDest = preg_replace('/^' . preg_quote($oldRef, '/') . '/', $newRef, $fileEntry['name']);
+                @rename($fileEntry['path'] . '/' . $fileEntry['name'], $fileEntry['path'] . '/' . $fileDest);
+            }
+        }
+
+        return count($moves);
     }
 
     /**
