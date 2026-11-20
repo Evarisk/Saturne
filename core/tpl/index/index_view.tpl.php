@@ -95,6 +95,10 @@ if (getDolGlobalString($moduleVersion) !== $modModule->version) {
         if ($modModule->init() > 0) {
             dolibarr_set_const($db, $moduleJustUpdated, 1, 'integer', 0, '', $conf->entity);
             dolibarr_set_const($db, $moduleShowPatchNote, 1, 'integer', 0, '', $conf->entity);
+
+            // Files of the objects validated while they stayed under (PROVn), before #1920 : moved back at each update
+            require_once __DIR__ . '/../../../lib/object.lib.php';
+            saturne_recover_prov_directories($moduleNameLowerCase);
         } else {
             setEventMessages($langs->trans('ModuleUpdateFailed', $moduleName, $modModule->version), array_filter(array_merge([$modModule->error], (array) $modModule->errors)), 'errors');
         }

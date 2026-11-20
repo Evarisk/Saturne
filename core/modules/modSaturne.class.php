@@ -407,6 +407,13 @@ class modSaturne extends DolibarrModules
         $result = $this->_init($sql, $options);
         if ($result > 0) {
             $conf->setValues($this->db);
+
+            // Files of the objects validated while they stayed under (PROVn), before #1920, for every module built on
+            // Saturne in this entity : each module does it again at its own update (index_view.tpl.php)
+            require_once __DIR__ . '/../../lib/object.lib.php';
+            foreach (saturne_get_dependent_modules() as $moduleName) {
+                saturne_recover_prov_directories($moduleName);
+            }
         }
 
         return $result;
