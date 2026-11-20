@@ -36,11 +36,19 @@ $moduleName          = GETPOST('module_name', 'alpha');
 $startUrl            = GETPOST('start_url', 'alpha');
 $moduleNameLowerCase = strtolower($moduleName);
 
+// Accept only a module folder name whose lib file exists. Opened alone, the page required "//lib/.lib.php" and ended in a
+// fatal error
+$moduleLibFile = preg_match('/^[a-z0-9_]+$/', $moduleNameLowerCase) ? dol_buildpath('/' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '.lib.php') : '';
+if (!$moduleLibFile || !is_readable($moduleLibFile)) {
+    $langs->load('errors');
+    accessforbidden($langs->trans('ErrorBadParameters'));
+}
+
 // Load Dolibarr libraries
 require_once TCPDF_PATH . 'tcpdf_barcodes_2d.php';
 
 // Load Module Libraries
-require_once dol_buildpath('/' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '.lib.php');
+require_once $moduleLibFile;
 
 // Global variables definitions
 global $conf, $db, $hookmanager, $langs, $user;
