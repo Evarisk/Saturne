@@ -827,9 +827,18 @@ class SaturneDocumentModel extends CommonDocGenerator
     {
         global $conf, $langs;
 
+        // Same fallback as SaturneObject::getNextNumRef(): a module updated without being reactivated
+        // does not have a constant added since, and its empty value was instantiated as a class name
         $confRefModName   = dol_strtoupper($this->module) . '_' . dol_strtoupper($this->document_type) . '_ADDON';
-        $numberingModules = [(!empty($moreParam['subDir']) ? $moreParam['subDir'] : $this->module . 'documents/') . $this->document_type => getDolGlobalString($confRefModName)];
+        $refModClassName  = getDolGlobalString($confRefModName) ?: 'mod_' . $this->document_type . '_standard';
+        $numberingModules = [(!empty($moreParam['subDir']) ? $moreParam['subDir'] : $this->module . 'documents/') . $this->document_type => $refModClassName];
         list($refModName) = saturne_require_objects_mod($numberingModules, $this->module);
+        if (!is_object($refModName)) {
+            $langs->load('errors');
+            dol_syslog(__METHOD__ . ' numbering module ' . $refModClassName . ' (' . $confRefModName . ') not found', LOG_ERR);
+            setEventMessages($langs->trans('ErrorModuleSetupNotComplete', $this->module), [], 'errors');
+            return -1;
+        }
 
         // The output directory is resolved before the document row is created: nothing below reads
         // the created document, and a failure after create() used to leave behind a row with no
