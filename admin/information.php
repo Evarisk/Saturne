@@ -44,9 +44,17 @@ global $db, $langs;
 saturne_load_langs(['admin']);
 
 // Get parameters
-$filename   = GETPOST('filename', 'alpha');
-$tabName    = GETPOST('tab_name', 'alpha');
+$filename   = GETPOST('filename', 'alpha') ?: 'saturne_dev';
+$tabName    = GETPOST('tab_name', 'alpha') ?: 'information';
 $backtopage = GETPOST('backtopage', 'alpha');
+
+// Only the Markdown files shipped with Saturne (saturne_dev, evarisk_modules, eoxia_modules): opened without filename, the
+// page read "saturne/.md" and showed an empty tab
+$filePath = preg_match('/^[a-z0-9_]+$/i', $filename) ? dol_buildpath('saturne/' . $filename . '.md') : '';
+if (!$filePath || !is_readable($filePath)) {
+    $langs->load('errors');
+    accessforbidden($langs->trans('ErrorBadParameters'));
+}
 
 // Initialize technical objects
 $parsedown = new Parsedown();
@@ -68,8 +76,7 @@ print load_fiche_titre($title, $linkback, 'title_setup');
 $head = saturne_admin_prepare_head();
 print dol_get_fiche_head($head, $tabName, $title, -1, 'saturne_color@saturne');
 
-$filePath = dol_buildpath('saturne/' . $filename . '.md');
-$content  = file_get_contents($filePath);
+$content = file_get_contents($filePath);
 print $parsedown->text($content);
 
 // Page end
