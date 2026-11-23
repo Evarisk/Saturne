@@ -1265,7 +1265,8 @@ function saturne_show_object_list_in_category(string $moduleNameLowerCase, strin
  * was a draft under (PROVn), where the card of the validated object no longer reads them. Driven by the disk : only the
  * (PROVn) directories found under the output of the module, in the current entity, are looked at, and only their objects
  * are read. A directory is matched with its object class the way the generic pages of Saturne load it
- * (<module>/class/<element>.class.php) : it is the one of the element itself, <element>document, the one of a model
+ * (<module>/class/<element>.class.php, or the file named without the underscores of the element, and in it the class
+ * of the element whatever its name) : it is the one of the element itself, <element>document, the one of a model
  * declared for <element>document or the type of a document recorded for the element. An object still in (PROVn) or
  * gone, a class that is not a Saturne object of the module and a directory two tables could claim are left as they are.
  * Moves only, never overwrites (see SaturneObject::moveRefDirectories()) : run again, it finds nothing left to do.
@@ -1337,35 +1338,54 @@ function saturne_recover_prov_directories(string $moduleNameLowerCase): int
     }
 
     // The Saturne object of the module behind each element, null when there is none : a class file loaded the way the
-    // generic pages of Saturne do, a class whose constructor needs nothing more than the database handler
+    // generic pages of Saturne do, or named without the underscores of the element (doliletter_attendance_sheet in
+    // doliletterattendancesheet.class.php), and in it the class of the element whatever its name (ReedcrmAddress for
+    // address), a class whose constructor needs nothing more than the database handler
     $prototypes = [];
     $prototype  = function (string $element) use (&$prototypes, $db, $moduleNameLowerCase): ?SaturneObject {
         if (array_key_exists($element, $prototypes)) {
             return $prototypes[$element];
         }
         $prototypes[$element] = null;
-
-        $classFile = preg_match('/^[a-z0-9_]+$/i', $element) ? dol_buildpath('/' . $moduleNameLowerCase . '/class/' . $element . '.class.php', 0) : '';
-        if (empty($classFile) || !is_file($classFile)) {
-            return null;
-        }
-        require_once $classFile;
-
-        $className = ucfirst($element); // Class names do not depend on the case : TimeSheet for timesheet
-        if (!class_exists($className, false) || !is_subclass_of($className, 'SaturneObject') || is_a($className, 'SaturneDocuments', true)) {
-            return null;
-        }
-        $constructor = (new ReflectionClass($className))->getConstructor();
-        if ($constructor !== null && $constructor->getNumberOfRequiredParameters() > 1) {
+        if (!preg_match('/^[a-z0-9_]+$/i', $element)) {
             return null;
         }
 
-        $object = new $className($db);
-        if ($object->element !== $element || dol_strtolower($object->module) !== $moduleNameLowerCase || empty($object->table_element) || empty($object->fields['ref'])) {
-            return null;
+        foreach (array_unique([$element, str_replace('_', '', $element)]) as $fileName) {
+            $classFile = dol_buildpath('/' . $moduleNameLowerCase . '/class/' . $fileName . '.class.php', 0);
+            if (!is_file($classFile)) {
+                continue;
+            }
+            require_once $classFile;
+
+            foreach (get_declared_classes() as $className) {
+                if (!is_subclass_of($className, 'SaturneObject') || is_a($className, 'SaturneDocuments', true)) {
+                    continue;
+                }
+                $reflection = new ReflectionClass($className);
+                if ($reflection->isAbstract() || realpath((string) $reflection->getFileName()) !== realpath($classFile)) {
+                    continue;
+                }
+                // The other classes of the file (lines, metadata...) are left before being built
+                $defaultElement = $reflection->getDefaultProperties()['element'] ?? '';
+                if (!empty($defaultElement) && $defaultElement !== $element) {
+                    continue;
+                }
+                $constructor = $reflection->getConstructor();
+                if ($constructor !== null && $constructor->getNumberOfRequiredParameters() > 1) {
+                    continue;
+                }
+
+                $object = new $className($db);
+                if ($object->element !== $element || dol_strtolower($object->module) !== $moduleNameLowerCase || empty($object->table_element) || empty($object->fields['ref'])) {
+                    continue;
+                }
+
+                return $prototypes[$element] = $object;
+            }
         }
 
-        return $prototypes[$element] = $object;
+        return null;
     };
 
     // Who claims each (PROVn) directory, by table : a directory two tables could claim is left as it is
