@@ -38,11 +38,11 @@ $objectType = GETPOST('object_type', 'alpha');
 // If the previous action is from extrafields, the return value is PHP_SELF without querys
 // So we need to fill moduleName and objectType using the previous url (HTTP_REFERER)
 if (empty($moduleName) && empty($objectType)) {
-    $lastUrl      = $_SERVER['HTTP_REFERER'];
+    $lastUrl      = $_SERVER['HTTP_REFERER'] ?? '';
     $lastUrlArray = parse_url($lastUrl);
     if (is_array($lastUrlArray) && isset($lastUrlArray['query'])) {
         parse_str($lastUrlArray['query'], $lastUrlQuerys);
-        if (isset($lastUrlQuerys['module_name']) && isset($lastUrlQuerys['object_type'])) {
+        if (isset($lastUrlQuerys['module_name']) && isset($lastUrlQuerys['object_type']) && is_string($lastUrlQuerys['module_name']) && is_string($lastUrlQuerys['object_type'])) {
             $moduleName = $lastUrlQuerys['module_name'];
             $objectType = $lastUrlQuerys['object_type'];
         }
@@ -51,14 +51,23 @@ if (empty($moduleName) && empty($objectType)) {
 
 $moduleNameLowerCase = strtolower($moduleName);
 
+// Global variables definitions
+global $conf, $db, $hookmanager, $langs, $user;
+
+// Module and object names come from the URL or from the referer above: accept only folder and class names whose lib and
+// class files exist. Opened alone, the page required "//lib/.lib.php" and ended in a fatal error
+$moduleLibFile   = preg_match('/^[a-z0-9_]+$/', $moduleNameLowerCase) ? dol_buildpath('/' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '.lib.php') : '';
+$objectClassFile = ($moduleLibFile && preg_match('/^[a-z0-9_]+$/i', $objectType)) ? dol_buildpath('/' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php') : '';
+if (!$objectClassFile || !is_readable($moduleLibFile) || !is_readable($objectClassFile)) {
+    $langs->load('errors');
+    accessforbidden($langs->trans('ErrorBadParameters'));
+}
+
 // Libraries
 require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
 
-require_once dol_buildpath('/' . $moduleNameLowerCase . '/lib/' . $moduleNameLowerCase . '.lib.php');
-require_once dol_buildpath('/' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php');
-
-// Global variables definitions
-global $conf, $db, $hookmanager, $langs, $user;
+require_once $moduleLibFile;
+require_once $objectClassFile;
 
 // Load translation files required by the page
 saturne_load_langs(['admin']);
