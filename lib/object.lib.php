@@ -1270,22 +1270,40 @@ function saturne_show_object_list_in_category(string $moduleNameLowerCase, strin
  * gone, a class that is not a Saturne object of the module and a directory two tables could claim are left as they are.
  * Moves only, never overwrites (see SaturneObject::moveRefDirectories()) : run again, it finds nothing left to do.
  *
+ * Run once per module and entity in a request : the index page of a module calls it after init(), which may have called
+ * it already, and so may the activation of Saturne in cascade. A module calls it from its init(), after _init(), to cover
+ * its activation from Home > Modules : _init() writes the constant of the module without reloading $conf, which does not
+ * know its output directory yet, it is reloaded here.
+ *
  * @param  string $moduleNameLowerCase Module name, ex. dolisirh
- * @return int                         Number of objects whose directories were handled, -1 if KO
+ * @return int                         Number of objects whose directories were handled (0 when already run for this
+ *                                     module and entity in the request), -1 if KO
  * @throws Exception
  */
 function saturne_recover_prov_directories(string $moduleNameLowerCase): int
 {
     global $conf, $db;
 
+    // Modules already handled in this request, by entity
+    static $done = [];
+
     require_once __DIR__ . '/../class/saturneobject.class.php';
 
     $moduleNameLowerCase = dol_strtolower($moduleNameLowerCase);
     $entity              = (int) $conf->entity;
-    $outputDir           = $conf->$moduleNameLowerCase->multidir_output[$entity] ?? '';
-    if (!preg_match('/^[a-z0-9_]+$/', $moduleNameLowerCase) || empty($outputDir) || !is_dir($outputDir)) {
+    if (!preg_match('/^[a-z0-9_]+$/', $moduleNameLowerCase) || isset($done[$moduleNameLowerCase][$entity])) {
         return 0;
     }
+
+    // Module enabled by this request : enabled for isModEnabled(), but $conf has no output directory for it
+    if (empty($conf->$moduleNameLowerCase->multidir_output[$entity]) && isModEnabled($moduleNameLowerCase)) {
+        $conf->setValues($db);
+    }
+    $outputDir = $conf->$moduleNameLowerCase->multidir_output[$entity] ?? '';
+    if (empty($outputDir) || !is_dir($outputDir)) {
+        return 0;
+    }
+    $done[$moduleNameLowerCase][$entity] = true;
 
     // The (PROVn) directories on the disk, by directory of the module output : the listing of the directory names is the
     // only work done when there is nothing to recover
