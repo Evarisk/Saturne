@@ -50,7 +50,7 @@ saturne_load_langs(['admin', 'saturne@saturne', 'medias@saturne']);
 
 // Security check
 /** @phpstan-ignore-next-line */
-$permissiontoread = $user->rights->saturne->adminpage->read;
+$permissiontoread = $user->hasRight('saturne', 'adminpage', 'read');
 saturne_check_access($permissiontoread);
 
 /*

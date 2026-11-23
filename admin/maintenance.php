@@ -53,7 +53,7 @@ $action = GETPOST('action', 'aZ09');
 // Security check
 // The operations delete rows across every entity, so they are reserved to administrators, like
 // the entity transfer
-$permissiontoread   = $user->rights->saturne->adminpage->read;
+$permissiontoread   = $user->hasRight('saturne', 'adminpage', 'read');
 $permissiontoclean  = $user->admin;
 
 saturne_check_access($permissiontoread);
