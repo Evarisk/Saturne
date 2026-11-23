@@ -62,7 +62,7 @@ class InterfaceTicketMailModel extends DolibarrTriggers
         $this->family      = 'ticket';
         $this->description = 'Send ticket notification emails from configurable email templates (Modèles d\'email).';
         $this->version     = '1.1.0';
-        $this->picto       = 'saturne@saturne';
+        $this->picto       = 'saturne_color@saturne';
     }
 
     /**

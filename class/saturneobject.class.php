@@ -529,17 +529,20 @@ abstract class SaturneObject extends CommonObject
     /**
      * Move the directories of the object from a ref to another one, the rows of llx_ecm_files of their files with them
      *
-     * Run by validate() when a draft takes its definitive ref in place of (PROVn), for each directory given by
-     * getRefDirectories(). A directory moves only when its destination does not exist yet : nothing is overwritten, it
-     * then stays where it is. The files named after the old ref take the new one, the others keep their name (a
-     * generated document carries the ref it was generated with). Run inside the transaction of the caller : the index
-     * is updated first, the disk once every update went through.
+     * Run by validate() when a draft takes its definitive ref in place of (PROVn), and by saturne_recover_prov_directories()
+     * for an object validated before its files followed. Nothing is ever overwritten : a directory whose destination does
+     * not exist yet moves at once, otherwise its files join the destination one by one and a file the destination already
+     * has stays where it is, with its directory. The files named after the old ref take the new one, the others keep their
+     * name (a generated document carries the ref it was generated with). The index is updated first, in the transaction of
+     * the caller, the disk once every update went through.
      *
-     * @param  string      $oldRef Ref the files are stored under, ex. (PROV12)
-     * @param  string      $newRef Ref they go to
-     * @return int<-1,max>         Number of directories moved, -1 if KO
+     * @param  string      $oldRef         Ref the files are stored under, ex. (PROV12)
+     * @param  string      $newRef         Ref they go to
+     * @param  string[]    $refDirectories Directories to handle, relative to the output directory of the module : all the
+     *                                     ones of getRefDirectories() when empty
+     * @return int<-1,max>                 Number of directories moved or merged, -1 if KO
      */
-    public function moveRefDirectories(string $oldRef, string $newRef): int
+    public function moveRefDirectories(string $oldRef, string $newRef, array $refDirectories = []): int
     {
         global $conf;
 
@@ -557,25 +560,46 @@ abstract class SaturneObject extends CommonObject
             return 0;
         }
 
-        // The index follows only a directory that will move : an existing destination makes rename() fail
-        $moves = [];
-        foreach ($this->getRefDirectories() as $refDirectory) {
+        // Paths of the index are relative to DOL_DATA_ROOT : <module>/<directory>/<ref>, behind the entity beyond the first one
+        $toEcmPath = function (string $path): string {
+            return preg_replace('/^' . preg_quote(DOL_DATA_ROOT, '/') . '\//', '', $path);
+        };
+        // A file named after the old ref takes the new one, in its own directory
+        $renamed = function (string $relativePath) use ($oldRef, $newRef): string {
+            $fileName = preg_replace('/^' . preg_quote($oldRef, '/') . '/', $newRef, basename($relativePath));
+            return (dirname($relativePath) !== '.' ? dirname($relativePath) . '/' : '') . $fileName;
+        };
+
+        $moves  = []; // Whole directories, the destination does not exist : source => destination
+        $merges = []; // Files joining an existing destination : [source, destination, [relative source => relative destination]]
+        foreach (!empty($refDirectories) ? $refDirectories : $this->getRefDirectories() as $refDirectory) {
             $dirSource = $moduleOutputDir . '/' . $refDirectory . '/' . $oldRef;
             $dirDest   = $moduleOutputDir . '/' . $refDirectory . '/' . $newRef;
             if (!dol_is_dir($dirSource)) {
                 continue;
             }
-            if (file_exists($dirDest)) {
-                dol_syslog(get_class($this) . '::moveRefDirectories ' . $dirDest . ' already exists, ' . $dirSource . ' is kept', LOG_WARNING);
+            if (!file_exists($dirDest)) {
+                $moves[$dirSource] = $dirDest;
                 continue;
             }
-            $moves[$dirSource] = $dirDest;
+
+            $files = [];
+            foreach (dol_dir_list($dirSource, 'files', 1, '', null, 'name', SORT_ASC, 0, 1) as $fileEntry) {
+                $relativeDest = $renamed($fileEntry['relativename']);
+                if (file_exists($dirDest . '/' . $relativeDest)) {
+                    dol_syslog(get_class($this) . '::moveRefDirectories ' . $dirDest . '/' . $relativeDest . ' already exists, ' . $fileEntry['fullname'] . ' is kept', LOG_WARNING);
+                    continue;
+                }
+                $files[$fileEntry['relativename']] = $relativeDest;
+            }
+            if (!empty($files)) {
+                $merges[] = [$dirSource, $dirDest, $files];
+            }
         }
 
         foreach ($moves as $dirSource => $dirDest) {
-            // Paths of the index are relative to DOL_DATA_ROOT : <module>/<directory>/<ref>, behind the entity beyond the first one
-            $ecmDirSource = preg_replace('/^' . preg_quote(DOL_DATA_ROOT, '/') . '\//', '', $dirSource);
-            $ecmDirDest   = preg_replace('/^' . preg_quote(DOL_DATA_ROOT, '/') . '\//', '', $dirDest);
+            $ecmDirSource = $toEcmPath($dirSource);
+            $ecmDirDest   = $toEcmPath($dirDest);
             $inDirSource  = "(filepath = '" . $this->db->escape($ecmDirSource) . "' OR filepath LIKE '" . $this->db->escape($this->db->escapeforlike($ecmDirSource)) . "/%') AND entity = " . $entity;
 
             // The files named after the old ref, in the directory and its sub-directories, as on the disk below
@@ -597,6 +621,21 @@ abstract class SaturneObject extends CommonObject
             }
         }
 
+        // Merged files : the row of each file that moves, a file kept where it is keeps its row
+        foreach ($merges as [$dirSource, $dirDest, $files]) {
+            foreach ($files as $relativeSource => $relativeDest) {
+                $sql  = 'UPDATE ' . $this->db->prefix() . 'ecm_files';
+                $sql .= " SET filepath = '" . $this->db->escape($toEcmPath(dirname($dirDest . '/' . $relativeDest))) . "',";
+                $sql .= " filename = '" . $this->db->escape(basename($relativeDest)) . "'";
+                $sql .= " WHERE filepath = '" . $this->db->escape($toEcmPath(dirname($dirSource . '/' . $relativeSource))) . "'";
+                $sql .= " AND filename = '" . $this->db->escape(basename($relativeSource)) . "' AND entity = " . $entity;
+                if (!$this->db->query($sql)) {
+                    $this->error = $this->db->lasterror();
+                    return -1;
+                }
+            }
+        }
+
         foreach ($moves as $dirSource => $dirDest) {
             dol_syslog(get_class($this) . '::moveRefDirectories rename dir ' . $dirSource . ' into ' . $dirDest);
             if (!@rename($dirSource, $dirDest)) {
@@ -604,15 +643,37 @@ abstract class SaturneObject extends CommonObject
                 continue;
             }
 
-            // Rename docs starting with $oldRef with $newRef
+            // Rename docs starting with $oldRef with $newRef, never over an existing file
             $listOfFiles = dol_dir_list($dirDest, 'files', 1, '^' . preg_quote($oldRef, '/'));
             foreach ($listOfFiles as $fileEntry) {
-                $fileDest = preg_replace('/^' . preg_quote($oldRef, '/') . '/', $newRef, $fileEntry['name']);
-                @rename($fileEntry['path'] . '/' . $fileEntry['name'], $fileEntry['path'] . '/' . $fileDest);
+                $fileDest = $fileEntry['path'] . '/' . basename($renamed($fileEntry['name']));
+                if (!file_exists($fileDest)) {
+                    @rename($fileEntry['path'] . '/' . $fileEntry['name'], $fileDest);
+                }
             }
         }
 
-        return count($moves);
+        foreach ($merges as [$dirSource, $dirDest, $files]) {
+            dol_syslog(get_class($this) . '::moveRefDirectories merge ' . count($files) . ' file(s) of ' . $dirSource . ' into ' . $dirDest);
+            foreach ($files as $relativeSource => $relativeDest) {
+                dol_mkdir(dirname($dirDest . '/' . $relativeDest));
+                if (!@rename($dirSource . '/' . $relativeSource, $dirDest . '/' . $relativeDest)) {
+                    dol_syslog(get_class($this) . '::moveRefDirectories cannot move ' . $dirSource . '/' . $relativeSource, LOG_ERR);
+                }
+            }
+
+            // Remove the directories the merge emptied, deepest first : rmdir() leaves the ones still holding a file
+            $dirs = dol_dir_list($dirSource, 'directories', 1, '', null, 'name', SORT_ASC, 0, 1);
+            usort($dirs, function ($a, $b) {
+                return strlen($b['fullname']) <=> strlen($a['fullname']);
+            });
+            foreach ($dirs as $dir) {
+                @rmdir($dir['fullname']);
+            }
+            @rmdir($dirSource);
+        }
+
+        return count($moves) + count($merges);
     }
 
     /**

@@ -1257,3 +1257,264 @@ function saturne_show_object_list_in_category(string $moduleNameLowerCase, strin
 
     return $out;
 }
+
+/**
+ * Move back the files of the objects of a module left under their (PROVn) directories once validated
+ *
+ * Until #1919 and #1920, SaturneObject::validate() left the attachments of a draft and the documents generated while it
+ * was a draft under (PROVn), where the card of the validated object no longer reads them. Driven by the disk : only the
+ * (PROVn) directories found under the output of the module, in the current entity, are looked at, and only their objects
+ * are read. A directory is matched with its object class the way the generic pages of Saturne load it
+ * (<module>/class/<element>.class.php, or the file named without the underscores of the element, and in it the class
+ * of the element whatever its name) : it is the one of the element itself, <element>document, the one of a model
+ * declared for <element>document or the type of a document recorded for the element. An object still in (PROVn) or
+ * gone, a class that is not a Saturne object of the module and a directory two tables could claim are left as they are.
+ * Moves only, never overwrites (see SaturneObject::moveRefDirectories()) : run again, it finds nothing left to do.
+ *
+ * Run once per module and entity in a request : the index page of a module calls it after init(), which may have called
+ * it already, and so may the activation of Saturne in cascade. A module calls it from its init(), after _init(), to cover
+ * its activation from Home > Modules : _init() writes the constant of the module without reloading $conf, which does not
+ * know its output directory yet, it is reloaded here.
+ *
+ * @param  string $moduleNameLowerCase Module name, ex. dolisirh
+ * @return int                         Number of objects whose directories were handled (0 when already run for this
+ *                                     module and entity in the request), -1 if KO
+ * @throws Exception
+ */
+function saturne_recover_prov_directories(string $moduleNameLowerCase): int
+{
+    global $conf, $db;
+
+    // Modules already handled in this request, by entity
+    static $done = [];
+
+    require_once __DIR__ . '/../class/saturneobject.class.php';
+
+    $moduleNameLowerCase = dol_strtolower($moduleNameLowerCase);
+    $entity              = (int) $conf->entity;
+    if (!preg_match('/^[a-z0-9_]+$/', $moduleNameLowerCase) || isset($done[$moduleNameLowerCase][$entity])) {
+        return 0;
+    }
+
+    // Module enabled by this request : enabled for isModEnabled(), but $conf has no output directory for it
+    if (empty($conf->$moduleNameLowerCase->multidir_output[$entity]) && isModEnabled($moduleNameLowerCase)) {
+        $conf->setValues($db);
+    }
+    $outputDir = $conf->$moduleNameLowerCase->multidir_output[$entity] ?? '';
+    if (empty($outputDir) || !is_dir($outputDir)) {
+        return 0;
+    }
+    $done[$moduleNameLowerCase][$entity] = true;
+
+    // The (PROVn) directories on the disk, by directory of the module output : the listing of the directory names is the
+    // only work done when there is nothing to recover
+    $provIds = [];
+    foreach (scandir($outputDir) ?: [] as $directory) {
+        if (!preg_match('/^[a-z0-9_-]+$/i', $directory) || !is_dir($outputDir . '/' . $directory)) {
+            continue;
+        }
+        $handle = opendir($outputDir . '/' . $directory);
+        if ($handle === false) {
+            continue;
+        }
+        while (($entry = readdir($handle)) !== false) {
+            if (preg_match('/^\(PROV([0-9]+)\)$/', $entry, $matches) && is_dir($outputDir . '/' . $directory . '/' . $entry)) {
+                $provIds[$directory][(int) $matches[1]] = (int) $matches[1];
+            }
+        }
+        closedir($handle);
+    }
+    if (empty($provIds)) {
+        return 0;
+    }
+
+    // Elements whose files a directory can hold : its own name, <element>document, the elements a model is declared for
+    // and the ones a document of this type was generated for
+    $candidates = [];
+    $names      = [];
+    foreach (array_keys($provIds) as $directory) {
+        $candidates[$directory][$directory] = $directory;
+        if (preg_match('/^(.+)document$/', $directory, $matches)) {
+            $candidates[$directory][$matches[1]] = $matches[1];
+        }
+        $names[] = "'" . $db->escape($directory) . "'";
+        $names[] = "'" . $db->escape($directory . '_odt') . "'";
+    }
+    $sql  = 'SELECT nom AS directory, type AS element FROM ' . $db->prefix() . 'document_model WHERE nom IN (' . implode(',', $names) . ')';
+    $sql .= ' UNION SELECT type AS directory, parent_type AS element FROM ' . $db->prefix() . 'saturne_object_documents';
+    $sql .= " WHERE module_name = '" . $db->escape($moduleNameLowerCase) . "' AND type IN (" . implode(',', $names) . ')';
+    $resql = $db->query($sql);
+    if ($resql) {
+        while ($obj = $db->fetch_object($resql)) {
+            $directory = preg_replace('/_odt$/', '', (string) $obj->directory);
+            $element   = preg_replace('/document$/', '', (string) $obj->element);
+            if (isset($candidates[$directory]) && $element !== '') {
+                $candidates[$directory][$element] = $element;
+            }
+        }
+        $db->free($resql);
+    }
+
+    // The Saturne object of the module behind each element, null when there is none : a class file loaded the way the
+    // generic pages of Saturne do, or named without the underscores of the element (doliletter_attendance_sheet in
+    // doliletterattendancesheet.class.php), and in it the class of the element whatever its name (ReedcrmAddress for
+    // address), a class whose constructor needs nothing more than the database handler
+    $prototypes = [];
+    $prototype  = function (string $element) use (&$prototypes, $db, $moduleNameLowerCase): ?SaturneObject {
+        if (array_key_exists($element, $prototypes)) {
+            return $prototypes[$element];
+        }
+        $prototypes[$element] = null;
+        if (!preg_match('/^[a-z0-9_]+$/i', $element)) {
+            return null;
+        }
+
+        foreach (array_unique([$element, str_replace('_', '', $element)]) as $fileName) {
+            $classFile = dol_buildpath('/' . $moduleNameLowerCase . '/class/' . $fileName . '.class.php', 0);
+            if (!is_file($classFile)) {
+                continue;
+            }
+            require_once $classFile;
+
+            foreach (get_declared_classes() as $className) {
+                if (!is_subclass_of($className, 'SaturneObject') || is_a($className, 'SaturneDocuments', true)) {
+                    continue;
+                }
+                $reflection = new ReflectionClass($className);
+                if ($reflection->isAbstract() || realpath((string) $reflection->getFileName()) !== realpath($classFile)) {
+                    continue;
+                }
+                // The other classes of the file (lines, metadata...) are left before being built
+                $defaultElement = $reflection->getDefaultProperties()['element'] ?? '';
+                if (!empty($defaultElement) && $defaultElement !== $element) {
+                    continue;
+                }
+                $constructor = $reflection->getConstructor();
+                if ($constructor !== null && $constructor->getNumberOfRequiredParameters() > 1) {
+                    continue;
+                }
+
+                $object = new $className($db);
+                if ($object->element !== $element || dol_strtolower($object->module) !== $moduleNameLowerCase || empty($object->table_element) || empty($object->fields['ref'])) {
+                    continue;
+                }
+
+                return $prototypes[$element] = $object;
+            }
+        }
+
+        return null;
+    };
+
+    // Who claims each (PROVn) directory, by table : a directory two tables could claim is left as it is
+    $claims = [];
+    foreach ($candidates as $directory => $elements) {
+        foreach ($elements as $element) {
+            $object = $prototype($element);
+            if ($object === null) {
+                continue;
+            }
+            foreach ($provIds[$directory] as $id) {
+                $claims[$directory][$id][$object->table_element] = $element;
+            }
+        }
+    }
+
+    // Directories to move back, by table then object
+    $toRecover = [];
+    foreach ($claims as $directory => $claimsById) {
+        foreach ($claimsById as $id => $tables) {
+            if (count($tables) > 1) {
+                dol_syslog(__FUNCTION__ . ' ' . $outputDir . '/' . $directory . '/(PROV' . $id . ') claimed by ' . implode(', ', array_keys($tables)) . ', left as it is', LOG_WARNING);
+                continue;
+            }
+            $toRecover[key($tables)][$id]['element']       = reset($tables);
+            $toRecover[key($tables)][$id]['directories'][] = $directory;
+        }
+    }
+
+    $nbHandled = 0;
+    $error     = 0;
+    foreach ($toRecover as $tableElement => $objectsById) {
+        $sample = $prototype(reset($objectsById)['element']);
+        if ($sample === null) {
+            continue;
+        }
+
+        $sql  = 'SELECT rowid, ref FROM ' . $db->prefix() . $tableElement;
+        $sql .= ' WHERE rowid IN (' . implode(',', array_map('intval', array_keys($objectsById))) . ')';
+        if (!empty($sample->fields['entity'])) {
+            $sql .= ' AND entity = ' . $entity;
+        }
+        $resql = $db->query($sql);
+        if (!$resql) {
+            dol_syslog(__FUNCTION__ . ' ' . $db->lasterror(), LOG_ERR);
+            $error++;
+            continue;
+        }
+        $refs = [];
+        while ($obj = $db->fetch_object($resql)) {
+            // Only a validated object : a draft still in (PROVn) keeps its directories, validate() moves them
+            if (!empty($obj->ref) && !preg_match('/^\(?PROV/i', $obj->ref)) {
+                $refs[(int) $obj->rowid] = $obj->ref;
+            }
+        }
+        $db->free($resql);
+
+        foreach ($refs as $id => $ref) {
+            $object = $prototype($objectsById[$id]['element']);
+            if ($object === null) {
+                continue;
+            }
+            $object         = clone $object;
+            $object->id     = $id;
+            $object->ref    = $ref;
+            $object->entity = $entity;
+
+            $db->begin();
+            if ($object->moveRefDirectories('(PROV' . $id . ')', $ref, $objectsById[$id]['directories']) < 0) {
+                $db->rollback();
+                dol_syslog(__FUNCTION__ . ' ' . $object->element . ' ' . $id . ' : ' . $object->error, LOG_ERR);
+                $error++;
+                continue;
+            }
+            $db->commit();
+            $nbHandled++;
+        }
+    }
+
+    dol_syslog(__FUNCTION__ . ' ' . $moduleNameLowerCase . ' entity ' . $entity . ' : ' . $nbHandled . ' object(s) handled');
+
+    return $error ? -1 : $nbHandled;
+}
+
+/**
+ * Modules enabled in the current entity that are built on Saturne : their descriptor depends on modSaturne
+ *
+ * @return string[] Module names, ex. dolisirh
+ */
+function saturne_get_dependent_modules(): array
+{
+    global $conf;
+
+    $modules = [];
+    foreach (array_keys($conf->modules ?? []) as $moduleName) {
+        $moduleName = dol_strtolower((string) $moduleName);
+        if ($moduleName === 'saturne' || !preg_match('/^[a-z0-9_]+$/', $moduleName)) {
+            continue;
+        }
+        // Core modules have no descriptor directory of their own : only the external ones are read
+        $descriptorDir = dol_buildpath('/' . $moduleName . '/core/modules', 0);
+        if (!is_dir($descriptorDir)) {
+            continue;
+        }
+        foreach (glob($descriptorDir . '/mod*.class.php') ?: [] as $descriptorFile) {
+            if (strpos((string) file_get_contents($descriptorFile), 'modSaturne') !== false) {
+                $modules[] = $moduleName;
+                break;
+            }
+        }
+    }
+
+    return $modules;
+}
