@@ -50,7 +50,7 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
         $this->family      = 'demo';
         $this->description = 'Saturne triggers.';
         $this->version     = '23.9.0';
-        $this->picto       = 'saturne@saturne';
+        $this->picto       = 'saturne_color@saturne';
     }
 
     /**
