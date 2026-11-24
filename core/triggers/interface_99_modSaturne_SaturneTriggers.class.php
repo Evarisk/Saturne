@@ -92,6 +92,13 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
             return 0; // If module is not enabled, we do nothing
         }
 
+        // Every event of the instance comes through here, also those another module sends with an object that is not
+        // a CommonObject (ExternalAccess passes its Context on externalAccessInitController): none of them concerns
+        // Saturne, and the event prepared below reads an id and element that such an object may lack
+        if (!($object instanceof CommonObject)) {
+            return 0;
+        }
+
         // A trigger never runs on a module page, so the $moduleNameLowerCase global it would rely on is not set
         $objectModuleName = saturne_get_module_name($object);
 
