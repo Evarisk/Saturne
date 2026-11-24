@@ -81,15 +81,36 @@
     line-height: 1.35;
   }
 
-  /* Saturne lists: the filter caret is pinned to the right of the title, a wrapped title would leave it alone on a line */
+  /* Saturne lists: the filter caret is pinned to the right of the title, a wrapped title would leave it alone on a line.
+     The right padding keeps only the room of the caret, just clear of the 6px resize strip at the edge */
   table.liste > thead > tr.liste_titre > th[data-colkey] {
-    padding-right: 24px;
+    padding-right: 20px;
 
     .saturne-col-filter-btn {
       position: absolute;
       top: 50%;
-      right: 10px;
+      right: 8px;
       transform: translateY(-50%);
+    }
+  }
+
+  /* The drag handle of a column, shown on hover, sits across in the top padding of the header rather than in
+     28px kept on the left of every title, shown or not (modules/list-columns): the header takes the left
+     padding of the cells below it, and a list of fifteen columns is some 300px narrower */
+  table.liste thead th[data-colkey] {
+    padding-left: 12px !important;
+
+    .saturne-col-drag-handle {
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 0 6px;
+      font-size: 11px;
+      line-height: 11px;
+
+      .fa-grip-vertical {
+        transform: rotate(90deg);
+      }
     }
   }
 
