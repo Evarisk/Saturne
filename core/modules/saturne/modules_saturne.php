@@ -1030,15 +1030,18 @@ class SaturneDocumentModel extends CommonDocGenerator
 
     /**
      * Delete the files a generation stopped by a fatal error or the time limit left in the temporary directory, its
-     * cleanup never ran. Only past TEMP_FILE_LIFETIME: a younger file can belong to a generation still running
+     * cleanup never ran. Only past TEMP_FILE_LIFETIME: a younger file can belong to a generation still running. The
+     * directories are left alone: odtphp works and cleans up in a subdirectory of its own, the others (uploads of a
+     * public interface...) belong to their module
      *
-     * @param  string $tempDir Temporary directory of the module, with its trailing slash
+     * @param  string $tempDir Temporary directory of the module
      * @return void
      */
     protected function deleteStaleTempFiles(string $tempDir): void
     {
         $limit = dol_now() - self::TEMP_FILE_LIFETIME;
-        foreach (dol_dir_list($tempDir, 'files') as $file) {
+        // Mode 1: dol_dir_list() only reads the dates when asked, an unread date counted every file as stale
+        foreach (dol_dir_list($tempDir, 'files', 0, '', null, 'name', SORT_ASC, 1, 1) as $file) {
             if ($file['date'] < $limit) {
                 dol_delete_file($file['fullname'], 1, 1, 1, null, false, 0);
             }
