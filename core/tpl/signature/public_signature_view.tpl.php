@@ -172,7 +172,8 @@
 <?php
 if (isset($moreParams['useConfirmation'])) {
     $downloadLink = '';
-    if (GETPOSTISSET('document_type') && $fileExists) {
+    // The name and path of the document are only known while the public interface is on
+    if (GETPOSTISSET('document_type') && $fileExists && getDolGlobalInt('SATURNE_ENABLE_PUBLIC_INTERFACE')) {
         $downloadLink = '<div class="file-generation-modal" style="margin-bottom:10px;"><input type="hidden" class="specimen-name" data-specimen-name="' . $specimenName . '"><input type="hidden" class="specimen-path" data-specimen-path="' . $path . '"><a href="javascript:void(0);" class="auto-download" style="text-decoration: underline; color: #47e58e; font-weight: bold;"><i class="far fa-file-' . ($canServePdf ? 'pdf' : 'word') . '"></i> ' . $originalName . '</a></div>';
     }
 
