@@ -137,7 +137,8 @@ if (GETPOSTISSET('document_type') && in_array(dol_strtolower($documentType), sat
 $upload_dir = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?? 1];
 
 // The page only signs what its view offers to sign: an object validated, waiting for its signatures
-$objectAwaitingSignatures = (defined(get_class($object) . '::STATUS_VALIDATED') && $object->status == $object::STATUS_VALIDATED) || $object->status == 1;
+$validatedStatus          = defined(get_class($object) . '::STATUS_VALIDATED') ? constant(get_class($object) . '::STATUS_VALIDATED') : 1;
+$objectAwaitingSignatures = $object->status == $validatedStatus || $object->status == 1;
 
 /*
  * Actions
