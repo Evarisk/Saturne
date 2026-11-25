@@ -620,6 +620,31 @@ class ActionsSaturne
     }
 
     /**
+     * Overloading the replaceThirdparty function : called by Societe::mergeCompany() once the core objects are moved,
+     * before the absorbed thirdparty is deleted. Moves the objects of Saturne and of the modules built on it to the kept
+     * thirdparty, from the thirdparty card as from the API (Saturne hooks the "all" context).
+     *
+     * @param  array       $parameters Hook metadatas, soc_origin is the absorbed thirdparty and soc_dest the kept one
+     * @param  object|null $object     Kept thirdparty
+     * @param  string|null $action     Current action, null when the merge comes from the API
+     * @return int                     0 < on error, 0 on success
+     */
+    public function replaceThirdparty(array $parameters, $object, ?string $action): int
+    {
+        require_once __DIR__ . '/../lib/thirdparty.lib.php';
+
+        $this->errors = [];
+
+        $result = saturne_replace_thirdparty($this->db, (int) ($parameters['soc_origin'] ?? 0), (int) ($parameters['soc_dest'] ?? 0), $this->errors);
+        if ($result < 0) {
+            $this->error = implode(', ', $this->errors);
+            return -1;
+        }
+
+        return 0;
+    }
+
+    /**
      * Labels of the opportunity statuses as Dolibarr installs them, by code (WIN was renamed WON by an upgrade)
      */
     private const OPP_STATUS_STOCK_LABELS = [

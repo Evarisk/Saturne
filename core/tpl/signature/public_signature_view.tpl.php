@@ -26,7 +26,7 @@
  * The following vars must be defined :
  * Global     : $conf, $langs
  * Parameters : $objectType, $trackID
- * Objects    : $object, $signatory
+ * Objects    : $document (optional), $object, $signatory
  * Variable   : $fileExists, $moduleNameLowerCase, $moreParams
  */ ?>
 
@@ -49,7 +49,10 @@
         $path = dol_buildpath('/' . $moduleNameLowerCase . '/documents/', 2) . 'temp/';
 
         $isSpecimen = 0;
-        $sourceDirDoc = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?? 1] . '/' . strtolower($objectType) . 'document/' . dol_sanitizeFileName($object->ref) . '/';
+        // Same directory as the actions : the one of the document type, the attendance sheets of a DoliMeet training
+        // session are not stored under trainingsessiondocument
+        $documentDir  = (isset($document) && is_object($document)) ? $document->element : strtolower($objectType) . 'document';
+        $sourceDirDoc = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?? 1] . '/' . $documentDir . '/' . dol_sanitizeFileName($object->ref) . '/';
         // Le format servi suit le fichier reellement present : un PDF prime toujours sur l'ODT.
         // La constante de modele peut mentir - un module dont le generateur natif est un PDF
         // produit un PDF meme quand elle designe encore le modele ODT - et le repli plus bas

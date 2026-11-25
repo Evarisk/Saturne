@@ -138,6 +138,13 @@ $theme-input-selector: 'input[type="text"], input[type="number"], input[type="em
     color: $theme-faint !important;
   }
 
+  /* Switch the user may not change (saturne_constant_onoff() without the write permission): the core marks
+     it .opacitymedium, which this theme sets back to opaque, so it looked like an active one doing nothing */
+  .linkobject.disabled {
+    cursor: not-allowed;
+    opacity: .4;
+  }
+
   /* Native file inputs (import pages) */
   div.fiche input[type="file"]::file-selector-button {
     margin-right: 10px;

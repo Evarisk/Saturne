@@ -56,7 +56,7 @@ $action = GETPOST('action', 'aZ09');
 // An export is a full dump of the entity, users and their password hashes included, so it
 // is reserved to administrators, and the archives are stored outside the document directories
 // of the modules: everything under them is downloadable by anyone holding a module read right
-$permissiontoread     = $user->rights->saturne->adminpage->read;
+$permissiontoread     = $user->hasRight('saturne', 'adminpage', 'read');
 $permissiontotransfer = $user->admin;
 
 saturne_check_access($permissiontoread);
