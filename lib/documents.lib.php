@@ -680,3 +680,39 @@ function saturne_get_default_model(DoliDB $db, string $moduleName, string $docum
 
     return str_replace($documentType . '_custom_odt', $documentType . '_odt', $model);
 }
+
+/**
+ * Return the document types generated for an object type : its own one, the object element suffixed by 'document',
+ * and the type of each model declared for it
+ *
+ * A model is declared under the type <element>document (addDocumentModel()) and named after its own document type,
+ * with or without the _odt suffix : a training session of DoliMeet has trainingsessiondocument and, through its
+ * attendancesheetdocument models, attendancesheetdocument
+ *
+ * @param  DoliDB   $db         Database handler
+ * @param  string   $objectType Object element type
+ * @return string[]             Document types, lower case
+ */
+function saturne_get_object_document_types(DoliDB $db, string $objectType): array
+{
+    global $conf;
+
+    $documentTypes = [dol_strtolower($objectType) . 'document'];
+
+    $sql  = 'SELECT DISTINCT nom FROM ' . $db->prefix() . 'document_model';
+    $sql .= " WHERE type = '" . $db->escape($documentTypes[0]) . "'";
+    $sql .= ' AND entity IN (0, ' . ((int) $conf->entity) . ')';
+
+    $resql = $db->query($sql);
+    if ($resql) {
+        while ($obj = $db->fetch_object($resql)) {
+            $documentType = preg_replace('/_odt$/', '', dol_strtolower((string) $obj->nom));
+            if (preg_match('/^[a-z0-9_]+$/', $documentType)) {
+                $documentTypes[] = $documentType;
+            }
+        }
+        $db->free($resql);
+    }
+
+    return array_values(array_unique($documentTypes));
+}
