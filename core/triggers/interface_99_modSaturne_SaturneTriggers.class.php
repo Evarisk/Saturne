@@ -224,7 +224,12 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
                     $actioncomm->socpeopleassigned = [$object->element_id => $object->element_id];
                     $actioncomm->fk_contact        = $object->element_id;
                 } else {
-                    $actioncomm->fk_user_action = $object->element_id;
+                    // A recipient user is assigned to the event as a recipient contact is: ActionComm stores no
+                    // fk_user_action property, that column holds the owner, the user who sent the request, kept first
+                    $actioncomm->userassigned = [
+                        (int) $actioncomm->userownerid => ['id' => (int) $actioncomm->userownerid, 'transparency' => 0],
+                        (int) $object->element_id      => ['id' => (int) $object->element_id, 'transparency' => 0],
+                    ];
                 }
                 $actioncomm->fk_element   = $object->fk_object;
                 $actioncomm->email_msgid  = $object->context['email_msgid'] ?? '';
