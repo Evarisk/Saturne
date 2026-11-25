@@ -24,7 +24,7 @@
 
 /**
  * The following vars must be defined:
- * Global     : $conf, $langs, $user
+ * Global     : $conf, $db, $langs, $user
  * Parameters : $action, $documentType, $moduleName, $moduleNameLowerCase, $objectType, $trackID
  * Objects    : $document, $object, $signatory
  * Variable   : $upload_dir
@@ -32,21 +32,38 @@
 
 // Action to add signature
 if ($action == 'add_signature') {
-    $data = json_decode(file_get_contents('php://input'), true);
+    $data      = json_decode(file_get_contents('php://input'), true);
+    $signature = (is_array($data) && is_string($data['signature'] ?? null)) ? $data['signature'] : '';
 
-    $signatory->signature      = $data['signature'];
-    $signatory->signature_date = dol_now();
-
-    $result = $signatory->update($user, 1);
-    // Creation signature OK
-    if ($result > 0) {
-        $signatory->setSigned($user, false, 'public');
-        // Creation signature KO
-    } elseif (!empty($signatory->errors)) {
-        setEventMessages('', $signatory->errors, 'errors');
+    // The link records the first signature of a signatory, it never replaces a recorded one: that is cleared from the
+    // back office only. The value is printed back as the source of an image, only an image drawn on the canvas is kept
+    if (dol_strlen((string) $signatory->signature) > 0 || $signatory->status == SaturneSignature::STATUS_SIGNED) {
+        setEventMessages($langs->trans('ErrorSignatureAlreadyRecorded'), [], 'errors');
+    } elseif (!$signatory->isAwaitingSignature()) {
+        setEventMessages($langs->trans('ErrorSignatureNotExpected'), [], 'errors');
+    } elseif (!SaturneSignature::isValidSignatureData($signature)) {
+        setEventMessages($langs->trans('ErrorUserSignatureInvalid'), [], 'errors');
     } else {
-        setEventMessages($signatory->error, [], 'errors');
+        $signatory->signature      = $signature;
+        $signatory->signature_date = dol_now();
+
+        $result = $signatory->update($user, 1);
+        // Creation signature OK
+        if ($result > 0) {
+            $signatory->setSigned($user, false, 'public');
+            // Creation signature KO
+        } elseif (!empty($signatory->errors)) {
+            setEventMessages('', $signatory->errors, 'errors');
+        } else {
+            setEventMessages($signatory->error, [], 'errors');
+        }
     }
+}
+
+// A document is only generated for the object of the link, in one of the types generated for it
+if ($action == 'builddoc' && (!isset($document) || !is_object($document) || !in_array($document->element, saturne_get_object_document_types($db, $object->element), true))) {
+    setEventMessages($langs->trans('DocumentNotAvailable'), [], 'errors');
+    $action = '';
 }
 
 // Action to build doc
@@ -54,7 +71,7 @@ if ($action == 'builddoc') {
     $outputLangs = $langs;
     $newLang = '';
 
-    if ($conf->global->MAIN_MULTILANGS && empty($newLang) && GETPOST('lang_id', 'aZ09')) {
+    if (getDolGlobalInt('MAIN_MULTILANGS') && empty($newLang) && GETPOST('lang_id', 'aZ09')) {
         $newLang = GETPOST('lang_id', 'aZ09');
     }
     if (!empty($newLang)) {
