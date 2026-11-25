@@ -94,8 +94,9 @@ if ($action == 'builddoc') {
     }
 
     // The default model constant only holds a model name : resolve it against the installed models so the
-    // template of a custom ODT model is honoured here as it already is on the object card
-    $model = saturne_get_default_model($db, $moduleName, $documentType);
+    // template of a custom ODT model is honoured here as it already is on the object card. The object type finds the
+    // models a module declares under the document type of the object, as DoliMeet does for its attendance sheets
+    $model = saturne_get_default_model($db, $moduleName, $documentType, $object->element);
 
     // An ODT model carries its template path after the model name, a native PDF model does not
     $isNativePdf = !preg_match('/_odt:/i', $model);
@@ -109,8 +110,10 @@ if ($action == 'builddoc') {
     $moreParams['zone']       = 'public';
     $moreParams['objectType'] = $objectType;
 
+    // A document is stored under the directory of its own type, which is not always the one of the object : DoliMeet
+    // keeps the attendance sheets of a training session under attendancesheetdocument
     $subDir    = $isSpecimen ? '/public_specimen/' : '/';
-    $sourceDir = $upload_dir . '/' . strtolower($objectType) . 'document/' . $object->ref . $subDir;
+    $sourceDir = $upload_dir . '/' . $document->element . '/' . $object->ref . $subDir;
     // Meme regle que la vue : le PDF deja genere prime sur l'ODT. $canServePdf etait utilise ici
     // alors qu'il n'est calcule que dans la vue, incluse apres cette action : la variable etait
     // toujours indefinie, le filtre retombait sur '.odt', ne voyait jamais le PDF natif et
@@ -139,7 +142,7 @@ if ($action == 'builddoc') {
 
     if ($result > 0) {
         $subDir    = $isSpecimen ? '/public_specimen/' : '/';
-        $sourceDir = $upload_dir . '/' . strtolower($objectType) . 'document/' . $object->ref . $subDir;
+        $sourceDir = $upload_dir . '/' . $document->element . '/' . $object->ref . $subDir;
         $tempDir   = dol_buildpath('/' . $moduleNameLowerCase . '/documents/') . 'temp/';
 
         if (!is_dir($tempDir)) {
