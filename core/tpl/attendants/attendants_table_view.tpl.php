@@ -51,8 +51,8 @@ if (!empty($signatories) || (empty($signatories) && $object->status == $object::
 }
 
 if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
-    // Signature requests sent by email, counted per contact at the first attendant waiting for one
-    $nbEmailSentByContact = null;
+    // Signature requests sent by email, counted for every attendant at the first one waiting for a signature
+    $nbEmailSentBySignatory = null;
 
     foreach ($signatories as $element) {
         $usertmp = new User($db);
@@ -113,23 +113,11 @@ if (is_array($signatories) && !empty($signatories) && $signatories > 0) {
             if (dol_strlen($element->email)) {
                 print dol_print_date($element->last_email_sent_date, 'dayhour', 'tzuser');
 
-                // The events of the object are read once for the table, not once per attendant. An event of a request
-                // only carries the contact it was sent to : the count is kept per contact, and a user attendant, never
-                // assigned to it, no longer gets the requests of a contact that happens to share their id
-                if ($nbEmailSentByContact === null) {
-                    require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
-                    $nbEmailSentByContact = [];
-                    $actionComm           = new ActionComm($db);
-                    $actionComms          = $actionComm->getActions(0, $object->id, $object->element . '@' . $moduleNameLowerCase, " AND code = 'AC_SATURNE_SIGNATURE_PENDING_SIGNATURE'");
-                    if (is_array($actionComms)) {
-                        foreach ($actionComms as $actionComm) {
-                            foreach (array_keys($actionComm->socpeopleassigned) as $contactId) {
-                                $nbEmailSentByContact[$contactId] = ($nbEmailSentByContact[$contactId] ?? 0) + 1;
-                            }
-                        }
-                    }
+                // The events of the object are read once for the table, not once per attendant
+                if ($nbEmailSentBySignatory === null) {
+                    $nbEmailSentBySignatory = $element->countSentSignatureRequests($object, $moduleNameLowerCase, $signatories);
                 }
-                $nbEmailSent = $element->element_type == 'socpeople' ? ($nbEmailSentByContact[$element->element_id] ?? 0) : 0;
+                $nbEmailSent = $nbEmailSentBySignatory[$element->id] ?? 0;
                 print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode . '">';
                 print '<input type="hidden" name="token" value="' . newToken() . '">';
                 print '<input type="hidden" name="action" value="send_email">';
