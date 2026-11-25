@@ -637,6 +637,22 @@ class SaturneSignature extends SaturneObject
     }
 
     /**
+     * Check that the signatory still has to sign : registered or waiting for its signature, not absent, and without a
+     * recorded signature
+     *
+     * A recorded signature is only ever cleared from the back office (deleteSignatoriesSignatures(), run when the object
+     * goes back to draft), which makes the signatory registered again
+     *
+     * @return bool True when a signature can be recorded for the signatory
+     */
+    public function isAwaitingSignature(): bool
+    {
+        return in_array((int) $this->status, [self::STATUS_REGISTERED, self::STATUS_PENDING_SIGNATURE], true)
+            && dol_strlen((string) $this->signature) == 0
+            && $this->attendance != self::ATTENDANCE_ABSENT;
+    }
+
+    /**
      * Sign the signatory lines an attendant still has to sign on an object, with an already known signature
      *
      * @param  User   $user         Object user that makes the signature

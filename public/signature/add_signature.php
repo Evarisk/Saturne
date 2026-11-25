@@ -66,20 +66,6 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 // Load Saturne libraries
 require_once __DIR__ . '/../../class/saturnesignature.class.php';
 
-// The module may sit in any root of Dolibarr, next to Saturne or not: dol_buildpath() searches them all
-$objectClassPath = dol_buildpath('/' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php');
-if (file_exists($objectClassPath)) {
-    require_once $objectClassPath;
-} else {
-    die('Include of ' . $moduleNameLowerCase . ' class fails');
-}
-// Load Module libraries
-$documentClassPath = dol_buildpath('/' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . strtolower($documentType) . '.class.php');
-$fileExists        = file_exists($documentClassPath);
-if ($fileExists && GETPOSTISSET('document_type')) {
-    require_once $documentClassPath;
-}
-
 // Global variables definitions
 global $conf, $db, $hookmanager, $langs;
 
@@ -93,11 +79,6 @@ $action  = GETPOST('action', 'aZ09');
 $source  = GETPOST('source', 'aZ09');
 
 // Initialize technical objects
-$classname = ucfirst($objectType);
-$object    = new $classname($db);
-if (GETPOSTISSET('document_type') && $fileExists && is_string($documentType) && class_exists($documentType)) {
-    $document = new $documentType($db);
-}
 $signatory = new SaturneSignature($db, $moduleNameLowerCase, $objectType);
 $user      = new User($db);
 
@@ -110,13 +91,54 @@ if (!isModEnabled('multicompany')) {
 $conf->setEntityValues($db, $entity);
 
 // The track id is the only secret of this public page: without the signatory it designates, nothing is shown
-// nor done. An empty one would load the signatories that have no link
-if (empty($trackID) || $signatory->fetch(0, '', " AND signature_url = '" . $db->escape($trackID) . "'") <= 0) {
+// nor done. An empty one would load the signatories that have no link, and the link of a signatory removed from
+// the object opens nothing anymore. The type of the URL names the class loaded below: it has to be the type of
+// the object of the signatory, and nothing of a module is loaded before the signatory is known
+if (
+    empty($trackID) || $signatory->fetch(0, '', " AND signature_url = '" . $db->escape($trackID) . "'") <= 0
+    || $signatory->status == SaturneSignature::STATUS_DELETED || $objectType !== $signatory->object_type
+    || !preg_match('/^[a-z0-9_]+$/', $moduleNameLowerCase) || !preg_match('/^[a-z0-9_]+$/', $objectType)
+) {
     accessforbidden('', 0, 0, 1);
 }
-$object->fetch($signatory->fk_object);
+
+// The module may sit in any root of Dolibarr, next to Saturne or not: dol_buildpath() searches them all
+$objectClassPath = dol_buildpath('/' . $moduleNameLowerCase . '/class/' . $objectType . '.class.php');
+if (file_exists($objectClassPath)) {
+    require_once $objectClassPath;
+} else {
+    die('Include of ' . $moduleNameLowerCase . ' class fails');
+}
+
+// Only the object of the signatory is opened: a class of the same name elsewhere would read another table
+$classname = ucfirst($objectType);
+if (!class_exists($classname) || !is_subclass_of($classname, 'CommonObject')) {
+    accessforbidden('', 0, 0, 1);
+}
+$object = new $classname($db);
+if ($object->fetch($signatory->fk_object) <= 0 || $object->element !== $signatory->object_type) {
+    accessforbidden('', 0, 0, 1);
+}
+
+// Only a document generated for this object is offered, in one of its types and from the documents of its module
+$document   = null;
+$fileExists = false;
+if (GETPOSTISSET('document_type') && in_array(dol_strtolower($documentType), saturne_get_object_document_types($db, $objectType), true)) {
+    $documentClassPath = dol_buildpath('/' . $moduleNameLowerCase . '/class/' . $moduleNameLowerCase . 'documents/' . dol_strtolower($documentType) . '.class.php');
+    if (file_exists($documentClassPath)) {
+        require_once $documentClassPath;
+        if (class_exists($documentType) && is_subclass_of($documentType, 'SaturneDocuments')) {
+            $document   = new $documentType($db);
+            $fileExists = true;
+        }
+    }
+}
 
 $upload_dir = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?? 1];
+
+// The page only signs what its view offers to sign: an object validated, waiting for its signatures
+$validatedStatus          = defined(get_class($object) . '::STATUS_VALIDATED') ? constant(get_class($object) . '::STATUS_VALIDATED') : 1;
+$objectAwaitingSignatures = $object->status == $validatedStatus || $object->status == 1;
 
 /*
  * Actions
@@ -128,7 +150,13 @@ if ($resHook < 0) {
     setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 }
 
-if (empty($resHook)) {
+// Nothing is done while the public interface is off, its view then shows nothing either
+if (empty($resHook) && getDolGlobalInt('SATURNE_ENABLE_PUBLIC_INTERFACE')) {
+    if ($action == 'add_signature' && !$objectAwaitingSignatures) {
+        setEventMessages($langs->trans('ErrorSignatureNotExpected'), [], 'errors');
+        $action = '';
+    }
+
     // Actions add_signature, builddoc, remove_file
     require_once __DIR__ . '/../../core/tpl/actions/signature_actions.tpl.php';
 }
