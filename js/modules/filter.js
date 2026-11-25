@@ -40,13 +40,25 @@ window.saturne.filter = {
         // The JS handler has been removed to avoid e.preventDefault() blocking the link.
 
         // Close popover when clicking outside
+        var insidePopover = '.saturne-col-filter-popover, .saturne-col-filter-btn, .select2-container, .ui-datepicker, .ui-widget-overlay';
+        var pressStartedInside = false;
+        // A text selection started in the search field and released outside the popover sends the click
+        // to the common ancestor of the press and the release, outside the popover: only a press that
+        // started outside closes it
+        $(document).off('mousedown.saturnePopover').on('mousedown.saturnePopover', function(e) {
+            pressStartedInside = $(e.target).closest(insidePopover).length > 0;
+        });
         $(document).off('click.saturnePopover').on('click.saturnePopover', function(e) {
             // The datepicker redraws itself on its month arrows: the clicked node is already detached
             // when the click bubbles here, so closest() finds nothing although the click was inside
             if (!document.documentElement.contains(e.target)) {
                 return;
             }
-            if (!$(e.target).closest('.saturne-col-filter-popover, .saturne-col-filter-btn, .select2-container, .ui-datepicker, .ui-widget-overlay').length) {
+            if (pressStartedInside) {
+                pressStartedInside = false;
+                return;
+            }
+            if (!$(e.target).closest(insidePopover).length) {
                 window.saturne.filter.closePopover();
             }
         });

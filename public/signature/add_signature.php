@@ -74,7 +74,7 @@ saturne_load_langs();
 
 // Get parameters
 $trackID = GETPOST('track_id', 'aZ09');
-$entity  = GETPOST('entity');
+$entity  = GETPOSTINT('entity');
 $action  = GETPOST('action', 'aZ09');
 $source  = GETPOST('source', 'aZ09');
 
@@ -84,7 +84,8 @@ $user      = new User($db);
 
 $hookmanager->initHooks([$objectType . 'publicsignature', 'saturnepublicsignature', 'saturnepublicinterface', 'saturneglobal', 'globalcard']); // Note that conf->hooks_modules contains array
 
-if (!isModEnabled('multicompany')) {
+// The entity of the link is a number: the setup of the page is read for it
+if (!isModEnabled('multicompany') || $entity <= 0) {
     $entity = $conf->entity;
 }
 
