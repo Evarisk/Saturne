@@ -131,7 +131,8 @@ if (empty($resHook)) {
         if ($result > 0) {
             // Creation attendant OK
             if ($attendantTypeUser > 0) {
-                $usertmp = $user;
+                // Load the attendant in its own object: $user is the logged-in user and must not be overwritten
+                $usertmp = new User($db);
                 $usertmp->fetch((int) $attendantTypeUser);
                 setEventMessages($langs->trans('AddAttendantMessage', $langs->transnoentities($attendantRole) . ' ' . $usertmp->getFullName($langs, 1)), []);
             } else {
@@ -196,7 +197,8 @@ if (empty($resHook)) {
         $langs->load('mails');
         if (!dol_strlen($signatory->email)) {
             if ($signatory->element_type == 'user') {
-                $usertmp = $user;
+                // Load the attendant in its own object: $user is the logged-in user and must not be overwritten
+                $usertmp = new User($db);
                 $usertmp->fetch((int) $signatory->element_id);
                 if (dol_strlen($usertmp->email)) {
                     $signatory->email = $usertmp->email;
