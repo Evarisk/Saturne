@@ -447,6 +447,17 @@ class SaturneDocumentModel extends CommonDocGenerator
     public bool $tableFillEmptyCells = false;
 
     /**
+     * Age in seconds past which a file of the temporary directory is a leftover of an interrupted generation: no
+     * generation lasts that long, the PHP time limit stops it before
+     */
+    public const TEMP_FILE_LIFETIME = 3600;
+
+    /**
+     * @var string[] Temporary files of the generation running, given by getTempFilePath(), deleted when it ends.
+     */
+    protected array $tempFiles = [];
+
+    /**
      * Constructor.
      *
      * @param  DoliDB $db                  Database handler.
@@ -739,13 +750,16 @@ class SaturneDocumentModel extends CommonDocGenerator
                             $tmpArray[$segment . '_role']           = $outputLangs->transnoentities($objectSignatory->role);
                             $tmpArray[$segment . '_signature_date'] = dol_print_date($objectSignatory->signature_date, 'dayhour', 'tzuser');
                             $tmpArray[$segment . '_attendance']     = $attendance;
+                            $signaturePath                          = '';
                             if (dol_strlen($objectSignatory->signature) > 0 && $objectSignatory->signature != $langs->transnoentities('FileGenerated')) {
                                 $confSignatureName = dol_strtoupper($this->module) . '_SHOW_SIGNATURE_SPECIMEN';
                                 if (empty($moreParam['specimen']) || getDolGlobalInt($confSignatureName) == 1) {
                                     $encodedImage = explode(',', $objectSignatory->signature)[1];
                                     $decodedImage = base64_decode($encodedImage);
-                                    file_put_contents($tempDir . 'signature' . $objectSignatory->id . '.png', $decodedImage);
-                                    $tmpArray[$segment . '_signature'] = $tempDir . 'signature' . $objectSignatory->id . '.png';
+                                    // A name of its own: signature<id>.png was shared by two generations of the same object
+                                    $signaturePath = $this->getTempFilePath($tempDir, 'signature_' . $objectSignatory->id, 'png');
+                                    file_put_contents($signaturePath, $decodedImage);
+                                    $tmpArray[$segment . '_signature'] = $signaturePath;
                                 } else {
                                     $tmpArray[$segment . '_signature'] = '';
                                 }
@@ -753,7 +767,9 @@ class SaturneDocumentModel extends CommonDocGenerator
                                 $tmpArray[$segment . '_signature'] = '';
                             }
                             $this->setTmpArrayVars($tmpArray, $listLines, $outputLangs);
-                            dol_delete_file($tempDir . 'signature' . $objectSignatory->id . '.png');
+                            if ($signaturePath !== '') {
+                                dol_delete_file($signaturePath, 1, 1, 1, null, false, 0);
+                            }
                         }
                     }
                 } else {
@@ -979,7 +995,62 @@ class SaturneDocumentModel extends CommonDocGenerator
     }
 
     /**
-     * Function to build a document on disk
+     * Path of a temporary file of the generation running, under a name of its own: two generations at the same time
+     * shared the fixed names and took the image of one another. Deleted when the generation ends, even on an error
+     *
+     * @param  string $tempDir   Temporary directory, with its trailing slash
+     * @param  string $prefix    Start of the file name
+     * @param  string $extension Extension, without its dot
+     * @return string            Full path of the file, not created yet
+     * @throws Exception
+     */
+    public function getTempFilePath(string $tempDir, string $prefix, string $extension): string
+    {
+        $path = $tempDir . $prefix . '_' . uniqid() . bin2hex(random_bytes(4)) . '.' . $extension;
+
+        $this->tempFiles[] = $path;
+
+        return $path;
+    }
+
+    /**
+     * Delete the temporary files of the generation running, the ones getTempFilePath() gave
+     *
+     * @return void
+     */
+    protected function deleteTempFiles(): void
+    {
+        // Without warning (the file may already be gone), hook nor ECM index: a temporary file is not a document
+        foreach ($this->tempFiles as $path) {
+            dol_delete_file($path, 1, 1, 1, null, false, 0);
+        }
+
+        $this->tempFiles = [];
+    }
+
+    /**
+     * Delete the files a generation stopped by a fatal error or the time limit left in the temporary directory, its
+     * cleanup never ran. Only past TEMP_FILE_LIFETIME: a younger file can belong to a generation still running. The
+     * directories are left alone: odtphp works and cleans up in a subdirectory of its own, the others (uploads of a
+     * public interface...) belong to their module
+     *
+     * @param  string $tempDir Temporary directory of the module
+     * @return void
+     */
+    protected function deleteStaleTempFiles(string $tempDir): void
+    {
+        $limit = dol_now() - self::TEMP_FILE_LIFETIME;
+        // Mode 1: dol_dir_list() only reads the dates when asked, an unread date counted every file as stale
+        foreach (dol_dir_list($tempDir, 'files', 0, '', null, 'name', SORT_ASC, 1, 1) as $file) {
+            if ($file['date'] < $limit) {
+                dol_delete_file($file['fullname'], 1, 1, 1, null, false, 0);
+            }
+        }
+    }
+
+    /**
+     * Function to build a document on disk. Its temporary files are deleted when it ends, even on an error or an
+     * exception
      *
      * @param  SaturneDocuments $objectDocument  Object source to build document
      * @param  Translate        $outputLangs     Lang object to use for output
@@ -992,6 +1063,28 @@ class SaturneDocumentModel extends CommonDocGenerator
      * @throws Exception
      */
     public function write_file(SaturneDocuments $objectDocument, Translate $outputLangs, string $srcTemplatePath, int $hideDetails = 0, int $hideDesc = 0, int $hideRef = 0, array $moreParam = []): int
+    {
+        try {
+            return $this->writeOdtFile($objectDocument, $outputLangs, $srcTemplatePath, $hideDetails, $hideDesc, $hideRef, $moreParam);
+        } finally {
+            $this->deleteTempFiles();
+        }
+    }
+
+    /**
+     * Build the ODT document on disk, for write_file()
+     *
+     * @param  SaturneDocuments $objectDocument  Object source to build document
+     * @param  Translate        $outputLangs     Lang object to use for output
+     * @param  string           $srcTemplatePath Full path of source filename for generator using a template file
+     * @param  int              $hideDetails     Do not show line details
+     * @param  int              $hideDesc        Do not show desc
+     * @param  int              $hideRef         Do not show ref
+     * @param  array            $moreParam       More param (Object/user/etc)
+     * @return int                               1 if OK, <=0 if KO
+     * @throws Exception
+     */
+    protected function writeOdtFile(SaturneDocuments $objectDocument, Translate $outputLangs, string $srcTemplatePath, int $hideDetails = 0, int $hideDesc = 0, int $hideRef = 0, array $moreParam = []): int
     {
         global $action, $conf, $hookmanager, $langs, $moduleNameLowerCase, $mysoc;
 
@@ -1129,12 +1222,10 @@ class SaturneDocumentModel extends CommonDocGenerator
         // another entity falls back on the current one instead of emitting a warning.
         $multidirOutput = $conf->$moduleNameLowerCase->multidir_output;
         $tempDir        = ($multidirOutput[$object->entity ?? $conf->entity] ?? $multidirOutput[$conf->entity] ?? '') . '/temp/';
-        $fileArray = dol_dir_list($tempDir, 'files');
-        if (!empty($fileArray)) {
-            foreach ($fileArray as $file) {
-                unlink($file['fullname']);
-            }
-        }
+
+        // The temporary files of this generation are deleted by write_file(). The whole directory was emptied here, with
+        // the files of the generations running at the same time: images missing from their document, unlink() warnings
+        $this->deleteStaleTempFiles($tempDir);
 
         $odfHandler = null; // Destroy object
 

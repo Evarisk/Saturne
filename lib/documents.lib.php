@@ -643,20 +643,43 @@ function saturne_get_list_of_models(DoliDB $db, string $type, int $maxfilenamele
  * known by the model list only. A custom ODT model shares the generation class of the standard one, so
  * once its template path is resolved its name is normalized back to the standard one
  *
+ * A module may declare the models of a document under the document type of the object it is generated for
+ * (addDocumentModel(<model>, '<element>document')) rather than under its own type : DoliMeet declares its attendance
+ * sheets under trainingsessiondocument. Given the object type, the models declared there for the document type are
+ * looked for too, the ones of the other documents of the object left out
+ *
  * @param  DoliDB $db           Database handler
  * @param  string $moduleName   Module name
  * @param  string $documentType Document type, the object element suffixed by 'document'
+ * @param  string $objectType   Element type of the object the document is generated for, '' to only look for the
+ *                              models declared under the document type
  * @return string               Model to generate the document with, '' if no model is available
  * @throws Exception
  */
-function saturne_get_default_model(DoliDB $db, string $moduleName, string $documentType): string
+function saturne_get_default_model(DoliDB $db, string $moduleName, string $documentType, string $objectType = ''): string
 {
     $documentType = dol_strtolower($documentType);
     $confName     = dol_strtoupper($moduleName . '_' . $documentType) . '_DEFAULT_MODEL';
     $defaultModel = getDolGlobalString($confName);
 
     $modelList = saturne_get_list_of_models($db, $documentType);
-    if (!is_array($modelList) || empty($modelList)) {
+    $modelList = is_array($modelList) ? $modelList : [];
+
+    $objectDocumentType = dol_strtolower($objectType) . 'document';
+    if (dol_strlen($objectType) > 0 && $objectDocumentType != $documentType) {
+        $objectModelList = saturne_get_list_of_models($db, $objectDocumentType);
+        if (is_array($objectModelList)) {
+            foreach ($objectModelList as $key => $label) {
+                // A model is named after the document it builds, with or without its _odt suffix, and an ODT model key
+                // carries its template path after the name : the models of the other documents of the object stay out
+                $modelDocumentType = preg_replace('/_(custom_)?odt$/', '', explode(':', (string) $key)[0]);
+                if ($modelDocumentType === $documentType && !isset($modelList[$key])) {
+                    $modelList[$key] = $label;
+                }
+            }
+        }
+    }
+    if (empty($modelList)) {
         return '';
     }
 

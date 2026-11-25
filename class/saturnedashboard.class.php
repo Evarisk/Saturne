@@ -62,6 +62,11 @@ class SaturneDashboard
      */
     public function load_dashboard(?array $moreParams = []): array
     {
+        // Saturne has no dashboard of its own: its module class would be this one, called again without end (memory fatal)
+        if ($this->module === 'saturne') {
+            return [];
+        }
+
         require_once dol_buildpath('/' . $this->module . '/class/' . $this->module . 'dashboard.class.php');
 
         $className      = ucfirst($this->module) . 'Dashboard';
