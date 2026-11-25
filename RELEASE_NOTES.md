@@ -1,33 +1,24 @@
-# [Saturne] [23.9.1] - Fichiers des objets validés retrouvés - Pages d'administration sans erreur
+# [Saturne] [23.9.2] - Page publique de signature plus sûre
 
-Description : Les fichiers joints et les documents de brouillon restés sous la référence provisoire `(PROV…)` d'un objet déjà validé reviennent sur sa fiche, y compris quand on active un module seul. Les pages d'administration ouvertes par un lien direct ne s'arrêtent plus sur une erreur.
+Description : la page publique de signature, commune à tous les modules qui font signer par lien (sessions de formation, plans de prévention, contrôles…), applique désormais les mêmes règles que son affichage. **Mise à jour recommandée pour toutes les instances.**
 
 ## Améliorations & corrections
 
-### Documents des objets validés
+### Page publique de signature : contrôles renforcés
 
-* Les fichiers d'un objet validé avant Saturne 23.9.0 et restés dans son dossier provisoire `(PROV…)` sont **rapatriés dans le dossier de sa référence définitive**, avec leur index, sans jamais rien écraser : pièces jointes et documents générés en brouillon réapparaissent sur la fiche.
-* La reprise tourne à la mise à jour d'un module, à l'activation de Saturne **et à l'activation d'un module seul depuis Accueil > Modules**, une seule fois par module et par entité. Elle ne prend que quelques millisecondes.
-* Elle retrouve aussi les objets des modules dont l'élément ne donne pas directement le nom de la classe (feuilles d'émargement de DoliLetter, listes d'appels et adresses de ReedCRM).
+* Une signature déjà enregistrée ne peut plus être remplacée depuis le lien de signature. Pour faire signer à nouveau, la remise en attente depuis la fiche (retour en brouillon) fonctionne comme avant.
+* Seul un signataire qui doit encore signer peut signer, et seulement sur un objet validé.
+* Seule une signature tracée sur la page est acceptée.
+* La page n'ouvre que l'objet du lien de signature et ne propose que les documents prévus pour cet objet.
+* Rien ne se fait quand l'interface publique est désactivée.
+* Les usages prévus ne changent pas : signature par lien, signature sur place depuis le tableau des participants, téléchargement du document signé par le signataire.
 
-### Administration
+### Page publique de signature : affichage
 
-* Les pages de configuration des objets, de l'application mobile et d'information, ouvertes seules (lien direct, favori), refusent proprement un module absent au lieu d'une erreur fatale ou d'un onglet vide.
-* La page de configuration des objets ne laisse plus d'avertissement PHP quand on l'ouvre sans page d'origine.
+* La page ne laisse plus d'avertissements dans le journal PHP quand l'interface publique est désactivée.
 
-### Divers
+## Comparaison des versions [23.9.1](https://github.com/Evarisk/Saturne/compare/23.9.1...23.9.2) et 23.9.2
 
-* Les événements d'agenda créés par Saturne affichent leur icône : l'image demandée n'existait pas.
-* Une page qui annule son action (par exemple l'annulation d'un formulaire sur la fiche d'une enveloppe DoliLetter) ne fait plus tomber les modules Saturne en erreur fatale.
-
-## Comparaison des versions [23.9.0](https://github.com/Evarisk/Saturne/compare/23.9.0...23.9.1) et 23.9.1
-
-* [#1943] [Object] fix: reprise des dossiers (PROVn) des objets dont l'élément ne donne pas le nom de la classe [`aa04e5c5`](https://github.com/Evarisk/Saturne/commit/aa04e5c5)
-* [#1940] [Trigger] fix: picto saturne_color@saturne, l'image saturne@saturne n'existe pas [`3ad661a8`](https://github.com/Evarisk/Saturne/commit/3ad661a8)
-* [#1939] [Object] fix: reprise des dossiers (PROVn) appelable depuis init() d'un module activé depuis Accueil > Modules [`29438898`](https://github.com/Evarisk/Saturne/commit/29438898)
-* [#1937] [Hook] fix: doActions accepte $action nul [`48dfd2ec`](https://github.com/Evarisk/Saturne/commit/48dfd2ec)
-* [#1935] [Admin] fix: $langs déclaré avant le contrôle des paramètres (phpstan) [`5a7f0f32`](https://github.com/Evarisk/Saturne/commit/5a7f0f32)
-* [#1935] [Admin] fix: object.php sans référent ne lève plus de warning [`2abba2d3`](https://github.com/Evarisk/Saturne/commit/2abba2d3)
-* [#1935] [Admin] fix: object.php, pwa.php et information.php refusent un module absent au lieu d'une fatale [`df766104`](https://github.com/Evarisk/Saturne/commit/df766104)
-* [#1933] [Object] fix: prototype absent écarté avant de cloner [`90aef62f`](https://github.com/Evarisk/Saturne/commit/90aef62f)
-* [#1933] [Object] fix: reprise des dossiers (PROVn) restés orphelins après la validation [`2016dc79`](https://github.com/Evarisk/Saturne/commit/2016dc79)
+* [Signature] fix: contrôles de la page publique de signature [`64d23788`](https://github.com/Evarisk/Saturne/commit/64d23788)
+* [Signature] fix: page publique de signature sans avertissement quand l'interface est fermée [`7f0c6c66`](https://github.com/Evarisk/Saturne/commit/7f0c6c66)
+* [Signature] fix: statut validé de l'objet lu sans supposer sa constante [`8b477e8c`](https://github.com/Evarisk/Saturne/commit/8b477e8c)
