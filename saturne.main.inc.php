@@ -22,6 +22,18 @@
  *  \brief      Saturne main file
  */
 
+// Entity of a public page: no session carries it, so with MultiCompany master.inc.php keeps entity 1 unless DOLENTITY is
+// defined before main.inc.php, and the module check below would then redirect when the module is off in entity 1. Same
+// choice as the public pages of Dolibarr (public/onlinesign/newonlinesign.php); GETPOST is not loaded yet. A page without
+// entity in its URL keeps the default
+if (defined('NOLOGIN') && !defined('DOLENTITY')) {
+    $publicPageEntity = !empty($_GET['entity']) ? $_GET['entity'] : ($_POST['entity'] ?? '');
+    if (is_numeric($publicPageEntity) && (int) $publicPageEntity > 0) {
+        define('DOLENTITY', (int) $publicPageEntity);
+    }
+    unset($publicPageEntity);
+}
+
 // Load Dolibarr environment
 // Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
 $res = 0;
