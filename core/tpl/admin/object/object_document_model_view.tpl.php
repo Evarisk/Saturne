@@ -3,8 +3,9 @@
 // A user without the write permission sees which models are active but cannot switch them
 $permissiontowrite = $permissiontowrite ?? saturne_check_admin_write_access();
 
-// Type stored in the document_model table, it may differ from the object type used by the config constants
-$documentModelType = !empty($documentType) ? $documentType : $documentParentType;
+// Type stored in the document_model table, it may differ from the object type used by the config constants. The caller
+// may give it: the documents admin page does for the models a module keeps with the ones of another document
+$documentModelType = $documentModelType ?? (!empty($documentType) ? $documentType : $documentParentType);
 
 // Select document models
 $def = [];
@@ -107,12 +108,13 @@ if (is_array($filelist) && !empty($filelist)) {
                 }
                 print '</td>';
 
-                // Info
+                // Info. A PDF model may be a standalone class, without the properties of CommonDocGenerator: the
+                // attendance sheet one of DoliMeet has no option_logo
                 $htmlToolTip  = $langs->trans('Name') . ': ' . $module->name;
                 $htmlToolTip .= '<br>' . $langs->trans('Type') . ': ' . ($module->type ?: $langs->trans('Unknown'));
-                $htmlToolTip .= '<br>' . $langs->trans('Width') . '/' . $langs->trans('Height') . ': ' . $module->page_largeur . '/' . $module->page_hauteur;
+                $htmlToolTip .= '<br>' . $langs->trans('Width') . '/' . $langs->trans('Height') . ': ' . ($module->page_largeur ?? '') . '/' . ($module->page_hauteur ?? '');
                 $htmlToolTip .= '<br><br><u>' . $langs->trans('FeaturesSupported') . ':</u>';
-                $htmlToolTip .= '<br>' . $langs->trans('Logo') . ': ' . yn($module->option_logo, 1, 1);
+                $htmlToolTip .= '<br>' . $langs->trans('Logo') . ': ' . yn($module->option_logo ?? 0, 1, 1);
                 print '<td class="center">';
                 print $form->textwithpicto('', $htmlToolTip, -1, 'info');
                 print '</td>';
