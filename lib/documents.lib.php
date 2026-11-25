@@ -739,3 +739,71 @@ function saturne_get_object_document_types(DoliDB $db, string $objectType): arra
 
     return array_values(array_unique($documentTypes));
 }
+
+/**
+ * Return where a module keeps the models of a document when they are not in the directory of the document
+ *
+ * The documents admin page lists the models of a document from its directory under <module>documents/, and reads and
+ * declares the active ones under its type. A module may keep them with the models of the other documents of an object
+ * instead : DoliMeet keeps the attendance sheet and completion certificate models in trainingsessiondocument/, the
+ * attendance sheet ones declared under trainingsessiondocument. When the directory of the document holds no model, the
+ * one holding the models named after the document is used, with these models only, and the type is the one the module
+ * declares them under : the document type if it is one of them, the directory one while none of them is declared
+ *
+ * @param  DoliDB $db                  Database handler
+ * @param  string $moduleNameLowerCase Module name, lower case
+ * @param  string $documentDir         Directory of the document under <module>documents/
+ * @param  string $documentType        Document type, the models are named after it
+ * @return array{dir?: string, files?: string[], type?: string} Directory, model file names and declared type, empty
+ *                                                               when the models are in the directory of the document
+ */
+function saturne_get_shared_document_model_location(DoliDB $db, string $moduleNameLowerCase, string $documentDir, string $documentType): array
+{
+    global $conf;
+
+    require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+
+    $baseDir = dol_buildpath('/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/');
+    if (!is_dir($baseDir) || !empty(dol_dir_list($baseDir . $documentDir, 'files', 0, '^(pdf|doc)_.+\.modules\.php$'))) {
+        return [];
+    }
+
+    // A model is named after the document it builds, with the _odt suffix for an ODT one
+    $documentType = dol_strtolower($documentType);
+    $modelFilter  = '^(pdf|doc)_' . preg_quote($documentType, '/') . '(_odt)?\.modules\.php$';
+
+    $location = [];
+    foreach (dol_dir_list($baseDir, 'directories') as $directory) {
+        $files = dol_dir_list($directory['fullname'], 'files', 0, $modelFilter);
+        if (!empty($files)) {
+            $location = ['dir' => $directory['fullname'] . '/', 'files' => array_column($files, 'name'), 'type' => $directory['name']];
+            break;
+        }
+    }
+    if (empty($location)) {
+        return [];
+    }
+
+    $declaredTypes = [];
+    $modelNames    = [$documentType, $documentType . '_odt', $documentType . '_custom_odt'];
+
+    $sql  = 'SELECT DISTINCT type FROM ' . $db->prefix() . 'document_model';
+    $sql .= " WHERE nom IN ('" . implode("', '", array_map([$db, 'escape'], $modelNames)) . "')";
+    $sql .= ' AND entity = ' . ((int) $conf->entity);
+
+    $resql = $db->query($sql);
+    if ($resql) {
+        while ($obj = $db->fetch_object($resql)) {
+            $declaredTypes[] = (string) $obj->type;
+        }
+        $db->free($resql);
+    }
+
+    if (in_array($documentType, $declaredTypes, true)) {
+        $location['type'] = $documentType;
+    } elseif (!empty($declaredTypes)) {
+        $location['type'] = $declaredTypes[0];
+    }
+
+    return $location;
+}
