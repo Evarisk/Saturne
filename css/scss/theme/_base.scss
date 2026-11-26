@@ -68,6 +68,22 @@
     background: $theme-bg;
   }
 
+  /* A list wider than the screen scrolls inside its .div-table-responsive, not the whole page.
+     In the eldy theme #id-right is a table-cell: its width follows its content, so the overflow-x of the
+     list wrapper never applies and the page stretches instead, pushing the page size selector and the
+     export of the list bar out of the screen. Dolibarr answers this with classforhorizontalscrolloftabs,
+     but its width: calc(100% - <left menu width + 30>px) is wrong once the left menu is hidden (PWA mode,
+     dol_hide_leftmenu). A flex row hands #id-right whatever the left menu leaves, be it displayed or
+     hidden, and min-width: 0 lets it shrink under its content (from digirisk-horizontal-scroll) */
+  &.bodyforlist > #id-container {
+    display: flex;
+
+    > #id-right {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+  }
+
   .opacitymedium {
     color: $theme-muted;
     opacity: 1;

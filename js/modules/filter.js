@@ -40,13 +40,25 @@ window.saturne.filter = {
         // The JS handler has been removed to avoid e.preventDefault() blocking the link.
 
         // Close popover when clicking outside
+        var insidePopover = '.saturne-col-filter-popover, .saturne-col-filter-btn, .select2-container, .ui-datepicker, .ui-widget-overlay';
+        var pressStartedInside = false;
+        // A text selection started in the search field and released outside the popover sends the click
+        // to the common ancestor of the press and the release, outside the popover: only a press that
+        // started outside closes it
+        $(document).off('mousedown.saturnePopover').on('mousedown.saturnePopover', function(e) {
+            pressStartedInside = $(e.target).closest(insidePopover).length > 0;
+        });
         $(document).off('click.saturnePopover').on('click.saturnePopover', function(e) {
             // The datepicker redraws itself on its month arrows: the clicked node is already detached
             // when the click bubbles here, so closest() finds nothing although the click was inside
             if (!document.documentElement.contains(e.target)) {
                 return;
             }
-            if (!$(e.target).closest('.saturne-col-filter-popover, .saturne-col-filter-btn, .select2-container, .ui-datepicker, .ui-widget-overlay').length) {
+            if (pressStartedInside) {
+                pressStartedInside = false;
+                return;
+            }
+            if (!$(e.target).closest(insidePopover).length) {
                 window.saturne.filter.closePopover();
             }
         });
@@ -155,6 +167,75 @@ window.saturne.filter = {
         });
     },
 
+    // Search form of the list holding the column
+    getListForm: function($th) {
+        var $form = $('#searchFormList');
+        if (!$form.length) {
+            // Sometime the form is just the closest form to the table
+            $form = $th.closest('form');
+        }
+
+        return $form;
+    },
+
+    // Sort through the search form so every context carried by its hidden inputs survives.
+    // Rebuilding the URL from window.location only works when the page was reached by GET :
+    // right after a filter/column submit the location has no query string at all, and both
+    // the filters and the page context (fromid/fromtype, object_type, ...) would be dropped.
+    sortList: function($th, sortField, direction) {
+        if (!sortField) {
+            return;
+        }
+
+        var $form = this.getListForm($th);
+        if ($form.length) {
+            $form.find('input[name="sortfield"]').val(sortField);
+            $form.find('input[name="sortorder"]').val(direction);
+            $form.find('input[name="page"]').val('0');
+            this.closePopover();
+            $form.submit();
+            return;
+        }
+
+        var url = new URL(window.location.href);
+        url.searchParams.set('sortfield', sortField);
+        url.searchParams.set('sortorder', direction);
+        url.searchParams.set('page', '0');
+        window.location.href = url.toString();
+    },
+
+    // A column summing up several values declares one sort criterion per value (data-sortkeys, sort field =>
+    // label): each one is offered with both orders in place of the A to Z sort of the column. A sort field
+    // may end with tie-breakers, the criterion is its first field. Empty for any other column
+    getSortKeysHtml: function($th) {
+        var sortKeys = $th.data('sortkeys');
+        if (!sortKeys || typeof sortKeys !== 'object') {
+            return '';
+        }
+
+        var $listForm    = this.getListForm($th);
+        var currentField = String($listForm.find('input[name="sortfield"]').val() || '').split(',')[0].trim();
+        var currentOrder = String($listForm.find('input[name="sortorder"]').val() || '').split(',')[0].trim().toLowerCase();
+        var orders       = [
+            { order: 'desc', icon: 'fa-sort-amount-down', title: 'Décroissant' },
+            { order: 'asc', icon: 'fa-sort-amount-up-alt', title: 'Croissant' }
+        ];
+
+        var html = '<div class="popover-section-title">Trier par</div>';
+        $.each(sortKeys, function(sortKey, sortLabel) {
+            var isCurrent = sortKey.split(',')[0].trim() === currentField;
+            html += '<div class="popover-sortkey' + (isCurrent ? ' active' : '') + '">';
+            html += '<span class="popover-sortkey-label">' + $('<span>').text(sortLabel).html() + '</span>';
+            $.each(orders, function(index, order) {
+                var isActive = isCurrent && order.order === currentOrder;
+                html += '<button type="button" class="popover-sortkey-order' + (isActive ? ' active' : '') + '" data-sortfield="' + $('<span>').text(sortKey).html() + '" data-sortorder="' + order.order + '" title="' + order.title + '"><i class="fas ' + order.icon + '"></i></button>';
+            });
+            html += '</div>';
+        });
+
+        return html;
+    },
+
     openPopover: function($btn, $th, colIndex, colKey) {
         this.closePopover(); // Ensure any existing is closed
 
@@ -171,6 +252,14 @@ window.saturne.filter = {
             return;
         }
 
+        var sortHtml = this.getSortKeysHtml($th) || `
+                <div class="popover-action action-sort-asc">
+                    <i class="fas fa-sort-alpha-down"></i> Trier de A à Z
+                </div>
+                <div class="popover-action action-sort-desc">
+                    <i class="fas fa-sort-alpha-up"></i> Trier de Z à A
+                </div>`;
+
         // Build popover HTML
         var html = `
             <div class="popover-header">
@@ -180,12 +269,7 @@ window.saturne.filter = {
                 </div>
             </div>
             <div class="popover-body">
-                <div class="popover-action action-sort-asc">
-                    <i class="fas fa-sort-alpha-down"></i> Trier de A à Z
-                </div>
-                <div class="popover-action action-sort-desc">
-                    <i class="fas fa-sort-alpha-up"></i> Trier de Z à A
-                </div>
+                ${sortHtml}
                 <div class="popover-divider"></div>
                 <div class="popover-action action-group" style="opacity: 0.5; cursor: not-allowed;" title="Bientôt disponible">
                     <i class="fas fa-layer-group"></i> Grouper
@@ -211,6 +295,11 @@ window.saturne.filter = {
         $inputWrapper.append($originalContent);
         $('#saturne-popover-input-wrapper').append($inputWrapper);
 
+        // A column without any filter (disablesearch) left an empty search box and a button validating nothing
+        if (!$inputWrapper.find('input:not([type="hidden"]), select, textarea').length) {
+            $popover.find('.popover-header, .popover-footer').hide();
+        }
+
         // Position the popover under the btn
         $popover.css('display', 'block');
         this.placePopover($popover, $btn);
@@ -229,9 +318,11 @@ window.saturne.filter = {
                      if ($el.data('select2')) {
                          $el.select2('destroy');
                      }
+                     // The list opens on the body, over the popover: inside it, the overflow of the
+                     // popover cut the list to the size of the box. A click on the list stays inside
+                     // for the outside-click handler, which ignores .select2-container
                      $el.select2({
-                         width: '100%',
-                         dropdownParent: $popover
+                         width: '100%'
                      });
                  });
                  // The select2 tags widen the popover: place it again
@@ -273,52 +364,28 @@ window.saturne.filter = {
             var sortFieldMatch = ($sortLink.attr('href') || '').match(/[?&]sortfield=([^&]+)/);
             var sortField      = sortFieldMatch ? decodeURIComponent(sortFieldMatch[1]) : '';
 
-            // Sort through the search form so every context carried by its hidden inputs survives.
-            // Rebuilding the URL from window.location only works when the page was reached by GET :
-            // right after a filter/column submit the location has no query string at all, and both
-            // the filters and the page context (fromid/fromtype, object_type, ...) would be dropped.
-            var sortByColumn = function(direction) {
-                if (!sortField) {
-                    return;
-                }
-
-                var $form = $('#searchFormList');
-                if (!$form.length) {
-                    $form = $th.closest('form');
-                }
-
-                if ($form.length) {
-                    $form.find('input[name="sortfield"]').val(sortField);
-                    $form.find('input[name="sortorder"]').val(direction);
-                    $form.find('input[name="page"]').val('0');
-                    window.saturne.filter.closePopover();
-                    $form.submit();
-                    return;
-                }
-
-                var url = new URL(window.location.href);
-                url.searchParams.set('sortfield', sortField);
-                url.searchParams.set('sortorder', direction);
-                url.searchParams.set('page', '0');
-                window.location.href = url.toString();
-            };
-
             $popover.find('.action-sort-asc').on('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                sortByColumn('asc');
+                window.saturne.filter.sortList($th, sortField, 'asc');
             });
 
             $popover.find('.action-sort-desc').on('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                sortByColumn('desc');
+                window.saturne.filter.sortList($th, sortField, 'desc');
             });
         } else {
             $popover.find('.action-sort-asc, .action-sort-desc')
                 .css({ opacity: 0.5, cursor: 'not-allowed' })
                 .attr('title', 'Tri non disponible sur cette colonne');
         }
+
+        $popover.find('.popover-sortkey-order').on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            window.saturne.filter.sortList($th, $(this).attr('data-sortfield'), $(this).attr('data-sortorder'));
+        });
 
         $popover.find('.action-hide').on('click', function() {
             var colKey = $th.data('colkey');

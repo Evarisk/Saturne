@@ -35,10 +35,11 @@
         <div class="modal-header">
             <h2 class="modal-title"></h2>
             <?php
+                // Recap of the object of the page: the $supplierData of the example this template came from was never defined
                 echo saturne_get_modal_header_recap_html([
-                    'iconClass' => 'fa-solid fa-user',   // L'icône que vous voulez pour le header
-                    'title'     => $supplierData->name,  // Le nom du fournisseur/entité
-                    'details'   => [$supplierData->ref], // La référence/ID
+                    'iconClass' => 'fa-solid fa-user',
+                    'title'     => (string) ($object->label ?? ($object->ref ?? '')),
+                    'details'   => [(string) ($object->ref ?? '')],
                 ]);
                 ?>
             <div class="modal-close"><i class="fas fa-2x fa-times"></i></div>

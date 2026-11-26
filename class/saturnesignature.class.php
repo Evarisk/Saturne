@@ -637,6 +637,70 @@ class SaturneSignature extends SaturneObject
     }
 
     /**
+     * Check that the signatory still has to sign : registered or waiting for its signature, not absent, and without a
+     * recorded signature
+     *
+     * A recorded signature is only ever cleared from the back office (deleteSignatoriesSignatures(), run when the object
+     * goes back to draft), which makes the signatory registered again
+     *
+     * @return bool True when a signature can be recorded for the signatory
+     */
+    public function isAwaitingSignature(): bool
+    {
+        return in_array((int) $this->status, [self::STATUS_REGISTERED, self::STATUS_PENDING_SIGNATURE], true)
+            && dol_strlen((string) $this->signature) == 0
+            && $this->attendance != self::ATTENDANCE_ABSENT;
+    }
+
+    /**
+     * Count the signature requests sent by email to each attendant of an object
+     *
+     * A request is an AC_SATURNE_SIGNATURE_PENDING_SIGNATURE event of the object. It carries a recipient contact as an
+     * assigned contact, and a recipient user as an assigned user besides its owner, the user who sent it. A request a
+     * user sent to themselves, as the ones sent to a user before recipients were assigned, carries no other user : the
+     * address it was sent to, recorded with it, names its recipient
+     *
+     * @param  CommonObject       $object              Object the attendants sign
+     * @param  string             $moduleNameLowerCase Module of the object
+     * @param  SaturneSignature[] $signatories         Attendants to count the requests of
+     * @return array<int, int>                         Number of requests sent, by signatory id
+     */
+    public function countSentSignatureRequests(CommonObject $object, string $moduleNameLowerCase, array $signatories): array
+    {
+        require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
+
+        $nbSent      = [];
+        $actionComm  = new ActionComm($this->db);
+        $actionComms = $actionComm->getActions(0, $object->id, $object->element . '@' . $moduleNameLowerCase, " AND code = 'AC_SATURNE_SIGNATURE_PENDING_SIGNATURE'");
+        if (!is_array($actionComms)) {
+            return $nbSent;
+        }
+
+        foreach ($actionComms as $actionComm) {
+            $contactIds = array_map('intval', array_keys($actionComm->socpeopleassigned));
+            $userIds    = [];
+            if (empty($contactIds)) {
+                $userIds = array_diff(array_map('intval', array_keys($actionComm->userassigned)), [(int) $actionComm->userownerid]);
+            }
+            $emailTo = dol_strtolower(trim((string) $actionComm->email_to));
+
+            foreach ($signatories as $signatory) {
+                if ($signatory->element_type == 'socpeople') {
+                    $isRecipient = in_array((int) $signatory->element_id, $contactIds, true);
+                } else {
+                    $isRecipient = in_array((int) $signatory->element_id, $userIds, true)
+                        || (empty($contactIds) && empty($userIds) && $emailTo !== '' && $emailTo === dol_strtolower(trim((string) $signatory->email)));
+                }
+                if ($isRecipient) {
+                    $nbSent[$signatory->id] = ($nbSent[$signatory->id] ?? 0) + 1;
+                }
+            }
+        }
+
+        return $nbSent;
+    }
+
+    /**
      * Sign the signatory lines an attendant still has to sign on an object, with an already known signature
      *
      * @param  User   $user         Object user that makes the signature

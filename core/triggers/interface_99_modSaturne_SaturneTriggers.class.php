@@ -49,8 +49,8 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
         $this->name        = preg_replace('/^Interface/i', '', get_class($this));
         $this->family      = 'demo';
         $this->description = 'Saturne triggers.';
-        $this->version     = '23.7.0';
-        $this->picto       = 'saturne@saturne';
+        $this->version     = '23.10.1';
+        $this->picto       = 'saturne_color@saturne';
     }
 
     /**
@@ -90,6 +90,13 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
     {
         if (!isModEnabled('saturne')) {
             return 0; // If module is not enabled, we do nothing
+        }
+
+        // Every event of the instance comes through here, also those another module sends with an object that is not
+        // a CommonObject (ExternalAccess passes its Context on externalAccessInitController): none of them concerns
+        // Saturne, and the event prepared below reads an id and element that such an object may lack
+        if (!($object instanceof CommonObject)) {
+            return 0;
         }
 
         // A trigger never runs on a module page, so the $moduleNameLowerCase global it would rely on is not set
@@ -141,7 +148,9 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
                 break;
 
             case 'SATURNE_CERTIFICATE_VALIDATE':
-                $actioncomm->label = $langs->transnoentities('ObjectValidateTrigger', $langs->transnoentities(ucfirst($object->element)), $object->ref);
+                // A validation trigger runs before the object takes its final ref, kept meanwhile in newref, as in Dolibarr core:
+                // the event is labelled with it, not with the (PROVn) one
+                $actioncomm->label = $langs->transnoentities('ObjectValidateTrigger', $langs->transnoentities(ucfirst($object->element)), !empty($object->newref) ? $object->newref : $object->ref);
                 $actioncomm->create($user);
                 break;
 
@@ -219,7 +228,12 @@ class InterfaceSaturneTriggers extends DolibarrTriggers
                     $actioncomm->socpeopleassigned = [$object->element_id => $object->element_id];
                     $actioncomm->fk_contact        = $object->element_id;
                 } else {
-                    $actioncomm->fk_user_action = $object->element_id;
+                    // A recipient user is assigned to the event as a recipient contact is: ActionComm stores no
+                    // fk_user_action property, that column holds the owner, the user who sent the request, kept first
+                    $actioncomm->userassigned = [
+                        (int) $actioncomm->userownerid => ['id' => (int) $actioncomm->userownerid, 'transparency' => 0],
+                        (int) $object->element_id      => ['id' => (int) $object->element_id, 'transparency' => 0],
+                    ];
                 }
                 $actioncomm->fk_element   = $object->fk_object;
                 $actioncomm->email_msgid  = $object->context['email_msgid'] ?? '';

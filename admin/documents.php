@@ -246,14 +246,21 @@ if (empty($resHook)) {
         /** @var SaturneDocumentModel $document */
         $document = new $documentType($db);
 
-        // Search template files
-        $dir = dol_buildpath('/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $documentType . '/');
+        // Search template files, in the directory the module keeps the models of the document in when it is not its own:
+        // the generation then looks for the model in the directory of that object type
+        $dir           = dol_buildpath('/' . $moduleNameLowerCase . '/core/modules/' . $moduleNameLowerCase . '/' . $moduleNameLowerCase . 'documents/' . $documentType . '/');
+        $modelDocType  = $documentType;
+        $modelLocation = saturne_get_shared_document_model_location($db, $moduleNameLowerCase, $documentType, $documentType);
+        if (!empty($modelLocation)) {
+            $dir          = $modelLocation['dir'];
+            $modelDocType = basename($modelLocation['dir']);
+        }
         $file = 'pdf_' . $modelName . '.modules.php';
         if (file_exists($dir . $file)) {
             $moreParams['user'] = $user;
             $moreParams['specimen'] = 1;
             $moreParams['zone'] = 'public';
-            $moreParams['objectType'] = str_replace('document', '', $documentType);
+            $moreParams['objectType'] = str_replace('document', '', $modelDocType);
 
             // Document models call CommonObject methods on the object the document describes:
             // an empty stdClass makes them fatal, so hand them an unsaved object of that type
@@ -452,6 +459,16 @@ foreach ($types as $type => $documentData) {
         $documentPath = true;
         require __DIR__ . '/../core/tpl/admin/object/object_const_view.tpl.php';
         require __DIR__ . '/../core/tpl/admin/object/object_numbering_module_view.tpl.php';
+
+        // The models are listed from the directory the numbering view read, unless the module keeps them with the ones
+        // of the other documents of an object: DoliMeet keeps the attendance sheet ones in trainingsessiondocument/
+        $documentModelType = $documentType;
+        $modelLocation     = saturne_get_shared_document_model_location($db, $moduleNameLowerCase, $documentParentType, $documentType);
+        if (!empty($modelLocation)) {
+            $dir               = $modelLocation['dir'];
+            $filelist          = $modelLocation['files'];
+            $documentModelType = $modelLocation['type'];
+        }
         require __DIR__ . '/../core/tpl/admin/object/object_document_model_view.tpl.php';
     }
 }

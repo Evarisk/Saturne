@@ -166,6 +166,21 @@ if (!(isset($error) && $error) && $subaction == 'uploadPhoto' && ! empty($conf->
         }
 
         if (! $error) {
+            $tmpName  = $_FILES['userfile']['tmp_name'][$key];
+            $origName = (string) ($_FILES['userfile']['name'][$key] ?? '');
+            if (!empty($tmpName)) {
+                require_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
+                $finfo    = new finfo(FILEINFO_MIME_TYPE);
+                $mimeType = $finfo->file($tmpName);
+                if (strpos($mimeType, 'image/') !== 0 || $mimeType === 'image/svg+xml' || image_format_supported($origName) < 0) {
+                    $error++;
+                    setEventMessages($langs->trans('ErrorFileNotAnImage'), null, 'errors');
+                    $submitFileErrorText = array('message' => $langs->trans('ErrorFileNotAnImage'), 'code' => '1337');
+                }
+            }
+        }
+
+        if (! $error) {
             $generatethumbs = 1;
             // An edited media is sent back under its own name: it must replace the original
             // instead of landing beside it as a numbered copy

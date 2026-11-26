@@ -54,8 +54,13 @@ window.saturne.modal.init = function() {
  * recalcule toute la page (180 ms sur la même liste). Les modules ouvrent aussi leurs modals en posant
  * directement la classe modal-active : c'est elle qu'on surveille, pas openModal et closeModal.
  *
+ * La même surveillance charge les images qu'une page diffère jusqu'à l'ouverture de leur modal
+ * (loadDeferredImages) : à l'ouverture, et dès qu'une telle image arrive hors de toute modal ou dans
+ * une modal déjà ouverte, quel que soit le code qui l'insère (liste rafraîchie en AJAX, bloc média
+ * renvoyé après un envoi).
+ *
  * @since   23.6.0
- * @version 23.6.0
+ * @version 23.8.0
  *
  * @return {void}
  */
@@ -65,13 +70,55 @@ window.saturne.modal.watchActiveModals = function() {
 		document.querySelectorAll('.side-nav-vert').forEach(nav => nav.classList.toggle('saturne-under-modal', open));
 	};
 
+	const loadReachable = function(root) {
+		const images = root.matches('img[data-deferred-src]') ? [root] : root.querySelectorAll('img[data-deferred-src]');
+		images.forEach(function(image) {
+			const modal = image.closest('.wpeo-modal');
+			if (!modal || modal.classList.contains('modal-active')) {
+				window.saturne.modal.loadDeferredImages(image);
+			}
+		});
+	};
+
 	new MutationObserver(function(records) {
-		if (records.some(record => record.target.classList.contains('wpeo-modal'))) {
+		const modals = records.filter(record => record.type === 'attributes' && record.target.classList.contains('wpeo-modal')).map(record => record.target);
+		if (modals.length) {
 			sync();
+			modals.filter(modal => modal.classList.contains('modal-active')).forEach(window.saturne.modal.loadDeferredImages);
 		}
-	}).observe(document.body, {subtree: true, attributes: true, attributeFilter: ['class']});
+		records.filter(record => record.type === 'childList').forEach(function(record) {
+			record.addedNodes.forEach(function(node) {
+				if (node.nodeType === Node.ELEMENT_NODE) {
+					loadReachable(node);
+				}
+			});
+		});
+	}).observe(document.body, {subtree: true, childList: true, attributes: true, attributeFilter: ['class']});
 
 	sync();
+	loadReachable(document.body);
+};
+
+/**
+ * Charge les images différées d'un conteneur.
+ *
+ * Une modal fermée reste dans la mise en page sous une opacité nulle : le navigateur tient donc ses
+ * images pour visibles et loading="lazy" ne les retient pas. Une page qui en affiche beaucoup (une par
+ * risque sur l'onglet Risques de Digirisk) les écrit avec data-deferred-src au lieu de src (option
+ * defer_images de saturne_show_medias_linked() et de saturne_render_media_block()), et elles ne
+ * partent qu'ici, appelée par watchActiveModals.
+ *
+ * @since   23.8.0
+ * @version 23.8.0
+ *
+ * @param  {Element|jQuery} container Conteneur dont les images différées sont à charger, ou l'image elle-même
+ * @return {void}
+ */
+window.saturne.modal.loadDeferredImages = function(container) {
+	$(container).find('img[data-deferred-src]').addBack('img[data-deferred-src]').each(function() {
+		this.setAttribute('src', this.getAttribute('data-deferred-src'));
+		this.removeAttribute('data-deferred-src');
+	});
 };
 
 /**

@@ -56,7 +56,32 @@ foreach ($object->fields as $key => $val) {
         $colWidth   = !empty($listColumnWidths[$key]) ? (int) $listColumnWidths[$key] : 0;
         $colStyle   = $colWidth > 0 ? ' style="width:' . $colWidth . 'px;min-width:' . $colWidth . 'px;"' : '';
         $moreAttrib = ($cssForField ? 'class="' . $cssForField . '"' : '') . ' data-colkey="' . dol_escape_htmltag($key) . '"' . $colStyle;
-        print saturne_get_title_field_of_list($arrayfields['t.' . $key]['label'], 0, $_SERVER['PHP_SELF'], ($val['otheralias'] ?? 't.') . $key, '', $param, $moreAttrib, $sortfield, $sortorder, ($cssForField ? $cssForField . ' ' : ''), (empty($val['disablesort']) ? '' : $val['disablesort']), (empty($val['helplist']) ? '' : $val['helplist']));
+
+        // A column summing up several values (a count and a date...) sorts on each of them: the module
+        // selects every criterion under its own name and the column filter offers them instead of its
+        // A to Z sort. A key may add tie-breakers after its criterion (relaunch_overdue,t.rowid), which
+        // keeps the pages stable when many records share a count. The criterion in use becomes the sort
+        // field of the title, for its arrow, and is named under the label
+        $titleLabel = $arrayfields['t.' . $key]['label'];
+        $titleField = ($val['otheralias'] ?? 't.') . $key;
+        if (!empty($val['sortkeys']) && is_array($val['sortkeys'])) {
+            $sortKeyLabels = [];
+            foreach ($val['sortkeys'] as $sortKey => $sortKeyLabel) {
+                $sortKeyLabels[$sortKey] = $langs->transnoentities($sortKeyLabel);
+            }
+            $moreAttrib .= ' data-sortkeys="' . htmlspecialchars(json_encode($sortKeyLabels), ENT_QUOTES, 'UTF-8') . '"';
+
+            $currentCriterion = trim(explode(',', (string) $sortfield)[0]);
+            foreach ($sortKeyLabels as $sortKey => $sortKeyLabel) {
+                if (trim(explode(',', (string) $sortKey)[0]) === $currentCriterion) {
+                    $titleField = (string) $sortKey;
+                    $titleLabel = $langs->trans($titleLabel) . '<span class="saturne-sortkey-caption">' . dol_escape_htmltag($sortKeyLabel) . '</span>';
+                    break;
+                }
+            }
+        }
+
+        print saturne_get_title_field_of_list($titleLabel, 0, $_SERVER['PHP_SELF'], $titleField, '', $param, $moreAttrib, $sortfield, $sortorder, ($cssForField ? $cssForField . ' ' : ''), (empty($val['disablesort']) ? '' : $val['disablesort']), (empty($val['helplist']) ? '' : $val['helplist']));
         $totalarray['nbfield']++;
     }
 }

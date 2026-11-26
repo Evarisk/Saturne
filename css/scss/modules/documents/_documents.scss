@@ -1,0 +1,270 @@
+@use "../../variable/variable" as *;
+
+// Documents box (saturne_show_documents): toolbar, search, type filters and sortable columns.
+// The rows keep the list style of the page; the JS of js/modules/document.js runs the box.
+
+.saturne-documents {
+  // Something hidden by the JS stays hidden, whatever display its own classes give it
+  [hidden] {
+    display: none !important;
+  }
+
+  .saturne-documents__count {
+    min-width: 22px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: #e2e8f0;
+    font-size: 12px;
+    font-weight: 700;
+    vertical-align: middle;
+    color: #475569;
+  }
+
+  // ---- Toolbar: generation on the left, search and filters on the right ----
+
+  .saturne-documents__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 16px;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: normal;
+    text-align: left;
+    text-transform: none;
+  }
+
+  .saturne-documents__generate {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .saturne-documents__model-icon {
+    font-size: 16px;
+    color: #2b579a;
+  }
+
+  .saturne-documents__filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  .saturne-documents__search {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    margin: 0;
+
+    > i {
+      position: absolute;
+      left: 10px;
+      font-size: 12px;
+      color: #94a3b8;
+      pointer-events: none;
+    }
+  }
+
+  .saturne-documents__search input.saturne-documents__search-input {
+    box-sizing: border-box;
+    width: 220px;
+    height: 32px;
+    margin: 0;
+    padding: 0 10px 0 30px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #ffffff;
+    font-size: 13px;
+    color: #1e293b;
+
+    &:focus {
+      outline: none;
+      border-color: $color__primary;
+      box-shadow: 0 0 0 3px rgba(13, 138, 255, 0.18);
+    }
+  }
+
+  .saturne-documents__types {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .saturne-documents__type {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 30px;
+    margin: 0;
+    padding: 0 6px 0 11px;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    background: #ffffff;
+    font: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1;
+    color: #475569;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+
+    &:hover {
+      border-color: $color__primary;
+      color: #0a6fd1;
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(13, 138, 255, 0.18);
+    }
+  }
+
+  .saturne-documents__type-count {
+    box-sizing: border-box;
+    min-width: 20px;
+    padding: 3px 6px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    color: #64748b;
+  }
+
+  .saturne-documents__type--active {
+    border-color: $color__primary;
+    background: rgba(13, 138, 255, 0.1);
+    color: #0a6fd1;
+
+    .saturne-documents__type-count {
+      background: $color__primary;
+      color: #ffffff;
+    }
+  }
+
+  // ---- Sortable column titles ----
+
+  .saturne-documents__sort {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    color: inherit;
+    cursor: pointer;
+
+    &:hover {
+      color: #0a6fd1;
+
+      .saturne-documents__sort-icon {
+        opacity: 1;
+      }
+    }
+
+    &:focus-visible {
+      outline: 2px solid rgba(13, 138, 255, 0.5);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+  }
+
+  .saturne-documents__sort-icon {
+    font-size: 10px;
+    opacity: 0.35;
+  }
+
+  th.saturne-documents__sorted .saturne-documents__sort {
+    color: #0a6fd1;
+
+    .saturne-documents__sort-icon {
+      opacity: 1;
+    }
+  }
+
+  // ---- Rows ----
+
+  .saturne-documents__preview {
+    color: #94a3b8;
+
+    &:hover {
+      color: $color__primary;
+    }
+  }
+
+  .saturne-documents__link-icon {
+    color: #64748b;
+  }
+
+  .saturne-documents__none {
+    padding-top: 18px;
+    padding-bottom: 18px;
+    text-align: center;
+  }
+
+  // The last row shown closes the list: the border of the box takes over its own
+  tr.saturne-documents__last > td {
+    border-bottom: none !important;
+  }
+
+  tr.saturne-documents__more > td {
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  .saturne-documents__more-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 6px 14px;
+    border: 0;
+    border-radius: 999px;
+    background: none;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: #0a6fd1;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(13, 138, 255, 0.1);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(13, 138, 255, 0.18);
+    }
+
+    i {
+      font-size: 11px;
+    }
+  }
+
+  @media (max-width: $media__small) {
+    .saturne-documents__filters,
+    .saturne-documents__search,
+    .saturne-documents__search input.saturne-documents__search-input {
+      width: 100%;
+    }
+
+    // The file names have no space to wrap on and the dates do not wrap: the table ran past the screen
+    td.saturne-documents__name {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    td.saturne-documents__date {
+      white-space: normal;
+    }
+  }
+}

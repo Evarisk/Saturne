@@ -264,6 +264,11 @@ class ActionsSaturne
 
         saturne_version_llxheader_assets($parameters);
 
+        // Opportunity statuses renamed in the dictionary: the screens printed after the header show the new labels
+        if (isModEnabled('project') && getDolGlobalString('PROJECT_USE_OPPORTUNITIES')) {
+            $this->getOppStatuses();
+        }
+
         return 0;
     }
 
@@ -434,6 +439,7 @@ class ActionsSaturne
                                 params.append('isFile', isFile ? 1 : 0);
                                 params.append('fileId', fileId);
                                 params.append('action', 'toggle_favorite');
+                                params.set('token', '" . newToken() . "');
 
                                 $.ajax({
                                     url: '" . dol_buildpath('/saturne/core/ajax/favorite.php', 1) . "?' + params.toString(),
@@ -478,13 +484,13 @@ class ActionsSaturne
     /**
      * Overloading the doActions function : replacing the parent's function with the one below
      *
-     * @param  array     $parameters Hook metadata (context, etc...)
-     * @param  object    $object    The object to process
-     * @param  string    $action    Current action (if set). Generally create or edit or null
-     * @return int                  0 < on error, 0 on success, 1 to replace standard code
+     * @param  array       $parameters Hook metadata (context, etc...)
+     * @param  object      $object     The object to process
+     * @param  string|null $action     Current action (if set). Generally create or edit or null
+     * @return int                     0 < on error, 0 on success, 1 to replace standard code
      * @throws Exception
      */
-    public function doActions(array $parameters, $object, string $action): int
+    public function doActions(array $parameters, $object, ?string $action): int
     {
         global $user;
 
@@ -614,10 +620,49 @@ class ActionsSaturne
     }
 
     /**
-     * Opportunity statuses of the dictionary, read once per request
+     * Overloading the replaceThirdparty function : called by Societe::mergeCompany() once the core objects are moved,
+     * before the absorbed thirdparty is deleted. Moves the objects of Saturne and of the modules built on it to the kept
+     * thirdparty, from the thirdparty card as from the API (Saturne hooks the "all" context).
+     *
+     * @param  array       $parameters Hook metadatas, soc_origin is the absorbed thirdparty and soc_dest the kept one
+     * @param  object|null $object     Kept thirdparty
+     * @param  string|null $action     Current action, null when the merge comes from the API
+     * @return int                     0 < on error, 0 on success
+     */
+    public function replaceThirdparty(array $parameters, $object, ?string $action): int
+    {
+        require_once __DIR__ . '/../lib/thirdparty.lib.php';
+
+        $this->errors = [];
+
+        $result = saturne_replace_thirdparty($this->db, (int) ($parameters['soc_origin'] ?? 0), (int) ($parameters['soc_dest'] ?? 0), $this->errors);
+        if ($result < 0) {
+            $this->error = implode(', ', $this->errors);
+            return -1;
+        }
+
+        return 0;
+    }
+
+    /**
+     * Labels of the opportunity statuses as Dolibarr installs them, by code (WIN was renamed WON by an upgrade)
+     */
+    private const OPP_STATUS_STOCK_LABELS = [
+        'PROSP'   => ['Prospection'],
+        'QUAL'    => ['Qualification'],
+        'PROPO'   => ['Proposal'],
+        'NEGO'    => ['Negotiation'],
+        'PENDING' => ['Pending'],
+        'WON'     => ['Won', 'Win'],
+        'LOST'    => ['Lost'],
+    ];
+
+    /**
+     * Opportunity statuses of the dictionary, read once per request, in the order of their position
      *
      * The list of projects reads them for its fields, then for every row of the fk_opp_status column: the dictionary
-     * does not depend on the row. Private on purpose, so that the hook manager never takes it for a hook.
+     * does not depend on the row. Inactive statuses are kept, a project may still carry one. Private on purpose, so
+     * that the hook manager never takes it for a hook.
      *
      * @return CLeadStatus[] Statuses, empty when the dictionary cannot be read
      */
@@ -628,11 +673,60 @@ class ActionsSaturne
         if ($oppStatuses === null) {
             require_once DOL_DOCUMENT_ROOT . '/core/class/cleadstatus.class.php';
             $leadStatus = new CLeadStatus($this->db);
-            $leadStatus->fetchAll();
+            // Without a sort field, fetchAll() returns the statuses in the order they were created
+            $leadStatus->fetchAll('ASC', 't.position,t.rowid');
             $oppStatuses = is_array($leadStatus->records) ? $leadStatus->records : [];
+            $this->applyOppStatusLabels($oppStatuses);
         }
 
         return $oppStatuses;
+    }
+
+    /**
+     * Make the labels typed in the dictionary win over the translations of Dolibarr
+     *
+     * Dolibarr prints the translation of "OppStatus<code>" whenever it exists (list and card of projects, boxes,
+     * statistics...), so a status renamed in the dictionary, QUAL to "Qualification à MT ou LT" for instance, keeps
+     * showing "Qualification". The key takes the label of the dictionary, unless the label is still the one Dolibarr
+     * installs: the language files translate that one. A language file loaded later keeps it, a key already known is
+     * never replaced. Private on purpose, so that the hook manager never takes it for a hook.
+     *
+     * @param  CLeadStatus[] $oppStatuses Statuses of the dictionary
+     * @return void
+     */
+    private function applyOppStatusLabels(array $oppStatuses): void
+    {
+        global $langs;
+
+        if (!is_object($langs)) {
+            return;
+        }
+
+        foreach ($oppStatuses as $oppStatus) {
+            $code  = (string) $oppStatus->code;
+            $label = trim((string) $oppStatus->label);
+            if ($code === '' || $label === '' || in_array($label, self::OPP_STATUS_STOCK_LABELS[$code] ?? [], true)) {
+                continue;
+            }
+            // trans() runs the translation through sprintf(), a percent sign of the label must stay one
+            $langs->tab_translate['OppStatus' . $code] = str_replace('%', '%%', $label);
+        }
+    }
+
+    /**
+     * Label of an opportunity status, as Dolibarr prints it
+     *
+     * @param  CLeadStatus $oppStatus Status of the dictionary
+     * @return string                 Label, not escaped
+     */
+    private function getOppStatusLabel(CLeadStatus $oppStatus): string
+    {
+        global $langs;
+
+        $transKey   = 'OppStatus' . $oppStatus->code;
+        $transLabel = $langs->transnoentitiesnoconv($transKey);
+
+        return $transLabel !== $transKey ? $transLabel : (string) $oppStatus->label;
     }
 
     /**
@@ -667,10 +761,11 @@ class ActionsSaturne
 
                 $arrayofkeyval[''] = '';
 
+                // Active statuses only, as the select of Dolibarr
                 foreach ($this->getOppStatuses() as $line) {
-                    $transLabel = $langs->trans("OppStatus" . $line->code);
-                    $label = ($transLabel !== "OppStatus" . $line->code) ? $transLabel : $line->label;
-                    $arrayofkeyval[$line->id] = $label;
+                    if (!empty($line->active)) {
+                        $arrayofkeyval[$line->id] = $this->getOppStatusLabel($line);
+                    }
                 }
                 $object->fields['fk_opp_status']['arrayofkeyval'] = $arrayofkeyval;
             }
@@ -745,10 +840,13 @@ class ActionsSaturne
                 $html .= '<select class="saturne-inline-select" data-field="fk_opp_status" data-element="' . $ceElement . '" data-id="' . $object->id . '">';
                 $html .= '<option value="0">&nbsp;</option>';
                 foreach ($this->getOppStatuses() as $line) {
-                    $selected = ($object->fk_opp_status == $line->id) ? ' selected' : '';
-                    $transLabel = $langs->trans("OppStatus" . $line->code);
-                    $label = ($transLabel !== "OppStatus" . $line->code) ? $transLabel : $line->label;
-                    $html .= '<option value="' . $line->id . '"' . $selected . '>' . dol_escape_htmltag($label) . '</option>';
+                    $isCurrent = ($object->fk_opp_status == $line->id);
+                    // An inactive status is offered only to the project that still carries it
+                    if (empty($line->active) && !$isCurrent) {
+                        continue;
+                    }
+                    $selected = $isCurrent ? ' selected' : '';
+                    $html .= '<option value="' . $line->id . '"' . $selected . '>' . dol_escape_htmltag($this->getOppStatusLabel($line)) . '</option>';
                 }
                 $html .= '</select>';
 

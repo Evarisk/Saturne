@@ -24,7 +24,7 @@
 
 /**
  * The following vars must be defined:
- * Global     : $conf, $langs, $user
+ * Global     : $conf, $db, $langs, $user
  * Parameters : $action, $documentType, $moduleName, $moduleNameLowerCase, $objectType, $trackID
  * Objects    : $document, $object, $signatory
  * Variable   : $upload_dir
@@ -32,21 +32,38 @@
 
 // Action to add signature
 if ($action == 'add_signature') {
-    $data = json_decode(file_get_contents('php://input'), true);
+    $data      = json_decode(file_get_contents('php://input'), true);
+    $signature = (is_array($data) && is_string($data['signature'] ?? null)) ? $data['signature'] : '';
 
-    $signatory->signature      = $data['signature'];
-    $signatory->signature_date = dol_now();
-
-    $result = $signatory->update($user, 1);
-    // Creation signature OK
-    if ($result > 0) {
-        $signatory->setSigned($user, false, 'public');
-        // Creation signature KO
-    } elseif (!empty($signatory->errors)) {
-        setEventMessages('', $signatory->errors, 'errors');
+    // The link records the first signature of a signatory, it never replaces a recorded one: that is cleared from the
+    // back office only. The value is printed back as the source of an image, only an image drawn on the canvas is kept
+    if (dol_strlen((string) $signatory->signature) > 0 || $signatory->status == SaturneSignature::STATUS_SIGNED) {
+        setEventMessages($langs->trans('ErrorSignatureAlreadyRecorded'), [], 'errors');
+    } elseif (!$signatory->isAwaitingSignature()) {
+        setEventMessages($langs->trans('ErrorSignatureNotExpected'), [], 'errors');
+    } elseif (!SaturneSignature::isValidSignatureData($signature)) {
+        setEventMessages($langs->trans('ErrorUserSignatureInvalid'), [], 'errors');
     } else {
-        setEventMessages($signatory->error, [], 'errors');
+        $signatory->signature      = $signature;
+        $signatory->signature_date = dol_now();
+
+        $result = $signatory->update($user, 1);
+        // Creation signature OK
+        if ($result > 0) {
+            $signatory->setSigned($user, false, 'public');
+            // Creation signature KO
+        } elseif (!empty($signatory->errors)) {
+            setEventMessages('', $signatory->errors, 'errors');
+        } else {
+            setEventMessages($signatory->error, [], 'errors');
+        }
     }
+}
+
+// A document is only generated for the object of the link, in one of the types generated for it
+if ($action == 'builddoc' && (!isset($document) || !is_object($document) || !in_array($document->element, saturne_get_object_document_types($db, $object->element), true))) {
+    setEventMessages($langs->trans('DocumentNotAvailable'), [], 'errors');
+    $action = '';
 }
 
 // Action to build doc
@@ -54,7 +71,7 @@ if ($action == 'builddoc') {
     $outputLangs = $langs;
     $newLang = '';
 
-    if ($conf->global->MAIN_MULTILANGS && empty($newLang) && GETPOST('lang_id', 'aZ09')) {
+    if (getDolGlobalInt('MAIN_MULTILANGS') && empty($newLang) && GETPOST('lang_id', 'aZ09')) {
         $newLang = GETPOST('lang_id', 'aZ09');
     }
     if (!empty($newLang)) {
@@ -77,8 +94,9 @@ if ($action == 'builddoc') {
     }
 
     // The default model constant only holds a model name : resolve it against the installed models so the
-    // template of a custom ODT model is honoured here as it already is on the object card
-    $model = saturne_get_default_model($db, $moduleName, $documentType);
+    // template of a custom ODT model is honoured here as it already is on the object card. The object type finds the
+    // models a module declares under the document type of the object, as DoliMeet does for its attendance sheets
+    $model = saturne_get_default_model($db, $moduleName, $documentType, $object->element);
 
     // An ODT model carries its template path after the model name, a native PDF model does not
     $isNativePdf = !preg_match('/_odt:/i', $model);
@@ -92,8 +110,10 @@ if ($action == 'builddoc') {
     $moreParams['zone']       = 'public';
     $moreParams['objectType'] = $objectType;
 
+    // A document is stored under the directory of its own type, which is not always the one of the object : DoliMeet
+    // keeps the attendance sheets of a training session under attendancesheetdocument
     $subDir    = $isSpecimen ? '/public_specimen/' : '/';
-    $sourceDir = $upload_dir . '/' . strtolower($objectType) . 'document/' . $object->ref . $subDir;
+    $sourceDir = $upload_dir . '/' . $document->element . '/' . $object->ref . $subDir;
     // Meme regle que la vue : le PDF deja genere prime sur l'ODT. $canServePdf etait utilise ici
     // alors qu'il n'est calcule que dans la vue, incluse apres cette action : la variable etait
     // toujours indefinie, le filtre retombait sur '.odt', ne voyait jamais le PDF natif et
@@ -122,7 +142,7 @@ if ($action == 'builddoc') {
 
     if ($result > 0) {
         $subDir    = $isSpecimen ? '/public_specimen/' : '/';
-        $sourceDir = $upload_dir . '/' . strtolower($objectType) . 'document/' . $object->ref . $subDir;
+        $sourceDir = $upload_dir . '/' . $document->element . '/' . $object->ref . $subDir;
         $tempDir   = dol_buildpath('/' . $moduleNameLowerCase . '/documents/') . 'temp/';
 
         if (!is_dir($tempDir)) {

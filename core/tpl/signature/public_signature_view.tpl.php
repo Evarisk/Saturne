@@ -26,7 +26,7 @@
  * The following vars must be defined :
  * Global     : $conf, $langs
  * Parameters : $objectType, $trackID
- * Objects    : $object, $signatory
+ * Objects    : $document (optional), $object, $signatory
  * Variable   : $fileExists, $moduleNameLowerCase, $moreParams
  */ ?>
 
@@ -49,7 +49,10 @@
         $path = dol_buildpath('/' . $moduleNameLowerCase . '/documents/', 2) . 'temp/';
 
         $isSpecimen = 0;
-        $sourceDirDoc = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?? 1] . '/' . strtolower($objectType) . 'document/' . dol_sanitizeFileName($object->ref) . '/';
+        // Same directory as the actions : the one of the document type, the attendance sheets of a DoliMeet training
+        // session are not stored under trainingsessiondocument
+        $documentDir  = (isset($document) && is_object($document)) ? $document->element : strtolower($objectType) . 'document';
+        $sourceDirDoc = $conf->$moduleNameLowerCase->multidir_output[$object->entity ?? 1] . '/' . $documentDir . '/' . dol_sanitizeFileName($object->ref) . '/';
         // Le format servi suit le fichier reellement present : un PDF prime toujours sur l'ODT.
         // La constante de modele peut mentir - un module dont le generateur natif est un PDF
         // produit un PDF meme quand elle designe encore le modele ODT - et le repli plus bas
@@ -139,7 +142,7 @@
 
         <div class="public-card__content signature">
             <div class="signature-element">
-                <?php if (empty($signatory->signature) && ((defined(get_class($object) . '::STATUS_VALIDATED') && $object->status == $object::STATUS_VALIDATED) || $object->status == 1) && $signatory->attendance != SaturneSignature::ATTENDANCE_ABSENT) :
+                <?php if ($signatory->isAwaitingSignature() && ((defined(get_class($object) . '::STATUS_VALIDATED') && $object->status == $object::STATUS_VALIDATED) || $object->status == 1)) :
                     ?>
                     <canvas class="canvas-container editable canvas-signature"></canvas>
                     <div class="signature-erase wpeo-button button-square-40 button-rounded button-grey"><span><i class="fas fa-eraser"></i></span></div>
@@ -147,7 +150,9 @@
                 else :
                     ?>
                     <div class="canvas-container">
-                        <img src='<?php echo $signatory->signature ?>' alt="">
+                        <?php if (SaturneSignature::isValidSignatureData((string) $signatory->signature)) : ?>
+                            <img src="<?php echo dol_escape_htmltag($signatory->signature); ?>" alt="">
+                        <?php endif; ?>
                     </div>
                     <?php
                 endif; ?>
@@ -155,7 +160,7 @@
         </div>
 
         <div class="public-card__footer">
-            <?php if (empty($signatory->signature) && ((defined(get_class($object) . '::STATUS_VALIDATED') && $object->status == $object::STATUS_VALIDATED) || $object->status == 1) && $signatory->attendance != SaturneSignature::ATTENDANCE_ABSENT) :
+            <?php if ($signatory->isAwaitingSignature() && ((defined(get_class($object) . '::STATUS_VALIDATED') && $object->status == $object::STATUS_VALIDATED) || $object->status == 1)) :
                 ?>
                 <div class="signature-validate wpeo-button button-grey <?php echo $moreParams['moreCSS'] ?? ''; ?>"><i class="fas fa-save"></i> <?php echo $langs->trans('SignatureSaveButton'); ?></div>
                 <?php
@@ -170,7 +175,8 @@
 <?php
 if (isset($moreParams['useConfirmation'])) {
     $downloadLink = '';
-    if (GETPOSTISSET('document_type') && $fileExists) {
+    // The name and path of the document are only known while the public interface is on
+    if (GETPOSTISSET('document_type') && $fileExists && getDolGlobalInt('SATURNE_ENABLE_PUBLIC_INTERFACE')) {
         $downloadLink = '<div class="file-generation-modal" style="margin-bottom:10px;"><input type="hidden" class="specimen-name" data-specimen-name="' . $specimenName . '"><input type="hidden" class="specimen-path" data-specimen-path="' . $path . '"><a href="javascript:void(0);" class="auto-download" style="text-decoration: underline; color: #47e58e; font-weight: bold;"><i class="far fa-file-' . ($canServePdf ? 'pdf' : 'word') . '"></i> ' . $originalName . '</a></div>';
     }
 

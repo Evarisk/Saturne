@@ -131,7 +131,8 @@ if (empty($resHook)) {
         if ($result > 0) {
             // Creation attendant OK
             if ($attendantTypeUser > 0) {
-                $usertmp = $user;
+                // Load the attendant in its own object: $user is the logged-in user and must not be overwritten
+                $usertmp = new User($db);
                 $usertmp->fetch((int) $attendantTypeUser);
                 setEventMessages($langs->trans('AddAttendantMessage', $langs->transnoentities($attendantRole) . ' ' . $usertmp->getFullName($langs, 1)), []);
             } else {
@@ -196,7 +197,8 @@ if (empty($resHook)) {
         $langs->load('mails');
         if (!dol_strlen($signatory->email)) {
             if ($signatory->element_type == 'user') {
-                $usertmp = $user;
+                // Load the attendant in its own object: $user is the logged-in user and must not be overwritten
+                $usertmp = new User($db);
                 $usertmp->fetch((int) $signatory->element_id);
                 if (dol_strlen($usertmp->email)) {
                     $signatory->email = $usertmp->email;
@@ -254,14 +256,17 @@ if (empty($resHook)) {
                     header('Location: ' . $_SERVER['PHP_SELF'] . '?id=' . $id . '&module_name=' . $moduleName . '&object_type=' . $object->element . '&document_type=' . $documentType . '&attendant_table_mode=' . $attendantTableMode);
                     exit;
                 } else {
-                    $langs->load('other');
-                    $errorMessage = '<div class="error">';
-                    $errorMessage .= $langs->transnoentities('ErrorFailedToSendMail', dol_escape_htmltag($from), dol_escape_htmltag($sendto));
-                    if ($mailfile->error) {
-                        $errorMessage .= '<br>' . $mailfile->error;
+                    // What happened and what to do first, the raw error of the mail server last
+                    $failure      = saturne_get_mail_failure($mailfile, $sendto);
+                    $errorMessage = dol_escape_htmltag($langs->transnoentities('SignatureEmailNotSentTo', $sendto)) . '<br>' . dol_escape_htmltag($failure['reason']);
+                    // The setup and the raw error of the server are for the administrator, who can act on them
+                    if ($failure['cause'] != 'recipient' && !empty($user->admin)) {
+                        $errorMessage .= '<br><a href="' . DOL_URL_ROOT . '/admin/mails.php" target="_blank">' . $langs->trans('ConfigEmail') . '</a>';
                     }
-                    $errorMessage .= '</div>';
-                    setEventMessages($errorMessage, [], 'warnings');
+                    if (dol_strlen($failure['detail']) && !empty($user->admin)) {
+                        $errorMessage .= '<br><span class="opacitymedium">' . dol_escape_htmltag($langs->transnoentities('MailFailureTechnicalDetail', $failure['detail'])) . '</span>';
+                    }
+                    setEventMessages($errorMessage, [], 'errors');
                 }
             } else {
                 $url = '<a href="' . dol_buildpath('/admin/mails.php', 1) . '" target="_blank">' . $langs->trans('ConfigEmail') . '</a>';

@@ -108,6 +108,7 @@ ErrorNoSocietyLogo          = Aucun logo de la société renseigné
 CustomODT                   = ODT personnalisé
 ErrorWrongFileNameExtension = Erreur : mauvaise extension de fichier %s
 ErrorFileNameCanNotBeBuilt  = Le nom du fichier n'a pas pu être construit
+TemplateVersion             = Version du modèle
 
 # Trigger - Événements
 ConfTrigger                 = Configuration des événements
@@ -215,6 +216,13 @@ CheckDocumentationToEnablePDFGeneration = Veuillez vous référer à la document
 PDFGenerationTooltip                    = Appuyez sur ce bouton pour générer le document ODT en PDF
 PDFGeneration                           = Génération du document PDF
 NoData                                  = N/A
+DocumentsSearchPlaceholder              = Rechercher un fichier
+DocumentsFilterByType                   = Filtrer par type de fichier
+DocumentsTypeImage                      = Images
+DocumentsNone                           = Aucun document pour le moment
+DocumentsNoMatch                        = Aucun fichier ne correspond à la recherche
+DocumentsShowMore                       = Afficher les %s autres fichiers
+DocumentsShowLess                       = Réduire la liste
 
 
 
@@ -227,6 +235,10 @@ SendMailSubject = Email
 QHSEService     = Service QHSE
 WithKindRegards = Bien cordialement
 ConfigEmail     = Cliquez sur ce lien pour vous rendre à la configuration des emails
+MailFailureServer           = Le serveur d'envoi des emails n'a pas pu transmettre le message : faites vérifier la configuration des emails par un administrateur.
+MailFailureRecipientRefused = L'adresse %s a été refusée : corrigez-la, puis renvoyez l'email.
+MailFailureLogin            = Le serveur d'envoi des emails a refusé l'identifiant ou le mot de passe : faites vérifier la configuration des emails par un administrateur.
+MailFailureTechnicalDetail  = Détail technique : %s
 
 
 
