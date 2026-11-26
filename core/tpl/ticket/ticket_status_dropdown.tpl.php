@@ -21,7 +21,7 @@
  * \ingroup saturne
  * \brief   Template of the status badge of the ticket card, turned into the list of the statuses the ticket can switch to
  *
- * Each status posts the action of ticket/card.php that applies it: the core runs it, then reloads the card.
+ * js/modules/ticket.js posts the picked status, then updates the card in place.
  */
 
 /**
@@ -33,7 +33,7 @@
 
 $statusFormUrl = DOL_URL_ROOT . '/ticket/card.php?track_id=' . urlencode($object->track_id); ?>
 
-<div class="wpeo-dropdown dropdown-right saturne-ticket-status">
+<div class="wpeo-dropdown dropdown-right saturne-ticket-status" data-error="<?php echo dol_escape_htmltag($langs->trans('Error')); ?>">
     <button type="button" class="dropdown-toggle saturne-ticket-status__toggle" title="<?php echo dol_escape_htmltag($langs->trans('TicketStatusChange')); ?>" aria-haspopup="true">
         <?php echo $statusHtml; ?>
     </button>
@@ -42,14 +42,8 @@ $statusFormUrl = DOL_URL_ROOT . '/ticket/card.php?track_id=' . urlencode($object
             <li>
                 <form method="POST" action="<?php echo $statusFormUrl; ?>">
                     <input type="hidden" name="token" value="<?php echo newToken(); ?>">
-                    <input type="hidden" name="action" value="<?php echo dol_escape_htmltag($choice['action']); ?>">
-                    <input type="hidden" name="id" value="<?php echo (int) $object->id; ?>">
-                    <input type="hidden" name="track_id" value="<?php echo dol_escape_htmltag($object->track_id); ?>">
+                    <input type="hidden" name="action" value="<?php echo SATURNE_TICKET_STATUS_ACTION; ?>">
                     <input type="hidden" name="new_status" value="<?php echo (int) $status; ?>">
-                    <input type="hidden" name="confirm" value="yes">
-                    <?php if ($choice['contactid'] !== null) : ?>
-                        <input type="hidden" name="contactid" value="<?php echo (int) $choice['contactid']; ?>">
-                    <?php endif; ?>
                     <button type="submit" class="dropdown-item saturne-ticket-status__item">
                         <?php echo $choice['picto']; ?>
                         <span><?php echo dol_escape_htmltag($choice['label']); ?></span>

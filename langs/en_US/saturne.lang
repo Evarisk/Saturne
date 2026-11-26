@@ -491,6 +491,7 @@ InlineEditOpenCalendar  = Open the calendar
 
 # Ticket card shortcuts
 TicketStatusChange                     = Change status
+TicketStatusChanged                    = Ticket status: %s
 TicketQuickEvent                       = Add an event
 TicketQuickEventTypeEmail              = Email
 TicketQuickEventTypeCall               = Call

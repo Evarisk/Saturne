@@ -126,6 +126,14 @@ if (!function_exists('getDolGlobalString')) {
     }
 }
 
+if (!function_exists('dol_now')) {
+    /** @return int */
+    function dol_now(string $mode = 'auto'): int
+    {
+        return time();
+    }
+}
+
 if (!function_exists('llxHeader')) {
     function llxHeader(): void
     {
@@ -297,6 +305,18 @@ if (!class_exists('Ticket')) {
 
         /** @var int|null */
         public $fk_project;
+
+        /** @var int|string|null */
+        public $date_read;
+
+        /** @var string */
+        public $error = '';
+
+        /** @var string[] */
+        public $errors = [];
+
+        /** @var array<string, mixed> */
+        public $context = [];
 
         /** @var array<int, string> */
         public $labelStatusShort = [

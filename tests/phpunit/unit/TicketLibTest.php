@@ -147,34 +147,145 @@ class TicketLibTest extends TestCase
         $this->assertArrayHasKey(Ticket::STATUS_WAITING, $choices);
     }
 
-    public function testClosedAndAbandonedGoThroughTheCloseActions(): void
-    {
-        $choices = saturne_ticket_get_status_choices($this->ticketIn(Ticket::STATUS_READ), $this->langs());
-
-        $this->assertSame('confirm_close', $choices[Ticket::STATUS_CLOSED]['action']);
-        $this->assertSame('confirm_abandon', $choices[Ticket::STATUS_CANCELED]['action']);
-        $this->assertSame('confirm_set_status', $choices[Ticket::STATUS_IN_PROGRESS]['action']);
-        $this->assertNull($choices[Ticket::STATUS_CANCELED]['contactid']);
-    }
-
-    public function testClosingNotifiesTheContactsAsTheCoreConfirmationDoesByDefault(): void
-    {
-        global $conf;
-
-        $choices = saturne_ticket_get_status_choices($this->ticketIn(Ticket::STATUS_READ), $this->langs());
-        $this->assertSame(-3, $choices[Ticket::STATUS_CLOSED]['contactid']);
-
-        $conf->global->TICKET_NOTIFY_AT_CLOSING = 1;
-        $choices = saturne_ticket_get_status_choices($this->ticketIn(Ticket::STATUS_READ), $this->langs());
-        $this->assertSame(-2, $choices[Ticket::STATUS_CLOSED]['contactid']);
-    }
-
     public function testClosedTicketCanOnlyBeReopened(): void
     {
         $choices = saturne_ticket_get_status_choices($this->ticketIn(Ticket::STATUS_CLOSED), $this->langs());
 
         $this->assertSame([0, 1, 2, 3, 5], array_keys($choices));
-        $this->assertSame(['confirm_set_status'], array_values(array_unique(array_column($choices, 'action'))));
+    }
+
+    // ─── saturne_ticket_set_status ────────────────────────────────────────────
+
+    /**
+     * Ticket recording the calls the status change makes, in its context: the methods of the core write in the database
+     *
+     * @param  int    $status Status of the ticket
+     * @param  int    $result Result returned by every recorded method
+     * @return Ticket
+     */
+    private function recordingTicket(int $status, int $result = 1): Ticket
+    {
+        global $db;
+
+        $ticket = new class ($db) extends Ticket {
+            /**
+             * @param  User $user User that closes
+             * @param  int  $mode 0 = closed, 1 = abandoned
+             * @return int
+             */
+            public function close(User $user, $mode = 0)
+            {
+                $this->context['test_calls'][] = ['close', $mode, $this->context['contact_id'] ?? null];
+                return $this->context['test_result'];
+            }
+
+            /**
+             * @param  int         $status      New status
+             * @param  int|null    $elementId   Id of the element
+             * @param  string      $elementType Type of the element
+             * @param  string      $trigkey     Trigger key
+             * @param  string      $fieldstatus Status field
+             * @return int
+             */
+            public function setStatut($status, $elementId = null, $elementType = '', $trigkey = '', $fieldstatus = 'fk_statut')
+            {
+                $this->context['test_calls'][] = ['setStatut', $status, $trigkey];
+                return $this->context['test_result'];
+            }
+
+            /**
+             * @param  string      $field         Field to update
+             * @param  mixed       $value         New value
+             * @param  string      $table         Table
+             * @param  int|null    $id            Id of the row
+             * @param  string      $format        Format of the value
+             * @param  string      $id_field      Id field
+             * @param  User|string $fuser         User
+             * @param  string      $trigkey       Trigger key
+             * @param  string      $fk_user_field User field
+             * @return int
+             */
+            public function setValueFrom($field, $value, $table = '', $id = null, $format = '', $id_field = '', $fuser = null, $trigkey = '', $fk_user_field = 'fk_user_modif')
+            {
+                // The read date set to now is only told apart from an empty one
+                $this->context['test_calls'][] = ['setValueFrom', $field, $value === '' ? '' : 'now', $format];
+                return $this->context['test_result'];
+            }
+        };
+
+        $ticket->id                     = 81;
+        $ticket->status                 = $status;
+        $ticket->context['test_calls']  = [];
+        $ticket->context['test_result'] = $result;
+
+        return $ticket;
+    }
+
+    public function testSetStatusClosesThroughCloseWithTheDefaultRecipientsOfTheCore(): void
+    {
+        global $conf;
+
+        $errors = [];
+        $ticket = $this->recordingTicket(Ticket::STATUS_IN_PROGRESS);
+        $this->assertSame(1, saturne_ticket_set_status($ticket, $this->userWith(['write']), $this->langs(), Ticket::STATUS_CLOSED, $errors));
+        $this->assertSame([['close', 0, -3]], $ticket->context['test_calls']);
+
+        $conf->global->TICKET_NOTIFY_AT_CLOSING = 1;
+        $ticket = $this->recordingTicket(Ticket::STATUS_IN_PROGRESS);
+        saturne_ticket_set_status($ticket, $this->userWith(['write']), $this->langs(), Ticket::STATUS_CLOSED, $errors);
+        $this->assertSame([['close', 0, -2]], $ticket->context['test_calls']);
+    }
+
+    public function testSetStatusAbandonsThroughClose(): void
+    {
+        $errors = [];
+        $ticket = $this->recordingTicket(Ticket::STATUS_READ);
+        saturne_ticket_set_status($ticket, $this->userWith(['write']), $this->langs(), Ticket::STATUS_CANCELED, $errors);
+
+        $this->assertSame([['close', 1, null]], $ticket->context['test_calls']);
+    }
+
+    public function testSetStatusSetsTheReadDateOnceLikeTheCore(): void
+    {
+        $errors = [];
+        $ticket = $this->recordingTicket(Ticket::STATUS_NOT_READ);
+        saturne_ticket_set_status($ticket, $this->userWith(['write']), $this->langs(), Ticket::STATUS_IN_PROGRESS, $errors);
+        $this->assertSame([['setStatut', Ticket::STATUS_IN_PROGRESS, 'TICKET_MODIFY'], ['setValueFrom', 'date_read', 'now', 'date']], $ticket->context['test_calls']);
+
+        // Already read: the first read date is kept
+        $ticket            = $this->recordingTicket(Ticket::STATUS_READ);
+        $ticket->date_read = 1795000000;
+        saturne_ticket_set_status($ticket, $this->userWith(['write']), $this->langs(), Ticket::STATUS_IN_PROGRESS, $errors);
+        $this->assertSame([['setStatut', Ticket::STATUS_IN_PROGRESS, 'TICKET_MODIFY']], $ticket->context['test_calls']);
+    }
+
+    public function testSetStatusBackToUnreadClearsTheReadDate(): void
+    {
+        $errors = [];
+        $ticket = $this->recordingTicket(Ticket::STATUS_READ);
+        saturne_ticket_set_status($ticket, $this->userWith(['write']), $this->langs(), Ticket::STATUS_NOT_READ, $errors);
+
+        $this->assertSame([['setStatut', Ticket::STATUS_NOT_READ, 'TICKET_MODIFY'], ['setValueFrom', 'date_read', '', 'date']], $ticket->context['test_calls']);
+    }
+
+    public function testSetStatusRefusesAStatusNotOffered(): void
+    {
+        $errors = [];
+        $ticket = $this->recordingTicket(Ticket::STATUS_CLOSED);
+
+        $this->assertSame(-1, saturne_ticket_set_status($ticket, $this->userWith(['write']), $this->langs(), Ticket::STATUS_CANCELED, $errors));
+        $this->assertSame([], $ticket->context['test_calls']);
+        $this->assertCount(1, $errors);
+    }
+
+    public function testSetStatusReportsTheErrorOfTheTicket(): void
+    {
+        $errors        = [];
+        $ticket        = $this->recordingTicket(Ticket::STATUS_READ, -1);
+        $ticket->error = 'ErrorTicketLocked';
+
+        $this->assertSame(-1, saturne_ticket_set_status($ticket, $this->userWith(['write']), $this->langs(), Ticket::STATUS_CLOSED, $errors));
+        $this->assertSame(['ErrorTicketLocked'], $errors);
     }
 
     // ─── saturne_ticket_add_quick_event ───────────────────────────────────────

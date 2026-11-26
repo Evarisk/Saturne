@@ -506,15 +506,7 @@ class ActionsSaturne
 
             $langs->load('saturne@saturne');
 
-            // Still set when the event could not be created: the modal opens again with what was typed
-            $quickEventOpen   = ($action === SATURNE_TICKET_QUICK_EVENT_ACTION);
-            $quickEventTypes  = saturne_ticket_get_quick_event_types($langs);
-            $quickEventValues = [
-                'type'        => $quickEventOpen ? GETPOST('quickeventtype', 'aZ09') : array_key_first($quickEventTypes),
-                'date'        => $quickEventOpen ? $this->getTicketQuickEventDate() : dol_now(),
-                'label'       => $quickEventOpen ? GETPOST('quickeventlabel', 'alphanohtml') : '',
-                'description' => $quickEventOpen ? GETPOST('quickeventdescription', 'restricthtml') : '',
-            ];
+            $quickEventTypes = saturne_ticket_get_quick_event_types($langs);
 
             require __DIR__ . '/../core/tpl/ticket/ticket_quick_event_modal.tpl.php';
         }
@@ -603,8 +595,11 @@ class ActionsSaturne
         if ($this->isTicketCard($parameters) && $object instanceof Ticket) {
             require_once __DIR__ . '/../lib/ticket.lib.php';
 
-            if ($action === SATURNE_TICKET_QUICK_EVENT_ACTION) {
-                return $this->addTicketQuickEvent($object);
+            // Both are posted by js/modules/ticket.js, which updates the card in place from the JSON answer
+            if ($action === SATURNE_TICKET_STATUS_ACTION) {
+                $this->setTicketStatus($object);
+            } elseif ($action === SATURNE_TICKET_QUICK_EVENT_ACTION) {
+                $this->addTicketQuickEvent($object);
             }
         }
 
@@ -866,31 +861,69 @@ class ActionsSaturne
     }
 
     /**
-     * Create the event posted by the quick event modal of the ticket card, then reload the card where it is listed
+     * Apply the status picked in the list of the badge of the ticket card, then answer in JSON
      *
      * @param  Ticket $ticket Ticket shown on the card
-     * @return int            -1 on error, the core then keeps showing the card with the modal open again
+     * @return void
      */
-    private function addTicketQuickEvent(Ticket $ticket): int
+    private function setTicketStatus(Ticket $ticket): void
+    {
+        global $langs, $user;
+
+        $langs->load('saturne@saturne');
+
+        if (!saturne_ticket_can_manage_status($user)) {
+            $this->sendTicketJson(['error' => true, 'messages' => [$langs->trans('NotEnoughPermissions')]], 403);
+        }
+
+        $status = GETPOSTINT('new_status');
+        $errors = [];
+        if (saturne_ticket_set_status($ticket, $user, $langs, $status, $errors) < 0) {
+            $this->sendTicketJson(['error' => true, 'messages' => $errors], 400);
+        }
+
+        // trans() escapes its parameters: the label goes in raw, or its accents show as entities
+        $statusLabel = $langs->transnoentitiesnoconv((string) ($ticket->labelStatusShort[$status] ?? ''));
+        $this->sendTicketJson(['error' => false, 'message' => $langs->trans('TicketStatusChanged', $statusLabel)]);
+    }
+
+    /**
+     * Create the event posted by the quick event modal of the ticket card, then answer in JSON
+     *
+     * @param  Ticket $ticket Ticket shown on the card
+     * @return void
+     */
+    private function addTicketQuickEvent(Ticket $ticket): void
     {
         global $langs, $user;
 
         $langs->load('saturne@saturne');
 
         if (!saturne_ticket_can_add_quick_event($user, $ticket)) {
-            $this->errors[] = $langs->trans('NotEnoughPermissions');
-            return -1;
+            $this->sendTicketJson(['error' => true, 'messages' => [$langs->trans('NotEnoughPermissions')]], 403);
         }
 
         $errors = [];
         $result = saturne_ticket_add_quick_event($ticket, $user, $langs, GETPOST('quickeventtype', 'aZ09'), $this->getTicketQuickEventDate(), GETPOST('quickeventlabel', 'alphanohtml'), GETPOST('quickeventdescription', 'restricthtml'), $errors);
         if ($result < 0) {
-            $this->errors = array_merge($this->errors, $errors);
-            return -1;
+            $this->sendTicketJson(['error' => true, 'messages' => $errors], 400);
         }
 
-        setEventMessages($langs->trans('TicketQuickEventCreated'), []);
-        header('Location: ' . DOL_URL_ROOT . '/ticket/card.php?track_id=' . urlencode($ticket->track_id));
+        $this->sendTicketJson(['error' => false, 'message' => $langs->trans('TicketQuickEventCreated')]);
+    }
+
+    /**
+     * Answer an action of the ticket card in JSON and stop there, before the core actions and the page
+     *
+     * @param  array<string, mixed> $response Answer: error, then message on success or messages on error
+     * @param  int                  $httpCode HTTP status code
+     * @return void
+     */
+    private function sendTicketJson(array $response, int $httpCode = 200): void
+    {
+        top_httphead('application/json');
+        http_response_code($httpCode);
+        echo json_encode($response);
         exit;
     }
 

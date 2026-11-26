@@ -26,7 +26,12 @@
  */
 
 /**
- * Action of the quick event form, handled by the doActions hook before the core actions of the card
+ * Action posted by the status list of the badge, handled by the doActions hook before the core actions of the card
+ */
+const SATURNE_TICKET_STATUS_ACTION = 'set_ticket_status';
+
+/**
+ * Action posted by the quick event modal, handled by the doActions hook before the core actions of the card
  */
 const SATURNE_TICKET_QUICK_EVENT_ACTION = 'add_ticket_quick_event';
 
@@ -34,7 +39,7 @@ const SATURNE_TICKET_QUICK_EVENT_ACTION = 'add_ticket_quick_event';
  * Tell whether the user may change the status of a ticket from the card.
  *
  * Dolibarr 24 checks 'manage_advance' instead of 'write' when advanced permissions are on, Dolibarr 23 checks
- * 'write' only: both are required, so that the core never turns down the action the badge sends.
+ * 'write' only: both are required, so that the badge never does more than the status buttons of the core allow.
  * External users never get the status buttons of the core either.
  *
  * @param  User $user Current user
@@ -50,15 +55,14 @@ function saturne_ticket_can_manage_status(User $user): bool
 }
 
 /**
- * Return the statuses a ticket can switch to, with the core action of ticket/card.php that applies each of them.
+ * Return the statuses a ticket can switch to.
  *
- * Closed and abandoned go through the close actions: Ticket::close() fills the closing date and runs TICKET_CLOSE,
- * which sends the closing emails, where setStatut() would not. The core already hides the suspended status in
- * labelStatusShort when it is disabled. A closed ticket can only be reopened, Ticket::close() refuses to close it twice.
+ * The core already hides the suspended status in labelStatusShort when it is disabled. A closed ticket can only be
+ * reopened: Ticket::close() refuses to close it twice.
  *
  * @param  Ticket    $ticket Ticket shown on the card
  * @param  Translate $langs  Translation object
- * @return array<int, array{action: string, contactid: int|null, label: string, picto: string}> Choices keyed by status
+ * @return array<int, array{label: string, picto: string}> Choices keyed by status
  */
 function saturne_ticket_get_status_choices(Ticket $ticket, Translate $langs): array
 {
@@ -71,26 +75,66 @@ function saturne_ticket_get_status_choices(Ticket $ticket, Translate $langs): ar
             continue;
         }
 
-        $contactId = null;
-        if ($status === Ticket::STATUS_CLOSED) {
-            $action = 'confirm_close';
-            // Same recipients as the default answer of the closing confirmation of the core
-            $contactId = getDolGlobalString('TICKET_NOTIFY_AT_CLOSING') ? -2 : -3;
-        } elseif ($status === Ticket::STATUS_CANCELED) {
-            $action = 'confirm_abandon';
-        } else {
-            $action = 'confirm_set_status';
-        }
-
         $choices[$status] = [
-            'action'    => $action,
-            'contactid' => $contactId,
-            'label'     => $langs->trans($labelKey),
-            'picto'     => $ticket->LibStatut($status, 3, 1),
+            'label' => $langs->trans($labelKey),
+            'picto' => $ticket->LibStatut($status, 3, 1),
         ];
     }
 
     return $choices;
+}
+
+/**
+ * Switch a ticket to a status, the way the status actions of ticket/card.php do.
+ *
+ * Closed and abandoned go through Ticket::close(), like confirm_close and confirm_abandon: it fills the closing date
+ * and runs TICKET_CLOSE, which sends the closing emails, where setStatut() would not. The other statuses go through
+ * setStatut() with TICKET_MODIFY, like confirm_set_status. As it does on Dolibarr 24, the read date is set when the
+ * ticket leaves unread and cleared when it goes back to it; written directly, as Ticket::setReadDate() is missing
+ * from Dolibarr 23.
+ *
+ * @param  Ticket    $ticket Ticket shown on the card
+ * @param  User      $user   Current user
+ * @param  Translate $langs  Translation object
+ * @param  int       $status New status, one of saturne_ticket_get_status_choices()
+ * @param  string[]  $errors Errors, filled when the status is not changed
+ * @return int               1 on success, -1 on error
+ */
+function saturne_ticket_set_status(Ticket $ticket, User $user, Translate $langs, int $status, array &$errors): int
+{
+    $errors = [];
+    if (!array_key_exists($status, saturne_ticket_get_status_choices($ticket, $langs))) {
+        $errors[] = $langs->trans('ErrorBadValueForParameter', (string) $status, 'new_status');
+        return -1;
+    }
+
+    if ($status === Ticket::STATUS_CLOSED || $status === Ticket::STATUS_CANCELED) {
+        if ($status === Ticket::STATUS_CLOSED) {
+            // Same recipients as the default answer of the closing confirmation of the core
+            $ticket->context['contact_id'] = getDolGlobalString('TICKET_NOTIFY_AT_CLOSING') ? -2 : -3;
+        }
+        $result = $ticket->close($user, $status === Ticket::STATUS_CANCELED ? 1 : 0);
+    } else {
+        $result = $ticket->setStatut($status, null, '', 'TICKET_MODIFY');
+        if ($result > 0) {
+            if ($status === Ticket::STATUS_NOT_READ) {
+                $result = $ticket->setValueFrom('date_read', '', '', null, 'date', '', $user);
+            } elseif (empty($ticket->date_read)) {
+                $result = $ticket->setValueFrom('date_read', dol_now(), '', null, 'date', '', $user);
+            }
+        }
+    }
+
+    if ($result <= 0) {
+        // Ticket reports some errors as translation keys
+        $errors = array_map([$langs, 'trans'], array_merge(array_filter([$ticket->error]), $ticket->errors));
+        if (empty($errors)) {
+            $errors[] = $langs->trans('Error');
+        }
+        return -1;
+    }
+
+    return 1;
 }
 
 /**
