@@ -1,0 +1,155 @@
+@use '../variable/variable' as *;
+
+// Shortcuts of the core ticket card (ticket/card.php): status list of the banner badge and quick event modal.
+// The card is a core page without any .mod-* class on its body: every rule hangs on a class of its own.
+
+// Status badge of the banner, turned into the list of the statuses the ticket can switch to
+.saturne-ticket-status {
+  // The banner aligns its status block on the right
+  text-align: left;
+
+  &__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 2px solid $color__primary;
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+  }
+
+  // The Dolibarr themes draw a chevron after every .dropdown-toggle, and turn it on their own .open class only
+  &__toggle::after {
+    opacity: 0.55;
+  }
+
+  &.dropdown-active .saturne-ticket-status__toggle::after {
+    transform: rotate(180deg);
+  }
+
+  .saturne-dropdown-content {
+    width: auto;
+    min-width: 220px;
+    margin-top: 4px;
+    padding: 0.3em 0;
+    border-radius: 6px;
+  }
+
+  form {
+    margin: 0;
+  }
+
+  // Doubled class: the dropdown list styles of Saturne set the padding and the background of .dropdown-item
+  &__item.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+    width: 100%;
+    margin: 0;
+    padding: 0.55em 0.9em;
+    border: 0;
+    background: #fff;
+    color: rgba(0, 0, 0, 0.8);
+    font: inherit;
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      background: rgba(0, 0, 0, 0.06);
+      outline: none;
+    }
+  }
+}
+
+// Modal tracing an event that happened outside Dolibarr
+.saturne-ticket-quick-event {
+  .modal-container {
+    max-width: 640px;
+    height: auto;
+  }
+
+  .modal-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1em;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    text-align: left;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+
+    input[type="text"],
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    textarea {
+      min-height: 9em;
+    }
+  }
+
+  &__label {
+    font-weight: 600;
+  }
+
+  &__types {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em;
+  }
+
+  &__type {
+    position: relative;
+
+    // Hidden but still focusable: the arrow keys move from one type to the next
+    input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45em;
+      padding: 0.45em 0.95em;
+      border: 1px solid #d8dde3;
+      border-radius: 6px;
+      background: #fff;
+      cursor: pointer;
+      transition: all 0.15s ease-out;
+    }
+
+    &:hover span {
+      border-color: $color__primary;
+    }
+
+    input:checked + span {
+      border-color: $color__primary;
+      background: rgba($color__primary, 0.1);
+      color: $color__primary;
+      font-weight: 600;
+    }
+
+    input:focus-visible + span {
+      outline: 2px solid $color__primary;
+      outline-offset: 2px;
+    }
+  }
+}

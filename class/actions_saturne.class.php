@@ -238,6 +238,20 @@ class ActionsSaturne
             $out .= '<script src="' . $resourcesRequired['js'] . '"></script>';
 
             $this->resprints = $out;
+        } elseif ($this->isTicketCard($parameters)) {
+            global $user;
+
+            require_once __DIR__ . '/../lib/ticket.lib.php';
+
+            // The status list of the badge and the quick event modal are built on the Saturne dropdown and modal
+            if (saturne_ticket_can_manage_status($user) || $user->hasRight('agenda', 'myactions', 'create')) {
+                $out  = '<!-- Includes CSS added by module saturne -->';
+                $out .= '<link rel="stylesheet" type="text/css" href="' . saturne_asset_full_url('/saturne/css/saturne.min.css') . '">';
+                $out .= '<!-- Includes JS added by module saturne -->';
+                $out .= '<script src="' . $saturne_js_url . '"></script>';
+
+                $this->resprints = $out;
+            }
         }
 
         $out = isset($this->resprints) ? $this->resprints : '';
@@ -476,6 +490,90 @@ class ActionsSaturne
             </script>
 
             <?php
+        } elseif ($this->isTicketCard($parameters) && $object instanceof Ticket) {
+            global $action, $form;
+
+            require_once __DIR__ . '/../lib/ticket.lib.php';
+
+            if (!saturne_ticket_can_add_quick_event($user, $object) || in_array($action, ['create', 'edit'], true)) {
+                return 0;
+            }
+
+            if (!is_object($form)) {
+                require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
+                $form = new Form($this->db);
+            }
+
+            $langs->load('saturne@saturne');
+
+            $quickEventTypes = saturne_ticket_get_quick_event_types($langs);
+
+            require __DIR__ . '/../core/tpl/ticket/ticket_quick_event_modal.tpl.php';
+        }
+
+        return 0;
+    }
+
+    /**
+     * Overloading the moreHtmlStatus function : replacing the parent's function with the one below
+     *
+     * Turns the status badge of the ticket card banner into the list of the statuses the ticket can switch to
+     *
+     * @param  array  $parameters Hook metadata (context, etc...)
+     * @param  object $object     The object shown in the banner
+     * @return int                0 < on error, 0 on success, 1 to replace standard code
+     */
+    public function moreHtmlStatus(array $parameters, $object): int
+    {
+        global $action, $langs, $user;
+
+        if (!$this->isTicketCard($parameters) || !$object instanceof Ticket || empty($object->id) || in_array($action, ['create', 'edit'], true)) {
+            return 0;
+        }
+
+        require_once __DIR__ . '/../lib/ticket.lib.php';
+
+        if (!saturne_ticket_can_manage_status($user)) {
+            return 0;
+        }
+
+        $statusChoices = saturne_ticket_get_status_choices($object, $langs);
+        if (empty($statusChoices)) {
+            return 0;
+        }
+
+        $langs->load('saturne@saturne');
+
+        $statusHtml = (string) ($parameters['morehtmlstatus'] ?? '');
+
+        ob_start();
+        require __DIR__ . '/../core/tpl/ticket/ticket_status_dropdown.tpl.php';
+        $this->resprints = ob_get_clean();
+
+        return 1;
+    }
+
+    /**
+     * Overloading the addMoreActionsButtons function : replacing the parent's function with the one below
+     *
+     * @param  array       $parameters Hook metadata (context, etc...)
+     * @param  object      $object     The object to process
+     * @param  string|null $action     Current action (if set). Generally create or edit or null
+     * @return int                     0 < on error, 0 on success, 1 to replace standard code
+     */
+    public function addMoreActionsButtons(array $parameters, $object, ?string $action): int
+    {
+        global $langs, $user;
+
+        if ($this->isTicketCard($parameters) && $object instanceof Ticket) {
+            require_once __DIR__ . '/../lib/ticket.lib.php';
+
+            if (saturne_ticket_can_add_quick_event($user, $object)) {
+                $langs->load('saturne@saturne');
+
+                // The card does not print what the hooks return here
+                require __DIR__ . '/../core/tpl/ticket/ticket_quick_event_button.tpl.php';
+            }
         }
 
         return 0;
@@ -493,6 +591,17 @@ class ActionsSaturne
     public function doActions(array $parameters, $object, ?string $action): int
     {
         global $user;
+
+        if ($this->isTicketCard($parameters) && $object instanceof Ticket) {
+            require_once __DIR__ . '/../lib/ticket.lib.php';
+
+            // Both are posted by js/modules/ticket.js, which updates the card in place from the JSON answer
+            if ($action === SATURNE_TICKET_STATUS_ACTION) {
+                $this->setTicketStatus($object);
+            } elseif ($action === SATURNE_TICKET_QUICK_EVENT_ACTION) {
+                $this->addTicketQuickEvent($object);
+            }
+        }
 
         if (strpos($parameters['context'], 'usercard') !== false) {
             global $langs;
@@ -727,6 +836,95 @@ class ActionsSaturne
         $transLabel = $langs->transnoentitiesnoconv($transKey);
 
         return $transLabel !== $transKey ? $transLabel : (string) $oppStatus->label;
+    }
+
+    /**
+     * Tell whether the hook runs on the ticket card (ticket/card.php). Private on purpose, so that the hook manager
+     * never takes it for a hook.
+     *
+     * @param  array $parameters Hook metadata (context, etc...)
+     * @return bool              True on the ticket card
+     */
+    private function isTicketCard(array $parameters): bool
+    {
+        return in_array('ticketcard', explode(':', (string) ($parameters['context'] ?? '')), true);
+    }
+
+    /**
+     * Date typed in the quick event modal of the ticket card, in the timezone of the user
+     *
+     * @return int Timestamp, 0 when the date is missing or invalid
+     */
+    private function getTicketQuickEventDate(): int
+    {
+        return (int) dol_mktime(GETPOSTINT('quickeventdatehour'), GETPOSTINT('quickeventdatemin'), 0, GETPOSTINT('quickeventdatemonth'), GETPOSTINT('quickeventdateday'), GETPOSTINT('quickeventdateyear'), 'tzuserrel');
+    }
+
+    /**
+     * Apply the status picked in the list of the badge of the ticket card, then answer in JSON
+     *
+     * @param  Ticket $ticket Ticket shown on the card
+     * @return void
+     */
+    private function setTicketStatus(Ticket $ticket): void
+    {
+        global $langs, $user;
+
+        $langs->load('saturne@saturne');
+
+        if (!saturne_ticket_can_manage_status($user)) {
+            $this->sendTicketJson(['error' => true, 'messages' => [$langs->trans('NotEnoughPermissions')]], 403);
+        }
+
+        $status = GETPOSTINT('new_status');
+        $errors = [];
+        if (saturne_ticket_set_status($ticket, $user, $langs, $status, $errors) < 0) {
+            $this->sendTicketJson(['error' => true, 'messages' => $errors], 400);
+        }
+
+        // trans() escapes its parameters: the label goes in raw, or its accents show as entities
+        $statusLabel = $langs->transnoentitiesnoconv((string) ($ticket->labelStatusShort[$status] ?? ''));
+        $this->sendTicketJson(['error' => false, 'message' => $langs->trans('TicketStatusChanged', $statusLabel)]);
+    }
+
+    /**
+     * Create the event posted by the quick event modal of the ticket card, then answer in JSON
+     *
+     * @param  Ticket $ticket Ticket shown on the card
+     * @return void
+     */
+    private function addTicketQuickEvent(Ticket $ticket): void
+    {
+        global $langs, $user;
+
+        $langs->load('saturne@saturne');
+
+        if (!saturne_ticket_can_add_quick_event($user, $ticket)) {
+            $this->sendTicketJson(['error' => true, 'messages' => [$langs->trans('NotEnoughPermissions')]], 403);
+        }
+
+        $errors = [];
+        $result = saturne_ticket_add_quick_event($ticket, $user, $langs, GETPOST('quickeventtype', 'aZ09'), $this->getTicketQuickEventDate(), GETPOST('quickeventlabel', 'alphanohtml'), GETPOST('quickeventdescription', 'restricthtml'), $errors);
+        if ($result < 0) {
+            $this->sendTicketJson(['error' => true, 'messages' => $errors], 400);
+        }
+
+        $this->sendTicketJson(['error' => false, 'message' => $langs->trans('TicketQuickEventCreated')]);
+    }
+
+    /**
+     * Answer an action of the ticket card in JSON and stop there, before the core actions and the page
+     *
+     * @param  array<string, mixed> $response Answer: error, then message on success or messages on error
+     * @param  int                  $httpCode HTTP status code
+     * @return void
+     */
+    private function sendTicketJson(array $response, int $httpCode = 200): void
+    {
+        top_httphead('application/json');
+        http_response_code($httpCode);
+        echo json_encode($response);
+        exit;
     }
 
     /**

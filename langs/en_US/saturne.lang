@@ -488,3 +488,15 @@ InlineEditSaved         = Saved
 InlineEditInvalidFormat = Invalid format
 InlineEditMaxPercent    = Maximum 100%%
 InlineEditOpenCalendar  = Open the calendar
+
+# Ticket card shortcuts
+TicketStatusChange                     = Change status
+TicketStatusChanged                    = Ticket status: %s
+TicketQuickEvent                       = Add an event
+TicketQuickEventTypeEmail              = Email
+TicketQuickEventTypeCall               = Call
+TicketQuickEventTypeMeeting            = Meeting
+TicketQuickEventTypeOther              = Other
+TicketQuickEventLabelPlaceholder       = E.g. Answer sent from Gmail
+TicketQuickEventDescriptionPlaceholder = E.g. a copy of the email sent, the minutes of the call
+TicketQuickEventCreated                = Event added to the ticket
