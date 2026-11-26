@@ -496,3 +496,14 @@ InlineEditSaved         = Enregistré
 InlineEditInvalidFormat = Format invalide
 InlineEditMaxPercent    = Maximum 100%%
 InlineEditOpenCalendar  = Ouvrir le calendrier
+
+# Ticket card shortcuts - Raccourcis de la fiche ticket
+TicketStatusChange                     = Changer l'état
+TicketQuickEvent                       = Ajouter un événement
+TicketQuickEventTypeEmail              = Email
+TicketQuickEventTypeCall               = Appel
+TicketQuickEventTypeMeeting            = Rendez-vous
+TicketQuickEventTypeOther              = Autre
+TicketQuickEventLabelPlaceholder       = Ex. : Réponse envoyée depuis Gmail
+TicketQuickEventDescriptionPlaceholder = Ex. : la copie du mail envoyé, le compte rendu de l'appel
+TicketQuickEventCreated                = Événement ajouté au ticket

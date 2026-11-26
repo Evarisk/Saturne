@@ -247,6 +247,87 @@ if (!class_exists('User')) {
         {
             return 1;
         }
+
+        /**
+         * Same lookup as the core: $user->rights->module->permlevel1(->permlevel2)
+         *
+         * @return int 1 if the right is granted, 0 otherwise
+         */
+        public function hasRight(string $module, string $permlevel1, string $permlevel2 = ''): int
+        {
+            $right = $this->rights->$module->$permlevel1 ?? null;
+            if ($permlevel2 !== '') {
+                $right = is_object($right) ? ($right->$permlevel2 ?? null) : null;
+            }
+
+            return empty($right) ? 0 : 1;
+        }
+    }
+}
+
+if (!class_exists('Ticket')) {
+    class Ticket
+    {
+        public const STATUS_NOT_READ       = 0;
+        public const STATUS_READ           = 1;
+        public const STATUS_ASSIGNED       = 2;
+        public const STATUS_IN_PROGRESS    = 3;
+        public const STATUS_NEED_MORE_INFO = 5;
+        public const STATUS_WAITING        = 7;
+        public const STATUS_CLOSED         = 8;
+        public const STATUS_CANCELED       = 9;
+
+        /** @var DoliDB|null */
+        public $db;
+
+        /** @var int */
+        public $id = 0;
+
+        /** @var string */
+        public $element = 'ticket';
+
+        /** @var int */
+        public $status = self::STATUS_NOT_READ;
+
+        /** @var string */
+        public $track_id = '';
+
+        /** @var int|null */
+        public $fk_soc;
+
+        /** @var int|null */
+        public $fk_project;
+
+        /** @var array<int, string> */
+        public $labelStatusShort = [
+            self::STATUS_NOT_READ       => 'Unread',
+            self::STATUS_READ           => 'Read',
+            self::STATUS_ASSIGNED       => 'Assigned',
+            self::STATUS_IN_PROGRESS    => 'InProgress',
+            self::STATUS_NEED_MORE_INFO => 'NeedMoreInformationShort',
+            self::STATUS_WAITING        => 'OnHold',
+            self::STATUS_CLOSED         => 'SolvedClosed',
+            self::STATUS_CANCELED       => 'Canceled',
+        ];
+
+        /**
+         * Like the core, the suspended status is dropped when it is disabled
+         *
+         * @param DoliDB|null $db
+         */
+        public function __construct($db = null)
+        {
+            $this->db = $db;
+            if (!getDolGlobalString('TICKET_INCLUDE_SUSPENDED_STATUS')) {
+                unset($this->labelStatusShort[self::STATUS_WAITING]);
+            }
+        }
+
+        /** @return string */
+        public function LibStatut(int $status, int $mode = 0, int $notooltip = 0, int $progress = 0): string
+        {
+            return '<span class="badge-status' . $status . '"></span>';
+        }
     }
 }
 
