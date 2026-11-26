@@ -283,10 +283,10 @@ function saturne_show_documents(string $modulepart, $modulesubdir, $filedir, str
         $out .= '<td class="nowrap right hideonsmartphone saturne-documents__size">' . dol_print_size($size, 1, 1) . '</td>';
         $out .= '<td class="nowrap right saturne-documents__date">' . dol_print_date($date, 'dayhour', 'tzuser') . '</td>';
 
-        // Show pdf generation icon
+        // Show pdf generation icon, only to who may generate the document: the action refuses everyone else
         if ($manualPdfGeneration) {
             $out .= '<td class="right nowraponall">';
-            if (pathinfo($file['name'], PATHINFO_EXTENSION) == 'odt') {
+            if ($genallowed && pathinfo($file['name'], PATHINFO_EXTENSION) == 'odt') {
                 $out .= '<a class="pdf-generation" href="' . $tmpurlsource . ((strpos($tmpurlsource, '?') === false) ? '?' : '&amp;') . 'action=pdfGeneration&amp;file=' . urlencode($relativepath) . '&token=' . newToken();
                 $out .= ($param ? '&amp;' . $param : '');
                 $out .= '">' . img_picto($langs->trans('PDFGeneration'), 'fontawesome_fa-file-pdf_fas_red') . '</a>';

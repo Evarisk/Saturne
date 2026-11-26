@@ -1,6 +1,14 @@
 <?php
 
-if ($action == 'pdfGeneration') {
+/**
+ * The following vars must be defined:
+ * Global     : $conf, $langs
+ * Parameters : $action
+ * Variable   : $moduleName, $moduleNameLowerCase, $upload_dir, $permissiontoadd
+ */
+
+// Converting rewrites the documents of the module: same right as generating them (documents_action.tpl.php)
+if ($action == 'pdfGeneration' && !empty($permissiontoadd)) {
     global $langs;
 
     require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
