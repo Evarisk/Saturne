@@ -31,8 +31,10 @@
     }
 }
 
-// The gallery footer acts on the grid selection, which the pending list does not share
-.modal-container.pending-tab-active > .modal-footer {
+// The gallery footer acts on the grid selection, which the pending list does not share. The modern
+// theme displays every modal footer as a flex box, with an id in its selector: the rule repeats it
+.modal-container.pending-tab-active > .modal-footer,
+body#mainbody.saturne-theme .wpeo-modal .modal-container.pending-tab-active > .modal-footer {
     display: none;
 }
 
@@ -293,24 +295,47 @@
 @media screen and (max-width: 1000px) {
     .saturne-pending {
         &-body {
-            flex-direction: column;
+            flex-direction: column-reverse;
         }
 
-        // Stacked under the list, a sticky preview would ride over the rows
+        // Above the list rather than under its last row, where a tap on a row would show the media
+        // out of sight
         &-preview {
             position: static;
             flex: 0 0 auto;
             align-self: stretch;
         }
 
+        &-preview:not(.has-media),
+        &-preview-placeholder {
+            display: none;
+        }
+
+        // The records go under the name: they are the only way to see and unlink where a media went
         &-head,
         &-row {
             grid-template-columns: 30px 48px minmax(0, 1fr) minmax(0, 1fr);
         }
 
-        &-col-date,
-        &-col-size,
         &-col-records {
+            grid-column: 3 / 5;
+            grid-row: 2;
+        }
+
+        // The type, the record and the button go one under the other instead of pushing the page wider
+        &-footer {
+            flex-wrap: wrap;
+
+            .select2-container,
+            .saturne-pending-object {
+                flex: 1 1 100%;
+                max-width: 100%;
+            }
+        }
+
+        &-head &-col-records,
+        &-col-date,
+        &-col-size {
             display: none;
         }
     }
@@ -349,8 +374,9 @@
             color: var(--color-primary);
         }
 
+        // A page without the primary colour would leave a white icon on a white button, read as disabled
         &.active {
-            background: var(--color-primary);
+            background: var(--color-primary, #2563eb);
             color: #fff;
         }
     }
@@ -418,11 +444,12 @@
     }
 }
 
-// Compact: as many names as possible on screen, the rest steps aside
+// Compact: as many names as possible on screen. The records stay, the only way to see and unlink
+// where a media went
 .saturne-pending.mode-compact {
     .saturne-pending-head,
     .saturne-pending-row {
-        grid-template-columns: 30px 28px minmax(140px, 2fr) 110px minmax(110px, 1.4fr);
+        grid-template-columns: 30px 28px minmax(140px, 2fr) 110px minmax(90px, 1fr) minmax(110px, 1.4fr);
         padding: 2px 10px;
     }
 
@@ -431,8 +458,7 @@
         height: 22px;
     }
 
-    .saturne-pending-col-size,
-    .saturne-pending-col-records {
+    .saturne-pending-col-size {
         display: none;
     }
 
@@ -459,6 +485,20 @@
     &-col-date {
         display: none;
     }
+}
+
+// The questions of the library (trash of the gallery, unlinking in the list) come over the gallery modal
+.ui-widget-overlay.saturne-media-confirm-overlay {
+    z-index: 1010;
+}
+
+.ui-dialog.saturne-media-confirm {
+    z-index: 1011;
+}
+
+// The AI writes the description of the media shown in the preview
+.saturne-pending-describe-ai {
+    margin-top: 8px;
 }
 
 // Taking a media off a record is not deleting it: the icon stays discreet until the badge is hovered

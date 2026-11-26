@@ -16,8 +16,10 @@
     height: 100%;
   }
 
+  // Opened from a block inside a modal, the gallery must come over it: it is written earlier in the
+  // page with the same z-index as the other modals, so it would open behind
   &.modal-active {
-    //z-index: 2014;
+    z-index: 1003;
   }
 
   .clickable-photo {
