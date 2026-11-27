@@ -453,7 +453,13 @@ function saturne_get_fiche_head(CommonObject $object, string $tabactive = '', st
  */
 function saturne_banner_tab(object $object, string $paramId = 'ref', string $moreHtml = '', int $showNav = 1, string $fieldId = 'ref', string $fieldRef = 'ref', string $moreHtmlRef = '', bool $handlePhoto = false, array $moreParams = []): void
 {
-    global $db, $langs, $hookmanager, $moduleName, $moduleNameLowerCase, $user;
+    global $db, $form, $langs, $hookmanager, $moduleName, $moduleNameLowerCase, $user;
+
+    // dol_banner_tab() and showrefnav() use the global $form: a page that did not create it (e.g. the medias tab) would end on a fatal error
+    if (!is_object($form)) {
+        require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
+        $form = new Form($db);
+    }
 
     if (isModEnabled('project')) {
         require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
@@ -581,7 +587,7 @@ function saturne_banner_tab(object $object, string $paramId = 'ref', string $mor
         $moreParamsBannerTab = (empty($moreParamsBannerTab) ? '&module_name=' . $moduleName . '&object_type=' . $object->element : $moreParamsBannerTab);
         dol_banner_tab($object, $paramId, $moreParamsMoreHtml, $showNav, $fieldId, $fieldRef, $saturneMoreHtmlRef, $moreParamsBannerTab);
     } else {
-        global $conf, $form;
+        global $conf;
 
         // Expose the object subtype (if any) so modules can style the ref/label (e.g. as a badge).
         $bannerTypeClass = (property_exists($object, 'element_type') && dol_strlen($object->element_type)) ? ' banner-element-' . dol_string_nospecial($object->element_type) : '';
