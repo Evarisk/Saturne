@@ -3,6 +3,8 @@
   text-align: left;
   width: 20px;
   padding-right: 4px;
+  // A picto dragged by mistake carries the "Files" type under Chrome: the file drop area of the card opened. Clicks still work
+  -webkit-user-drag: none;
 }
 
 $menu-styles: (
