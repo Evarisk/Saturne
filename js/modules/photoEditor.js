@@ -315,16 +315,18 @@ window.saturne.photoEditor.event = function() {
       var isBatch = window.saturne.photoEditor._isBatchUpload;
       var files = window.saturne.photoEditor._files;
       var currentIndex = window.saturne.photoEditor._currentIndex;
+      // Read before closing: closing forgets the types of the opened files
+      var mime = window.saturne.photoEditor._sourceMimeType();
       window.saturne.photoEditor._close();
       if (typeof onSaveAll === 'function') {
         canvas.toBlob(function(blob) {
           if (isBatch) {
-            files[currentIndex] = new File([blob], files[currentIndex].name, { type: 'image/jpeg', lastModified: Date.now() });
+            files[currentIndex] = new File([blob], files[currentIndex].name, { type: mime, lastModified: Date.now() });
             onSaveAll(files);
           } else {
             onSaveAll(blob);
           }
-        }, 'image/jpeg', 0.85);
+        }, mime, 0.85);
       }
     });
   }
@@ -452,6 +454,7 @@ window.saturne.photoEditor.open = function(urlOrUrls, onSave, startIndex, onDele
   pe._favorite       = favorite || null;
   pe._onAnalyse      = onAnalyse || null;
   pe._historyStack   = [];
+  pe._sourceTypes    = [];
   pe._urls           = Array.isArray(urlOrUrls) ? urlOrUrls : [urlOrUrls];
   pe._currentIndex   = (typeof startIndex === 'number') ? startIndex : 0;
 
@@ -515,13 +518,19 @@ window.saturne.photoEditor._fitToViewport = function() {
  * @memberof Saturne_PhotoEditor
  *
  * @since   1.0.0
- * @version 1.0.0
+ * @version 1.7.0
  *
  * @returns {string} Mime type to encode the canvas with
  */
 window.saturne.photoEditor._sourceMimeType = function() {
-  var pe     = window.saturne.photoEditor;
-  var source = (pe._urls && pe._urls[pe._currentIndex]) || '';
+  var pe         = window.saturne.photoEditor;
+  var source     = (pe._urls && pe._urls[pe._currentIndex]) || '';
+  var sourceType = (pe._sourceTypes && pe._sourceTypes[pe._currentIndex]) || '';
+
+  // A file picked on the device opens under a blob: URL, which carries no name: its own type tells
+  if (sourceType) {
+    return pe._outputMimeType(sourceType);
+  }
 
   try {
     source = decodeURIComponent(source);
@@ -530,6 +539,25 @@ window.saturne.photoEditor._sourceMimeType = function() {
   }
 
   return /\.png(\?|&|$)/i.test(source) ? 'image/png' : 'image/jpeg';
+};
+
+/**
+ * Resolve the mime type a picked file is sent as once drawn on a canvas
+ *
+ * JPEG has no alpha channel: a canvas exported in JPEG turns every transparent pixel black. The
+ * formats able to hold a transparent background (a logo, a pictogram, a screenshot) are sent as
+ * lossless PNG, the photos keep going as JPEG.
+ *
+ * @memberof Saturne_PhotoEditor
+ *
+ * @since   1.7.0
+ * @version 1.7.0
+ *
+ * @param   {string} type Mime type of the picked file
+ * @returns {string}      Mime type to encode the canvas with
+ */
+window.saturne.photoEditor._outputMimeType = function(type) {
+  return /^image\/(png|webp|gif)$/i.test(type || '') ? 'image/png' : 'image/jpeg';
 };
 
 /**
@@ -710,6 +738,8 @@ window.saturne.photoEditor.openFile = function(file, onSave, onSaveAll) {
       onSave(blob);
     }
   }, 0, null, onSaveAll);
+  // Once open() has reset them: the blob: URL carries no name, the file type picks the output format
+  window.saturne.photoEditor._sourceTypes = [file.type];
 };
 
 /**
@@ -744,11 +774,16 @@ window.saturne.photoEditor.openBatch = function(files, onSaveBatch) {
   };
 
   pe.open(urls, null, 0, null, onSaveBatchWrapper);
+  // Once open() has reset them: the blob: URLs carry no name, the file types pick the output formats
+  pe._sourceTypes = files.map(function(file) {
+    return file.type;
+  });
 };
 
 /**
- * Resize a File/Blob to the currently selected quality and return a JPEG Blob,
- * without opening the editor. Mirrors _loadUrlIntoCanvas() resize logic.
+ * Resize a File/Blob to the currently selected quality and return a JPEG Blob (a PNG one when
+ * the file may hold a transparent background), without opening the editor. Mirrors
+ * _loadUrlIntoCanvas() resize logic.
  *
  * @memberof Saturne_PhotoEditor
  *
@@ -776,7 +811,7 @@ window.saturne.photoEditor.resizeFileToBlob = function(file, callback) {
       if (typeof callback === 'function') {
         callback(blob);
       }
-    }, 'image/jpeg', 0.85);
+    }, window.saturne.photoEditor._outputMimeType(file.type), 0.85);
   };
   img.src = url;
 };
@@ -853,12 +888,15 @@ window.saturne.photoEditor._close = function() {
   window.saturne.photoEditor._onSaveAll = null;
   window.saturne.photoEditor._isBatchUpload = false;
   window.saturne.photoEditor._files = null;
+  window.saturne.photoEditor._sourceTypes = [];
 };
 
 window.saturne.photoEditor._saveCurrentStateAndGo = function(nextIndex) {
   var pe     = window.saturne.photoEditor;
   var canvas = pe._canvas;
-  
+  // The photo left keeps its format: a PNG stays a PNG, transparent background included
+  var mime   = pe._sourceMimeType();
+
   canvas.toBlob(function(blob) {
     var oldUrl = pe._urls[pe._currentIndex];
     if (oldUrl.indexOf('blob:') === 0) {
@@ -866,9 +904,9 @@ window.saturne.photoEditor._saveCurrentStateAndGo = function(nextIndex) {
     }
     pe._urls[pe._currentIndex] = URL.createObjectURL(blob);
     if (pe._files && pe._files[pe._currentIndex]) {
-      pe._files[pe._currentIndex] = new File([blob], pe._files[pe._currentIndex].name, { type: 'image/jpeg', lastModified: Date.now() });
+      pe._files[pe._currentIndex] = new File([blob], pe._files[pe._currentIndex].name, { type: mime, lastModified: Date.now() });
     }
-    
+
     pe._currentIndex = nextIndex;
     pe._loadUrlIntoCanvas(pe._urls[pe._currentIndex], function() {
       var badge = document.getElementById('saturne-photo-index-badge');
@@ -876,7 +914,7 @@ window.saturne.photoEditor._saveCurrentStateAndGo = function(nextIndex) {
         badge.textContent = (pe._currentIndex + 1) + ' / ' + pe._urls.length;
       }
     });
-  }, 'image/jpeg', 0.85);
+  }, mime, 0.85);
 };
 
 window.saturne.photoEditor._saveState = function() {

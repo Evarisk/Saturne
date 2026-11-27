@@ -696,7 +696,7 @@ window.saturne.mediaBlock.onLinkedPhotoClick = function(event) {
  * @memberof Saturne_MediaBlock
  *
  * @since   1.0.0
- * @version 1.0.0
+ * @version 1.7.0
  *
  * @param   {Blob}        blob             Image blob to upload
  * @param   {string}      module           Module name
@@ -708,7 +708,8 @@ window.saturne.mediaBlock.onLinkedPhotoClick = function(event) {
 window.saturne.mediaBlock.uploadBlob = function(blob, module, subdir, block, originalFilename) {
   var token          = window.saturne.toolbox.getToken();
   var querySeparator = window.saturne.toolbox.getQuerySeparator(document.URL);
-  var filename       = originalFilename || ('photo_' + new Date().getTime() + '.jpg');
+  // A new media is named after the format the editor encoded it in: a PNG keeps its transparent background
+  var filename       = originalFilename || ('photo_' + new Date().getTime() + (blob.type === 'image/png' ? '.png' : '.jpg'));
   var overwrite      = originalFilename ? '1' : '0';
   var file           = new File([blob], filename, { type: blob.type || 'image/jpeg', lastModified: Date.now() });
   var formData       = new FormData();
