@@ -95,7 +95,7 @@ if ($resHook < 0) {
 
 if (empty($resHook)) {
     // A user without the write permission may read this page, changing a setting is refused
-    if (in_array($action, ['set', 'del', 'setdoc', 'deletefile', 'setModuleOptions', 'update_documents_config'], true) && !$permissiontowrite) {
+    if (in_array($action, ['set', 'del', 'setdoc', 'deletefile', 'confirm_deletefile', 'setModuleOptions', 'update_documents_config'], true) && !$permissiontowrite) {
         setEventMessages($langs->trans('ReadOnlyAdminAccessMessage'), [], 'errors');
         $action = '';
     }
@@ -123,7 +123,8 @@ if (empty($resHook)) {
         exit;
     }
 
-    if ($action == 'deletefile' && $modulepart == 'ecm' && $permissiontowrite) {
+    // The delete button of a template file only opens the confirmation (see the view), the file goes on "Yes"
+    if ($action == 'confirm_deletefile' && GETPOST('confirm', 'alpha') == 'yes' && $modulepart == 'ecm' && $permissiontowrite) {
         include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
         $keyforuploaddir = GETPOST('keyforuploaddir', 'aZ09');
 
@@ -337,6 +338,14 @@ $preHead = $moduleNameLowerCase . '_admin_prepare_head';
 $head    = $preHead();
 
 print dol_get_fiche_head($head, 'documents', $title, -1, $moduleNameLowerCase . '_color@' . $moduleNameLowerCase);
+
+// Deleting a template file can not be undone: its delete button asks first
+if ($action == 'deletefile' && $modulepart == 'ecm' && $permissiontowrite) {
+    $langs->load('companies');
+    $fileToDelete = GETPOST('file');
+    $urlConfirm   = $_SERVER['PHP_SELF'] . '?module_name=' . urlencode($moduleName) . '&modulepart=ecm&keyforuploaddir=' . urlencode(GETPOST('keyforuploaddir', 'aZ09')) . '&file=' . urlencode($fileToDelete) . '&type=' . urlencode(GETPOST('type', 'alpha'));
+    print $form->formconfirm($urlConfirm, $langs->trans('DeleteFile'), $langs->trans('ConfirmDeleteFile', dol_escape_htmltag($fileToDelete)), 'confirm_deletefile', '', 'no', 1);
+}
 
 // Warns a user allowed to read the settings but not to change them
 require_once __DIR__ . '/../core/tpl/admin/admin_write_access_notice.tpl.php';
