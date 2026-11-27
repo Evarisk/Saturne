@@ -27,7 +27,7 @@
  * Globals    : $conf, $db, $hookmanager, $langs, $user
  * Parameters : $action, $limit, $contextpage, $massaction, $mode, $optioncss, $page, $searchAll, $sortfield, $sortorder, $toselect
  * Objects    : $categorie, $extrafields (extrafields_list_search_param.tpl), $form, $object
- * Variables  : $arrayfields, $createUrl (optional), $enableMassLock (optional), $enableMassSignature (optional),
+ * Variables  : $arrayfields, $createUrl (optional, false for no "New" button), $enableMassLock (optional), $enableMassSignature (optional),
  *              $enableMassValidate (optional), $fieldsToSearchAll, $formMoreParams (optional), $helpText (optional), $listXlsxExportAvailable (optional),
  *              $moreUrlParameters (optional), $nbTotalOfRecords, $num,
  *              $permissiontoadd, $resql, $search, $search_array_options (extrafields_list_search_param.tpl),
@@ -264,8 +264,10 @@ if ($mode != 'kanban' && $mode != 'pwa' && !empty($listLayoutId)) {
     $cardButton = ($cardButton ?? '') . ' ' . $filterIndicator;
 }
 
-// "New" button to create a new object
-$cardButton = ($cardButton ?? '') . ' ' . dolGetButtonTitle($langs->trans('New' . ucfirst($object->element)), $helpText ?? '', 'fa fa-plus-circle', ($createUrl ?? dol_buildpath('/' . $object->module . '/view/' . $object->element . '/' . $object->element . '_card.php', 1) . '?action=create' . ($moreUrlParameters ?? '')), '', $permissiontoadd);
+// "New" button to create a new object, left out by the lists whose objects are not created from a card ($createUrl = false)
+if (($createUrl ?? null) !== false) {
+    $cardButton = ($cardButton ?? '') . ' ' . dolGetButtonTitle($langs->trans('New' . ucfirst($object->element)), $helpText ?? '', 'fa fa-plus-circle', ($createUrl ?? dol_buildpath('/' . $object->module . '/view/' . $object->element . '/' . $object->element . '_card.php', 1) . '?action=create' . ($moreUrlParameters ?? '')), '', $permissiontoadd);
+}
 
 // Format the title text — record count BEFORE filter indicator
 $titleText = ($conf->browser->layout == 'classic' && $mode != 'pwa') ? ($title ?? '') : '';
