@@ -153,6 +153,7 @@ if (empty($resHook)) {
         $filetodelete = $tmpdir . '/' . GETPOST('file');
         $result = dol_delete_file($filetodelete);
         if ($result > 0) {
+            $langs->load('other');
             setEventMessages($langs->trans('FileWasRemoved', GETPOST('file')), null);
             header('Location: ' . $_SERVER['PHP_SELF'] . '?module_name=' . $moduleName . '&page_y=' . $pageY);
             exit;
